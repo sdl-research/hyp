@@ -34,7 +34,7 @@
 #include <unicode/schriter.h>
 #include <unicode/brkiter.h>
 #include <unicode/normalizer2.h>
-
+#include <unicode/umachine.h>
 
 
 

@@ -9,7 +9,7 @@
 
 
 
-
+#include <boost/function.hpp>
 
 #include <algorithm>
 
@@ -69,17 +69,17 @@ struct CmpFsmArcInput {
 
 
 
+struct CmpFsmArcHead {
+  bool operator()(Arc const* a, Arc const* b) const{
 
-
-
-
-
+  }
+};
 
 template<class Arc>
 
 
-
-
+template<class Arc, class SortPolicy>
+void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp){
 
 
 
@@ -90,19 +90,19 @@ template<class Arc>
   }
 }
 
+template<class Arc>
 
 
 
 
 
 
+}
+
+template<class Arc, class SortPolicy>
 
 
-
-
-
-
-
+}
 
 
 

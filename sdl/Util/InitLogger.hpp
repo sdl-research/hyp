@@ -35,9 +35,9 @@ std::string logFileName(std::string const& appname);
 
 
 
-
-
-
+  // whether or not the application uses multiple threads
+  // if set to true, then logger will print out thread id information
+  bool multiThread;
 
 
 
@@ -126,7 +126,7 @@ std::string logFileName(std::string const& appname);
 
 
 
-
+                InitLoggerOptions const& opts = InitLoggerOptions());
 
 
 

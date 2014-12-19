@@ -53,6 +53,7 @@
 
 
 
+  virtual IHypergraph<Arc>* value() = 0;
 
 
 
@@ -61,11 +62,10 @@
 
 
 
+  */
+  virtual void setHgProperties(Properties prop) = 0;
 
-
-
-
-
+  /**
 
 
 

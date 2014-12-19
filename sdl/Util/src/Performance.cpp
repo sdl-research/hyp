@@ -58,8 +58,8 @@
 
 
 
-
-
+  // this assertion won't work for multi-thread case
+  //  assert(totalInputSize.units==size.units);
 
 
 

@@ -18,6 +18,7 @@
 
 
 
+#include <boost/algorithm/string.hpp>
 
 
 
@@ -52,7 +53,6 @@
 
 
 
-  }
 
 
 
@@ -149,7 +149,26 @@
 
 
 
-    const bool isTerminal = symid.isTerminal();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

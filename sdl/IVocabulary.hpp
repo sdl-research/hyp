@@ -170,8 +170,8 @@
 
 
 
-
-
+  // variables are supposed to start from 0 index
+  // this is a mapping from indices to variable id in vocabulary
   // TODO@SK: Should we check the presence of this variable in vocabulary?
 
 

@@ -52,13 +52,13 @@
 
 
 
-  }
 
 
 
 
 
 
+  virtual IHypergraph<Arc>* value() {
 
 
 
@@ -67,6 +67,7 @@
 
 
 
+ private:
 
 
 
@@ -106,6 +107,7 @@
 
 
 
+  virtual IHypergraph<Arc>* value() {
 
 
 
@@ -114,6 +116,7 @@
 
 
 
+ private:
 
 
 
@@ -131,25 +134,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const bool isTerminal = symid.isTerminal();
 
 
 

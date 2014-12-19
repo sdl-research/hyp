@@ -5,81 +5,23 @@
 
 
 
-
-
-#include <cmath>
-#include <set>
-#include <algorithm>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
-
 */
-template <class T>
-bool floatEqual(T a, T b, T epsilon = 1e-6) {
 
 
-}
 
 
 
 
 
 
+#include <vector>
 
 
 
 
 
 
+typedef std::pair<Position, Position> TokenSpan;
 
 
 
@@ -111,7 +53,6 @@ bool floatEqual(T a, T b, T epsilon = 1e-6) {
 
 
 
-}
 
 
 
@@ -235,6 +176,7 @@ bool floatEqual(T a, T b, T epsilon = 1e-6) {
 
 
 
+typedef std::vector<TokenSpan> TokenSpans;
 
 
 
@@ -261,7 +203,9 @@ bool floatEqual(T a, T b, T epsilon = 1e-6) {
 
 
 
-  }
+
+
+
 
 
 

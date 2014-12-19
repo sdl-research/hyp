@@ -70,11 +70,11 @@ SPECIAL_SYMBOL(TOK_PROTECT_END, </tok-protect>, kSpecialTerminal)
 
 
 
-
+// Used by syntax decoder to denote the start of the foreign sentence
 SPECIAL_SYMBOL(FS, <foreign-sentence>, kSpecialTerminal)
 
-
-
+// Used by abortSegment to return the output of the canceled segment
+SPECIAL_SYMBOL(ABORTSEGMENT, <abort-segment>, kSpecialTerminal)
 
 
 

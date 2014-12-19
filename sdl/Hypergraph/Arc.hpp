@@ -453,14 +453,14 @@ std::ostream& operator<<(std::ostream& out, const ArcTpl<W>& arc) {
 
 
 
+class ArcWithDataTpl : public ArcTpl<W> {
 
 
 
-
-
-
-
-
+  typedef ArcTpl<W> Base;
+  typedef ArcWithDataTpl<W> Arc;
+  typedef boost::function<bool(Arc*)> ArcFilter;
+  typedef boost::function<void(Arc*)> ArcVisitor;
 
 
 

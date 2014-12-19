@@ -21,8 +21,8 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
 
   template <class Arc>
   bool transform1(IHypergraph<Arc> const& i, IMutableHypergraph<Arc> *o) {
-
-
+    UniformInArcSampler<Arc> sampler;
+    samplePath(i, sampler, o);
     return true;
   }
 };

@@ -10,7 +10,7 @@
 #include <log4cxx/xml/domconfigurator.h>
 #include <log4cxx/patternlayout.h>
 #include <log4cxx/helpers/transcoder.h>
-
+#endif
 
 
 
@@ -38,7 +38,7 @@ std::string logFileName(std::string const& appname) {
 }
 
 //TODO: free memory for valgrind?
-
+#ifndef NLOG
 void initLogger(std::string const& appname,
 
 
@@ -47,10 +47,10 @@ void initLogger(std::string const& appname,
 
 
 
-
+                LogLevelPtr level,
 
 {
-
+  defaultLocale();
 
 
 
@@ -63,7 +63,7 @@ void initLogger(std::string const& appname,
   log4cxx::LogString logStrLayout;
 
 
-
+      opts.patternLayout;
 
   log4cxx::PatternLayout* pLayout = new log4cxx::PatternLayout(logStrLayout);
 
@@ -97,6 +97,15 @@ void initLogger(std::string const& appname,
 
 
 
+#else
+void initLogger(std::string const& appname,
+                LogLevelPtr level,
+
+
+
+
+
+void initLogger(std::string const& appname,
 
 
 
@@ -106,16 +115,7 @@ void initLogger(std::string const& appname,
 
 
 
-
-
-
-
-
-
-
-
-
-
+#endif // end ifndef NLOG
 
 
 

@@ -811,8 +811,8 @@ MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 
 
 
-
-
+find_package(TBB)
+MESSAGE(STATUS "TBB Library: ${TBB_LIBRARY}")
 MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithoutTbbmalloc")
   unset(TBBMALLOC_LIBRARY CACHE)
@@ -841,9 +841,9 @@ if(CMPH_FOUND)
   MESSAGE(STATUS "Enabling Noisy LM build")
 endif()
 
-
+find_package(Zeromq)
 MESSAGE(STATUS "Zeromq include directory: ${ZEROMQ_INCLUDE_DIR}")
-
+MESSAGE(STATUS "Zeromq Library: ${ZEROMQ_LIBRARY}")
 if(ZEROMQ_FOUND)
   add_definitions(-DHAVE_ZMQ)
 endif()
@@ -957,7 +957,7 @@ SET(boost_libs
   system
   filesystem
   program_options
-
+  date_time
   iostreams
   timer
 
@@ -1222,7 +1222,7 @@ endif()
 
 
 
-
+  SyntaxBased
 
 
 
@@ -1262,9 +1262,9 @@ endif()
 
 
 
-
+#CTest and CDash
 if(NOT ANDROID)
-
+  INCLUDE(CTest)
 endif()
 
 
@@ -1350,10 +1350,10 @@ endif()
 
 message(STATUS "-- Test Executables: ${testExecutables}")
 
-
-
-
-
+#configure a header file to pass some of the CMake settings to the source code
+configure_file (
+  "${PROJECT_SOURCE_DIR}/CMakeConfig.in"
+  "${PROJECT_SOURCE_DIR}/CMakeConfig.hpp")
 
 MESSAGE(STATUS "Unit test (check only) executables: ${testExecutables}")
 

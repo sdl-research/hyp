@@ -27,7 +27,7 @@
 
 
 
-
+#include <memory>
 
 
 
@@ -170,6 +170,8 @@ shared_ptr<impl::tss_cleanup_function> makeDummyTssCleanupFunction();
 
 
 
+template <class Value,
+          class Allocator = std::allocator<Value> >
 
 
 
@@ -177,8 +179,11 @@ shared_ptr<impl::tss_cleanup_function> makeDummyTssCleanupFunction();
 
 
 
+  static void cleanFun(Value* p) {
 
+      p->~Value();
 
+    }
 
 
 
@@ -231,23 +236,18 @@ shared_ptr<impl::tss_cleanup_function> makeDummyTssCleanupFunction();
 
 
 
+  Value const& get() const {
 
+    assert(v != NULL);
+    return *v;
+  }
 
 
+  }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+  }
 
 
 
