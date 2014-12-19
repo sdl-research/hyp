@@ -1,0 +1,2 @@
+0(head) <- 1(tail1) 2(tail2) 3(tail3) / 0.693
+FINAL <- 0(head)

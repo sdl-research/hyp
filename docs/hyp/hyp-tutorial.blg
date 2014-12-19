@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d (TeX Live 2014)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: hyp-tutorial.aux
+The style file: plainnat.bst
+Database file #1: hyp.bib
+Warning--string name "emnlp" is undefined
+--line 33 of file hyp.bib
+Warning--empty booktitle in dreyer-smith-eisner:2008:emnlp
+Warning--empty publisher in earley_efficient_1970
+Warning--empty journal in gallo_directed_1993
+Warning--empty journal in stolcke_efficient_1995
+You've used 15 entries,
+            2773 wiz_defined-function locations,
+            686 strings with 7723 characters,
+and the built_in function-call counts, 7287 in all, are:
+= -- 689
+> -- 346
+< -- 16
++ -- 118
+- -- 103
+* -- 535
+:= -- 1085
+add.period$ -- 57
+call.type$ -- 15
+change.case$ -- 75
+chr.to.int$ -- 15
+cite$ -- 34
+duplicate$ -- 371
+empty$ -- 622
+format.name$ -- 128
+if$ -- 1582
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 14
+newline$ -- 90
+num.names$ -- 62
+pop$ -- 172
+preamble$ -- 1
+purify$ -- 63
+quote$ -- 0
+skip$ -- 281
+stack$ -- 0
+substring$ -- 287
+swap$ -- 68
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 160
+warning$ -- 4
+while$ -- 70
+width$ -- 0
+write$ -- 216
+(There were 5 warnings)

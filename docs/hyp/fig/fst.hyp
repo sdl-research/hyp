@@ -1,0 +1,6 @@
+START <- 0
+1 <- 0 ("he")
+2 <- 1 ("eats" "ate")
+2 <- 1 ("likes" "liked")
+3 <- 2 ("rice")
+FINAL <- 3

@@ -1,0 +1,5 @@
+FINAL <- 0
+START <- 0
+0 <- 0 ("eats" "ate")
+0 <- 0 ("sleeps" "slept")
+0 <- 0 (<rho>)

@@ -1,0 +1,109 @@
+\begin{thebibliography}{15}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Dreyer(2011)]{dreyer-thesis}
+Markus Dreyer.
+\newblock \emph{A Non-Parametric Model for the Discovery of Inflectional
+  Paradigms from Plain Text Using Graphical Models over Strings}.
+\newblock PhD thesis, Johns Hopkins University, 2011.
+
+\bibitem[Dreyer et~al.(2008)Dreyer, Smith, and
+  Eisner]{dreyer-smith-eisner:2008:emnlp}
+Markus Dreyer, Jason Smith, and Jason Eisner.
+\newblock Latent-variable modeling of string transductions with finite-state
+  methods.
+\newblock Honolulu, Hawaii, October 2008.
+
+\bibitem[Dyer(2010)]{dyer_formal_2010}
+Christopher Dyer.
+\newblock \emph{A formal model of ambiguity and its applications in machine
+  translation}.
+\newblock PhD thesis, University of Maryland, 2010.
+
+\bibitem[Earley(1970)]{earley_efficient_1970}
+Jay Earley.
+\newblock \emph{An Efficient Context-Free Parsing Algorithm}.
+\newblock 1970.
+
+\bibitem[Eisner(2002)]{eisner-2002-acl-fst}
+Jason Eisner.
+\newblock Parameter estimation for probabilistic finite-state transducers.
+\newblock In \emph{Proceedings of the 40th Annual Meeting of the Association
+  for Computational Linguistics (ACL)}, pages 1--8, Philadelphia, July 2002.
+\newblock URL \url{http://cs.jhu.edu/~jason/papers/#eisner-2002-acl-fst}.
+
+\bibitem[Eisner and Filardo(2011)]{eisner_dyna:_2011}
+Jason Eisner and Nathaniel~W. Filardo.
+\newblock Dyna: Extending datalog for modern {AI}.
+\newblock In \emph{Datalog Reloaded}, pages 181--220. Springer, 2011.
+\newblock URL
+  \url{http://link.springer.com/chapter/10.1007/978-3-642-24206-9_11}.
+
+\bibitem[Eisner et~al.(2005)Eisner, Goldlust, and Smith]{eisner_compiling_2005}
+Jason Eisner, Eric Goldlust, and Noah~A. Smith.
+\newblock Compiling comp ling: Practical weighted dynamic programming and the
+  dyna language.
+\newblock In \emph{In Advances in Probabilistic and Other Parsing}, 2005.
+
+\bibitem[Gallo et~al.(1993)Gallo, Longo, Pallottino, and
+  Nguyen]{gallo_directed_1993}
+Giorgio Gallo, Giustino Longo, Stefano Pallottino, and Sang Nguyen.
+\newblock Directed hypergraphs and applications.
+\newblock 42\penalty0 (2):\penalty0 177--201, 1993.
+\newblock URL
+  \url{http://www.sciencedirect.com/science/article/pii/0166218X9390045P}.
+
+\bibitem[Huang and Chiang(2005)]{huang_better_2005}
+Liang Huang and David Chiang.
+\newblock Better k-best parsing.
+\newblock In \emph{Proceedings of the Ninth International Workshop on Parsing
+  Technology}, pages 53--64. Association for Computational Linguistics, 2005.
+\newblock URL \url{http://dl.acm.org/citation.cfm?id=1654500}.
+
+\bibitem[Klein and Manning(2005)]{klein_parsing_2005}
+Dan Klein and Christopher~D. Manning.
+\newblock Parsing and hypergraphs.
+\newblock In \emph{New developments in parsing technology}, pages 351--372.
+  Springer, 2005.
+\newblock URL \url{http://link.springer.com/chapter/10.1007/1-4020-2295-6_18}.
+
+\bibitem[Lafferty et~al.(2001)Lafferty, McCallum, and Pereira]{lafferty01}
+John Lafferty, Andrew McCallum, and Fernando Pereira.
+\newblock Conditional random fields: Probabilistic models for segmenting and
+  labeling sequence data.
+\newblock In \emph{Proceedings of the 18th International Conference on Machine
+  Learning}, pages 282--289. Morgan Kaufmann, San Francisco, CA, 2001.
+
+\bibitem[Petrov and Klein(2008)]{petrov_klein_2008}
+Slav Petrov and Dan Klein.
+\newblock Discriminative log-linear grammars with latent variables.
+\newblock In J.~C. Platt, D.~Koller, Y.~Singer, and S.Editors Roweis, editors,
+  \emph{Advances in Neural Information Processing Systems 20 (NIPS)}, pages
+  1153--1160. MIT Press, 2008.
+
+\bibitem[Quattoni et~al.(2007)Quattoni, Wang, Morency, Collins, and
+  Darrell]{quattoni-et-al:2007:latent-crf}
+A.~Quattoni, S.~Wang, L.~P. Morency, M.~Collins, and T.~Darrell.
+\newblock Hidden conditional random fields.
+\newblock \emph{IEEE Transactions on Pattern Analysis and Machine
+  Intelligence}, 29\penalty0 (10):\penalty0 1848--1852, 2007.
+
+\bibitem[Stolcke(1995)]{stolcke_efficient_1995}
+Andreas Stolcke.
+\newblock An efficient probabilistic context-free parsing algorithm that
+  computes prefix probabilities.
+\newblock 21\penalty0 (2):\penalty0 165--201, 1995.
+\newblock ISSN 0891-2017.
+\newblock URL \url{http://dl.acm.org/citation.cfm?id=211190.211197}.
+
+\bibitem[Sutton and McCallum(2012)]{crftut:fnt}
+Charles Sutton and Andrew McCallum.
+\newblock An introduction to conditional random fields.
+\newblock \emph{Foundations and Trends in Machine Learning}, 4\penalty0 (4),
+  2012.
+
+\end{thebibliography}

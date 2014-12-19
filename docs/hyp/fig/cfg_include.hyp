@@ -1,0 +1,9 @@
+FINAL <- (S)
+(S) <- (NP) (VP)     / 0.1823216 \begin{scriptsize}# = -log(5/6)\end{scriptsize}
+(S) <- (NP) (V) (NP) / 1.791759  \begin{scriptsize}# = -log(1/6)\end{scriptsize}
+(NP) <- (N)
+(VP) <- (V) (NP)
+(V) <- ("eats")
+(N) <- ("he")   / 0.6931472 \begin{scriptsize}# = -log(5/10)\end{scriptsize}
+(N) <- ("rice") / 1.203973  \begin{scriptsize}# = -log(3/10)\end{scriptsize}
+(N) <- ("fish") / 1.609438  \begin{scriptsize}# = -log(2/10)\end{scriptsize}

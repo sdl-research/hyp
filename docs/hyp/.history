@@ -1,0 +1,57 @@
+2014-12-18T09:33:22.pwn git rm hyp-tutorial.pdf
+2014-12-18T09:41:48.pwn latq hyp-tutorial
+2014-12-18T09:41:49.pwn latq hyp-tutorial
+2014-12-18T09:41:49.pwn latq hyp-tutorial
+2014-12-18T09:41:57.pwn ps2pdf hyp-tutorial.ps
+2014-12-18T09:42:21.pwn open hyp-tutorial.ps
+2014-12-18T09:42:27.pwn l fig/
+2014-12-18T09:42:39.pwn more comment-hyp.pl 
+2014-12-18T09:43:12.pwn brew reinstall ghostscript
+2014-12-18T09:43:33.pwn brew search texlive
+2014-12-18T09:44:05.pwn ps2pdf hyp-tutorial.ps
+2014-12-18T09:44:11.pwn brew reinstall ps2pdf
+2014-12-18T09:44:14.pwn which ps2pdf
+2014-12-18T09:44:16.pwn which ps2pdf
+2014-12-18T09:44:26.pwn git status
+2014-12-18T09:44:31.pwn rm hyp-tutorial.ps
+2014-12-18T14:00:03.pwn latpdf hyp-tutorial.tex 
+2014-12-18T14:00:36.pwn latpdf hyp-tutorial.tex 
+2014-12-18T14:00:38.pwn which ps2pdf
+2014-12-18T14:00:42.pwn ps2pdf -h
+2014-12-18T14:00:51.pwn lat  hyp-tutorial.tex 
+2014-12-18T14:00:55.pwn latq  hyp-tutorial.tex 
+2014-12-18T14:00:57.pwn which latex
+2014-12-18T14:01:00.pwn which bibtex
+2014-12-18T14:01:23.pwn which bibtex
+2014-12-18T14:01:25.pwn . ~/local.sh
+2014-12-18T14:01:33.pwn lat  hyp-tutorial.tex 
+2014-12-18T14:01:34.pwn lat  hyp-tutorial.tex 
+2014-12-18T14:02:51.pwn l *.hpp
+2014-12-18T14:04:01.pwn lat  hyp-tutorial
+2014-12-18T14:04:05.pwn git status
+2014-12-18T14:15:45.pwn git ls
+2014-12-18T15:00:40.pwn cat > CreateForest.hpp
+2014-12-18T15:00:54.pwn cat > Inside.hpp
+2014-12-18T15:02:19.pwn cwithmertrun
+2014-12-18T15:02:19.pwn export INSIDE_EMACS=1
+2014-12-18T15:02:21.pwn export TERM=xterm-256color
+2014-12-18T15:02:21.pwn exec bash --noediting -i
+2014-12-18T15:02:21.pwn export PAGER=cat
+2014-12-18T15:02:23.pwn export GIT_PAGER=cat
+2014-12-18T15:02:23.pwn git add *.hpp
+2014-12-18T15:02:24.pwn sa
+2014-12-18T15:02:50.pwn latpdf hyp-tutorial
+2014-12-18T15:03:44.pwn sa;latpdf hyp-tutorial
+2014-12-18T15:04:04.pwn mv hyp-tutorial.tex.pdf ~/x/hyp-tutorial.pdf
+2014-12-18T15:04:13.pwn open ~/x/hyp-tutorial.pdf 
+2014-12-18T15:04:28.pwn pdflatex -h
+2014-12-18T15:05:01.pwn touchadd make.pdf.sh
+2014-12-18T15:05:58.pwn chmod +x make.pdf.sh 
+2014-12-18T15:06:15.pwn ./make.pdf.sh
+2014-12-18T15:06:27.pwn git status
+2014-12-18T15:07:47.pwn c-s yreg MinBayesRisk/regtest-mbr.yml
+2014-12-18T16:03:58.pwn cp ~/x/.clang-format .
+2014-12-18T16:04:00.pwn git add .clang-format
+2014-12-18T16:15:06.pwn git mv .clang-format ..
+2014-12-18T16:15:11.pwn mend
+2014-12-18T17:01:40.pwn c-s yreg MinBayesRisk/regtest-mbr.yml

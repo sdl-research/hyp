@@ -1,0 +1,11 @@
+0(S) <- 1(NP) 2(VP)
+1(NP) <- 3(PRON)
+2(VP) <- 4(V) 5(NP) 6(PP)
+3(PRON) <- 10("He")
+4(V) <- 11("eats")
+5(NP) <- 7(N)
+6(PP) <- 8(PREP) 9(N)
+7(N) <- 12("rice")
+8(PREP) <- 13("with")
+9(N) <- 14("sticks")
+FINAL <- 0

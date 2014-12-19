@@ -1,0 +1,13 @@
+// Compiler should not see this:
+#error Documentation only
+
+/**
+ * @namespace LW
+ * LW namespace
+ */
+
+/**
+ * @namespace LW::xmt
+ * XMT namespace
+ */
+
