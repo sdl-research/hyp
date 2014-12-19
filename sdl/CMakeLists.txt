@@ -855,12 +855,12 @@ if(SVMTOOL_FOUND)
   add_definitions(-DHAVE_SVMTOOL)
 endif()
 
-
-
-
-
-
-
+find_package(Liblinear)
+MESSAGE(STATUS "Liblinear Library: ${LIBLINEAR_LIBRARY}")
+MESSAGE(STATUS "Liblinear Include: ${LIBLINEAR_INCLUDE_DIR}")
+if(LIBLINEAR_FOUND)
+  add_definitions(-DHAVE_LIBLINEAR)
+endif()
 
 
 
@@ -1083,9 +1083,9 @@ MESSAGE(STATUS "CDB Include Directories: ${CDB_INCLUDE_DIR}")
 
 
 
-
-
-
+  message(STATUS "OpenSSL libraries for Hadoop: ${HADOOP_SSL_LIBRARY}, ${HADOOP_CRYPTO_LIBRARY}")
+  message(STATUS "OpenSSL include path for Hadoop: ${HADOOP_SSL_INCLUDE_DIR}")
+  set(_JAVA_PATHS "/usr/java/")
 endif()
 
 #
@@ -1236,11 +1236,11 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
-
-
-
-
-
+if(LIBLINEAR_FOUND)
+  list(APPEND subDirectories
+    Preorderer
+    )
+endif()
 
 
 
