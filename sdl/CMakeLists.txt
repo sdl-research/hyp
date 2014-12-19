@@ -320,7 +320,7 @@ endif()
 
 # <NOT_OPEN_SOURCE>
 set(LIBSTEMMER_ROOT "${SDL_EXTERNALS_PATH}/libraries/libstemmer_c")
-
+find_package(LibStemmer)
 
 
 if (LIBSTEMMER_FOUND)
