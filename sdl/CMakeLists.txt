@@ -813,7 +813,7 @@
 
 
 
-
+MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
 
 
 
