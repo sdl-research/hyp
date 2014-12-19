@@ -284,7 +284,7 @@ if(NOT ANDROID)
 
 
 
-
+  enable_testing()
 endif()
 
 
@@ -698,7 +698,7 @@ endif()
 
 
 
-
+   set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
 
 
 
@@ -1047,7 +1047,7 @@ endif()
 
 
 
-
+MESSAGE(STATUS "Berkeley DB Libraries: ${DB_LIBRARIES}")
 
 
 
@@ -1355,7 +1355,7 @@ endif()
 
 
 
-
+MESSAGE(STATUS "Unit test (check only) executables: ${testExecutables}")
 
 
 
