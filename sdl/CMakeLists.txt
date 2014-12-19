@@ -1088,22 +1088,22 @@ endif()
 
 endif()
 
+#
+# JNI to work with DFS
+#
+find_package(JNI)
 
 
 
 
-
-
-
-
-
-
-
+include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+MESSAGE (STATUS "JNI header: ${JAVA_INCLUDE_PATH}")
+MESSAGE (STATUS "JVM shared library: ${JAVA_JVM_LIBRARY}")
 
 find_program(MAVEN_EXECUTABLE mvn ${MAVEN_ROOT} NO_DEFAULT_PATH)
-
-
-
+if(NOT MAVEN_EXECUTABLE)
+  MESSAGE(FATAL_ERROR "Maven was not found.")
+endif(NOT MAVEN_EXECUTABLE)
 
 
 
