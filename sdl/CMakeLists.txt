@@ -18,6 +18,7 @@
 
 
 
+    "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
 
 
 
@@ -267,8 +268,7 @@
 
 
 
-
-
+    "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
 
 
 
@@ -752,9 +752,9 @@ endif()
 
 
 
-
-
-
+MARK_AS_ADVANCED(
+  CMAKE_CXX_FLAGS_RELWITHOUTTBBMALLOC
+  )
 
 
 
@@ -814,6 +814,7 @@ endif()
 
 
 MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithoutTbbmalloc")
 
 
 
@@ -821,11 +822,10 @@ MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
 
 
 
+  find_package(Cryptopp)
 
 
-
-
-
+  if(${CRYPTOPP_FOUND})
 
 
 
@@ -909,19 +909,19 @@ endif()
 
 
 
+if(${LINUX})
 
 
+  find_package(NPLM)
+  message(STATUS "NPLM include dir: ${NPLM_INCLUDE_DIR}")
+  message(STATUS "NPLM libs: ${NPLM_LIBRARIES}")
 
 
-
-
-
-
-
-
-
-
-
+  message(STATUS "EIGEN include dir: ${EIGEN_INCLUDE_DIR}")
+  message(STATUS "TCLAP include dir: ${TCLAP_INCLUDE_DIR}")
+  add_definitions(-DHAVE_NPLM)
+  set(HAVE_NPLM 1)
+endif()
 
 
 
