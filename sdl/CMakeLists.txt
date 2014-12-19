@@ -848,12 +848,12 @@ if(ZEROMQ_FOUND)
   add_definitions(-DHAVE_ZMQ)
 endif()
 
-
-
-
-
-
-
+find_package(Svmtool)
+MESSAGE(STATUS "Svmtool Library: ${SVMTOOL_LIBRARY}")
+MESSAGE(STATUS "Svmtool Include: ${SVMTOOL_INCLUDE_DIR}")
+if(SVMTOOL_FOUND)
+  add_definitions(-DHAVE_SVMTOOL)
+endif()
 
 
 
@@ -1189,7 +1189,7 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
-
+  DependencyParser
 
 
 

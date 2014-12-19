@@ -336,9 +336,9 @@ function(xmt_maven_project_with_profile_test TARGET_NAME BINARY_DIR PROFILE_NAME
 endfunction(xmt_maven_project_with_profile_test)
 
 
-
-
-
-
+  set(PROJECT_TEST_NAME "Test${PROJECT_NAME}")
+  xmt_add_test_executable(${PROJECT_TEST_NAME} ${PROJECT_SOURCE_DIR})
+  enable_testing()
+  xmt_add_unit_tests(${PROJECT_NAME} ${PROJECT_TEST_NAME})
 
 
