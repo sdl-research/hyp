@@ -28,7 +28,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ../sdl && make -j4 VERBOSE=1`
 
 Then, when you're ready to use or improve the source code for your own
 projects, consider generating [Doxygen](http://www.doxygen.org/):
-`doxygen doxy/xmtDoxy.conf`.
+`doxygen doxy/doxy.conf`.
 
 If you're willing to give us permission to use your source code, and
 any patents required for it, we welcome pull requests. Keep your diffs

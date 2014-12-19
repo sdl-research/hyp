@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  18 DEC 2014 22:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  18 DEC 2014 23:26
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1582,9 +1582,9 @@ y-per-graph (cur-rently only
  []
 
 [17 <./fig/union_result.pdf> <./fig/concat_result.pdf>]
-Overfull \hbox (85.42386pt too wide) in paragraph at lines 726--727
+Overfull \hbox (63.82387pt too wide) in paragraph at lines 726--727
 []\T1/futs/m/n/12 The full API doc-u-men-ta-tion can be gen-er-ated us-ing \T1/
-qcr/m/n/12 doxygen doxygen/xmtDoxy.conf\T1/futs/m/n/12 . 
+qcr/m/n/12 doxygen doxygen/doxy.conf\T1/futs/m/n/12 . 
  []
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
@@ -1703,13 +1703,16 @@ Package rerunfilecheck Info: File `hyp-tutorial.out' has not changed.
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1012.
  ) 
 Here is how much of TeX's memory you used:
- 30770 strings out of 493117
- 591033 string characters out of 6135433
- 687972 words of memory out of 5000000
- 33317 multiletter control sequences out of 15000+600000
+ 30773 strings out of 493117
+ 591117 string characters out of 6135433
+ 688043 words of memory out of 5000000
+ 33320 multiletter control sequences out of 15000+600000
  149271 words of font info for 179 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  68i,21n,82p,10397b,1390s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1725,7 +1728,7 @@ dist/fonts/type1/adobe/utopia/putr8a.pfb></usr/local/texlive/2014/texmf-dist/fo
 nts/type1/adobe/utopia/putri8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/ty
 pe1/public/tex-gyre/qcrb.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/pu
 blic/tex-gyre/qcrr.pfb>
-Output written on hyp-tutorial.pdf (25 pages, 279620 bytes).
+Output written on hyp-tutorial.pdf (25 pages, 279607 bytes).
 PDF statistics:
  865 PDF objects out of 1000 (max. 8388607)
  759 compressed objects within 8 object streams
