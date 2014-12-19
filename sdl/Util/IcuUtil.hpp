@@ -353,7 +353,7 @@ template<class GenericString>
 GenericString const& Tokenizer<GenericString>::value(TokenSpan& tokSpan) const {
 
 
-
+}
 
 
 

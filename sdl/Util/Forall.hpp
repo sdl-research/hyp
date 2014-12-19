@@ -1,0 +1,41 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Eclipse CDT parser does not understand BOOST_FOREACH,
+// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=332278.
+#ifdef __CDT_PARSER__
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,131 @@
+
+
+
+
+
+#ifndef GRAEHL_SHARED__VERBOSE_EXCEPTION_HPP
+#define GRAEHL_SHARED__VERBOSE_EXCEPTION_HPP
+
+
+
+#include <iostream>
+#include <sstream>
+
+
+namespace graehl {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+struct verbose_exception : public std::exception
+{
+  const char *file;
+  const char *function;
+  unsigned line;
+  std::string message;
+
+  verbose_exception() : file(""), function(""), line(), message("unspecified verbose_exception") {}
+
+
+
+
+  verbose_exception(const char *fun, const char *fil, unsigned lin) : file(fil), function(fun), line(lin) {
+    std::stringstream mbuf;
+    mbuf << function << "() [" << file << ":" << line << "].";
+    message=mbuf.str();
+  }
+
+  template <class M1>
+
+
+    std::stringstream mbuf;
+    mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ".";
+    message=mbuf.str();
+  }
+
+  template <class M1, class M2>
+
+
+    std::stringstream mbuf;
+    mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ".";
+    message=mbuf.str();
+  }
+
+  template <class M1, class M2, class M3>
+
+
+    std::stringstream mbuf;
+    mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ' ' << m3 << ".";
+    message=mbuf.str();
+  }
+
+  template <class M1, class M2, class M3, class M4>
+
+
+    std::stringstream mbuf;
+    mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ' ' << m3 << ' ' << m4 << ".";
+    message=mbuf.str();
+  }
+
+  template <class M1, class M2, class M3, class M4, class M5>
+
+
+    std::stringstream mbuf;
+    mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ' ' << m3 << ' ' << m4 << ' ' << m5 << ".";
+    message=mbuf.str();
+  }
+
+
+
+
+    return message.c_str();
+  }
+};
+
+}
+
+#define VTHROW_A(type)  throw type(__FUNCTION__, __FILE__, __LINE__)
+#define VTHROW_A_1(type, arg)  throw type(__FUNCTION__, __FILE__, __LINE__, arg)
+#define VTHROW_A_2(type, arg, arg2)  throw type(__FUNCTION__, __FILE__, __LINE__, arg, arg2)
+#define VTHROW_A_3(type, arg, arg2, arg3)  throw type(__FUNCTION__, __FILE__, __LINE__, arg, arg2, arg3)
+#define VTHROW_A_4(type, arg, arg2, arg3, arg4)  throw type(__FUNCTION__, __FILE__, __LINE__, arg, arg2, arg3, arg4)
+
+#define VTHROW VTHROW_A(graehl::verbose_exception)
+#define VTHROW_1(a1) VTHROW_A_1(graehl::verbose_exception, a1)
+#define VTHROW_2(a1, a2) VTHROW_A_2(graehl::verbose_exception, a1, a2)
+#define VTHROW_3(a1, a2, a3) VTHROW_A_3(graehl::verbose_exception, a1, a2, a3)
+#define VTHROW_4(a1, a2, a3, a4) VTHROW_A_4(graehl::verbose_exception, a1, a2, a3, a4)
+
+#define THROW_MSG(type, msg) do { std::stringstream out; out << msg; throw type(out.str()); } while(0)
+#define VTHROW_A_MSG(type, msg) do { std::stringstream out; out << msg; throw type(__FUNCTION__, __FILE__, __LINE__, out.str()); } while(0)
+#define VTHROW_MSG(msg) VTHROW_A_MSG(graehl::verbose_exception, msg)
+
+
+
+
+
+
+
+
+
+
+  template <class M1, class M2, class M3>                               \
+
+
+  template <class M1, class M2, class M3, class M4>                     \
+
+
+
+
+
+#endif

@@ -18,6 +18,7 @@
 
 
 
+#include <string>
 
 
 
@@ -25,13 +26,12 @@
 
 
 
+namespace Util {
 
+/**
 
-
-
-
-
-
+*/
+std::string logFileName(std::string const& appname);
 
 
 
@@ -146,4 +146,4 @@
 
 
 
-
+#endif

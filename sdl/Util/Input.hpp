@@ -98,6 +98,7 @@ std::string const& kPipePrefix("/proc/self/fd/");
 std::string const& kPipePrefix2("/dev/fd/");
 
 
+/**
 
 
 
@@ -106,6 +107,7 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
+*/
 
 
 
@@ -192,12 +194,15 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
+  }
 
 
 
 
 
+  std::istream& getStream() const {
 
+  }
 
 
 
@@ -211,6 +216,7 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
+};
 
 
 
@@ -235,10 +241,4 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
-
-
-
-
-
-
-
+#endif

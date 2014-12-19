@@ -16,10 +16,10 @@
 
 
 
-
-
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
-
+    FORCE)
 
 
 
@@ -237,7 +237,7 @@ endif()
 
 
 
-
+include_directories(${CMAKE_SOURCE_DIR})
 
 if(ANDROID)
 
@@ -256,34 +256,34 @@ if(ANDROID)
   endmacro()
 endif()
 
+set(xmt_STAGE_PREFIX ${CMAKE_BINARY_DIR}/stage) #this is the stage/installation dir
+
+include(GetGitRevisionDescription)
 
 
 
 
 
+add_definitions(-DHAVE_CXX_STDHEADERS -DBOOST_ALL_NO_LIB -DTIXML_USE_TICPP)
 
-
-
-
-
-
-
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
-
+    FORCE)
 
 
 if(UNIX AND NOT APPLE AND NOT ANDROID)
   set(LINUX 1)
 endif()
 
-
-
-
+#
+# Initialize unit testing.
+#
 if(NOT ANDROID)
-
-
-
-
+  set(xmt_UTEST_DIR ${PROJECT_BINARY_DIR}/logs/unittests)
+  if(NOT EXISTS ${xmt_UTEST_DIR})
+    make_directory(${xmt_UTEST_DIR})
+  endif()
   enable_testing()
 endif()
 
@@ -352,10 +352,10 @@ endif()
 
 
 
-
-
-
-
+#
+# Windows specific settings.
+#
+if(WIN32)
 
 
 
@@ -393,6 +393,7 @@ endif()
 
   set(Boost_COMPILER "-vc100")
 
+  set(Boost_USE_STATIC_LIBS ON)
 
 
 
@@ -404,11 +405,10 @@ endif()
 
 
 
+  set(VS_MULTITHREADED_DEBUG_DLL_IGNORE_LIBRARY_FLAGS
 
 
-
-
-
+  set(VS_MULTITHREADED_RELEASE_DLL_IGNORE_LIBRARY_FLAGS
 
 
 
@@ -433,7 +433,7 @@ endif()
 
 
 
-
+endif()
 
 
 
@@ -654,6 +654,8 @@ endif()
     set(Boost_COMPILER "-gcc44")
 
 
+    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
+    set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
 
 
 
@@ -662,9 +664,7 @@ endif()
 
 
 
-
-
-
+  endif()
 
   if(ANDROID)
 
@@ -687,6 +687,7 @@ endif()
   endif()
 
 
+  if(APPLE)
 
 
 
@@ -694,11 +695,11 @@ endif()
 
 
 
-
-
+   endif()
 
 
    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 
 
@@ -724,6 +725,7 @@ endif()
 
 
 
+   set(Boost_USE_STATIC_LIBS OFF)
 
 
 
@@ -744,9 +746,7 @@ endif()
 
 
 
-
-
-
+   endif()
 
 
 
@@ -804,8 +804,8 @@ endif()
 
 
 
-
-
+find_package(ICU)
+MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 
   set(LINK_DEPENDENCIES ${LINK_DEPENDENCIES} ${ICU_LIBRARIES})
 
@@ -834,12 +834,12 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDe
 
 
 
-
-
-
-
-
-
+find_package(cmph)
+MESSAGE(STATUS "CMPH Libraries: ${CMPH_LIBRARIES}")
+if(CMPH_FOUND)
+  add_definitions(-DCMPH_NOISY_LM)
+  MESSAGE(STATUS "Enabling Noisy LM build")
+endif()
 
 
 MESSAGE(STATUS "Zeromq include directory: ${ZEROMQ_INCLUDE_DIR}")
@@ -867,22 +867,22 @@ message(STATUS "TinyXML++ library: ${TINYXMLCPP_LIBRARY}")
 message(STATUS "TinyXML++ include directory: ${TINYXMLCPP_INCLUDE_DIR}")
 
 
+if(${HAVE_SRILM})
+  find_package(SRILM)
+  MESSAGE(STATUS "SRILM Libraries: ${SRILM_LIBRARIES}")
+  if(${SRILM_FOUND})
+    add_definitions(-DHAVE_SRILM)
+  else()
+    set(HAVE_SRILM 0)
+  endif()
+endif()
 
+find_package(IRSTLM)
+MESSAGE(STATUS "IrstLM Libraries: ${IRSTLM_LIBRARIES}")
+if(${IRSTLM_FOUND})
+  add_definitions(-DHAVE_IRSTLM)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+endif()
 
 
 
@@ -926,40 +926,40 @@ endif()
 find_package(Protobuf REQUIRED)
 
 
+if(${HAVE_SRILM})
 
-
-
+  if(UNIX)
     if(NOT ANDROID)
 
-
+    endif()
+  endif()
+endif()
+if(${HAVE_IRSTLM})
 
 endif()
-
-
-
 if(${HAVE_NPLM})
 
 endif()
+if(${HAVE_KENLM})
+
+endif()
+if(CMPH_FOUND)
+
+endif()
 
 
 
 
-
-
-
-
-
-
-
+set(Boost_USE_STATIC_RUNTIME OFF)
 SET(boost_libs
 
+  serialization
+  system
+  filesystem
+  program_options
 
-
-
-
-
-
-
+  iostreams
+  timer
 
 
 
@@ -1034,21 +1034,21 @@ find_package(Boost ${Boost_find_version} REQUIRED COMPONENTS ${boost_libs})
 
 
 
-
-
+find_package(ZLIB)
+MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
 
 
 if(NOT ANDROID)
-
-
-
+  find_package (Log4CXX)
+  MESSAGE(STATUS "log4cxx Libraries: ${LOG4CXX_LIBRARIES}")
+  MESSAGE(STATUS "log4cxx Include Directories: ${LOG4CXX_INCLUDE_DIR}")
 endif()
 
 
 
-
+find_package(BerkeleyDB)
 MESSAGE(STATUS "Berkeley DB Libraries: ${DB_LIBRARIES}")
-
+MESSAGE(STATUS "Berkeley DB Include Directories: ${DB_INCLUDE_DIR}")
 
 
 
@@ -1077,12 +1077,12 @@ MESSAGE(STATUS "CDB Include Directories: ${CDB_INCLUDE_DIR}")
 
 
 
+  find_package(Hadoop)
 
 
 
-
-
-
+  message(STATUS "Hadoop library: ${HADOOP_LIBRARIES}")
+  message(STATUS "Hadoop include directory: ${HADOOP_INCLUDE_DIR}")
   message(STATUS "OpenSSL libraries for Hadoop: ${HADOOP_SSL_LIBRARY}, ${HADOOP_CRYPTO_LIBRARY}")
   message(STATUS "OpenSSL include path for Hadoop: ${HADOOP_SSL_INCLUDE_DIR}")
   set(_JAVA_PATHS "/usr/java/")
@@ -1116,7 +1116,7 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
-
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
 
 
@@ -1154,7 +1154,7 @@ MESSAGE(STATUS "libLBFGS Include Directories: ${LBFGS_INCLUDE_DIR}")
 
 
 
-
+find_package(UTF8)
 
 # By default, create only the dynamic XMT lib. The user can override this
 
@@ -1298,9 +1298,9 @@ endif()
 
 
 
-
-
-
+  include_directories(${Boost_INCLUDE_DIRS})
+  include_directories(${CMAKE_SOURCE_DIR}/..)
+  include_directories(${LOG4CXX_INCLUDE_DIR})
 
 
 
@@ -1348,7 +1348,7 @@ endif()
 
   endif()
 
-
+message(STATUS "-- Test Executables: ${testExecutables}")
 
 
 
@@ -1362,10 +1362,10 @@ MESSAGE(STATUS "Unit test (check only) executables: ${testExecutables}")
 
 
 
-
-
-
-
+#
+# Generate Doxygen target
+#
+add_custom_target(doc ${CMAKE_SOURCE_DIR}/doxygenate WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 
 

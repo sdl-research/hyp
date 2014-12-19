@@ -14,7 +14,7 @@
 
 
 
-
+namespace Vocabulary {
 
 
 
@@ -68,6 +68,7 @@
 
 
 
+ protected:
 
 
 
@@ -133,6 +134,7 @@
 
 
 
+ private:
 
 
 
@@ -149,17 +151,15 @@
 
 
 
+  }
 
+ protected:
 
 
 
+};
 
 
 
 
-
-
-
-
-
-
+#endif

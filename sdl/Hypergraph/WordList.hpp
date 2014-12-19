@@ -21,20 +21,20 @@
 
 
 
+namespace Hypergraph {
+
+VERBOSE_EXCEPTION_DECLARE(TrieWordListException)
+
+typedef graehl::normalize_options<double> NormOpt;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+  bool chars;
+  std::string wordsep;
+  std::size_t maxlines;
+  double unigram_addk;
+  double lengthBase;
+  double maxLength;
 
   bool enablenormalize;
 
@@ -43,9 +43,9 @@
 
       , enablenormalize(true)
 
-
-
-
+  std::string usage() const {
+    return "input list of lines: COUNT WORD (if --chars) else WORD*";
+  }
 
 
 
@@ -59,6 +59,9 @@
 
 
 
+};
+
+template <class W>
 
 
 
@@ -96,12 +99,9 @@
 
 
 
-
-
-
-
-
-
+      counts.push_back(c*p);
+      ws.closeString();
+    } else if ((in.bad() || in.fail()) && !in.eof())
 
 
 

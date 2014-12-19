@@ -1,4 +1,4 @@
-
+#include <iostream>
 
 #include <iomanip>
 #include <fstream>
@@ -76,6 +76,7 @@
 
 
 
+namespace Config {
 
 
 
@@ -113,6 +114,7 @@
 
 
 
+/*
 
 
 
@@ -140,16 +142,19 @@
 
 
 
+ */
 
 
 
 
+}
 
 
 
 
 
 
+  }
 
 
 
@@ -188,10 +193,15 @@
 
 
 
+      }
+      os << " ]";
+    }
 
 
 
 
+      os << " { ";
+    }
 
 
 
@@ -201,34 +211,24 @@
 
 
 
+        }
 
 
 
+        else
 
+      }
 
+    }
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
+  }
+}
 
 
 ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
@@ -249,26 +249,26 @@ ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
 }
 
 
+ConfigNode loadRawConfig(boost::filesystem::path const& path) {
+  try {
+    ConfigNode rawNode = YAML::LoadFile(path.string());
+
+
+    return rawNode;
 
 
 
 
+  }
+}
+
+/// fully expanded starting from relative or absolute path 'basis',
+/// and interpreted via conventions specified in ../docs/xmt-configuration-with-yaml.pdf
 
 
+  configProc.setFilePath(filePath);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
 
@@ -284,7 +284,7 @@ ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
 
 
   }
-
+}
 
 
 

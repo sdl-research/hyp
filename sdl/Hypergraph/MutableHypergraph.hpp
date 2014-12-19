@@ -32,7 +32,7 @@
 
 
 
-
+namespace Hypergraph {
 
 
 
@@ -86,6 +86,128 @@
 
 
     // assumes that kHasOutputLabels will be/has already been set to true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return Util::getOrElse(lstate, io, kNoState);
+
+
+
+
+
 
 
 
@@ -273,6 +395,7 @@
 
 
 
+    if (!x.stateAdding()) {
 
 
 
@@ -562,6 +685,8 @@
 
 
 
+ protected:
+  void init(Properties props) {
 
 
 
@@ -569,8 +694,11 @@
 
 
 
+  }
 
+ public:
 
+  // improved: default props get set no matter what you pass in.
 
 
 
@@ -578,8 +706,11 @@
 
 
 
+  }
 
 
+    this->deleteArcs();  // can't go in parent classes
+  }
 
 
 
@@ -600,6 +731,7 @@
 
 
 
+  }
 
 
 
@@ -614,11 +746,13 @@
 
 
 
+  }
 
 
 
 
 
+  }
 
 
 
@@ -698,6 +832,7 @@
 
 
 
+  }
 
 
 
@@ -722,15 +857,18 @@
 
 
 
+  }
 
 
 
 
+  }
 
 
 
 
 
+  }
 
 
 
@@ -741,6 +879,7 @@
 
 
 
+  }
 
 
 
@@ -777,6 +916,7 @@
 
 
 
+  }
 
 
 
@@ -799,9 +939,12 @@
 
 
 
+  }
 
+  /**
 
 
+  */
 
 
 
@@ -877,11 +1020,13 @@
 
 
 
+  }
 
 
 
 
 
+  }
 
 
 
@@ -892,17 +1037,27 @@
 
 
 
+  }
 
 
 
 
+    if (!IHypergraph<Arc>::checkValid()) return false;
+    if (this->prunedEmpty()) return true;
+    if (this->isFsm() && !this->isFsmCheck()) {
 
 
+    }
+    return true;
+  }
 
+ private:
 
 
+  void addArcIn(Arc* arc) {
 
 
+  }
 
 
 
@@ -912,10 +1067,12 @@
 
 
 
+  void addArcOut(Arc* arc) {
 
 
 
 
+  }
 
 
 
@@ -967,6 +1124,7 @@
 
 
 
+ public:
 
 
 
@@ -975,9 +1133,11 @@
 
 
 
+  /**
 
 
 
+  */
 
 
 
@@ -997,6 +1157,7 @@
 
 
 
+  }
 
 
 
@@ -1028,6 +1189,7 @@
 
 
 
+  }
 
 
 
@@ -1037,7 +1199,9 @@
 
 
 
+    }
 
+  }
 
 
 
@@ -1078,6 +1242,7 @@
 
 
 
+  }
 
 
 
@@ -1094,6 +1259,7 @@
 
 
 
+  }
 
 
 
@@ -1107,187 +1273,21 @@
 
 
 
+  }
 
 
 
 
 
+  // The in and out arcs are not in a separate State class because
+  // then every state would have such vectors of in and out
 
+  // will have just one empty vector now.
 
 
+};
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
