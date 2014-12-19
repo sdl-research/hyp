@@ -334,13 +334,13 @@
 
 
 
+if(HADOOP_YARN)
 
+  message(STATUS "running using HDP2.1 hadoop libraries")
+else()
 
-
-
-
-
-
+  message(STATUS "running using CDH3 hadoop libraries")
+endif()
 
 
 
