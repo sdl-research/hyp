@@ -1,6 +1,6 @@
-
-
-
+#ifndef SDL_SIMPLECRF_CREATESEARCHSPACE_HPP
+#define SDL_SIMPLECRF_CREATESEARCHSPACE_HPP
+#pragma once
 
 #include <string>
 #include <set>
@@ -9,29 +9,29 @@
 #include <boost/thread.hpp>
 #include <boost/noncopyable.hpp>
 
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/Forall.hpp>
+#include <sdl/Util/StringBuilder.hpp>
+#include <sdl/Config/ConfigureYaml.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/StringToHypergraph.hpp>
+#include <sdl/Hypergraph/Compose.hpp>
+#include <sdl/Hypergraph/SortArcs.hpp>
+#include <sdl/Hypergraph/SortStates.hpp>
+#include <sdl/Optimization/ICreateSearchSpace.hpp>
+#include <sdl/Optimization/IInput.hpp>
+#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
+#include <sdl/Optimization/ExternalFeatHgPairs.hpp>
+#include <sdl/Optimization/Types.hpp>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+namespace sdl {
 namespace CrfDemo {
 
-
+SDL_ENUM(TransitionModelType, 4, (Unigram, Bigram, Hierarchical, Bihierarchical));
 
 struct CrfDemoConfig {
 
@@ -69,7 +69,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   typedef typename Pairs::value_type value_type;
   typedef typename Pairs::IHgPtr IHgPtr;
   typedef Optimization::TrainingDataIndex TrainingDataIndex;
-
+  typedef boost::unordered_map<Sym, std::set<Sym> > LabelsPerPosMap;
 
  public:
   CreateSearchSpace(ConfigNode const& yamlConfig)
@@ -81,47 +81,47 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   ///
 
   void readLabelsFile(std::string const& fname) {
-
+    SDL_INFO(CrfDemo, "Reading labels file '" << fname << "'");
     Util::Input input(fname);
     std::string label;
     while (std::getline(*input, label)) {
-
+      allLabels_.insert(pVoc_->add(label, kTerminal));
     }
   }
 
   void writeLabelsFile(std::string const& fname) {
-
+    SDL_INFO(CrfDemo, "Writing labels file '" << fname << "'");
     Util::Output output(fname);
-
-
+    forall (Sym labelId, allLabels_) {
+      *output << pVoc_->str(labelId) << '\n';
     }
   }
 
   void readLabelsPerPosFile(std::string const& fname) {
-
+    SDL_INFO(CrfDemo, "Reading labels-per-pos file '" << fname << "'");
     Util::Input input(fname);
     std::string line;
     while (std::getline(*input, line)) {
       std::stringstream ss(line);
       std::string pos, label;
       ss >> pos;
-
+      std::set<Sym>& s = labelsPerPos_[pVoc_->add(pos, kTerminal)];
       while (ss >> label) {
-
+        s.insert(pVoc_->add(label, kTerminal));
       }
     }
   }
 
   void writeLabelsPerPosFile(std::string const& fname) {
-
+    SDL_INFO(CrfDemo, "Writing labels-per-pos file '" << fname << "'");
     Util::Output output(fname);
     for (LabelsPerPosMap::const_iterator it = labelsPerPos_.begin();
          it != labelsPerPos_.end(); ++it) {
-
-
-
+      *output << pVoc_->str(it->first);
+      forall (Sym labelId, it->second) {
+        *output << "\t" << pVoc_->str(labelId);
       }
-
+      *output << '\n';
     }
   }
 
@@ -141,7 +141,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
   void setTestMode() {
     if (opts_.labelsPath.empty()) {
-
+      SDL_THROW_LOG(CrfDemo, InvalidInputException, "Need labels-path option");
     }
     readLabelsFile(opts_.labelsPath);
     readLabelsPerPosFile(opts_.labelsPerPosPath);
@@ -150,26 +150,26 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
   /////////////////////////////////////////////////////////////////
   struct Sentence {
-
+    std::vector<Sym> words, poss, labels;
 
     void clear() {
       words.clear(); poss.clear(); labels.clear();
     }
 
-
+    void add(std::string const& line, std::set<Sym>* allLabels
              , IVocabularyPtr& pVoc, bool testMode) {
       std::stringstream ss(line);
       std::string word, pos, label;
       ss >> word >> pos >> label;
       if (word.empty() || pos.empty() || label.empty()) {
-
+        SDL_THROW_LOG(CrfDemo, InvalidInputException, "Bad line: " << line);
       }
-
-
-
-
-
-
+      words.push_back(pVoc->add(word, kTerminal));
+      poss.push_back(pVoc->add(pos, kTerminal));
+      labels.push_back(pVoc->add(label, kTerminal));
+      SDL_DEBUG(CrfDemo, "id(" << word << "): " << words.back()) ;
+      SDL_DEBUG(CrfDemo, "id(" << pos << "): " << poss.back()) ;
+      SDL_DEBUG(CrfDemo, "id(" << label << "): " << labels.back()) ;
       if (!testMode) {
         allLabels->insert(labels.back());
       }
@@ -181,28 +181,28 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     std::size_t id = 0;
     boost::hash_combine(id, featName);
     id = id % opts_.numFeatures;
-
+    SDL_TRACE(CrfDemo, "getFeatId(" << featName << "): " << id);
     return id;
   }
 
-
+  std::string createFeatureName(std::string const& prefix, Sym sym) const {
     if (opts_.meaningfulFeatureNames)
-
+      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym)).str();
     else
       return Util::StringBuilder(prefix)("_")(sym).str();
   }
 
-
+  std::string createFeatureName(std::string const& prefix, Sym sym1, Sym sym2) const {
     if (opts_.meaningfulFeatureNames)
-
+      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym1))("_")(pVoc_->str(sym2)).str();
     else
       return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2).str();
   }
 
   std::string createFeatureName(std::string const& prefix,
-
+                                Sym sym1, Sym sym2, Sym sym3) const {
     if (opts_.meaningfulFeatureNames)
-
+      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym1))("_")(pVoc_->str(sym2))("_")(pVoc_->str(sym3)).str();
     else
       return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2)("_")(sym3).str();
   }
@@ -230,9 +230,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     IMutableHypergraph<Arc>* model = new MutableHypergraph<Arc>();
     model->setVocabulary(pVoc_);
     model->addState();
-
-
-
+    model->setStart(0);
+    model->setFinal(0);
+    forall (Sym sym, allLabels_) {
       model->addArc(new Arc(Head(0), Tails(0, model->addState(sym)), Weight::one()));
     }
     sortArcs(model);
@@ -244,10 +244,10 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     IMutableHypergraph<Arc>* model = new MutableHypergraph<Arc>();
     model->setVocabulary(pVoc_);
 
-
+    std::vector<Sym> historyNames; // just for more meaningful feature names
     historyNames.reserve(allLabels_.size() + 1);
     historyNames.push_back(EPSILON::ID);
-
+    forall (Sym label, allLabels_) {
       historyNames.push_back(label);
     }
 
@@ -255,12 +255,12 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     for (std::size_t i = 0; i < numStates; ++i) {
       model->addState();
     }
-
+    model->setStart(0);
     StateId finalState = numStates - 1;
-
+    model->setFinal(finalState);
 
     for (StateId s = 0; s < finalState; ++s) {
-
+      std::set<Sym>::const_iterator symIter = allLabels_.begin();
       for (StateId t = 1; t < finalState; ++t, ++symIter) {
         Weight weight(0.0f);
         weight.insert(getFeatureId(createFeatureName("bi", historyNames[s], historyNames[t])),
@@ -279,16 +279,16 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       }
     }
     sortArcs(model);
-
+    SDL_DEBUG(CrfDemo, "Bigram model: " << *model);
     return model;
   }
 
   // shortcut
-
-
+  Sym sym(std::string const& str) {
+    return pVoc_->add(str, kNonterminal);
   }
-
-
+  Sym termSym(std::string const& str) {
+    return pVoc_->add(str, kTerminal);
   }
 
   Hypergraph::IHypergraph<Arc>* createHierarchicalModel() {
@@ -296,33 +296,33 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     IMutableHypergraph<Arc>* model = new MutableHypergraph<Arc>();
     model->forceCanonicalLex();
     model->setVocabulary(pVoc_);
+    // model->setStart(model->addState());
 
-
-
-
-
+    std::set<Sym> nonterminals; // NP, VP, ...
+    forall (Sym label, allLabels_) {
+      std::string const& str = pVoc_->str(label);
       if (str.length() > 2 && (str[0] == 'I' || str[0] == 'B') && str[1] == '-') {
         nonterminals.insert(sym(str.substr(2)));
       }
     }
 
-
+    boost::unordered_map<Sym, StateId> stateId;
 
     // (NP) <- (B-NP)
     // (NP) <- (B-NP) (NP0)
     // (NP0) <- (I-NP)
     // (NP0) <- (I-NP) (NP0)
-
-
+    forall (Sym nt, nonterminals) {
+      std::string const& ntStr = pVoc_->str(nt);
       stateId[nt] = model->addState(nt);
 
-
+      Sym b = termSym("B-" + ntStr);
       stateId[b] = model->addState(b);
 
-
+      Sym i = termSym("I-" + ntStr);
       stateId[i] = model->addState(i);
 
-
+      Sym nt0 = sym(ntStr + "0");
       stateId[nt0] = model->addState(nt0);
 
       Weight weight1(0.0f); weight1.insert(getFeatureId(createFeatureName("short", nt)), 1.0f);
@@ -338,16 +338,16 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       model->addArc(new Arc(Head(stateId[nt0]), Tails(stateId[i], stateId[nt0]), weight4));
     }
 
-
+    Sym O = termSym("O"); // similar to "B-NP", etc.: it's a terminal symbol
     nonterminals.insert(O);
     stateId[O] = model->addState(O);
 
     // add (nt1+nt2) states
-
-
-
-
-
+    forall (Sym nt1, nonterminals) {
+      std::string const& nt1Str = pVoc_->str(nt1);
+      forall (Sym nt2, nonterminals) {
+        std::string const& nt2Str = pVoc_->str(nt2);
+        Sym nt12 = sym(nt1Str + "+" + nt2Str);
         stateId[nt12] = model->addState(nt12);
       }
     }
@@ -355,14 +355,14 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     // Trigram model over nonterminals:
     // (NP+VP) <- (ADJ+NP) (VP)
     // ...
-
-
-
-
-
-
-
-
+    forall (Sym nt1, nonterminals) {
+      std::string const& nt1Str = pVoc_->str(nt1);
+      forall (Sym nt2, nonterminals) {
+        std::string const& nt2Str = pVoc_->str(nt2);
+        Sym nt12 = sym(nt1Str + "+" + nt2Str);
+        forall (Sym nt3, nonterminals) {
+          std::string const& nt3Str = pVoc_->str(nt3);
+          Sym nt23 = sym(nt2Str + "+" + nt3Str);
           Weight weight(0.0f);
           weight.insert(getFeatureId(createFeatureName("tri_nt", nt1Str, nt2Str, nt3Str)), 1.0f);
           weight.insert(getFeatureId(createFeatureName("bi_nt", nt2Str, nt3Str)), 1.0f);
@@ -374,15 +374,15 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     }
 
     // (NP+VP) <- (eps+NP) (VP)
+    forall (Sym nt1, nonterminals) {
+      std::string const& nt1Str = pVoc_->str(nt1);
 
-
-
-
+      Sym epsNt1 = sym("eps+" + nt1Str);
       stateId[epsNt1] = model->addState(epsNt1);
 
-
-
-
+      forall (Sym nt2, nonterminals) {
+        std::string const& nt2Str = pVoc_->str(nt2);
+        Sym nt12 = sym(nt1Str + "+" + nt2Str);
         Weight weight(0.0f);
         weight.insert(getFeatureId(createFeatureName("tri_nt", "eps", nt1Str, nt2Str)), 1.0f);
         weight.insert(getFeatureId(createFeatureName("bi_nt", nt1Str, nt2Str)), 1.0f);
@@ -395,9 +395,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     // (eps+NP) <- START (NP)
     // (eps+VP) <- START (VP)
     // ...
-
-
-
+    forall (Sym nt, nonterminals) {
+      std::string const& ntStr = pVoc_->str(nt);
+      Sym epsNt = sym("eps+" + ntStr);
       Weight weight(0.0f);
       weight.insert(getFeatureId(createFeatureName("bi_nt", "eps", ntStr)), 1.0f);
       weight.insert(getFeatureId(createFeatureName("uni_nt", ntStr)), 1.0f);
@@ -405,15 +405,15 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
                             Tails(stateId[nt]), weight));
     }
 
-
+    Sym final0 = sym("FINAL0");
     stateId[final0] = model->addState(final0);
 
     // (FINAL0) <- (NP+VP)
-
-
-
-
-
+    forall (Sym nt1, nonterminals) {
+      std::string const& nt1Str = pVoc_->str(nt1);
+      forall (Sym nt2, nonterminals) {
+        std::string const& nt2Str = pVoc_->str(nt2);
+        Sym nt12 = sym(nt1Str + "+" + nt2Str);
         Weight weight(0.0f);
         weight.insert(getFeatureId(createFeatureName("tri_nt", nt1Str, nt2Str, "FINAL")), 1.0f);
         weight.insert(getFeatureId(createFeatureName("bi_nt", nt2Str, "FINAL")), 1.0f);
@@ -424,9 +424,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     }
 
     // (FINAL0) <- (eps+NP)
-
-
-
+    forall (Sym nt1, nonterminals) {
+      std::string const& nt1Str = pVoc_->str(nt1);
+      Sym epsNt1 = sym("eps+" + nt1Str);
       Weight weight(0.0f);
       weight.insert(getFeatureId(createFeatureName("tri_nt", "eps", nt1Str, "FINAL")), 1.0f);
       weight.insert(getFeatureId(createFeatureName("bi_nt", nt1Str, "FINAL")), 1.0f);
@@ -435,10 +435,10 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
                             Tails(stateId[epsNt1]), weight));
     }
 
-
+    model->setFinal(stateId[final0]);
 
     // sortArcs(model); // doesn't work
-
+    SDL_DEBUG(CrfDemo, "Hierarchical model: " << *model);
 
     return model;
   }
@@ -455,7 +455,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   }
 
   void addLabelArc(Hypergraph::IMutableHypergraph<Arc>* hg
-
+                   , Sym word, Sym pos, Sym label
                    , Hypergraph::StateId from, Hypergraph::StateId to) const {
     Weight weight(0.0f);
     weight.insert(getFeatureId(createFeatureName("word+label", word, label)), 1.0f);
@@ -481,26 +481,26 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     for (std::size_t i = 0; i <= sent.words.size(); ++i) {
       result->addState();
     }
-
+    result->setStart(0);
 
     for (std::size_t i = 0; i < sent.words.size(); ++i) {
       if (hgType == kClamped) { // add the observed (gold) label (clamped, nominator)
         addLabelArc(result, sent.words[i], sent.poss[i], sent.labels[i], i, i + 1);
       }
       else {
-
-
+        // forall (Sym label, allLabels_) { // add all possible labels (unclamped, denominator)
+        std::set<Sym> const* labels = &allLabels_;
         LabelsPerPosMap::const_iterator iter = labelsPerPos_.find(sent.poss[i]);
         if (iter != labelsPerPos_.end()) {
           labels = &(iter->second);
         }
-
+        forall (Sym label, *labels) {
           addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1);
         }
       }
     }
 
-
+    result->setFinal(sent.words.size());
     IMutableHypergraph<Arc>* composed =
         new MutableHypergraph<Arc>(kCanonicalLex | kStoreOutArcs | kStoreInArcs);
 
@@ -553,17 +553,17 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     {}
 
     void operator()() {
-
+      SDL_DEBUG(Optimization.ProcessTrainingExampleRange,
                 "Processing sentences " << begin_ << " to " << end_);
       for (std::size_t i = begin_; i < end_; ++i) {
-
+        SDL_DEBUG(Optimization.ProcessTrainingExampleRange,
                   "Processing sentence " << i);
         outer_.processTrainingSentence(sents_[i], transitionModel_, trainingExamples_);
 
         if (doLogProgress_) {
           std::size_t blockSize = (end_ - begin_) / 10.0f;
           if (blockSize && (i-begin_+1) % blockSize == 0) {
-
+            SDL_INFO(CrfDemo,
                      (((i-begin_+1.0f) / (end_ - begin_)) * 100.0f) << "% processed");
           }
         }
@@ -597,7 +597,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       pairs_.reset(new Optimization::InMemoryFeatureHypergraphPairs<Arc>());
     }
 
-
+    SDL_INFO(CrfDemo, "Loading " + opts_.conllPath);
     std::vector<Sentence> sents;
     std::string line;
     Sentence sent;
@@ -612,8 +612,8 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       }
     }
     assert(!allLabels_.empty());
-
-
+    SDL_INFO(CrfDemo, "Read " << sents.size() << " training examples");
+    SDL_INFO(CrfDemo, "Found " << allLabels_.size() << " labels");
 
     // For pruning
     forall (Sentence const& sent, sents) {
@@ -627,7 +627,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         opts_.transitionModel == kBigram ? createBigramModel() :
         opts_.transitionModel == kHierarchical ? createHierarchicalModel() :
         createBihierarchicalModel();
-
+    SDL_INFO(CrfDemo, "Extracting features");
 
     if (opts_.numThreads < 2) {
       std::size_t cnt = 0;
@@ -662,7 +662,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     }
 
     delete transitionModel;
-
+    SDL_INFO(CrfDemo, "Number of features: " << opts_.numFeatures);
 
     if (!testMode_) {
       writeLabelsFile(opts_.labelsPath);
@@ -671,7 +671,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     pairs_->setNumFeatures(getNumFeatures());
     pairs_->finish();
-
+    SDL_DEBUG(CrfDemo, "Found " << pairs_->size() << " training examples.");
 
     if (!opts_.writeTrainArchivePath.empty()
         && !opts_.readTrainArchivePath.empty()) {  // Read after we've just written
@@ -689,12 +689,12 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   IVocabularyPtr pVoc_;
   shared_ptr< Optimization::IFeatureHypergraphPairs<Arc> > pairs_;
   CrfDemoConfig opts_;
-
-
+  std::set<Sym> allLabels_;
+  boost::unordered_map<Sym, std::set<Sym> > labelsPerPos_;
   bool testMode_;
   boost::mutex mutex_;
 };
 
-
+}}
 
 #endif

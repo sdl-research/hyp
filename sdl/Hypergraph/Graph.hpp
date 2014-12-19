@@ -1,47 +1,47 @@
+/** \file
+
+    build subgraph of Fsm with just epsilon arcs (or phi arcs). no weights yet. for determinize.
+*/
+
+#ifndef HYP__GRAPH_HPP
+#define HYP__GRAPH_HPP
+#pragma once
 
 
-
-
-
-
-
-
-
-
-
-
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <algorithm>
 
-
+namespace sdl {
 namespace Hypergraph {
 
 template <class SpecialSymbol>
 struct isSpecial {
-
+  bool operator()(Sym s) const {
     return s==SpecialSymbol::ID;
   }
 };
 
 struct isEps {
-
+  bool operator()(Sym s) const {
     return s==EPSILON::ID;
   }
 };
 
 struct isRho {
-
+  bool operator()(Sym s) const {
     return s==RHO::ID;
   }
 };
 
 struct isPhi {
-
+  bool operator()(Sym s) const {
     return s==PHI::ID;
   }
 };
 
 struct isSigma {
-
+  bool operator()(Sym s) const {
     return s==SIGMA::ID;
   }
 };
@@ -61,39 +61,39 @@ struct Closure {
 template <class Adjs> // e.g. vector<BitSet>
 void warshall_transitive_close(Adjs &adjs) {
   typedef unsigned I;
-
+  I N = (I)adjs.size();
   for (I t = 0; t < N; ++t) {
     typename Adjs::value_type &a = adjs[t];
     for (I h = 0; h<N; ++h)
-
+      if (Util::test(a, h)) { // t->h
         adjs[t] |= adjs[h];
       }
 
   }
 }
 
-
-
-
-
+/**
+   (unweighted) Graph version of a Hypergraph-fsm
+*/
+struct Graph {
   typedef StateId Edge;
-
+  typedef unordered_set<Edge> Out;
   typedef std::vector<Out> Outs;
-
+  typedef StateSet Adj;
   typedef std::vector<Adj> Adjs;
 
   Outs outs;
   typedef unsigned I;
   I size() const { // # vecs
-
+    return (I)outs.size();
   }
 
   void fromAdjs(Adjs const& as) {
-
+    I N = (I)as.size();
     outs.clear();
     outs.resize(N);
     for (I i = 0; i<N; ++i)
-
+      Util::copyBits(as[i], outs[i]);
   }
 
   void toAdjs(Adjs &as) {
@@ -102,7 +102,7 @@ void warshall_transitive_close(Adjs &adjs) {
     for (I i = 0; i<N; ++i) {
       Adj &a = as[i];
       a.resize(N);
-
+      Util::setBits(a, outs[i]);
     }
   }
 
@@ -117,36 +117,36 @@ void warshall_transitive_close(Adjs &adjs) {
   struct adder {
     Outs &outs;
     IHypergraph<A> const& hg;
-
-
-
+    LabelP labelPred;
+    adder(Outs &outs, IHypergraph<A> const& hg, LabelP const& labelPred) : outs(outs), hg(hg), labelPred(labelPred) {}
+    adder(adder const& o) : outs(o.outs), hg(o.hg), labelPred(o.labelPred) {}
     void operator()(A * a) const {
       arc(*a);
     }
     void arc(A const& a) const {
-
-
+      if (labelPred(hg.getFsmInput(a)))
+        Util::add(outs[a.tails()[0]], Edge(a.head()));
     }
   };
   template <class A, class LabelP>
-
-
-
+  void addFsmArcs(IHypergraph<A> const& hg, LabelP const& labelPred) {
+    outs.resize(hg.size());
+    hg.forArcsFsm(adder<A, LabelP>(outs, hg, labelPred));
   }
 
-
-
+  template <class Out>
+  void print(Out &o) const {
     for (unsigned i = 0; i<outs.size(); ++i) {
       o << i<<" ->";
-
+      forall (StateId d, outs[i])
           o<<' '<<d;
-
+      o << '\n';
     }
   }
   inline friend std::ostream& operator<<(std::ostream &o, Graph const& g) { g.print(o); return o; }
 };
 
 
-
+}}
 
 #endif

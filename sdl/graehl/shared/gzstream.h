@@ -1,4 +1,4 @@
-
+/// (with bugfixes from graehl)
 // ============================================================================
 // gzstream, C++ iostream classes wrapping the zlib compression library.
 // Copyright (C) 2001  Deepak Bandyopadhyay, Lutz Kettner
@@ -29,7 +29,7 @@
 
 #ifndef GRAEHL__SHARED__GZSTREAM_H
 #define GRAEHL__SHARED__GZSTREAM_H
-
+#pragma once
 
 // standard C++ with new header file names and std:: namespace
 #include <iostream>

@@ -1,0 +1,73 @@
+#ifndef PATH_JG2012615_HPP
+#define PATH_JG2012615_HPP
+#pragma once
+
+/** \file
+
+    Configure for Path (boost::filesystem::path).
+*/
+
+#include <sdl/LexicalCast.hpp>
+#ifndef BOOST_FILESYSTEM_NO_DEPRECATED
+# define BOOST_FILESYSTEM_NO_DEPRECATED
+#endif
+#ifndef BOOST_FILESYSTEM_VERSION
+# define BOOST_FILESYSTEM_VERSION 3
+#endif
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <sdl/graehl/shared/leaf_configurable.hpp>
+
+namespace boost {
+namespace filesystem {
+
+//for configure ADL:
+inline std::string type_string(path &)
+{
+  return "filesystem path";
+}
+inline std::string to_string_impl(const path& val)
+{
+  return val.string();
+}
+
+inline void string_to_impl(const std::string& val, path& out) {
+  out = path(val);
+}
+
+}
+}
+
+LEAF_CONFIGURABLE_EXTERNAL(boost::filesystem::path)
+
+namespace sdl {
+
+typedef boost::filesystem::path Path;
+
+inline Path & extendPathFrom(Path const& base, Path &relative) {
+  if (!relative.is_absolute())
+    relative = base / relative;
+  return relative;
+}
+
+/**
+   returns base/relative.
+*/
+inline std::string extendedPath(Path const& base, Path relative) {
+  return extendPathFrom(base, relative).string();
+}
+
+/**
+   returns whether exists(file) prior to rm.
+*/
+inline bool removeFile(Path const& path) {
+  return remove(path);
+}
+
+inline bool removeFile(std::string const& path) {
+  return remove(Path(path));
+}
+
+}
+
+#endif

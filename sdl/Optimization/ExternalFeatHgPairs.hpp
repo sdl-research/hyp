@@ -1,15 +1,15 @@
-
-
-
+#ifndef SDL_OPTIMIZATION_EXTERNALFEATHGPAIRS_HPP
+#define SDL_OPTIMIZATION_EXTERNALFEATHGPAIRS_HPP
+#pragma once
 
 #include <string>
 #include <boost/thread/mutex.hpp>
 
+#include <sdl/SharedPtr.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
 
-
-
-
-
+namespace sdl {
 namespace Optimization {
 
 template<class ArcT>
@@ -55,6 +55,6 @@ class ExternalFeatHgPairs : public IFeatureHypergraphPairs<ArcT> {
   boost::mutex mutex_;
 };
 
-
+}}
 
 #endif

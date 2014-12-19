@@ -1,15 +1,15 @@
-
-
-
+#ifndef SDL_OPTIMIZATION_ARC_HPP
+#define SDL_OPTIMIZATION_ARC_HPP
+#pragma once
 
 #include <map>
 #include <lbfgs.h>
 
+#include <sdl/Hypergraph/FeatureWeightTpl.hpp>
+#include <sdl/Hypergraph/Arc.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 
-
-
-
-
+namespace sdl {
 namespace Optimization {
 
 // When optimizing with L-BFGS, we *must* use the lbfgsfloatval_t
@@ -23,6 +23,6 @@ typedef Hypergraph::FeatureWeightTpl<FloatT,
 
 typedef Hypergraph::ArcTpl<Weight> Arc;
 
-
+}}
 
 #endif

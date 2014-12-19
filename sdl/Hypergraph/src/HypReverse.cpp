@@ -4,10 +4,10 @@
 #define VERSION "v1"
 
 #define HG_TRANSFORM_MAIN
+#include <sdl/Hypergraph/TransformMain.hpp>
+#include <sdl/Hypergraph/Reverse.hpp>
 
-
-
-
+namespace sdl {
 namespace Hypergraph {
 
 struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it)
@@ -20,6 +20,6 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
   }
 };
 
+}}
 
-
-
+INT_MAIN(sdl::Hypergraph::TRANSFORM)

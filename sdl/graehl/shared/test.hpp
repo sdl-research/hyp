@@ -1,16 +1,16 @@
 // helps me use the Boost Unit Test library
 #ifndef GRAEHL__SHARED__TEST_HPP
 #define GRAEHL__SHARED__TEST_HPP
-
+#pragma once
 
 #include <string>
 #include <sstream>
 #include <iostream>
 
 #if defined(GRAEHL__SINGLE_MAIN)
-
+# define GRAEHL_TEST_MAIN
 #endif
-
+#ifdef GRAEHL_TEST_MAIN
 # define BOOST_TEST_MAIN
 #endif
 
@@ -21,7 +21,7 @@
 
 //included/
 //#include <boost/test/unit_test_framework.hpp>
-
+#ifdef GRAEHL_INCLUDED_TEST
 #include <boost/test/included/unit_test.hpp>
 #else
 #include <boost/test/unit_test.hpp>
@@ -87,7 +87,7 @@ bool test_extract_insert(S &s, C &c, bool whine=true) {
       if (o.str() != s) {
 //      DBP(o.str());
 //      DBP(o2.str());
-
+          std::cerr << "Output after writing and rereading: " << o.str() << '\n' << " ... didn't match original: " << s << '\n';
           return 0;
       }
   } catch (std::ios_base::failure &e) {

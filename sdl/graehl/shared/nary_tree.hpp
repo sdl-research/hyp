@@ -1,19 +1,19 @@
+/** \file
 
-
-
-
-
-
+    tree template. n-ary meaning variable n as opposed to e.g. strictly
+    binary. allows sharing via intrusive reference counting (useful for
+    lazy_forest_kbest.hpp)
+*/
 
 
 #ifndef GRAEHL_SHARED__NARY_TREE_HPP
 #define GRAEHL_SHARED__NARY_TREE_HPP
+#pragma once
 
-
-
-
-
-
+// you may override this with a fully namespace qualified type - but be careful to do so consistently before every inclusion!
+#ifndef CHILD_INDEX_TYPE
+# define CHILD_INDEX_TYPE unsigned
+#endif
 
 #include <graehl/shared/intrusive_refcount.hpp>
 #include <vector>
@@ -40,9 +40,9 @@
 
 namespace graehl {
 
-
+typedef CHILD_INDEX_TYPE child_index;
 template <class T, class C>
-
+// cppcheck-suppress mallocOnClassError
 struct nary_tree
 {
   typedef T crtp_type;
@@ -53,29 +53,29 @@ struct nary_tree
   Cs children;
   nary_tree() {}
   nary_tree(nary_tree const& o) : children(o.children) {}
-
+  nary_tree(child_index n) : children(n) {}
 };
 
 //TODO: use pool_traits?
 
-
+template <class T, class R=atomic_count, class U=alloc_new_delete>
 struct shared_nary_tree
-
-
+  : nary_tree<T, boost::intrusive_ptr<T> >
+  , /* private */ intrusive_refcount<T, R, U> // if private need to friend intrusive_refcount
 {
-
+  friend struct intrusive_refcount<T, R, U>;
   typedef nary_tree<T, boost::intrusive_ptr<T> > TreeBase;
-
-
-
+  typedef shared_nary_tree self_type;
+  friend void intrusive_ptr_add_ref(self_type *p) { p->add_ref();  }
+  friend void intrusive_ptr_release(self_type *p) { p->release(p); }
 
   shared_nary_tree() {}
-
+  shared_nary_tree(child_index n) : TreeBase(n) {}
   shared_nary_tree(shared_nary_tree const& o) : TreeBase(o) {} // note: refcount doesn't get copied - so T needs to deep copy its data
 
 };
 
 
-
+}
 
 #endif

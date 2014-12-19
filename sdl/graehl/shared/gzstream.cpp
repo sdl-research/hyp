@@ -1,4 +1,4 @@
-
+/// (with bugfixes from graehl)
 // ============================================================================
 // gzstream, C++ iostream classes wrapping the zlib compression library.
 // Copyright (C) 2001 Deepak Bandyopadhyay, Lutz Kettner
@@ -29,9 +29,9 @@
 
 #include <graehl/shared/gzstream.h>
 #include <iostream>
-
+#include <string>
 #include <cstring>
-
+#include <string>
 #include <stdexcept>
 
 namespace graehl {
@@ -86,7 +86,7 @@ void gzstreambuf::handle_gzerror() {
   const char *errmsg=gzerror(file, &errnum);
   if (errnum==Z_DATA_ERROR) errmsg="CRC error reading gzip";
   if (!errmsg) errmsg=" unknown error (file not found?)";
-
+  throw std::runtime_error(std::string("gzstreambuf error: ")+std::string(errmsg));
 }
 
 
@@ -97,7 +97,7 @@ int gzstreambuf::underflow() { // used for input buffer only
   if (! (mode & std::ios::in) || !opened)
     return EOF;
   // Josuttis' implementation of inbuf
-
+  int n_putback = (int)(gptr() - eback());
   if (n_putback > 4)
     n_putback = 4;
   memcpy(buffer + (4 - n_putback), gptr() - n_putback, n_putback);
@@ -122,7 +122,7 @@ int gzstreambuf::underflow() { // used for input buffer only
 int gzstreambuf::flush_buffer() {
   // Separate the writing of the buffer from overflow() and
   // sync() operation.
-
+  int w = (int)(pptr() - pbase());
   if (gzwrite(file, pbase(), w) != w)
     handle_gzerror();
   pbump(-w);
@@ -143,7 +143,7 @@ int gzstreambuf::overflow(int c) { // used for output buffer only
 
 int gzstreambuf::sync() {
   // Changed to use flush_buffer() instead of overflow(EOF)
-
+  // which caused improper behavior with '\n' and flush(),
   // bug reported by Vincent Ricard.
   if (pptr() && pptr() > pbase()) {
     if (flush_buffer() == EOF)

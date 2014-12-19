@@ -1,31 +1,31 @@
+/** \file
 
+  heap of indices (or pointers) where distance (priority, lowest = at top by
+  default), location in heap, etc. are stored in external property maps (usually
+  separate arrays).
 
+  you can update(), maybe_improve(), or push_or_update() the priority unlike vanilla binary-heap w/
+  std::pop_heap etc.
 
+  by default, d=4-ary min-heap (faster than 2-ary depending on key size, due to cache locality)
 
+  TODO: it might be worth trying priority+index together in heap data structure
+  for even more locality (these are almost always used together when maintaining
+  heap invariant by moving nodes up or down). location should still be external
+  since it's less frequently updated
 
-
-
-
-
-
-
-
-
-
-
-
-
+  'min-heap' means first distance is at top() - (smallest w/ the default, std::less)
  */
 
+#ifndef GRAEHL_SHARED__D_ARY_HEAP_HPP
+#define GRAEHL_SHARED__D_ARY_HEAP_HPP
+#pragma once
 
-
-
-
-
-
+#ifndef GRAEHL_DEBUG_D_ARY_HEAP
+#define GRAEHL_DEBUG_D_ARY_HEAP 0
 #endif
-
-
+#include <graehl/shared/ifdbg.hpp>
+#if GRAEHL_DEBUG_D_ARY_HEAP
 #include <graehl/shared/show.hpp>
 #define DDARY(x) x
 DECLARE_DBG_LEVEL(DDARY)
@@ -33,13 +33,13 @@ DECLARE_DBG_LEVEL(DDARY)
 #define DDARY(x)
 #endif
 
-
-
-
-
-
-
-
+#include <boost/static_assert.hpp>
+#include <boost/smart_ptr/shared_array.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <string>
+#include <functional>
+#include <memory>
+#include <cstddef>
 
 #ifndef DEFAULT_DBG_D_ARY_VERIFY_HEAP
 #define DEFAULT_DBG_D_ARY_VERIFY_HEAP 0
@@ -52,26 +52,26 @@ DECLARE_DBG_LEVEL(DDARY)
 #define DBG_D_ARY_VERIFY_HEAP DEFAULT_DBG_D_ARY_VERIFY_HEAP
 #endif
 
+#define D_ARY_PUSH_GRAEHL 0  // 1 is untested
+#define D_ARY_POP_GRAEHL 0  // 1 is untested
+#define D_ARY_DOWN_GRAEHL 0  // 1 is untested
+#define D_ARY_UP_GRAEHL 0  // 1 is untested
 
+#define D_ARY_APPEND_ALWAYS_PUSH 1
+// heapify (0) is untested.  0 means switch between push and heapify depending
+// on size (cache effects, existing items vs. # appended ones)
 
-
-
-
-
-
-
-
-
-
-
-
+#define D_ARY_TRACK_OUT_OF_HEAP 0
+// set to 1 to slightly speed up contains(), if you are willing to preinit loc
+// map to D_ARY_HEAP_NULL_INDEX - but should work fine with 0 because we avoid
+// false positives by checking key at that location.
 
 #define D_ARY_VERIFY_HEAP DBG_D_ARY_VERIFY_HEAP
-
+// see DBG_D_ARY_VERIFY_HEAP, which should be 0 even in debug (unless you want to wait a long time)
 
 #undef D_ARY_HEAP_NULL_INDEX
-
-
+#define D_ARY_HEAP_NULL_INDEX (-1)
+// you may init location map to this for D_ARY_TRACK_OUT_OF_HEAP (optional), or for push_or_update
 
 namespace graehl {
 
@@ -107,28 +107,28 @@ static const std::size_t OPTIMAL_HEAP_ARITY = 4;
   (2,1) -> (2*A+1) = 7
   etc.
 
+//TODO: block-align siblings!  assume data[0] is 16 or 32-byte aligned ... then we want root @ index
+(blocksize-1).  see http://www.lamarca.org/anthony/pubs/heaps.pdf pg8.  for pow2(e.g. 4)-ary heap, it may be
+reasonable to  use root @index A-1.  however, suppose the key size is not padded to a power of 2 (e.g. 12
+bytes), then we would need internal gaps at times.  would want to use compile const template based inlineable
+alignment math for this?  possibly use a container like vector that lets you specify padding relative to some
+address multiple for v[0].
 
-
-
-
-
-
-
-
-
-
+ optimal D: see http://www.lamarca.org/anthony/pubs/heaps.pdf pg 9.  depedns on relative cost of swap,
+compare, but in all cases except swap=free, 2 is worse than 3-4.  for expensive swap (3x compare), 4 still as
+good as 5.  so just use 4.  boost benchmarking djikstra agrees; 4 is best.
 
  cache-aligned 4-heap speedup over regular 2-heap is 10-80% (for huge heaps, the speedup is more)
 
  splay/skew heaps are worse than 2heap or aligned 4heap in practice.
 
-
-
+ //TODO: switch from heapify (Floyd's method) to repeated push past some size limit (in bytes) due to cache
+effect -
  #define D_ARY_BYTES_OUT_OF_CACHE 0x1000000
 
-
-
-
+ //TODO: assuming locmap is an lvalue pmap, we can be more efficient.  on the other hand, if it's an intrusive
+property map to an interned mutable object, there's no difference in performance, and that's what i'm going to
+do in my first uses.  plus, if keys are indices and the map is a vector, it's barely any overhead.
 
  */
 
@@ -177,9 +177,9 @@ static const std::size_t OPTIMAL_HEAP_ARITY = 4;
 // - Container must be a random-access, contiguous container (in practice,
 //   the operations used probably require that it is std::vector<Value>).
 //
-
-
-
+template <typename Value, std::size_t Arity, typename DistanceMap, typename IndexInHeapPropertyMap,
+          typename Better = std::less<typename DistanceMap::value_type>, typename Container = std::vector<Value>,
+          typename Size = typename Container::size_type, typename Equal = std::equal_to<Value> >
 class d_ary_heap_indirect {
   BOOST_STATIC_ASSERT(Arity >= 2);
 
@@ -192,11 +192,11 @@ class d_ary_heap_indirect {
   // The distances being compared using better and that are stored in the
   // distance map
   typedef typename boost::property_traits<DistanceMap>::value_type distance_type;
-
-
-
-
-
+  d_ary_heap_indirect(DistanceMap const& distance, IndexInHeapPropertyMap const& index_in_heap,
+                      const Better& better = Better(), size_type container_reserve = 100000,
+                      Equal const& equal = Equal())
+      : better(better), data(), distance(distance), index_in_heap(index_in_heap), equal(equal) {
+    if (container_reserve) data.reserve(container_reserve);
   }
   /* Implicit copy constructor */
   /* Implicit assignment operator */
@@ -221,11 +221,11 @@ class d_ary_heap_indirect {
     append_push(c.begin(), c.end());
   }
 
-
-
+  // past some threshold, this should be faster than append_heapify.  also, if there are many existing
+  // elements it will be faster.
   template <class I>
   void append_push(I begin, I end) {
-
+    for (; begin != end; ++begin) push(*begin);
   }
 
   template <class C>
@@ -236,8 +236,8 @@ class d_ary_heap_indirect {
       append_heapify(c);
   }
 
-
-
+  // past some threshold, this should be faster than append_heapify.  also, if there are many existing
+  // elements it will be faster.
   template <class I>
   void append(I begin, I end) {
     if (D_ARY_APPEND_ALWAYS_PUSH || data.size() >= 0x10000)
@@ -252,33 +252,33 @@ class d_ary_heap_indirect {
     data.push_back(v);
   }
 
-
-
-
-
-
-
+  /**
+     doesn't maintain heap property for you. so unless you added in sorted order, you must call
+     finish_adding() after
+  */
+  template <class V>
+  void add(V const& v) {
     put(index_in_heap, v, data.size());  // allows contains() and heapify() to function properly
     data.push_back(v);
   }
 
-
+  void finish_adding() { heapify(); }
 
   // for debugging, please
-
+  inline size_type loc(Value const& v) const { return get(index_in_heap, v); }
 
   // call heapify yourself after.
-
-
+  // could allow mutation of data directly, e.g. push_back 1 at a time - but then they could forget to
+  // heapify()
 
   // from bottom of heap tree up, turn that subtree into a heap by adjusting the root down
-
-
-
-
+  // for n=size, array elements indexed by floor(n/2) + 1, floor(n/2) + 2, ... , n are all leaves for the
+  // tree, thus each is an one-element heap already
+  // warning: this is many fewer instructions but, at some point (when heap doesn't fit in Lx cache) it will
+  // become slower than repeated push().
   void set_index_in_heap(std::size_t i = 0) {
     for (std::size_t e = data.size(); i < e; ++i) {
-
+      // cppcheck-suppress unusedScopedObject
       set(index_in_heap, data[i], i);
     }
   }
@@ -367,8 +367,8 @@ This is definitely linear to n.
    */
   void heapify() {
     EIFDBG(DDARY, 1, SHOWM1(DDARY, "heapify", data.size()));
-
-
+    for (size_type i = parent(data.size());
+         i > 0;) {  // starting from parent of last node, ending at first child of root (i==1)
       --i;
       EIFDBG(DDARY, 2, SHOWM1(DDARY, "heapify", i));
       preserve_heap_property_down(i);
@@ -376,15 +376,15 @@ This is definitely linear to n.
     verify_heap();
   }
 
+  void reserve(size_type s) { data.reserve(s); }
 
+  size_type size() const { return data.size(); }
 
+  bool empty() const { return data.empty(); }
 
+  const_iterator begin() const { return data.begin(); }
 
-
-
-
-
-
+  const_iterator end() const { return data.end(); }
 
   void clear() {
 #if D_ARY_TRACK_OUT_OF_HEAP
@@ -395,9 +395,9 @@ This is definitely linear to n.
     data.clear();
   }
 
-
-
-
+  /**
+     you must have put v's distance in the DistanceMap before pushing
+  */
   void push(const Value& v) {
     if (D_ARY_PUSH_GRAEHL) {
       size_type i = data.size();
@@ -413,21 +413,21 @@ This is definitely linear to n.
     verify_heap();
   }
 
+  Value& top() { return data[0]; }
 
+  const Value& top() const { return data[0]; }
 
+  /**
+     as with top(), take care not to invalidate heap property or item<->location map
+  */
+  Value& operator[](size_type i) { return data[i]; }
 
-
-
-
-
-
-
-
+  Value const& operator[](size_type i) const { return data[i]; }
 
 
   void pop() {
     using boost::put;
-
+    if (D_ARY_TRACK_OUT_OF_HEAP) put(index_in_heap, data[0], (size_type)D_ARY_HEAP_NULL_INDEX);
     if (data.size() != 1) {
       if (D_ARY_POP_GRAEHL) {
         preserve_heap_property_down(data.back(), 0, data.size() - 1);
@@ -464,7 +464,7 @@ This is definitely linear to n.
     return false;
   }
 
-
+  distance_type best(distance_type null = 0) const { return empty() ? null : get(distance, data[0]); }
   distance_type second_best(distance_type null = 0) const {
     if (data.size() < 2) return null;
     int m = std::min(data.size(), Arity + 1);
@@ -472,26 +472,26 @@ This is definitely linear to n.
     distance_type b = get(distance, data[1]);
     for (int i = 2; i < m; ++i) {
       distance_type d = get(distance, data[i]);
-
+      if (better(d, b)) b = d;
     }
     return b;
   }
 
 
+#include <graehl/shared/warning_push.h>
 
-
-
-
-
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wtautological-compare"
+#endif
 
   inline bool contains(const Value& v, size_type i) const {
-
+    if (D_ARY_TRACK_OUT_OF_HEAP) return i != (size_type)D_ARY_HEAP_NULL_INDEX;
     size_type sz = data.size();
     EIFDBG(DDARY, 2, SHOWM2(DDARY, "d_ary_heap contains", i, data.size()));
-
-
+    return i >= 0 && i < sz && equal(v, data[i]);  // note: size_type may be signed (don't recommend it,
+                                                   // though) - thus i>=0 check to catch uninit. data
   }
-
+#include <graehl/shared/warning_pop.h>
 
   inline bool contains(const Value& v) const {
     using boost::get;
@@ -526,7 +526,7 @@ This is definitely linear to n.
   Equal equal;
 
   // Get the parent of a given node in the heap
-
+  static inline size_type parent(size_type index) { return (index - 1) / Arity; }
 
   // Get the child_idx'th child of a given node; 0 <= child_idx < Arity
   static inline size_type child(size_type index, std::size_t child_idx) {
@@ -568,18 +568,18 @@ This is definitely linear to n.
 #endif
   }
 
-
-
-
+  // we have a copy of the key, so we don't need to do that stupid find # of levels to move then move.  we act
+  // as though data[index]=currently_being_moved, but in fact it's an uninitialized "hole", which we fill at
+  // the very end
   inline void preserve_heap_property_up(Value const& currently_being_moved, size_type index) {
     using boost::get;
     preserve_heap_property_up(currently_being_moved, index, get(distance, currently_being_moved));
   }
 
-
-
-
-
+  /**
+     disabled because distance map may not be writable. would need traits to enable
+  */
+  /*
   inline void preserve_heap_property_up_set_dist(Value const& currently_being_moved, distance_type dbetter) {
     using boost::get;
     using boost::put;
@@ -587,10 +587,10 @@ This is definitely linear to n.
     preserve_heap_property_up(currently_being_moved, get(index_in_heap, currently_being_moved), dbetter);
     verify_heap();
   }
+  */
 
-
-
-
+  void preserve_heap_property_up(Value const& currently_being_moved, size_type index,
+                                 distance_type currently_being_moved_dist) {
     using boost::put;
     using boost::get;
     if (D_ARY_UP_GRAEHL) {
@@ -606,12 +606,12 @@ This is definitely linear to n.
         }
       }
       // finish "swap chain" by filling hole w/ currently_being_moved
-
-
-
+      move_heap_element(currently_being_moved, index);  // note: it's ok not to return early on index==0 at
+                                                        // start, even if self-assignment isn't supported by
+                                                        // Value - because currently_being_moved is a copy.
     } else {
       put(index_in_heap, currently_being_moved, index);
-
+      // put(distance, currently_being_moved, currently_being_moved_dist);
       preserve_heap_property_up(index);
     }
   }
@@ -632,7 +632,7 @@ This is definitely linear to n.
     // aliasing issues in its search; there is a second loop that does the
     // necessary swap operations
     Value currently_being_moved = data[index];
-
+    distance_type currently_being_moved_dist = get(distance, currently_being_moved);
     for (;;) {
       if (index == 0) break;  // Stop at root
       size_type parent_index = parent(index);
@@ -663,51 +663,51 @@ This is definitely linear to n.
 
 
   // From the root, swap elements (each one with its smallest child) if there
-
-
-
-
-
-
-
+  // are any parent-child pairs that violate the heap property.  v is placed at data[i], but then pushed down
+  // (note: data[i] won't be read explicitly; it will instead be overwritten by percolation).  this also means
+  // that v must be a copy of data[i] if it was already at i.
+  // e.g. v=data.back(), i=0, sz=data.size()-1 for pop(), implicitly swapping data[i], data.back(), and doing
+  // data.pop_back(), then adjusting from 0 down w/ swaps.  updates index_in_heap for v.
+  inline void preserve_heap_property_down(Value const& currently_being_moved, size_type index,
+                                          size_type heap_size) {
     //// hole at index - currently_being_moved to be put here when we find the final hole spot
-
-
+    EIFDBG(DDARY, 4,
+           SHOWM3(DDARY, "preserve_heap_property_down impl", index, currently_being_moved, heap_size));
     using boost::get;
     distance_type currently_being_moved_dist = get(distance, currently_being_moved);
     Value* data_ptr = &data[0];
     for (;;) {
       size_type first_child_index = child(index, 0);
       if (first_child_index >= heap_size) break; /* No children */
-
-
-
-
-
+      Value* child_base_ptr
+          = data_ptr + first_child_index;  // using index of first_child_index+smallest_child_index because we
+                                           // hope optimizer will be smart enough to const-unroll a loop below
+                                           // if we do this.  i think the optimizer would have gotten it even
+                                           // without our help (i.e. store root-relative index)
 
       // begin find best child index/distance
-
-
+      size_type smallest_child_index
+          = 0;  // don't add to base first_child_index every time we update which is smallest.
       distance_type smallest_child_dist = get(distance, child_base_ptr[smallest_child_index]);
 #undef D_ARY_MAYBE_IMPROVE_CHILD_I
-
-
+#define D_ARY_MAYBE_IMPROVE_CHILD_I                          \
+  do {                                                       \
     distance_type i_dist = get(distance, child_base_ptr[i]); \
     if (better(i_dist, smallest_child_dist)) {               \
       smallest_child_index = i;                              \
       smallest_child_dist = i_dist;                          \
-
-
+    }                                                        \
+  } while (0)
       if (first_child_index + Arity <= heap_size) {
-
-
-
-
-
+        // avoid repeated heap_size boundcheck (should test if this is really a speedup - instruction cache
+        // tradeoff - could use upperbound = min(Arity, heap_size-first_child_index) instead.  but this
+        // optimizes to a fixed number of iterations (compile time known) so probably worth it
+        for (size_type i = 1; i < Arity; ++i) {
+          D_ARY_MAYBE_IMPROVE_CHILD_I;
         }
       } else {
-
-
+        for (size_type i = 1, e = heap_size - first_child_index; i < e; ++i) {
+          D_ARY_MAYBE_IMPROVE_CHILD_I;
         }
       }
       // end: know best child
@@ -729,11 +729,11 @@ This is definitely linear to n.
     preserve_heap_property_down(data[i], i, data.size());
   }
 
-
-
-
-
-
+ public:
+  /**
+     if you modify top() and might need to move element down since it's no longer the least.
+  */
+  void adjust_top() { this->preserve_heap_property_down(); }
 
   // moves what's at root downwards if needed
   void preserve_heap_property_down() {
@@ -746,7 +746,7 @@ This is definitely linear to n.
     }
     size_type index = 0;
     Value currently_being_moved = data[0];
-
+    distance_type currently_being_moved_dist = get(distance, currently_being_moved);
     size_type heap_size = data.size();
     Value* data_ptr = &data[0];
     for (;;) {
@@ -756,12 +756,12 @@ This is definitely linear to n.
       size_type smallest_child_index = 0;
       distance_type smallest_child_dist = get(distance, child_base_ptr[smallest_child_index]);
       if (first_child_index + Arity <= heap_size) {
-
-
+        for (size_type i = 1; i < Arity; ++i) {  // can be unrolled completely.
+          D_ARY_MAYBE_IMPROVE_CHILD_I;
         }
       } else {
-
-
+        for (size_type i = 1, e = heap_size - first_child_index; i < e; ++i) {
+          D_ARY_MAYBE_IMPROVE_CHILD_I;
         }
       }
       if (better(smallest_child_dist, currently_being_moved_dist)) {
@@ -777,6 +777,6 @@ This is definitely linear to n.
 };
 
 
-
+}
 
 #endif

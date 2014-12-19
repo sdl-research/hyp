@@ -1,16 +1,16 @@
+/** \file
+
+    helpers for IHypergraph.
+*/
 
 
+#ifndef HYP__HYPERGRAPHIMPL_HPP
+#define HYP__HYPERGRAPHIMPL_HPP
+#pragma once
 
+#include <sdl/Hypergraph/Arc.hpp>
 
-
-
-
-
-
-
-
-
-
+namespace sdl {
 namespace Hypergraph {
 namespace impl {
 
@@ -27,6 +27,6 @@ struct set_weight1 {
 };
 
 
-
+}}}
 
 #endif

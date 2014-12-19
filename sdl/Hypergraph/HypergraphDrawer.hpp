@@ -1,21 +1,21 @@
+/** \file
 
-
-
-
+    Graphviz 'dot'-renderable file from a hypergraph
+*/
 
 
 #ifndef HYPERGRAPH_HYPERGRAPHDRAWER_HPP
 #define HYPERGRAPH_HYPERGRAPHDRAWER_HPP
+#pragma once
 
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Util/Forall.hpp>
 
-
-
-
-
+namespace sdl {
 namespace Hypergraph {
 
 /**
-
+   Draws an arc (Graphviz dot format).
 */
 struct DrawArcFct {
 
@@ -23,7 +23,7 @@ struct DrawArcFct {
       : out(out_), nodeId(firstNodeId_) {}
 
   template<class Arc>
-
+  void operator()(Arc* arc) const {
     typedef typename Arc::Weight Weight;
     if (arc->getNumTails() == 1) { // just one tail: no aux node needed
       out << arc->getTail(0) << " -> " << arc->head() << " [label=\"";
@@ -35,14 +35,14 @@ struct DrawArcFct {
 
     // Draw auxiliary node for the hyperarc
     out << nodeId << " [label = \"\", shape = circle, style=solid, width = 0]"
-
+        << '\n';
 
     // Draw tails into aux arc
     std::size_t cnt = 1;
-
+    forall (StateId sid, arc->tails()) {
       out << sid << " -> " << nodeId << " [label = \""<< cnt
           <<"\", arrowhead = none, fontcolor = gray, fontsize = 9]"
-
+          << '\n';
       ++cnt;
     }
 
@@ -56,18 +56,18 @@ struct DrawArcFct {
   }
 
   std::ostream& out;
-
+  mutable std::size_t nodeId;
 };
 
 bool writeStateLabel(std::ostream& out,
                      Hypergraph::StateId stateId,
-
-
+                     Sym symId,
+                     IVocabularyPtr pVoc) {
   if (!pVoc || symId == NoSymbol) {
     out << stateId;
   }
   else {
-
+    std::string const& sym = pVoc->str(symId);
     if (symId.isTerminal()) {
       out << "\\\"" << sym << "\\\"";
     }
@@ -80,25 +80,25 @@ bool writeStateLabel(std::ostream& out,
 
 template<class A>
 std::ostream& drawHypergraph(std::ostream& out,
-
-
+                             const IHypergraph<A>& hg)
+{
   // Begin
-
-
-
-
-
+  out << "digraph HG {\n"
+      << "  rankdir = LR;\n"
+      << "  label = \"\";\n"
+      << "  center = 1;\n"
+      << "  orientation = Portrait;\n"
       << "  ranksep = 0.25;\n"
       << "  nodesep = 0.1;\n"
       << "  bgcolor = \"transparent\";\n"
       << "  node [margin=0.01];\n";
 
   // States
-
+  IVocabularyPtr pVoc = hg.getVocabulary();
   std::size_t maxSid = 0;
-
-
-
+  forall (StateId sid, hg.getStateIds()) {
+    Sym inId = hg.inputLabel(sid);
+    Sym outId = hg.outputLabel(sid);
     out << sid << " [";
     if (inId.isTerminal()) {
       out << "fontcolor=blue,";
@@ -110,7 +110,7 @@ std::ostream& drawHypergraph(std::ostream& out,
       writeStateLabel(out, sid, outId, pVoc);
     }
     out << "\", shape = "
-
+        << (hg.final() == sid ? "doublecircle" : "circle")
         << ", width = .5, fontsize = 12";
     if (hg.numInArcs(sid) == 0)       // no in arcs = no need to derive = 'observed'
       out << ", style=filled, fillcolor=\"#E6E6E6\""; // => filled grey like in graphical models
@@ -123,15 +123,15 @@ std::ostream& drawHypergraph(std::ostream& out,
   }
 
   // Arcs
-
+  hg.forArcs(DrawArcFct(out, maxSid + 1));
 
   // End
-
+  out << "}\n";
 
   return out;
 }
 
 
-
+}}
 
 #endif

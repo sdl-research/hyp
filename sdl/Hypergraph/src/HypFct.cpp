@@ -4,14 +4,14 @@
 #define VERSION "v1"
 
 #define HG_TRANSFORM_MAIN
+#include <sdl/Hypergraph/TransformMain.hpp>
 
-
-
+namespace sdl {
 namespace Hypergraph {
 
-
-
-
+template <class Arc>
+void testFct(IMutableHypergraph<Arc> &h) {
+}
 
 struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it)
 
@@ -19,7 +19,7 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
 
   TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION) {}
 
-
+  Properties properties(int i) const {
     return kDefaultProperties | kStoreInArcs | kStoreOutArcs;
   }
 
@@ -37,6 +37,6 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
 };
 
 
+}}
 
-
-
+INT_MAIN(sdl::Hypergraph::TRANSFORM)

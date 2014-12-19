@@ -75,8 +75,8 @@
 
 % \newcommand{\hypdraw}{\texttt{hypdraw}\xspace}
 % \newcommand{\hypcompose}{\texttt{hypcompose}\xspace}
-
-
+\newcommand{\hypdraw}{\texttt{HypDraw}\xspace}
+\newcommand{\hypcompose}{\texttt{HypCompose}\xspace}
 
 \newcommand{\vtheta}{\boldsymbol{\theta}}
 \newcommand{\ptheta}{p_{\vtheta}}
@@ -210,9 +210,9 @@ is a pair $H=\langle V,E\rangle$, where $V$ is a set of vertices and
 $E$ a set of edges. Each edge (also called \textit{hyperedge}) is a
 triple $e=\langle T(e), h(e), w(e) \rangle$, where $T(e)$ is an
 ordered list of tails (i.e., source vertices), $h(e)$ is the head
-
-
-
+(i.e., target vertex) and $w(e)$ is the semiring weight of the edge
+(see \figref{hyperarc}). Semirings are described in
+\secref{semirings}.
 
 \begin{figure}[t]
   \centering
@@ -464,7 +464,7 @@ above. The command line tools can be used to compose, concatenate,
 invert, create unions, extract k-best paths, run the inside algorithm,
 etc.
 
-
+\subsection{HypCompose}\label{sec:compose}
 
 As an example, consider composing a CFG hypergraph with an input
 sentence hypergraph:
@@ -474,7 +474,7 @@ $ cat cfg.hyp
 \input{fig/cfg_include.hyp}
 $ cat sent.hyp
 \input{fig/sent1.hyp}
-
+$ \textbf{HypCompose} cfg.hyp sent.hyp
 \end{alltt}\end{mdframed}
 
 \noindent The result is a packed parse forest, see
@@ -490,7 +490,7 @@ composition algorithm. The result is the parse of the whole input
 structure. Note, however, that the CFG composition algorithm in \hyp
 currently does not perform pruning and can therefore only used with
 small grammars. If both hypergraphs are \textit{finite-state},
-
+however, \code{HypCompose} switches to a fast finite-state composition
 algorithm.
 
 \subsubsection{Hypergraph rescoring}
@@ -498,21 +498,21 @@ algorithm.
 We can also rescore a weighted hypergraph by composing (or similarly,
 intersecting) with a finite-state machine, e.g., a language model.
 
+\subsection{HypPruneToBest, HypBest}\label{sec:hgbest}
 
-
-
+To get an $n$-best list from any hypergraph, use \code{HypBest}. For
 example, the two entries in the composition result
 (\tabref{compose_result}) are:
 
 \begin{mdframed}\footnotesize\begin{alltt}
-
+$ HypCompose cfg.hyp sent.hyp | \textbf{HypBest} --num-best=2
   n=1 2.07944 "he" "eats" "rice"
   n=2 3.68888 "he" "eats" "rice"
 \end{alltt}\end{mdframed}
 
-
+To print the best tree, use \code{HypPruneToBest}. Example:
 \begin{mdframed}\footnotesize\begin{alltt}
-
+$ HypCompose cfg.hyp sent.hyp | \textbf{HypPruneToBest}
   FINAL <- 0(S)
   0(S) <- 1(NP) 2(VP) / 0.182322
   1(NP) <- 5(N) / 0
@@ -526,7 +526,7 @@ example, the two entries in the composition result
 Remember that all arc weights are interpreted as negative log numbers,
 i.e., costs, and the best parse is the one with the lowest cost.
 
-
+\subsection{HypInside}\label{sec:inside}
 
 The inside algorithm computes the cost of reaching each state starting
 from the leaves.
@@ -534,13 +534,13 @@ from the leaves.
 In \tabref{compose_result}, for example, the final state $0$ can be
 reached via two different paths, which have weights $2.07944$ and
 $3.68888$, respectively. The sum in negative log space is
-
+$-\log(\exp(-2.07944) + \exp(-3.68888))=1.897117$. \code{HypInside},
 called on the hypergraph from \tabref{compose_result}, gives exactly
 that result for state $0$ and lists the costs for reaching the other
 states as well:
 
 \begin{mdframed}\footnotesize\begin{alltt}
-
+$ \textbf{HypInside} foo.hyp
   0       1.89712
   1       1.20397
   2       0.693147
@@ -554,7 +554,7 @@ paths are not added up, but the best among them is picked, so we
 have:
 
 \begin{mdframed}\footnotesize\begin{alltt}
-
+$ HypInside \textbf{--arc-type=viterbi} foo.hyp
   0       2.07944
   1       1.20397
   2       0.693147
@@ -575,11 +575,11 @@ $ cat feats.hyp
 \end{alltt}\end{mdframed}
 
 On the first arc, feature $0$ fires $1.3$ times and feature $1$ fires
-
+twice. The output of \code{HypInside} looks like the Viterbi result
 above, but with the accumulated feature vectors added:
 
 \begin{mdframed}\footnotesize\begin{alltt}
-
+$ HypInside \textbf{--arc-type=feature} feats.hyp
   0       2.07944[0=1.3,1=6]
   1       1.20397[1=4]
   2       0.693147
@@ -615,11 +615,11 @@ $ cat expectation.hyp
 \input{fig/compose_result_expectation.hyp}
 \end{alltt}\end{mdframed}
 
-
+\noindent\code{HypInside} lists the (negative log of the) feature expectations
 at each state:
 
 \begin{mdframed}\footnotesize\begin{alltt}
-
+$ HypInside --arc-type=expectation expectation.hyp
   0       1.89712[0=1.60943,1=0.510826,2=2.59026]
   1       1.20397[1=-0.182322]
   2       0.693147
@@ -635,7 +635,7 @@ $-1.60943$, i.e., $-\log(0.2)=-\log(0.125 \times 1.3 + 0.025 \times
 1.5)$, because that feature fires $1.3$ times on the best path and
 $1.5$ times on the other path.
 
-
+\subsection{HypInvert, HypProject}\label{sec:invert-project}
 
 The \code{invert} operation swaps input and output labels of all arcs.
 For example, the following toy transducer changes \textit{eat} or
@@ -651,7 +651,7 @@ $ cat past_tense.hyp
 \textit{eat} or \textit{sleep}:
 
 \begin{mdframed}\footnotesize\begin{alltt}
-
+  cat past_tense.hyp | \textbf{HypInvert}
 \input{fig/past_tense_inverted.hyp}
 \end{alltt}\end{mdframed}
 
@@ -662,13 +662,13 @@ the output after composing. Example:
 \begin{mdframed}\footnotesize\begin{alltt}
 $ cat sent.hyp
 \input{fig/sent2.hyp}
-
+$ HypCompose sent.hyp past_tense.hyp | \textbf{HypProject}
 \input{fig/he_ate_rice.hyp}
 \end{alltt}\end{mdframed}
 
+\subsection{HypUnion}
 
-
-
+The \code{HypUnion} executable takes the union of two or more
 hypergraphs. The union operation implements an OR logic, so that in
 the resulting hypergraph, one can follow the paths of any of the input
 hypergraphs. Example:
@@ -680,16 +680,16 @@ $ cat kl.hyp
 \input{fig/kl.hyp}
 $ cat xyz.hyp
 \input{fig/xyz.hyp}
-
+$ HypUnion ab.hyp kl.hyp xyz.hyp
 \end{alltt}\end{mdframed}
 
 The result is shown in \tabref{union_result}.
 \examplecols{union_result}{Union result.}{0.4}{1.7cm}
 
+\subsection{HypConcat}
 
-
-
-
+The \code{HypConcat} concatenates two or more hypergraphs. If you
+use \code{HypConcat} instead of \code{HypUnion} in the example above,
 you obtain the output shown in \tabref{concat_result}.
 \examplecols{concat_result}{Concat result.}{0.4}{1.7cm}
 
@@ -699,23 +699,23 @@ The \hyp toolkit also provides the following executables, in addition
 to the ones discussed above:
 
 \begin{itemize}
-
+\item \code{HypComplement} creates the complement of an unweighted
   finite-state hypergraph
-
+\item \code{HypConvertStrings} converts string input into string
   hypergraphs (i.e., hypergraphs like the one shown in
   \tabref{sent1})
-
+\item \code{HypDeterminize} determinizes a finite-state hypergraph
   (currently only unweighted acceptors allowed)
-
+\item \code{HypDraw} draws a hypergraph in \code{dot} format (see the
   figures in this tutorial)
-
+\item \code{HypEmpty} decides if a hypergraph is empty, i.e., has no
   valid paths
-
+\item \code{HypGetString} prints the string contained in a one-path
   hypergraph
-
-
-
-
+\item \code{HypPrune} prunes away all unreachable arcs of a hypergraph
+\item \code{HypReverse} reverses a hypergraph
+\item \code{HypReweight} modifies arc weights of a hypergraph
+\item \code{HypSamplePath} generates sample paths from a hypergraph
 \end{itemize}
 
 \section{Using the C++ API}
@@ -723,7 +723,7 @@ to the ones discussed above:
 We now describe basic usage of the C++ API. See also the complete
 example code in \texttt{HypDemo/src/HypDemo.cpp}.
 
-
+The full API documentation can be generated using \code{doxygen doxygen/xmtDoxy.conf}.
 
 \subsection{Creating a forest}\label{sec:creating-forest}
 

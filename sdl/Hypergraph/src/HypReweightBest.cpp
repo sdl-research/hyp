@@ -1,23 +1,23 @@
 #define TRANSFORM HgReweightBest
-
+#define USAGE ReweightOptions::caption()
 #define VERSION "v1"
 #define HG_TRANSFORM_MAIN
 
 //TODO: include compensating plus cost to all arcs first? saving additional call to HgReweight?
 
+#include <sdl/Hypergraph/TransformMain.hpp>
+#include <sdl/Hypergraph/ReweightBest.hpp>
 
-
-
-
+namespace sdl {
 namespace Hypergraph {
 
 struct TRANSFORM : TransformMain<TRANSFORM> { // CRTP
   typedef TransformMain<TRANSFORM> Base;
-
+  TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION)
   {
-
-
-
+  }
+  void declare_configurable() {
+    this->configurable(&rw.opt);
   }
 
   ReweightBest rw;
@@ -27,11 +27,11 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // CRTP
     rw.inplace(h);
     return true;
   }
-
+  void validate_parameters_more() {
     rw.opt.validate();
   }
 };
 
+}}
 
-
-
+INT_MAIN(sdl::Hypergraph::TRANSFORM)

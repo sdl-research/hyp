@@ -1,23 +1,23 @@
 /**
+   \file
+   Functions to multiply maps values by a scalar.
 
-
-
-
+   \author Markus Dreyer
 */
 
-
-
-
+#ifndef SDL_UTIL_MULTIPLIED_MAP_H_
+#define SDL_UTIL_MULTIPLIED_MAP_H_
+#pragma once
 
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/functional.hpp>
 
-
+namespace sdl {
 namespace Util {
 
 /**
-
-
+   Function object that takes a pair and multiplies the second
+   element by a factor.
 */
 template<class T, class TimesFct>
 struct Multiply2nd : public std::unary_function<T, T> {
@@ -31,8 +31,8 @@ struct Multiply2nd : public std::unary_function<T, T> {
 };
 
 /**
-
-
+   A wrapper for std::map that lazily multiplies the map by a
+   constant factor.
 */
 template<class Map, class TimesFct>
 class MultipliedMap {
@@ -60,6 +60,6 @@ class MultipliedMap {
   mapped_type factor_;
 };
 
-
+}}
 
 #endif

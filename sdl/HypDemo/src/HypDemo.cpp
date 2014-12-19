@@ -5,29 +5,29 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <sdl/Vocabulary/HelperFunctions.hpp>
 
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/InsideAlgorithm.hpp>
+#include <sdl/Hypergraph/HelperFunctions.hpp>
 
-
-
-
-
-
-
-
-
-
+using namespace sdl;
+using namespace sdl::Hypergraph;
+using namespace sdl::Vocabulary;
 
 template<class Arc>
 IMutableHypergraph<Arc>* createForest() {
 
   typedef typename Arc::Weight Weight;
 
-
-
-
-
-
-
+  IVocabularyPtr voc(createDefaultVocab());
+  Sym john = voc->add("John", kTerminal);
+  Sym loves = voc->add("loves", kTerminal);
+  Sym likes = voc->add("likes", kTerminal);
+  Sym mary = voc->add("Mary", kTerminal);
+  Sym vp = voc->add("VP", kNonterminal);
 
   // Construct hypergraph that stores incoming arcs per state, and
   // uses canonical state IDs for terminal symbols:
@@ -56,11 +56,11 @@ IMutableHypergraph<Arc>* createLattice() {
 
   typedef typename Arc::Weight Weight;
 
-
-
-
-
-
+  IVocabularyPtr voc(createDefaultVocab());
+  Sym john = voc->add("John", kTerminal);
+  Sym loves = voc->add("loves", kTerminal);
+  Sym likes = voc->add("likes", kTerminal);
+  Sym mary = voc->add("Mary", kTerminal);
 
   IMutableHypergraph<Arc>* hyp = new MutableHypergraph<Arc>();
   hyp->setVocabulary(voc);
@@ -94,9 +94,9 @@ void printInsideCosts(IHypergraph<Arc> const& hyp) {
   typedef typename Arc::Weight Weight;
   boost::ptr_vector<Weight> costs;
   insideAlgorithm(hyp, &costs);
-
+  std::cout << "Inside costs:" << '\n';
   for (unsigned i = 0; i < costs.size(); ++i) {
-
+    std::cout << i << " " << costs[i] << '\n';
   }
 }
 
@@ -104,22 +104,22 @@ void printInsideCosts(IHypergraph<Arc> const& hyp) {
 /// templated weight)
 template<class Weight>
 void demo() {
-
+  std::cout << "Using " << weightName<Weight>() << " weight" << '\n';
   typedef ArcTpl<Weight> Arc;
 
-
+  std::cout << "=> Lattice" << '\n';
   IHypergraph<Arc>* lattice = createLattice<Arc>();
-
+  std::cout << *lattice << '\n';
   printInsideCosts(*lattice);
   delete lattice;
 
-
+  std::cout << '\n' << "=> Forest" << '\n';
   IHypergraph<Arc>* forest = createForest<Arc>();
-
+  std::cout << *forest << '\n';
   printInsideCosts(*forest);
   delete forest;
 
-
+  std::cout << '\n';
 }
 
 /// Runs hypergraph demo
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     demo<LogWeight>();
   }
   catch(std::exception& e){
-
+    std::cerr << e.what() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

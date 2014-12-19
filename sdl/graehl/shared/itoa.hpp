@@ -1,31 +1,31 @@
+/** \file
 
-
-
-
+    fast itoa but supporting unsigned and larger integral types.
+*/
 
 #ifndef GRAEHL_SHARED__ITOA_H
 #define GRAEHL_SHARED__ITOA_H
+#pragma once
 
-
-
+#include <graehl/shared/int_types.hpp>
 #include <string>
 #include <cstring>
 #include <limits>
 #include <cassert>
 
 
-
-
-
-
+// define this if you're paranoid about converting 0-9 (int) to 0-9 (char) by
+// adding to '0', which is safe for ascii, utf8, etc.
+#ifndef GRAEHL_ITOA_DIGIT_LOOKUP_TABLE
+#define GRAEHL_ITOA_DIGIT_LOOKUP_TABLE 0
 #endif
 
-
-
-
-
-
-
+// maybe this is faster than mod because we are already dividing. //TODO:
+// benchmark to prove that
+#define GRAEHL_ITOA_NDIV10MOD(rem, n) \
+  rem = n;                            \
+  n /= 10;                            \
+  rem -= 10 * n;
 
 namespace graehl {
 
@@ -39,7 +39,7 @@ const unsigned ultoa_bufsize=22;
 const unsigned ultoa_bufsizem1=utoa_bufsize-1;
 */
 
-
+#ifdef GRAEHL_ITOA_DIGIT_LOOKUP_TABLE
 namespace {
 char digits[] = "0123456789";
 }
@@ -47,15 +47,15 @@ char digits[] = "0123456789";
 
 inline char digit_to_char(int d) {
   return
-
+#ifdef GRAEHL_ITOA_DIGIT_LOOKUP_TABLE
       digits[d];
 #else
       '0' + d;
 #endif
 }
 
-
-
+// returns n in string [return, num); *num=0 yourself before calling if you want a c_str. in other words, the
+// sequence [ret, buf) contains the written digits
 template <class Int>
 char* utoa(char* buf, Int n_) {
   typedef typename signed_for_int<Int>::unsigned_t Uint;
@@ -66,17 +66,17 @@ char* utoa(char* buf, Int n_) {
     Uint rem;
     // 3digit lookup table, divide by 1000 faster?
     while (n) {
-
+      GRAEHL_ITOA_NDIV10MOD(rem, n);
       *--buf = digit_to_char(rem);
     }
   }
   return buf;
 }
 
-
-
+// left_pad_0(buf, utoa(buf+bufsz, n)) means that [buf, buf+bufsz) is a left-0 padded seq. of digits. no 0s
+// are added if utoa is already past buf (you must have ensured that this is valid memory, naturally)
 inline void left_pad(char* left, char* buf, char pad = '0') {
-
+  while (buf > left) *--buf = pad;
   // return buf;
 }
 
@@ -88,8 +88,8 @@ char* utoa_left_pad(char* buf, char* bufend, Int n, char pad = '0') {
   return buf;
 }
 
-
-
+// note: 0 -> 0, but otherwise x000000 -> x (x has no trailing 0s). same conditions as utoa; [ret, buf) gives
+// the sequence of digits
 // useful for floating point fraction output
 template <class Uint_>
 char* utoa_drop_trailing_0(char* buf, Uint_ n_, unsigned& n_skipped) {
@@ -102,12 +102,12 @@ char* utoa_drop_trailing_0(char* buf, Uint_ n_, unsigned& n_skipped) {
   } else {
     Uint rem;
     while (n) {
-
+      GRAEHL_ITOA_NDIV10MOD(rem, n);
       if (rem) {
         *--buf = digit_to_char(rem);
         // some non-0 trailing digits; now output all digits.
         while (n) {
-
+          GRAEHL_ITOA_NDIV10MOD(rem, n);
           *--buf = digit_to_char(rem);
         }
         return buf;
@@ -125,28 +125,28 @@ template <class Int>
 // typename signed_for_int<Int>::original_t instead of Int to give more informative wrong-type message?
 char* itoa(char* buf, Int i, bool positive_sign = false) {
   typename signed_for_int<Int>::unsigned_t n = i;
+#ifdef __clang__
+#include <graehl/shared/warning_push.h>
+#pragma clang diagnostic ignored "-Wtautological-compare"
+#endif
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4146)
+#endif
 
+  if (i < 0) n = -n;
+  /* above n=-n is because:
 
+     -(int)-2147483648 = (int) -2147483648 - WRONG
+     -((unsigned)-2147483648) = 2147483648 - RIGHT
 
+     and for all other -n representable
+     -(int)-n = (int) n - OK
+     -((unsigned)-n) = n - STILL OK
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  */
+  char* ret = utoa(buf, n);
+  if (i < 0) {
     *--ret = '-';
   } else if (positive_sign)
     *--ret = '+';
@@ -157,13 +157,13 @@ template <class Int>
 char* itoa_left_pad(char* buf, char* bufend, Int i, bool positive_sign = false, char pad = '0') {
   typename signed_for_int<Int>::unsigned_t n = i;
   if (i < 0) {
-
-
-
-
-
-
-
+    n = -n;  // see comment above for itoa
+#ifdef __clang__
+#include <graehl/shared/warning_pop.h>
+#endif
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
     *buf = '-';
   } else if (positive_sign)
     *buf = '+';
@@ -216,6 +216,6 @@ inline char* append_itoa(char* to, typename signed_for_int<Int>::signed_t n) {
 }
 
 
-
+}
 
 #endif

@@ -1,32 +1,32 @@
+/** \file
 
+    uniform access to "return true if previous value was false, and force new
+    value to true" ('latch')
+*/
 
+#ifndef SDL_UTIL__LATCH_HPP
+#define SDL_UTIL__LATCH_HPP
+#pragma once
 
+#include <sdl/Util/Add.hpp>
+#include <sdl/Util/Contains.hpp>
+#include <sdl/Util/BitSet.hpp> // for contains(bitset, index)
 
+namespace sdl {
+namespace Util {
 
+/** \return true iff falseToTrue was false
 
+    \param falseToTrue becomes true after the call
+*/
+inline bool latch(bool &falseToTrue)
+{
+  if (falseToTrue) return false;
+  falseToTrue=true;
+  return true;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//TODO: specialization for std::set, unordered_set, etc?
 template <class Set, class K>
 bool latch(Set &s, K const& k) {
   if (!Util::contains(s, k)) {
@@ -79,6 +79,6 @@ template <class Set>
 removeDupF<Set> removeDup(Set &s) { return removeDupF<Set>(s); }
 
 
-
+}}
 
 #endif

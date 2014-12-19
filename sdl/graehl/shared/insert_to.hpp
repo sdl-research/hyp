@@ -1,20 +1,20 @@
 #ifndef GRAEHL_SHARED__INSERT_TO_HPP
 #define GRAEHL_SHARED__INSERT_TO_HPP
+#pragma once
 
-
-
+#include <cassert>
 
 namespace graehl {
 
 template <class O>
 struct put_iterator {
-
-
+  O *o;
+  explicit put_iterator(O &o) : o(&o) {}
   typedef char value_type;
   typedef put_iterator self_type;
-
+  void operator=(put_iterator const& other) const { assert(o == other.o); }
   template <class V>
-
+  void operator=(V const& v) const { o->put(v); }
   self_type const& operator++(int) const { return *this; }
   self_type const& operator++() const { return *this; }
   self_type const& operator*() const { return *this; }
@@ -68,6 +68,6 @@ insertion_iterator_typed<O, V> insert_to_typed(O &o) {
 }
 
 
-
+}
 
 #endif

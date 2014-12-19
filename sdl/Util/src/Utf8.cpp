@@ -1,42 +1,42 @@
+/** \file
 
+    Reminder: here's UTF8:
 
+    sig bits | first | last | bytes | byte sequence pattern
+    7 U+0000 U+007F 1 0xxxxxxx
+    11 U+0080 U+07FF 2 110xxxxx 10xxxxxx
+    16 U+0800 U+FFFF 3 1110xxxx 10xxxxxx 10xxxxxx
+    21 U+10000 U+1FFFFF 4 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 
+    // and theoretically the unused (so far) code points:
 
+    26 U+200000 U+3FFFFFF 5 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+    31 U+4000000 U+7FFFFFFF 6 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+*/
 
+#include <sdl/Util/String32.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <utility>
+#include <unicode/uchar.h> //u_iscntrl u_isspace
 
+namespace sdl {
+namespace Util {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+std::string fixedUtf8(std::string const& string) {
+  std::string fixedStr;
+  fixUtf8To(string, fixedStr);
+  return fixedStr;
 }
 
+std::string & fixUtf8(std::string &string) {
+  if (validUtf8(string)) return string;
+  std::string fixedStr;
+  fixUtf8To(string, fixedStr);
+  std::swap(fixedStr, string);
+  return string;
+}
 
-
-
-
-
-
-
-
-
+Unicode gWindows1252ToUnicode[kNWindows1252Unicode] = {
   0x20ac, // 0x80 -> Euro Sign
   0x0081,
   0x201a, // 0x82 -> Single Low-9 Quotation Mark
@@ -72,4 +72,4 @@
 };
 
 
-
+}}

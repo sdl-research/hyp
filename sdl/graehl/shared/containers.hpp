@@ -1,6 +1,6 @@
 #ifndef GRAEHL_SHARED__CONTAINERS_HPP
 #define GRAEHL_SHARED__CONTAINERS_HPP
-
+#pragma once
 
 /* container selectors (all assume default allocator, but TODO - could change to template on allocator).
 
@@ -19,7 +19,7 @@
 #endif
 
 #include <list>
-
+#include <deque>
 #ifdef BOOST_HAS_SLIST
 #include BOOST_SLIST_HEADER
 # define GRAEHL_STD_SLIST BOOST_STD_EXTENSION_NAMESPACE::slist
@@ -37,8 +37,8 @@
 
 #ifndef UNORDERED_NS
 #ifndef USE_TR1_UNORDERED
-
-
+#if defined(_WIN32) || __clang__
+// mac clang lacks tr1::unordered
 # define USE_TR1_UNORDERED 0
 #else
 # define USE_TR1_UNORDERED 1
@@ -113,24 +113,24 @@ T & last_added(std::list<T, A> &v) {
   return v.back();
 }
 
-
-
-
+struct DequeS {
+  template <class T> struct container {
+    typedef std::deque<T> type;
   };
 };
 
 template <class T, class A>
-
+void add(std::deque<T, A> &v, T const& t) {
   v.push_back(t);
 }
 
 template <class T, class A>
+T & last_added(std::deque<T, A> &v) {
+  return v.back();
+}
 
-
-
-
-
-
+inline DequeS dequeS() {
+  return DequeS();
 }
 
 struct SlistS {
@@ -196,7 +196,7 @@ struct MapS {
   };
 };
 
-
+inline MapS s() {
   return MapS();
 }
 
@@ -223,7 +223,7 @@ typename M::mapped_type *find_second(const M& ht, const K& first)
 
 // traits for map-like things that have different find() and insert() results than the usual:
 
-
+template <class Map>
 struct map_traits;
 
 template <class K, class V>
@@ -298,6 +298,6 @@ inline std::size_t mix_hash_fast(std::size_t a, std::size_t b)
 }
 
 
-
+}
 
 #endif

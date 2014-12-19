@@ -1,15 +1,15 @@
 /**
+   \file
+   Parses an arc string into an arc wrapper ParserUtil::Arc,
+   using boost::spirit. Should be included only from .cpp files, if
+   possible, to reduce compile times.
 
-
-
-
-
-
+   \author Markus Dreyer
 */
 
-
-
-
+#ifndef HYP__HYPERGRAPH_ARCPARSER_IMPL_HPP
+#define HYP__HYPERGRAPH_ARCPARSER_IMPL_HPP
+#pragma once
 
 #include <cstring>
 #include <iostream>
@@ -25,39 +25,39 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 
+#include <sdl/Hypergraph/ParserUtil.hpp>
 
+#include <sdl/Hypergraph/SymbolPrint.hpp>
+#include <sdl/Util/QuoteEsc.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/Delete.hpp>
 
+namespace ParserUtil = sdl::Hypergraph::ParserUtil;
 
+/**
+   present our structs as mpl vectors so that the list of ( ) captures in the
+   grmamar below assign to id -> inputSymbol -> outputSymbol.
 
+   (that requires we place this is in the top-level namespace)
 
-
-
-
-
-
-
-
-
-
-
-
-
+   http://www.boost.org/doc/libs/1_56_0/libs/spirit/doc/html/spirit/qi/tutorials/employee___parsing_into_structs.html
+*/
 BOOST_FUSION_ADAPT_STRUCT(ParserUtil::State,
-
+                          (sdl::Hypergraph::StateId, id)
                           (std::string, inputSymbol)
                           (std::string, outputSymbol)
                           (bool, isInputSymbolLexical)
+                          (bool, isOutputSymbolLexical)
+                          )
 
-
-
-
+enum { kAtId = 0, kAtInputSymbol = 1, kAtOutputSymbol = 2, kAtInputLexical = 3, kAtOutputLexical = 4};
 
 BOOST_FUSION_ADAPT_STRUCT(ParserUtil::Arc,
                           (ParserUtil::State, head)
                           (std::vector<ParserUtil::State>, tails)
                           (std::string, weightStr))
 
-
+namespace sdl {
 namespace Hypergraph {
 
 
@@ -75,7 +75,7 @@ struct DoubleQuotedEscapedString
       : DoubleQuotedEscapedString::base_type(startRule),
         quote("\"")
   {
-
+    Util::DoubleQuoteEsc e;
     e.toQi(escChar);
 
     startRule = quote
@@ -97,7 +97,7 @@ struct SingleQuotedString
       : SingleQuotedString::base_type(startRule),
         quote("'")
   {
-
+    Util::SingleQuoteEsc e;
     e.toQi(escQuote);
     startRule = quote
         >> *(escQuote | (qi::char_ - quote))
@@ -123,14 +123,14 @@ struct ArcParserImpl : qi::grammar<Iterator, ParserUtil::Arc(), ascii::space_typ
   SingleQuotedString<Iterator> singleQuotedStr;
 
   /**
-
+     Parses an arc string using the boost::spirit ArcParserImpl.
   */
-
-
-
-
-
-
+  ParserUtil::Arc* parse(const std::string& str) const {
+    Iterator iter = str.begin(), end = str.end();
+    Util::AutoDelete<ParserUtil::Arc> arc(new ParserUtil::Arc());
+    return (qi::phrase_parse(iter, end, *this, ascii::space, *arc) && iter == end) ?
+        arc.release() :
+        (ParserUtil::Arc*)0;
   }
 };
 
@@ -165,12 +165,12 @@ ArcParserImpl<Iterator>::ArcParserImpl()
   // state with optional ID, input symbol and optional output symbol
   state1 %=
       lexeme[ (int_
-
+               | qi::eps [phoenix::at_c<kAtId>(_val) = -1]
                )
               >> '(' ]
-
+      >> (lexSymbol [phoenix::at_c<kAtInputLexical>(_val) = true]
           | symbol)
-
+      >> -(lexSymbol [phoenix::at_c<kAtOutputLexical>(_val) = true]
            | symbol)
       >> ')'
       ;
@@ -180,8 +180,8 @@ ArcParserImpl<Iterator>::ArcParserImpl()
 
   // special case, state as in "START <- 0"
   state3 %=
-
-
+      qi::lit("START") [phoenix::at_c<kAtId>(_val) = -2]
+      | qi::lit("FINAL") [phoenix::at_c<kAtId>(_val) = -3]
       ;
 
   state %=
@@ -200,6 +200,6 @@ ArcParserImpl<Iterator>::ArcParserImpl()
 }
 
 
-
+}}
 
 #endif

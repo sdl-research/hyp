@@ -1,16 +1,16 @@
+/** \file
 
+    common compare/less/equal function objects.
+*/
 
-
-
-
-
-
-
+#ifndef SDL_UTIL_COMPARE_H
+#define SDL_UTIL_COMPARE_H
+#pragma once
 
 #include <cstring>
+#include <sdl/SharedPtr.hpp>
 
-
-
+namespace sdl {
 namespace Util {
 
 // >0 <-> a>b
@@ -79,7 +79,7 @@ struct Compare1stByValue {
 
 template<class Pair>
 struct Compare2nd {
-
+  typedef bool result_type;
   bool operator()(const Pair& s1, const Pair& s2) const {
     return s1.second < s2.second;
   }
@@ -107,13 +107,13 @@ struct Compare2ndReverse {
 };
 
 /**
-
+   Compares two shared_ptr objs by value
  */
 //TODO@MD: Template the operators, not the class
 template<class T>
 struct LessByValue {
-
-
+  bool operator()(shared_ptr<T> const& a,
+                  shared_ptr<T> const& b) const {
     return *a < *b;
   }
   bool operator()(T const* a,
@@ -123,12 +123,12 @@ struct LessByValue {
 };
 
 /**
-
+   Compares two shared_ptr objs by value
  */
 template<class T>
 struct EqualByValue {
-
-
+  bool operator()(shared_ptr<T> a,
+                  shared_ptr<T> b) const {
     return *a == *b;
   }
   bool operator()(T const* a,
@@ -138,8 +138,8 @@ struct EqualByValue {
 };
 
 /**
-
-
+   A 'less' functor comparing two pairs; each pair element is
+   taken by value (i.e., dereferenced).
  */
 struct PairLessByValue {
   template<class P>
@@ -150,7 +150,7 @@ struct PairLessByValue {
 };
 
 /**
-
+   Replaces b with a if a is smaller than b.
  */
 template<typename T>
 struct ReplaceIfLess {
@@ -161,6 +161,6 @@ struct ReplaceIfLess {
   }
 };
 
-
+}}
 
 #endif

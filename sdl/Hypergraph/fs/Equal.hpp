@@ -1,23 +1,23 @@
 
+/* \file
 
+   equality check
 
-
-
-
+   no rho, sigma, phi allowed in first position in compose
 
    therefore, implement fs-only Compose that supports them? note: openfst doesn't allow them in first position either.
 */
 
+#ifndef HYP__HYPERGRAPH__EQUAL_HPP
+#define HYP__HYPERGRAPH__EQUAL_HPP
+#pragma once
 
+#include <sdl/Hypergraph/Determinize.hpp>
+#include <sdl/Hypergraph/Difference.hpp>
+#include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 
-
-
-
-
-
-
-
-
+namespace sdl {
 namespace Hypergraph {
 namespace fs {
 
@@ -30,15 +30,15 @@ bool equal(IHypergraph<A> const& a, IHypergraph<A> const& b) {
   if (b.prunedEmpty())
     return empty(a);
   if (!a.isFsm() || !b.isFsm()) {
-
+    SDL_THROW_LOG(Hypergraph, InvalidInputException, "equal(a, b) is undecidable for general CFG a and b - convert to Fsm first");
   }
   if (a.getVocabulary() != b.getVocabulary()) {
-
+    SDL_THROW_LOG(Hypergraph, InvalidInputException, "Difference: hypergraphs must have same vocabulary");
   }
   //  return &a==&b; //FIXME
 
   typedef IHypergraph<A> H;
-
+  typedef shared_ptr<H const> HP;
 
   // will need both indexes for compose-first-position
   //  HP pa=ensureProperties(a, kStoreInArcs|kStoreOutArcs);
@@ -47,7 +47,7 @@ bool equal(IHypergraph<A> const& a, IHypergraph<A> const& b) {
   Properties p=kStoreOutArcs; // |kStoreInArcs
 
 #define HG_EQUAL_CHECK_DIFF(a, b, msgv, msgempty) do {                     \
-
+    MutableHypergraph<A> d(p);                                          \
     difference(a, b, &d);                                                 \
     if (!empty(d)) {                                                    \
       return false;                                                     \
@@ -61,6 +61,6 @@ bool equal(IHypergraph<A> const& a, IHypergraph<A> const& b) {
   return true;
 }
 
-
+}}}
 
 #endif

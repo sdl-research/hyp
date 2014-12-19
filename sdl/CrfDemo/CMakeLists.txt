@@ -10,10 +10,10 @@ include_directories(${TBB_INCLUDE_DIR})
 
 set(LINK_DEPENDENCIES
   ${LBFGS_LIB}
-
+  ${YAML_CPP_LIBRARY}
   Config
   Hypergraph
-
+  ${UTIL_LIBRARIES}
   Optimization
   )
 

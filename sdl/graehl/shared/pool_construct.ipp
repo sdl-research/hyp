@@ -1,8 +1,8 @@
+/** \file
 
-
-
-
-
+    helpers for object construction - to include in your pool class - note lack
+    of include guard.
+*/
 
 // Copyright (C) 2000 Stephen Cleary
 //

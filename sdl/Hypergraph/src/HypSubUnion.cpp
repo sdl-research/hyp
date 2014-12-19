@@ -1,27 +1,27 @@
 #define HG_TRANSFORM_MAIN
+#include <sdl/Hypergraph/TransformMain.hpp>
+#include <sdl/Hypergraph/SubUnion.hpp>
 
-
-
-
+namespace sdl {
 namespace Hypergraph {
 
 #define VERSION "v1"
 
-
+struct HypSubUnion : TransformMain<HypSubUnion> {
 
   SubUnionOptions opt;
 
-
-
+  HypSubUnion()
+      : TransformMain<HypSubUnion>("HypSubUnion", SubUnionOptions::usage(), VERSION)
   {
     opt.requirePathOverlap = false;
     opt.addStandardUnion = false;
-
-
-
+  }
+  void declare_configurable() {
+    this->configurable(&opt);
   }
 
-
+  Properties properties(int i) const {
     return kDefaultProperties | kStoreInArcs;
   }
 
@@ -41,6 +41,6 @@ namespace Hypergraph {
 };
 
 
+}}
 
-
-
+INT_MAIN(sdl::Hypergraph::HypSubUnion)

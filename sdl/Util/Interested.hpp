@@ -1,0 +1,64 @@
+/** \file
+
+    Build subsets in O(|subset|) time (O(1) per element). Only one subset of interest may exist at a time.
+
+    Assumes dense indices. A hash-based version would work for sparse indices.
+
+    (used in e.g. MutableHypergraph deleteIn/OutArcs).
+*/
+
+#ifndef INTERESTED_JG_2014_06_24_HPP
+#define INTERESTED_JG_2014_06_24_HPP
+#pragma once
+
+#include <sdl/Util/BitSet.hpp>
+
+namespace sdl { namespace Util {
+
+template <class Index>
+struct Interested : std::vector<Index> {
+  typedef std::vector<Index> Indices;
+  Util::BitSet inInterested_;
+  void clear() {
+    for (typename Indices::const_iterator i = this->begin(), e = this->end(); i != e; ++i)
+      inInterested_.reset(*i);
+    Indices::clear();
+  }
+  void reserve(Index n) {
+    assertEmpty();
+    inInterested_.resize(n);
+  }
+  void add(Index s) {
+    if (!inInterested_.test_set(s))
+      this->push_back(s);
+  }
+  bool addIsNew(Index s) {
+    if (inInterested_.test_set(s))
+      return false;
+    else
+      this->push_back(s);
+    return true;
+  }
+  bool addIsNewSparse(Index s) {
+    if (!latchGrow(inInterested_, s))
+      return false;
+    else
+      this->push_back(s);
+    return true;
+  }
+  bool containsSparse(Index s) const {
+    return testSparse(inInterested_, s);
+  }
+  bool contains(Index s) const {
+    return inInterested_.test(s);
+  }
+  void assertEmpty() {
+    assert(this->empty());
+    assert(inInterested_.count() == 0);
+  }
+};
+
+
+}}
+
+#endif

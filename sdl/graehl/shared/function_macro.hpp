@@ -1,6 +1,6 @@
 #ifndef GRAEHL__SHARED__FUNCTION_MACRO_HPP
 #define GRAEHL__SHARED__FUNCTION_MACRO_HPP
-
+#pragma once
 
 #define FUNCTION_OBJ_X(name, result, expr)        \
 struct name \
@@ -47,6 +47,6 @@ PREDICATE_OBJ_X_Y(geq_typeless, x>=y);
 PREDICATE_OBJ_X_Y(neq_typeless, x!=y);
 
 
-
+}
 
 #endif

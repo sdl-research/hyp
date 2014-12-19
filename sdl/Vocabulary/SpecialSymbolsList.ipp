@@ -1,12 +1,12 @@
+/**
+   //TODO: use this to get true compile time constants
 
-
-
-
-
-
-
-
-
+   #include <boost/preprocessor/slot/counter.hpp>
+   BOOST_PP_COUNTER; // 0
+   #include BOOST_PP_UPDATE_COUNTER()
+   BOOST_PP_COUNTER; // 1
+   ...
+*/
 
 // this gets multiply included - once to define the symbols, and again
 // to instantiate. the order is significant - keep the first 4 eps
@@ -26,7 +26,7 @@
  * first lexical symbols (in that order). DO NOT CHANGE THIS.
  */
 
-
+/// This appears first so <eps> has index 0 and thus Sym::id() 0, so
 /// EPSILON::ID is 0, like in OpenFst.
 /// The IDs for sigma, phi, and rho are different from the
 /// corresponding IDs in OpenFst, where they are negative numbers.
@@ -40,15 +40,15 @@ SPECIAL_SYMBOL(RHO, <rho>, kSpecialTerminal)
 // vocabulary bugs that prevent those tokens in data
 // from being treated normally are resolved
 // see http://jira:8080/jira/browse/CM-230
-
-
-
-
-
-
-
-
-
+#define SDL_SEGMENT_NONSTANDARD_START_END 1
+//TODO: remove this #define once CM-230 is properly resolved:
+// One way to fix CM-230 is to remove SEG_START and SEG_END entirely, since we
+//don't need them to query the LM. this would imply that you'd need separate
+//boolean options for whether to start at <s> vs empty context, and whether to
+//score </s> (see LmRescore where I did this already). the reason i want this
+//resolved is that we pay a performance price for every Sym or string -> LmId
+//lookup, which would go away if we either switched these back to <s> </s>, or
+//if we don't use those symbols at all
 SPECIAL_SYMBOL(SEG_START, <xmt-segment>, kSpecialTerminal)
 SPECIAL_SYMBOL(SEG_END, </xmt-segment>, kSpecialTerminal)
 
@@ -68,7 +68,7 @@ SPECIAL_SYMBOL(TOK_PROTECT_END, </tok-protect>, kSpecialTerminal)
 SPECIAL_SYMBOL(GLUE, __LW_AT__, kSpecialTerminal)
 
 // Used by TrieGrammar and Syntax decoder to separate source formula and preconditions
-
+SPECIAL_SYMBOL(SDL_STAR, <lw-star>, kSpecialTerminal)
 
 // Used by syntax decoder to denote the start of the foreign sentence
 SPECIAL_SYMBOL(FS, <foreign-sentence>, kSpecialTerminal)
@@ -77,7 +77,7 @@ SPECIAL_SYMBOL(FS, <foreign-sentence>, kSpecialTerminal)
 SPECIAL_SYMBOL(ABORTSEGMENT, <abort-segment>, kSpecialTerminal)
 
 //////////////////////////////
-
+// SDL_BLOCK symbols
 //////////////////////////////
 
 // These are used by the decoders: They do not move any words or
@@ -93,11 +93,11 @@ SPECIAL_SYMBOL(ABORTSEGMENT, <abort-segment>, kSpecialTerminal)
 
 SPECIAL_SYMBOL(BLOCK_END, </xmt-block>, kSpecialTerminal)
 SPECIAL_SYMBOL(BLOCK_START, <xmt-block>, kSpecialTerminal)
+SPECIAL_SYMBOL(CONSTRAINT_SUBSTITUTE, <xmt-entity>, kSpecialTerminal)
 
+// CONSTRAINT_SUBSTITUTE and BLOCK_START are actually a range of symbols, each one which prints as the same string
+// //TODO: preprocessor iteration or similar to give each one a numeric id suffix for clarity and round-trip hg io
 
-
-
-
-
+// Do NOT define additional special symbols here at the
 // end. Additional special symbols must be defined BEFORE the block
 // symbols.

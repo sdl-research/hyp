@@ -1,9 +1,9 @@
-
-
-
-
-
-
+#if defined(_MSC_VER)
+#pragma warning ( push )
+#pragma warning ( disable: 4231 4251 )
+#endif
+#include <sdl/Util/Locale.hpp>
+#ifndef NLOG
 #include <log4cxx/logger.h>
 #include <log4cxx/fileappender.h>
 #include <log4cxx/consoleappender.h>
@@ -11,67 +11,67 @@
 #include <log4cxx/patternlayout.h>
 #include <log4cxx/helpers/transcoder.h>
 #endif
-
-
-
-
-
-
+#include <sdl/Util/InitLogger.hpp>
+#include <sdl/Util/FindFile.hpp>
+#include <sdl/Util/LogHelper.hpp> //LOG_INFO() sdl::logLevel(int) etc
+#if defined(_MSC_VER)
+#pragma warning (pop)
+#endif
 
 #include <iostream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#if SDL_LOG_SEQUENCE_NUMBER
+# include <sdl/Util/RefCount.hpp>
+#endif
 
+std::size_t gLogSeqXmt = 0;
 
-
-
-
-
-
+namespace sdl {
 namespace Util {
 
 std::string logFileName(std::string const& appname) {
-
-
-
+  boost::posix_time::ptime currentTime = boost::posix_time::second_clock::local_time();
+  std::string time = boost::posix_time::to_iso_string(currentTime);
+  return appname + "-" + time + ".log";
 }
 
 //TODO: free memory for valgrind?
 #ifndef NLOG
 void initLogger(std::string const& appname,
+                Util::InitLoggerOptions opts)
+{
+  LogLevelPtr level = logLevel(opts.loglvl, opts.verbose);
+  initLogger(appname, level, opts);
+}
 
-
-
-
-
-
-
+void initLogger(std::string const& appname,
                 LogLevelPtr level,
-
+                Util::InitLoggerOptions const& opts)
 {
   defaultLocale();
-
-
-
-
-
-
+  if (!opts.xmlConfigFile.empty()) {
+    if (opts.verbose)
+      std::cerr << "Logging xml configuration from: " << opts.xmlConfigFile << '\n';
+    log4cxx::xml::DOMConfigurator::configure(opts.xmlConfigFile);
+    return;
+  }
   log4cxx::LoggerPtr g_pStatsDBLogger(log4cxx::Logger::getRootLogger());
   if (opts.removeAppenders)
     g_pStatsDBLogger->removeAllAppenders();
   log4cxx::LogString logStrLayout;
-
-
+  std::string layout = opts.patternLayout.empty()?
+      (opts.multiThread?  "%-4t %-5p %c{2} - %m%n": "%-5p %c{2} - %m%n") :
       opts.patternLayout;
-
+  log4cxx::helpers::Transcoder::decode(layout, logStrLayout);
   log4cxx::PatternLayout* pLayout = new log4cxx::PatternLayout(logStrLayout);
   if (!opts.file.empty()) {
-
+    std::string logFile = opts.file=="AUTO"?logFileName(appname):opts.file;
     if (opts.verbose)
-
+      std::cerr << "Log: " << logFile << '\n';
     log4cxx::LogString logFileName;
-
+    log4cxx::helpers::Transcoder::decode(logFile, logFileName);
     log4cxx::FileAppender* pAppender = new log4cxx::FileAppender(pLayout, logFileName, !opts.overwriteFile);
     g_pStatsDBLogger->addAppender(pAppender);
   }
@@ -81,41 +81,41 @@ void initLogger(std::string const& appname,
                                   );
   }
   if (opts.verbose) {
-
+    SDL_TRACE(log, "Starting application: " << appname);
   }
   g_pStatsDBLogger->setLevel(level);
   if (opts.verbose)
-
+    SDL_TRACE(log, appname <<" initialized with default log config (no log config file given).");
   findFile().activateLogging();
 }
 
-
-
-
-
-
-
-
+void initLoggerConsole(char const* name, LogLevel level) {
+  LogLevelPtr plevel = logLevel(level);
+  //    defaultLocale(); // not well enough tested
+  initLogger(name,
+             plevel,
+             InitLoggerOptions().setConsole(true));
+}
 
 #else
 void initLogger(std::string const& appname,
                 LogLevelPtr level,
-
-
-
-
+                Util::InitLoggerOptions const& opts)
+{
+  defaultLocale();
+}
 
 void initLogger(std::string const& appname,
+                Util::InitLoggerOptions opts)
+{
+  defaultLocale();
+}
 
-
-
-
-
-
-
-
+void initLoggerConsole(char const* name, LogLevel level)
+{
+}
 
 #endif // end ifndef NLOG
 
 
-
+}}

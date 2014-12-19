@@ -1,44 +1,44 @@
 /**
+   \file
 
+   Procedure for optimizing hypergraph weights.
 
+   The procedure is: Read data, generate features, construct
+   parameterized objective function, optimize function parameters.
 
-
-
-
-
-
+   \author Markus Dreyer
  */
 
-
-
-
+#ifndef SDL_OPTIMIZATION_OPTIMIZATIONPROCEDURE_HPP
+#define SDL_OPTIMIZATION_OPTIMIZATIONPROCEDURE_HPP
+#pragma once
 
 #include <string>
 #include <vector>
 #include <map>
 #include <stdexcept>
 
+#include <sdl/SharedPtr.hpp>
 
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/StringToTokens.hpp>
 
+#include <sdl/Hypergraph/FeatureWeight.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/StringToHypergraph.hpp>
+#include <sdl/Hypergraph/ArcVisitors.hpp>
 
+#include <sdl/Optimization/HypergraphCrfObjFct.hpp>
+#include <sdl/Optimization/LbfgsOptimizer.hpp>
+#include <sdl/Optimization/OnlineOptimizer.hpp>
+#include <sdl/Optimization/ICreateSearchSpace.hpp>
+#include <sdl/Optimization/Arc.hpp>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+namespace sdl {
 namespace Optimization {
 
-
+SDL_ENUM(OptimizationMethod, 2, (Lbfgs, Online));
 
 struct OptimizationProcedureOptions {
 
@@ -48,7 +48,7 @@ struct OptimizationProcedureOptions {
 
   template <class Config>
   void configure(Config& config) {
-
+    config("Optimize the weights of an SDL module");
     config.is("OptimizationProcedure");
 
     config("optimization-method", &optimizationMethod)("Either 'lbfgs' or 'online'. For each method you can specify options, e.g., lbfgs").init(kLbfgs);
@@ -76,7 +76,7 @@ struct OptimizationProcedureOptions {
 };
 
 /*
-
+Procedure for optimizing hypergraph weights.
  */
 class OptimizationProcedure
 {
@@ -88,32 +88,32 @@ class OptimizationProcedure
                         , OptimizationProcedureOptions const&);
 
   /**
-
-
+      Starts the optimization. Call this after all training
+      examples have been added.
    */
   void optimize();
 
   /**
-
-
-
+      If true: Will check on every training pair if the two
+      created hypergraphs are compatible (i.e., they
+      intersect). Expensive test, use only for debugging.
    */
   void setCheckIntersectionNonEmpty(bool b = true) {
     checkIntersectionNonEmpty_ = b;
   }
 
   /**
-
-
-
+      If true: Will check if the gradients and the function
+      value (as computed based on the task-specific CreateSearchSpace
+      functor) are compatible. Expensive test, use only for debugging.
    */
   void setCheckGradients(bool b = true) {
     checkGradients_ = b;
   }
 
   /**
-
-
+      Gets the best path from all unclamped hypergraphs, after
+      weighting the arcs according to the passed weights map.
    */
   void test();
 
@@ -127,6 +127,6 @@ class OptimizationProcedure
 };
 
 
-
+}}
 
 #endif

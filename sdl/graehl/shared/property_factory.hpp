@@ -1,16 +1,16 @@
+/** \file
 
-
-
-
-
-
+    Boost Graph Library "Property Map" concept enhancement: you have a graph
+  type G. for each edge or vertex you want to read/write a value
+  P=property_factory<G, edge_tag> or property_factory<G, vertex_tag> is a traits
+  type:
 
   G g;
   typedef typename P::rebind<value> F;
-
-
-
-
+  typename F::impl impl(F::init<value>(g)); // - backing which must exist (new or stack) while used. // may or
+  may not have shallow-copy semantics.
+  typename F::reference r=impl; // actually satisfies copyable-by-val property map semantics - may be
+  boost::reference_wrapper<implementation> or similar. shallow-copy semantics.
 
   reminder: boost property maps (namespace usually found by ADL on map type):
 
@@ -21,7 +21,7 @@
 
 #ifndef GRAEHL_SHARED__PROPERTY_FACTORY_HPP
 #define GRAEHL_SHARED__PROPERTY_FACTORY_HPP
-
+#pragma once
 
 
 #include <graehl/shared/graph.hpp>
@@ -74,7 +74,7 @@ struct identity_offset_map {
   }
 };
 
-
+inline std::size_t get(identity_offset_map, std::size_t i) {
   return i;
 }
 
@@ -84,16 +84,16 @@ struct identity_offset_map {
 
 namespace graehl {
 
-
-
-
-
-
-
-
-
-
-
+template <class T, class Size = unsigned>
+struct array_pmap : boost::put_get_helper<T&, array_pmap<T> >, boost::shared_array<T> {
+  typedef Size size_type;
+  typedef Size key_type;
+  typedef T value_type;
+  typedef T& reference;
+  typedef boost::lvalue_property_map_tag category;
+  array_pmap() {}
+  explicit array_pmap(Size n) : boost::shared_array<T>(new T[n]) {}
+};
 
 // specialize, unless you have integral [0...size) descriptors
 template <class G, class ptag>
@@ -101,7 +101,7 @@ struct property_factory {
  public:
   typedef typename size_traits<G, ptag>::size_type init_type;
   init_type N;
-
+  explicit property_factory(G const& g) : N(size(g, ptag())) {}
   template <class V>
   init_type init() const {
     return N;
@@ -112,18 +112,18 @@ struct property_factory {
     rebind(property_factory const& p) : p(p) {}
     rebind(rebind const& o) : p(o.p) {}
     init_type init() const { return p.template init<V>(); }
-
+    typedef array_pmap<V, init_type> reference;
     typedef reference impl;
   };
-
-
-
-
+  template <class Val>
+  typename rebind<Val>::reference construct() const {
+    typename rebind<Val>::reference(N);
+  }
 };
 
 template <class V, class G, class ptag>
-
-
+typename property_factory<G, ptag>::template rebind<V>::reference
+pmap(typename property_factory<G, ptag>::template rebind<V>::impl& i) {
   return i;
 }
 
@@ -172,7 +172,7 @@ struct pmap_pair_getter {
   typedef typename T::value_type V;
   typedef map_pair<key_type, V> result_type;
   // template <class key_type>
-
+  result_type operator()(key_type const& k) const { return result_type(k, get(p, k)); }
 };
 
 template <class A, class P>
@@ -211,16 +211,16 @@ class const_sink_property_map
   explicit const_sink_property_map(V v = V()) : v(v) {}
 
   template <typename T>
-
-
-
+  inline reference operator[](T) const {
+    return v;
+  }
 
   template <typename T>
   friend inline value_type get(const_sink_property_map const& m, T) {
     return m.v;
   }
   template <typename T>
-
+  friend inline void put(const_sink_property_map const& m, T, value_type) {}
 };
 
 // values are ALWAYS default constructed on first get.
@@ -242,9 +242,9 @@ struct set_pmap {
 };
 
 template <class P, class V>
-
-
-
+set_pmap<P, V> pmap_setter(P& p, V const& v) {
+  return set_pmap<P, V>(p, v);
+}
 
 template <class G, class P, class T, class V>
 void init_pmap(T t, G const& g, P& p, V const& v = V()) {
@@ -252,8 +252,8 @@ void init_pmap(T t, G const& g, P& p, V const& v = V()) {
 }
 
 template <class G, class T, class V>
-
-
+typename property_factory<G, T>::template rebind<V>::reference
+make_pmap(boost::shared_ptr<typename property_factory<G, T>::template rebind<V>::impl>& pimpl) {
   return reference(*pimpl);
 }
 
@@ -267,8 +267,8 @@ struct built_pmap {
   I impl;
   property_map_type pmap;
   built_pmap(G const& g) : g(g), impl(P(g).template init<V>()), pmap(impl) {}
-
-
+  built_pmap(G const& g, V const& i) : g(g), impl(P(g).template init<V>()), pmap(impl) { init(i); }
+  void init(V const& v) { visit(T(), g, pmap_setter(pmap, v)); }
 };
 
 template <class D, class S>
@@ -289,9 +289,9 @@ void copy_pmap(T t, G const& g, D const& dest, S const& src) {
 
 template <class C1, class C2, class C3>
 struct IndexedPairCopier {
-
-
-
+  C1 a;
+  C2 b;
+  C3 c;
   IndexedPairCopier(C1 const& a, C2 const& b, C3 const& c) : a(a), b(b), c(c) {}
   typedef typename boost::property_traits<C2>::key_type K;
   void operator()(K const& k) const {
@@ -313,6 +313,6 @@ IndexedPairCopier<C1, C2, C3> make_indexed_pair_copier(C1 const& a, C2 const& b,
 }
 
 
-
+}
 
 #endif

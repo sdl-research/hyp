@@ -1,6 +1,6 @@
+#include <sdl/Util/LoadLibrary.hpp>
 
-
-
+namespace sdl { namespace Util {
 
 # ifdef _WIN32
 
@@ -16,4 +16,4 @@ void* loadProc(LoadedLib aLib, const char* name) { return ::dlsym(aLib, name); }
 
 #endif
 
-
+}}
