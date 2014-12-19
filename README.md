@@ -14,7 +14,15 @@ library dependencies (which you can build yourself from source if you
 prefer, but you will need to use or modify our `FindXXXX.cmake`
 scripts).
 
-For example, on windows: `set SDL_EXTERNALS_PATH=c:/src/hypergraphs-externals/Windows` and then `cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 10 Win64" c:/src/hypergraphs/sdl`
+For example, on windows: `set SDL_EXTERNALS_PATH=c:/src/sdl-externals/Windows` and then `cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 10 Win64" c:/src/hyp/sdl`
+
+Or on linux:
+`export SDL_EXTERNALS_PATH=$HOME/src/sdl-externals/FC12;
+git clone https://github.com/hypergraphs/hyp.git;
+cd hyp
+mkdir build-hyp;
+cd build-hyp;
+cmake -DCMAKE_BUILD_TYPE=Release ../sdl && make -j4 VERBOSE=1`
 
 Then, when you're ready to use or improve the source code for your own
 projects, consider generating [Doxygen](http://www.doxygen.org/):

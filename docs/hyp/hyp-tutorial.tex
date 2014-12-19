@@ -600,7 +600,7 @@ in the overall hypergraph.\footnote{This property of the expectation
   efficient to compute feature expectations by running the inside and
   outside passes in the log semiring, then passing over the hypergraph
   again and accumulating the feature expectations in just one vector. We
-  use this method in \code{Hypergraph/FeatureExpectations.hpp}.}
+  use this method in \code{sdl/Hypergraph/FeatureExpectations.hpp}.}
 
 For the expectation semiring, each arc weight is a tuple of the weight
 $w$ and the feature vector $v$ times $w$
@@ -743,7 +743,7 @@ tails, and a weight. It then sets the final state.
 \subsection{Hypergraph properties}
 
 Each hypergraph object has properties, expressed as bits in a 64-bit
-number, see \texttt{Hypergraph/Properties.hpp}. These can describe
+number, see \texttt{sdl/Hypergraph/Properties.hpp}. These can describe
 properties of the hypergraph at any point in time, e.g.,
 \texttt{kFsm}, which is on by default until non-finite-state arcs are
 added, or \texttt{kCfg}. Other properties act as policies that control
