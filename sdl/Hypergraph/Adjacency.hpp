@@ -42,7 +42,7 @@ struct nOut
 template <class A>
 ArcId countInArcs(IHypergraph<A> const& h, StateId s)
 {
-
+  if (h.storesInArcs())
 
   detail::nIn v(s);
 
@@ -52,7 +52,7 @@ ArcId countInArcs(IHypergraph<A> const& h, StateId s)
 template <class A>
 ArcId countOutArcs(IHypergraph<A> const& h, StateId s)
 {
-
+  if (h.storesOutArcs())
 
   detail::nOut v(s);
 

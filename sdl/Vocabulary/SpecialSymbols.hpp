@@ -26,8 +26,11 @@
 
 
 
+// The following include will make each special symbol X globablly
+// accessible as X::TOKEN and X::ID.
 
 
+/**
 
 
 
@@ -37,7 +40,10 @@
 
 
 
+*/
+struct SpecialSymbolsOrder {
 
+  SpecialSymbolsOrder() {
 
 
 
@@ -51,11 +57,14 @@
 
 
 
+  }
+};
 
 
 
 
 
+namespace Vocabulary {
 
 
 
@@ -70,15 +79,21 @@
 
 
 
+/**
 
 
+ */
 
 
+}
 
+/**
 
 
+ */
 
 
+}
 
 
 
@@ -114,9 +129,11 @@
 
 
 
+/**
 
 
 
+*/
 
 
 
@@ -127,6 +144,7 @@
 
 
 
+}
 
 
 
@@ -163,9 +181,11 @@
 
 
 
+/**
 
 
 
+ */
 
 
 
@@ -200,27 +220,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
 

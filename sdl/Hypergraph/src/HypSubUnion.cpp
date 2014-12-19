@@ -9,20 +9,20 @@ namespace Hypergraph {
 
 
 
-
+  SubUnionOptions opt;
 
 
 
   {
-
-
+    opt.requirePathOverlap = false;
+    opt.addStandardUnion = false;
 
 
 
   }
 
 
-
+    return kDefaultProperties | kStoreInArcs;
   }
 
   enum { has_inplace_input_transform = true, has_transform1 = false, has_transform2 = true, out_every = false }; // means multiple input files
@@ -35,7 +35,7 @@ namespace Hypergraph {
   bool transform2mm(IMutableHypergraph<Arc>& hg1,
                     IMutableHypergraph<Arc>& hg2,
                     IMutableHypergraph<Arc>* o) {
-
+    subUnion(hg1, hg2, o, opt);
     return true;
   }
 };

@@ -226,7 +226,7 @@ namespace Hypergraph {
     }
 
     if (outHypergraph) {
-
+      MutableHypergraph<A> oh(kStoreInArcs);
       d->translateToHypergraph(hg, oh, keepOriginalStateIds);
       out << oh << '\0' << '\n';
     }
@@ -251,7 +251,7 @@ namespace Hypergraph {
 
 
 
-
+      print_header(out, d, n);
 
 
 
@@ -287,15 +287,15 @@ namespace Hypergraph {
   bool bestfirst;
   bool random;
   static inline std::string usage() {
+    return
 
 
+          "Run Bellman-Ford algorithm (iterative relaxing) until convergence. "
+          "For Viterbi semiring, up to O(VE) = O(V^3) but correct for negative "
 
 
-
-
-
-
-
+        "which is O(E*lg V) but may loop forever if negative weight cycles, and "
+        "not correct for non-viterbi semirings.";
   }
 
 
@@ -400,7 +400,7 @@ typedef graehl::BestTreeStats BestPathStats;
 
 
 
-
+  template <class A>
 
     typedef A Arc;
 
@@ -693,7 +693,7 @@ typedef graehl::BestTreeStats BestPathStats;
 
         return o;
       }
-
+    };  // end BinaryDerivation
 
     static BinaryDerivation none;  // for lazy kbest impl
     static BinaryDerivation pending;
@@ -1002,7 +1002,7 @@ typedef graehl::BestTreeStats BestPathStats;
 
 
       }
-
+    };  // end BuildLazy
 
     template <class DerivVisitor>
 
@@ -1282,7 +1282,7 @@ typedef graehl::BestTreeStats BestPathStats;
       }
 
 
-
+  };  // end Compute
 
 
 

@@ -1,6 +1,6 @@
 
 
-
+#if HAVE_OPENFST
 
 
 

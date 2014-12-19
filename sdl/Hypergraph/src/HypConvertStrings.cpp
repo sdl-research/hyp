@@ -1,5 +1,5 @@
 #define PROGNAME HgConvertStrings
-
+#define USAGE "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL byte separates outputs"
 #define VERSION "v1"
 
 
@@ -43,7 +43,7 @@ struct PROGNAME : HypergraphMainBase {
 
 
 
-
+    this->configurable(&opt);
   }
 
 

@@ -35,6 +35,12 @@
 
 namespace Hypergraph {
 
+namespace ArcParserFctUtil {
+
+/**
+
+
+*/
 
 
 
@@ -62,17 +68,11 @@ namespace Hypergraph {
 
 
 
+        if (id == BLOCK_START::ID) {
 
 
 
-
-
-
-
-
-
-
-
+        }
         return id;
 
 

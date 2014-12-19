@@ -14,7 +14,7 @@ namespace Hypergraph {
 
 
 
-
+  }
 
 
 
@@ -29,7 +29,7 @@ namespace Hypergraph {
 
   template <class Arc>
 
-
+    PruneUnreachable<Arc> p(popt);
 
 
   }

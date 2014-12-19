@@ -21,7 +21,7 @@
 
 
 
-
+#include <boost/ptr_container/ptr_vector.hpp>
 
 
 
@@ -159,7 +159,7 @@ namespace po = boost::program_options;
 
 
 
-
+      std::cout << "Run inside algorithm on hypergraph and output inside weight for each "
 
 
       std::cout << generic << "\n";

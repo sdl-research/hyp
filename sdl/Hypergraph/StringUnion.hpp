@@ -242,7 +242,7 @@
   }
 
 
-
+    hg.addArcFsm(s, loopEndState, hg.addState(label), s == start ? times(wt, perTokenWeight) : wt);
 
 
 
@@ -313,10 +313,10 @@
 
 
 
-
+      hg.addArcFsm(start, trieStart, begin.labelState, Weight::one());
 
     LastTrie triep;
-
+    if (endOfTokenSequenceWeight != Weight::one()) {
 
 
 
@@ -359,6 +359,7 @@
 
 
 
+        StateId asciiCharSt = hg.addState(lexicalSymbol(s, *voc));
 
 
 
@@ -371,8 +372,7 @@
 
 
 
-
-
+        StateId spaceState = hg.addState(deleteSpace);
 
 
 
@@ -413,7 +413,7 @@
 
 
 
-
+    hg.clear(kFsm | kCanonicalLex | kStoreFirstTailOutArcs);
 
 
 

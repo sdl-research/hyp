@@ -569,7 +569,7 @@ template <class Arc>
 void determinize(IHypergraph<Arc> const& i,  // input
                  IMutableHypergraph<Arc>* o,  // output
 
-
+                 Properties prop_off = 0  // kStoreInArcs
 
 
 
@@ -584,11 +584,11 @@ void determinize(IHypergraph<Arc> const& i,  // input
   determinize_always(i, o, flags);
 }
 
-
+struct Determinize : TransformBase<Transform::Inout, (kFsm | kStoreOutArcs)> {
   DeterminizeFlags flags;
   Properties prop_on, prop_off;
 
-
+              Properties prop_off = 0  // kStoreInArcs
 
 
   Properties outAddProps() const { return prop_on; }

@@ -7,7 +7,7 @@
 
 namespace Hypergraph {
 
-
+#define USAGE "Print EMPTY if input hypergraph is empty (can't reach final state from start and lexical leaves); otherwise print NONEMPTY"
 #define VERSION "v1"
 
 

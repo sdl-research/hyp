@@ -37,18 +37,13 @@
 
 }
 
-
-
-
-}
-
+unsigned IVocabulary::getNumSymbols(SymbolType symType) const {
 
 
 }
 
-
-
-
+std::size_t IVocabulary::getSize() const {
+  return doGetSize() + specialSymbols().getSize();
 }
 
 
@@ -59,6 +54,23 @@
 
 
 
+}
+
+void IVocabulary::print(std::ostream& out) const {
+  out << "{" << category() << " ";
+
+
+
+
+
+
+
+
+  out << " #frozen=" << (size() - unk - ro);
+  out << "}";
+}
+
+bool IVocabulary::evictThread(Occupancy const&) {
 
 
 
@@ -68,19 +80,7 @@
 
 
 
+  else
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  return changed;
+}

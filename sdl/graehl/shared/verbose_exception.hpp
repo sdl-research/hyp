@@ -46,48 +46,48 @@ struct verbose_exception : public std::exception
   }
 
   template <class M1>
-
-
+  verbose_exception(const char *fun, const char *fil, unsigned lin, const M1 &m1)
+      : file(fil), function(fun), line(lin) {
     std::stringstream mbuf;
     mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ".";
     message=mbuf.str();
   }
 
   template <class M1, class M2>
-
-
+  verbose_exception(const char *fun, const char *fil, unsigned lin, const M1 &m1, const M2 &m2)
+      : file(fil), function(fun), line(lin) {
     std::stringstream mbuf;
     mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ".";
     message=mbuf.str();
   }
 
   template <class M1, class M2, class M3>
-
-
+  verbose_exception(const char *fun, const char *fil, unsigned lin, const M1 &m1, const M2 &m2, const M3 &m3)
+      : file(fil), function(fun), line(lin) {
     std::stringstream mbuf;
     mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ' ' << m3 << ".";
     message=mbuf.str();
   }
 
   template <class M1, class M2, class M3, class M4>
-
-
+  verbose_exception(const char *fun, const char *fil, unsigned lin, const M1 &m1, const M2 &m2, const M3 &m3, const M4 &m4)
+      : file(fil), function(fun), line(lin) {
     std::stringstream mbuf;
     mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ' ' << m3 << ' ' << m4 << ".";
     message=mbuf.str();
   }
 
   template <class M1, class M2, class M3, class M4, class M5>
-
-
+  verbose_exception(const char *fun, const char *fil, unsigned lin, const M1 &m1, const M2 &m2, const M3 &m3, const M4 &m4, const M5 &m5)
+      : file(fil), function(fun), line(lin) {
     std::stringstream mbuf;
     mbuf << function << "() [" << file << ":" << line << "]: " << m1 << ' ' << m2 << ' ' << m3 << ' ' << m4 << ' ' << m5 << ".";
     message=mbuf.str();
   }
 
+  ~verbose_exception() throw() {}
 
-
-
+  inline const char* what() const throw() {
     return message.c_str();
   }
 };

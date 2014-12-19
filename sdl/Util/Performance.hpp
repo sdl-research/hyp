@@ -118,10 +118,10 @@ CpuTimes cpuTimesNow();
 
 
 
+  double deltaMb() const {
 
 
-
-
+  double peakMb() const {
 
 
 
@@ -142,11 +142,38 @@ CpuTimes cpuTimesNow();
 
 
 */
+struct Performance : boost::noncopyable
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+  ~Performance() { finalReport(); }
+
+
+
+
+  Elapsed now() const {
+
+
+
+  Elapsed elapsed() const {
 
 
 
@@ -174,41 +201,14 @@ CpuTimes cpuTimesNow();
 
 
 
+  static inline StringConsumer logger(std::string const& name,
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  void init(StringConsumer const& s);
 
 
 

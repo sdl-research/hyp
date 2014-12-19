@@ -90,7 +90,9 @@ namespace Hypergraph {
 
 
 
+  /// may return kNoState (partial mapping)
 
+  /// may return kNoState; call only for lexical labelpairs (the ones that kCanonicalLex affects)
 
 
 
@@ -140,6 +142,7 @@ namespace Hypergraph {
 
 
 
+    return outHg->addState(io);
 
 
 
@@ -160,6 +163,7 @@ namespace Hypergraph {
 
 
 
+    return outHg->addState(io);
 
 
 
@@ -177,6 +181,7 @@ namespace Hypergraph {
 
 
 
+    return Util::contains(subset, s) ? this->outHg->addState(io) : kNoState;
 
 
 
@@ -254,6 +259,7 @@ namespace Hypergraph {
 
 
 
+    //    if (s==kNoState) return s; // handled above already
 
 
 
@@ -263,13 +269,7 @@ namespace Hypergraph {
 
 
 
-
-
-
-
-
-
-
+    if (s == kNoState) return s;
 
     StateId* r;
 
@@ -277,20 +277,20 @@ namespace Hypergraph {
   }
 
 
+    if (s == kNoState) return s;
 
 
 
 
 
+  StateId addState(StateId s, LabelPair const& io) {
+    StateId r = addStateImpl(s, io);
 
 
 
 
 
-
-
-
-
+  StateId addStateImpl(StateId s, LabelPair const& io) {
 
     StateId* r;
 

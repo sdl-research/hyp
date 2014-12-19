@@ -177,12 +177,12 @@ class HypergraphTextWriter_Topdown : public HypergraphTextWriter<A> {
 template <class A>
 
   bool e = fullEmptyCheck ? empty(hypergraph) : hypergraph.prunedEmpty();
+  if (!e) {
 
 
-
-
+    if (hypergraph.storesInArcs())
       w.reset(new HypergraphTextWriter_Topdown<A>(pVoc));
-
+    else if (hypergraph.storesOutArcs())
       w.reset(new HypergraphTextWriter_Bottomup<A>(pVoc));
     else
 

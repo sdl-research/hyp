@@ -19,7 +19,7 @@
 
 
 
-
+#if HAVE_OPENFST
 
 
 
@@ -44,7 +44,7 @@ namespace Hypergraph {
 template<class FstArc, class HgArc>
 fst::ReplaceFst<FstArc>*
 toReplaceFst(IHypergraph<HgArc> const& hg, fst::SymbolTable* fsyms) {
-
+  if (!hg.storesInArcs()) {
 
                   "Needs incoming arcs");
   }
@@ -129,6 +129,6 @@ toReplaceFst(IHypergraph<HgArc> const& hg) {
 
 
 
-
+#endif // if HAVE_OPENFST
 
 #endif

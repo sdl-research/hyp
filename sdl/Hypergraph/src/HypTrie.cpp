@@ -6,7 +6,7 @@
 
 
 #define EXENAME HgTrie
-
+#define USAGE "Build character trie"
 #define VERSION "v1"
 
 #define HG_MAIN
@@ -21,6 +21,7 @@ struct EXENAME : HypergraphMainBase {
 
   EXENAME() : Base(TRANSFORM_NAME(EXENAME), USAGE, VERSION)
   {
+    // usage += stringUnionFromWordList.usageSuffix();
 
 
 
@@ -33,8 +34,7 @@ struct EXENAME : HypergraphMainBase {
 
 
 
-
-
+    // wordlist.normalize.addk_num=0;
   }
 
 
@@ -45,7 +45,7 @@ struct EXENAME : HypergraphMainBase {
 
 
   void run() {
-
+    HG hg(kFsm|kStoreFirstTailOutArcs|kCanonicalLex);
 
 
   }

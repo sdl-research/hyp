@@ -12,13 +12,13 @@ namespace Hypergraph {
 struct TRANSFORM : TransformMain<TRANSFORM> { // CRTP
   typedef TransformMain<TRANSFORM> Base;
 
-
+  {
 
 
 
   }
 
-
+  Reweight rw;
 
 
   template <class Arc>

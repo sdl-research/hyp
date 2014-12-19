@@ -85,7 +85,7 @@
 
 
 
-
+#include <boost/pointer_cast.hpp>
 
 
 
@@ -393,7 +393,7 @@ template <class A>
     return true;
   }
 
-
+  /// input hypergraph [checkInputsHelp] for stransform [name].
 
 
 
@@ -462,7 +462,7 @@ template <class A>
 
 
 
-
+  shared_ptr<ApplyFinalOutput> applyFinalOutput;
 
 
 

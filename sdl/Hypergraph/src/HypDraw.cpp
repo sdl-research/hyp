@@ -21,7 +21,7 @@
 
 
 namespace Hypergraph {
-
+#define USAGE "Print graphviz (dot) equivalent of hypergraph."
 #define VERSION "v1"
 
 
@@ -30,7 +30,7 @@ namespace Hypergraph {
 
   }
 
-
+    return kStoreInArcs;
   }
   enum { has_transform1 = false, has_transform2 = false, has_inplace_input_transform = true };
   template <class Arc>

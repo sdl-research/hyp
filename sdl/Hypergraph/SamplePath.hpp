@@ -19,7 +19,7 @@
 
 
 
-
+#include <boost/ptr_container/ptr_vector.hpp>
 
 
 namespace Hypergraph {
@@ -80,7 +80,7 @@ class ProbabilityArcSampler: public Sampler<Arc> {
 
     }
 
-
+    Weight totalWeight = Weight::zero();
     std::vector< Weight> weights;
     std::vector< Arc* > arcs;
 
@@ -91,7 +91,7 @@ class ProbabilityArcSampler: public Sampler<Arc> {
 
         }
       }
-
+      totalWeight = Hypergraph::plus(totalWeight, w);
       arcs.push_back(arc);
       weights.push_back(w);
     }
@@ -100,7 +100,7 @@ class ProbabilityArcSampler: public Sampler<Arc> {
     int i = 0;
     Weight weightSum = weights[0];
     while (exp(- weightSum.getValue() ) < random) {
-
+      weightSum = Hypergraph::plus(weightSum, weights[++i]);
     }
     return arcs[i];
   }

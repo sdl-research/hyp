@@ -15,8 +15,8 @@
 
 
 
-
-
+#include <cassert>
+#include <vector>
 
 
 
@@ -155,7 +155,7 @@ namespace Hypergraph {
 
 
 
-
+      if (i.isTerminal())
 
 
 
@@ -404,6 +404,7 @@ namespace Hypergraph {
 
 
 
+  typedef typename ArcsContainer::iterator ArcsIter;
 
 
 
@@ -414,6 +415,8 @@ namespace Hypergraph {
 
 
 
+        ArcsIter o = ias.begin();
+        ArcsIter i = o, e = ias.end();
 
 
 
@@ -435,6 +438,7 @@ namespace Hypergraph {
 
 
 
+            addArcFirstTailOut(a);
 
 
 
@@ -598,6 +602,7 @@ namespace Hypergraph {
 
 
 
+    setNumStates((m == kNoState) ? 0 : m + 1);
 
 
 
@@ -624,12 +629,7 @@ namespace Hypergraph {
 
 
 
-
-
-
-
-
-
+        forceFirstTailOutArcs();
 
 
 
@@ -704,8 +704,8 @@ namespace Hypergraph {
 
 
 
-
-
+    copyHypergraph(*this, pHg);
+    return pHg;
   }
 
 
@@ -872,8 +872,8 @@ namespace Hypergraph {
 
 
 
-
-
+    if (!(properties_ & kCanonicalLex) || !input.isTerminal())
+      return addStateImpl(input);
 
 
 
@@ -884,25 +884,25 @@ namespace Hypergraph {
 
 
 
+    setNewStateLabels(state, input, output, properties_);
 
 
 
+  StateId addState(LabelPair const& io) {
+    return addState(input(io), output(io));
+  }
 
 
+  /// available.  Call only for axioms (terminal labels).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    assert(output == NoSymbol || input == output || input.isTerminal() && output.isTerminal());
+    if (!(properties_ & kCanonicalLex)) return addStateNoCanonical(input, output);
+    StateId* s;
+    if (Util::update(lstate, LabelPair(input, output), s))
+      return (*s = addStateNoCanonical(input, output));
+    else
+      return *s;
+  }
 
 
 
@@ -955,6 +955,7 @@ namespace Hypergraph {
 
 
 
+      StateId s = (m == kNoState) ? 0 : m + 1;
 
 
 
@@ -984,8 +985,7 @@ namespace Hypergraph {
 
 
 
-
-
+    return kNoState;
 
 
 
@@ -1030,7 +1030,7 @@ namespace Hypergraph {
 
 
 
-
+    this->clearProperties(kStoreOutArcs);
 
 
 
@@ -1083,7 +1083,7 @@ namespace Hypergraph {
 
 
 
-
+    AddFirstTailOut(Self& hg) : hg(hg) {}
 
 
 
@@ -1267,9 +1267,9 @@ namespace Hypergraph {
 
 
 
+    assert(storesInArcs());
 
-
-
+  }
 
 
 
@@ -1281,7 +1281,7 @@ namespace Hypergraph {
 
   // The in and out arcs are not in a separate State class because
   // then every state would have such vectors of in and out
-
+  // arcs. Sometimes we do not store in arcs, for example, at all, and
   // will have just one empty vector now.
 
 

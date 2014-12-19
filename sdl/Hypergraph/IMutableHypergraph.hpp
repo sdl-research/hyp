@@ -7,6 +7,7 @@
 
 
 
+#include <algorithm>
 
 
 
@@ -15,6 +16,7 @@
 
 
 
+namespace Hypergraph {
 
 
 
@@ -76,6 +78,7 @@
 
 
 
+  virtual StateId nextStateId() const = 0;
 
 
 
@@ -99,6 +102,7 @@
 
 
 
+  // same as input.
 
 
 
@@ -107,11 +111,7 @@
 
 
 
-
-
-
-
-
+     Add existing labels to new vocab, and setVocabulary(vocab).
 
 
 
@@ -174,8 +174,11 @@
 
 
 
+/**
 
 
+*/
+template <class A>
 
 
 
@@ -191,6 +194,7 @@
 
 
 
+ protected:
 
 
 
@@ -219,9 +223,13 @@
 
 
 
+ public:
 
 
+  typedef IMutableHypergraph<A> Self;
 
+  typedef A Arc;
+  typedef typename A::Weight Weight;
 
 
 
@@ -274,6 +282,10 @@
 
 
 
+  // for each Arc *arc, if keep(arc), then remap arc through x and
+  // place it in the in/out arcs index. similar to HypergraphCopy.hpp
+  // but in-place. note: if x.frozen, then keep is implicitly
+  // heads+tails-in-x(arc) AND keep(arc)
 
 
 
@@ -288,6 +300,7 @@
 
 
 
+    this->addProperties(kOutArcsSortedBestFirst);
 
 
 
@@ -322,6 +335,8 @@
 
 
 
+  template <class Arc, class SortPolicy>
+  friend void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp);
 
 
 
@@ -372,6 +387,7 @@
 
 
 
+  void clear(Properties prop) {
 
 
 
@@ -385,23 +401,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  void setEmptyIfNoArcs(bool addstart = true, bool addfinal = false) {
 
   }
 
@@ -413,7 +413,9 @@
 
 
 
+    addProperties(kFsm);
 
+  }
 
 
 
@@ -429,11 +431,13 @@
 
 
 
+    Arc* a = new Arc(from, addState(label), w, to);
 
 
 
 
 
+    Arc* a = new Arc(from, addState(EPSILON::ID), w, to);
 
 
 
@@ -445,28 +449,35 @@
 
 
 
+    Arc* a = new Arc(from, addState(LabelPair(label, labelout)), w, to);
 
 
 
 
 
+    Arc* a = new Arc(from, addState(inout), w, to);
 
 
+  }
 
 
 
 
 
 
+  // function overwrite with covariant return type:
 
 
 
 
 
+  virtual void addArc(Arc*) = 0;
 
 
 
+  void forceStoreArcs(bool outPreferred = true) {
 
+  }
 
 
 
@@ -503,7 +514,11 @@
 
 
 
+    if (this->prunedEmpty()) {  // empty, who cares - any props are fine
+      this->setEmpty();
 
+      return;
+    }
 
 
 
@@ -525,6 +540,7 @@
 
 
 
+        sortArcs(this);
 
 
 
@@ -542,6 +558,7 @@
 
 
 
+    }
 
 
 
@@ -558,7 +575,9 @@
 
 
 
+    }
 
+  }
 
 
 
@@ -566,6 +585,7 @@
 
 
 
+  virtual void removeOutArcs() = 0;
 
 
 
@@ -588,113 +608,9 @@
 
 
 
+  void projectInput() {
+    removeOutputLabels();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  void setPropertiesAt(Properties bits, bool on) {
-    if (on)
-      addProperties(bits);
-    else
-      clearProperties(bits);
   }
 
 
@@ -741,6 +657,87 @@
 
 
 
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+  void setPropertiesAt(Properties bits, bool on) {
+    if (on)
+      addProperties(bits);
+    else
+      clearProperties(bits);
+  }
+
+
+
+    clear();
+
+
+
+
+  }
+
+
+
+
+    clear();
+
+    StateId f = this->addState();
+
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    template <class H, class SI>
+
+
+
+
+
+};
 
 
 
@@ -785,3 +782,6 @@
 
 
 
+
+
+#endif

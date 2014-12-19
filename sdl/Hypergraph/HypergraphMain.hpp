@@ -116,12 +116,12 @@ namespace Hypergraph {
 
 
 
+    if (initlogger) {
 
 
 
 
-
-
+    }
   }
 
   virtual void validate_parameters_extra() {
@@ -129,7 +129,7 @@ namespace Hypergraph {
     validate_parameters_more();
   }
 
-
+  virtual void validate_parameters_more() {}
 };
 
 

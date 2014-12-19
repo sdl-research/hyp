@@ -51,34 +51,34 @@ struct State {
 
 
 
+  bool hasId() const {
+    return id != kNoState && id != kStart && id != kFinal;
+  }
+
+  void increaseMaxId(StateId &maxId) const {
+    if (!hasId())
 
 
 
 
 
 
+  void print(Out &out) const {
+
+
+    out << id<<'('<<inQuote << inputSymbol << inQuote
 
 
 
 
+  friend std::basic_ostream<C, T>& operator<<(std::basic_ostream<C, T> &out, State const& self) {
+    self.print(out); return out;
+  }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  friend std::basic_ostream<C, T>& operator<<(std::basic_ostream<C, T> &out, State const* selfp) {
+    out << "State@0x" << (void*)selfp << ": "; if (selfp) selfp->print(out); return out;
+  }
 };
 
 struct Arc {

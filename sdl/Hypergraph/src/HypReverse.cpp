@@ -1,6 +1,6 @@
 #define TRANSFORM HgReverse
 //TODO: name FsX for Fs only xforms? but we can reverse input/output labels on general Hg too.
-
+#define USAGE "Reverse strings in language (todo: support cfg)"
 #define VERSION "v1"
 
 #define HG_TRANSFORM_MAIN

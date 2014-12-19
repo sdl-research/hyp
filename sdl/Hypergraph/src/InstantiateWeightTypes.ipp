@@ -26,9 +26,9 @@ namespace Hypergraph {
 
 
 
+typedef FeatureWeightTpl<double, std::map<FeatureId, double> > DFeatureWeight;
 
-
-
+#endif
 
 
 #undef INSTANTIATE_WEIGHT_TYPES

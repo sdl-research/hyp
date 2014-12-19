@@ -17,13 +17,13 @@
 
 namespace Util {
 
-
-
-
-
-
-
-
+// TODO: Could make it a Matrix class member.
+template <class T>
+class MatrixVisitor {
+ public:
+  virtual ~MatrixVisitor() {}
+  virtual void visit(T&) = 0;
+};
 
 template <class T>
 
@@ -32,7 +32,7 @@ template <class T>
 
 
 
-
+  typedef T value_type;
 
 
 
@@ -88,10 +88,10 @@ template <class T>
     container_.resize(n * m, default_value);
   }
 
+  void accept(MatrixVisitor<T>& visitor) {
 
 
-
-
+  }
 
 
 

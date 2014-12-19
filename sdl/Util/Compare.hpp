@@ -11,7 +11,7 @@
 
 
 
-
+namespace Util {
 
 // >0 <-> a>b
 // ==0 <-> a==b
@@ -45,11 +45,11 @@ struct Cmp3FromLess : public Less {
   Cmp3FromLess(Less const& l=Less()) : Less(l) {}
   Cmp3FromLess(Cmp3FromLess const& o) : Less(o) {}
   template <class V>
-
-
-
-
-
+  int operator()(V const& a, V const& b) const {
+    return Less::operator()(a, b)
+        ? -1
+        : Less::operator()(b, a);
+  }
 };
 
 struct LessFromCmp3 {
@@ -109,7 +109,7 @@ struct Compare2ndReverse {
 /**
 
  */
-
+//TODO@MD: Template the operators, not the class
 template<class T>
 struct LessByValue {
 
@@ -137,29 +137,29 @@ struct EqualByValue {
   }
 };
 
+/**
 
 
-
-
-
-
-
-
-
+ */
+struct PairLessByValue {
+  template<class P>
+  bool operator()(P const& x, P const& y) {
+    return *x.first < *y.first
+                      || (!(*y.first < *x.first) && *x.second < *y.second);
   }
+};
 
+/**
 
-
-
-
-
-
-
-
-
-
-
-
+ */
+template<typename T>
+struct ReplaceIfLess {
+  void operator()(T const& a, T& b) const {
+    if (a < b) {
+      b = a;
+    }
+  }
+};
 
 
 

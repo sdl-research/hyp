@@ -29,10 +29,10 @@
 
 
 
-
-
-
-
+macro(xmt_set NAME VAL HELP)
+  message(STATUS "${NAME}=${VAL}")
+  set(${NAME} ${VAL} CACHE STRING ${HELP})
+endmacro()
 
 
 
@@ -315,7 +315,7 @@ function(xmt_maven_project_with_profile TARGET_NAME BINARY_DIR PROFILE_NAME)
 
   add_custom_target(${TARGET_NAME} ALL COMMAND ${MAVEN_EXECUTABLE} -P${PROFILE_NAME} -Dmaven.project.build.directory=${work_dir} -fae -B -q -f pom.xml -Dmaven.test.skip=true clean compile package
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
+endfunction(xmt_maven_project_with_profile)
 
 
 

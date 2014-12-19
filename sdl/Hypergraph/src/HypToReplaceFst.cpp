@@ -73,7 +73,7 @@ int main(int ac, char** av) {
       return EXIT_FAILURE;
     }
 
-
+#if HAVE_OPENFST
     bool userProvidedSymbolTable = false;
     fst::SymbolTable* syms;
     if (vm.count("symbols")) {

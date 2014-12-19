@@ -26,11 +26,11 @@ struct DeterminizeOptions {
   DeterminizeFlags getFlags() const {
     DeterminizeFlags f = default_flags;
 
-
-
-
-
-
+    HYP__DETOPTSETMASK(EPSILON_NORMAL);
+    HYP__DETOPTSETMASK(RHO_NORMAL);
+    HYP__DETOPTSETMASK(PHI_NORMAL);
+    HYP__DETOPTSETMASK(SIGMA_NORMAL);
+#undef HYP__DETOPTSETMASK
     return f;
   }
 
@@ -38,11 +38,11 @@ struct DeterminizeOptions {
 
 
 
-
-
-
-
-
+    HYP__DETOPT('E', epsilon, EPSILON);
+    HYP__DETOPT('R', rho, RHO);
+    HYP__DETOPT('P', phi, PHI);
+    HYP__DETOPT('S', sigma, SIGMA);
+#undef HYP__DETOPT
 
 };
 

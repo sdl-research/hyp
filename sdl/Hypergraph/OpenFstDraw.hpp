@@ -12,7 +12,7 @@
 
 
 
-
+#if HAVE_OPENFST
 
 #include <fst/script/draw.h>
 #include <fst/script/print.h>
@@ -76,20 +76,20 @@ namespace Hypergraph {
   }
 
   graehl::ostream_arg oarg;
+  template <class Config>
+  void configure(Config& config) {
+#if HAVE_OPENFST
+    config.is("OpenFst Draw/Print");
+#define FOR_DRAW_OPTIONS_ADD_OPTION(n) config(#n, &n)("openfst draw " #n);
+
+
+    config("replaceFst", &replaceFst)("use ToReplaceFst for fsm");
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+    config("stateNames", &stateNames)("name states for non-replaceFst openfst translation");
+    config("pruneBeam", &pruneBeam)("unless nan, openfst prune with this beam before print/draw");
 
     ;
 #endif
@@ -107,7 +107,7 @@ namespace Hypergraph {
 
   }
 
-
+#if HAVE_OPENFST
 
 
 

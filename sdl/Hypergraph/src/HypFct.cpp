@@ -1,6 +1,6 @@
 #define TRANSFORM HgFct
 
-
+#define USAGE "Debugging binary, for internal use."
 #define VERSION "v1"
 
 #define HG_TRANSFORM_MAIN
@@ -20,12 +20,12 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
   TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION) {}
 
 
-
+    return kDefaultProperties | kStoreInArcs | kStoreOutArcs;
   }
 
-
-
-
+  bool printFinal() const {
+    return false;
+  }
 
   enum { has_inplace_transform1 = true };
 

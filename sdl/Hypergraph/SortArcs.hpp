@@ -19,21 +19,21 @@
 
 namespace Hypergraph {
 
+struct CmpByWeight {
+
+
+
+  }
+};
+
+struct EqualByWeight {
+  template <class X>
+  bool operator()(X const* a, X const* b) const {
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+template<class Arc>
 struct CmpFsmArcInput {
   const IHypergraph<Arc>& fst;
   CmpFsmArcInput(const IHypergraph<Arc>& fst)
@@ -42,11 +42,12 @@ struct CmpFsmArcInput {
 
 
 
-
+  bool operator()(Arc const* a, Arc const* b) const {
 
 
 
   }
+};
 
 
 
@@ -55,20 +56,19 @@ struct CmpFsmArcInput {
 
 
 
+      : fst(fst) {}
+
+
+
+
+  bool operator()(Arc const* a, Arc const* b) const {
 
 
 
 
 
 
-
-
-
-
-
-
-
-
+template<class Arc>
 struct CmpFsmArcHead {
   bool operator()(Arc const* a, Arc const* b) const{
 
@@ -81,9 +81,9 @@ template<class Arc>
 template<class Arc, class SortPolicy>
 void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp){
 
+  if (hg->hasSortedArcs()) return;
 
-
-
+    typedef typename IMutableHypergraph<Arc>::ArcsContainer ArcsContainer;
 
 
 
@@ -93,7 +93,7 @@ void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp){
 template<class Arc>
 
 
-
+    pHg->forceProperties(kStoreFirstTailOutArcs);
 
 
 

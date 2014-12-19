@@ -163,13 +163,13 @@ class RegistryWithIds : public Registry<T> {
 
 };
 
+struct EarleyParserOptions {
+
+  bool enablePhiRhoMatch;
+  bool sigmaPreventsPhiRhoMatch;
 
 
-
-
-
-
-
+};
 
 // Does matching an eps (or sigma) arc prevent matching a phi or rho
 // arc? (phi and rho mean "match otherwise") This should usually not
@@ -191,20 +191,20 @@ class EarleyParser {
 
 
 
+  typedef std::set<Item*> ItemsSet;
+
+
+
+               EarleyParserOptions opts = EarleyParserOptions())
+
+
+  }
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+  struct Item {
 
 
 
@@ -247,7 +247,7 @@ class EarleyParser {
     // transition? in that case, we can say we have
     // something lexical right before the dot (we
     // traversed an FST arc)
-
+  };  // end Item
 
   struct ItemPriorityFct {
     bool operator()(Item* a, Item* b) const {
@@ -268,11 +268,11 @@ class EarleyParser {
   typedef std::pair<Item*, Item*> BackPointer;
 
 
+    out << "[";
+    if (Util::isDebugBuild()) {
 
-
-
-
-
+      out << ", ";
+    }
 
 
     writeArc(out, *item->arc, hg);
@@ -281,28 +281,28 @@ class EarleyParser {
     return out;
   }
 
+  template <class T>
+  struct DbgItem {
+    DbgItem(Item* i, EarleyParser<T>& ep) : i(i), ep(ep) {}
 
-
-
-
-
+    friend std::ostream& operator<<(std::ostream& out, DbgItem const& di) {
       // by convention:
-
+      const bool isFstEpsItem = (di.i->from == kNoState);
 
     }
 
+    Item* i;
+    EarleyParser<T>& ep;
+  };
 
-
-
-
-
+  typedef DbgItem<Arc> dbgItem;
 
 
 
 
   void pushAgendaItem(Item* item, Weight agendaWeight) {
-
-
+    Hypergraph::removeFeatures(agendaWeight);
+    if (item->agendaWeight == Weight::zero()) {
       item->agendaWeight = agendaWeight;
 
 
@@ -415,8 +415,8 @@ class EarleyParser {
       return;
 
 
-
-
+                    "Currently, special symbols <phi>, <rho>, <sigma> can only be used in "
+                    "the 2nd argument to compose.");
     }
     StateId sid = item->to;
 
@@ -449,7 +449,7 @@ class EarleyParser {
     // Search for search label using binary search
 
     // binary search:
-
+    ArcIdIterator arcEnd = boost::end(arcIdsRange);
 
 
     for (; matchingArcIdsIter != arcEnd; ++matchingArcIdsIter, ++numMatches) {
@@ -524,7 +524,7 @@ class EarleyParser {
 
 
 
-
+  StateId createTerminalState(BackPointer bp);
 
   void backtrace(std::string name, Item* item, std::size_t recursion) {
     std::stringstream blanks;
@@ -599,24 +599,24 @@ class EarleyParser {
 
   */
   struct ItemAndMatchedArcs {
+    ItemAndMatchedArcs(Item* i, ArcVecPerDotPosPtr s, StateId h, StateIdContainer const& t)
+        : item(i), stateIds(s), head(h), tails(t) {
 
+      boost::hash_combine(hashCode, h);
 
-
-
-
-
+      boost::hash_range(hashCode, tails.begin(), tails.end());
     }
 
     bool operator==(const ItemAndMatchedArcs& other) const {
-
+      return other.item == item && other.head == head && *other.stateIds == *stateIds && other.tails == tails;
     }
     bool operator<(const ItemAndMatchedArcs& other) const {
       if (item != other.item)
         return item < other.item;
-
-
-
-
+      else if (head != other.head)
+        return head < other.head;
+      else if (*stateIds != *other.stateIds)
+        return *stateIds < *other.stateIds;
 
 
     }
@@ -624,8 +624,8 @@ class EarleyParser {
     Item* item;
     const ArcVecPerDotPosPtr stateIds;
     std::size_t hashCode;
-
-
+    StateId head;
+    StateIdContainer tails;  // TODO: too expensive?
   };
 
   struct ItemAndMatchedArcsHashFct {
@@ -651,7 +651,7 @@ class EarleyParser {
 
 
 
-
+      createResultArcs(item, head, &alreadyExpanded);
     }
 
   }
@@ -685,11 +685,11 @@ class EarleyParser {
 
 
       Weight agendaWeight = item->agendaWeight;
-
+      item->agendaWeight = Weight::zero();
       Weight oldChartWeight = item->chartWeight;
 
       // Enter into chart, unless already there
-
+      if (oldChartWeight == Weight::zero()) {
         const bool isComplete = item->isComplete();
 
 
@@ -708,11 +708,11 @@ class EarleyParser {
     }
   }
 
+ public:
 
 
 
-
-
+ private:
 
 
 
@@ -754,7 +754,7 @@ class EarleyParser {
 
 
 
-
+};  // end class
 
 /// Functions that create the result Hypergraph from the chart:
 
@@ -777,7 +777,7 @@ template <class A>
 
 */
 template <class A>
-
+StateId EarleyParser<A>::createTerminalState(BackPointer bp) {
 
   // CFG has an eps at that position
 
@@ -820,31 +820,31 @@ template <class Arc>
 
 
 
+                                << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
 
 
+  if (foundItem != alreadyExpanded->end()) {
 
-
-
-
+    delete itemAndMatchedArcs;
     return;
   }
 
   Item* item = itemAndMatchedArcs->item;
+  alreadyExpanded->insert(itemAndMatchedArcs);
 
 
 
 
+      if (Util::isDebugBuild()) {
 
 
-
-
-
+      }
       Item* complete = bp.second;
 
       StateId rightmost;
 
       if (isLexical) {
-
+        rightmost = createTerminalState(bp);
 
 
 
@@ -858,14 +858,14 @@ template <class Arc>
 
       }
 
-
-
+      createResultArcs1(irts, head, matchedArcs2, tails2, prod, alreadyExpanded);
+      createResultArcs(bp.second, rightmost, alreadyExpanded);
     }
 
 
+      if (tails.empty())
 
-
-
+      else
 
     }
   }
@@ -875,24 +875,24 @@ template <class Arc>
 
 
   ArcVecPerDotPosPtr matchedArcs(new std::vector<std::vector<Arc*> >());
-
+  ItemAndMatchedArcs* irts = new ItemAndMatchedArcs(item, matchedArcs, head, tails);
 
 }
 
 ///
 
+struct ComposeOptions {
+  explicit ComposeOptions() {}
 
 
 
+    // currently no options here
+
+};
 
 
-
-
-
-
-
-
-
+const Properties kComposeFstRequiredProperties = kFsm | kStoreOutArcs | kSortedOutArcs;
+const Properties kComposeCfgRequiredProperties = kStoreInArcs;
 
 
 
@@ -905,7 +905,7 @@ template <class Arc>
 
 template <class A>
 
-
+                 ComposeOptions opts = ComposeOptions()) {
   ASSERT_VALID_HG(cfg);
 
 
@@ -938,7 +938,7 @@ template <class A>
 
 
 
-
+  EarleyParserOptions earleyOpts;
 
   p.parse();
 
@@ -947,12 +947,12 @@ template <class A>
   ASSERT_VALID_HG(*resultCfg);
 }
 
+// HgMaybeConst: means maybe you can modify if props are wrong, maybe
+// you have to make a copy. both are IHypergraph<A> &
 
 
 
-
-
-
+             OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties) {
   typedef IHypergraph<A> H;
 
 
@@ -970,17 +970,8 @@ template <class A>
 
 
 
-
-
-
-
-
-
-
-
-
-}
-
+    reqFstProp |= kStoreFirstTailOutArcs;
+    reqFstProp &= ~kStoreOutArcs;
 
 
 
@@ -992,6 +983,19 @@ template <class A>
 
 
 
+               OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties) {
+
+
+  }
+
+}
+
+
+
+
+
+  template <class Arc>
+  struct TransformFor {
 
 
 
@@ -1015,13 +1019,9 @@ template <class A>
 
 
 
-
-
-
-
-
-
-
+// TODO: support 3 arc types: input (cfg), match (fst), output(cfg),
+// using a configurable fn object. fs compose supports this already but
+// it's not exposed to module.
 
 
 

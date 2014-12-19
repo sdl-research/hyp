@@ -39,13 +39,13 @@ struct SubUnionOptions {
 
   static inline std::string usage() {
 
-
+           "additional paths that are not contained in standard union.";
   }
-
-
-
-
-
+  template <class Config>
+  void configure(Config& config) {
+    config.is("SubUnionOptions");
+    config("require-path-overlap", &requirePathOverlap)("require path overlap?");
+    config("add-standard-union", &addStandardUnion)("add standard union?");
   }
 };
 
@@ -205,12 +205,12 @@ struct InvalidArcSpansRemover {
 
 
 
+    typename Arc::StateIdContainer const& tails = arc.tails();
 
 
-
-
-
-
+    for (std::size_t i = 0, end = tails.size(); i < end; ++i) {
+      StateIdToSpan::iterator found = m->find(tails[i]);
+      const bool tailIsLexical = hg.hasLexicalLabel(tails[i]);
 
     }
   }
@@ -227,7 +227,7 @@ struct InvalidArcSpansRemover {
 template <class Arc>
 
   InvalidArcSpansRemover<Arc> fct(hg, stateIdToSpan);
-
+  hg.forArcs(fct);
 
 
 

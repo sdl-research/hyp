@@ -3,6 +3,7 @@
 
 
 
+*/
 
 
 
@@ -24,6 +25,7 @@
 
 
 
+namespace Hypergraph {
 
 
 
@@ -46,6 +48,7 @@
 
 
 
+template <class W>
 
 
 
@@ -75,10 +78,12 @@
 
 
 
+}
 
 
 
 
+template <class W>
 
 
 
@@ -114,8 +119,10 @@
 
 
 
+  }
 
 
+template <class W>
 
 
 
@@ -139,6 +146,7 @@
 
 
 
+   }
 
 
 
@@ -170,10 +178,15 @@
 
 
 
+template <class W>
 
 
+}
 
+/**
 
+*/
+template <class W>
 
 
 
@@ -186,10 +199,14 @@
 
 
 
+}
 
+template <class W, class F>
 
 
+}
 
+template <class W>
 
 
 
@@ -199,6 +216,7 @@
 
 
 
+    return W::zero();
 
 
 
@@ -207,29 +225,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return W::one();
+  W r;
+  parseWeightString(str, &r);
+  return r;
+}
 
 
 template <class W>
@@ -284,22 +284,22 @@ bool plusByChanged(BooleanWeight const& a, BooleanWeight &b) {
   return false;
 }
 
+template<class T>
+T neglogToProb(T const& v) {
+  return std::exp(-v);
+}
 
+template<class T>
+T probToNeglog(T const& prob) {
+  return -std::log(prob);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+template<class T>
+struct ProbToNeglog {
+  FloatWeightTpl<T> operator()(T prob) const {
+    return FloatWeightTpl<T>(-std::log(prob));
+  }
+};
 
 template<class T>
 struct Identity {
@@ -308,6 +308,7 @@ struct Identity {
   }
 };
 
+#if HAVE_OPENFST
 
 
 
@@ -331,5 +332,4 @@ struct Identity {
 
 
 
-
-
+#endif

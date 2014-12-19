@@ -41,10 +41,10 @@ bool equal(IHypergraph<A> const& a, IHypergraph<A> const& b) {
 
 
   // will need both indexes for compose-first-position
+  //  HP pa=ensureProperties(a, kStoreInArcs|kStoreOutArcs);
+  //  HP pb=ensureProperties(b, kStoreInArcs|kStoreOutArcs);
 
-
-
-
+  Properties p=kStoreOutArcs; // |kStoreInArcs
 
 #define HG_EQUAL_CHECK_DIFF(a, b, msgv, msgempty) do {                     \
 

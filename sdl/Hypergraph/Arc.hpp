@@ -23,8 +23,8 @@
 
 
 #include <vector>
-
-
+#include <iostream>
+#include <cassert>
 
 
 
@@ -315,6 +315,7 @@ template <class W>
 
 
 
+    // heads equal: continue with weight
 
 
 
@@ -332,8 +333,7 @@ template <class W>
 
 
 
-
-
+  }
 
  private:
 
@@ -360,8 +360,11 @@ std::ostream& operator<<(std::ostream& out, const ArcTpl<W>& arc) {
 
 
 
+template <class Arc>
 
+  assert(hg.isFsmArc(arc));
 
+}
 
 
 
@@ -385,17 +388,34 @@ std::ostream& operator<<(std::ostream& out, const ArcTpl<W>& arc) {
 
 
 
+template <class Arc>
 
+  assert(hg.isFsmArc(arc));
 
+}
 
+template <class Arc>
 
+  assert(pHg->isFsmArc(arc));
+  pHg->setInputLabel(arc.getTail(1), symid);
+}
 
+template <class Arc>
 
+  assert(pHg->isFsmArc(arc));
+  return pHg->setOutputLabel(arc.getTail(1), symid);
+}
 
 
+struct ArcWithDataDeleter {
 
+  virtual ~ArcWithDataDeleter() {}
+};
 
+template <class T>
+struct ArcWithDataDeleterTpl : public ArcWithDataDeleter {
 
+};
 
 
 
@@ -405,6 +425,7 @@ std::ostream& operator<<(std::ostream& out, const ArcTpl<W>& arc) {
 
 
 
+/**
 
 
 
@@ -430,33 +451,12 @@ std::ostream& operator<<(std::ostream& out, const ArcTpl<W>& arc) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+*/
+template <class W>
 class ArcWithDataTpl : public ArcTpl<W> {
 
-
-
+ public:
+  typedef W Weight;
   typedef ArcTpl<W> Base;
   typedef ArcWithDataTpl<W> Arc;
   typedef boost::function<bool(Arc*)> ArcFilter;
@@ -487,10 +487,13 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
   virtual ~ArcWithDataTpl() {
 
+  }
 
 
+  void clear() {
 
 
+  }
 
 
 
@@ -501,15 +504,19 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
 
 
+  }
 
+  template <class T>
 
 
 
+  }
 
 
 
 
 
+  }
 
 
 
@@ -522,39 +529,32 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
 
 
+  }
 
 
 
+ private:
 
 
+};
 
 
+/**
 
 
+*/
+template <class Arc, class StateIdTranslation>
 
+  Arc* pResult = new Arc();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    const StateId mappedTail = tr.stateFor(otherArc.getTail(i));
+    assert(mappedTail != kNoState);
+    pResult->addTail(mappedTail);
+  }
+  return pResult;
+}
 
 
 

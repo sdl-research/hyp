@@ -14,9 +14,9 @@ namespace Hypergraph {
 
 
 
+    this->configurable(&opt);
 
-
-
+  }
 
   // TODO: inefficient to always store in and out arcs
 

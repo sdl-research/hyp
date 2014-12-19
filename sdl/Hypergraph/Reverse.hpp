@@ -70,15 +70,15 @@ template <class Arc>
 
 
   ArcReverser<Arc> fct(result);
-
+  inhg.forArcs(fct);
 }
 
 template <class Arc>
 void reverseFsm(IMutableHypergraph<Arc>& h) {
-
+  IMutableHypergraph<Arc>* i = h.clone();
   h.clear();
-
-
+  reverseFsm(*i, &h);
+  delete i;
 }
 
 
@@ -100,7 +100,7 @@ void reverseCfg(IMutableHypergraph<Arc>& h) {
 
 
   ArcReverserCfgInPlace<Arc> rev(&h);
-
+  h.forArcs(rev);
 }
 
 template <class Arc>
@@ -122,13 +122,13 @@ void reverse(IMutableHypergraph<Arc>& h) {
 }
 
 
+  template <class Config>
+  void configure(Config& c) {
+    c.is("Reverse");
+    c("Reverse each path in a hypergraph");
+  }
 
-
-
-
-
-
-
+  static char const* name() { return "Reverse"; }
 
   template <class A>
   void inplace(IMutableHypergraph<A>& h) const {

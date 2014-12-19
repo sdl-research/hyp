@@ -15,26 +15,43 @@ namespace Hypergraph {
 
 
 
+/**
 
 
+*/
+struct IFeaturesPerInputPosition {
+  virtual ~IFeaturesPerInputPosition() {}
 
+  /**
 
 
 
+  */
 
+};
 
+/**
 
+*/
+struct NoFeatures : public IFeaturesPerInputPosition {
 
 
+  /**
 
+  */
 
 
+  }
 
 
 
+};
 
+/**
 
 
+*/
+struct TakeFeaturesFromVector : public IFeaturesPerInputPosition {
 
 
 
@@ -43,46 +60,29 @@ namespace Hypergraph {
 
 
 
+  }
 
 
 
+};
 
+/**
 
 
+*/
+struct MultipleFeaturesPerInputPosition : public IFeaturesPerInputPosition {
 
 
 
 
 
+  }
 
 
 
+};
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif

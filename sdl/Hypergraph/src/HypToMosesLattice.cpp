@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   Hypergraph::IHypergraphsIteratorTpl<Arc>* pHgIter
 
 
-
+  pHgIter->setHgProperties(Hypergraph::kStoreFirstTailOutArcs);
   while (!pHgIter->done()) {
     Hypergraph::IHypergraph<Arc>* pHg = pHgIter->value();
     pHgIter->next();

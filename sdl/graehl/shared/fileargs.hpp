@@ -294,15 +294,15 @@ public:
 
   std::string name;
 
-
+  char const* desc() const
   {
     return name.c_str();
   }
 
 
-
-
-
+  {
+    return name;
+  }
 
   void close()
   {

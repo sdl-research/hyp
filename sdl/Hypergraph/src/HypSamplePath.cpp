@@ -1,6 +1,6 @@
 #define TRANSFORM HgSamplePath
 
-
+#define USAGE "Generate sample path from hypergraph. Currently, this binary only supports uniform sampling (but C++ library allows more options)."
 #define VERSION "v1"
 
 #define HG_TRANSFORM_MAIN
@@ -16,7 +16,7 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
   TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION) {}
 
 
-
+    return kStoreInArcs; // we'll sample top down
   }
 
   template <class Arc>

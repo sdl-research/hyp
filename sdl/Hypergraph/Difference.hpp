@@ -36,9 +36,9 @@ template <class A>
 
   if (!b.isFsm())
 
-
+  MutableHypergraph<A> c(kStoreOutArcs);
   fs::complement(b, &c);
-
+  sortArcs(&c);
 
   ASSERT_VALID_HG(*r);
 }

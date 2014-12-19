@@ -20,6 +20,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
     FORCE)
+endif()
 
 
 
@@ -29,6 +30,7 @@ if(NOT CMAKE_BUILD_TYPE)
 
 
 
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 
 
@@ -74,16 +76,14 @@ if(NOT CMAKE_BUILD_TYPE)
 
 
 
+option(HAVE_OPENFST "Have OpenFst library" ON)
 
-
-
-
-
-
-
-
-
-
+# Increasing this uses more memory for all lm cost and weight values,
+# so this should be as low as possible. TODO: Test if higher MAX_LMS
+# really is less efficient in practice.
+# You may change the value on the command line, e.g., cmake -DMAX_LMS=6
+set(MAX_LMS "4" CACHE STRING "Maximum number of LMs")
+xmt_compiled_setting(MAX_LMS ${MAX_LMS})
 
 
 
@@ -126,7 +126,7 @@ endif()
 
 
 
-
+option(AllHgBins "Build all hypergraph bins" OFF)
 
 
 
@@ -190,10 +190,10 @@ if(APPLE)
 endif()
 if(WIN32)
   message(STATUS "The target system is WINDOWS.")
+  if(CMAKE_VERSION VERSION_GREATER "2.8.11")
 
 
-
-
+  endif()
 endif()
 
 
@@ -235,8 +235,8 @@ endif()
 
 
 
-
-
+  endif()
+endif()
 include_directories(${CMAKE_SOURCE_DIR})
 
 if(ANDROID)
@@ -260,9 +260,9 @@ set(xmt_STAGE_PREFIX ${CMAKE_BINARY_DIR}/stage) #this is the stage/installation 
 
 include(GetGitRevisionDescription)
 
+# <NOT_OPEN_SOURCE>
 
-
-
+# </NOT_OPEN_SOURCE>
 
 add_definitions(-DHAVE_CXX_STDHEADERS -DBOOST_ALL_NO_LIB -DTIXML_USE_TICPP)
 
@@ -270,7 +270,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
     FORCE)
-
+endif()
 
 if(UNIX AND NOT APPLE AND NOT ANDROID)
   set(LINUX 1)
@@ -310,26 +310,26 @@ endif()
 
 
 
+  # Apache Portable Runtime (used by Log4cxx)
+
+  find_package(Apr)
+
+
+  find_package(AprUtil)
+
+
+# <NOT_OPEN_SOURCE>
+
+
+
+
+if (LIBSTEMMER_FOUND)
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+endif()
 
 
 
@@ -350,7 +350,7 @@ endif()
 
 
 
-
+# </NOT_OPEN_SOURCE>
 
 #
 # Windows specific settings.
@@ -398,12 +398,12 @@ if(WIN32)
 
 
 
+  # <NOT_OPEN_SOURCE>
 
 
 
 
-
-
+  # </NOT_OPEN_SOURCE>
 
   set(VS_MULTITHREADED_DEBUG_DLL_IGNORE_LIBRARY_FLAGS
 
@@ -443,7 +443,7 @@ endif()
 
 
 
-
+  if(GCC_VERSION VERSION_LESS 4.7)
 
 
 
@@ -658,12 +658,12 @@ endif()
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
 
 
+    # <NOT_OPEN_SOURCE>
 
 
 
 
-
-
+    # </NOT_OPEN_SOURCE>
   endif()
 
   if(ANDROID)
@@ -682,7 +682,7 @@ endif()
 
 
 
-
+    # Android uses different yaml and tbb versions:
 
   endif()
 
@@ -691,12 +691,12 @@ endif()
 
 
 
-
-
-
-
+    find_path(FOUND_LOG4CXX_ROOT include/log4cxx/logger.h PATHS ${LOG4CXX_ROOT})
+    if(NOT FOUND_LOG4CXX_ROOT)
+      message(ERROR "Could not find log4cxx installation. Please
+       install it system-wide or specify location with -DLOG4CXX_ROOT")
    endif()
-
+   set(LOG4CXX_ROOT ${FOUND_LOG4CXX_ROOT})
 
    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -727,11 +727,11 @@ endif()
 
    set(Boost_USE_STATIC_LIBS OFF)
 
+   # <NOT_OPEN_SOURCE>
 
 
 
-
-
+   # </NOT_OPEN_SOURCE>
 
 
 
@@ -750,7 +750,7 @@ endif()
 
 
 
-
+endif() # UNIX
 
 MARK_AS_ADVANCED(
   CMAKE_CXX_FLAGS_RELWITHOUTTBBMALLOC
@@ -759,7 +759,7 @@ MARK_AS_ADVANCED(
 if(ANDROID)
   add_definitions(-DNLOG)
   MESSAGE(STATUS "Disabling logging for Android")
-
+endif()
 
 # Suppress warnings/errors for Production builds
 
@@ -817,14 +817,14 @@ MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithoutTbbmalloc")
   unset(TBBMALLOC_LIBRARY CACHE)
 
-
-
+  MESSAGE(STATUS "Disabling TBB malloc: TBB_LIBRARY=${TBB_LIBRARY} TBBMALLOC_LIBRARY=${TBBMALLOC_LIBRARY}")
+endif()
 
 
 
   find_package(Cryptopp)
-
-
+  message(STATUS "Crypto++ library: ${CRYPTOPP_LIBRARY}")
+  message(STATUS "Crypto++ include directory: ${CRYPTOPP_INCLUDE_DIR}")
   if(${CRYPTOPP_FOUND})
 
 
@@ -832,7 +832,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDe
 
 
 
-
+# <NOT_OPEN_SOURCE>
 
 find_package(cmph)
 MESSAGE(STATUS "CMPH Libraries: ${CMPH_LIBRARIES}")
@@ -866,7 +866,7 @@ find_package(Tinyxmlcpp)
 message(STATUS "TinyXML++ library: ${TINYXMLCPP_LIBRARY}")
 message(STATUS "TinyXML++ include directory: ${TINYXMLCPP_INCLUDE_DIR}")
 
-
+set(HAVE_SRILM 1)
 if(${HAVE_SRILM})
   find_package(SRILM)
   MESSAGE(STATUS "SRILM Libraries: ${SRILM_LIBRARIES}")
@@ -908,7 +908,7 @@ endif()
 add_definitions(-DHAVE_KENLM)
 set(HAVE_KENLM 1)
 
-
+# NPLM
 if(${LINUX})
 
 
@@ -947,9 +947,9 @@ if(CMPH_FOUND)
 
 endif()
 
+# </NOT_OPEN_SOURCE>
 
-
-
+# Boost
 set(Boost_USE_STATIC_RUNTIME OFF)
 SET(boost_libs
 
@@ -965,17 +965,17 @@ SET(boost_libs
 
 
 
-
+if(NOT ANDROID)
   list(APPEND boost_libs
     unit_test_framework
     locale)
+endif()
+
+if(WIN32)
 
 
 
-
-
-
-
+set(boost_libs_shared ${boost_libs})
 
 # Proceed to generate the normal all-inclusive Boost libraries
 
@@ -1024,15 +1024,15 @@ find_package(Boost ${Boost_find_version} REQUIRED COMPONENTS ${boost_libs})
 
 
 
+if(NOT Boost_FOUND)
+  message(FATAL_ERROR "Boost libraries not found")
+endif()
 
 
 
-
-
-
-
-
-
+find_package(YamlCpp)
+message(STATUS "yaml-cpp library: ${YAML_CPP_LIBRARY}")
+message(STATUS "yaml-cpp include directory: ${YAML_CPP_INCLUDE_DIR}")
 
 find_package(ZLIB)
 MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
@@ -1044,7 +1044,7 @@ if(NOT ANDROID)
   MESSAGE(STATUS "log4cxx Include Directories: ${LOG4CXX_INCLUDE_DIR}")
 endif()
 
-
+# <NOT_OPEN_SOURCE>
 
 find_package(BerkeleyDB)
 MESSAGE(STATUS "Berkeley DB Libraries: ${DB_LIBRARIES}")
@@ -1105,13 +1105,13 @@ if(NOT MAVEN_EXECUTABLE)
   MESSAGE(FATAL_ERROR "Maven was not found.")
 endif(NOT MAVEN_EXECUTABLE)
 
+find_package(Lexertl)
 
-
-
-
-
-
-
+if(AllHgBins)
+  message(STATUS "Will build all hypergraph bins.")
+else()
+  message(STATUS "Will only build essential hypergraph bins.")
+endif()
 
 
 
@@ -1119,39 +1119,39 @@ endif(NOT MAVEN_EXECUTABLE)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
 
+# </NOT_OPEN_SOURCE>
 
+# L-BFGS
+# Would use float (i.e., value 32) instead of double but gets aborts
+# due to rounding errors:
+set(LBFGS_FLOAT "64" CACHE STRING "Float type for L-BFGS")
+xmt_compiled_setting(LBFGS_FLOAT ${LBFGS_FLOAT})
+if(NOT DEFINED LBFGS_ROOT)
+  if(${LBFGS_FLOAT} MATCHES 32)
 
+  else()
 
-
-
-
-
-
-
-
-
-
-
-
-
+  endif()
+endif()
+find_package(Lbfgs)
 MESSAGE(STATUS "libLBFGS Libraries: ${LBFGS_LIB}")
 MESSAGE(STATUS "libLBFGS Include Directories: ${LBFGS_INCLUDE_DIR}")
 
+if(WIN32)
+  # Windows linker problem: OpenFst constant kNoSymbol is defined in
+  # multiple Hypergraph objects
+  set(HAVE_OPENFST 0)
+endif()
 
+if(HAVE_OPENFST)
 
+  find_package(OpenFst)
 
+    message(STATUS "OpenFst include directory: ${OPENFST_INCLUDE_DIR}")
 
-
-
-
-
-
-
-
-
-
-
-
+  else()
+    set(HAVE_OPENFST 0)
+  endif()
 
 
 find_package(UTF8)
@@ -1173,68 +1173,68 @@ endif()
 
 
 
+  Vocabulary
+  Hypergraph
+  Optimization
+  Config
+  CrfDemo
+  HypDemo
+  # <NOT_OPEN_SOURCE>
 
+  AutoRule
+  BloomFilter
 
+  CompoundSplitter
+  Constraints
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+  DecoderOutput
+  DecodersShared
   DependencyParser
-
-
-
-
-
-
-
-
+  Encrypt
+  FeatureBot
+  Grammar
+  HypergraphExt
+  Kraken
+  LanguageModel
+  LmCapitalize
+  Lowercase
   MaltServer
-
-
-
+  MapReduceDatabaseSplit
+  MapReduceFeatureBot
+  MinBayesRisk
   MorphAnalyzer
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  OCRC
+  PhraseBased
+  ProcessYAML
+  RegexTokenizer
+  RemoteGrammar
+  Resources
+  RuleDumper
+  RuleFeatures
+  RuleParser
+  RuleSerializer
+  RuleStats
+  SearchReplace
+  Serializer
+  SimpleTransliterator
   SpellChecker
-
-
-
-
+  StandaloneFeatureBot
+  StatisticalTokenizer
+  StatsDBSerializer
+  Symmetrizer
   SyntaxBased
-
-
-
+  Test
+  TrainableCapitalizer
+  Tree
   Trustscore
+  Utf8Normalize
+  ValidateConfig
+  ZeroMQ
+  xmt
+  # </NOT_OPEN_SOURCE>
 
 
-
-
-
-
-
-
+# <NOT_OPEN_SOURCE>
 
 if(LIBLINEAR_FOUND)
   list(APPEND subDirectories
@@ -1260,7 +1260,7 @@ endif()
 
 
 
-
+# </NOT_OPEN_SOURCE>
 
 #CTest and CDash
 if(NOT ANDROID)
@@ -1270,26 +1270,26 @@ endif()
 
 
 
+  ${APR_LIBRARY}
+  ${APR_UTIL_LIBRARY}
+
+
+
+  ${Boost_LIBRARIES}
 
 
 
 
+  Vocabulary
+  )
 
+# <NOT_OPEN_SOURCE>
 
+  set(ENCRYPT_LIB "encrypt_static")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ${ENCRYPT_LIB})
+endif()
+# </NOT_OPEN_SOURCE>
 
 
 
@@ -1336,18 +1336,18 @@ endif()
 
 
 
-
-
+foreach(subDirectory ${subDirectories})
+  add_subdirectory(${subDirectory})
   if(NOT ANDROID)
-
-
-
-
-
-
-
+    set(testFiles "")
+    aux_source_directory("${subDirectory}/test" testFiles)
+    foreach(testFile ${testFiles})
+      get_filename_component(testFile ${testFile} NAME)
+      string(REGEX REPLACE ".cpp$" "" testFile ${testFile})
+      list(APPEND testExecutables "${testFile}")
+    endforeach()
   endif()
-
+endforeach()
 message(STATUS "-- Test Executables: ${testExecutables}")
 
 #configure a header file to pass some of the CMake settings to the source code
@@ -1357,10 +1357,10 @@ configure_file (
 
 MESSAGE(STATUS "Unit test (check only) executables: ${testExecutables}")
 
+# Add custom target "check" that builds unit test executables and runs
+# unit tests:
 
-
-
-
+  DEPENDS ${testExecutables})
 
 #
 # Generate Doxygen target

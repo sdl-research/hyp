@@ -9,8 +9,8 @@
 
 
 
-
-
+#include <stdexcept>
+#include <algorithm>
 
 #include <boost/preprocessor/list/at.hpp>
 #include <boost/preprocessor/list/enum.hpp>
@@ -24,7 +24,7 @@
 
 
 
-
+#include <boost/range/iterator_range.hpp>
 
 
 
@@ -214,9 +214,9 @@
 
 
 
-
-
-
+   private:                                                                                                   \
+    friend class boost::iterator_core_access;                                                                 \
+    void increment() { ++val_; }                                                                              \
 
 
 

@@ -81,8 +81,8 @@ VERBOSE_EXCEPTION_DECLARE(ResourceRegistrationException)
 
 
 
-
-
+VERBOSE_EXCEPTION_DECLARE(TrainableCapitalizerModuleException)
+VERBOSE_EXCEPTION_DECLARE(LowerCaserModuleException)
 
 
 

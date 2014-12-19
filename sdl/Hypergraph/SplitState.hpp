@@ -131,7 +131,7 @@ struct TokenSplitPolicy {
 
 
 
-
+    StateId const labelSt = pHgResult->addState(resultingSymbol(arc, firstLexical, type1, type2));
 
   }
 

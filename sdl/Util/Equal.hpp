@@ -20,19 +20,19 @@
 
 
 
+namespace Util {
+
+namespace detail {
 
 
 
 
+struct Line : std::string {
 
 
 
-
-
-
-
-
-
+struct LineNoTrailingSpaces : std::string {
+  friend std::istream& operator>>(std::istream& in, LineNoTrailingSpaces& line) {
 
 
 
@@ -247,23 +247,23 @@ bool floatEqual(T a, T b, T epsilon = 1e-6) {
 
 
 
+/**
 
 
+*/
+template <class T>
 
 
-
-
-
-
-
-
-
+  std::stringstream ss;
+  ss << obj;
+  bool ok = str == ss.str();
+  if (!ok) {
 
 
 
   }
-
-
+  return ok;
+}
 
 
 

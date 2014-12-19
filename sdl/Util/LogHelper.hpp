@@ -222,7 +222,7 @@
 
 
 
-
+#else  // NLOG is defined:
 
 #include <string>
 
@@ -247,11 +247,11 @@
 
 
 
+// streams instead of %1% formatting
 
 
-
-
-
+    std::stringstream UNLIKELYss;              \
+    UNLIKELYss << expression;                  \
 
   } while (0)
 

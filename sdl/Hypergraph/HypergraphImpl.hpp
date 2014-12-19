@@ -22,7 +22,7 @@ struct deleter {
 
 struct set_weight1 {
   template <class A> void operator()(A *a) const {
-
+    a->setWeight(A::Weight::one());
   }
 };
 

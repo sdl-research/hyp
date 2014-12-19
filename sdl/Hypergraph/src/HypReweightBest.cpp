@@ -14,13 +14,13 @@ namespace Hypergraph {
 struct TRANSFORM : TransformMain<TRANSFORM> { // CRTP
   typedef TransformMain<TRANSFORM> Base;
 
-
+  {
 
 
 
   }
 
-
+  ReweightBest rw;
   enum { has_inplace_transform1 = true };
   template <class Arc>
   bool transform1InPlace(IMutableHypergraph<Arc> &h) {

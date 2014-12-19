@@ -91,6 +91,7 @@ template <class A>
 
 
 
+template <class A>
 
 
 
@@ -98,17 +99,16 @@ template <class A>
 
 
 
+}
+
+template <class A>
 
 
 
 
 
 
-
-
-
-
-
+}
 
 
 

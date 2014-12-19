@@ -114,12 +114,12 @@ typedef boost::counting_iterator<TailId> TailIdIterator;
 
 
 
+static const ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
+static const StateId kNoState = boost::integer_traits<StateId>::const_max;
 
-
-
-
-
-
+inline StateId maxState(StateId a, StateId b) {
+  if (a == kNoState) return b;
+  if (b == kNoState) return a;
 
 
 
@@ -128,8 +128,8 @@ typedef boost::counting_iterator<TailId> TailIdIterator;
 }  // Hypergraph
 
 namespace Constants {
-
-
+using Hypergraph::kNoArc;
+using Hypergraph::kNoState;
 
 
 

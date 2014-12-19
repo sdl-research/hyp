@@ -11,7 +11,7 @@
 
 
 
-
+#if HAVE_OPENFST
 
 
 #include <fst/symbol-table.h>
@@ -126,7 +126,7 @@ template <class Arc, class FArc = fst::ArcTpl<typename Arc::Weight> >
   IHypergraph<Arc> const& h;
   fst::VectorFst<FstArc> fst;
 
-
+  void operator()(Arc const* a) {
 
 
 

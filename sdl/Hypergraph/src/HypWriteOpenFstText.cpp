@@ -74,7 +74,7 @@ int main(int ac, char** av) {
 
 
 
-
+    Util::Input in_(file);
 
     MutableHypergraph<Arc> hg;
     hg.setVocabulary(pVoc);

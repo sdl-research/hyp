@@ -1,19 +1,19 @@
+/**
 
 
 
 
 
-
-
+ */
 
 
 
 
 
 #include <cassert>
-
+#include <list>
 #include <vector>
-
+#include <utility>
 #include <algorithm>
 
 #include <boost/thread/mutex.hpp>
@@ -37,11 +37,11 @@
 
 
 
+namespace Optimization {
 
-
-
-
-
+// fwd decl:
+template <class FloatT>
+class IObjectiveFunctionVisitor;
 
 template <class X, class Y>
 struct PodPair {
@@ -90,6 +90,7 @@ template <class FloatT>
 
 };
 
+/**
 
 
 
@@ -104,6 +105,9 @@ template <class FloatT>
 
 
 
+ */
+template <class FloatT>
+class IObjectiveFunction {
 
 
 
@@ -117,48 +121,44 @@ template <class FloatT>
 
 
 
+  virtual ~IObjectiveFunction() {}
 
+  /**
 
 
+     *
 
 
 
 
+     *
 
 
 
+   */
 
 
+  /**
 
+   */
+  virtual FloatT getFunctionValue() const = 0;
 
+  /**
 
 
+   */
+  virtual void accept(IObjectiveFunctionVisitor<FloatT>*) = 0;
+};
 
+/**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ */
+template <class FloatT>
+class IObjectiveFunctionVisitor {
+ public:
+  virtual ~IObjectiveFunctionVisitor() {}
+  virtual void visit(IObjectiveFunction<FloatT>*) = 0;
+};
 
 template <class FloatT>
 struct IUpdate {
@@ -250,18 +250,18 @@ struct ConsumeUpdates {
   boost::atomic<bool>& areProducersDone;
 };
 
+/**
 
 
 
 
 
 
-
-
+ */
 template <class FloatT>
 
 
-
+ public:
   DataObjectiveFunction() : numThreads_(1), doScale_(false) {}
 
   virtual void setNumThreads(std::size_t n) {
@@ -315,9 +315,9 @@ template <class FloatT>
     return fctVal_;
   }
 
+  /**
 
-
-
+   */
 
 
 
@@ -353,27 +353,27 @@ template <class FloatT>
 
     typedef boost::lockfree::queue<Pair> Queue;
     assert(numThreads_ > 1);
-
+    TrainingDataIndex numProducers = numThreads_ - 1;  // one of the threads is the consumer
     Queue queue(50 * numProducers);
 
+    boost::thread_group producerThreads, consumerThreads;
 
 
 
+    TrainingDataIndex rest = size % numProducers;
 
 
 
-
-
-
+    producers.reserve(numProducers);
     GradientUpdate_Queue<FloatT, Queue> updateQueue(queue);
 
+    TrainingDataIndex prevBlockEnd = begin;
+    for (TrainingDataIndex i = 0; i < numProducers; ++i) {
+      TrainingDataIndex const blockEnd = prevBlockEnd + blockSize + (i < rest);
+      // process one more in the first 'rest' threads so no training examples are left out
 
-
-
-
-
-
-
+      prevBlockEnd = blockEnd;
+      producerThreads.create_thread(boost::ref(*update));  // boost::ref prevents copy
     }
 
     boost::atomic<bool> areProducersDone(false);
@@ -381,11 +381,11 @@ template <class FloatT>
     // just one consumer; consumes gradient updates from queue and
     // writes them into gradient array
     ConsumeUpdates<Queue, FloatT> consumer(updates, queue, areProducersDone);
+    consumerThreads.create_thread(consumer);
 
-
-
+    producerThreads.join_all();
     areProducersDone = true;
-
+    consumerThreads.join_all();
 
     FloatT fctValDelta(0.0f);
 
@@ -405,57 +405,57 @@ template <class FloatT>
 
 
 
+  /**
+
+   */
+  virtual std::size_t getNumExamples() = 0;
+
+  /**
+
+   */
 
 
+  /**
 
 
-
-
-
-
-
-
-
-
-
-
+   */
 
 
 
   FloatT fctVal_;
 
   bool doScale_;
+};
 
+/**
 
+ */
+template <class FloatT>
+class MockObjectiveFunction : public IObjectiveFunction<FloatT> {
 
-
-
-
-
-
-
+ public:
 
     function_value_ = (FloatT)0.0;
+    for (int i = 0; i < num_params; i += 2) {
 
 
 
 
-
-
-
-
-
+      function_value_ += t1 * t1 + t2 * t2;
+    }
+    return function_value_;
+  }
 
 
 
 
 
  private:
+  FloatT function_value_;
+
+};  // end class
 
 
 
 
-
-
-
-
+#endif

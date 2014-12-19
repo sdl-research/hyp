@@ -81,7 +81,7 @@ struct TransformMainBase : HypergraphMainBase {
   typedef ExpectationWeight expectationSemiring;
   typedef LogWeightTpl<float> logSemiring;
   typedef ViterbiWeightTpl<float> viterbiSemiring;
-
+  typedef FeatureWeight featureSemiring;
 
   std::string arcType;
   graehl::hex_int<Properties> default_properties;
@@ -108,30 +108,30 @@ struct TransformMainBase : HypergraphMainBase {
 
   semirings_type allowedSemirings;
 
+  // these control the appearance of cmdline options that activate
+  // alternative input options and output options (lines = paths, or
+  // multiple input hgs)
+  bool bestOutputs;
 
 
 
 
 
-
-
-
-
-
+  static std::string semiringsList(semirings_type x) {
     std::ostringstream o;
     graehl::word_spacer sp('|');
-
-
-
+    if (x & viterbi) o << sp << "viterbi";
+    if (x & log) o << sp << "log";
+    if (x & expectation) o << sp << "expectation";
 
     return o.str();
   }
 
-
-
-
-
-
+  static semirings_type semiringFor(std::string const& s) {
+    if (s == "viterbi") return viterbi;
+    if (s == "log") return log;
+    if (s == "expectation") return expectation;
+    if (s == "feature") return feature;
 
 
 
@@ -175,6 +175,12 @@ struct TransformMainBase : HypergraphMainBase {
 
 
 
+  typedef ArcTpl<featureSemiring> featureArc;
+
+
+
+
+  void configure(Config& c) {
 
 
 
@@ -193,16 +199,10 @@ struct TransformMainBase : HypergraphMainBase {
 
 
 
+  void finish_configure_more() OVERRIDE {
 
 
-
-
-
-
-
-
-
-
+      this->configurable(&optBestOutputs);
 
 
 
@@ -291,8 +291,8 @@ struct TransformMain : TransformMainBase {
     else if (w == "expectation")
       r = runWeight<expectationSemiring>();
 
-
-
+    else if (w == "feature")
+      r = runWeight<featureSemiring>();
     else
 
 
@@ -350,9 +350,9 @@ struct TransformMain : TransformMainBase {
     return true;
   }
 
-
-
-
+  // if has2().
+  // First ptr is taken as result for reduction/fold of N Hgs to
+  // 1. please don't meaningfully modify i2.
   template <class Arc>
 
 
@@ -426,7 +426,7 @@ struct TransformMain : TransformMainBase {
 
 
 
-
+  struct Cascade {
 
     typedef MutableHypergraph<Arc> H;
 
@@ -445,15 +445,15 @@ struct TransformMain : TransformMainBase {
 
 
 
+    bool transformInput(unsigned inputLine, bool reload, bool free) {
+
+      std::string olast_name;
 
 
 
+      std::ostringstream o_name;
 
-
-
-
-
-
+      Util::Sep oname_sep = main.impl().transform2sep();
 
 
 
@@ -500,12 +500,12 @@ struct TransformMain : TransformMainBase {
     }
 
 
+  /// Override if desired: it's guaranteed that impl().prepare will be
+  /// called for exactly one Arc type - the same as in all the
+  /// transform* calls.  this may e.g. create a TransformHolder or
+  /// other shared_ptr<void> that's used across all inputs.
 
-
-
-
-
-
+  void prepare() {}
 
 
 

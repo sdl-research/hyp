@@ -34,7 +34,7 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
 
 
 
-
+  Properties properties(int) const { return kStoreInArcs; }
 
 
 

@@ -188,13 +188,13 @@ struct Derivation
 
 
 
-
+    Weight axiom(StateId) { return Weight::one(); }
 
       timesBy(cr, r);
     }
     bool finished(Weight &w) const
     {
-
+      return !(w == Weight::zero());
     }
   };
 
@@ -247,13 +247,13 @@ struct Derivation
 
   {
     ComputeWeight w;
-
+    return computeOnceDfs(w, kNoState);
   }
 
 
 
 
-
+    return computeOnceDfs(w, kNoState);
   }
 
 
@@ -876,6 +876,7 @@ struct DerivationPointer
 
 
 
+  assert(from!=kNoState);
 
 
 
@@ -910,6 +911,8 @@ struct DerivationPointer
 
 
 
+  assert(from!=kNoState);
+  assert(final!=kNoState);
 
 
 
@@ -943,9 +946,11 @@ struct DerivationPointer
 
 
 
+    if (hg.storesOutArcs() && hg.isFsm()) {
 
 
 
+    } else if (hg.storesInArcs()) {
 
 
 
@@ -958,12 +963,7 @@ struct DerivationPointer
 
 
 
-
-
-
-
-
-
+                                                  p ? p->weight() : Arc::Weight::zero());
 
 
 

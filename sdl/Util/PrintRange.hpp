@@ -13,7 +13,7 @@
 
 
 
-
+#include <map>
 
 #include <boost/type_traits/add_const.hpp>
 #include <boost/type_traits/add_reference.hpp>
@@ -130,23 +130,23 @@ struct RangeSep {
 
 
 
+template <class Out, class Iter>
+Out& printRange(Out& out, Iter i, Iter end, RangeSep const& sep = RangeSep()) {
+  out << sep.pre;
+  if (sep.spaceBefore)
 
-
-
-
-
-
-
+      out << sep.space;
+      adlimpl::adl_write(out, *i);
 
   else {
+    Sep s(sep.space);
 
-
-
-
+      out << s;
+      adlimpl::adl_write(out, *i);
     }
 
-
-
+  out << sep.post;
+  return out;
 }
 
 
@@ -179,16 +179,16 @@ O& printRange(O& o, C const& c, RangeSep const& r = RangeSep()) {
 
 
 
+  out << sep.pre;
+  if (sep.spaceBefore)
 
-
-
-
+      out << sep.space;
 
 
   else {
+    Sep s(sep.space);
 
-
-
+      out << s;
 
 
 
@@ -235,23 +235,23 @@ O& printRange(O& o, C const& c, RangeSep const& r = RangeSep()) {
 
 
 // uses 3-arg print()
-
-
-
-
-
-
-
+template <class O, class PrintState, class Iter>
+O& printRangeState(O& out, PrintState const& q, Iter it, Iter const& end, RangeSep const& rs = RangeSep()) {
+  out << rs.pre;
+  if (rs.spaceBefore)
+    for (; it != end; ++it) {
+      out << rs.space;
+      print(out, *it, q);
 
   else {
-
-
-
-
+    Sep sep(rs.space);
+    for (; it != end; ++it) {
+      out << sep;
+      print(out, *it, q);
     }
 
-
-
+  out << rs.post;
+  return out;
 }
 
 
@@ -335,44 +335,44 @@ void print(std::ostream& o, V const& v, StateRangeRangeSep<X> const& rr) {
   printRangeState(o, rr.inner, v, rr.outer);
 }
 
+// Wraps range in PrintableRange, which has output operator.
+
+
+//        ...
+
+template <class T>
+
+
+}
 
 
 
 
 
 
+template <class Pair>
+struct PrintPair {
+  Pair p;
+  char const* sep;
+
+  PrintPair(Pair p_, char const* sep_ = ",") : p(p_), sep(sep_) {}
+
+  template <class Out>
+  void print(Out& out) const {
+    writePair(out, p, sep);
+  }
+
+  template <class Ch, class Tr>
 
 
 
 
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+template <class T1, class T2>
+PrintPair<std::pair<T1, T2> > makePrintable(std::pair<T1, T2> p) {
+  return PrintPair<std::pair<T1, T2> >(p);
+}
 
 
 

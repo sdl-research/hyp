@@ -15,7 +15,7 @@
 
 
 
-
+#endif
 
 
 
@@ -247,7 +247,7 @@ ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
 
   }
 }
-
+#endif
 
 ConfigNode loadRawConfig(boost::filesystem::path const& path) {
   try {
@@ -275,8 +275,8 @@ ConfigNode loadRawConfig(boost::filesystem::path const& path) {
 
 
 
-
-
+#endif
+                                                loadRawConfig(path),
 
 
 

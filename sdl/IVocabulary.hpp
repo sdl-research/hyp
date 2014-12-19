@@ -11,7 +11,7 @@
 
 
 #include <string>
-
+#include <ostream>
 #include <stdexcept>
 #include <boost/scoped_ptr.hpp>
 
@@ -36,16 +36,17 @@
 
 
 
+/**
 
 
 
-
-
+*/
 
   virtual ~IVocabularyVisitor() {}
 
 };
 
+struct IVocabulary : Resource {
 
 
 
@@ -54,8 +55,7 @@
 
 
 
-
-
+  bool evictThread(Occupancy const&) OVERRIDE;
 
 
 
@@ -234,7 +234,7 @@
 
 
 
-
+  void print(std::ostream& out) const;
 
 
 
@@ -275,7 +275,7 @@
 
 
 
-
+  virtual unsigned doGetNumSymbols(SymbolType) const = 0;
 
 
 

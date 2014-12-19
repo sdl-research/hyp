@@ -58,7 +58,7 @@ template <class A>
   template <class A>
 
     ReweightDerivation<A> v(h, opt);
-
+    visitNbest(v, 1, h);
   }
 };
 

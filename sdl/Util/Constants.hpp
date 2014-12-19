@@ -20,7 +20,7 @@
 
 
 
-
+// TODO: Add namespace Util
 
 // numeric limits class
 template <class T>
@@ -53,16 +53,16 @@ class FloatConstants {
 template <class T>
 
 
+namespace Util {
+
+/**
 
 
-
-
-
-
-
-
-
-
+*/
+template <class T>
+T getUndef() {
+  return std::numeric_limits<T>::max();
+}
 
 
 

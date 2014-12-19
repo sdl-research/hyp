@@ -110,6 +110,15 @@ std::string const& kPipePrefix2("/dev/fd/");
 */
 
 
+  friend std::string const& to_string_impl(Input const& fa) {
+
+
+
+  friend void string_to_impl(std::string const& name, Input & fa) {
+
+
+
+  friend char const* type_string(Input const&) { return "Input filename (.gz, '-', or encrypted)"; }
 
 
 
@@ -121,40 +130,7 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }
 
 
 
@@ -199,6 +175,30 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+  std::string getFilename() const {
+
+  }
 
   std::istream& getStream() const {
 
@@ -209,7 +209,7 @@ std::string const& kPipePrefix2("/dev/fd/");
 
 
 
-
+  shared_ptr<std::string> decrypted;
 
 
 

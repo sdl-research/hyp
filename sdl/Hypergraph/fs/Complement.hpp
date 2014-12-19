@@ -58,7 +58,7 @@ template <class Arc>
 
   // deteriminize:
   typedef IHypergraph<Arc> H;
-
+  shared_ptr<H const> det;  // = ptr(inhg); inplace(inhg, Determinize(DETERMINIZE_INPUT, kStoreOutArcs));
   // determinize only if needed:
   H const& hg = determinized(inhg, det, DETERMINIZE_INPUT);
 
@@ -116,7 +116,7 @@ template <class Arc>
 
 
   if (!hadempty) {  // then complement must contain empty.
-
+    StateId epsilonState = result->addState(EPSILON::ID);
     StateId emptyFinal;
 
 

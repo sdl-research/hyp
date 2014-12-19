@@ -260,8 +260,8 @@
 
 
 
-
-
+  template <class Config>
+  void configure(Config& config) {
 
 
 
@@ -587,9 +587,9 @@ inline std::size_t bytesForUtf(std::size_t nchar) {
 
 
 
+template <class Out>
 
-
-
+  return UTF8_CHECKED_NS::append(ch, out);
 }
 
 
@@ -609,10 +609,10 @@ inline std::size_t bytesForUtf(std::size_t nchar) {
 
 // note: unchecked output iter
 
+template <class In, class Out>
+Out toUtf8(In in, In const& iend, Out out) {
 
-
-
-
+  return out;
 }
 
 

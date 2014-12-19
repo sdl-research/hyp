@@ -7,7 +7,7 @@
 
 
 
-
+#if HAVE_OPENFST
 
 
 
@@ -32,6 +32,6 @@
 
 
 
-
+#endif // HAVE_OPENFST
 
 #endif

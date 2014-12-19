@@ -394,8 +394,8 @@ namespace Config {
 
 
 
-
-
+                  "Two basis node types do not match. File: " << getFilePath() << ", path: " << path()
+                                                              << ", '" << base << "' != '" << over << "'");
 
 
 

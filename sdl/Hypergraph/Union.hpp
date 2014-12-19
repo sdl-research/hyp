@@ -39,17 +39,17 @@ struct ArcCopyFct {
 
 
 
-
+  void operator()(Arc* pArc) const {
     Arc* newArc = new Arc();
 
-
-
+    for (TailId i = 0, e = (TailId)pArc->getNumTails(); i < e; ++i) {
+      newArc->addTail(getNewStateId(pArc->getTail(i)));
     }
 
 
   }
 
-
+  StateId getNewStateId(StateId oldSid) const {
 
 
 
@@ -86,7 +86,7 @@ template <class Arc>
 
   // Write sourceFst into pTargetFst
   UnionHelper::ArcCopyFct<Arc> fct(sourceFst, pTargetFst);
-
+  sourceFst.forArcs(fct);  // must store arcs
 
   StateId epsLabelState = pTargetFst->addState(EPSILON::ID);
 
@@ -108,9 +108,9 @@ template <class Arc>
 
 
     UnionHelper::ArcCopyFct<Arc> copier(sourceHg, pTargetHg);
+    sourceHg.forArcs(copier);
 
-
-
+    StateId epsLabelStateId = pTargetHg->addState(EPSILON::ID);
 
     // Add common new final state
     StateId superfinal = pTargetHg->addState();

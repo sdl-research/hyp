@@ -19,7 +19,7 @@
 // ============================================================================
 //
 // File : gzstream.C
-
+// Revision : $Revision$
 // Revision_date : $Date: 2011-06-28 14:35:28 -0700 (Tue, 28 Jun 2011) $
 // Author(s) : Deepak Bandyopadhyay, Lutz Kettner
 //

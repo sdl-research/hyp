@@ -13,7 +13,7 @@ namespace Hypergraph {
 
 
 
-
+    return kDefaultProperties | kStoreOutArcs | kStoreInArcs;
 
 
 

@@ -75,9 +75,9 @@ template <class A>
 
 
 
-
+    assert(rf != Hypergraph::kNoState && lf != Hypergraph::kNoState);
     if (l.isFsm() && r.isFsm()) {  // for FSM, add epsilon between final1 and start2
-
+      if (rs == Hypergraph::kNoState || ls == Hypergraph::kNoState)
 
 
 
@@ -90,8 +90,8 @@ template <class A>
 
 
     } else {  // for CFG, add S->S1 S2. note: since only one axiom is allowed, share (remap) start states
-
-
+      if (rs != Hypergraph::kNoState) {
+        if (ls != Hypergraph::kNoState)
 
         else
 
@@ -100,9 +100,9 @@ template <class A>
 
       StateIdContainer ff;
       ff.push_back(lf);
-
+      assert(lf != Hypergraph::kNoState);
       ff.push_back(x.stateFor(rf));
-
+      assert(ff.back() != Hypergraph::kNoState);
       StateId newf = l.addState();
       if (opt.cfgFinalLabel)
 

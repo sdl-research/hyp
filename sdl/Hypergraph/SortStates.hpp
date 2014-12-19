@@ -229,7 +229,7 @@ template <class A>
 
 
 
-
+        pDestState->addState(*i, ph->labelPair(lexst));
       else
 
     }
@@ -300,12 +300,12 @@ template <class A>
 
 
 
+            x.addState(s, h.labelPair(s));
 
 
 
 
-
-
+              x.addState(s, h.labelPair(s));
 
 
 
@@ -336,6 +336,31 @@ template <class A>
 
 
 
+/**
+
+
+
+
+   *
+   */
+
+
+
+
+
+
+
+
+/**
+
+
+
+
+   *
+   */
+
+StateId sortStates(IHypergraph<A> const&h, IMutableHypergraph<A> *out,
+                   SortStatesOptions const& opt = SortStatesOptions())
 
 
 
@@ -352,32 +377,7 @@ template <class A>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    MutableHypergraph<Arc> sorted((kStoreInArcs));
 
 
 

@@ -37,7 +37,7 @@ struct WeightedStrings {
     strings.push_back(s);
     weights.push_back(w);
   }
-
+  void openString(W w = W::one()) {
 
 
 
