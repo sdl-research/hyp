@@ -228,25 +228,25 @@ endfunction(xmt_add_executable_explicit)
 
 
 
+  # If the user specified a target name, use it; otherwise, assume the project-name
+  set(TARGET_NAME ${ARGV0})
+  if(NOT TARGET_NAME)
+    set(TARGET_NAME ${PROJECT_NAME})
+  endif()
+
+  set_property(TARGET ${TARGET_NAME} PROPERTY PUBLIC_HEADER ${INCS})
+  install(TARGETS ${TARGET_NAME}
 
 
 
 
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/xmt/include/${TARGET_NAME}/include)
+  install(TARGETS ${TARGET_NAME}
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/xmt/include/${TARGET_NAME}/include)
 
 
 

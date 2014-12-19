@@ -88,23 +88,23 @@
 
 
 
+# Increasing this will use more space for all kenlm states, so this should be as low as possible.
 
 
+else()
+
+endif()
 
 
+# Run CMAKE with -DBUILD_KENLM to force re-building of the KenLM shared library. This option requires that the
 
+if(BUILD_KENLM AND NOT BUILD_KENLM EQUAL 0)
+  # Build and link against a custom KenLM
 
-
-
-
-
-
-
-
-
-
-
-
+else()
+  # Use prebuilt KenLM shared/dynamic libs
+  xmt_set(BUILD_KENLM 0 "Use prebuilt KenLM (i.e., do not build KenLM)")
+endif()
 
 
 
@@ -386,12 +386,12 @@ endif()
 
 
 
+  # Set Boost options
 
 
 
 
-
-
+  set(Boost_COMPILER "-vc100")
 
 
 
@@ -553,8 +553,8 @@ endif()
 
 
 
-
-
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
 
 
 
@@ -651,7 +651,7 @@ endif()
 
 
 
-
+    set(Boost_COMPILER "-gcc44")
 
 
 
@@ -761,19 +761,19 @@ if(ANDROID)
   MESSAGE(STATUS "Disabling logging for Android")
 
 
+# Suppress warnings/errors for Production builds
 
 
 
+else()
+
+endif()
+
+# CA-7791 Suppress source code locations in log messages; used when building in release mode for external customers
 
 
 
-
-
-
-
-
-
-
+endif()
 
 
 
@@ -815,7 +815,7 @@ if(ANDROID)
 
 MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithoutTbbmalloc")
-
+  unset(TBBMALLOC_LIBRARY CACHE)
 
 
 
@@ -842,7 +842,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDe
 
 
 
-
+MESSAGE(STATUS "Zeromq include directory: ${ZEROMQ_INCLUDE_DIR}")
 
 if(ZEROMQ_FOUND)
   add_definitions(-DHAVE_ZMQ)
@@ -862,6 +862,9 @@ if(LIBLINEAR_FOUND)
   add_definitions(-DHAVE_LIBLINEAR)
 endif()
 
+find_package(Tinyxmlcpp)
+message(STATUS "TinyXML++ library: ${TINYXMLCPP_LIBRARY}")
+message(STATUS "TinyXML++ include directory: ${TINYXMLCPP_INCLUDE_DIR}")
 
 
 
@@ -889,24 +892,21 @@ endif()
 
 
 
+    endif()
 
 
 
 
+  message(STATUS "KenLM include directory: ${KENLM_INCLUDE_DIR}")
 
 
 
+  find_package(KenLM)
+  message(STATUS "KenLM libraries: ${KENLM_LIBRARIES}")
+  message(STATUS "KenLM include directory: ${KENLM_INCLUDE_DIR}")
 
-
-
-
-
-
-
-
-
-
-
+add_definitions(-DHAVE_KENLM)
+set(HAVE_KENLM 1)
 
 
 if(${LINUX})
@@ -937,9 +937,9 @@ endif()
 
 
 
+if(${HAVE_NPLM})
 
-
-
+endif()
 
 
 
@@ -977,6 +977,20 @@ SET(boost_libs
 
 
 
+# Proceed to generate the normal all-inclusive Boost libraries
+
+find_package(Boost ${Boost_find_version} REQUIRED COMPONENTS ${boost_libs})
+
+
+
+# Create a list of Boost libraries that can be used to build shared libs; this list is essentially the same as the
+# normal list with the exception of the unit_test_framework.
+# Due to the Boost quirk described in https://svn.boost.org/trac/boost/ticket/5553, running boost unit-tests built in
+# Debug mode against a dynamic shared library built in Release mode, will cause segfaults to occur: in order to avoid
+# this, we simply avoid linking dynamic shared libs against the Boost unit-test framework.
+
+
+  LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
 
 
 
@@ -985,21 +999,7 @@ SET(boost_libs
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  elseif(NOT WIN32)
 
 
 
@@ -1134,6 +1134,8 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
+MESSAGE(STATUS "libLBFGS Libraries: ${LBFGS_LIB}")
+MESSAGE(STATUS "libLBFGS Include Directories: ${LBFGS_INCLUDE_DIR}")
 
 
 
@@ -1154,22 +1156,20 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
+# By default, create only the dynamic XMT lib. The user can override this
+
+# - "Shared" -- (Default mode) xmtShell and related binaries will link dynamically to this
+# - "Static" -- xmtShell and related binaries will link statically to this
+# - "All" -- builds both libraries and links to the xmtShell and related binaries statically
 
 
+else()
 
+endif()
 
+if(BUILD_KENLM)
 
-
-
-
-
-
-
-
-
-
-
-
+endif()
 
 
 
