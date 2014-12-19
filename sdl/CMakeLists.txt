@@ -159,6 +159,7 @@
 
 
 
+add_definitions(-DU_HAVE_STD_STRING=1)
 
 
 
@@ -178,10 +179,22 @@
 
 
 
+if(LINUX)
+  message(STATUS "The target system is LINUX.")
+endif()
+if(ANDROID)
+  message(STATUS "The target system is ANDROID.")
+endif()
+if(APPLE)
+  message(STATUS "The target system is APPLE.")
+endif()
+if(WIN32)
+  message(STATUS "The target system is WINDOWS.")
 
 
 
 
+endif()
 
 
 
@@ -226,35 +239,22 @@
 
 
 
+if(ANDROID)
 
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  macro(find_host_path)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
+    find_path(${ARGN})
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  endmacro()
+endif()
 
 
 
@@ -272,20 +272,20 @@
 
 
 
+if(UNIX AND NOT APPLE AND NOT ANDROID)
+  set(LINUX 1)
+endif()
+
+
+
+
+if(NOT ANDROID)
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+endif()
 
 
 
@@ -421,6 +421,8 @@ endif()
 
 
 
+  # Without this, the compiler complains some boost methods fail to return a value
+  add_definitions("/DBOOST_NO_UNREACHABLE_RETURN_DETECTION")
 
 
 
@@ -591,8 +593,16 @@ endif()
 
 
 
+  if(ANDROID)
+    if("$ENV{ANDROID_STANDALONE_TOOLCHAIN}" STREQUAL "")
+      message(FATAL_ERROR "Please define env. var ANDROID_STANDALONE_TOOLCHAIN")
+    endif()
+    set(ANDROID_SYS_ROOT "$ENV{ANDROID_STANDALONE_TOOLCHAIN}/sysroot")
+    set(CMAKE_CXX_FLAGS "         -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar --sysroot=${ANDROID_SYS_ROOT}")
+  else(ANDROID)
 
 
+  endif()
 
 
 
@@ -632,9 +642,11 @@ endif()
 
 
 
+  if(NOT ANDROID)
 
 
 
+  if(LINUX)
 
 
 
@@ -654,37 +666,25 @@ endif()
 
 
 
+  if(ANDROID)
 
+    set(Boost_find_version 1.49)
+    set(Boost_ADDITIONAL_VERSIONS "1.49" "1.49.0")
+    set(Boost_NO_SYSTEM_PATHS 1)
 
+    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_COMPILER "-gcc")
 
 
+    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
+    set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/lib) # always use release for Android
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  endif()
 
 
 
@@ -756,6 +756,9 @@ MARK_AS_ADVANCED(
   CMAKE_CXX_FLAGS_RELWITHOUTTBBMALLOC
   )
 
+if(ANDROID)
+  add_definitions(-DNLOG)
+  MESSAGE(STATUS "Disabling logging for Android")
 
 
 
@@ -774,6 +777,7 @@ MARK_AS_ADVANCED(
 
 
 
+  if(ANDROID)
 
 
 
@@ -791,11 +795,7 @@ MARK_AS_ADVANCED(
 
 
 
-
-
-
-
-
+  endif()
 
 
 
@@ -923,14 +923,17 @@ if(${LINUX})
   set(HAVE_NPLM 1)
 endif()
 
+find_package(Protobuf REQUIRED)
 
 
 
 
 
+    if(NOT ANDROID)
 
 
 
+endif()
 
 
 
@@ -948,6 +951,7 @@ endif()
 
 
 
+SET(boost_libs
 
 
 
@@ -962,6 +966,9 @@ endif()
 
 
 
+  list(APPEND boost_libs
+    unit_test_framework
+    locale)
 
 
 
@@ -1031,9 +1038,11 @@ endif()
 
 
 
+if(NOT ANDROID)
 
 
 
+endif()
 
 
 
@@ -1060,18 +1069,9 @@ endif()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+find_package(CDB)
+MESSAGE(STATUS "CDB Libraries: ${CDB_LIBRARIES}")
+MESSAGE(STATUS "CDB Include Directories: ${CDB_INCLUDE_DIR}")
 
 
 
@@ -1093,9 +1093,9 @@ endif()
 #
 find_package(JNI)
 
-
-
-
+  set(JAVA_INCLUDE_PATH "$ENV{JAVA_HOME}\\include")
+  set(JAVA_INCLUDE_PATH2 "$ENV{JAVA_HOME}\\include\\win32")
+endif()
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
 MESSAGE (STATUS "JNI header: ${JAVA_INCLUDE_PATH}")
 MESSAGE (STATUS "JVM shared library: ${JAVA_JVM_LIBRARY}")
@@ -1198,7 +1198,7 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
-
+  MaltServer
 
 
 
@@ -1226,6 +1226,7 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
+  Trustscore
 
 
 
@@ -1262,7 +1263,9 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
+if(NOT ANDROID)
 
+endif()
 
 
 
@@ -1335,6 +1338,7 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
+  if(NOT ANDROID)
 
 
 
@@ -1342,11 +1346,7 @@ endif(NOT MAVEN_EXECUTABLE)
 
 
 
-
-
-
-
-
+  endif()
 
 
 

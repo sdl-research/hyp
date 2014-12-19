@@ -25,7 +25,7 @@
 
 
 
-
+typedef FromUnicodes FromString32;
 
 
 

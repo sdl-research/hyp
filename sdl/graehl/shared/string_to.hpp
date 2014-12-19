@@ -174,6 +174,7 @@
 
 
 
+#endif
 
 
 
@@ -410,7 +411,6 @@
 
 
 
-#pragma execution_character_set("utf-8")
 
 
 
@@ -456,7 +456,6 @@
 
 
 
-  typename Utf8Chars::iterator out = vec.begin();
 
 
 
@@ -675,121 +674,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    unsigned written = (unsigned)snprintf(begin() + sz, maxLen, fmt, val);
 
 
 
