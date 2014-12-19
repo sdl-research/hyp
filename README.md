@@ -1,7 +1,8 @@
 % Hypergraphs README
 
-First, see `hyp-tutorial.pdf` provided in
-this directory for your immediate gratification.
+First, see
+[`hyp-tutorial.pdf`](https://github.com/hypergraphs/hyp/raw/master/hyp-tutorial.pdf)
+provided in this directory for your immediate gratification.
 
 You can build the tutorial doc with
 [TeX](https://www.tug.org/texlive/): `docs/hyp/hyp-tutorial.tex`.
