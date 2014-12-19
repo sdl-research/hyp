@@ -51,95 +51,6 @@ endif()
 
 option(OPEN_SOURCE_RELEASE ON)
 
-# <NOT_OPEN_SOURCE>
-set(OPEN_SOURCE_RELEASE OFF)
-option(SDL_ENCRYPT "use encryption (allow reading encrypted lps)" ON)
-if(SDL_DEVELOPMENT)
-  option(XMT_GIT_SHA1 "" OFF)
-  # set to OFF if you're frequently tweaking and don't want a slow libxmt+xmtShell rebuild
-  MESSAGE(STATUS "SDL_BUILD_TYPE: Development build")
-else()
-  MESSAGE(STATUS "SDL_BUILD_TYPE: Production targeted build")
-  set(SDL_SUPPRESS_IGNORABLE_WARNINGS 1)
-  set(SDL_SUPPRESS_SOURCE_LOCATION 1)
-  option(XMT_GIT_SHA1 "compile git sha1 into xmtShell/Server" ON)
-endif()
-
-option(SDL_MODULES_ALLOW_LHG
-  "allow input-type/output-type LHG (log weight HG). ON means slower compilation"
-  OFF)
-
-if (SDL_MODULES_ALLOW_LHG)
-  xmt_compiled_setting(SDL_MODULES_ALLOW_LHG 1)
-endif()
-
-# if ON, faster release compile in windows (see jenkins_buildscript.bat)
-option(SDL_VALIDATION_BUILD "" OFF)
-
-option(HAVE_OPENFST "Have OpenFst library" ON)
-
-# Increasing this uses more memory for all lm cost and weight values,
-# so this should be as low as possible. TODO: Test if higher MAX_LMS
-# really is less efficient in practice.
-# You may change the value on the command line, e.g., cmake -DMAX_LMS=6
-set(MAX_LMS "4" CACHE STRING "Maximum number of LMs")
-xmt_compiled_setting(MAX_LMS ${MAX_LMS})
-
-# KenLM has two versions in SDL_EXTERNALS built with value 5 & 7
-# for other values, run e.g. `cmake -DSDL_MAX_NGRAM_ORER=4 -DBUILD_KENLM`
-
-# Increasing this will use more space for all kenlm states, so this should be as low as possible.
-if(SDL_MAX_NGRAM_ORDER)
-  xmt_set(SDL_MAX_NGRAM_ORDER SDL_MAX_NGRAM_ORDER "Maximum order for n-gram models")
-else()
-  xmt_set(SDL_MAX_NGRAM_ORDER "5" "Maximum order for n-gram models")
-endif()
-set(XMT_MAX_NGRAM_ORDER ${SDL_MAX_NGRAM_ORDER}) # TODO: update FindKenLM.cmake then remove this line
-
-# Run CMAKE with -DBUILD_KENLM to force re-building of the KenLM shared library. This option requires that the
-# SDL_EXTERNALS_SOURCE_PATH environment variable be set so the KenLM source can be located.
-if(BUILD_KENLM AND NOT BUILD_KENLM EQUAL 0)
-  # Build and link against a custom KenLM
-  xmt_set(BUILD_KENLM 1 "Build KenLM (i.e., do not use prebuilt version in SDL_EXTERNALS)")
-else()
-  # Use prebuilt KenLM shared/dynamic libs
-  xmt_set(BUILD_KENLM 0 "Use prebuilt KenLM (i.e., do not build KenLM)")
-endif()
-
-xmt_compiled_setting(SDL_MAX_NGRAM_ORDER ${SDL_MAX_NGRAM_ORDER})
-
-option(USE_CLANG_ANALYZER
-  "use static analyzers (may slow compilation)" ON)
-option(USE_CLANG_SANITIZE
-  "build with runtime valgrind-like sanitizers (runtime overhead but less than valgrind) for clang compiler - see http://clang.llvm.org/docs/UsersManual.html#controlling-code-generation" OFF)
-option(CLANG_SANITIZE_thread
-  "use thread sanitizer (which is still consider beta quality) instead of address sanitizer - up to 10x slowdown (address is only 2x) (typically only one sanitizer may run at once)" OFF)
-option(CLANG_SANITIZE_memory
-  "use memory sanitizer (address is more mature) (typically only one sanitizer may run at once)" OFF)
-option(CLANG_SANITIZE_address
-  "use address sanitizer, similar to vg --tool=addrcheck (typically only one sanitizer may run at once). When linking shared libraries, the AddressSanitizer run-time is not linked, so -Wl,-z,defs may cause link errors (don’t use it with AddressSanitizer)." OFF)
-option(CLANG_SANITIZE_undefined
-  "use undefined sanitizer (typically only one sanitizer may run at once)" OFF)
-option(USE_CLANG_SANITIZE_NO_RUNTIME
-  "enable ONLY the sanitizers that don't need special runtime linking ('undefined-trap'). but boost serialiazation singleton static init is triggering the undefined-trap, so that's no good (TODO - recompile boost w/ sanitizers)" OFF)
-
-# 0 means concurrent PosTagger but more memory used to hold models
-xmt_compiled_setting(SDL_SINGLE_THREAD_TAGGER 0)
-
-option(AllHgBins "Build all hypergraph bins" OFF)
-
-# 0 means no limit on distortion (ok to mix covered/uncovered over infinite
-# spans). with 32 or 64 the mixed covered/uncovered window is at most that many
-# lattice states (words in non-lattice case)
-xmt_compiled_setting(SDL_MAX_COVERAGE_MIXED_SPAN 64)
-
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  #xmt_quiet_compiled_setting(SDL_32BIT_POINTER 1)
-else()
-  #xmt_quiet_compiled_setting(SDL_64BIT_POINTER 1)
-endif()
-
-# </NOT_OPEN_SOURCE>
 
 # Use cmake -DSDL_FLOAT=32 or -DSDL_FLOAT=64
 if(NOT DEFINED SDL_FLOAT)
@@ -260,9 +171,6 @@ set(xmt_STAGE_PREFIX ${CMAKE_BINARY_DIR}/stage) #this is the stage/installation 
 
 include(GetGitRevisionDescription)
 
-# <NOT_OPEN_SOURCE>
-set(UCAMLMBR_INCLUDE_DIR "${SDL_SHARED_EXTERNALS_PATH}/ucam-lmbr/include/")
-# </NOT_OPEN_SOURCE>
 
 add_definitions(-DHAVE_CXX_STDHEADERS -DBOOST_ALL_NO_LIB -DTIXML_USE_TICPP)
 
@@ -318,39 +226,6 @@ if(UNIX AND NOT APPLE)
   find_package(AprUtil)
 endif()
 
-# <NOT_OPEN_SOURCE>
-set(LIBSTEMMER_ROOT "${SDL_EXTERNALS_PATH}/libraries/libstemmer_c")
-find_package(LibStemmer)
-
-
-if (LIBSTEMMER_FOUND)
-  add_definitions(-DSDL_HAVE_STEMMER)
-  message(STATUS "LibStemmer include: ${LIBSTEMMER_INCLUDE_DIR}")
-  message(STATUS "LibStemmer Libraries: ${LIBSTEMMER_LIBRARY}")
-else()
-  message(STATUS "LibStemmer not found")
-endif()
-set(ZEROMQ_ROOT "${SDL_EXTERNALS_PATH}/libraries/zeromq-4.0.4")
-set(ZEROMQ_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/zeromq-4.0.4")
-set(LEXERTL_ROOT "${SDL_EXTERNALS_PATH}/libraries/lexertl-2012-07-26")
-set(CMPH_ROOT_PATH "${SDL_EXTERNALS_PATH}/libraries/cmph-0.6")
-if(HADOOP_YARN)
-  set(HADOOP_ROOT "${SDL_EXTERNALS_PATH}/libraries/hadoop-hdp2.1/")
-  message(STATUS "running using HDP2.1 hadoop libraries")
-else()
-  set(HADOOP_ROOT "${SDL_EXTERNALS_PATH}/libraries/hadoop-0.20.2-cdh3u3/")
-  message(STATUS "running using CDH3 hadoop libraries")
-endif()
-set(HADOOP_SSL_ROOT "${SDL_EXTERNALS_PATH}/libraries/openssl-1.0.1e/")
-set(SVMTOOL_ROOT "${SDL_EXTERNALS_PATH}/libraries/svmtool++/")
-set(MAVEN_ROOT "${SDL_EXTERNALS_PATH}/../Shared/java/apache-maven-3.0.4/bin")
-set(TINYXMLCPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/tinyxmlcpp-2.5.4")
-set(TINYXMLCPP_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/tinyxmlcpp-2.5.4")
-set(CRYPTOPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/cryptopp-5.6.2")
-set(CRYPTOPP_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/cryptopp-5.6.2")
-set(LIBLINEAR_ROOT "${SDL_EXTERNALS_PATH}/libraries/liblinear-1.94")
-set(PROTOBUF_ROOT "${SDL_EXTERNALS_PATH}/libraries/protobuf-2.4.1")
-# </NOT_OPEN_SOURCE>
 
 #
 # Windows specific settings.
@@ -398,12 +273,6 @@ if(WIN32)
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
   set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.5")
 
-  # <NOT_OPEN_SOURCE>
-  set(DB_ROOT_PATH "${SDL_EXTERNALS_PATH}/libraries/db-5.3.15")
-  set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-4.8")
-  set(IRSTLM_ROOT "${SDL_EXTERNALS_PATH}/libraries/irstlm-5.20.00")
-  set(CDB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tinycdb-0.77")
-  # </NOT_OPEN_SOURCE>
 
   set(VS_MULTITHREADED_DEBUG_DLL_IGNORE_LIBRARY_FLAGS
     "/NODEFAULTLIB:libc.lib /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:tbb_debug.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib")
@@ -658,12 +527,6 @@ if(UNIX)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
     set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-4.8")
 
-    # <NOT_OPEN_SOURCE>
-    set(DB_ROOT_PATH "${SDL_EXTERNALS_PATH}/libraries/db-5.3.15")
-    set(IRSTLM_ROOT "${SDL_EXTERNALS_PATH}/libraries/irstlm-5.70.04")
-    set(SRILM_ROOT "${SDL_EXTERNALS_PATH}/libraries/srilm-v1.5.12")
-    set(CDB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tinycdb-0.78")
-    # </NOT_OPEN_SOURCE>
   endif()
 
   if(ANDROID)
@@ -727,11 +590,6 @@ if(UNIX)
    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
    set(Boost_USE_STATIC_LIBS OFF)
 
-   # <NOT_OPEN_SOURCE>
-   set(DB_ROOT_PATH "${SDL_EXTERNALS_PATH}/libraries/db-5.3.15")
-   set(SRILM_ROOT "${SDL_EXTERNALS_PATH}/libraries/srilm-1.5.12")
-   set(CDB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tinycdb-0.78")
-   # </NOT_OPEN_SOURCE>
 
    if(CMAKE_COMPILER_IS_GNUCXX)
      #    xmt_exe_linker_flags(-static -static-libgcc -static-libstdc++)
@@ -832,122 +690,6 @@ if(SDL_ENCRYPT)
   endif()
 endif()
 
-# <NOT_OPEN_SOURCE>
-
-find_package(cmph)
-MESSAGE(STATUS "CMPH Libraries: ${CMPH_LIBRARIES}")
-if(CMPH_FOUND)
-  add_definitions(-DCMPH_NOISY_LM)
-  MESSAGE(STATUS "Enabling Noisy LM build")
-endif()
-
-find_package(Zeromq)
-MESSAGE(STATUS "Zeromq include directory: ${ZEROMQ_INCLUDE_DIR}")
-MESSAGE(STATUS "Zeromq Library: ${ZEROMQ_LIBRARY}")
-if(ZEROMQ_FOUND)
-  add_definitions(-DHAVE_ZMQ)
-endif()
-
-find_package(Svmtool)
-MESSAGE(STATUS "Svmtool Library: ${SVMTOOL_LIBRARY}")
-MESSAGE(STATUS "Svmtool Include: ${SVMTOOL_INCLUDE_DIR}")
-if(SVMTOOL_FOUND)
-  add_definitions(-DHAVE_SVMTOOL)
-endif()
-
-find_package(Liblinear)
-MESSAGE(STATUS "Liblinear Library: ${LIBLINEAR_LIBRARY}")
-MESSAGE(STATUS "Liblinear Include: ${LIBLINEAR_INCLUDE_DIR}")
-if(LIBLINEAR_FOUND)
-  add_definitions(-DHAVE_LIBLINEAR)
-endif()
-
-find_package(Tinyxmlcpp)
-message(STATUS "TinyXML++ library: ${TINYXMLCPP_LIBRARY}")
-message(STATUS "TinyXML++ include directory: ${TINYXMLCPP_INCLUDE_DIR}")
-
-set(HAVE_SRILM 1)
-if(${HAVE_SRILM})
-  find_package(SRILM)
-  MESSAGE(STATUS "SRILM Libraries: ${SRILM_LIBRARIES}")
-  if(${SRILM_FOUND})
-    add_definitions(-DHAVE_SRILM)
-  else()
-    set(HAVE_SRILM 0)
-  endif()
-endif()
-
-find_package(IRSTLM)
-MESSAGE(STATUS "IrstLM Libraries: ${IRSTLM_LIBRARIES}")
-if(${IRSTLM_FOUND})
-  add_definitions(-DHAVE_IRSTLM)
-  set(HAVE_IRSTLM 1)
-endif()
-
-if(${BUILD_KENLM})
-  if(DEFINED ENV{SDL_EXTERNALS_SOURCE_PATH})
-      set(SDL_EXTERNALS_SOURCE_PATH $ENV{SDL_EXTERNALS_SOURCE_PATH})
-  else()
-    if(DEFINED ENV{XMT_EXTERNALS_SOURCE_PATH})
-      set(SDL_EXTERNALS_SOURCE_PATH $ENV{XMT_EXTERNALS_SOURCE_PATH})
-    else()
-      message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_SOURCE_PATH")
-    endif()
-  endif()
-  string(REPLACE "\\" "/" SDL_EXTERNALS_SOURCE_PATH ${SDL_EXTERNALS_SOURCE_PATH})
-
-  set(KENLM_INCLUDE_DIR ${SDL_EXTERNALS_SOURCE_PATH}/KenLM)
-  message(STATUS "KenLM include directory: ${KENLM_INCLUDE_DIR}")
-else()
-  set(KENLM_ROOT "${SDL_EXTERNALS_PATH}/libraries/KenLM-5.1.0")
-  set(KENLM_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/KenLM-5.1.0")
-  find_package(KenLM)
-  message(STATUS "KenLM libraries: ${KENLM_LIBRARIES}")
-  message(STATUS "KenLM include directory: ${KENLM_INCLUDE_DIR}")
-endif()
-add_definitions(-DHAVE_KENLM)
-set(HAVE_KENLM 1)
-
-# NPLM
-if(${LINUX})
-  set(NPLM_ROOT "${SDL_EXTERNALS_PATH}/libraries/nplm-ken")
-  set(NPLM_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/nplm-ken")
-  find_package(NPLM)
-  message(STATUS "NPLM include dir: ${NPLM_INCLUDE_DIR}")
-  message(STATUS "NPLM libs: ${NPLM_LIBRARIES}")
-  set(EIGEN_INCLUDE_DIR "${SDL_SHARED_EXTERNALS_PATH}/eigen-3.2.0")
-  set(TCLAP_INCLUDE_DIR "${SDL_SHARED_EXTERNALS_PATH}/tclap-1.2.1/include")
-  message(STATUS "EIGEN include dir: ${EIGEN_INCLUDE_DIR}")
-  message(STATUS "TCLAP include dir: ${TCLAP_INCLUDE_DIR}")
-  add_definitions(-DHAVE_NPLM)
-  set(HAVE_NPLM 1)
-endif()
-
-find_package(Protobuf REQUIRED)
-
-set(SDL_LM_LIBS LWLM)
-if(${HAVE_SRILM})
-  set(SDL_LM_LIBS ${SDL_LM_LIBS} ${SRILM_LIBRARIES})
-  if(UNIX)
-    if(NOT ANDROID)
-      set(SDL_LM_LIBS ${SDL_LM_LIBS} ${SDL_PTHREAD_LIB})
-    endif()
-  endif()
-endif()
-if(${HAVE_IRSTLM})
-  set(SDL_LM_LIBS ${SDL_LM_LIBS} ${IRSTLM_LIBRARIES})
-endif()
-if(${HAVE_NPLM})
-  set(SDL_LM_LIBS ${SDL_LM_LIBS} ${NPLM_LIBRARIES})
-endif()
-if(${HAVE_KENLM})
-  set(SDL_LM_LIBS ${SDL_LM_LIBS} ${KENLM_LIBRARIES})
-endif()
-if(CMPH_FOUND)
-  set(SDL_LM_LIBS ${SDL_LM_LIBS} ${CMPH_LIBRARIES} biglm)
-endif()
-
-# </NOT_OPEN_SOURCE>
 
 # Boost
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -1044,82 +786,6 @@ if(NOT ANDROID)
   MESSAGE(STATUS "log4cxx Include Directories: ${LOG4CXX_INCLUDE_DIR}")
 endif()
 
-# <NOT_OPEN_SOURCE>
-
-find_package(BerkeleyDB)
-MESSAGE(STATUS "Berkeley DB Libraries: ${DB_LIBRARIES}")
-MESSAGE(STATUS "Berkeley DB Include Directories: ${DB_INCLUDE_DIR}")
-
-
-option(SDL_TRY_LMDB "look for LMDB and use it" ON)
-if(USING_GCC AND GCC_VERSION VERSION_LESS "4.4.6")
-  MESSAGE(WARNING "FC12 is too old for fully-functional (robust mutex) LMDB - need LIBC 2.12 or later. get newer machines rebuild lmdb from xmt-externals-source!")
-endif()
-
-if (SDL_TRY_LMDB)
-  find_package(Lmdb)
-  MESSAGE(STATUS "LMDB Libraries: ${LMDB_LIBRARY}")
-  MESSAGE(STATUS "LMDB Include Directories: ${LMDB_INCLUDE_DIR}")
-endif()
-if(LMDB_FOUND)
-  xmt_compiled_setting(SDL_LMDB 1)
-else()
-  xmt_compiled_setting(SDL_LMDB 0)
-  set(LMDB_LIBRARY "")
-  message(WARNING "LMDB libraries not found - need newer than FC12 for pthread_mutexattr_setrobust and pthread_mutex_consistent (GLIBC_2.12 or later)")
-endif()
-
-find_package(CDB)
-MESSAGE(STATUS "CDB Libraries: ${CDB_LIBRARIES}")
-MESSAGE(STATUS "CDB Include Directories: ${CDB_INCLUDE_DIR}")
-
-if(WIN32)
-  set(HADOOP_FOUND 0)
-  set(HADOOP_SSL_FOUND 0)
-else()
-  find_package(Hadoop)
-  if(HADOOP_FOUND)
-    add_definitions(-DHAVE_HADDOP)
-  endif()
-  message(STATUS "Hadoop library: ${HADOOP_LIBRARIES}")
-  message(STATUS "Hadoop include directory: ${HADOOP_INCLUDE_DIR}")
-  message(STATUS "OpenSSL libraries for Hadoop: ${HADOOP_SSL_LIBRARY}, ${HADOOP_CRYPTO_LIBRARY}")
-  message(STATUS "OpenSSL include path for Hadoop: ${HADOOP_SSL_INCLUDE_DIR}")
-  set(_JAVA_PATHS "/usr/java/")
-endif()
-
-#
-# JNI to work with DFS
-#
-find_package(JNI)
-if(WIN32)
-  set(JAVA_INCLUDE_PATH "$ENV{JAVA_HOME}\\include")
-  set(JAVA_INCLUDE_PATH2 "$ENV{JAVA_HOME}\\include\\win32")
-endif()
-include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
-MESSAGE (STATUS "JNI header: ${JAVA_INCLUDE_PATH}")
-MESSAGE (STATUS "JVM shared library: ${JAVA_JVM_LIBRARY}")
-
-find_program(MAVEN_EXECUTABLE mvn ${MAVEN_ROOT} NO_DEFAULT_PATH)
-if(NOT MAVEN_EXECUTABLE)
-  MESSAGE(FATAL_ERROR "Maven was not found.")
-endif(NOT MAVEN_EXECUTABLE)
-
-find_package(Lexertl)
-
-if(AllHgBins)
-  message(STATUS "Will build all hypergraph bins.")
-else()
-  message(STATUS "Will only build essential hypergraph bins.")
-endif()
-
-if(XMT_GIT_SHA1)
-  xmt_quiet_compiled_setting(XMT_GIT_SHA1 1)
-  get_git_head_revision(GIT_REFSPEC GIT_SHA1 "${CMAKE_CURRENT_SOURCE_DIR}")
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
-endif()
-
-# </NOT_OPEN_SOURCE>
 
 # L-BFGS
 # Would use float (i.e., value 32) instead of double but gets aborts
@@ -1179,88 +845,8 @@ list(APPEND subDirectories
   Config
   CrfDemo
   HypDemo
-  # <NOT_OPEN_SOURCE>
-  CapList
-  AutoRule
-  BloomFilter
-  CancelSegment
-  CompoundSplitter
-  Constraints
-  Db
-  DecoderOutput
-  DecodersShared
-  DependencyParser
-  Encrypt
-  FeatureBot
-  Grammar
-  HypergraphExt
-  Kraken
-  LanguageModel
-  LmCapitalize
-  Lowercase
-  MaltServer
-  MapReduceDatabaseSplit
-  MapReduceFeatureBot
-  MinBayesRisk
-  MorphAnalyzer
-  OCRC
-  PhraseBased
-  ProcessYAML
-  RegexTokenizer
-  RemoteGrammar
-  Resources
-  RuleDumper
-  RuleFeatures
-  RuleParser
-  RuleSerializer
-  RuleStats
-  SearchReplace
-  Serializer
-  SimpleTransliterator
-  SpellChecker
-  StandaloneFeatureBot
-  StatisticalTokenizer
-  StatsDBSerializer
-  Symmetrizer
-  SyntaxBased
-  Test
-  TrainableCapitalizer
-  Tree
-  Trustscore
-  Utf8Normalize
-  ValidateConfig
-  ZeroMQ
-  xmt
-  # </NOT_OPEN_SOURCE>
   )
 
-# <NOT_OPEN_SOURCE>
-
-if(LIBLINEAR_FOUND)
-  list(APPEND subDirectories
-    Preorderer
-    )
-endif()
-
-if(SVMTOOL_FOUND)
-  list(APPEND subDirectories
-    PosTagger)
-endif()
-
-if(HADOOP_FOUND)
-  list(APPEND subDirectories
-    WordAligner
-    RuleExtractor
-    )
-endif()
-
-if(OPENFST_FOUND)
-  list(APPEND subDirectories
-    LatticeMinBayesRisk
-    )
-endif()
-
-# </NOT_OPEN_SOURCE>
 
 #CTest and CDash
 if(NOT ANDROID)
@@ -1283,13 +869,6 @@ set(INDIRECT_UTIL_LIB_DEPENDENCIES
   Vocabulary
   )
 
-# <NOT_OPEN_SOURCE>
-if(SDL_ENCRYPT)
-  set(ENCRYPT_LIB "encrypt_static")
-  list(APPEND INDIRECT_UTIL_LIB_DEPENDENCIES
-    ${ENCRYPT_LIB})
-endif()
-# </NOT_OPEN_SOURCE>
 
 set(UTIL_LIBRARY_NAME sdl_util)
 

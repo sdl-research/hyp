@@ -1,3 +1,17 @@
+// Copyright 2014 SDL plc
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 /**
    \file
 
@@ -23,12 +37,7 @@
 #include <sdl/Util/QuickExit.hpp>
 
 #include <sdl/Util/Performance.hpp>
-#if HYP_OPEN_SOURCE_RELEASE
 #include <sdl/Optimization/MockResourceManager.hpp>
-#else  // !HYP_OPEN_SOURCE_RELEASE
-#include <sdl/Resources/ResourceManager.hpp>
-#include <sdl/xmt/XMT.hpp>
-#endif  // !HYP_OPEN_SOURCE_RELEASE
 
 #include <sdl/Util/Enum.hpp>
 #include <sdl/Util/FindFile.hpp>
@@ -66,11 +75,6 @@ std::string getLibraryName(std::string const& stem) {
 int main(int ac, char* av[]) {
   sdl::Util::FinishLoggingAfterScope endLogging;
 
-#if HYP_OPEN_SOURCE_RELEASE
-#else  // !HYP_OPEN_SOURCE_RELEASE
-  int const numXmtThreads = 1;
-  sdl::xmt::XMT::init(numXmtThreads == 1); // number of *xmt* threads is always 1 even though we start some threads here. //TODO: check that
-#endif  // !HYP_OPEN_SOURCE_RELEASE
   using namespace sdl;
   using namespace sdl::Util;
 
@@ -175,15 +179,7 @@ int main(int ac, char* av[]) {
       SDL_THROW_LOG(Optimize, ConfigException, "Could not find config section called '"
                                                << optimizeSectionName << "' in " << configFile);
     }
-#if HYP_OPEN_SOURCE_RELEASE
     Resources::ResourceManager& resourceManager = Resources::mockResourceManager;
-#else  // !HYP_OPEN_SOURCE_RELEASE
-    sdl::xmt::XMT xmtInstance; // for resources only
-    xmtInstance.initThreads(numXmtThreads, true);
-    xmtInstance.showConfigOnLoadLP(showEffective, verbosity);
-    xmtInstance.loadLP(configNode);
-    Resources::ResourceManager& resourceManager = xmtInstance.getResourceManager();
-#endif  // !HYP_OPEN_SOURCE_RELEASE
 
     optProcConfig.testMode = testMode;
     if (!weightsPath.empty()) {

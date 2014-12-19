@@ -1,0 +1,6 @@
+#ifndef LW__CMAKECONFIG_HPP
+#define LW__CMAKECONFIG_HPP
+
+#define PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@"
+
+#endif
