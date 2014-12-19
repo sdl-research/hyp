@@ -807,7 +807,7 @@
 
 
 
-
+  set(LINK_DEPENDENCIES ${LINK_DEPENDENCIES} ${ICU_LIBRARIES})
 
 
 
@@ -1086,7 +1086,7 @@ endif()
 
 
 
-
+endif()
 
 
 
@@ -1217,7 +1217,7 @@ find_program(MAVEN_EXECUTABLE mvn ${MAVEN_ROOT} NO_DEFAULT_PATH)
 
 
 
-
+  SpellChecker
 
 
 
