@@ -118,9 +118,11 @@ void fstUnion(const IHypergraph<Arc>& sourceFst, IMutableHypergraph<Arc>* pTarge
   ASSERT_VALID_HG(*pTargetFst);
 }
 
+
 template <class Arc>
 void hgUnion(const IHypergraph<Arc>& sourceHg, IMutableHypergraph<Arc>* pTargetHg) {
-  if (sourceHg.isFsm() && pTargetHg->isFsm()) { fstUnion(sourceHg, pTargetHg); } else {
+  if (sourceHg.isFsm() && pTargetHg->isFsm()) { fstUnion(sourceHg, pTargetHg);
+  } else {
     UnionHelper::ArcCopyFct<Arc> copier(sourceHg, pTargetHg);
     sourceHg.forArcs(copier);
 
@@ -132,6 +134,50 @@ void hgUnion(const IHypergraph<Arc>& sourceHg, IMutableHypergraph<Arc>* pTargetH
     pTargetHg->addArc(new Arc(Head(superfinal), Tails(copier.getNewFinal(), epsLabelStateId)));
     pTargetHg->setFinal(superfinal);
   }
+}
+
+/**
+ * Do union of a list of fsts with one single common start state.
+ * More efficient than running fstUnion in a loop.
+ * If you have a list of fsts with unbalanced sizes, make sure
+ * the fst at position 0 is the biggest one.
+ */
+template<class Arc>
+void fstMultiUnion(std::vector< shared_ptr< IMutableHypergraph<Arc> > > &fsts) {
+  SDL_DEBUG(Hypergraph.Union, "Enter fstMultiUnion");
+
+  if (fsts.size() < 2)
+    SDL_THROW_LOG(Hypergraph.Union
+                  , InvalidInputException
+                  , "You need at least two fsts to make a union");
+
+  IMutableHypergraph<Arc> *pTargetFst =&*fsts[0];
+  StateId origStartSid = pTargetFst->start();
+  StateId origFinalSid = pTargetFst->final();
+  StateId epsLabelState = pTargetFst->addState(EPSILON::ID);
+  StateId unionStartSid = pTargetFst->addState();
+  StateId unionFinalSid = pTargetFst->addState();
+  pTargetFst->setStart(unionStartSid);
+  pTargetFst->setFinal(unionFinalSid);
+  pTargetFst->addArc(new Arc(Head(origStartSid),
+                             Tails(unionStartSid, epsLabelState)));
+
+  pTargetFst->addArc(new Arc(Head(unionFinalSid),
+                               Tails(origFinalSid, epsLabelState)));
+
+  for (std::size_t k = 1
+           ; k < fsts.size()
+           ; ++k ) {
+    IMutableHypergraph<Arc> &sourceFst =*fsts[k];
+  // Write sourceFst into pTargetFst
+    UnionHelper::ArcCopyFct<Arc> fct(sourceFst, pTargetFst);
+    sourceFst.forArcs(fct); // must store arcs
+    pTargetFst->addArc(new Arc(Head(fct.getNewStart()),
+                               Tails(unionStartSid, epsLabelState)));
+    pTargetFst->addArc(new Arc(Head(unionFinalSid),
+                               Tails(fct.getNewFinal(), epsLabelState)));
+  }
+  ASSERT_VALID_HG(*pTargetFst);
 }
 
 
