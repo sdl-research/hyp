@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using namespace sdl;
+using namespace sdl::Hypergraph;
 typedef ViterbiWeight Weight;
 typedef ArcTpl<Weight> Arc;
-
-shared_ptr<IVocabulary> voc(createDefaultVocab());
-SymId john = voc->addSymbol("John", kTerminal);
-SymId loves = voc->addSymbol("loves", kTerminal);
-SymId likes = voc->addSymbol("likes", kTerminal);
-SymId mary = voc->addSymbol("Mary", kTerminal);
-SymId vp = voc->addSymbol("VP", kNonTerminal);
-
 MutableHypergraph<Arc> hyp;
-hyp.setVocabulary(voc);
+IVocabularyPtr voc(createDefaultVocab());
+Sym john = voc->add("John", kTerminal);
+Sym loves = voc->add("loves", kTerminal);
+Sym likes = voc->add("likes", kTerminal);
+Sym mary = voc->add("Mary", kTerminal);
+Sym vp = voc->add("VP", kNonTerminal);
 
 StateId s0 = hyp.addState(vp);
 StateId s1 = hyp.addState();
@@ -37,4 +36,5 @@ hyp.addArc(new Arc(Head(s0),
 hyp.addArc(new Arc(Head(s1), Tails(hyp.addState(john), s0),
                    Weight(8.0f)));
 
+hyp.setVocabulary(voc);
 hyp.setFinal(s1);

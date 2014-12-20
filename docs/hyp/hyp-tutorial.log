@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  18 DEC 2014 23:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014) (preloaded format=pdflatex 2014.5.25)  19 DEC 2014 17:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1698,7 +1698,7 @@ Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1012.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1012.
 
 Package rerunfilecheck Info: File `hyp-tutorial.out' has not changed.
-(rerunfilecheck)             Checksum: 1EB0E84FAF736DE5532A833AEC1433E8;2366.
+(rerunfilecheck)             Checksum: 816149BDB3A8FDEFED2E47FEFB11B54A;2355.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -1709,10 +1709,10 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1012.
  ) 
 Here is how much of TeX's memory you used:
- 30773 strings out of 493117
- 591117 string characters out of 6135433
- 688043 words of memory out of 5000000
- 33320 multiletter control sequences out of 15000+600000
+ 30780 strings out of 493117
+ 591174 string characters out of 6135433
+ 689043 words of memory out of 5000000
+ 33327 multiletter control sequences out of 15000+600000
  149271 words of font info for 179 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  68i,21n,82p,10397b,1390s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1728,7 +1728,7 @@ dist/fonts/type1/adobe/utopia/putr8a.pfb></usr/local/texlive/2014/texmf-dist/fo
 nts/type1/adobe/utopia/putri8a.pfb></usr/local/texlive/2014/texmf-dist/fonts/ty
 pe1/public/tex-gyre/qcrb.pfb></usr/local/texlive/2014/texmf-dist/fonts/type1/pu
 blic/tex-gyre/qcrr.pfb>
-Output written on hyp-tutorial.pdf (25 pages, 279607 bytes).
+Output written on hyp-tutorial.pdf (25 pages, 279609 bytes).
 PDF statistics:
  865 PDF objects out of 1000 (max. 8388607)
  759 compressed objects within 8 object streams

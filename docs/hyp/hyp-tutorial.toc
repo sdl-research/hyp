@@ -26,7 +26,7 @@
 \contentsline {subsection}{\numberline {5.2}Hypergraph properties}{19}{subsection.5.2}
 \contentsline {subsubsection}{\numberline {5.2.1}Arc storage}{19}{subsubsection.5.2.1}
 \contentsline {subsubsection}{\numberline {5.2.2}Canonical lexical states}{19}{subsubsection.5.2.2}
-\contentsline {subsection}{\numberline {5.3}Calling an operation on a hypergraph}{20}{subsection.5.3}
+\contentsline {subsection}{\numberline {5.3}Operating on a hypergraph}{20}{subsection.5.3}
 \contentsline {section}{\numberline {6}Optimizing hypergraph feature weights}{20}{section.6}
 \contentsline {subsection}{\numberline {6.1}Model}{20}{subsection.6.1}
 \contentsline {subsection}{\numberline {6.2}Defining the search space}{21}{subsection.6.2}
