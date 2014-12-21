@@ -1,0 +1,12 @@
+unset(LBFGS_INCLUDE_DIR CACHE)
+find_path(LBFGS_INCLUDE_DIR lbfgs.h ${LBFGS_ROOT}/include NO_DEFAULT_PATH)
+unset(LBFGS_LIB CACHE)
+find_library(LBFGS_LIB NAMES lbfgs PATHS ${LBFGS_ROOT}/lib NO_DEFAULT_PATH)
+
+if (LBFGS_INCLUDE_DIR)
+  SET(LBFGS_FOUND 1)
+  SET(LBFGS_LIB optimized ${LBFGS_LIB} debug ${LBFGS_LIB})
+  MESSAGE(STATUS "Found L-BFGS library in ${LBFGS_ROOT}")
+else()
+  MESSAGE(FATAL_ERROR "Could not locate L-BFGS library in ${LBFGS_ROOT}")
+endif()

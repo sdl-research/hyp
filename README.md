@@ -1,4 +1,4 @@
-% hyp
+# `hyp` -- The Hypergraph Toolkit
 
 `hyp` is a general toolkit for the representation,
 manipulation, and optimization of weighted hypergraphs. Finite-state
@@ -18,35 +18,68 @@ for hypergraphs as well as many algorithms: `compose`, `project`,
 algorithm, and more. In addition, it provides functionality to
 optimize hypergraph feature weights from training data.
 
+## Documentation
+
 For documentation see
 [`hyp-tutorial.pdf`](https://github.com/hypergraphs/hyp/raw/master/hyp-tutorial.pdf)
-provided in this directory for your immediate gratification. (you can also build the pdf with
-[TeX](https://www.tug.org/texlive/): `docs/hyp/hyp-tutorial.tex`)
+provided in this directory for your immediate gratification. (You can
+also build the PDF with [TeX](https://www.tug.org/texlive/):
+`docs/hyp/hyp-tutorial.tex`)
 
-Build the library by running [CMake](http://www.cmake.org/download/)
-on the project sources in the `sdl` directory, after setting
-environment variable `SDL_EXTERNALS_PATH` to an appropriate checkout
-of the hypergraph library dependencies (which you can build yourself
-from source if you prefer, but you will need to use or modify our
-`FindXXXX.cmake` scripts).
+For documentation of the source code API, consider generating
+[Doxygen](http://www.doxygen.org/): `doxygen doxy/doxy.conf`.
 
-For example, on windows: `set SDL_EXTERNALS_PATH=c:/src/sdl-externals/Windows` and then `cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 10 Win64" c:/src/hyp/sdl`
+## Build
 
-Or on linux:
-```
-export SDL_EXTERNALS_PATH=$HOME/src/sdl-externals/FC12;
-git clone https://github.com/hypergraphs/hyp.git;
-cd hyp;
-mkdir build-hyp;
-cd build-hyp;
-cmake -DCMAKE_BUILD_TYPE=Release ../sdl && make -j4 VERBOSE=1`
-```
+To build `hyp`, follow the following steps:
 
-Then, when you're ready to use or improve the source code for your own
-projects, consider generating [Doxygen](http://www.doxygen.org/):
-`doxygen doxy/doxy.conf`.
+* In addition to the `hyp` repository, clone the
+[sdl-externals](https://github.com/hypergraphs/sdl-externals)
+repository, which contains pre-built third-party libraries used by
+`hyp`.
+
+### Windows
+
+* Set an environment variable `SDL_EXTERNALS_PATH` to point to the
+  `Windows` subdirectory of your `sdl-externals` clone. Example: `set
+  SDL_EXTERNALS_PATH=c:/src/sdl-externals/Windows` 
+
+* Create and change to a directory `build-hyp` inside your `hyp`
+  directory.
+
+* Run [cmake](http://www.cmake.org/) like this: `cmake
+  -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 10 Win64"
+  c:/src/hyp/sdl`
+
+* Then build the project as usual with Visual Studio.
+
+### Linux
+
+* Set an environment variable `SDL_EXTERNALS_PATH` to point to the
+  `FC12` subdirectory of your `sdl-externals` clone. This also works
+  for CentOS 6 and possibly other Linux distributions. Example:
+  `export SDL_EXTERNALS_PATH=$HOME/sdl-externals/FC12`
+
+* Create and change to a directory `build-hyp` inside your `hyp`
+  directory.
+
+* Run [cmake](http://www.cmake.org/) like this: `cmake
+-DCMAKE_BUILD_TYPE=Release ../sdl`
+
+* Run `make`: make -j4
+
+## Pull Requests
 
 If you're willing to give us permission to use your source code, and
 any patents required for it, we welcome pull requests. Keep your diffs
 small, or talk to us before getting too crazy so we can save you some
 wasted effort.
+
+## Citations
+
+If you use the `hyp` toolkit in your publication, please cite the
+tutorial document: 
+
+Markus Dreyer and Jonathan Graehl (2014): Tutorial: The hyp hypergraph
+toolkit. Url:
+https://github.com/hypergraphs/hyp/raw/master/hyp-tutorial.pdf

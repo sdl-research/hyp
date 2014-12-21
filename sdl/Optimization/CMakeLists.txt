@@ -33,7 +33,7 @@ target_link_libraries(${PROJECT_NAME}
   ${LINK_DEPENDENCIES}
   )
 
-xmt_rpath(${PROJECT_BINARY_DIR}/../CrfDemo)
+sdl_rpath(${PROJECT_BINARY_DIR}/../CrfDemo)
 
 # Executable for optimizing feature weights
 set(TRAIN_EXE Optimize)

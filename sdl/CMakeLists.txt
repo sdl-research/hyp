@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.7)
 project (sdl)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/")
+
 include(SdlHelperFunctions.cmake)
 
 if(DEFINED ENV{SDL_EXTERNALS_PATH})
@@ -40,10 +40,20 @@ else()
   set(SDL_DEBUG_SYMBOLS off)
 endif()
 
+if(WIN32)
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Windows")
+elseif(APPLE)
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Apple")
+elseif(ANDROID)
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Android")
+elseif(UNIX)
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/FC12")
+endif()
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Shared")
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+
 if(DEFINED SDL_EXTERNALS_PATH)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SDL_EXTERNALS_PATH}/misc/cmake)
   set(SDL_SHARED_EXTERNALS_PATH "${SDL_EXTERNALS_PATH}/../Shared/cpp")
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SDL_SHARED_EXTERNALS_PATH}/misc/cmake)
   message(STATUS "SDL_EXTERNALS_PATH=${SDL_EXTERNALS_PATH}")
 else()
   message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_PATH")
@@ -56,7 +66,7 @@ option(OPEN_SOURCE_RELEASE ON)
 if(NOT DEFINED SDL_FLOAT)
   set(SDL_FLOAT 32)
 endif()
-xmt_compiled_setting(SDL_FLOAT ${SDL_FLOAT})
+sdl_compiled_setting(SDL_FLOAT ${SDL_FLOAT})
 
 
 if(${SDL_FLOAT} MATCHES 32)
@@ -76,7 +86,7 @@ add_definitions(-DU_HAVE_STD_STRING=1)
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
   set(SDL_DEBUG 1)
   set(SDL_RELEASE 0)
-  xmt_quiet_compiled_setting(SDL_MEMSTATS 0) # detailed malloc pool info if run without tbb
+  sdl_quiet_compiled_setting(SDL_MEMSTATS 0) # detailed malloc pool info if run without tbb
 else()
   set(SDL_DEBUG 0)
   set(SDL_RELEASE 1)
@@ -84,10 +94,10 @@ endif()
 
 if(SDL_DEBUG)
   # comment this out for very-slightly better performance (but spurious valgrind warnings)
-  xmt_compiled_setting(SDL_VALGRIND 1)
+  sdl_compiled_setting(SDL_VALGRIND 1)
 else()
   # comment this out for very-slightly better performance (but spurious valgrind warnings)
-  xmt_compiled_setting(SDL_VALGRIND 1)
+  sdl_compiled_setting(SDL_VALGRIND 1)
 endif()
 
 if(LINUX)
@@ -133,18 +143,18 @@ if("${CMAKE_CXX_COMMAND}" MATCHES "analyzer")
   set($ENV{CCC_CXX} clang++)
 endif()
 # later on we can strip symbols from release, or we can build without it (might be faster)
-xmt_enable_debug_info()
+sdl_enable_debug_info()
 
 if(UNIX)
   if(NOT CMAKE_COMPILER_IS_CLANGXX)
-    xmt_linker_flags(-shared-libgcc)
+    sdl_linker_flags(-shared-libgcc)
   endif()
   ## shared-libgcc is required if you want to catch exceptions across library /
   ## program boundaries e.g. in main (without the exception simply triggering
   ## abort()
   if(SDL_GPROF)
     add_definitions("-pg")
-    xmt_linker_flags(-pg)
+    sdl_linker_flags(-pg)
     message(STATUS "Activated gprof flags")
   endif()
 endif()
@@ -167,7 +177,7 @@ if(ANDROID)
   endmacro()
 endif()
 
-set(xmt_STAGE_PREFIX ${CMAKE_BINARY_DIR}/stage) #this is the stage/installation dir
+set(sdl_STAGE_PREFIX ${CMAKE_BINARY_DIR}/stage) #this is the stage/installation dir
 
 include(GetGitRevisionDescription)
 
@@ -188,16 +198,15 @@ endif()
 # Initialize unit testing.
 #
 if(NOT ANDROID)
-  set(xmt_UTEST_DIR ${PROJECT_BINARY_DIR}/logs/unittests)
-  if(NOT EXISTS ${xmt_UTEST_DIR})
-    make_directory(${xmt_UTEST_DIR})
+  set(sdl_UTEST_DIR ${PROJECT_BINARY_DIR}/logs/unittests)
+  if(NOT EXISTS ${sdl_UTEST_DIR})
+    make_directory(${sdl_UTEST_DIR})
   endif()
   enable_testing()
 endif()
 
+
 set(UTF8_ROOT "${SDL_SHARED_EXTERNALS_PATH}/utf8")
-set(LMDB_ROOT "${SDL_EXTERNALS_PATH}/libraries/lmdb")
-set(LMDB_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/lmdb")
 set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.3.0-newapi")
 if(UNIX)
   set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.1")
@@ -243,13 +252,13 @@ if(WIN32)
   # /Gm option affects debug builds, too (and is faster if you have the
   # processors)
 
-  xmt_linker_flags(/machine:x64)
+  sdl_linker_flags(/machine:x64)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od")
   if(SDL_VALIDATION_BUILD)
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Od") # disable optimization for faster compile
     message(STATUS "SDL_VALIDATION_BUILD - faster (no optimization) build for Windows")
   else()
-    xmt_linker_flags(/LTCG)
+    sdl_linker_flags(/LTCG)
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi /GL") # some debugging info for actual release build
     message(STATUS "!SDL_VALIDATION_BUILD - optimized build for Windows")
   endif()
@@ -335,7 +344,7 @@ if(USING_GCC)
       add_definitions(-Wno-type-limits)
       add_definitions(-Wno-maybe-uninitialized)
       if(APPLE)
-        # xmt_enable_cpp11()
+        # sdl_enable_cpp11()
       endif()
     endif()
     if(GCC_VERSION VERSION_LESS 4.9)
@@ -354,9 +363,9 @@ elseif(USING_CLANG)
   add_definitions("-Wno-deprecated-declarations")
   # note: llvm libc++ might not be compatible with some of our externals; you can use a libstdc++ from a recent GCC (e.g. 4.7) instead #-stdlib=libc++")
   if(USING_SCAN_BUILD)
-    xmt_enable_cpp11()
+    sdl_enable_cpp11()
   endif()
-  # xmt_enable_cpp11()
+  # sdl_enable_cpp11()
 else ()
   message(WARNING "Your C++ compiler does not support C++11.")
 endif()
@@ -424,14 +433,14 @@ if(CMAKE_COMPILER_IS_CLANGXX)
   if (USE_CLANG_SANITIZE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
-    xmt_linker_flags(-Wl,--no-undefined)
+    sdl_linker_flags(-Wl,--no-undefined)
 
     add_definitions("-fno-omit-frame-pointer -O1 -fno-optimize-sibling-calls")
     message(INFO "using clang sanitize, which might have significant (2-3x) runtime overhead - disable USE_CLANG_SANITIZE cmake option if you want full speed")
     message(INFO "using clang sanitizes: ${SDL_CLANG_SANITIZES}")
     add_definitions(${SDL_CLANG_SANITIZES})
     #${SDL_CLANG_SANITIZES}
-    xmt_linker_flags(${SDL_CLANG_SANITIZES})
+    sdl_linker_flags(${SDL_CLANG_SANITIZES})
     SET(CMAKE_LINKER "clang++") # needed for sanitizes
 
     #  When linking shared libraries, the AddressSanitizer run-time is not
@@ -445,11 +454,11 @@ if(CMAKE_COMPILER_IS_CLANGXX)
   # libstdc++ for some low-level features such as exception objects, rtti and
   # memory allocation.
   if(APPLE)
-    # xmt_clang_stdlib(c)
+    # sdl_clang_stdlib(c)
     # libc++ is not yet fully working on linux: http://libcxx.llvm.org/results.Linux.html
-    xmt_clang_stdlib(stdc)
+    sdl_clang_stdlib(stdc)
   else()
-    xmt_clang_stdlib(stdc)
+    sdl_clang_stdlib(stdc)
   endif()
 else()
   set(SDL_PTHREAD_LIB pthread)
@@ -508,7 +517,7 @@ if(UNIX)
 
   set(CMAKE_CXX_FLAGS_RELEASE "${SDL_O3} ${SDL_CFLAGS_ALL} -Wuninitialized ${SDL_RELEASE_OPTIMIZATIONS} ${SDL_UNSAFE_MATH}")
 
-  xmt_linker_flags(${SDL_UNSAFE_MATH})
+  sdl_linker_flags(${SDL_UNSAFE_MATH})
 
   #CPU:
   if(NOT ANDROID)
@@ -530,7 +539,7 @@ if(UNIX)
   endif()
 
   if(ANDROID)
-    xmt_exe_linker_flags(-static)
+    sdl_exe_linker_flags(-static)
     set(Boost_find_version 1.49)
     set(Boost_ADDITIONAL_VERSIONS "1.49" "1.49.0")
     set(Boost_NO_SYSTEM_PATHS 1)
@@ -582,9 +591,9 @@ if(UNIX)
    endif()
    if(APPLE_USE_BOOST_1_54)
      # https://svn.boost.org/trac/boost/ticket/8092 std::move not defined in xcode libstdc++ with --std=c++11
-     #xmt_enable_cpp11()
+     #sdl_enable_cpp11()
    else()
-     xmt_enable_cpp11()
+     sdl_enable_cpp11()
    endif()
 
    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
@@ -592,7 +601,7 @@ if(UNIX)
 
 
    if(CMAKE_COMPILER_IS_GNUCXX)
-     #    xmt_exe_linker_flags(-static -static-libgcc -static-libstdc++)
+     #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
    else()
      #clang
      add_definitions("-Wno-mismatched-tags -Wno-gnu")
@@ -679,18 +688,6 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDe
 endif()
 
 
-if(SDL_ENCRYPT)
-  find_package(Cryptopp)
-  message(STATUS "Crypto++ library: ${CRYPTOPP_LIBRARY}")
-  message(STATUS "Crypto++ include directory: ${CRYPTOPP_INCLUDE_DIR}")
-  if(${CRYPTOPP_FOUND})
-    xmt_compiled_setting(SDL_ENCRYPT 1)
-  else()
-    message(FATAL_ERROR "Crypto++ not found - set SDL_ENCRYPT to off")
-  endif()
-endif()
-
-
 # Boost
 set(Boost_USE_STATIC_RUNTIME OFF)
 SET(boost_libs
@@ -770,7 +767,7 @@ if(NOT Boost_FOUND)
   message(FATAL_ERROR "Boost libraries not found")
 endif()
 
-xmt_rpath(${Boost_LIBRARY_DIRS})
+sdl_rpath(${Boost_LIBRARY_DIRS})
 
 find_package(YamlCpp)
 message(STATUS "yaml-cpp library: ${YAML_CPP_LIBRARY}")
@@ -791,7 +788,7 @@ endif()
 # Would use float (i.e., value 32) instead of double but gets aborts
 # due to rounding errors:
 set(LBFGS_FLOAT "64" CACHE STRING "Float type for L-BFGS")
-xmt_compiled_setting(LBFGS_FLOAT ${LBFGS_FLOAT})
+sdl_compiled_setting(LBFGS_FLOAT ${LBFGS_FLOAT})
 if(NOT DEFINED LBFGS_ROOT)
   if(${LBFGS_FLOAT} MATCHES 32)
     set(LBFGS_ROOT "${SDL_EXTERNALS_PATH}/libraries/liblbfgs-b2a54a9-float") # L-BFGS compiled with float
@@ -830,7 +827,7 @@ find_package(UTF8)
 if(NOT DEFINED SDL_LIB_TYPE OR SDL_LIB_TYPE STREQUAL "Shared")
   set(SDL_LIB "xmt_shared")
 else()
-  set(SDL_LIB "xmt_static")
+  set(SDL_LIB "sdl_static")
 endif()
 
 if(BUILD_KENLM)
@@ -876,24 +873,18 @@ set(UTIL_LIBRARY_NAME sdl_util)
 # use Util header-only)
 set(UTIL_LIBRARIES ${UTIL_LIBRARY_NAME} ${INDIRECT_UTIL_LIB_DEPENDENCIES})
 
-macro(xmt_lwutil_includes)
+macro(sdl_lwutil_includes)
   include_directories(${Boost_INCLUDE_DIRS})
   include_directories(${CMAKE_SOURCE_DIR}/..)
   include_directories(${LOG4CXX_INCLUDE_DIR})
   include_directories(${ICU_INCLUDE_DIR})
-  include_directories(${LMDB_INCLUDE_DIR})
   include_directories(${YAML_CPP_INCLUDE_DIR})
   include_directories(${TBB_INCLUDE_DIR})
   include_directories(${UTF8_INCLUDE_DIR})
   include_directories(${ZEROMQ_INCLUDE_DIR})
   include_directories(${ZLIB_INCLUDE_DIR})
-  include_directories(${DB_INCLUDE_DIR})
 endmacro()
 
-macro(xmt_db_includes)
-  xmt_lwutil_includes()
-  include_directories(${TINYXMLCPP_INCLUDE_DIR})
-endmacro()
 
 set(INDIRECT_CONFIG_LIB_DEPENDENCIES
   ${UTIL_LIBRARIES}
@@ -909,7 +900,7 @@ set(INDIRECT_CONFIG_LIB_DEPENDENCIES
 #require caller use the configure library for that purpose
 set(CONFIG_LIBRARIES Config ${INDIRECT_CONFIG_LIB_DEPENDENCIES})
 
-xmt_finish_cflags()
+sdl_finish_cflags()
 
 # Add subdirectories and find their unit test executables.
 
@@ -947,20 +938,20 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose
 add_custom_target(doc ${CMAKE_SOURCE_DIR}/doxygenate WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 if(${OPEN_SOURCE_RELEASE})
-  xmt_quiet_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1)
+  sdl_quiet_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1)
 else()
   if(${SDL_DEVELOPMENT})
     # if not set, then enabled for debug only:
-    xmt_quiet_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
+    sdl_quiet_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
   endif()
   if(${SDL_DEBUG})
     if(${SDL_PRODUCTION})
-      xmt_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
+      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
     else()
-      xmt_quiet_compiled_setting(SDL_OBJECT_COUNT 1)
+      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 1)
       # ~1% runtime cost but can tell you exactly what type of object leaks in single thread
     endif()
   else()
-    xmt_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
+    sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
   endif()
 endif()
