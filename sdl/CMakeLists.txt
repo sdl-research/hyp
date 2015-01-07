@@ -79,9 +79,7 @@ endif()
 
 # speedup; see xmt/LexicalCast.hpp for rationale
 add_definitions(-DBOOST_LEXICAL_CAST_ASSUME_C_LOCALE)
-
 add_definitions(-DU_HAVE_STD_STRING=1)
-
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
   set(SDL_DEBUG 1)
