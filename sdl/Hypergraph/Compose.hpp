@@ -1135,10 +1135,8 @@ struct ComposeTransform : TransformBase<Transform::Inout> {
       SDL_THROW_LOG(
           Hypergraph.Compose, ConfigException,
           "fst '" << fstname << "' has different vocabulary '" << vocabName(fst->getVocabulary().get())
-                  << " from input vocabulary '" << vocabName(r.get())
-                  << " - check 'input-vocab' option or 'vocabulary: " << defaultVocab
-                  << "' module or resource option to refer to the same vocabulary resource. otherwise, use "
-                     "hypergraph resources or you'll have a bad time.");
+          << "' from input vocabulary '" << vocabName(r.get())
+          << "' - reconfigure so 'input-vocab' agrees with 'hg-resource.vocabulary:' or 'compose.vocabulary:'.");
     }
     return r;
   }

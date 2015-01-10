@@ -63,7 +63,7 @@ inline bool isInAngleBrackets(std::string const& str) {
 /**
    \return symbol from string
 
-   unless output, if <xmt-block>, then increment numBlockStartSymsSeen
+   unless output, if <xmt-blockN>, then increment numBlockStartSymsSeen
 
    Special syms like <eps> are not enclosed in quotes but in < >. If the parsed
    text contains other syms like "the" or "<html>", they will be in quotes.

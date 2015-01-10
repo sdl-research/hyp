@@ -75,6 +75,7 @@ struct SpecialSymbolsOrder {
 
 namespace sdl {
 
+/// must be a multiple of 10
 SymInt const SDL_NUM_BLOCKS = 1000;
 
 namespace Vocabulary {
@@ -201,6 +202,15 @@ inline BlockId blockIndexForStart(Sym sym) {
  */
 inline BlockId getBlockId(Sym sym) {
   return isBlockStartSymbol(sym) ? blockIdForStart(sym) : 0;
+}
+
+inline BlockId getBlockOp(Sym sym) {
+  return sym.id() - BLOCK_END::ID.id();
+}
+
+inline bool isBlockOp(SymIdInt blockOp) {
+  assert(blockOp >= 0);
+  return blockOp <= SDL_NUM_BLOCKS;
 }
 
 inline void checkBlockId(BlockId id) {

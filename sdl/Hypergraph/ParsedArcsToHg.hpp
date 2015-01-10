@@ -37,7 +37,7 @@ void parsedArcsToHg(ParsedArcs const& arcs
   assert(result->size() == 0);
   typedef typename Arc::Weight Weight;
 
-  // increments on each <xmt-block> symbol
+  // increments on each <xmt-blockN> symbol
   std::size_t numBlockStartSymsSeen = 0;
 
   IVocabularyPtr pVoc = result->getVocabulary();

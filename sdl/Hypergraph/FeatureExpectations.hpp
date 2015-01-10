@@ -65,10 +65,12 @@ struct AccumulateExpectedValuesFct {
   typedef LogWeightTpl<FloatT> LogW;
   typedef MapT Map;
 
-  AccumulateExpectedValuesFct(boost::ptr_vector<LogW> const& insideWeights,
+  IHypergraphStates const& hg_;
+
+  AccumulateExpectedValuesFct(IHypergraphStates const& hg, boost::ptr_vector<LogW> const& insideWeights,
                               boost::ptr_vector<LogW> const& outsideWeights,
                               Map* pResultMap)
-      : insideWeights_(insideWeights),
+      : hg_(hg), insideWeights_(insideWeights),
         outsideWeights_(outsideWeights),
         pResultMap_(pResultMap) {}
 
@@ -110,8 +112,8 @@ struct AccumulateExpectedValuesFct {
     StateIdContainer const& tails = arc->tails();
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       StateId const tailId = *i;
-      assert(insideWeights_.size() > tailId);
-      Hypergraph::timesBy(insideWeights_[tailId], result);
+      if (!hg_.isAxiom(tailId))
+        Hypergraph::timesBy(insideWeights_[tailId], result);
     }
     return result;
   }
@@ -147,10 +149,10 @@ computeFeatureExpectations(IHypergraph<Arc> const& hg,
   // Run inside/outside algorithm in log semiring:
   boost::ptr_vector<LogW> insideWeights;
   boost::ptr_vector<LogW> outsideWeights;
-  insideAlgorithm(logWeightHg, &insideWeights);
-  outsideAlgorithm(logWeightHg, insideWeights, &outsideWeights);
+  insideAlgorithm(logWeightHg, &insideWeights, false);
+  outsideAlgorithm(logWeightHg, insideWeights, &outsideWeights, false);
 
-  AccumulateExpectedValuesFct<FloatT, Map> fct(insideWeights, outsideWeights, pResultMap);
+  AccumulateExpectedValuesFct<FloatT, Map> fct(hg, insideWeights, outsideWeights, pResultMap);
   hg.visitArcs(fct);
 
   // Negative log of sum over all paths (used for global

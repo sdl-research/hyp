@@ -44,6 +44,9 @@ namespace Hypergraph {
    sets sum the outside score (with final as the root) for sid, assuming the
    outside scores of all the heads of outarcs of sid are already known (and all
    the inside scores, of course). assumes commutative Weight
+
+   insideScores needs to be generated for all states, not just the nonlexical
+   ones (i.e. enable includingLeaves)
 */
 template <class Arc>
 void outsideFromInside(StateId stateId
@@ -51,7 +54,8 @@ void outsideFromInside(StateId stateId
                        , boost::ptr_vector<typename Arc::Weight> const& insideScores
                        , boost::ptr_vector<typename Arc::Weight> const& outsideScores
                        , typename Arc::Weight &sum
-                       , StateId final)
+                       , StateId final
+                       , bool haveInsideForAxiom = true)
 {
   SDL_TRACE(Hypergraph.OutsideAlgorithm,
             "Computing outside score for " << stateId << ", sum=" << sum);
@@ -63,22 +67,24 @@ void outsideFromInside(StateId stateId
       Arc const& arc = *hg.outArc(stateId, aid);
       SDL_TRACE(Hypergraph.OutsideAlgorithm, " Found out arc: " << arc);
       Weight prod(times(arc.weight(), outsideScores[arc.head()]));
-      // Product order doesn't matter, since outside is not well
-      // defined for non-commutative semirings (would have to store a
-      // pair of left-outside, right-outside).
-      forall (StateId tail, arc.tails()) {
-        //TODO: Doesn't allow for multiple occurences of same state in
-        // tails (seen w/ e.g. copying tree transducers or
-        // determinize-minimize of some unweighted tree forest, but
-        // otherwise unlikely). to be clear: we should only skip one
-        // occurence of the stateId in tails, not all of them.
-        if (tail != stateId) {
-          assert(insideScores.size() > tail);
+      // normally we say that arc weight comes after tails, but outside is only
+      // meaningful for commutative anyway (granted, you could instead have a
+      // pair for each state: (L, R) where L are the left-outside and R are the
+      // right-outside)
+      StateIdContainer const& tails = arc.tails();
+      unsigned nself = 0;
+      for(StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
+        StateId const tail = *i;
+        if (tail == stateId && !nself)
+          ++nself;
+        else if (haveInsideForAxiom || !hg.isAxiom(tail)) {
+          assert(tail < insideScores.size());
           timesBy(insideScores[tail], prod);
         }
       }
-      SDL_TRACE(Hypergraph.OutsideAlgorithm, " prod=" << prod);
-      plusBy(prod, sum);
+      SDL_TRACE(Hypergraph.OutsideAlgorithm, " prod=" << prod << " (add #self="<<nself<<" times)");
+      while (nself--)
+        plusBy(prod, sum);
     }
   }
   SDL_TRACE(Hypergraph.OutsideAlgorithm, " sum now " << sum);
@@ -95,12 +101,14 @@ struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
 
   ComputeOutsideScoreStatesVisitor(IHypergraph<Arc> const& hg,
                                    boost::ptr_vector<Weight> const& insideScores,
-                                   boost::ptr_vector<Weight>* outsideScores)
+                                   boost::ptr_vector<Weight>* outsideScores,
+                                   bool haveInsideForAxiom)
       : hg_(hg)
       , final(hg.final())
       , insideScores_(insideScores)
       , outsideScores_(outsideScores)
       , kZero(Weight::zero())
+      , haveInsideForAxiom_(haveInsideForAxiom)
   {}
 
   /**
@@ -109,7 +117,7 @@ struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
   void visit(StateId stateId) {
     assert(outsideScores_);
     Weight &outside = Util::atExpandPtr(*outsideScores_, stateId, kZero);
-    outsideFromInside(stateId, hg_, insideScores_, *outsideScores_, outside, final);
+    outsideFromInside(stateId, hg_, insideScores_, *outsideScores_, outside, final, haveInsideForAxiom_);
     SDL_TRACE(Hypergraph.InsideAlgorithm,
               "Stored outside distance: " << (*outsideScores_)[stateId] << " to state " << stateId);
   }
@@ -119,6 +127,7 @@ struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
   StateId final;
   boost::ptr_vector<Weight> const& insideScores_;
   boost::ptr_vector<Weight>* outsideScores_;
+  bool haveInsideForAxiom_;
 };
 
 /**
@@ -132,12 +141,12 @@ struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
 template<class Arc>
 void outsideAlgorithm(IHypergraph<Arc> const& hg,
                       boost::ptr_vector<typename Arc::Weight> const& insideScores,
-                      boost::ptr_vector<typename Arc::Weight>* outsideScores) {
+                      boost::ptr_vector<typename Arc::Weight>* outsideScores, bool haveInsideForAxiom = true) {
 
   // Traverse states in reverse topsorted order (i.e., starting from
   // FINAL root), and compute outsideScore for each state:
   ComputeOutsideScoreStatesVisitor<Arc> outsideScoreComputer(
-      hg, insideScores, outsideScores);
+      hg, insideScores, outsideScores, haveInsideForAxiom);
   ReverseTopsortStatesTraversal<Arc>(hg, &outsideScoreComputer);
 }
 

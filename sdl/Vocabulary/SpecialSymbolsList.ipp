@@ -94,15 +94,7 @@ SPECIAL_SYMBOL(ABORTSEGMENT, <abort-segment>, kSpecialTerminal)
 //////////////////////////////
 
 // These are used by the decoders: They do not move any words or
-// phrases into the block or out of the block.
-
-// Each block in a sentence has an ID. Internally, the different
-// <xmt-block> symbols in a sentence are mapped to different symbol
-// IDs: BLOCK_START::ID+0, BLOCK_START::ID+1, BLOCK_START::ID+2, ...
-
-// The main reason for this is that, by default, Hypergraphs have
-// canonical labels, and all label states that start an <xmt_block>
-// would be indistinguishible if they used the same symbol ID.
+// phrases into the block or out of the block. BLOCK_START and CONSTRAINT_SUBSTITUTE get SDL_NUM_BLOCKS symbols <xmt-blockN> and <xmt-entityN> starting at N=0 (up to N = SDL_NUM_BLOCKS-1)
 
 SPECIAL_SYMBOL(BLOCK_END, </xmt-block>, kSpecialTerminal)
 SPECIAL_SYMBOL(BLOCK_START, <xmt-block>, kSpecialTerminal)

@@ -42,26 +42,23 @@ namespace Hypergraph {
    specified state.
 */
 
-template<typename Arc>
+template <typename Arc>
 class Sampler {
  public:
-
-  Sampler(unsigned long seed = time(0)) {srand(seed); }
+  Sampler(unsigned long seed = time(0)) { srand(seed); }
 
   virtual ~Sampler() {}
 
   virtual void initialize(IHypergraph<Arc> const& hg) {}
 
   virtual Arc* sampleArc(IHypergraph<Arc> const& hg, StateId sid) const = 0;
-
-
 };
 
-template<typename Arc>
-class UniformInArcSampler: public Sampler<Arc> {
+template <typename Arc>
+class UniformInArcSampler : public Sampler<Arc> {
  public:
   typedef typename Arc::Weight Weight;
-  UniformInArcSampler(unsigned long seed = time(0)):Sampler<Arc>(seed) {}
+  UniformInArcSampler(unsigned long seed = time(0)) : Sampler<Arc>(seed) {}
 
   virtual Arc* sampleArc(IHypergraph<Arc> const& hg, StateId sid) const {
     std::size_t numArcs = hg.numInArcs(sid);
@@ -72,18 +69,15 @@ class UniformInArcSampler: public Sampler<Arc> {
     ArcId aid = static_cast<ArcId>(r * numArcs);
     return hg.inArc(sid, aid);
   }
-
 };
 
-template<typename Arc>
-class ProbabilityArcSampler: public Sampler<Arc> {
+template <typename Arc>
+class ProbabilityArcSampler : public Sampler<Arc> {
  public:
   typedef typename Arc::Weight Weight;
-  ProbabilityArcSampler(unsigned long seed = time(0)):Sampler<Arc>(seed) {}
+  ProbabilityArcSampler(unsigned long seed = time(0)) : Sampler<Arc>(seed) {}
 
-  virtual void initialize(IHypergraph<Arc> const& hg) {
-    insideAlgorithm(hg, &insideDistances_);
-  }
+  virtual void initialize(IHypergraph<Arc> const& hg) { insideAlgorithm(hg, &insideDistances_); }
   virtual Arc* sampleArc(IHypergraph<Arc> const& hg, StateId sid) const {
     std::size_t numArcs = hg.numInArcs(sid);
     if (numArcs == 0) {
@@ -94,29 +88,30 @@ class ProbabilityArcSampler: public Sampler<Arc> {
     }
 
     Weight totalWeight = Weight::zero();
-    std::vector< Weight> weights;
-    std::vector< Arc* > arcs;
+    std::vector<Weight> weights;
+    std::vector<Arc*> arcs;
     forall (ArcId aid, hg.inArcIds(sid)) {
       Arc* arc = hg.inArc(sid, aid);
       Weight w = arc->weight();
       forall (StateId tailId, arc->tails()) {
-        if ( !hg.hasLexicalLabel(tailId)) {
-          w = times(w, insideDistances_[tailId]);
+        if (!hg.hasLexicalLabel(tailId)) {
+          timesBy(insideDistances_[tailId], w);
         }
       }
-      totalWeight = Hypergraph::plus(totalWeight, w);
+      plusBy(w, totalWeight);
       arcs.push_back(arc);
       weights.push_back(w);
     }
 
-    double random = rand()%RAND_MAX/static_cast<double>(RAND_MAX) * exp(-totalWeight.getValue());
+    double random = rand() % RAND_MAX / static_cast<double>(RAND_MAX) * exp(-totalWeight.getValue());
     int i = 0;
     Weight weightSum = weights[0];
-    while (exp(- weightSum.getValue() ) < random) {
+    while (exp(-weightSum.getValue()) < random) {
       weightSum = Hypergraph::plus(weightSum, weights[++i]);
     }
     return arcs[i];
   }
+
  private:
   boost::ptr_vector<Weight> insideDistances_;
 };
@@ -129,10 +124,8 @@ class ProbabilityArcSampler: public Sampler<Arc> {
 /**
    Samples a path from hg, starting from the final state.
 */
-template<class Arc>
-void samplePath(IHypergraph<Arc> const& hg,
-                Sampler<Arc>& sampler,
-                IMutableHypergraph<Arc>* result) {
+template <class Arc>
+void samplePath(IHypergraph<Arc> const& hg, Sampler<Arc>& sampler, IMutableHypergraph<Arc>* result) {
   if (!(hg.properties() & kStoreInArcs)) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "HG must store incoming arcs");
   }
@@ -143,9 +136,7 @@ void samplePath(IHypergraph<Arc> const& hg,
   StateId finalStateId = hg.final();
   queue.push(finalStateId);
   onQueue.insert(finalStateId);
-  result->addStateId(finalStateId,
-                     hg.inputLabel(finalStateId),
-                     hg.outputLabel(finalStateId));
+  result->addStateId(finalStateId, hg.inputLabel(finalStateId), hg.outputLabel(finalStateId));
 
   while (!queue.empty()) {
     StateId hgStateId = queue.front();
@@ -154,19 +145,12 @@ void samplePath(IHypergraph<Arc> const& hg,
       result->setStart(hgStateId);
     }
 
-    Arc* arc = sampler.sampleArc(hg, hgStateId);
-    if (arc != NULL) {
-
+    if (Arc* arc = sampler.sampleArc(hg, hgStateId)) {
       forall (StateId sid, arc->tails()) {
-        if (onQueue.find(sid) != onQueue.end()) {
-          continue;
+        if (onQueue.insert(sid).second) {
+          result->addStateId(sid, hg.inputLabel(sid), hg.outputLabel(sid));
+          queue.push(sid);
         }
-
-        result->addStateId(sid,
-                           hg.inputLabel(sid),
-                           hg.outputLabel(sid));
-        queue.push(sid);
-        onQueue.insert(sid);
       }
       result->addArc(new Arc(*arc));
     }

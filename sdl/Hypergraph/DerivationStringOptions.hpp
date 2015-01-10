@@ -50,11 +50,11 @@ struct ShowSymbolOptions {
         ("backward compatability for 'types' option");
 
     config("types", &types).verbose(hide).init(kAllSymbolTypes)
-        ("only print lexical symbols (so will skip <xmt-block> <tok> etc, so implies 'epsilon: skip-epsilon' and 'block: skip-block')");
+        ("only print lexical symbols (so will skip <xmt-blockN> <tok> etc, so implies 'epsilon: skip-epsilon' and 'block: skip-block')");
     config("epsilon", &epsilon).verbose(hide).init(kSkip_Epsilon)
         ("skip or keep epsilon (<eps>)");
     config("block", &block).verbose(hide).init(kSkip_Block)
-        ("skip or keep block/entity symbols (<xmt-block> </xmt-block> <xmt-entity>)");
+        ("skip or keep block/entity symbols (<xmt-blockN> </xmt-block> <xmt-entityN>)");
   }
   SymbolTypes types;
   SymbolEpsilonSkip epsilon;

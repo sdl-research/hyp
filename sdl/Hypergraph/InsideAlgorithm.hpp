@@ -44,18 +44,12 @@ namespace Hypergraph {
    A states visitor that computes the distance to each
    particular state that it's called with.
 
-   axioms here use StateWtFn(stateid). axioms are states with no inarcs (not
-   necessarily terminal-labeled only).  FIXME: this is wrong if you delete
-   unwanted arcs (because e.g. they have 0 weight) and don't remove the
-   unreachable states also
+   axioms here use StateWtFn(stateid). axioms are terminal-labeled states and
+   the start state if it exists.
 */
-template<class HG
-         , class StateWtFn
-         , class ArcWtFn = ArcWeight<typename StateWtFn::Weight>
-         , class Distances = boost::ptr_vector<typename ArcWtFn::Weight > >
-struct ComputeDistanceStatesVisitor
-    : IStatesVisitor, private ArcWtFn, private StateWtFn
-{
+template <class HG, class StateWtFn, class ArcWtFn = ArcWeight<typename StateWtFn::Weight>,
+          class Distances = boost::ptr_vector<typename ArcWtFn::Weight>, bool IncludingAxioms = false>
+struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private StateWtFn {
   typedef typename ArcWtFn::Weight Weight;
   typedef HG InputHypergraph;
   typedef typename HG::Arc Arc;
@@ -72,63 +66,73 @@ struct ComputeDistanceStatesVisitor
      'distances' to include no-inarc (leaf) states. false => recompute
      stateWtFn(leaf) and don't store it in distances.
   */
-  ComputeDistanceStatesVisitor(IHypergraph<Arc> const& hg
-                               , Distances &distances
-                               , StateWtFn const& stateWtFn = StateWtFn()
-                               , ArcWtFn const& arcWtFn = ArcWtFn()
-                               , bool cacheStateWt = true)
+  ComputeDistanceStatesVisitor(HG const& hg, Distances& distances, StateWtFn const& stateWtFn = StateWtFn(),
+                               ArcWtFn const& arcWtFn = ArcWtFn(), bool useStateWt = true)
       : ArcWtFn(arcWtFn)
       , StateWtFn(stateWtFn)
       , kZero(Weight::zero())
-      , hg(hg)
-      , distances(distances)
-      , cacheStateWt_(cacheStateWt)
+      , hg_(hg)
+      , distances_(distances)
+      , maxNonAxiom_(0)
   {}
 
   /**
      Computes the distance to a particular state.
   */
   void visit(StateId sid) {
-    //topo visit calls for tails first. so all the distances[tail] are already computed.
-    std::size_t const cntInArcs = hg.numInArcs(sid);
-    if (!cntInArcs && !cacheStateWt_) // see code below: we'll never visit no-in-arcs states.
-      return;
-    Weight &sum = Util::atExpandPtr(distances, sid, kZero);
+    // topo visit calls for tails first. so all the distances_[tail] are already computed.
+    std::size_t const cntInArcs = hg_.numInArcs(sid);
+    bool axiom = hg_.isAxiom(sid);
+    Weight& sum = Util::atExpandPtr(distances_, sid, kZero);
     // keeping this reference is ok because there's no recursion in loops below:
-    if (!cntInArcs)
-      sum = StateWtFn::operator()(sid);
-    else {
-      for (ArcId aid = 0; aid < cntInArcs; ++aid) {
-        Arc const& arc = *hg.inArc(sid, aid);
-        Weight const& arcw = ArcWtFn::operator()(&arc); // timesBy at the end because of noncommutative ngram, block weights.
-        Weight prod(Weight::one());
-        // we start from one here, and add arcw at the very end because we use
-        // some noncommutative semirings (block, ngram, token weight)
-        StateIdContainer const& tails = arc.tails();
-        for (typename StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i!=e; ++i) {
-          StateId const tail=*i;
-          bool const tailDone = tail < distances.size();
-          if (!cacheStateWt_ && !hg.numInArcs(tail)) {
-            // necessary to check !inarcs here instead of tailDone in case states weren't sorted but cacheStateWt was false
-            Hypergraph::timesBy(StateWtFn::operator()(tail), prod);
-          } else if (!tailDone) {
-            SDL_THROW_LOG(Hypergraph.InsideAlgorithm, CycleException,
-                          "back edge tail=" << tail << " => head=" << sid << " - input was cyclic or wasn't topo-sorted");
-          } else {
-            Hypergraph::timesBy(distances[tail], prod);
-          }
-        }
-        Hypergraph::timesBy(arcw, prod);
-        Hypergraph::plusBy(prod, sum);
-      }
+    if (axiom) {
+      setOne(sum);
+      return;
     }
+    if (!IncludingAxioms && sid > maxNonAxiom_)
+      maxNonAxiom_ = sid;
+    for (ArcId aid = 0; aid < cntInArcs; ++aid) {
+      Arc const& arc = *hg_.inArc(sid, aid);
+      Weight prod(Weight::one());
+      // we start from one here, and add arcw at the very end because we use
+      // some noncommutative semirings (block, ngram, token weight)
+      StateIdContainer const& tails = arc.tails();
+      for (typename StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
+        StateId const tail = *i;
+        if (hg_.isAxiom(tail)) {
+          StateWtFn::timesByState(tail, prod);
+          SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << sid << " from " << tail << " prod = " << prod
+                                                        << " = old * " << StateWtFn::operator()(tail));
+        } else if (tail >= distances_.size()) {
+          SDL_THROW_LOG(Hypergraph.InsideAlgorithm, CycleException,
+                        "back edge tail=" << tail << " => head=" << sid
+                                          << " - input was cyclic or wasn't topo-sorted");
+        } else {
+          Hypergraph::timesBy(distances_[tail], prod);
+          SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << sid << " from " << tail << " prod = " << prod
+                                                        << " = old * " << distances_[tail]);
+        }
+      }
+      ArcWtFn::timesBy(&arc, prod);
+      // arcw has to come after the states for non-commutative e.g. SingleBlockWeight
+      SDL_TRACE(FinalOutput.InsideAlgorithm, "after arc wt for " << Util::print(arc, hg_) << " for " << sid
+                                                                 << " prod = " << prod);
+
+      Hypergraph::plusBy(prod, sum);
+      SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << sid << " sum " << sum << " = old + " << prod);
+    }
+  }
+
+  ~ComputeDistanceStatesVisitor() {
+    if (!IncludingAxioms)
+      distances_.resize(maxNonAxiom_ + 1);
   }
 
  private:
   Weight kZero;
-  IHypergraph<Arc> const& hg;
-  Distances &distances;
-  bool cacheStateWt_;
+  HG const& hg_;
+  Distances& distances_;
+  StateId maxNonAxiom_;
 };
 
 /**
@@ -141,42 +145,57 @@ struct ComputeDistanceStatesVisitor
    (i.e. state weights will be used for all states > than this). side
    effect: pDistances doesn't grow larger than maxNonLexical+1
 */
-template<class Arc, class StateWtFn, class ArcWtFn, class Distances>
-void insideAlgorithm(
-    IHypergraph<Arc> const& hg
-    , Distances *pDistances
-    , StateWtFn const& stateWtFn
-    , ArcWtFn const& arcWtFn
-    , StateId maxNotTerminal = (StateId)-1)
-{
-  shared_ptr<IHypergraph<Arc> const> phg = ensureProperties(hg, kStoreInArcs);
+template <bool IncludingAxioms, class Arc, class StateWtFn, class ArcWtFn, class Distances>
+void insideAlgorithmWithAxioms(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtFn const& stateWtFn,
+                               ArcWtFn const& arcWtFn, StateId maxNotTerminal = (StateId)-1) {
+  typedef IHypergraph<Arc> HG;
+  shared_ptr<HG const> phg = ensureProperties(hg, kStoreInArcs);
 
-  SDL_DEBUG(Hypergraph.InsideAlgorithm,
-            "Start inside alg on hypergraph, setting distances for states [0,..."
-            <<maxNotTerminal << "]:\n" << hg);
+  SDL_DEBUG(Hypergraph.InsideAlgorithm, "Start inside alg on hypergraph, setting distances for states [0,..."
+                                        << maxNotTerminal << "]:\n" << hg);
 
   // Traverse states in topsorted order, and compute distance for each state:
-  ComputeDistanceStatesVisitor<Arc, StateWtFn, ArcWtFn, Distances> distanceComputer(
-      *phg, *pDistances, stateWtFn, arcWtFn, maxNotTerminal == (StateId)-1);
+  ComputeDistanceStatesVisitor<HG, StateWtFn, ArcWtFn, Distances, IncludingAxioms> distanceComputer(
+      *phg, *pDistances, stateWtFn, arcWtFn);
   TopsortStatesTraversal<Arc>(*phg, &distanceComputer, maxNotTerminal);
 }
 
-template<class Arc, class StateWtFn, class Distances>
-void insideAlgorithm(
-    IHypergraph<Arc> const& hg,
-    Distances* pDistances,
-    StateWtFn const& stateWtFn)
-{
-  insideAlgorithm(hg, pDistances, stateWtFn, ArcWeight<typename Arc::Weight>());
+template <class Arc, class StateWtFn, class ArcWtFn, class Distances>
+void insideAlgorithmMaybeAxioms(bool includingAxioms, IHypergraph<Arc> const& hg, Distances* pDistances,
+                                StateWtFn const& stateWtFn, ArcWtFn const& arcWtFn,
+                                StateId maxNotTerminal = (StateId)-1) {
+  if (includingAxioms)
+    insideAlgorithmWithAxioms<true, Arc, StateWtFn, ArcWtFn, Distances>(hg, pDistances, stateWtFn, arcWtFn,
+                                                                        maxNotTerminal);
+  else
+    insideAlgorithmWithAxioms<false, Arc, StateWtFn, ArcWtFn, Distances>(hg, pDistances, stateWtFn, arcWtFn,
+                                                                         maxNotTerminal);
+}
+
+template <class Arc, class StateWtFn, class ArcWtFn, class Distances>
+void insideAlgorithmIncludingAxioms(IHypergraph<Arc> const& hg, Distances* pDistances,
+                                    StateWtFn const& stateWtFn, ArcWtFn const& arcWtFn,
+                                    StateId maxNotTerminal = (StateId)-1) {
+  insideAlgorithmMaybeAxioms(true, hg, pDistances, stateWtFn, arcWtFn, maxNotTerminal);
+}
+
+template <class Arc, class StateWtFn, class ArcWtFn, class Distances>
+void insideAlgorithm(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtFn const& stateWtFn,
+                     ArcWtFn const& arcWtFn, StateId maxNotTerminal = (StateId)-1) {
+  insideAlgorithmMaybeAxioms(false, hg, pDistances, stateWtFn, arcWtFn, maxNotTerminal);
+}
+
+template <class Arc, class StateWtFn, class Distances>
+void insideAlgorithm(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtFn const& stateWtFn,
+                     bool includingAxioms) {
+  insideAlgorithmMaybeAxioms(includingAxioms, hg, pDistances, stateWtFn, ArcWeight<typename Arc::Weight>());
 }
 
 
-template<class Arc>
-void insideAlgorithm(
-    IHypergraph<Arc> const& hg,
-    boost::ptr_vector<typename Arc::Weight> *pDistances)
-{
-  insideAlgorithm(hg, pDistances, OneStateWeight<typename Arc::Weight>());
+template <class Arc>
+void insideAlgorithm(IHypergraph<Arc> const& hg, boost::ptr_vector<typename Arc::Weight>* pDistances,
+                     bool includingAxioms = false) {
+  insideAlgorithm(hg, pDistances, OneStateWeight<typename Arc::Weight>(), includingAxioms);
 }
 
 

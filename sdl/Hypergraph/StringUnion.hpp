@@ -141,7 +141,7 @@ struct StringUnionOptions {
         "cost for each token e.g. 1-[stop-weight]. unset means prob = 1 (cost 0)").self_init();
     c('t')("ignore-tags", &ignoreTags)("ignore tokens between <ignore-tag> ... </ignore-tag>").self_init();
     c("xmt-block", &xmtBlock)(
-        "force <xmt-block> and </xmt-block> in a token to be single-character words - effectively forcing a "
+        "force <xmt-blockN> and </xmt-block> in a token to be single-character words - effectively forcing a "
         "token to end on the left and start on the right of the block open or close tag. this already "
         "happens by default (see xmt-block-via-unk-unigram) if you allow the unk-weight novel-character "
         "backoff.").self_init();
@@ -260,10 +260,10 @@ struct BuildStringUnion {
 
   void addFinal(StateId s, Weight const& wt) { hg.addArcFsm(s, loopEndState, end.labelState, wt); }
 
-  StateId start;  /// actual start state. if loop then this is also the loopEndState. <xmt-block> tags start
+  StateId start;  /// actual start state. if loop then this is also the loopEndState. <xmt-blockN> tags start
   /// from here (aren't wrapped in <tok>)
   StateId trieStart;  /// start of dictionary (may be after open tag)
-  StateId loopEndState;  /// where you go after finishing word+weight and its </tok> tag if any. <xmt-block>
+  StateId loopEndState;  /// where you go after finishing word+weight and its </tok> tag if any. <xmt-blockN>
   /// tags go to here (aren't wrapped in </tok>)
   StateId endStringThenFinal;  /// return here for ->loopEndState with </tok> (no weight added)
 

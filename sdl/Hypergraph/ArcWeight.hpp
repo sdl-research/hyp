@@ -35,6 +35,10 @@ struct ArcWeight {
   typedef Wt Weight;
   template <class Arc>
   Wt const& operator()(Arc *a) const { return a->weight(); }
+  template <class Arc>
+  void timesBy(Arc *a, Wt &w) const {
+    Hypergraph::timesBy(a->weight(), w);
+  }
 };
 
 template <class Wt>
@@ -42,6 +46,9 @@ struct OneArcWeight {
   typedef Wt Weight;
   template <class Arc>
   Weight operator()(Arc *) const { return Weight::one(); }
+  template <class Arc>
+  void timesBy(Arc *a, Wt &w) const {
+  }
 };
 
 template <class Wt>
@@ -49,6 +56,10 @@ struct ZeroArcWeight {
   typedef Wt Weight;
   template <class Arc>
   Weight operator()(Arc *) const { return Weight::zero(); }
+  template <class Arc>
+  void timesBy(Arc *a, Wt &w) const {
+    Hypergraph::setZero(w);
+  }
 };
 
 template<class Wt>
@@ -57,7 +68,7 @@ struct StateToWeight {
   virtual ~StateToWeight() {}
   virtual Weight operator()(StateId sid) const = 0;
   void timesByState(StateId sid, Weight &w) const {
-    timesBy((*this)(sid, w));
+    Hypergraph::timesBy((*this)(sid), w);
   }
 };
 
@@ -70,7 +81,7 @@ struct CallStateToWeight {
     return (*p)(sid);
   }
   void timesByState(StateId sid, Weight &w) const {
-    timesBy((*this)(sid, w));
+    p->timesByState(sid, w);
   }
 
   CallStateToWeight() : p() {}
@@ -253,6 +264,10 @@ struct AxiomArcWeightImpl : StateWtFn, ArcWtFn {
     if (arcOnRight)
       timesBy(arcw, w);
     return w;
+  }
+  template <class Arc>
+  void timesBy(Arc *a, Wt &w) const {
+    Hypergraph::timesBy(operator()(a), w);
   }
 };
 

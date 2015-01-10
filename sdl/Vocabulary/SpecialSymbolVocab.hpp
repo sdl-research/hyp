@@ -46,10 +46,7 @@ class SpecialSymbolVocab {
 
   virtual ~SpecialSymbolVocab();
 
-  inline Sym add(std::string const& symbol, SymbolType symType) {
-    assert(Sym::isSpecialType(symType));
-    return (symType == kSpecialTerminal ? vocab : ntVocab)->add(symbol, symType);
-  }
+  Sym add(std::string const& symbol, SymbolType symType);
 
   std::string const& str(Sym const& id) const;
 

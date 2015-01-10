@@ -117,14 +117,14 @@ const PropertiesInt kAcyclic
 /// at most one lexical tail per state, with no terminal heads
 const PropertiesInt kOneLexical = 0x800ULL;
 
-/// have <xmt-block> symbols that will need to be preserved across transformations for later use
+/// have <xmt-blockN> symbols that will need to be preserved across transformations for later use
 const PropertiesInt kAnnotations = 0x1000ULL;
 
-/// have <xmt-block> symbols and each constraint id is on an arc <=> a fixed
+/// have <xmt-blockN> symbols and each constraint id is on an arc <=> a fixed
 /// state startBlock(id) is the graph source. implies kAnnotations
 const PropertiesInt kConstraintStarts = 0x2000ULL;
 
-/// have <xmt-block> symbols and each </xmt-block> for an id is on an arc <=> a
+/// have <xmt-blockN> symbols and each </xmt-block> for an id is on an arc <=> a
 /// fixed state endBlock(id) is the graph source
 const PropertiesInt kConstraintEnds = 0x4000ULL;
 
