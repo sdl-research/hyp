@@ -30,11 +30,11 @@ namespace sdl { namespace Hypergraph {
 
 SDL_ENUM(WhichDerivationStates, 3, (WholeTree, LeafOnly, NonLeafOnly))
 
-struct ShowSymbolOptions {
+struct WhichSymbolOptions {
   void defaults() {
     Config::inits(this);
   }
-  ShowSymbolOptions() { defaults(); }
+  WhichSymbolOptions() { defaults(); }
   bool shows(Sym sym) const {
     if (sym.isLexical()) return true;
     if (types == kLexical_Only) return false;
@@ -55,13 +55,19 @@ struct ShowSymbolOptions {
         ("skip or keep epsilon (<eps>)");
     config("block", &block).verbose(hide).init(kSkip_Block)
         ("skip or keep block/entity symbols (<xmt-blockN> </xmt-block> <xmt-entityN>)");
+    config("label-type", &labelType).verbose(hide).init(kOutput).verbose()
+        ("Write Input or Output labels? Note: Output is the default because it is correct in the typical cases - wherever no explicit output label is present it is implicitly identical to the input label.");
+    config("leaf-only", &leafOnly).verbose(hide).init(kLeafOnly)
+        ("(false, or whole-tree, means print all derivation states' nodes' labels) (true, or leaf-only; means don't print internal (e.g. nonterminal) labels)");
   }
   SymbolTypes types;
   SymbolEpsilonSkip epsilon;
   SymbolBlockSkip block;
+  LabelType labelType;
+  WhichDerivationStates leafOnly;
 };
 
-struct DerivationStringOptions : ShowSymbolOptions {
+struct DerivationStringOptions : WhichSymbolOptions {
 
   void defaults() {
     Config::inits(this);
@@ -105,18 +111,12 @@ struct DerivationStringOptions : ShowSymbolOptions {
     defaults();
   }
 
-  LabelType labelType;
-  WhichDerivationStates leafOnly;
   SymbolQuotation quote;
   std::string space;
   template <class Config>
   void configure(Config &config, bool hide = false) {
-    ShowSymbolOptions::configure(config);
+    WhichSymbolOptions::configure(config);
     config.is("hypergraph nbest -> string");
-    config("label-type", &labelType).verbose(hide).init(kOutput).verbose()
-        ("Write Input or Output labels? Note: Output is the default because it is correct in the typical cases - wherever no explicit output label is present it is implicitly identical to the input label.");
-    config("leaf-only", &leafOnly).verbose(hide).init(kLeafOnly)
-        ("(false, or whole-tree, means print all derivation states' nodes' labels) (true, or leaf-only; means don't print internal (e.g. nonterminal) labels)");
     config("quote", &quote).verbose(hide).self_init()
         ("quote/escape symbols - if false (unquoted)O, you can't distinguish special (e.g. <eps>) from lexical symbols");
     config("space", &space).verbose(hide).self_init()

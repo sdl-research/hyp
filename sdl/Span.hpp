@@ -207,39 +207,6 @@ struct PrintSpan : TokenSpan {
   }
 };
 
-/// the non-empty non-space spans in s[0..len)
-inline void addTokenSpans(TokenSpans &spans, char const* s, Position len) {
-  Position i = 0;
-  for (;;) {
-    if (i == len) return;
-    if (s[i] != ' ') break;
-    ++i;
-  }
-  TokenSpan span;
-  span.first = span.second = i;
-  for (;;) {
-    assert(span.second < len && s[span.second] != ' ');
-    if (++span.second == len) {
-      spans.push_back(span);
-      return;
-    }
-    if (s[span.second] == ' ') {
-      spans.push_back(span);
-      for (;;) {
-        if (s[++span.second] != ' ') break;
-        if (span.second == len) return;
-      }
-      span.first = span.second;
-    }
-  }
-}
-
-inline void addTokenSpans(TokenSpans &spans, std::string const& str) {
-  Position len = (Position)str.size();
-  if (len)
-    addTokenSpans(spans, &str[0], len);
-}
-
 typedef std::vector<std::string> Tokens;
 
 inline void spansToTokens(std::string const& str, TokenSpans const& spans, Tokens &tokens) {

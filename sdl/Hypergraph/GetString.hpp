@@ -54,7 +54,7 @@ template <class A>
 Syms &symsFromStatesAppend(Syms &result,
                            StateString const& ss,
                            IHypergraph<A> const& hg,
-                           DerivationStringOptions const& opts = DerivationStringOptions())
+                           WhichSymbolOptions const& opts = WhichSymbolOptions())
 {
   for (StateString::const_iterator i = ss.begin(), e = ss.end(); i != e; ++i) {
     Sym sym = hg.label(*i, opts.labelType);
@@ -69,7 +69,7 @@ template <class Arc>
 Syms &symsFromDerivAppend(Syms &syms,
                           typename Derivation<Arc>::child_type const& pDerivation,
                           IHypergraph<Arc> const& hg,
-                          DerivationStringOptions const& opts = DerivationStringOptions())
+                          WhichSymbolOptions const& opts = WhichSymbolOptions())
 {
   if (pDerivation)
     symsFromStatesAppend(syms, pDerivation->yieldStates(hg.final(), opts.leafOnly), hg, opts);
@@ -102,6 +102,7 @@ std::string textFromSyms(Syms const& str,
                          char const* space = " ",
                          SymbolQuotation quote = kQuoted)
 {
+  //TODO: StringBuilder faster than ostringstream
   std::ostringstream out;
   print(out, str, pVoc, space, quote);
   return out.str();

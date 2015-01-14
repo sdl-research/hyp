@@ -83,14 +83,15 @@ Util::StringBuilder& bestPathString(Util::StringBuilder& out, IHypergraph<Arc> c
 template <class Arc>
 Syms& bestPathSymsAppend(Syms& syms, IHypergraph<Arc> const& hg,
                          BestPathOptions const& bestPathOpts = BestPathOptions(),
-                         DerivationStringOptions const& opts = DerivationStringOptions()) {
+                         WhichSymbolOptions const& opts = WhichSymbolOptions()) {
   return symsFromDerivAppend(syms, bestPath(hg, bestPathOpts), hg, opts);
 }
 
 template <class Arc>
 Syms& bestPathSymsAppend(Syms& syms, FeatureValue& cost, IHypergraph<Arc> const& hg,
                          BestPathOptions const& bestPathOpts = BestPathOptions(),
-                         DerivationStringOptions const& opts = DerivationStringOptions()) {
+                         WhichSymbolOptions const& opts = WhichSymbolOptions())
+{
   typename Derivation<Arc>::DerivAndWeight derivWeight = bestDerivWeight(hg, bestPathOpts);
   if (boost::get<0>(derivWeight)) {
     cost = boost::get<1>(derivWeight).getValue();
