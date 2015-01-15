@@ -39,6 +39,16 @@
 namespace sdl {
 namespace Hypergraph {
 
+
+template <class Arc>
+void addGraphEpsilon(IMutableHypergraph<Arc> &hg, StateId epsLabelState, bool graphOutput, StateId from,
+                     StateId to) {
+  if (graphOutput)
+    hg.addArcGraphEpsilon(from, to);
+  else
+    hg.addArcFsm(from, to, epsLabelState);
+}
+
 namespace UnionHelper {
 /**
    Copies an arc, adding all involved states to the resulting
@@ -54,15 +64,15 @@ struct ArcCopyFct {
 
   void operator()(Arc* pArc) const {
     Arc* newArc = new Arc();
-    newArc->setHead(getNewStateId(pArc->head()));
+    newArc->setHead(stateId(pArc->head()));
     for (TailId i = 0, e = (TailId)pArc->getNumTails(); i < e; ++i) {
-      newArc->addTail(getNewStateId(pArc->getTail(i)));
+      newArc->addTail(stateId(pArc->getTail(i)));
     }
     newArc->setWeight(pArc->weight());
     pTarget_->addArc(newArc);
   }
 
-  StateId getNewStateId(StateId oldSid) const {
+  StateId stateId(StateId oldSid) const {
     StateId* pNewState;
     if (Util::update(old2new_, oldSid, pNewState))
       return (*pNewState = pTarget_->addState(source_.labelPair(oldSid)));
@@ -72,9 +82,9 @@ struct ArcCopyFct {
   /**
      call only after visiting all arcs.
   */
-  StateId getNewStart() { return old2new_[source_.start()]; }
+  StateId start() { return old2new_[source_.start()]; }
 
-  StateId getNewFinal() { return old2new_[source_.final()]; }
+  StateId final() { return old2new_[source_.final()]; }
 
   IHypergraph<Arc> const& source_;
   IMutableHypergraph<Arc>* pTarget_;
@@ -106,13 +116,13 @@ void fstUnion(const IHypergraph<Arc>& sourceFst, IMutableHypergraph<Arc>* pTarge
   // Add common new start state
   StateId unionStartSid = pTargetFst->addState();
   pTargetFst->addArc(new Arc(Head(origStartSid), Tails(unionStartSid, epsLabelState)));
-  pTargetFst->addArc(new Arc(Head(fct.getNewStart()), Tails(unionStartSid, epsLabelState)));
+  pTargetFst->addArc(new Arc(Head(fct.start()), Tails(unionStartSid, epsLabelState)));
   pTargetFst->setStart(unionStartSid);
 
   // Add common new final state
   StateId unionFinalSid = pTargetFst->addState();
   pTargetFst->addArc(new Arc(Head(unionFinalSid), Tails(origFinalSid, epsLabelState)));
-  pTargetFst->addArc(new Arc(Head(unionFinalSid), Tails(fct.getNewFinal(), epsLabelState)));
+  pTargetFst->addArc(new Arc(Head(unionFinalSid), Tails(fct.final(), epsLabelState)));
   pTargetFst->setFinal(unionFinalSid);
   ASSERT_VALID_HG(*pTargetFst);
 }
@@ -120,7 +130,8 @@ void fstUnion(const IHypergraph<Arc>& sourceFst, IMutableHypergraph<Arc>* pTarge
 
 template <class Arc>
 void hgUnion(const IHypergraph<Arc>& sourceHg, IMutableHypergraph<Arc>* pTargetHg) {
-  if (sourceHg.isFsm() && pTargetHg->isFsm()) { fstUnion(sourceHg, pTargetHg);
+  if (sourceHg.isFsm() && pTargetHg->isFsm()) {
+    fstUnion(sourceHg, pTargetHg);
   } else {
     UnionHelper::ArcCopyFct<Arc> copier(sourceHg, pTargetHg);
     sourceHg.forArcs(copier);
@@ -130,53 +141,48 @@ void hgUnion(const IHypergraph<Arc>& sourceHg, IMutableHypergraph<Arc>* pTargetH
     // Add common new final state
     StateId superfinal = pTargetHg->addState();
     pTargetHg->addArc(new Arc(Head(superfinal), Tails(pTargetHg->final(), epsLabelStateId)));
-    pTargetHg->addArc(new Arc(Head(superfinal), Tails(copier.getNewFinal(), epsLabelStateId)));
+    pTargetHg->addArc(new Arc(Head(superfinal), Tails(copier.final(), epsLabelStateId)));
     pTargetHg->setFinal(superfinal);
   }
 }
 
 /**
- * Do union of a list of fsts with one single common start state.
- * More efficient than running fstUnion in a loop.
- * If you have a list of fsts with unbalanced sizes, make sure
- * the fst at position 0 is the biggest one.
+   n-way union construction (instead of binary fstUnion list/tree). updates
+   fst[0] in-place, so faster if fsts[0] is the largest
+
+   if !graphOut, add explicit <eps>
  */
-template<class Arc>
-void fstMultiUnion(std::vector< shared_ptr< IMutableHypergraph<Arc> > > &fsts) {
-  SDL_DEBUG(Hypergraph.Union, "Enter fstMultiUnion");
+template <class Arc>
+shared_ptr<Hypergraph::IMutableHypergraph<Arc> >
+graphMultiUnion(std::vector<shared_ptr<IMutableHypergraph<Arc> > >& graphs, bool graphOutput = true) {
+  typedef IMutableHypergraph<Arc> Hg;
+  typedef shared_ptr<Hg> HgPtr;
 
-  if (fsts.size() < 2)
-    SDL_THROW_LOG(Hypergraph.Union
-                  , InvalidInputException
-                  , "You need at least two fsts to make a union");
+  if (graphs.empty()) return HgPtr();
 
-  IMutableHypergraph<Arc> *pTargetFst =&*fsts[0];
-  StateId origStartSid = pTargetFst->start();
-  StateId origFinalSid = pTargetFst->final();
-  StateId epsLabelState = pTargetFst->addState(EPSILON::ID);
-  StateId unionStartSid = pTargetFst->addState();
-  StateId unionFinalSid = pTargetFst->addState();
-  pTargetFst->setStart(unionStartSid);
-  pTargetFst->setFinal(unionFinalSid);
-  pTargetFst->addArc(new Arc(Head(origStartSid),
-                             Tails(unionStartSid, epsLabelState)));
+  /// the resulting union of graphs[0...]
+  HgPtr const& union0ptr = graphs[0];
+  Hg& union0 = *union0ptr;
+  StateId start0 = union0.start();
+  StateId final0 = union0.final();
+  StateId epsLabelState = graphOutput ? kNoState : union0.addState(EPSILON::ID);
+  StateId start = union0.addState();
+  StateId final = union0.addState();
+  union0.setStart(start);
+  union0.setFinal(final);
 
-  pTargetFst->addArc(new Arc(Head(unionFinalSid),
-                               Tails(origFinalSid, epsLabelState)));
+  addGraphEpsilon(union0, epsLabelState, graphOutput, start, start0);
+  addGraphEpsilon(union0, epsLabelState, graphOutput, final0, final);
 
-  for (std::size_t k = 1
-           ; k < fsts.size()
-           ; ++k ) {
-    IMutableHypergraph<Arc> &sourceFst =*fsts[k];
-  // Write sourceFst into pTargetFst
-    UnionHelper::ArcCopyFct<Arc> fct(sourceFst, pTargetFst);
-    sourceFst.forArcs(fct); // must store arcs
-    pTargetFst->addArc(new Arc(Head(fct.getNewStart()),
-                               Tails(unionStartSid, epsLabelState)));
-    pTargetFst->addArc(new Arc(Head(unionFinalSid),
-                               Tails(fct.getNewFinal(), epsLabelState)));
+  for (typename std::vector<HgPtr>::const_iterator i = graphs.begin() + 1, e = graphs.end(); i != e; ++i) {
+    IHypergraph<Arc> const& graph = **i;
+    // copy g arcs into pTargetGraph (creating new states)
+    UnionHelper::ArcCopyFct<Arc> copied(graph, &union0);
+    graph.forArcs(copied);
+    addGraphEpsilon(union0, epsLabelState, graphOutput, start, copied.start());
+    addGraphEpsilon(union0, epsLabelState, graphOutput, copied.final(), final);
   }
-  ASSERT_VALID_HG(*pTargetFst);
+  return union0ptr;
 }
 
 
