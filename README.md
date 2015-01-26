@@ -21,7 +21,7 @@ optimize hypergraph feature weights from training data.
 ## Documentation
 
 For documentation see
-[`hyp-tutorial.pdf`](https://github.com/hypergraphs/hyp/raw/master/hyp-tutorial.pdf)
+[`hyp-tutorial.pdf`](https://github.com/sdl-research/hyp/raw/master/hyp-tutorial.pdf)
 provided in this directory for your immediate gratification. (You can
 also build the PDF with [TeX](https://www.tug.org/texlive/):
 `docs/hyp/hyp-tutorial.tex`)
@@ -34,7 +34,7 @@ For documentation of the source code API, consider generating
 To build `hyp`, follow the following steps:
 
 * In addition to the `hyp` repository, clone the
-[sdl-externals](https://github.com/hypergraphs/sdl-externals)
+[sdl-externals](https://github.com/sdl-research/sdl-externals)
 repository, which contains pre-built third-party libraries used by
 `hyp`.
 
@@ -82,4 +82,4 @@ tutorial document:
 
 Markus Dreyer and Jonathan Graehl (2014): Tutorial: The hyp hypergraph
 toolkit. Url:
-https://github.com/hypergraphs/hyp/raw/master/hyp-tutorial.pdf
+https://github.com/sdl-research/hyp/raw/master/hyp-tutorial.pdf
