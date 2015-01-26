@@ -123,7 +123,7 @@ typename std::map<Key, Value>::const_iterator getMaxValueIter(std::map<Key, Valu
   typedef typename std::map<Key, Value>::const_iterator Iter;
   Iter it = aMap.begin();
   Iter best = it;
-  std::advance(it, 1);
+  ++it;
   for (; it != aMap.end(); ++it) {
     if (it->second > best->second) { best = it; }
   }

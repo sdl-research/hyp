@@ -209,21 +209,6 @@ struct PrintSpan : TokenSpan {
 
 typedef std::vector<std::string> Tokens;
 
-inline void spansToTokens(std::string const& str, TokenSpans const& spans, Tokens &tokens) {
-  if (str.empty()) return;
-  char const* s = &str[0];
-  unsigned i = 0, n = spans.size();
-  tokens.resize(n);
-  for (; i < n; ++i) {
-    TokenSpan const& span = spans[i];
-    assert(span.first < str.size());
-    assert(span.second <= str.size());
-    tokens[i].assign(s + span.first, s + span.second);
-  }
-
-}
-
-
 }
 
 #endif
