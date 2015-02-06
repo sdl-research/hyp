@@ -54,7 +54,7 @@ struct DrawArcFct {
     std::size_t cnt = 1;
     forall (StateId sid, arc->tails()) {
       out << sid << " -> " << nodeId << " [label = \""<< cnt
-          <<"\", arrowhead = none, fontcolor = gray, fontsize = 9]"
+          <<"\", arrowhead = none, fontcolor = gray55, fontsize = 10]"
           << '\n';
       ++cnt;
     }
@@ -72,6 +72,23 @@ struct DrawArcFct {
   mutable std::size_t nodeId;
 };
 
+/**
+   For dot tool, write Greek symbols as HTML entities
+ */
+std::string dotify(std::string const& sym) {
+  if (sym.length() < 3 || !(*sym.begin() == '<' && *sym.rbegin() == '>'))
+    return sym;
+  if (sym == "<eps>")
+    return "&epsilon;";
+  if (sym == "<phi>")
+    return "&phi;";
+  if (sym == "<rho>")
+    return "&rho;";
+  if (sym == "<sigma>")
+    return "&sigma;";
+  return sym;
+}
+
 bool writeStateLabel(std::ostream& out,
                      Hypergraph::StateId stateId,
                      Sym symId,
@@ -81,11 +98,11 @@ bool writeStateLabel(std::ostream& out,
   }
   else {
     std::string const& sym = pVoc->str(symId);
-    if (symId.isTerminal()) {
+    if (symId.isTerminal() && !symId.isSpecial()) {
       out << "\\\"" << sym << "\\\"";
     }
     else {
-      out << sym;
+      out << dotify(sym);
     }
   }
   return true;

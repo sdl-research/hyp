@@ -237,7 +237,7 @@ ordered list of tails (i.e., source vertices), $h(e)$ is the head
   \label{fig:hyperarc}
 \end{figure}
 
-We regard hypergraph as \textit{automata} and call the vertices
+We regard hypergraphs as \textit{automata} and call the vertices
 \textit{states} and edges \textit{arcs}. We add an optional start
 state $S\in V$ and a final state $F\in V$.
 
@@ -258,7 +258,7 @@ last arc must always be the final state, $h(a_k)=F$.
 
 The hypergraphs we consider, in which each arc has exactly one head,
 have been called \textit{B-hypergraphs} \cite{gallo_directed_1993}, as
-opposed to the more general version in which multiple head states are
+opposed to a more general version in which multiple head states are
 allowed.
 
 \section{Representing hypergraphs}
@@ -402,7 +402,7 @@ following machine rewrites ``he eats rice'' to ``he ate rice''; it is
 a finite-state transducer (in \hyp hypergraph format):
 \yellowlisting{fig/fst.hyp}
 
-Note that general hypergraphs (trees, forests, etc.) may have output
+General hypergraphs (trees, forests, etc.) may have output
 labels as well. The following hypergraph rewrites ``he eats rice with
 sticks'' to ``he ate pasta''; it also parses the input string into a
 structure that (unlike the example above) is not just left-recursive:
@@ -412,7 +412,7 @@ Special symbols like epsilon, phi, rho, sigma are written with
 brackets, as \code{<eps>}, \code{<phi>}, \code{<rho>}, \code{<sigma>}.
 
 When a state has no explicit output label the output label is assumed
-to be similar to the input label---a convention from the finite-state
+to be identical to the input label---a convention from the finite-state
 world.
 
 In order to rewrite a string, we compose it with the input (see
@@ -483,15 +483,14 @@ $ \textbf{HypCompose} cfg.hyp sent.hyp
 
 \subsubsection{Natural language parsing}
 
-Note that we can do weighted lattice parsing: A weighted context-free
-grammar (CFG) can be encoded as a hypergraph and can be composed with
+We can do weighted lattice parsing: A weighted context-free grammar
+(CFG) can be encoded as a hypergraph and can be composed with
 finite-state input (e.g., a string or a weighted lattice), using our
 composition algorithm. The result is the parse of the whole input
-structure. Note, however, that the CFG composition algorithm in \hyp
-currently does not perform pruning and can therefore only used with
-small grammars. If both hypergraphs are \textit{finite-state},
-however, \code{HypCompose} switches to a fast finite-state composition
-algorithm.
+structure. But since the CFG composition algorithm in \hyp currently
+does not perform pruning it can only be used with small grammars. If
+both hypergraphs are \textit{finite-state}, however, \code{HypCompose}
+switches to a fast finite-state composition algorithm.
 
 \subsubsection{Hypergraph rescoring}
 
@@ -921,8 +920,8 @@ This assumes a simple feature set: Each of the features looks at the
 current named entity tag and one of the following: \{current word,
   previous POS tag, current POS tag, next POS tag\}. See table
 \tabref{features} for a mapping from feature IDs to feature
-names. Note that feature 2 (t$_0$=I $\land$ p$_{0}$=NE) fires both on
-the first and the third arc.
+names. Feature 2 (t$_0$=I $\land$ p$_{0}$=NE) fires both on the first
+and the third arc.
 
 \noindent The unclamped hypergraph would look as follows; it contains
 the clamped hypergraph and adds any tagging alternatives as additional
