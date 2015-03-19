@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     Defines Token and TokenWeight classes.
@@ -93,30 +80,32 @@ class Token {
   typedef Syms SymsVector;
   typedef SymsVector::const_iterator const_iterator;
 
-  typedef uint64 Properties;
+  typedef unsigned Properties;
 
-  static const Properties kExtendableLeft = 0x0000000000000002ULL;
-  static const Properties kExtendableRight = 0x0000000000000004ULL;
-  static const Properties kMustExtendLeft = 0x0000000000000008ULL;
-  static const Properties kMustExtendRight = 0x0000000000000010ULL;
-  static const Properties kUnspecified = 0x0000000000000020ULL;
+  // TODO: why not start at 1?
+  enum {
+    kExtendableLeft = 2,
+    kExtendableRight = 4,
+    kMustExtendLeft = 8,
+    kMustExtendRight = 0x10,
+    kUnspecified = 0x20,
+    kExtendable = kExtendableLeft | kExtendableRight,
+    kBlockSymbolTokenProperties = kExtendable,
+    kDefaultTokenProperties = kExtendableLeft | kExtendableRight | kMustExtendLeft | kMustExtendRight
+  };
 
-  static inline Properties getDefaultProperties() {
-    return kExtendableLeft | kExtendableRight | kMustExtendLeft | kMustExtendRight;
-  }
-
-  Token() : props_(getDefaultProperties()), symIdsVec_(), start_(kNoState), endState_(kNoState) {}
+  Token() : props_(kDefaultTokenProperties), syms_(), start_(kNoState), endState_(kNoState) {}
 
   // default copy/equal/assign
 
-  Token(Sym symId, Properties props = getDefaultProperties())
-      : props_(props), symIdsVec_(), start_(kNoState), endState_(kNoState) {
-    symIdsVec_.push_back(symId);
+  Token(Sym symId, Properties props = kDefaultTokenProperties)
+      : props_(props), start_(kNoState), endState_(kNoState) {
+    syms_.push_back(symId);
   }
 
   Token(Sym symId, Properties props, StateId startState, StateId endState)
-      : props_(props), symIdsVec_(), start_(startState), endState_(endState) {
-    if (symId != EPSILON::ID) symIdsVec_.push_back(symId);
+      : props_(props), start_(startState), endState_(endState) {
+    if (symId != EPSILON::ID) syms_.push_back(symId);
   }
 
   /**
@@ -131,7 +120,7 @@ class Token {
   enum { EmptyToken = 0 };  // doc for unused bool arg tag
 
   Token(StateId startState, StateId endState, bool)
-      : props_(kUnspecified), symIdsVec_(), start_(startState), endState_(endState) {}
+      : props_(kUnspecified), start_(startState), endState_(endState) {}
 
   /**
      Is this token extendable to the left?
@@ -189,29 +178,30 @@ class Token {
 
   void setEndState(StateId s) { endState_ = s; }
 
-  const_iterator begin() const { return symIdsVec_.begin(); }
+  const_iterator begin() const { return syms_.begin(); }
 
-  const_iterator end() const { return symIdsVec_.end(); }
+  const_iterator end() const { return syms_.end(); }
 
-  SymsIndex size() const { return (SymsIndex)symIdsVec_.size(); }
+  SymsIndex size() const { return (SymsIndex)syms_.size(); }
 
-  bool empty() const { return symIdsVec_.empty(); }
+  bool empty() const { return syms_.empty(); }
 
-  Sym const& front() const { return symIdsVec_.front(); }
+  Sym const& front() const { return syms_.front(); }
 
-  Sym const& back() const { return symIdsVec_.back(); }
+  Sym const& back() const { return syms_.back(); }
 
-  Sym const& operator[](SymsIndex n) const { return symIdsVec_[n]; }
+  Sym const& operator[](SymsIndex n) const { return syms_[n]; }
 
   void append(Token const& other);
 
   Properties properties() const { return props_; }
 
-  void print(std::ostream& out, IVocabularyPtr pVoc) const;
+  void print(std::ostream& out, IVocabularyPtr const& pVoc) const { print(out, pVoc.get()); }
+  void print(std::ostream& out, IVocabulary const* voc) const;
 
   bool operator==(Token const& other) const {
     return props_ == other.props_ && start_ == other.start_ && endState_ == other.endState_
-           && symIdsVec_ == other.symIdsVec_;
+           && syms_ == other.syms_;
   }
 
   bool operator!=(Token const& other) const { return !(*this == other); }
@@ -227,15 +217,15 @@ class Token {
     if (getEndState() < other.getEndState()) return true;
     if (other.getEndState() < getEndState()) return false;
 
-    return symIdsVec_ < other.symIdsVec_;
+    return syms_ < other.syms_;
   }
+  Syms const& syms() const { return syms_; }
 
  private:
-  SymsVector symIdsVec_;
+  SymsVector syms_;
   Properties props_;
   StateId start_;
   StateId endState_;
-
 };  // end class Token
 
 inline std::ostream& operator<<(std::ostream& out, Token const& tok) {
@@ -291,7 +281,6 @@ class TokenWeightTpl {
 #if SDL_WEIGHT_USE_AT_STATIC_INIT
   // reasonably cheap construction. spare us the thread synch difficulty
   static inline Self one() { return Self(); }
-  // SDL_CACHE_STATIC_LOCAL(Self, one(), Self())
   // this is a little slower, so probably worth the caching overhead
   SDL_CACHE_STATIC_LOCAL(Self, zero(), Self(Token(kNoState, kNoState, Token::EmptyToken), W::zero()))
 #else

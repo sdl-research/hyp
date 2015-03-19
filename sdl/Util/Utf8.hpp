@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     Provides efficient utf8 bytes<->unicode codepoints decoding/encoding (inline, C++)
@@ -67,7 +54,6 @@ CLANG_DIAG_ON(unsequenced)
 #include <boost/noncopyable.hpp>
 #include <sdl/Types.hpp>
 #include <sdl/Array.hpp>
-#include <sdl/Config/Init.hpp>
 #include <sdl/Span.hpp>
 
 
@@ -124,8 +110,8 @@ inline TokenSpan toUtf8ByteSpan(TokenSpan const& unicodeSpan, std::string const&
 }
 
 template <typename octet_iterator>
-octet_iterator append(Unicode cp, octet_iterator const& result) {
-  return UTF8_CHECKED_NS::append(cp, result);
+octet_iterator append(Unicode c, octet_iterator const& result) {
+  return UTF8_CHECKED_NS::append(c, result);
 }
 
 template <class ByteOutIter>
@@ -206,17 +192,17 @@ inline bool validUtf8(Bytes const& bytes) {
 /// when doing nfc, we disable all on-by-default normalizations that might apply
 /// before tokenizers record spans.
 
-/// false is tested. true needs testing (is enabled specifically for
-/// StringToTokens - so for many string-input modules, and
-/// TrainableCapitalizer/Input)
-enum { kDefaultRemoveControlChars = false };
-
 enum { kAlreadyValidUtf8 = true };
 
 /// options for 1:1 and deleting Unicode translations for control chars and
 /// kUnicodeReplacementChar, with badUtf8Handler also including the (not
 /// recommended) option of ignoring corrupt utf8
 struct FixUnicode {
+  void initAssumingValidUtf8(bool assumeValidUtf8) {
+    defaults();
+    badUtf8Handler = assumeValidUtf8 ? kUnsafe_Ignore : kRemove;
+  }
+
   void disableAllFixes() {
     removeControlChars = false;
     convertWindows1252 = false;
@@ -230,7 +216,7 @@ struct FixUnicode {
   }
 
   void defaults() {
-    removeControlChars = kDefaultRemoveControlChars;
+    removeControlChars = false;
     convertWindows1252 = true;  // will never alter # of unicode chars
     badUtf8Handler = kRemove;
   }
@@ -242,6 +228,7 @@ struct FixUnicode {
   /// utf8 (and U+FFFE, the 'replacement' char), callers should simply be aware
   /// of that (it's simple/standard enough)
   bool removesUnicodes() const { return removeControlChars; }
+  // TODO: not safe unless we implement constraints (char alignment) adjustment
 
   FixUnicode() { defaults(); }
 
@@ -252,7 +239,9 @@ struct FixUnicode {
       defaults();
   }
 
-  bool removeControlChars, convertWindows1252;
+  bool removeControlChars;  // TODO: not safe unless we implement constraints (char alignment) adjustment
+
+  bool convertWindows1252;  // safe to enable (1:1)
   BadUtf8HandlerType badUtf8Handler;
 
   bool cleanupEnabled() const {
@@ -265,22 +254,13 @@ struct FixUnicode {
     return modifiesControlChars() && containsNonSpaceControlChars(str);
   }
 
-  friend inline void validate(FixUnicode& x) { x.validate(); }
-  void validate() {
-    if (badUtf8Handler == kUnsafe_Ignore)
-      SDL_WARN(Utf8,
-               "If input is not utf-8, character boundaries are likely wrong. Recommend 'remove' or "
-               "'replace' instead of 'ignore'");
-  }
-
   template <class Config>
   void configure(Config& config) {
     config.is("FixUnicode");
-    config("bad-utf8-handler", &badUtf8Handler).self_init()(
+    config("bad-utf8-handler", &badUtf8Handler).init(kRemove)(
         "Handle malformed UTF-8 byte sequences, by either removing them, replacing them with the UTF-8 "
         "replacement character 0xfffd, or ignoring them. warning: the quality of our models is severely "
-        "degraded if you use Ignore for text that is not utf8 - character boundaries will likely include "
-        "some wrong ones");
+        "degraded if you use Ignore for text that is not really utf8");
     config("remove-control-characters", &removeControlChars).self_init()(
         "Remove non-whitespace control characters (whitespace is normalized/handled by a different "
         "mechanism).");
@@ -438,8 +418,8 @@ inline void appendUtf8From16(Utf8Chars& vec, Utf16Iter begin, Utf16Iter end) {
   unsigned n16 = (unsigned)(end - begin);
   if (!n16) return;
   vec.reserve(vec.size() + (n16 * 3) / 2);  // middle of road estimate for asian languages (not 4 for worst
-                                            // case), asian languages commonly pay 3 bytes per char but one
-                                            // resize+grow wouldn't kill you, would it?
+  // case), asian languages commonly pay 3 bytes per char but one
+  // resize+grow wouldn't kill you, would it?
   utf8::unchecked::utf16to8(begin, end, std::back_inserter(vec));
 }
 
@@ -448,8 +428,8 @@ inline void appendUtf8From16(Utf8Chars& vec, Utf16Chars const& append) {
   unsigned n16 = (unsigned)append.size();
   if (!n16) return;
   vec.reserve(vec.size() + (n16 * 3) / 2);  // middle of road estimate for asian languages (not 4 for worst
-                                            // case), asian languages commonly pay 3 bytes per char but one
-                                            // resize+grow wouldn't kill you, would it?
+  // case), asian languages commonly pay 3 bytes per char but one
+  // resize+grow wouldn't kill you, would it?
   utf8::unchecked::utf16to8(append.begin(), append.end(), std::back_inserter(vec));
 }
 
@@ -501,12 +481,9 @@ namespace Utf8 {
 using utf8::unchecked::iterator;
 }
 
-typedef utf8::unchecked::iterator<std::string::const_iterator> FromUtf8Iter;  // checked iterator must be
-                                                                              // initialized with the
-                                                                              // permitted range, so unchecked
-                                                                              // is easier to use
-typedef utf8::unchecked::iterator<char const*>
-    FromUtf8IterC;  // checked iterator must be initialized with the
+typedef utf8::unchecked::iterator<std::string::const_iterator> FromUtf8Iter;
+typedef utf8::unchecked::iterator<char const*> FromUtf8IterC;
+// checked iterator must be initialized with the whole range
 
 // could use boost::iterator_range<Utf8::iterator<Bytes::iterator> > instead - this is essentially a template
 // typedef
@@ -546,6 +523,10 @@ void fixUtf8All(Strings& strings) {
 inline void fixUtf8To(std::string const& string, std::string& fixedStr) {
   fixedStr.reserve(string.size() + 4);
   utf8::replace_invalid(string.begin(), string.end(), std::back_inserter(fixedStr), kUnicodeReplacementChar);
+}
+
+inline void fixUtf8To(Slice s, std::string& fixedStr) {
+  utf8::replace_invalid(s.first, s.second, std::back_inserter(fixedStr), kUnicodeReplacementChar);
 }
 
 /**

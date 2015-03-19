@@ -24,11 +24,8 @@ set(LINK_DEPENDENCIES
 
 
 # Optimization library
-add_library(${PROJECT_NAME}
-  ${PROJECT_SOURCE_DIR}/src/OptimizationProcedure.cpp
-  ${PROJECT_SOURCE_DIR}/src/LearningRate.cpp
-  ${PROJECT_SOURCE_DIR}/src/ExternalFeatHgPairs.cpp
-  )
+ sdl_add_library(${PROJECT_NAME} ${PROJECT_SOURCE_DIR} EXCLUDE ${PROJECT_SOURCE_DIR}/src/OptimizeMain.cpp)
+
 target_link_libraries(${PROJECT_NAME}
   ${LINK_DEPENDENCIES}
   )
@@ -37,9 +34,7 @@ sdl_rpath(${PROJECT_BINARY_DIR}/../CrfDemo)
 
 # Executable for optimizing feature weights
 set(TRAIN_EXE Optimize)
-add_executable(${TRAIN_EXE}
-  ${PROJECT_SOURCE_DIR}/src/OptimizeMain.cpp
-  )
+sdl_add_executable(${TRAIN_EXE} ${PROJECT_SOURCE_DIR} INCLUDE_ONLY src/OptimizeMain.cpp)
 target_link_libraries(${TRAIN_EXE}
   ${LINK_DEPENDENCIES}
   ${PROJECT_NAME}

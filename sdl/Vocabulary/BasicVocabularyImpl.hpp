@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     an array of strings and a map from string to id (as used to make IVocabulary
@@ -126,11 +113,8 @@ class BasicVocabularyImpl {
   }
 
   /// (everything before offset is a frozen or read only index, too)
-  SymInt pastFrozenIndex() const {
-    return offset_ + freezeEndIndex_;
-  }
+  SymInt pastFrozenIndex() const { return offset_ + freezeEndIndex_; }
 
- protected:
   SymInt offset_, maxLstSize_, freezeEndIndex_;
   SymbolType type_;
 
@@ -145,26 +129,38 @@ class BasicVocabularyImpl {
     return sym;
   }
 
-  Sym add(const std::string& symbol) {
+  Sym add(Slice s) { return add(std::string(s.first, s.second)); }
+
+  Sym add(std::string const& symbol) {
     SymInt i = symbols_.index(symbol);
-    if (i >= maxLstSize_) throw std::out_of_range("BasicVocab::addSymbol");
+    assert(i < maxLstSize_);
     return symForIndex(i);
   }
 
-  Sym addSymbolMustBeNew(const std::string& symbol) {
-    SymInt const sz = size();
+  SymIdInt indexAdding(std::string const& symbol) {
+    SymInt i = symbols_.index(symbol);
+    assert(i < maxLstSize_);
+    return i;
+  }
+
+  SymIdInt indexAdding(Slice s) { return indexAdding(std::string(s.first, s.second)); }
+
+  Sym addSymbolMustBeNew(Slice s) { return addSymbolMustBeNew(std::string(s.first, s.second)); }
+
+  Sym addSymbolMustBeNew(std::string const& symbol) {
+    SymInt const oldsz = size();
     SymInt const i = symbols_.index(symbol);
-    if (i != sz || i >= maxLstSize_)
+    if (size() == oldsz || i >= maxLstSize_)
       throw std::out_of_range("BasicVocab::addSymbolMustBeNew - string was not new");
     return symForIndex(i);
   }
 
-  Sym add(const std::string& symbol, SymbolType type) {
+  Sym add(std::string const& symbol, SymbolType type) {
     assert(type == type_);
     return add(symbol);
   }
 
-  Sym addSymbolMustBeNew(const std::string& symbol, SymbolType type) {
+  Sym addSymbolMustBeNew(std::string const& symbol, SymbolType type) {
     assert(type == type_);
     return addSymbolMustBeNew(symbol);
   }
@@ -176,7 +172,7 @@ class BasicVocabularyImpl {
 
   SymInt index(std::string const& symbol) const { return symbols_.find(symbol); }
 
-  Sym sym(const std::string& symbol) const {
+  Sym sym(std::string const& symbol) const {
     SymInt const i = symbols_.find(symbol);
     return i == kNullIndex ? NoSymbol : symForIndex(i);
   }
@@ -190,7 +186,7 @@ class BasicVocabularyImpl {
 
   bool containsIndex(SymInt i) const { return i - offset_ < symbols_.size(); }
 
-  bool contains(const std::string& symbol) const { return symbols_.find(symbol) != kNullIndex; }
+  bool contains(std::string const& symbol) const { return symbols_.find(symbol) != kNullIndex; }
 
   SymInt getNumSymbols() const { return size(); }
 

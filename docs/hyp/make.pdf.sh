@@ -9,5 +9,6 @@ pdflatex $f
 bibtex $f
 pdflatex $f
 pdflatex $f
+pdflatex $f
 mv hyp-tutorial*pdf ../../hyp-tutorial.pdf
 rm hyp-tutorial.{aux,log,out,toc}

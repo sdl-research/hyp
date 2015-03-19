@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 #ifndef HYP__HYPERGRAPH_ARC_HPP
 #define HYP__HYPERGRAPH_ARC_HPP
 #pragma once
@@ -222,8 +209,14 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
 
   // for PhraseDecoder / ArcWithDataTpl
   template <class Cost>
-  ArcTpl(Hypergraph::StateId head, Hypergraph::StateId tail, Cost w)
+  ArcTpl(StateId head, StateId tail, Cost w)
       : head_(head), tails_(1, tail), weight_(w) {}
+
+  // for ConvertCharsToTokens
+  ArcTpl(Head head, Weight const& w)
+      : head_(head), weight_(w) {}
+  ArcTpl(Head head, StateId tail)
+      : head_(head), tails_(1, tail) {}
 
   /**
      for binarization - head set later
@@ -262,6 +255,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   ArcTpl(StateId h, StateIdContainer const& t, Weight const& w = Weight::one())
       : head_(h), tails_(t), weight_(w) {}
 
+  // for ConvertCharsToTokens and hypergraph
   ArcTpl(StateId h, Weight const& w, StateId t) : head_(h), tails_(1, t), weight_(w) {}
 
   /**
@@ -483,7 +477,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
   ArcWithDataTpl() : Base(), data_(NULL), deleter_(NULL) {}
 
-  ArcWithDataTpl(Hypergraph::StateId head, Hypergraph::StateIdContainer const& tails,
+  ArcWithDataTpl(StateId head, StateIdContainer const& tails,
                  Weight const& w = Weight::one())
       : Base(head, tails, w), data_(NULL), deleter_(NULL) {}
 
@@ -491,11 +485,11 @@ class ArcWithDataTpl : public ArcTpl<W> {
       : Base(from, label, w, to), data_(NULL), deleter_(NULL) {}
 
   template <class Cost>
-  ArcWithDataTpl(Hypergraph::StateId head, Hypergraph::StateId tail, Cost const& w)
+  ArcWithDataTpl(StateId head, StateId tail, Cost const& w)
       : Base(head, tail, w), data_(NULL), deleter_(NULL) {}
 
   template <class Cost>
-  ArcWithDataTpl(Hypergraph::StateId head, Cost const& w, Hypergraph::StateId tail)
+  ArcWithDataTpl(StateId head, Cost const& w, StateId tail)
       : Base(head, w, tail), data_(NULL), deleter_(NULL) {}
 
   virtual ~ArcWithDataTpl() {

@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     vocabulary resource: (string, type id) <-> Sym which is (index, type id)
@@ -27,7 +14,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <boost/scoped_ptr.hpp>
-#include <sdl/Sym.hpp> // std::string, Sym
+#include <sdl/Sym.hpp>  // std::string, Sym
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Exception.hpp>
 #include <sdl/Resource.hpp>
@@ -86,6 +73,7 @@ struct IVocabulary : Resource {
   Sym add(std::string const& str, SymbolType symType) { return addImpl(str, symType); }
 
   Sym add(Slice const& field, SymbolType symType) { return doAddField(field, symType); }
+  Sym addTerminal(Slice const& field) { return doAddField(field, kTerminal); }
 
   Sym add(Unicode c, SymbolType symType) { return addImpl(Util::utf8s(c), symType); }
 
@@ -93,9 +81,8 @@ struct IVocabulary : Resource {
     assert(symFromOtherVocab);
     return symFromOtherVocab.isSpecial()
                ? symFromOtherVocab
-               : this == &otherVocab
-                     ? symFromOtherVocab
-                     : symImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+               : this == &otherVocab ? symFromOtherVocab
+                                     : symImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
   }
 
   /// return same string in our vocabulary. pre: symFromOtherVocab is not NoSymbol
@@ -103,9 +90,8 @@ struct IVocabulary : Resource {
     assert(symFromOtherVocab);
     return symFromOtherVocab.isSpecial()
                ? symFromOtherVocab
-               : this == &otherVocab
-                     ? symFromOtherVocab
-                     : addImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+               : this == &otherVocab ? symFromOtherVocab
+                                     : addImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
   }
 
   /// does symFromOtherVocab = add(symFromOtherVocab, otherVocab). pre: symFromOtherVocab is not
@@ -168,9 +154,7 @@ struct IVocabulary : Resource {
   virtual void freeze() = 0;
 
   /// all frozen terminal syms have index lower than this
-  virtual SymInt pastFrozenTerminalIndex() const {
-    return getNumSymbols(kTerminal);
-  }
+  virtual SymInt pastFrozenTerminalIndex() const { return getNumSymbols(kTerminal); }
 
   /**
      \return number of symbols added since freeze.
@@ -256,9 +240,7 @@ struct IVocabulary : Resource {
     if (phase == kPhase1) setThreadLocal(true);
   }
 
-  void initThread() OVERRIDE {
-    SDL_DEBUG(evict.init.Vocabulary, "vocabulary initThread " << getName());
-  }
+  void initThread() OVERRIDE { SDL_DEBUG(evict.init.Vocabulary, "vocabulary initThread " << getName()); }
 
  protected:
   bool threadlocal_;
@@ -296,7 +278,6 @@ struct IVocabulary : Resource {
 
   // TODO@SK: better names: if containsSymbol then idForSymbol and if containsId then symbolForId
   virtual bool containsImpl(std::string const& symbol, SymbolType symType) const = 0;
-
 };
 
 namespace {

@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     expand all paths from source best-first in a lazy fsm, stopping when finding
@@ -287,7 +274,7 @@ struct LazyBest : DistanceFn {
     assert(p);
     bestPathOut.totalDistance = p->distance;
     for (; p->predecessor; p = p->predecessor)  // skip the start-state pseudo-arc
-      bestPathOut.prepend((FstArc const&)*p);
+      bestPathOut.prepend(static_cast<FstArc const&>(*p));
   }
 
   /**
@@ -302,7 +289,7 @@ struct LazyBest : DistanceFn {
         return;  // success
       }
       if (from.arcs) {
-        FstArc arc = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
+        FstArc const& arc = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
         Distance distance = from.distance + arc.getDistance();
         from.estimateSuccessor(distance - opt.expandMoreArcs);
         queue.adjustTop();  // note: moving items around in queue doesn't invalidate the pointed-to Best
@@ -419,6 +406,7 @@ bool lazyBestToHg(Fst& fst, IMutableHypergraph<Arc>& outHg, LazyBestOptions cons
   typedef typename Fst::Weight Weight;
   Path<FstArcNoState<Weight> > path;
   LazyBest<Fst> lazyBest(fst, path, opt);
+  //  SDL_DEBUG(Hypergraph.fs.LazyBest, print(path, outHg.getVocabulary()));
   std::size_t nWords
       = path.addToHypergraph(outHg, kNoState, kNoState, opt.removeEpsilon, opt.projectOutput, opt.annotations);
   if (!opt.logNumWordsName.empty())

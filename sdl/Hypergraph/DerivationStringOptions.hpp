@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     options for printing best paths.
@@ -35,6 +22,7 @@ struct WhichSymbolOptions {
     Config::inits(this);
   }
   WhichSymbolOptions() { defaults(); }
+  WhichSymbolOptions(bool) { }
   bool shows(Sym sym) const {
     if (sym.isLexical()) return true;
     if (types == kLexical_Only) return false;
@@ -50,7 +38,7 @@ struct WhichSymbolOptions {
         ("backward compatability for 'types' option");
 
     config("types", &types).verbose(hide).init(kAllSymbolTypes)
-        ("only print lexical symbols (so will skip <xmt-blockN> <tok> etc, so implies 'epsilon: skip-epsilon' and 'block: skip-block')");
+        ("all-symbols includes <xmt-blockN> <tok> etc; lexical-only implies 'epsilon: skip-epsilon' and 'block: skip-block')");
     config("epsilon", &epsilon).verbose(hide).init(kSkip_Epsilon)
         ("skip or keep epsilon (<eps>)");
     config("block", &block).verbose(hide).init(kSkip_Block)
@@ -74,28 +62,33 @@ struct DerivationStringOptions : WhichSymbolOptions {
   }
 
   void setQuoted() {
-    defaults();
     quote = kQuoted;
+    defaults();
   }
 
+  /// for eg ->zh (no spaces between chi tokens)
   void setChars() {
-    defaults();
     quote = kUnquoted;
     space = "";
+    defaults();
   }
 
   void setWords() {
+    quoteSpaceDefaults();
     defaults();
   }
 
   DerivationStringOptions()
   {
-    quote = kUnquoted; // most prefer unquoted since spaces aren't allowed in
-    // tokens (exception: ->chi CharDetok LPs will add spaces
-    // at the end - where the intended result is unquoted and
-    // space=="" for simple concatenation
-    space = " ";
+    quoteSpaceDefaults();
     defaults();
+  }
+
+  DerivationStringOptions(bool) { quoteSpaceDefaults(); }
+
+  void quoteSpaceDefaults() {
+    quote = kUnquoted;
+    space = " ";
   }
 
   DerivationStringOptions(SymbolQuotation quoted) {

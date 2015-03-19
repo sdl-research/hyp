@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
    symbol type and index in a 32-bit POD
@@ -279,20 +266,20 @@ struct Sym {
 
   /** \return is terminal, including special, persistent or not
    */
-  inline bool isTerminal() const {
+  bool isTerminal() const {
     assert(!isPersistent());
     return id_ >= (SymInt)kBeginTerminal && id_ < (SymInt)kEndTerminal
         || id_ >= (SymInt)kSpecialTerminal && id_ < (SymInt)kEndSpecialTerminal;
   }
 
-  inline bool isSpecialTerminal() const {
+  bool isSpecialTerminal() const {
     assert(!isPersistent());
     return id_ >= (SymInt)kSpecialTerminal && id_ < (SymInt)kEndSpecialTerminal;
   }
 
   /** \return is a lexical non-special terminal symbol - kTerminal or kPeristentTerminal
    */
-  inline bool isLexical() const {
+  bool isLexical() const {
     assert(!isPersistent());
     assert(((SymInt)(id_ + 1) > (SymInt)kTerminal)
            == (id_ >= (SymInt)kBeginTerminal && id_ < (SymInt)kEndTerminal));
@@ -304,7 +291,7 @@ struct Sym {
    *
       The function will return true for non-special non-terminals
    */
-  inline bool isNonterminal() const {
+  bool isNonterminal() const {
     assert(!isPersistent());
     return (id_ & kSmallTypeMask) == kNonterminal;
   }
@@ -315,11 +302,11 @@ struct Sym {
       The function will return true for all non-terminal symbol Id's, including
       non-persistent non-terminal, persistent non-terminal and special non-terminal symbols.
    */
-  inline bool isVariable() const {
+  bool isVariable() const {
     return id_ >= (SymInt)kVariable && id_ < (SymInt)kEndVariable;
   }
 
-  inline bool isPersistent() const {
+  bool isPersistent() const {
     return isPersistentType(type());
   }
 
@@ -334,11 +321,11 @@ struct Sym {
     id_ |= kTerminal;
   }
 
-  inline bool isSpecial() const {
+  bool isSpecial() const {
     return id_ >= (SymInt)kBeginSpecial && id_ < (SymInt)kEndSpecial;
   }
 
-  inline SymInt maxIndex() const {
+  SymInt maxIndex() const {
     return (SymInt)(id_ >= (SymInt)kLargeIdsStart ? kLargeSizeMask : kSmallSizeMask);
   }
 #ifdef __clang__
@@ -353,7 +340,7 @@ struct Sym {
       Sym::createSym(4, kVariable).index() will return 4.
       Sym::getVariableId(4).index() will return 4.
    */
-  inline SymInt index() const {
+  SymInt index() const {
     return id_ & maxIndex();
   }
 
@@ -361,7 +348,7 @@ struct Sym {
   /*
       set to NoSymbol
    */
-  inline void reset() {
+  void reset() {
     id_ = (SymInt)kNoSymbol;
   }
 
@@ -370,7 +357,7 @@ struct Sym {
 
       - simpler: just if(sym) or (bool)sym
   */
-  inline bool isValid() const {
+  bool isValid() const {
     return id_ != (SymInt)kNoSymbol;
   }
 
@@ -426,7 +413,7 @@ struct Sym {
     return id_ >= rhs;
   }
 
-  inline bool incrementable() const {
+  bool incrementable() const {
     return ((id_ + 1) & kSmallSizeMask) || id_ == (SymInt)kLargeIncrementable;
   }
 
@@ -463,36 +450,36 @@ struct Sym {
       used by KeyGeneratorUtil.hpp and in serializing {Phrase, Syntax}Rule
    */
   template <class Archive>
-  inline void serialize(Archive& ar, const SymInt version) {
+  void serialize(Archive& ar, const SymInt version) {
     ar & id_;
     assert(!isPersistent());
   }
 
-  inline SymbolType type() const {
+  SymbolType type() const {
     if (id_ >= (SymInt)kLargeIdsStart)
       return ~id_ ? kLargeIdsStart : (SymbolType)id_;
     else
       return (SymbolType)(id_ & (SymInt)kSmallTypeMask);
   }
 
-  inline SymInt id() const {
+  SymInt id() const {
     return id_;
   }
 
   SymInt id_;
-  inline void operator+=(SymInt deltaIndex) {
+  void operator+=(SymInt deltaIndex) {
     assert(index() + deltaIndex <= maxIndex());
     id_ += deltaIndex;
   }
-  inline void operator-=(SymInt deltaIndex) {
+  void operator-=(SymInt deltaIndex) {
     assert(index() > deltaIndex);
     id_ -= deltaIndex;
   }
-  inline void operator+=(Sym delta) {
+  void operator+=(Sym delta) {
     assert(delta.type() == type());
     operator+=(delta.index());
   }
-  inline void operator-=(Sym delta) {
+  void operator-=(Sym delta) {
     assert(delta.type() == type());
     operator-=(delta.index());
   }
@@ -522,14 +509,14 @@ inline Sym operator+(SymInt index, Sym sym) {
 }
 
 template <class Rhs>
-inline Sym operator+(Sym lhs, Rhs rhs) {
+Sym operator+(Sym lhs, Rhs rhs) {
   Sym r(lhs);
   r += rhs;
   return r;
 }
 
 template <class Rhs>
-inline Sym operator-(Sym lhs, Rhs rhs) {
+Sym operator-(Sym lhs, Rhs rhs) {
   Sym r(lhs);
   r -= rhs;
   return r;

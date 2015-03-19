@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /**
    //TODO: use this to get true compile time constants
 
@@ -69,6 +56,8 @@ SPECIAL_SYMBOL(UNK, <unk>, kSpecialTerminal)
 
 // Used by tokenizers to mark tokens.
 // Example: <tok> 't' 'e' 's' 't' </tok>
+// IMPORTANT: placing new symbols before TOK_START and TOK_END
+// will break unit tests (hardwired values).
 SPECIAL_SYMBOL(TOK_START, <tok>, kSpecialTerminal)
 SPECIAL_SYMBOL(TOK_END, </tok>, kSpecialTerminal)
 
@@ -88,6 +77,10 @@ SPECIAL_SYMBOL(FS, <foreign-sentence>, kSpecialTerminal)
 
 // Used by abortSegment to return the output of the canceled segment
 SPECIAL_SYMBOL(ABORTSEGMENT, <abort-segment>, kSpecialTerminal)
+
+SPECIAL_SYMBOL(SENT_START, <s>, kSpecialTerminal)
+SPECIAL_SYMBOL(SENT_END, </s>, kSpecialTerminal)
+SPECIAL_SYMBOL(NULL_TAG, <null>, kSpecialTerminal)
 
 //////////////////////////////
 // SDL_BLOCK symbols

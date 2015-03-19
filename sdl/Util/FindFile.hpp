@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     search path for regular files (not only executables)
@@ -56,6 +43,8 @@ std::string absParent(std::string const& path);  // pStrDir part of splitFilePat
 
 /// \return (possibly relative) path.parent_path
 std::string dirname(std::string const& path);
+
+std::string basename(std::string const& path);
 
 /// POST: path.parent_path exists and is a dir (else exception). \return path.parent_path
 std::string mkdirParentPath(std::string const& path);

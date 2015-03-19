@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     Hypergraph (or Graph, or FSM, as special cases).
@@ -163,17 +150,17 @@ namespace Hypergraph {
 #ifdef NDEBUG
 #define ASSERT_VALID_HG(hg)
 #else
-#define ASSERT_VALID_HG(hg)                                                         \
-  do {                                                                              \
-    if (!(hg).checkValid()) {                                                       \
+#define ASSERT_VALID_HG(hg)                                                                  \
+  do {                                                                                       \
+    if (!(hg).checkValid()) {                                                                \
       SDL_THROW_LOG(Hypergraph, InvalidInputException, "ERROR: checkValid failed for " #hg); \
-    }                                                                               \
+    }                                                                                        \
   } while (0)
 #endif
 
 #define THROW_NO_ARCS()                                                              \
   do {                                                                               \
-    SDL_THROW_LOG(Hypergraph.IHypergraph, std::runtime_error, \
+    SDL_THROW_LOG(Hypergraph.IHypergraph, std::runtime_error,                        \
                   "Hypergraph has no arcs (use kStoreInArcs and/or kStoreOutArcs)"); \
   } while (0);
 
@@ -755,8 +742,7 @@ struct FstArc {
   }
 
   void printLabel(std::ostream& out, IVocabulary const& vocab) const {
-    if (!annotations.empty())
-      out << "annotations:"<<Util::print(annotations, vocab);
+    if (!annotations.empty()) out << "annotations:" << Util::print(annotations, vocab);
     out << '(';
     out << vocab.str(labelPair.first);
     if (labelPair.first != labelPair.second) out << ' ' << vocab.str(labelPair.second);
@@ -862,9 +848,8 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
   TailId endAnnotations(Arc const* a) const { return endAnnotations(a->tails()); }
 
   struct FstArcFor {
-
     void init(Self const* hg, bool allowAnnotations = false) {
-      annotations = allowAnnotations && (true || hg->properties() & kAnnotations);
+      annotations = allowAnnotations && (true || (hg->properties() & kAnnotations));
       // TODO: set kAnnotations prop for hgs w/ annotations
       hg_ = hg;
       sizeForLabels_ = hg->sizeForLabels();
@@ -884,22 +869,22 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
       r.weight = arc->weight();
       StateIdContainer const& tails = arc->tails();
       if (annotations) {
-        TailId n = tails.size();
-        for (TailId i = 1;;++i) {
-          if (i >= n) {
+        StateIdContainer::const_iterator i = tails.begin(), e = tails.end();
+        for (;;) {
+          if (++i >= e) {
             r.labelPair.first = r.labelPair.second = EPSILON::ID;
-            return r;
+            break;
           }
-          StateId t = tails[i];
+          StateId const t = *i;
           if (t >= sizeForLabels_) {
             r.labelPair.first = r.labelPair.second = EPSILON::ID;
-            return r;
+            break;
           }
           r.labelPair = hg_->labelPair(t);
           if (Vocabulary::isAnnotation(r.labelPair.first))
             r.annotations.push_back(r.labelPair.first);
           else
-            return r;
+            break;
         }
       } else {
         if (tails.size() == 2) {
@@ -913,6 +898,8 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
           r.labelPair = hg_->firstLexicalLabelPairOrEps(arc);
         }
       }
+      SDL_DEBUG_IF(!r.annotations.empty(), Hypergraph.annotations,
+                   "IHypergraph fstarc with annotations=" << annotations << ": " << r);
       return r;
     }
 
@@ -1297,9 +1284,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     forArcs(Util::visitorReference(r));
     return r;
   }
-  void setWeight1() const {
-    forArcsAllowRepeats(impl::set_weight1());
-  }
+  void setWeight1() const { forArcsAllowRepeats(impl::set_weight1()); }
   // TODO: cache in props?
   bool unweighted() const { return countArcs().unweighted(); }
 
@@ -1580,10 +1565,16 @@ StateId maxState(IHypergraph<A> const& h) {
   return r;
 }
 
+
 template <class Arc>
-bool isEpsilonLikeGraphArc(IHypergraph<Arc> const& hg, Arc const* arc) {
-  StateIdContainer const& tails = arc->tails();
-  return isOne(arc->weight()) && (tails.size() <= 1 || hg.inputLabel(tails[1]) == EPSILON::ID);
+bool isEpsilonLikeGraphArcAnyWeight(IHypergraph<Arc> const& hg, Arc const& arc) {
+  StateIdContainer const& tails = arc.tails();
+  return tails.size() <= 1 || hg.labelPair(tails[1]) == kEpsilonLabelPair;
+}
+
+template <class Arc>
+bool isEpsilonLikeGraphArc(IHypergraph<Arc> const& hg, Arc const& arc) {
+  return isOne(arc.weight()) && isEpsilonLikeGraphArcAnyWeight(hg, arc);
 }
 
 template <class Arc>

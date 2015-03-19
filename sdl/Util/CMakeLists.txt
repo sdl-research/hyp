@@ -1,6 +1,6 @@
 project (Util)
 
-sdl_lwutil_includes()
+sdl_util_includes()
 
 file(GLOB LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_library(${UTIL_LIBRARY_NAME} ${LIB_SOURCES})

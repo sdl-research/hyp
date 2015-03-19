@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 #define SDL_TRANSFORM_MAIN_LOG_WEIGHT 1
 #define SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT 1
 
@@ -19,9 +6,11 @@
 #include <sstream>
 #include <string>
 
+#include <sdl/Hypergraph/FeatureWeight.hpp>
+#include <sdl/Hypergraph/Arc.hpp>
+
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-
 #include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/ArcParserFct.hpp>
 
@@ -46,7 +35,6 @@
 
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
-#include <sdl/Hypergraph/FeatureWeight.hpp>
 #include <sdl/Util/Locale.hpp>
 
 namespace po = boost::program_options;

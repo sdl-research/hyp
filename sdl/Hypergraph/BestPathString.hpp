@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     sequences of symbols, or a formatted string from that, for terminal yields of a best path tree.
@@ -47,21 +34,13 @@ inline SymsRewrite identitySymsRewrite() {
 
 unsigned const kReserveForBestPathString = 500;
 
+
 template <class Arc>
-std::string bestPathString(IHypergraph<Arc> const& hg, BestPathOptions const& bestPathOpts = BestPathOptions(),
-                           DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
-                           bool printWeight = false,
-                           char const* fallbackIfNoDerivation = "[no derivation exists]") {
-  typename Derivation<Arc>::child_type deriv = bestPath(hg, bestPathOpts);
-  if (!deriv)
-    return fallbackIfNoDerivation;
-  else if (printWeight) {
-    Util::StringBuilder out(kReserveForBestPathString);
-    out(deriv->weight())(' ');
-    textFromDeriv(out, deriv, hg, opts);
-    return out.str();
-  } else
-    return textFromDeriv(deriv, hg, opts);
+void appendBestPathStringForDeriv(Util::StringBuilder& out, typename Derivation<Arc>::child_type const& deriv, IHypergraph<Arc> const& hg,
+                                  DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
+                                  bool printWeight = false) {
+  if (printWeight) out(deriv->weight())(' ');
+  textFromDeriv(out, deriv, hg, opts);
 }
 
 template <class Arc>
@@ -75,8 +54,23 @@ Util::StringBuilder& bestPathString(Util::StringBuilder& out, IHypergraph<Arc> c
     return out(fallbackIfNoDerivation);
   else {
     out.reserve(kReserveForBestPathString);
-    if (printWeight) out(deriv->weight())(' ');
-    return textFromDeriv(out, deriv, hg, opts);
+    appendBestPathStringForDeriv(out, deriv, hg, opts, printWeight);
+    return out;
+  }
+}
+
+template <class Arc>
+std::string bestPathString(IHypergraph<Arc> const& hg, BestPathOptions const& bestPathOpts = BestPathOptions(),
+                           DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
+                           bool printWeight = false,
+                           char const* fallbackIfNoDerivation = "[no derivation exists]") {
+  typename Derivation<Arc>::child_type deriv = bestPath(hg, bestPathOpts);
+  if (!deriv)
+    return fallbackIfNoDerivation;
+  else {
+    Util::StringBuilder out(kReserveForBestPathString);
+    appendBestPathStringForDeriv(out, deriv, hg, opts, printWeight);
+    return out.str();
   }
 }
 

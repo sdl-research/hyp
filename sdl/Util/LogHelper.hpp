@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     macros SDL_* for logging and logged exceptions using log4cxx in the
@@ -32,8 +19,8 @@
 #else
 // for debugging static init problems temporarily
 // (don't leave any SDL_DEBUG_CERR in production permanently, even for debug build)
-#define SDL_DEBUG_CERR(a, b) \
-  do {                                                  \
+#define SDL_DEBUG_CERR(a, b)                         \
+  do {                                               \
     std::cerr << "\nsdl." << #a << " " << b << '\n'; \
   } while (0)
 #endif
@@ -103,7 +90,7 @@ struct WithInitLogging : FinishLoggingAfterScope {
 
 
 namespace sdl {
-static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and then set hardware watchpoint
+static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) and then set hardware watchpoint
 // on gLogSeqXmt == the # you see printed
 }
 
@@ -128,38 +115,29 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
     if (!sdl::Util::gFinishedLogging) LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
 
-#ifndef NDEBUG  // Debug mode: Enable trace & debug statements
+// Enable trace & debug statements if in Debug mode, or if explicitly allowed
+#if !defined(NDEBUG) || defined(SDL_ENABLE_DEBUG_LOGGING) || defined(SDL_ENABLE_TRACE_LOGGING)
 
 // the LOG4CXX_ macros unfortunately only enclose in {} and not do {} while (0), so we must:
 
+#define LOG_DEBUG_NAMESTR(loggerName, expression)                                                       \
+  do {                                                                                                  \
+    if (!sdl::Util::gFinishedLogging) LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
+  } while (0)
+
+#if !defined(NDEBUG) || defined(SDL_ENABLE_TRACE_LOGGING)
 #define LOG_TRACE_NAMESTR(loggerName, expression)                                                       \
   do {                                                                                                  \
     if (!sdl::Util::gFinishedLogging) LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
-#define LOG_DEBUG_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
-  } while (0)
+#else
+#define LOG_TRACE_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()
+#endif
 
-#else  // NDEBUG // Release mode: Disable trace & debug statements
+#else  // NDEBUG: Release mode or if no override specified: Disable trace & debug statements
 
 #define LOG_TRACE_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()
-
-/* CA-8792 Conditionally allow debug statements even for NDEBUG. This flag will only be set when building
-   xmtserver
-   where we actually want DEBUG level statements to be available for customers.
-*/
-#ifndef NTRACE_ONLY
-// xmt should use this section
 #define LOG_DEBUG_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()
-
-#else  // NTRACE_ONLY is set -- enable debug statements
-// Only xmtserver should use this section
-#define LOG_DEBUG_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
-  } while (0)
-#endif
 
 #endif  // NDEBUG
 
@@ -174,7 +152,7 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
     if (!sdl::Util::gFinishedLogging) LOG4CXX_INFO(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
 
-#ifdef SDL_SUPPRESS_SOURCE_LOCATION // Used with release mode for external releases: Hide source locations in
+#ifdef SDL_SUPPRESS_SOURCE_LOCATION  // Used with release mode for external releases: Hide source locations in
 // log messages
 
 #define LOG_WARN_NAMESTR(loggerName, expression)                                                       \
@@ -196,7 +174,7 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
     }                                                                                      \
   } while (0)
 
-#else // Don't SDL_SUPPRESS_SOURCE_LOCATION // Debug or Release mode for internal company use
+#else  // Don't SDL_SUPPRESS_SOURCE_LOCATION // Debug or Release mode for internal company use
 
 #define LOG_WARN_NAMESTR(loggerName, expression)                                                               \
   do {                                                                                                         \
@@ -220,7 +198,7 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
     }                                                                                            \
   } while (0)
 
-#endif // SDL_SUPPRESS_SOURCE_LOCATION
+#endif  // SDL_SUPPRESS_SOURCE_LOCATION
 
 /// these macros take unquoted constant strings for loggerName
 #define LOG_LEVEL(loggerName, logLevel, expression) LOG_DEBUG_NAMESTR(#loggerName, logLevel, expression)
@@ -238,7 +216,7 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
 #else  // NLOG is defined:
 
 #include <string>
-#include <sdl/Exception.hpp> // some standard exception types for SDL_THROW_LOG etc
+#include <sdl/Exception.hpp>  // some standard exception types for SDL_THROW_LOG etc
 
 #define LOG_ENABLED(x)
 #define LOG_DEBUG(loggerName, expression) SDL_EMPTY_STATEMENT()
@@ -291,9 +269,9 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
 #define SDL_THROW_IF(cond, loggerNameSuffix, exceptionClass, expression) \
   do {                                                                   \
     if (cond) {                                                          \
-      SDL_THROW_LOG(loggerNameSuffix, exceptionClass, expression); \
+      SDL_THROW_LOG(loggerNameSuffix, exceptionClass, expression);       \
     } else {                                                             \
-      SDL_ERROR(loggerNameSuffix, expression); \
+      SDL_ERROR(loggerNameSuffix, expression);                           \
     }                                                                    \
   } while (0)
 
@@ -339,7 +317,7 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
 #define SDL_ASSERT_THROW_LOG(loggerNameSuffix, cond, exceptionClass, expression) \
   do {                                                                           \
     if (!(cond)) {                                                               \
-      SDL_THROW_LOG(loggerNameSuffix, exceptionClass, expression); \
+      SDL_THROW_LOG(loggerNameSuffix, exceptionClass, expression);               \
     }                                                                            \
   } while (0)
 
@@ -352,5 +330,15 @@ static Util::LogSeq const gseq = {}; // usage: SDL_TRACE(blah, gseq << blah) and
     (void) exception;                                                      \
     throw;                                                                 \
   } while (0)
+
+
+#ifndef NDEBUG
+#define SDL_DEBUG_IF(cond, name, msg) \
+  do {                                \
+    if (cond) SDL_DEBUG(name, msg);   \
+  } while (0)
+#else
+#define SDL_DEBUG_IF(cond, name, msg)
+#endif
 
 #endif

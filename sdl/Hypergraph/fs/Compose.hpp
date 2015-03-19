@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     ComposeFst<InputFst, MatchFst, Filter, WeightProductFn>
@@ -376,7 +363,7 @@ struct TimesByMix<FeatureWeight, FeatureWeight, typename FeatureWeight::IsFeatur
 
 struct FstComposeOptions : SaveFstOptions {
   FstComposeOptions()
-      : fstCompose(true), allowDuplicatePaths(false), sortBestFirst(true), epsilonMatchingFilter(false) {}
+      : fstCompose(true), allowDuplicatePaths(true), sortBestFirst(false), epsilonMatchingFilter(false) {}
 
   template <class Arc>
   bool willLazyFsCompose(Hypergraph::IHypergraph<Arc> const& hg) const {
@@ -486,6 +473,7 @@ struct ComposeFst : TimesFn {
       // detecting empty range in advance
       LabelPair const& inLabels = inArc.labelPair;
       r.dst.input = inArc.dst;
+      r.annotations = inArc.annotations;
       r.dst.filter() = *(Filter const*)this;
       LabelPair& rLabels = r.labelPair;
       rLabels.first = inLabels.first;
@@ -600,14 +588,14 @@ struct ComposeFst : TimesFn {
 
       while (inArcs) {
         Sym matchSym = (r.inArc = inArcs()).labelPair.second;
-        if (matchSym
-            == EPSILON::ID) {  // input epsilons don't cause us to exclude a phi in the match transducer.
+        if (matchSym == EPSILON::ID) {
+          // input epsilons don't cause us to exclude a phi in the match transducer.
           if (filter.allowInputMatchEpsilon()
               && (r.matchedArcs = match->arcsMatchingInput(src.match, matchSym))) {
             r.matchSrc = src.match;  // used for input epsilon only case
             filter.inputMatchEpsilon();
-            assert(
-                filter.allowInputEpsilon());  // will also generate input epsilon (permitted by all 3 filters)
+            assert(filter.allowInputEpsilon());
+            // will also generate input epsilon (permitted by all 3 filters)
             return r;
           } else if (filter.allowInputEpsilon()) {
             r.matchSrc = src.match;
@@ -617,11 +605,13 @@ struct ComposeFst : TimesFn {
             continue;  // skip this arc; filter doesn't allow input epsilon
         } else {
           bool const haveStandard = (r.matchedArcs = match->arcsMatchingInput(src.match, matchSym));
+          //TODO: can we use member 'sigma' more than once? then assign r.matchedArcs = sigma
           bool const haveSigma = (r.sigmaArcs = match->arcsMatchingInput(src.match, SIGMA::ID));
           bool haveRhoOrStandard = haveStandard;
           if (haveStandard)
             anyStandardMatch = true;
           else
+            //TODO: can we use member 'rho' more than once? then assign r.matchedArcs = rho
             haveRhoOrStandard = (r.matchedArcs = match->arcsMatchingInput(src.match, RHO::ID));
           if (haveRhoOrStandard || haveSigma) {
             filter.normal();
@@ -659,8 +649,9 @@ struct ComposeFst : TimesFn {
         , match(match)
         , concatState(matchEpsilon)
         , anyStandardMatch()
-        , sigma(match->arcsMatchingInput(src.match, SIGMA::ID))  // consuming fallback
-        , rho(match->arcsMatchingInput(src.match, RHO::ID))  // consuming wildcard
+          //TODO: why grab sigma+rho in advance before we know we need them?
+          //        , sigma(match->arcsMatchingInput(src.match, SIGMA::ID))  // consuming fallback
+          //        , rho(match->arcsMatchingInput(src.match, RHO::ID))  // consuming wildcard
         , epsilon(src.allowMatchEpsilon() ? match->arcsMatchingInput(src.match, EPSILON::ID)
                                           : MatchArcs())  // nonconsuming wildcard
     {}
@@ -669,8 +660,8 @@ struct ComposeFst : TimesFn {
     MatchPtr match;
     ConcatState concatState;  // because we want to emit 3 different types of arcs
     bool anyStandardMatch;
-    MatchArcs sigma, rho,
-        epsilon;  // we don't save phi because it's not subject to reuse; it's the last thing we do
+    MatchArcs epsilon;  // we don't save phi because it's not subject to reuse; it's the last thing we do
+    //MatchArcs sigma, rho;
     friend inline std::ostream& operator<<(std::ostream& out, ArcsGenGen const& self) {
       out << "ArcsGenGen[";
       out << self.src << " stage=" << self.concatState << " any=" << self.anyStandardMatch;

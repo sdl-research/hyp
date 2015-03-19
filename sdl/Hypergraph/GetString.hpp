@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     helpers for symbol sequence or string from derivation (see bestPathString).
@@ -102,8 +89,7 @@ std::string textFromSyms(Syms const& str,
                          char const* space = " ",
                          SymbolQuotation quote = kQuoted)
 {
-  //TODO: StringBuilder faster than ostringstream
-  std::ostringstream out;
+  Util::StringBuilder out;
   print(out, str, pVoc, space, quote);
   return out.str();
 }
@@ -124,7 +110,7 @@ std::string textFromSyms(Syms const& str,
                          char const* space = " ",
                          SymbolQuotation quote = kQuoted)
 {
-  std::ostringstream out;
+  Util::StringBuilder out;
   print(out, str, voc, space, quote);
   return out.str();
 }

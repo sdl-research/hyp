@@ -1,5 +1,5 @@
-macro(sdl_add_library_explicit_named LIBNAME)
-  sdl_add_library_explicit(${LIBNAME} ${ARGN})
+macro(sdl_add_library_named LIBNAME)
+  sdl_add_library(${LIBNAME} "" INCLUDE_ONLY ${ARGN})
   set_target_properties(${LIBNAME} PROPERTIES OUTPUT_NAME_RELEASE "${LIBNAME}")
   set_target_properties(${LIBNAME} PROPERTIES OUTPUT_NAME_DEBUG "${LIBNAME}_debug")
   set_target_properties(${LIBNAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY lib)
@@ -138,50 +138,81 @@ macro(sdl_finish_cflags)
   message(CMAKE_CXX_FLAGS_RELWITHDEBINFO = ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
 endmacro()
 
-function(sdl_add_library PROJ_NAME SOURCE_DIR)
+function(sdl_add_library LIBRARY_NAME SOURCE_DIR)
+  set(options SHARED)
+  set(oneValueArgs)
+  set(multiValueArgs EXCLUDE INCLUDE INCLUDE_ONLY)
+  cmake_parse_arguments(sdl_add_library "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  # Collect available source file names
   aux_source_directory("${SOURCE_DIR}/src" LW_PROJECT_SOURCE_FILES)
   file(GLOB_RECURSE INCS "*.hpp")
   file(GLOB_RECURSE TEMPLATE_IMPLS "${SOURCE_DIR}/src/*.ipp")
+  list(APPEND ALL_SOURCE_FILES ${LW_PROJECT_SOURCE_FILES} ${INCS} ${TEMPLATE_IMPLS})
+
+  # Add only these included file names
+  if(sdl_add_library_INCLUDE_ONLY)
+    set(ALL_SOURCE_FILES ${INCS} ${TEMPLATE_IMPLS})
+    list(APPEND ALL_SOURCE_FILES ${sdl_add_library_INCLUDE_ONLY})
+  endif()
+
+  # Add included file names
+  if(sdl_add_library_INCLUDE)
+    list(APPEND ALL_SOURCE_FILES ${sdl_add_library_INCLUDE})
+  endif()
+
+  # Remove excluded file names
+  if(sdl_add_library_EXCLUDE)
+    list(REMOVE_ITEM  ALL_SOURCE_FILES ${sdl_add_library_EXCLUDE})
+  endif()
+
   source_group("Template Definitions" FILES ${TEMPLATE_IMPLS})
-  add_library(${PROJ_NAME} ${LW_PROJECT_SOURCE_FILES} ${INCS} ${TEMPLATE_IMPLS})
-  sdl_msvc_links(${PROJ_NAME})
+  if(sdl_add_library_SHARED)
+    add_library(${LIBRARY_NAME} SHARED ${ALL_SOURCE_FILES})
+  else()
+    add_library(${LIBRARY_NAME} ${ALL_SOURCE_FILES})
+  endif()
+  sdl_msvc_links(${LIBRARY_NAME})
 endfunction(sdl_add_library)
 
+function(sdl_add_executable EXECUTABLE_NAME SOURCE_DIR)
+  set(options)
+  set(oneValueArgs)
+  set(multiValueArgs EXCLUDE INCLUDE INCLUDE_ONLY)
+  cmake_parse_arguments(sdl_add_executable "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-function(sdl_add_executable PROJ_NAME SOURCE_DIR)
+  # Collect available source file names
   aux_source_directory("${SOURCE_DIR}/src" LW_PROJECT_SOURCE_FILES)
   file(GLOB_RECURSE INCS "*.hpp")
   file(GLOB_RECURSE TEMPLATE_IMPLS "${SOURCE_DIR}/src/*.ipp")
+  list(APPEND ALL_SOURCE_FILES ${LW_PROJECT_SOURCE_FILES} ${INCS} ${TEMPLATE_IMPLS})
+
+  # Add only these included file names
+  if(sdl_add_executable_INCLUDE_ONLY)
+    set(ALL_SOURCE_FILES ${INCS} ${TEMPLATE_IMPLS})
+    list(APPEND ALL_SOURCE_FILES ${sdl_add_executable_INCLUDE_ONLY})
+  endif()
+
+  # Add included file names
+  if(sdl_add_executable_INCLUDE)
+    list(APPEND ALL_SOURCE_FILES ${sdl_add_executable_INCLUDE})
+  endif()
+
+  # Remove excluded file names
+  if(sdl_add_executable_EXCLUDE)
+    list(REMOVE_ITEM ALL_SOURCE_FILES ${sdl_add_executable_EXCLUDE})
+  endif()
+
   source_group("Template Definitions" FILES ${TEMPLATE_IMPLS})
-  add_executable(${PROJ_NAME} ${LW_PROJECT_SOURCE_FILES} ${INCS} ${TEMPLATE_IMPLS})
-  sdl_msvc_links(${PROJ_NAME})
+  add_executable(${EXECUTABLE_NAME} ${ALL_SOURCE_FILES})
+  sdl_msvc_links(${EXECUTABLE_NAME})
 endfunction(sdl_add_executable)
 
-function(sdl_add_library_explicit PROJ_NAME)
-  if (WIN32)
-    file(GLOB_RECURSE INCS "*.hpp")
-    file(GLOB_RECURSE TEMPLATE_IMPLS "${SOURCE_DIR}/src/*.ipp")
-    source_group("Template Definitions" FILES ${TEMPLATE_IMPLS})
-  endif()
-  add_library(${PROJ_NAME} ${ARGN} ${INCS} ${TEMPLATE_IMPLS})
-  sdl_msvc_links(${PROJ_NAME})
-endfunction(sdl_add_library_explicit)
-
-function(sdl_add_executable_explicit PROJ_NAME)
-  if (WIN32)
-    file(GLOB_RECURSE INCS "*.hpp")
-    file(GLOB_RECURSE TEMPLATE_IMPLS "${SOURCE_DIR}/src/*.ipp")
-    source_group("Template Definitions" FILES ${TEMPLATE_IMPLS})
-  endif()
-  add_executable(${PROJ_NAME} ${ARGN} ${INCS} ${TEMPLATE_IMPLS})
-  sdl_msvc_links(${PROJ_NAME})
-endfunction(sdl_add_executable_explicit)
-
-function(sdl_add_test_executable PROJ_NAME SOURCE_DIR)
+function(sdl_add_test_executable EXECUTABLE_NAME SOURCE_DIR)
   aux_source_directory("${SOURCE_DIR}/test" LW_PROJECT_TEST_FILES)
   file(GLOB_RECURSE TEST_INCS "test/*.hpp")
-  add_executable(${PROJ_NAME} ${LW_PROJECT_TEST_FILES} ${TEST_INCS})
-  #sdl_msvc_links(${PROJ_NAME})
+  add_executable(${EXECUTABLE_NAME} ${LW_PROJECT_TEST_FILES} ${TEST_INCS})
+  #sdl_msvc_links(${EXECUTABLE_NAME})
 endfunction(sdl_add_test_executable)
 
 # macro so we can grab sdl_UTEST_DIR var later ? seems to work as function.
@@ -193,9 +224,9 @@ function(sdl_add_unit_tests PROJECT_NAME TEST_EXE)
   add_test(${PROJECT_NAME} ${TEST_EXE} --catch_system_errors --detect_fp_exceptions --detect_memory_leaks --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
 endfunction(sdl_add_unit_tests)
 
-function(sdl_unit_tests_executable PROJ_NAME SOURCE_DIR)
-  sdl_add_test_executable(${PROJ_NAME} ${SOURCE_DIR})
-  sdl_add_unit_tests(${PROJ_NAME}-all ${PROJ_NAME})
+function(sdl_unit_tests_executable EXECUTABLE_NAME SOURCE_DIR)
+  sdl_add_test_executable(${EXECUTABLE_NAME} ${SOURCE_DIR})
+  sdl_add_unit_tests(${EXECUTABLE_NAME}-all ${EXECUTABLE_NAME})
 endfunction(sdl_unit_tests_executable)
 
 #TODO: smilar/redundant to sdl_project_test(s): sdl_unit_tests(${LINK_DEPENDENCIES} ${PROJECT_NAME})
@@ -313,8 +344,13 @@ function(sdl_maven_project_with_profile TARGET_NAME BINARY_DIR PROFILE_NAME)
   set(work_dir ${BINARY_DIR}/target)
   message(STATUS "Run mvn package: \"${MAVEN_EXECUTABLE}\" wth profile:\"${PROFILE_NAME}\"")
 
-  add_custom_target(${TARGET_NAME} ALL COMMAND ${MAVEN_EXECUTABLE} -P${PROFILE_NAME} -Dmaven.project.build.directory=${work_dir} -fae -B -q -f pom.xml -Dmaven.test.skip=true clean compile package
+  add_custom_target(${TARGET_NAME} ALL COMMAND ${MAVEN_EXECUTABLE} -P${PROFILE_NAME} -Dmaven.project.build.directory=${work_dir} -Dmaven.project.build.directory.parent=${BINARY_DIR} -fae -B -q -f pom.xml -Dmaven.test.skip=true clean compile package
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+  set(INSTALLER ${TARGET_NAME}_installer)
+  add_custom_target(${INSTALLER} ALL COMMAND ${MAVEN_EXECUTABLE} -Pcmake -Dmaven.project.build.directory=${work_dir} -Dmaven.project.build.directory.parent=${BINARY_DIR} -fae -B -q -f pom.xml -Dmaven.test.skip=true install
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS ${TARGET_NAME})
 endfunction(sdl_maven_project_with_profile)
 
 function(sdl_maven_test TARGET_NAME BINARY_DIR)

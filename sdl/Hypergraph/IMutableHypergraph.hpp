@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     IHypergraph that can be modified in-place.
@@ -568,9 +555,9 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       add = on & ~p;
       if (add)
         SDL_THROW_LOG(Hypergraph, InvalidInputException, "Don't know how to add properties "
-                                                << PrintProperties(add) << " in forceProperties("
-                                                << PrintProperties(on) << ", ON); ended up with "
-                                                << PrintProperties(p));
+                                                         << PrintProperties(add) << " in forceProperties("
+                                                         << PrintProperties(on) << ", ON); ended up with "
+                                                         << PrintProperties(p));
     }
     Properties remove = off & p;
     if (remove) {
@@ -586,8 +573,8 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       remove = off & this->properties();
       if (remove)
         SDL_THROW_LOG(Hypergraph, InvalidInputException, "Don't know how to remove properties "
-                                                << PrintProperties(remove) << " in forceProperties("
-                                                << PrintProperties(off) << ", OFF)");
+                                                         << PrintProperties(remove) << " in forceProperties("
+                                                         << PrintProperties(off) << ", OFF)");
     }
     assert(this->storesArcs());
   }
@@ -792,6 +779,17 @@ StateId ensureFinal(IMutableHypergraph<Arc>& hg) {
     hg.setFinal(s);
   }
   return s;
+}
+
+template <class Arc>
+inline void forceInArcs(IHypergraph<Arc>& hg) {
+  if (!hg.storesInArcs()) {
+    IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
+    if (mhg)
+      mhg->forceInArcs();
+    else
+      SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, "input hg doesn't have inarcs");
+  }
 }
 
 

@@ -1,8 +1,6 @@
 project (HypDemo)
 
-sdl_lwutil_includes()
+sdl_util_includes()
 
-add_executable(${PROJECT_NAME}
-  ${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp
-  )
+sdl_add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} ${UTIL_LIBRARIES} Hypergraph)

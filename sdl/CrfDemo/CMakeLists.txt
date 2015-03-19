@@ -17,7 +17,6 @@ set(LINK_DEPENDENCIES
   Optimization
   )
 
-add_library( ${PROJECT_NAME}-shared SHARED
-  ${PROJECT_SOURCE_DIR}/src/CreateSearchSpace.cpp)
+sdl_add_library( ${PROJECT_NAME}-shared ${PROJECT_SOURCE_DIR} SHARED)
 target_link_libraries(${PROJECT_NAME}-shared ${LINK_DEPENDENCIES})
 

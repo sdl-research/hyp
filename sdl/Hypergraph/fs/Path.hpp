@@ -1,16 +1,3 @@
-// Copyright 2014 SDL plc
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 /** \file
 
     an fst derivation.
@@ -49,7 +36,9 @@ struct FstArcNoState {
 
   template <class FstArc2>
   FstArcNoState(FstArc2 const& arc)
-      : labelPair(arc.labelPair), weight(arc.weight) {}
+      : labelPair(arc.labelPair), weight(arc.weight), annotations(arc.annotations) {
+    SDL_DEBUG_IF(!annotations.empty(), Hypergraph.fs.Path, "fs arc Annotations: " << annotations);
+  }
 
   void printLabel(std::ostream& out) const {
     out << '(' << labelPair.first;
@@ -112,6 +101,7 @@ Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail,
   Arc* add = new Arc(wt);
   add->head() = head;
   StateIdContainer& tails = add->tails();
+  SDL_DEBUG_IF(annotations, Hypergraph.fs.Path, "fs arc Annotations: " << *annotations);
   if (annotate) {
     bool const label = labelPair.first != EPSILON::ID || labelPair.second && labelPair.second != EPSILON::ID;
     TailId n = annotations->size(), labeli = 1 + n;
@@ -119,10 +109,11 @@ Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail,
     Syms::const_iterator anno = annotations->begin();
     for (TailId i = 1; i <= n; ++i, ++anno) {
       tails[i] = outHg.addState(*anno);
-      SDL_TRACE(Hypergraph.fs.Path.annotations, "annotation "<<*anno<<" -> tail #"<<i);
+      SDL_TRACE(Hypergraph.fs.Path.annotations, "annotation " << *anno << " -> tail #" << i);
     }
     if (label) tails[labeli] = outHg.addState(labelPair);
-  } else {
+  }
+  else {
     tails.resize(2);
     tails[1] = outHg.addState(labelPair);
   }
@@ -155,6 +146,8 @@ struct Path {
   */
   template <class FstArc2>
   void prepend(FstArc2 const& fstArc) {
+    SDL_DEBUG(Hypergraph.fs.Path, "prepend best-path fs arc: " << fstArc);
+    SDL_DEBUG_IF(!fstArc.annotations.empty(), Hypergraph.fs.Path, "fs arc Annotations: " << fstArc.annotations);
     arcs.push_back(fstArc);
   }
 
@@ -280,7 +273,7 @@ struct Path {
 #if 1
         if (projectOutput) setInputAsOutput(label);
         addEpsTo = &addAnnotatedArc(outHg, head, tail, label, i->weight, &annotations, createAnnotatedGraph)
-                       ->weight();
+                        ->weight();
 #else
         Arc* add = new Arc(head, tail, i->weight);
         StateIdContainer& tails = add->tails();
