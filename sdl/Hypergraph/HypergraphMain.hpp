@@ -21,6 +21,7 @@
 #define TRANSFORM_TO_STR(x) #x
 #define TRANSFORM_NAME(x) TRANSFORM_TO_STR(x)
 
+#include <sdl/Util/ProgramOptions.hpp>
 #include <sdl/LexicalCast.hpp>
 #include <sdl/graehl/shared/random.hpp>
 #include <sdl/graehl/shared/cmdline_main.hpp>

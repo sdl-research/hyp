@@ -1,15 +1,6 @@
-#define PROGNAME HgConvertStrings
+#define PROGNAME HypConvertStrings
 #define USAGE "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL byte separates outputs"
 #define VERSION "v1"
-
-#include <sdl/LexicalCast.hpp>
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-
 #define HG_MAIN
 #include <sdl/Hypergraph/HypergraphMain.hpp>
 #include <sdl/Hypergraph/LineToHypergraph.hpp>

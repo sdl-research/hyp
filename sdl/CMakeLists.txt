@@ -466,12 +466,10 @@ if(WIN32)
 endif()
 
 if(UNIX)
-
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-undefined")
   if (NOT CMAKE_COMPILER_IS_CLANGXX)
-    sdl_linker_flags(-Wl,--no-undefined)
+    if (NOT APPLE)
+      sdl_linker_flags(-Wl,--no-undefined)
+    endif()
   endif()
   if(ANDROID)
     if("$ENV{ANDROID_STANDALONE_TOOLCHAIN}" STREQUAL "")
@@ -481,7 +479,6 @@ if(UNIX)
     set(CMAKE_CXX_FLAGS "         -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar --sysroot=${ANDROID_SYS_ROOT}")
   else(ANDROID)
     set(CMAKE_CXX_FLAGS "${SDL_PTHREAD_ARG} -fPIC -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar -march=core2")
-
   endif()
 
   set(SDL_Og "-O0")

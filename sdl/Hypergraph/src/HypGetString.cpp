@@ -1,28 +1,9 @@
-#define TRANSFORM HgGetString
+#define TRANSFORM HypGetString
 #define USAGE "get the single string found by taking the first edge into each node starting from final (TOP)"
 #define VERSION "v1"
 #define HG_TRANSFORM_MAIN
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-
 #include <sdl/Hypergraph/TransformMain.hpp>
-#include <sdl/Hypergraph/Arc.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
-
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Forall.hpp>
-
-#include <sdl/Util/ProgramOptions.hpp>
 
 namespace po = boost::program_options;
 

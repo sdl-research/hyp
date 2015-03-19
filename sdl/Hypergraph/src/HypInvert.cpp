@@ -1,7 +1,6 @@
-#define TRANSFORM HgInvert
+#define TRANSFORM HypInvert
 #define USAGE "Invert (swap) lexical ('input' 'output') state labels of hypergraph."
 #define VERSION "v1"
-
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Invert.hpp>

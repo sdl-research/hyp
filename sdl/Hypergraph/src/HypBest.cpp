@@ -1,8 +1,5 @@
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
-#include <sdl/Hypergraph/BestPath.hpp>
-#include <sdl/Hypergraph/GetString.hpp>
-#include <sdl/Exception.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -1,4 +1,4 @@
-#define TRANSFORM HgFct
+#define TRANSFORM HypFct
 
 #define USAGE "Debugging binary, for internal use."
 #define VERSION "v1"

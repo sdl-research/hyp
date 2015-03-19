@@ -3,12 +3,6 @@
 #include <sdl/Hypergraph/OpenFstDraw.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
 
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Forall.hpp>
-
 namespace sdl {
 namespace Hypergraph {
 #if HAVE_OPENFST

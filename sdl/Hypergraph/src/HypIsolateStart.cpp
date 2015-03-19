@@ -1,7 +1,6 @@
-#define TRANSFORM HgIsolateStartState
+#define TRANSFORM HypIsolateStartState
 #define USAGE "Create the complement (determinize first if necessary) of an unweighted fsa hypergraph -- input symbols only"
 #define VERSION "v1"
-
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/IsolateStartState.hpp>

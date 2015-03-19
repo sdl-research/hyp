@@ -1,8 +1,6 @@
-#define TRANSFORM HgSamplePath
-
+#define TRANSFORM HypSamplePath
 #define USAGE "Generate sample path from hypergraph. Currently, this binary only supports uniform sampling (but C++ library allows more options)."
 #define VERSION "v1"
-
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/SamplePath.hpp>

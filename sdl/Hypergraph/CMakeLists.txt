@@ -24,6 +24,7 @@ add_library(${PROJECT_NAME} ${LIB_SOURCES})
 target_link_libraries(${PROJECT_NAME} ${UTIL_LIBRARIES})
 
 SET(hygbins
+  HypConvertCharsToTokens
   HypBest
   HypComplement
   HypCompose

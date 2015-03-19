@@ -1,7 +1,6 @@
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/fs/Equal.hpp>
-#include <sdl/Hypergraph/SortArcs.hpp>
 
 namespace sdl {
 namespace Hypergraph {

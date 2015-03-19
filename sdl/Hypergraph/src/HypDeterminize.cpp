@@ -1,7 +1,6 @@
-#define TRANSFORM HgDeterminize
+#define TRANSFORM HypDeterminize
 #define USAGE "Determinize an unweighted FSA hypergraph -- input symbols only. TODO: support sigma, phi, weights, outputs."
 #define VERSION "v1"
-
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Determinize.hpp>

@@ -1,8 +1,7 @@
-#define TRANSFORM HgReweight
+#define TRANSFORM HypReweight
 #define USAGE ReweightOptions::caption()
 #define VERSION "v1"
 #define HG_TRANSFORM_MAIN
-
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Reweight.hpp>
 

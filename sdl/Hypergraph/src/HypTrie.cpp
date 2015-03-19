@@ -5,7 +5,7 @@
 */
 
 
-#define EXENAME HgTrie
+#define TRANSFORM HypTrie
 #define USAGE "Build character trie"
 #define VERSION "v1"
 
@@ -16,10 +16,10 @@
 namespace sdl {
 namespace Hypergraph {
 
-struct EXENAME : HypergraphMainBase {
+struct TRANSFORM : HypergraphMainBase {
   typedef HypergraphMainBase Base;
   StringUnionFromWordList stringUnionFromWordList;
-  EXENAME() : Base(TRANSFORM_NAME(EXENAME), USAGE, VERSION)
+  TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION)
   {
     // usage += stringUnionFromWordList.usageSuffix();
 
@@ -53,4 +53,4 @@ struct EXENAME : HypergraphMainBase {
 
 }}
 
-INT_MAIN(sdl::Hypergraph::EXENAME)
+INT_MAIN(sdl::Hypergraph::TRANSFORM)
