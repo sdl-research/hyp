@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   clock_gettime(CLOCK_MONOTONIC, &tstart);
   fs::compose(*hyp1, *hyp2, &hyp3, fs::FstComposeOptions());
   clock_gettime(CLOCK_MONOTONIC, &tend);
-  printf("Elapsed time: %.5f seconds\n",
+  fprintf(stderr, "Elapsed time: %.5f seconds\n",
 	 ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) -
 	 ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
 
