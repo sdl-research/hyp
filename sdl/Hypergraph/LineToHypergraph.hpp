@@ -67,7 +67,7 @@ struct LineToHypergraph : ParseTokensOptions
 
   Properties properties() const
   {
-    return kFsm | hgProperties | (reuse?kCanonicalLex:0);
+    return kGraph | kFsm | hgProperties | (reuse?kCanonicalLex:0);
   }
 
   template <class A>

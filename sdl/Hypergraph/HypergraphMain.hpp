@@ -31,8 +31,12 @@
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Util/FindFile.hpp>
 #include <sdl/Util/Locale.hpp>
+#include <sdl/graehl/shared/named_main.hpp>
 
-sdl::Util::DefaultLocaleFastCout initCout;
+#define HYPERGRAPH_PREPEND_HYP(MAINCLASS) sdl::Hypergraph::Hyp ## MAINCLASS
+#define HYPERGRAPH_NAMED_MAIN(MAINCLASS) GRAEHL_NAMED_MAIN(MAINCLASS, HYPERGRAPH_PREPEND_HYP(MAINCLASS))
+
+static sdl::Util::DefaultLocaleFastCout initCout;
 
 namespace sdl {
 namespace Hypergraph {
@@ -89,7 +93,7 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
     return pVoc;
   }
 
-  HypergraphMainBase(std::string const& n, std::string const& usage, std::string const& ver,
+  HypergraphMainBase(std::string const& n, std::string const& usage, std::string const& ver = "v1",
                      HypergraphMainOpt const& opt = HypergraphMainOpt())
       : graehl::main(n, usage, ver, opt.multifile, opt.random, opt.input)
       , HypergraphMainOpt(opt)

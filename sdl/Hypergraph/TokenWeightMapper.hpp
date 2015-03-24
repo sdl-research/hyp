@@ -30,11 +30,11 @@ struct SetTokenWeightMapper {
   typedef TokenWeightTpl<Weight> TokenWeight;
   typedef ArcTpl<TokenWeight> ToArc;
   ToArc* operator()(FromArc const* arc) const {
-    assert(arc->tails().size() > 0);
     // Token spans from first tail to head:
-    TokenWeight w(Token::createEmptyToken(arc->getTail(0), arc->head()),
-                  arc->weight());
-    ToArc* toArc = new ToArc(arc->head(), arc->tails(), w);
+    StateIdContainer const& tails = arc->tails();
+    assert(!tails.empty());
+    TokenWeight w(Token::createEmptyToken(tails[0], arc->head()), arc->weight());
+    ToArc* toArc = new ToArc(arc->head(), tails, w);
     SDL_DEBUG(Hypergraph.SetTokenWeightMapper, "Created " << *toArc);
     return toArc;
   }

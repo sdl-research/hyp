@@ -117,6 +117,9 @@ enum SymbolType {
   kAllSymbols = 3, // nor this
 };
 
+inline std::ostream & operator<<(std::ostream &o, SymbolType t) {
+  return o << "SymbolType=" << ((unsigned)t >> 29);
+}
 
 /**
    (string, type) -> (index, type) in the context of a vocabulary. the whole thing

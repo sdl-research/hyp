@@ -116,6 +116,7 @@ BOOST_STATIC_ASSERT(sizeof(StateSet::size_type) >= sizeof(StateId));
 
 static const ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
 static const StateId kNoState = boost::integer_traits<StateId>::const_max;
+static const StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max - 1;
 
 inline StateId maxState(StateId a, StateId b) {
   if (a == kNoState) return b;

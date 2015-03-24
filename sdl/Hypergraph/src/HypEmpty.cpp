@@ -1,4 +1,4 @@
-#define HG_MAIN
+#define USAGE_HypEmpty "Print EMPTY if input hypergraph is empty (can't reach final state from start and lexical leaves); otherwise print NONEMPTY"
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
@@ -6,9 +6,6 @@
 
 namespace sdl {
 namespace Hypergraph {
-
-#define USAGE "Print EMPTY if input hypergraph is empty (can't reach final state from start and lexical leaves); otherwise print NONEMPTY"
-#define VERSION "v1"
 
 struct HypEmptyOptions {
   bool empty;
@@ -31,12 +28,11 @@ struct HypEmptyOptions {
 
 
 struct HypEmpty : TransformMain<HypEmpty> { // note base class CRTP (google it)
-  typedef TransformMain<HypEmpty> Base;
-  HypEmptyOptions empty;
-  HypEmpty() : Base("HypEmpty", USAGE, VERSION)
+  HypEmpty() : TransformMain<HypEmpty>("Empty", USAGE_HypEmpty)
   {
     opt.require_ins();
   }
+  HypEmptyOptions empty;
 
   void declare_configurable() {
     this->configurable(&empty);
@@ -72,4 +68,4 @@ struct HypEmpty : TransformMain<HypEmpty> { // note base class CRTP (google it)
 
 }}
 
-INT_MAIN(sdl::Hypergraph::HypEmpty)
+HYPERGRAPH_NAMED_MAIN(Empty)

@@ -16,13 +16,9 @@
 #define HYP__HYPERGRAPH_TO_REPLACE_FST_HPP
 #pragma once
 
-
-#include <sdl/Hypergraph/UseOpenFst.hpp>
-
 #if HAVE_OPENFST
-
+#include <sdl/Hypergraph/UseOpenFst.hpp>
 #include <sdl/LexicalCast.hpp>
-
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>

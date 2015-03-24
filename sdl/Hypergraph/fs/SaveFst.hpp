@@ -11,7 +11,7 @@
 #include <sdl/Hypergraph/fs/Fst.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Project.hpp>
-#include <sdl/Hypergraph/PruneToNbest.hpp>
+#include <sdl/Hypergraph/PruneNonBest.hpp>
 
 namespace sdl {
 namespace Hypergraph {

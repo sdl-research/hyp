@@ -1,5 +1,5 @@
-#define USAGE "turn FST into FSA by setting input/output labels of FST both to output(default) or input"
-#define VERSION "v1"
+#define USAGE_HypProject \
+  "turn FST into FSA by setting input/output labels of FST both to output(default) or input"
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Project.hpp>
@@ -13,13 +13,9 @@ struct HypProject : TransformMain<HypProject> {
 
   Project project;
 
-  HypProject()
-      : Base("HypProject", USAGE, VERSION)
-  {}
+  HypProject() : Base("Project", USAGE_HypProject) {}
 
-  void declare_configurable() {
-    this->configurable(&project);
-  }
+  void declare_configurable() { this->configurable(&project); }
 
   enum { has_inplace_transform1 = true };
 
@@ -28,9 +24,9 @@ struct HypProject : TransformMain<HypProject> {
     project.inplace(hg);
     return true;
   }
-
 };
+
 
 }}
 
-INT_MAIN(sdl::Hypergraph::HypProject)
+HYPERGRAPH_NAMED_MAIN(Project)

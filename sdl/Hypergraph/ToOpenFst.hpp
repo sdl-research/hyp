@@ -3,15 +3,14 @@
     copy hg fsm to openfst w/ same weight type
 */
 
-#ifndef HYP__TOOPENFST_LW201213_HPP
-#define HYP__TOOPENFST_LW201213_HPP
+#ifndef SDL_HYP__TOOPENFST_LW201213_HPP
+#define SDL_HYP__TOOPENFST_LW201213_HPP
 #pragma once
 
 // TODO: Make our Hypergraph derive from OpenFst class instead of copying?
 
-#include <sdl/Hypergraph/UseOpenFst.hpp>
-
 #if HAVE_OPENFST
+#include <sdl/Hypergraph/UseOpenFst.hpp>
 #include <sdl/LexicalCast.hpp>
 
 #include <fst/symbol-table.h>

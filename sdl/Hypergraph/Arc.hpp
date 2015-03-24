@@ -37,6 +37,7 @@
 #include <sdl/Util/ObjectCount.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/Hash.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -196,7 +197,9 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   static ArcFilter filterTrue() { return (ArcFilter)fnFilterTrue; }
   static ArcFilter filterFalse() { return (ArcFilter)fnFilterFalse; }
 
-  ArcTpl() : head_(Hypergraph::kNoState), tails_(), weight_(Weight::one()) {}
+  ArcTpl() : head_(Hypergraph::kNoState), tails_(), weight_() {
+    setOne(weight_);
+  }
 
   explicit ArcTpl(Weight const& w) : weight_(w) {}
 
@@ -216,12 +219,15 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   ArcTpl(Head head, Weight const& w)
       : head_(head), weight_(w) {}
   ArcTpl(Head head, StateId tail)
-      : head_(head), tails_(1, tail) {}
+      : head_(head), tails_(1, tail) {
+    setOne(weight_);
+  }
 
   /**
      for binarization - head set later
   */
-  ArcTpl(StateId srcState, StateId lexState) : tails_(2), weight_(Weight::one()) {
+  ArcTpl(StateId srcState, StateId lexState) : tails_(2) {
+    setOne(weight_);
     tails_[0] = srcState;
     tails_[1] = lexState;
   }

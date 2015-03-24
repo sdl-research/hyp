@@ -63,8 +63,7 @@ void complement(const IHypergraph<Arc>& inhg, IMutableHypergraph<Arc>* result) {
   H const& hg = determinized(inhg, det, DETERMINIZE_INPUT);
 
   // store arcs:
-  result->forceProperties(kStoreOutArcs | kFsm,
-                          true);  // for checking epsilon from start state (empty string membership)
+  result->forceProperties(kStoreFirstTailOutArcs | kFsm | kGraph, true);
 
   /*
 

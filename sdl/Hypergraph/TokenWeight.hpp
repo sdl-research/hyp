@@ -11,6 +11,8 @@
     Example for how detokenize uses TokenWeight:
     Transform "a" "b" "<GLUE>c" to "a" "bc"
 
+    also permit <xmt-blockN> and </...> inside or outside <TOK>
+
     For simple usage examples, see test/TestTokenWeight.hpp.
 
     \author Markus Dreyer
@@ -84,15 +86,23 @@ class Token {
 
   // TODO: why not start at 1?
   enum {
-    kExtendableLeft = 2,
-    kExtendableRight = 4,
-    kMustExtendLeft = 8,
-    kMustExtendRight = 0x10,
-    kUnspecified = 0x20,
+    kUnspecified = 0,
+    kExtendableLeft = 1,
+    kExtendableRight = 2,
+    kMustExtendLeft = 4,
+    kMustExtendRight = 8,
+    //    kBlockLeft = 32, // unused
+    kBlockRight = 16,
+    kBlockAny = kBlockRight, // | kBlockLeft // unused
     kExtendable = kExtendableLeft | kExtendableRight,
-    kBlockSymbolTokenProperties = kExtendable,
-    kDefaultTokenProperties = kExtendableLeft | kExtendableRight | kMustExtendLeft | kMustExtendRight
+    // if we don't allow extending, then have to put block syms on separate arcs (not graph arcs, but fsm)
+    kDefaultTokenProperties = kExtendableLeft | kExtendableRight | kMustExtendLeft | kMustExtendRight,
+    kBlockSymbolTokenProperties = kBlockAny | kExtendable,
+    kMustExtend = kMustExtendLeft | kMustExtendRight,
+    kRightExtendability = kExtendableRight | kMustExtendRight | kBlockRight
   };
+
+  bool blockRight() const { return props_ & kBlockRight; }
 
   Token() : props_(kDefaultTokenProperties), syms_(), start_(kNoState), endState_(kNoState) {}
 
@@ -114,10 +124,6 @@ class Token {
   static inline Token createEmptyToken(StateId startState, StateId endState) {
     return Token(startState, endState, false);
   }
-  /**
-     create empty token.
-  */
-  enum { EmptyToken = 0 };  // doc for unused bool arg tag
 
   Token(StateId startState, StateId endState, bool)
       : props_(kUnspecified), start_(startState), endState_(endState) {}
@@ -132,11 +138,11 @@ class Token {
   */
   bool isExtendableRight() const { return props_ & kExtendableRight; }
 
-  bool isExtendable() const { return isExtendableLeft() || isExtendableRight(); }
+  bool isExtendable() const { return props_ & kExtendable; }
 
   bool mustExtendLeft() const { return props_ & kMustExtendLeft; }
 
-  bool isComplete() const { return !mustExtendLeft() && !mustExtendRight(); }
+  bool isComplete() const { return !(props_ & kMustExtend); }
 
   bool mustExtendRight() const { return props_ & kMustExtendRight; }
 
@@ -171,6 +177,7 @@ class Token {
   void setProperties(Properties props) { props_ = props; }
 
   StateId start() const { return start_; }
+  StateId endState() const { return endState_; }
 
   void setStart(StateId s) { start_ = s; }
 
@@ -191,8 +198,6 @@ class Token {
   Sym const& back() const { return syms_.back(); }
 
   Sym const& operator[](SymsIndex n) const { return syms_[n]; }
-
-  void append(Token const& other);
 
   Properties properties() const { return props_; }
 
@@ -221,7 +226,6 @@ class Token {
   }
   Syms const& syms() const { return syms_; }
 
- private:
   SymsVector syms_;
   Properties props_;
   StateId start_;
@@ -253,14 +257,16 @@ class TokenWeightTpl {
   typedef std::map<Token, Weight> TokenMap;  // TODO: speed-up using (Token*)?
   typedef shared_ptr<TokenMap> TokenMapPtr;
 
+  typedef std::pair<Token, Weight> TokenAndWeight;
   typedef typename TokenMap::value_type value_type;  // a pair
   typedef typename TokenMap::const_iterator const_iterator;
   typedef typename TokenMap::iterator iterator;
 
   TokenWeightTpl() : pTokens_(make_shared<TokenMap>()) {}
 
+  // TODO: do we use endState for anything important?
   TokenWeightTpl(StateId startState, StateId endState) : pTokens_(make_shared<TokenMap>()) {
-    insert(Token(startState, endState, Token::EmptyToken), Weight::one());
+    insert(Token(startState, endState, false), Weight::one());
   }
 
   TokenWeightTpl(Token const& token, Weight const& weight) : pTokens_(make_shared<TokenMap>()) {
@@ -282,7 +288,7 @@ class TokenWeightTpl {
   // reasonably cheap construction. spare us the thread synch difficulty
   static inline Self one() { return Self(); }
   // this is a little slower, so probably worth the caching overhead
-  SDL_CACHE_STATIC_LOCAL(Self, zero(), Self(Token(kNoState, kNoState, Token::EmptyToken), W::zero()))
+  SDL_CACHE_STATIC_LOCAL(Self, zero(), Self(Token(kNoState, kNoState, false), W::zero()))
 #else
   static Self const& one() { return kOne; }
   static Self const& zero() { return kZero; }
@@ -292,7 +298,14 @@ class TokenWeightTpl {
     return pTokens_->insert(value_type(tok, weight));
   }
 
-  std::pair<iterator, bool> insert(std::pair<Token, Weight> const& aPair) { return pTokens_->insert(aPair); }
+  void insertProd(Token const& tok, Weight const& weight1, Weight const& weight2) {
+    timesBy(weight2, (*pTokens_)[tok] = weight1);
+  }
+
+  std::pair<iterator, bool> insert(TokenAndWeight const& aPair) {
+    return pTokens_->insert(reinterpret_cast<value_type const&>(aPair));
+  }
+  std::pair<iterator, bool> insert(value_type const& aPair) { return pTokens_->insert(aPair); }
 
   const_iterator begin() const { return pTokens_->begin(); }
 
@@ -341,7 +354,7 @@ template <class W>
 TokenWeightTpl<W> TokenWeightTpl<W>::kOne;
 
 template <class W>
-TokenWeightTpl<W> TokenWeightTpl<W>::kZero(Token(kNoState, kNoState, Token::EmptyToken), W::zero());
+TokenWeightTpl<W> TokenWeightTpl<W>::kZero(Token(kNoState, kNoState, false), W::zero());
 
 template <class W>
 inline void parseWeightString(std::string const& str, TokenWeightTpl<W>*) {
@@ -390,6 +403,7 @@ inline TokenWeightTpl<W> times(TokenWeightTpl<W> const& tokWeight1, TokenWeightT
   typedef W Weight;
   typedef TokenWeightTpl<W> TokWt;
   typedef typename TokWt::value_type value_type;
+  typedef std::pair<Token, Weight> TokenAndWeight;
   if (isZero(tokWeight1) || isZero(tokWeight2)) return TokWt::zero();
 
   if (isOne(tokWeight1)) return tokWeight2;
@@ -397,26 +411,35 @@ inline TokenWeightTpl<W> times(TokenWeightTpl<W> const& tokWeight1, TokenWeightT
 
   // Build cross-product of the contained tokens in tokWeight1 and tokWeight2
   TokWt product;  //=1
-  forall (value_type tokWeightPair1, tokWeight1) {
-    Token const& tok1 = tokWeightPair1.first;
-    Weight const& w1 = tokWeightPair1.second;
-    forall (value_type tokWeightPair2, tokWeight2) {
-      Token const& tok2 = tokWeightPair2.first;
-      Weight const& w2 = tokWeightPair2.second;
+  forall (value_type const& tw1, tokWeight1) {
+    Token const& tok1 = tw1.first;
+    for (typename TokWt::TokenMap::const_iterator i = tokWeight2.begin(), e = tokWeight2.end(); i != e; ++i) {
+      value_type const& tw2 = *i;
+      Token const& tok2 = tw2.first;
       if (tok1.empty() || tok2.empty()
-          || tok2.isExtendableLeft() && (tok1.mustExtendRight() || tok2.mustExtendLeft())) {
-        Token tok3(tok1);
-        tok3.append(tok2);
-        Weight w3 = Hypergraph::times(w1, w2);
-        if (tok1.properties() == Token::kUnspecified)
-          tok3.setProperties(tok2.properties());
-        else if (tok2.properties() == Token::kUnspecified)
-          tok3.setProperties(tok1.properties());
-        product.insert(tok3, w3);
-      } else if (tok2.isExtendable()) {
-        Token tok(tok2);
-        if (tok1.getEndState() != kNoState) tok.setStart(tok1.getEndState());
-        product.insert(tok, w2);
+          || tok1.blockRight() || tok2.isExtendableLeft() && (tok1.mustExtendRight() || tok2.mustExtendLeft())) {
+        // concat tok1 tok2
+        TokenAndWeight tw3(tw1);
+        Hypergraph::timesBy(tw2.second, tw3.second);
+        tw3.first.syms_.append(tok2.syms_);
+        Token::Properties &props3 = tw3.first.props_, props2 = tok2.props_;
+        if (props3 == Token::kUnspecified)
+          props3 = props2;
+        else if (props2 != Token::kUnspecified)
+          props3 = (props3 & ~Token::kRightExtendability) | (props2 & Token::kRightExtendability);
+        StateId end2 = tok2.endState_;
+        if (end2 != kNoState)
+          tw3.first.endState_ = end2;
+        product.insert(tw3);
+      } else if (tok2.isExtendable()) { // starting new token w/ tok2.
+        StateId const end1 = tok1.getEndState();
+        if (end1 == kNoState)
+          product.insert(tw2);
+        else {
+          TokenAndWeight tw3(tw2);
+          tw3.first.setStart(end1);
+          product.insert(tw3);
+        }
       }
     }
   }

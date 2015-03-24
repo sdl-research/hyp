@@ -46,7 +46,7 @@ struct StringUnionFromWordList {
 
     readWordList(in, ws, wordlist, stringUnion.unweighted);
 
-    outHg->clear(kFsm|kStoreFirstTailOutArcs|kCanonicalLex);
+    outHg->clear(kFsmOutProperties);
 
     BuildStringUnion<Arc> build(ws, *outHg, stringUnion); //sets vocab
     finish(build);

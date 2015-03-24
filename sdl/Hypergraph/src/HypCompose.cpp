@@ -1,6 +1,5 @@
 #define SDL_TRANSFORM_MAIN_LOG_WEIGHT 1
 #define SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT 1
-#define HG_MAIN
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Compose.hpp>
@@ -8,14 +7,13 @@
 namespace sdl {
 namespace Hypergraph {
 
-#define USAGE "Compose cfg*fsm*...*fsm"
-#define VERSION "v1"
+#define USAGE_HypCompose "Compose cfg*fsm*...*fsm"
 
 struct HypCompose : TransformMain<HypCompose> {
   static bool nbestHypergraphDefault() { return false; } // for backward compat w/ regtests mostly
 
   HypCompose()
-      : TransformMain<HypCompose>("HypCompose", USAGE, VERSION)
+      : TransformMain<HypCompose>("Compose", USAGE_HypCompose)
   {
     opt.require_ins();
     composeOpt.addFstOption = false;
@@ -57,4 +55,4 @@ struct HypCompose : TransformMain<HypCompose> {
 
 }}
 
-INT_MAIN(sdl::Hypergraph::HypCompose)
+HYPERGRAPH_NAMED_MAIN(Compose)

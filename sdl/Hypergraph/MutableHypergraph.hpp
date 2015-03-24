@@ -226,6 +226,13 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return LabelPair(inputLabelImpl(state), Util::getOrElse(oLabelForState, state, NoSymbol));
   }
 
+  void setFsmGraphOneLexical(bool fsm, bool graph, bool one) OVERRIDE {
+    MutableBase::setPropertiesAt(kGraph, graph);
+    MutableBase::setPropertiesAt(kFsm, fsm);
+    MutableBase::setPropertiesAt(kOneLexical, one);
+    fsmChecked = true;
+  }
+
  protected:
   LabelPair labelPairImpl(StateId state) const {
     Sym const in = inputLabelImpl(state);
@@ -570,9 +577,17 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     oneLexical = properties_ & kOneLexical;
     return properties_ & kGraph;
   }
+
+  virtual bool checkGraph() OVERRIDE {
+    fsmChecked = false;
+    computeFsmGraphProperty();
+    return properties_ & kGraph;
+  }
+
+
   void computeFsmGraphProperty() const {
     if (fsmChecked) return;
-    properties_ &= ~(kFsm | kGraph);  // need to do this up front because isFsmCheck itself may check
+    properties_ &= ~(kFsmProperties);  // need to do this up front because isFsmCheck itself may check
     // properties via prunedEmpty
     fsmChecked = true;
     bool f, one;
@@ -729,7 +744,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     iLabelForState.clear();
     oLabelForState.clear();
     numStates_ = 0;
-    properties_ = prop | kFsm | kGraph;
+    properties_ = prop | kFsmProperties;
     fsmChecked = true;
   }
 

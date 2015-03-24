@@ -121,21 +121,6 @@ void reverse(IMutableHypergraph<Arc>& h) {
     reverseCfg(h);
 }
 
-struct Reverse : TransformBase<Transform::Inplace> {
-  template <class Config>
-  void configure(Config& c) {
-    c.is("Reverse");
-    c("Reverse each path in a hypergraph");
-  }
-
-  static char const* name() { return "Reverse"; }
-
-  template <class A>
-  void inplace(IMutableHypergraph<A>& h) const {
-    reverse(h);
-  }
-};
-
 
 }}
 

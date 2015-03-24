@@ -252,6 +252,19 @@ if(WIN32)
 
   sdl_linker_flags(/machine:x64)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od")
+
+  # For debugging on Windows, we recommend building a RelWithDebInfo build with all optimizations disabled. This is
+  # effectively the same as building xmt in Debug mode; however, the advantage is that it allows you to link against
+  # release mode 3rd party libs. Use a Debug build if you really want to link against the slower debug 3rdParty libs.
+  # This option is similar to building with -DSDL_VALIDATION_BUILD, but with a few extra settings added.
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /Od /Ob0 /RTC1")
+
+  # Enable TRACE statements for RelWIthDebInfo mode -- On Windows, this is the typical mode a developer will use when
+  # writing code and debugging
+  if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    sdl_compiled_setting(SDL_ENABLE_TRACE_LOGGING 1)
+  endif()
+
   if(SDL_VALIDATION_BUILD)
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Od") # disable optimization for faster compile
     message(STATUS "SDL_VALIDATION_BUILD - faster (no optimization) build for Windows")
@@ -812,7 +825,7 @@ if(HAVE_OPENFST)
   find_package(OpenFst)
   if(OPENFST_FOUND)
     message(STATUS "OpenFst include directory: ${OPENFST_INCLUDE_DIR}")
-    add_definitions(-DHAVE_OPENFST)
+    sdl_compiled_setting(HAVE_OPENFST 1)
   else()
     set(HAVE_OPENFST 0)
   endif()

@@ -1,17 +1,15 @@
+#define USAGE_HypUnion "Create the union of multiple hypergraphs\n (if all are FSM, the result is also FSM)"
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Union.hpp>
 
 namespace sdl {
-
 namespace Hypergraph {
 
-#define USAGE "Create the union of multiple hypergraphs\n (if all are FSM, the result is also FSM)"
-#define VERSION "v1"
 
 struct HypUnion : TransformMain<HypUnion> {
 
-  HypUnion() : TransformMain<HypUnion>("HypUnion", USAGE, VERSION) {
+  HypUnion() : TransformMain<HypUnion>("Union", USAGE_HypUnion) {
     opt.require_ins();
     configureInputs();
   }
@@ -37,4 +35,4 @@ struct HypUnion : TransformMain<HypUnion> {
 
 }}
 
-INT_MAIN(sdl::Hypergraph::HypUnion)
+HYPERGRAPH_NAMED_MAIN(Union)

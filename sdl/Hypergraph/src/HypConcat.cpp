@@ -5,14 +5,14 @@
 namespace sdl {
 namespace Hypergraph {
 
-#define USAGE "Concatenate cfg*...*cfg (cross product of yields).\n (If all are FSMs, result is also FSM)."
-#define VERSION "v1"
+#define USAGE_HypConcat \
+  "Concatenate cfg*...*cfg (cross product of yields).\n (If all are FSMs, result is also FSM)."
 
 // FIXME: weird problem with TransformMain cascades of inplace transform2
 
 struct HypConcat : TransformMain<HypConcat> {
 
-  HypConcat() : TransformMain<HypConcat>("HypConcat", USAGE, VERSION) {
+  HypConcat() : TransformMain<HypConcat>("Concat", USAGE_HypConcat) {
     this->configurable(&opt);
     configureInputs();
   }
@@ -39,4 +39,4 @@ struct HypConcat : TransformMain<HypConcat> {
 
 }}
 
-INT_MAIN(sdl::Hypergraph::HypConcat)
+HYPERGRAPH_NAMED_MAIN(Concat)

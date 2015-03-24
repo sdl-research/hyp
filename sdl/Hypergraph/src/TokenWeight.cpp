@@ -5,16 +5,6 @@
 namespace sdl {
 namespace Hypergraph {
 
-void Token::append(Token const& other) {
-  syms_.append(other.syms());
-  if (other.properties() != Token::kUnspecified) {
-    setExtendableRight(other.isExtendableRight());
-    setMustExtendRight(other.mustExtendRight());
-  }
-  if (other.getEndState() != kNoState)
-    setEndState(other.getEndState());
-}
-
 void Token::print(std::ostream& out, IVocabulary const* voc) const {
   if (start() == kNoState)
     out << "?";
@@ -30,7 +20,16 @@ void Token::print(std::ostream& out, IVocabulary const* voc) const {
     sdl::print(out, syms_, voc);
     out << ",";
   }
-  out << "props:" << this->properties();
+  if (props_ == kUnspecified)
+    out << '*';
+  else {
+    //    if (props_ & kBlockLeft) out << '{';
+    if (props_ & kMustExtendLeft) out << '<';
+    if (props_ & kExtendableLeft) out << '[';
+    if (props_ & kExtendableRight) out << ']';
+    if (props_ & kMustExtendRight) out << '>';
+    if (props_ & kBlockRight) out << '}';
+  }
 }
 
 

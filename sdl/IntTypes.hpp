@@ -13,7 +13,6 @@
 #include <cstdint>
 #else
 #include <stdint.h>
-#include <boost/cstdint.hpp>
 #endif
 
 #ifndef UINT64_DIFFERENT_FROM_SIZE_T
@@ -33,15 +32,15 @@ typedef std::int32_t int32;
 typedef std::int16_t int16;
 typedef std::int8_t int8;
 #else
-typedef boost::uint64_t uint64;
-typedef boost::uint32_t uint32;
-typedef boost::uint16_t uint16;
-typedef boost::uint8_t uint8;
+typedef uint64_t uint64;
+typedef uint32_t uint32;
+typedef uint16_t uint16;
+typedef uint8_t uint8;
 
-typedef boost::int64_t int64;
-typedef boost::int32_t int32;
-typedef boost::int16_t int16;
-typedef boost::int8_t int8;
+typedef int64_t int64;
+typedef int32_t int32;
+typedef int16_t int16;
+typedef int8_t int8;
 #endif
 
 typedef std::size_t Size;

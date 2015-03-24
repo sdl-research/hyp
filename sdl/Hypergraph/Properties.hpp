@@ -120,10 +120,11 @@ const PropertiesInt kAllProperties = kPropertyEnd - 1;
 
 const PropertiesInt kAnyConstraints = kConstraintEnds | kConstraintStarts;
 
-const PropertiesInt kDefaultProperties = kFsm;
+const PropertiesInt kFsmProperties = kFsm | kGraph | kOneLexical;
 
-const PropertiesInt kFsmOutProperties = kDefaultProperties | kGraph | kFsm | kStoreFirstTailOutArcs
-                                        | kCanonicalLex;
+const PropertiesInt kDefaultProperties = kFsmProperties;
+
+const PropertiesInt kFsmOutProperties = kStoreFirstTailOutArcs | kFsmProperties | kCanonicalLex;
 
 const PropertiesInt kFullInOutArcs = kStoreInArcs | kStoreOutArcs;
 const PropertiesInt kDefaultStoreArcsPerState = kFullInOutArcs;

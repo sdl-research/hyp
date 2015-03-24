@@ -413,7 +413,7 @@ struct BuildStringUnion {
 
   BuildStringUnion(WS const& ws, HG& hg, StringUnionOptions const& opt = StringUnionOptions())
       : ws(ws), hg(hg), opt(opt), one(Weight::one()) {
-    hg.clear(kFsm | kCanonicalLex | kStoreFirstTailOutArcs);
+    hg.clear(kFsmOutProperties);
     hg.setVocabulary(ws.voc);
     assert(ws.voc == hg.getVocabulary());
     voc = hg.getVocabulary();

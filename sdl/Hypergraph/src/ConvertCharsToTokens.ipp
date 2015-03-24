@@ -4,9 +4,6 @@
     detokenize) rely on the TokenWeight
 
     \author Markus Dreyer, Jonathan Graehl
-
-    TODO: split detokenize part into Detokenize.ipp for clarity
-
 */
 
 #include <set>
@@ -95,7 +92,15 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
       , incomingTokenWeights_(incomingTokenWeights)
       , outhg_(pHgResult)
       , outvoc_(pHgResult->getVocabulary().get())
-      , oldStateToNewState_(pHgResult) {
+      , oldStateToNewState_(pHgResult)
+      , instart_(hg.start())
+      , infinal_(hg.final())
+      , inarcs_(hg.inArcs())
+  {
+    if (instart_ == kNoState) {
+      --instart_;
+      assert(instart_ == kImpossibleNotNoState);
+    }
     assert(hg.storesInArcs());
     assert(outvoc_ != 0);
 
@@ -116,8 +121,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
      at start of hypergraph.
   */
   bool isBadStartToken(Hypergraph::Token const& tok) const {
-    StateId tokenStart = tok.start();
-    return tokenStart != kNoState && tok.mustExtendLeft() && tokenStart == inhg_.start();
+    return tok.mustExtendLeft() && tok.start() == instart_;
   }
 
   /**
@@ -131,8 +135,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
      the final state (because it handles <eps> correctly).
   */
   bool isBadFinalToken(Hypergraph::Token const& tok) const {
-    StateId tokenFinal = tok.getEndState();
-    return tokenFinal != kNoState && tok.mustExtendRight() && tokenFinal == inhg_.final();
+    return tok.mustExtendRight() && tok.endState() == infinal_;
   }
 
   /**
@@ -141,12 +144,40 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
   bool isTokenImpossibleToComplete(Token const& tok) const {
     return isBadStartToken(tok) || isBadFinalToken(tok);
   }
-
+  /* //TODO: handle block syms on inarcs instead of in TokenWeight?
   void visit(StateId stateid) {
     SDL_TRACE(Hypergraph.ConvertCharsToTokens, "Visiting state " << stateid);
-    if (inhg_.numInArcs(stateid) == 0) {
-      return;
+    assert(inarcs_);
+    if (stateid >= (*inarcs_).size()) return;
+    ArcsContainer const& arcs = (*inarcs_)[stateid];
+    if (adj.empty()) return;
+
+    StateId outmid = kNoState;
+    for(typename Arcs::const_iterator ai = arcs.begin(), ae = arcs.end(); ai != ae; ++ai) {
+      Arc *a = *ai;
+      Weight const& inweight = a->weight();
+      StateIdContainer const& intails = a->tails();
+      for(StateIdContainer::const_iterator ti = intails.begin(), te = intails.end(); ti != te; ++ti) {
+        StateId tail = *ti;
+        SymId tailsym = inhg_.inputLabel(tail);
+        if (Vocabulary::isBlockSymbol(tailsym)) {
+          if (outmid == kNoState) {
+          }
+
+        }
+
+        TokenWeight const& tailTokenWt = incomingTokenWeights_[tail];
+
+      }
+
     }
+
+  }
+  */
+  void visit(StateId stateid) {
+    SDL_TRACE(Hypergraph.ConvertCharsToTokens, "Visiting state " << stateid);
+    if (stateid >= (*inarcs_).size() || (*inarcs_)[stateid].empty()) return;
+
     // Construct incoming tokens
     std::size_t cntIncomingTokens = 0;
     TokenWeight const& tokenWeight = incomingTokenWeights_[stateid];
@@ -162,7 +193,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
           assert(!(tok.isComplete() && isTokenImpossibleToComplete(tok)));
           SDL_TRACE(Hypergraph.ConvertCharsToTokens,
                     (tok.isComplete() ? "Complete" : "")
-                    << (isTokenImpossibleToComplete(tok) ? "Can't be completed" : "") << ": " << tok);
+                    << (isTokenImpossibleToComplete(tok) ? "Can't be completed" : "") << ": " << tok<<" weight="<<tokWeightPair.second);
           bool start = true;
           StateId to = oldStateToNewState_.stateFor(tokenEndState);
           StateId const tokstart = tok.start();
@@ -193,7 +224,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
             }
             StateId mid = outhg_->addState();
             arc->setHead(mid);
-            SDL_TRACE(Hypergraph.ConvertCharsToTokens.Constraints, "Adding arc: " << *arc);
+            SDL_TRACE(Hypergraph.ConvertCharsToTokens, "Adding arc: " << *arc);
             outhg_->addArc(arc);
             arc = new Arc(Head(to), mid);
             buf.clear();
@@ -235,6 +266,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
 
   IMutableHypergraph<Arc>* getResult() const { return outhg_; }
 
+  typedef typename IHypergraph<Arc>::AdjsPtr AdjsPtr;
   IHypergraph<Arc> const& inhg_;
   IVocabulary const* invoc_;
   boost::ptr_vector<TokenWeight> incomingTokenWeights_;
@@ -242,6 +274,8 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
   IMutableHypergraph<Arc>* outhg_;
   IVocabulary* outvoc_;
   StateIdTranslation oldStateToNewState_;
+  StateId instart_, infinal_;
+  AdjsPtr inarcs_;
 };
 }
 

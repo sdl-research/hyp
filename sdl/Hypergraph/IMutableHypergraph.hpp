@@ -394,7 +394,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     SDL_TRACE(Hypergraph, "clearImpl set p=" << PrintProperties(p));
     p &= ~kHasOutputLabels;
     p |= kDefaultProperties;
-    if (p & kStoreOutArcs) p |= kSortedOutArcs;
+    if (p & kStoresAnyOutArcs) p |= kSortedOutArcs;
     this->setProperties(p);
     SDL_TRACE(Hypergraph, "clear postlude prop=" << printProperties(*this));
   }
@@ -669,7 +669,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   /**
      instead of checkGraph, trust the caller.
   */
-  void setFsmGraphOneLexical(bool fsm, bool graph, bool one) {
+  virtual void setFsmGraphOneLexical(bool fsm, bool graph, bool one) {
     setPropertiesAt(kGraph, graph);
     setPropertiesAt(kFsm, fsm);
     setPropertiesAt(kOneLexical, one);
@@ -680,7 +680,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
      kGraph properties. since we can update kFsm at the same time for free (kFsm
      => kGraph), we do that too
   */
-  bool checkGraph() {
+  virtual bool checkGraph() {
     bool fsm;
     bool one;
     bool graph = this->isGraphCheck(fsm, one);
@@ -696,6 +696,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     else
       clearProperties(bits);
   }
+
   void setAllStrings(Sym sigma
                      = RHO::ID) {  // whether you use RHO or SIGMA doesn't matter since there will be only 1
     // arc. HOWEVER determinize only supports rho now, not sigma

@@ -1,7 +1,5 @@
-#define PROGNAME HypConvertStrings
-#define USAGE "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL byte separates outputs"
-#define VERSION "v1"
-#define HG_MAIN
+#define USAGE_HypConvertStrings "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL byte separates outputs"
+#define TRANSFORM_MAIN
 #include <sdl/Hypergraph/HypergraphMain.hpp>
 #include <sdl/Hypergraph/LineToHypergraph.hpp>
 
@@ -22,15 +20,12 @@
 #include <sdl/Util/ProgramOptions.hpp>
 #include <sdl/Util/Nfc.hpp>
 
-namespace po = boost::program_options;
 
 namespace sdl {
 namespace Hypergraph {
 
-HypergraphMainOpt mainOpt;
-
-struct PROGNAME : HypergraphMainBase {
-  PROGNAME() : HypergraphMainBase(TRANSFORM_NAME(PROGNAME), USAGE, VERSION, mainOpt)
+struct HypConvertStrings : HypergraphMainBase {
+  HypConvertStrings() : HypergraphMainBase("ConvertStrings", USAGE_HypConvertStrings)
   {}
 
   void declare_configurable() {
@@ -64,4 +59,4 @@ struct PROGNAME : HypergraphMainBase {
 
 }}
 
-INT_MAIN(sdl::Hypergraph::PROGNAME);
+HYPERGRAPH_NAMED_MAIN(ConvertStrings)

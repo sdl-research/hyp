@@ -3,21 +3,21 @@
     print openfst as graphviz/dot.
 */
 
-#ifndef OPENFSTDRAW_LW201213_HPP
-#define OPENFSTDRAW_LW201213_HPP
+#ifndef SDL_HYP__OPENFSTDRAW_LW201213_HPP
+#define SDL_HYP__OPENFSTDRAW_LW201213_HPP
 #pragma once
 
-#include <sdl/Hypergraph/ToOpenFst.hpp>
-#include <sdl/Hypergraph/HypergraphDrawer.hpp>
-#include <sdl/graehl/shared/fileargs.hpp>
-
-#include <sdl/Hypergraph/UseOpenFst.hpp>
 #if HAVE_OPENFST
+#include <sdl/Hypergraph/UseOpenFst.hpp>
+#include <sdl/Hypergraph/ToOpenFst.hpp>
 #include <sdl/Hypergraph/ToReplaceFst.hpp>
 #include <fst/script/draw.h>
 #include <fst/script/print.h>
 #include <fst/script/prune.h>
 #endif
+
+#include <sdl/Hypergraph/HypergraphDrawer.hpp>
+#include <sdl/graehl/shared/fileargs.hpp>
 
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
@@ -177,7 +177,7 @@ struct DrawOptions {
     typedef typename FstArc::Weight FW;
     typedef ToOpenFst<A, FstArc> T;
     T t(h, stateNames);
-    if (pruneBeam != FloatLimits<double>::posInfinity) { Prune(&t.fst, FW(pruneBeam)); }
+    if (pruneBeam != FloatLimits<double>::posInfinity) { fst::Prune(&t.fst, FW(pruneBeam)); }
     drawFst<FstArc>(t.getFst(), t.stateNames());
   }
   template <class A>

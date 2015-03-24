@@ -1,6 +1,4 @@
-#define TRANSFORM HypDeterminize
-#define USAGE "Determinize an unweighted FSA hypergraph -- input symbols only. TODO: support sigma, phi, weights, outputs."
-#define VERSION "v1"
+#define USAGE_HypDeterminize "Determinize an unweighted FSA hypergraph -- input symbols only. TODO: support sigma, phi, weights, outputs."
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Determinize.hpp>
@@ -9,9 +7,8 @@
 namespace sdl {
 namespace Hypergraph {
 
-struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it)
-  typedef TransformMain<TRANSFORM> Base;
-  TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION)
+struct HypDeterminize : TransformMain<HypDeterminize> { // note base class CRTP (google it)
+  HypDeterminize() : TransformMain<HypDeterminize>("Determinize", USAGE_HypDeterminize)
   {}
   DeterminizeOptions detOpt;
   void declare_configurable() {
@@ -27,4 +24,4 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
 
 }}
 
-INT_MAIN(sdl::Hypergraph::TRANSFORM)
+HYPERGRAPH_NAMED_MAIN(Determinize)

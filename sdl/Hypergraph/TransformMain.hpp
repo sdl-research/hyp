@@ -254,7 +254,7 @@ struct TransformMain : TransformMainBase {
     optInputs.setLine();
     optInputs.setChars();
   }
-  TransformMain(std::string const& n, std::string const& usage, std::string const& ver)
+  TransformMain(std::string const& n, std::string const& usage, std::string const& ver = "v1")
       : TransformMainBase(n, usage, ver, HypergraphMainOpt(multiFile(), CRTP::randomSeed()),
                           CRTP::semirings(), CRTP::bestOutput(), CRTP::defaultSemiring(),
                           CRTP::nbestHypergraphDefault())

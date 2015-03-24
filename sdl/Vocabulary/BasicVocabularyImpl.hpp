@@ -79,7 +79,7 @@ class BasicVocabularyImpl {
   void clearSinceFreeze() {
     assert(freezeEndIndex_ <= symbols_.size());
     SDL_INFO(evict.Vocabulary,
-             "Shrinking " << type_ << " vocabulary from " << symbols_.size() << " to " << freezeEndIndex_
+             "Shrinking " << (SymbolType)type_ << " vocabulary from " << symbols_.size() << " to " << freezeEndIndex_
                           << " symbols (these " << (symbols_.size() - freezeEndIndex_)
                           << " removed symbols should all be novel words seen in inputs recently processed - "
                              "if not, call IVocabulary::freeze() to keep your permanent symbols permanent");

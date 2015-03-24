@@ -27,7 +27,7 @@ struct ArcWriter {
 
 template <class Arc>
 std::ostream& writeOpenFstFormat(std::ostream& out, const IHypergraph<Arc>& hg) {
-  shared_ptr<IHypergraph<Arc> const> hp = ensureProperties(hg, kFsm | kStoreOutArcs);
+  shared_ptr<IHypergraph<Arc> const> hp = ensureProperties(hg, kFsm | kGraph | kStoreOutArcs);
   if (!hg.isFsm()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "WriteOpenFstFormat needs FSM input");
   typedef WriteOpenFstFormatHelper::ArcWriter<Arc> Writer;
   Writer writer(out, *hp);

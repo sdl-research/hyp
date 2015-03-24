@@ -1,7 +1,4 @@
-#define TRANSFORM HypFct
-
-#define USAGE "Debugging binary, for internal use."
-#define VERSION "v1"
+#define USAGE_HypFct "Debugging binary, for internal use."
 
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
@@ -10,27 +7,21 @@ namespace sdl {
 namespace Hypergraph {
 
 template <class Arc>
-void testFct(IMutableHypergraph<Arc> &h) {
+void testFct(IMutableHypergraph<Arc>& h) {
+  // your test here
 }
 
-struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it)
+struct HypFct : TransformMain<HypFct> {
+  HypFct() : TransformMain<HypFct>("Fct", USAGE_HypFct) {}
 
-  typedef TransformMain<TRANSFORM> Base;
+  Properties properties(int i) const { return kDefaultProperties | kStoreInArcs | kStoreFirstTailOutArcs; }
 
-  TRANSFORM() : Base(TRANSFORM_NAME(TRANSFORM), USAGE, VERSION) {}
-
-  Properties properties(int i) const {
-    return kDefaultProperties | kStoreInArcs | kStoreOutArcs;
-  }
-
-  bool printFinal() const {
-    return false;
-  }
+  bool printFinal() const { return false; }
 
   enum { has_inplace_transform1 = true };
 
   template <class Arc>
-  bool transform1InPlace(IMutableHypergraph<Arc> &h) {
+  bool transform1InPlace(IMutableHypergraph<Arc>& h) {
     testFct(h);
     return true;
   }
@@ -39,4 +30,4 @@ struct TRANSFORM : TransformMain<TRANSFORM> { // note base class CRTP (google it
 
 }}
 
-INT_MAIN(sdl::Hypergraph::TRANSFORM)
+HYPERGRAPH_NAMED_MAIN(Fct)

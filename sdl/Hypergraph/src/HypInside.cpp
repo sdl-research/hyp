@@ -35,9 +35,8 @@
 
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
-#include <sdl/Util/Locale.hpp>
+#include <sdl/Hypergraph/HypergraphMain.hpp>
 
-namespace po = boost::program_options;
 
 namespace sdl {
 namespace Hypergraph {
@@ -115,80 +114,82 @@ void process(const std::string& file, unsigned ngramMax = 0, bool allPairs = fal
   } else
     printDistances(hg, allPairs, dag, sort.stateRemap, sort.partBoundary);
 }
-}
-}
 
+struct HypInside {
+  static int run_main(int argc, char** argv) {
+    namespace po = boost::program_options;
+    using namespace std;
+    try {
+      bool help = false;
+      unsigned ngramMax = 0;
+      bool allPairs = false, dag = false;
+      string file = "-", arcType = "log";
+      po::options_description generic("Allowed options");
+      sdl::AddOption opt(generic);
+      opt("arc-type,a", po::value(&arcType)->default_value("log"),
+          "arc type (e.g., log, viterbi, expectation, feature)");
+      opt("config-file,c", po::value<string>(), "config file name");
+      opt("ngram-max,n", po::value(&ngramMax)->default_value(0),
+          "if >0, show NgramWeight<arc-type> up to this #of words, starting from arc symbol unigrams");
+      opt("help,h", po::bool_switch(&help), "produce help message");
+      opt("input-file,i", po::value(&file)->default_value("-"), "input file; - is stdin");
+      opt("all-pairs,p", po::bool_switch(&allPairs),
+          "output all-pairs shortest paths (s -> d = w) - fsm only");
+      opt("dag,d", po::bool_switch(&dag), "for all-pairs, assume input is a DAG (no cycles)");
 
-int main(int argc, char** argv) {
-  using namespace std;
-  try {
-    sdl::Util::DefaultLocaleFastCout initCout;
-    bool help = false;
-    unsigned ngramMax = 0;
-    bool allPairs = false, dag = false;
-    string file = "-", arcType = "log";
-    po::options_description generic("Allowed options");
-    sdl::AddOption opt(generic);
-    opt("arc-type,a", po::value(&arcType)->default_value("log"),
-        "arc type (e.g., log, viterbi, expectation, feature)");
-    opt("config-file,c", po::value<string>(), "config file name");
-    opt("ngram-max,n", po::value(&ngramMax)->default_value(0),
-        "if >0, show NgramWeight<arc-type> up to this #of words, starting from arc symbol unigrams");
-    opt("help,h", po::bool_switch(&help), "produce help message");
-    opt("input-file,i", po::value(&file)->default_value("-"), "input file; - is stdin");
-    opt("all-pairs,p", po::bool_switch(&allPairs), "output all-pairs shortest paths (s -> d = w) - fsm only");
-    opt("dag,d", po::bool_switch(&dag), "for all-pairs, assume input is a DAG (no cycles)");
+      po::options_description cmdline_options;
+      cmdline_options.add(generic);
 
-    po::options_description cmdline_options;
-    cmdline_options.add(generic);
+      po::options_description config_file_options;
+      config_file_options.add(generic);
 
-    po::options_description config_file_options;
-    config_file_options.add(generic);
+      po::positional_options_description p;
+      p.add("input-file", -1);
 
-    po::positional_options_description p;
-    p.add("input-file", -1);
+      po::variables_map vm;
+      store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
 
-    po::variables_map vm;
-    store(po::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
+      if (vm.count("config-file")) {
+        Util::Input ifs(vm["config-file"].as<std::string>());
+        store(parse_config_file(*ifs, config_file_options), vm);
+      }
+      notify(vm);
 
-    using namespace sdl;
+      if (help) {
+        std::cout
+            << "Run inside algorithm on hypergraph and output inside weight for each "
+            << "state reachable from the FINAL state. if all-pairs, output source -> destination = weight"
+            << '\n';
+        std::cout << generic << "\n";
+        return EXIT_FAILURE;
+      }
 
-    if (vm.count("config-file")) {
-      Util::Input ifs(vm["config-file"].as<std::string>());
-      store(parse_config_file(*ifs, config_file_options), vm);
-    }
-    notify(vm);
-
-    if (help) {
-      std::cout << "Run inside algorithm on hypergraph and output inside weight for each "
-                << "state reachable from the FINAL state. if all-pairs, output source -> destination = weight"
-                << '\n';
-      std::cout << generic << "\n";
+      typedef ViterbiWeightTpl<float> Viterbi;
+      if (arcType == "log") {
+        typedef ArcTpl<LogWeightTpl<float> > Arc;
+        process<Arc>(file, ngramMax, allPairs, dag);
+      } else if (arcType == "viterbi") {
+        typedef ArcTpl<Viterbi> Arc;
+        process<Arc>(file, ngramMax, allPairs, dag);
+      } else if (arcType == "expectation") {
+        typedef ArcTpl<ExpectationWeight> Arc;
+        process<Arc>(file, ngramMax, allPairs, dag);
+      } else if (arcType == "feature") {
+        typedef ArcTpl<FeatureWeight> Arc;
+        process<Arc>(file, ngramMax, allPairs, dag);
+      } else {
+        std::cerr << "unknown arc-type " << arcType << "\n";
+        return EXIT_FAILURE;
+      }
+    } catch (std::exception& e) {
+      std::cerr << e.what() << '\n';
       return EXIT_FAILURE;
     }
-
-    using namespace sdl::Hypergraph;
-
-    typedef ViterbiWeightTpl<float> Viterbi;
-    if (arcType == "log") {
-      typedef ArcTpl<LogWeightTpl<float> > Arc;
-      process<Arc>(file, ngramMax, allPairs, dag);
-    } else if (arcType == "viterbi") {
-      typedef ArcTpl<Viterbi> Arc;
-      process<Arc>(file, ngramMax, allPairs, dag);
-    } else if (arcType == "expectation") {
-      typedef ArcTpl<ExpectationWeight> Arc;
-      process<Arc>(file, ngramMax, allPairs, dag);
-    } else if (arcType == "feature") {
-      typedef ArcTpl<FeatureWeight> Arc;
-      process<Arc>(file, ngramMax, allPairs, dag);
-    } else {
-      std::cerr << "unknown arc-type " << arcType << "\n";
-      return EXIT_FAILURE;
-    }
-  } catch (std::exception& e) {
-    std::cerr << e.what() << '\n';
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
   }
-  return EXIT_SUCCESS;
-}
+};
+
+
+}}
+
+HYPERGRAPH_NAMED_MAIN(Inside)
