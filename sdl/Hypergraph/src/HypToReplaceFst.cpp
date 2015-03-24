@@ -34,6 +34,7 @@
 #include <sdl/Util/Input.hpp>
 #include <sdl/Util/Output.hpp>
 #include <sdl/Hypergraph/HypergraphMain.hpp>
+#include <sdl/Util/Delete.hpp>
 
 
 namespace sdl {
@@ -72,23 +73,23 @@ struct HypToReplaceFst {
       }
 
       if (vm.count("help")) {
-        std::cout << "Convert hypergraph to an OpenFst ReplaceFst object" << '\n';
-        std::cout << generic << "\n";
+        std::cout << generic << "\n\n";
+        std::cout << "Convert hypergraph to an OpenFst ReplaceFst object\n";
         return EXIT_FAILURE;
       }
 
 #if HAVE_OPENFST
       bool userProvidedSymbolTable = false;
-      fst::SymbolTable* syms;
+      Util::AutoDelete<fst::SymbolTable> syms;
       if (vm.count("symbols")) {
         if (vm.count("stem")) {
           throw std::runtime_error("Do not provide both --stem and --symbols.");
         }
         std::string filename = vm["symbols"].as<std::string>();
-        syms = fst::SymbolTable::ReadText(filename);
+        syms.reset(fst::SymbolTable::ReadText(filename));
         userProvidedSymbolTable = true;
       } else {
-        syms = new fst::SymbolTable("");
+        syms.reset(new fst::SymbolTable(""));
       }
 
       std::string stem;
@@ -126,43 +127,46 @@ struct HypToReplaceFst {
       const std::string fstName = stem + ".std-fst";
 
       // Convert to OpenFst ReplaceFst:
-      // std::pair<const fst::Fst<FArc>*, fst::SymbolTable*> fsPair =
-      // sdl::Hypergraph::toReplaceFst<FArc>(hg);
-      fst::Fst<FArc>* result = sdl::Hypergraph::toReplaceFst<FArc>(hg, syms);
+      Util::AutoDelete<fst::Fst<FArc> > result(sdl::Hypergraph::toReplaceFst<FArc>(hg, syms));
 
-      // Copy to non-lazy OpenFst object and write to disk
-      fst::MutableFst<FArc>* tmp = new fst::VectorFst<FArc>();
-      std::cerr << "Expanding Hypergraph (will not terminate if cyclic) ... ";
-      *tmp = *result;  // copy
-      std::cerr << "Done.\n";
+      fst::VectorFst<FArc> minimized;
 
-      std::cerr << "Optimizing ... ";
-      fst::Project(tmp, fst::PROJECT_OUTPUT);
-      fst::RmEpsilon(tmp);
-      fst::MutableFst<FArc>* tmp2 = new fst::VectorFst<FArc>();
-      *tmp2 = fst::DeterminizeFst<FArc>(*tmp);
-      delete tmp;
-      tmp = tmp2;
-      fst::Minimize(tmp);
+      typedef fst::MutableFst<FArc> IFst;
+      // TODO: most of these explicit IFst casts are overcautious because of unfamiliarity w/ OpenFst API
+      {
+        // Copy to non-lazy OpenFst object and write to disk
+        fst::VectorFst<FArc> nonlazy;
+        std::cerr << "Expanding Hypergraph (will not terminate if cyclic) ... ";
+        nonlazy = *result;  // copy
+        std::cerr << "Done.\n";
+
+        std::cerr << "Optimizing ... ";
+        fst::Project((IFst*)&nonlazy, fst::PROJECT_OUTPUT);
+#if 0
+        fst::RmEpsilon((IFst*)&nonlazy);
+        fst::DeterminizeFst<FArc>((IFst&)nonlazy, &minimized);
+#else
+        fst::Determinize(fst::RmEpsilonFst<FArc>(nonlazy), &minimized);
+#endif
+      }
+      // TODO: can we result.release() now?
+      fst::Minimize((IFst*)&minimized);
       std::cerr << "Done.\n";
 
       fst::FstWriteOptions opts;
 
       if (userProvidedSymbolTable) {
-        tmp->Write(std::cout, opts);
+        minimized.Write(std::cout, opts);
       } else {
         std::cerr << "Writing " << fstName << '\n';
         Util::Output out(fstName);
-        tmp->Write(*out, opts);
+        minimized.Write(*out, opts);
 
         const std::string symsName = stem + ".syms";
         std::cerr << "Writing " << symsName << '\n';
         syms->WriteText(symsName);
       }
 
-      delete tmp;
-      delete result;
-      delete syms;
 #else
       std::cerr << "ERROR: Recompile with OpenFst!\n";
       return EXIT_FAILURE;

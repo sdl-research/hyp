@@ -354,16 +354,20 @@ if(USING_GCC)
       add_definitions(-Wno-error=maybe-uninitialized)
       add_definitions(-Wno-type-limits)
       add_definitions(-Wno-maybe-uninitialized)
-      if(APPLE)
-        # sdl_enable_cpp11()
-      endif()
     endif()
     if(GCC_VERSION VERSION_LESS 4.9)
       add_definitions("-fno-tree-vectorize") # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53533
+    else()
+      message(STATUS "Found gcc 4.9 or later, which means we're trying C++11, which should improve performance and allow for clearer code.")
+      set(SDL_HAVE_GCC_4_9 1)
+      sdl_enable_cpp11()
+      # TODO: rebuild externals libs with -std=c++11 or else we need extensive
+      # testing to make sure there are no problems mixing libstdc++ (what's in
+      # std::) - boost header-only libs should autodetect fine, but anything w/
+      # linked .cpp impl is suspect. fortunately so far they seem binary
+      # compatible, i.e. c++11 doesn't break iostream or string ABI but just
+      # adds some new methods?
     endif()
-    #TODO: need to link against a boost built with same -std=c++11 most likely
-    #(or risk subtle bugs). too bad, because C++11 speeds some things up w/
-    #move ctors
   endif()
 elseif(USING_CLANG)
   add_definitions(-ftemplate-depth=255)

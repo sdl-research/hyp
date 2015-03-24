@@ -5,7 +5,6 @@
 
 #include <sdl/Util/Locale.hpp>
 #include <sdl/graehl/shared/named_main.hpp>
-#include <sdl/graehl/shared/force_link.hpp>
 
 #ifndef SDL_INLINE_HYP_CPPS
 #define SDL_INLINE_HYP_CPPS 1
@@ -45,6 +44,8 @@
 #if HAVE_OPENFST
 #include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
 #endif
+#else
+#include <sdl/graehl/shared/force_link.hpp>
 #endif
 
 #if HAVE_OPENFST
@@ -86,7 +87,9 @@
 namespace sdl {
 namespace Hypergraph {
 void forceLinkMains() {
+#if !SDL_INLINE_HYP_CPPS
   SDL_HYP_FOR_MAINS(GRAEHL_FORCE_LINK_CLASS)
+#endif
 }
 }
 }

@@ -161,7 +161,7 @@ inline bool update(Map& map, typename Map::value_type& keyValPair) {
 
     \return true iff k wasn't in m (val was inserted) . */
 template <class Map>
-inline bool update(Map& map, typename Map::key_type const& key, typename Map::mapped_type& val) {
+inline bool update(Map& map, typename Map::key_type const& key, typename Map::mapped_type & val) {
   std::pair<typename Map::iterator, bool> i = map.insert(typename Map::value_type(key, val));
   if (!i.second) val = i.first->second;
   return i.second;

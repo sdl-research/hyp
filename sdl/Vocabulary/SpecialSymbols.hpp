@@ -196,7 +196,6 @@ inline BlockId getBlockOp(Sym sym) {
 }
 
 inline bool isBlockOp(SymIdInt blockOp) {
-  assert(blockOp >= 0);
   return blockOp <= SDL_NUM_BLOCKS;
 }
 

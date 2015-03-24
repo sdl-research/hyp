@@ -32,8 +32,8 @@ struct HypToOpenFstText {
     try {
       po::options_description generic("Allowed options");
 
-      add(generic)("config-file", po::value<std::string>(), "config file name");
-      add(generic)("help", "produce help message");
+      add(generic)("config-file,c", po::value<std::string>(), "config file name");
+      add(generic)("help,h", "produce help message");
 
       po::options_description hidden("Hidden options");
       hidden.add_options()("input-file", po::value<std::string>(), "input file");
@@ -57,8 +57,8 @@ struct HypToOpenFstText {
       }
 
       if (vm.count("help")) {
+        std::cout << generic << "\n\n";
         std::cout << "Convert FSM (in hypergraph format) to OpenFst text format" << '\n';
-        std::cout << generic << "\n";
         return EXIT_FAILURE;
       }
 

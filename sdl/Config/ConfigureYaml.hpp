@@ -137,7 +137,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
 
   static inline std::string option_name(configure::conf_expr_base const& conf) { return conf.name(); }
 
-  typedef std::map<std::string, ConfigNode> ChildMap;
+  typedef std::map<std::string, YAML::Node> ChildMap;
   typedef ChildMap::value_type ChildPair;
   typedef configure::conf_opt::allow_unrecognized_args UnrecognizedOpt;
 
@@ -203,10 +203,9 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
       if (n.IsMap()) {
         for (YAML::const_iterator i = n.begin(), e = n.end(); i != e; ++i) {
           YamlScalarRef key = i->first.Scalar();
-          ConfigNode val = i->second;
-          if (!Util::update(unprocessedMapChildren, key, val))
+          if (!Util::supplyMissing(unprocessedMapChildren, key, i->second))
             trouble(fullname(key) + " duplicated in YAML map; " + "was: " + (std::string const&)key + ": "
-                    + to_string(i->second) + ", and now: " + to_string(val),
+                    + to_string(i->second) + ", and now: " + to_string(i->second),
                     true);
         }
       }
@@ -515,7 +514,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     std::string const& name = conf.name();
     std::string const& pathname = conf.path_name();
 
-    ConfigNode n = ctx->node(name, opt.is_required(), opt.is_required_err());
+    ConfigNode const& n = ctx->node(name, opt.is_required(), opt.is_required_err());
     SDL_TRACE(ConfigureYaml, "store leaf " << pathname << ": " << Util::print(n, Config::kShallow));
     if (n.IsDefined()) {
       conf.warn_if_deprecated();

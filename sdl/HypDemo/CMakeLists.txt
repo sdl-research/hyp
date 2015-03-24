@@ -7,7 +7,9 @@ add_executable(HypDemo
   )
 target_link_libraries(HypDemo ${UTIL_LIBRARIES} Hypergraph)
 
-add_executable(HypSpeedTest
+if(NOT WIN32)
+  add_executable(HypSpeedTest
   ${PROJECT_SOURCE_DIR}/src/HypSpeedTest.cpp
   )
 target_link_libraries(HypSpeedTest ${UTIL_LIBRARIES} Hypergraph)
+endif()

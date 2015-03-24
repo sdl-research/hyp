@@ -59,12 +59,18 @@ struct YAMLConfigProcessor {
   /**
       Push the Key of the node being processed on to the stack. for path() log msgs only
    */
-  void push(const std::string& key) const { optPath_.push_back(key); }
+  void push(const std::string& key) const {
+    optPath_.push_back(key);
+    //SDL_DEBUG(Config.PushPop, "push +" << optPath_.back() << " => " << optPath_.size());
+  }
 
   /**
       Pop a key.
    */
-  void pop() const { optPath_.pop_back(); }
+  void pop() const {
+    //SDL_DEBUG(Config.PushPop, "popped " << optPath_.back() << " -1 => " << optPath_.size() - 1);
+    optPath_.pop_back(false);
+  }
 
   /**
       Dump the stack in to a string, for use Pop a key.
@@ -128,11 +134,6 @@ struct YAMLConfigProcessor {
   ConfigNode expandBasis(ConfigNode const&, boost::filesystem::path const&) const;
 
   /**
-     helper for expandBasis.
-  */
-  void addBasisElement(std::vector<ConfigNode>&, ConfigNode const&, boost::filesystem::path const&) const;
-
-  /**
       Handles node categories like 'resource', 'module' & 'pipeline'.
    */
   ConfigNode resolveCategories(ConfigNode const& in);
@@ -163,7 +164,8 @@ struct YAMLConfigProcessor {
   ConfigNode processReplaceNodes(ConfigNode const& in);
 
   boost::filesystem::path filePath_;
-  mutable OptPath optPath_;  // for log messages
+  mutable OptPath optPath_;  // for log messages. mutable because of insanity - DFS push/pop discipline. to
+                             // keep refs sane have ot use StableVector
   std::size_t const optPathInitialDepth_;
   Instances instances;
 };

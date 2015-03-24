@@ -173,7 +173,7 @@ void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bo
     if (newlines && !sequenceAllScalar(in.begin(), in.end())) {
       for (; i != end; ++i) {
         os << indent << "- ";
-        ConfigNode node = *i;
+        ConfigNode const& node = *i;
         if (node.IsScalar())
           os << node.as<std::string>();
         else
@@ -184,7 +184,7 @@ void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bo
       os << indent << "[ ";
       bool first = true;
       for (; i != end; ++i) {
-        ConfigNode node = *i;
+        ConfigNode const& node = *i;
         if (!first) os << ", ";
         if (node.IsScalar())
           os << node.as<std::string>();
@@ -206,7 +206,7 @@ void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bo
     bool first = true;
     for (; i != end; ++i) {
       std::string const& key = i->first.as<std::string>();
-      ConfigNode val = i->second;
+      ConfigNode const& val = i->second;
       if (!val.IsNull()) {
         if (!first) {
           if (longMap) os << ", ";
@@ -236,7 +236,7 @@ ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
     std::string decryptedtext;
     Encrypt::decryptFile(path.string(), decryptedtext);
     SDL_DEBUG(Configure.loadRawEncryptedConfig, "decrypted: " << decryptedtext);
-    YAML::Node rawNode = YAML::Load(decryptedtext);
+    YAML::Node const& rawNode = YAML::Load(decryptedtext);
 
     if (is_null(rawNode))  // because it turns out that YAML::LoadFile doesn't throw if file can't be read!
       SDL_THROW_LOG(Config, ConfigException, "No YAML configuration could be read from file " << path.string());
@@ -251,7 +251,7 @@ ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
 
 ConfigNode loadRawConfig(boost::filesystem::path const& path) {
   try {
-    ConfigNode rawNode = YAML::LoadFile(path.string());
+    ConfigNode const& rawNode = YAML::LoadFile(path.string());
     if (is_null(rawNode))  // because it turns out that YAML::LoadFile doesn't throw if file can't be read!
       SDL_THROW_LOG(Config, ConfigException, "No YAML configuration could be read from file " << path.string());
     return rawNode;

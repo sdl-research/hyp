@@ -7,6 +7,7 @@
     YAML based implementation of configure library (see docs/)..
 */
 
+#include <sdl/Util/StableVector.hpp>
 #include <sdl/Config-fwd.hpp>
 #include <sdl/Path.hpp>
 #include <iostream>
@@ -37,7 +38,7 @@ namespace sdl {
 
 inline ConfigNode child(ConfigNode const& parent, std::string const& childname) {
   assert(!is_null(parent));
-  ConfigNode child(parent[childname]);
+  ConfigNode const& child(parent[childname]);
   if (is_null(child))
     SDL_THROW_LOG(Config, ConfigException, "child node " << childname << " not present in yaml");
   return child;
@@ -45,16 +46,11 @@ inline ConfigNode child(ConfigNode const& parent, std::string const& childname) 
 
 namespace Config {
 
-typedef std::vector<std::string> OptPath;
+typedef Util::StableStrings OptPath;
 
 template <class Key, class Val>
 inline void addKeyVal(ConfigNode& node, Key const& key, Val const& val) {
-#if SDL_HAVE_AT_LEAST_YAML_CPP_0_5
   node.force_insert(key, val);
-#else
-  // O(n) - awful
-  node[key] = val;
-#endif
 }
 
 /**
@@ -132,6 +128,7 @@ ConfigNode expandConfig(ConfigNode const& unexpanded, Path const& filePath, OptP
 
 // Loads and expands the config.
 ConfigNode loadConfig(Path const& path, OptPath const& forPath = OptPath());
+
 
 /**
    sequence of YAML map/sequence keys

@@ -7,6 +7,7 @@
 #define STABLEVECTOR_JG_2014_03_04_HPP
 #pragma once
 
+#include <sdl/Util/Valgrind.hpp>
 #include <graehl/shared/stable_vector.hpp>
 #include <sdl/Sym.hpp>
 #include <string>

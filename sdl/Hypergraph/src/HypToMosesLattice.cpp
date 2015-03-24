@@ -26,8 +26,8 @@ struct HypToMosesLattice {
     std::string logConfigFile;
     po::options_description generic("Generic options");
     sdl::AddOption opt(generic);
-    opt("help", "produce help message");
-    opt("input-file",
+    opt("help,h", "produce help message");
+    opt("input-file,i",
         "input file in plain text, hypergraphs are separated "
         "by \"-----\"");
     opt("log-config", po::value(&logConfigFile), "log4cxx config file");
@@ -37,8 +37,8 @@ struct HypToMosesLattice {
     po::store(po::command_line_parser(argc, argv).options(generic).positional(p).run(), vm);
     po::notify(vm);
     if (vm.count("help")) {
+      std::cout << generic << '\n' << '\n';
       std::cout << "Converts SDL lattice format to PLF format (used by Moses)\n";
-      std::cout << generic << '\n';
       return EXIT_SUCCESS;
     }
     Util::defaultLocale();
