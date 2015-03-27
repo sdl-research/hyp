@@ -27,7 +27,7 @@ struct FstArcNoState {
   typedef StateT State;
   LabelPair labelPair;
   Weight weight;
-  Syms annotations;
+  IF_SDL_HYPERGRAPH_FS_ANNOTATIONS(Syms annotations;)
   template <class State2>
   void setDst(State2 const& dst_) {}
   State getDst() const { return State(); }
@@ -36,7 +36,12 @@ struct FstArcNoState {
 
   template <class FstArc2>
   FstArcNoState(FstArc2 const& arc)
-      : labelPair(arc.labelPair), weight(arc.weight), annotations(arc.annotations) {
+      : labelPair(arc.labelPair)
+      , weight(arc.weight)
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
+      , annotations(arc.annotations)
+#endif
+  {
     SDL_DEBUG_IF(!annotations.empty(), Hypergraph.fs.Path, "fs arc Annotations: " << annotations);
   }
 
@@ -97,10 +102,15 @@ struct PrependForInputStateCached : PrependForInputStateIdFn {
 
 template <class Arc>
 Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail, LabelPair const& labelPair,
-                     typename Arc::Weight const& wt, Syms const* annotations, bool annotate) {
+                     typename Arc::Weight const& wt,
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
+                     Syms const* annotations, bool annotate
+#endif
+                     ) {
   Arc* add = new Arc(wt);
   add->head() = head;
   StateIdContainer& tails = add->tails();
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
   SDL_DEBUG_IF(annotations, Hypergraph.fs.Path, "fs arc Annotations: " << *annotations);
   if (annotate) {
     bool const label = labelPair.first != EPSILON::ID || labelPair.second && labelPair.second != EPSILON::ID;
@@ -112,8 +122,9 @@ Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail,
       SDL_TRACE(Hypergraph.fs.Path.annotations, "annotation " << *anno << " -> tail #" << i);
     }
     if (label) tails[labeli] = outHg.addState(labelPair);
-  }
-  else {
+  } else
+#endif
+  {
     tails.resize(2);
     tails[1] = outHg.addState(labelPair);
   }
@@ -147,7 +158,6 @@ struct Path {
   template <class FstArc2>
   void prepend(FstArc2 const& fstArc) {
     SDL_DEBUG(Hypergraph.fs.Path, "prepend best-path fs arc: " << fstArc);
-    SDL_DEBUG_IF(!fstArc.annotations.empty(), Hypergraph.fs.Path, "fs arc Annotations: " << fstArc.annotations);
     arcs.push_back(fstArc);
   }
 
@@ -252,8 +262,12 @@ struct Path {
     std::size_t nNonEpsilonOutput = 0;
     for (;; ++i) {
       bool const last = i == lasti;
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
       Syms const& annotations = i->annotations;
       TailId const nAnnotations = createAnnotatedGraph ? annotations.size() : 0;
+#else
+      TailId const nAnnotations = 0;
+#endif
       LabelPair label = i->labelPair;
       bool const inputEpsilon = label.first == EPSILON::ID;
       bool const outputEpsilon = label.second == EPSILON::ID || inputEpsilon && !label.second;
@@ -270,21 +284,13 @@ struct Path {
         }
       } else {
         StateId head = last ? final : outHg.addState();
-#if 1
         if (projectOutput) setInputAsOutput(label);
-        addEpsTo = &addAnnotatedArc(outHg, head, tail, label, i->weight, &annotations, createAnnotatedGraph)
-                        ->weight();
-#else
-        Arc* add = new Arc(head, tail, i->weight);
-        StateIdContainer& tails = add->tails();
-        if (createAnnotatedGraph)
-          for (Syms::const_iterator j = annotations.begin(), jend = annotations.end(); j != jend; ++j)
-            tails.push_back(outHg.addState(*j));
-        if (!createAnnotatedGraph || !nolabel)
-          tails.push_back(projectOutput ? outHg.addState(label.second) : outHg.addState(label));
-        outHg.addArc(add);
-        addEpsTo = &add->weight();
+        addEpsTo = &addAnnotatedArc(outHg, head, tail, label, i->weight
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
+                                    ,
+                                    &annotations, createAnnotatedGraph
 #endif
+                                    )->weight();
         tail = head;
         if (startEpsWeights) {
           timesBy(*startEpsWeights, *addEpsTo);

@@ -65,7 +65,11 @@ struct LazyBestOptions {
         .self_init()("output an fsa using the composition's output symbols (setting input == output");
     config("log-num-words-name", &logNumWordsName)(
         "if nonempty, log # of output words under sdl.PerformancePer.[log-num-words-name]");
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
     config("annotations", &annotations).self_init()("preserve annotations (e.g. constraints) on input hg");
+#else
+    config("annotations", &annotations).init(false)("(not enabled in this build; must be false)").verbose();
+#endif
   }
 
   PrependForInputStatePtr prependForStateId;
@@ -159,7 +163,7 @@ struct LazyBest : DistanceFn {
       assert(arc.dst == this->dst);
       this->labelPair = arc.labelPair;
       this->weight = arc.weight;
-      this->annotations = arc.annotations;
+      IF_SDL_HYPERGRAPH_FS_ANNOTATIONS(this->annotations = arc.annotations;)
     }
 
     void init(Fst const& fst, Best* prev = 0) {
@@ -289,7 +293,8 @@ struct LazyBest : DistanceFn {
         return;  // success
       }
       if (from.arcs) {
-        FstArc const& arc = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
+        FstArc const& arc
+            = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
         Distance distance = from.distance + arc.getDistance();
         from.estimateSuccessor(distance - opt.expandMoreArcs);
         queue.adjustTop();  // note: moving items around in queue doesn't invalidate the pointed-to Best

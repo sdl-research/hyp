@@ -59,7 +59,7 @@ else()
   message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_PATH")
 endif()
 
-option(OPEN_SOURCE_RELEASE ON)
+option(OPEN_SOURCE_RELEASE "hyp open-source release" ON)
 
 
 # Use cmake -DSDL_FLOAT=32 or -DSDL_FLOAT=64
@@ -358,13 +358,16 @@ if(USING_GCC)
     else()
       message(STATUS "Found gcc 4.9 or later, which means we're trying C++11, which should improve performance and allow for clearer code.")
       set(SDL_HAVE_GCC_4_9 1)
-      sdl_enable_cpp11()
-      # TODO: rebuild externals libs with -std=c++11 or else we need extensive
-      # testing to make sure there are no problems mixing libstdc++ (what's in
-      # std::) - boost header-only libs should autodetect fine, but anything w/
-      # linked .cpp impl is suspect. fortunately so far they seem binary
-      # compatible, i.e. c++11 doesn't break iostream or string ABI but just
-      # adds some new methods?
+      # https://gcc.gnu.org/wiki/Cxx11AbiCompatibility:
+
+      # summary: libstdc++ is *nearly* binary ABI compatible; see details; it's
+      # best to rebuild all the libs with -std=c++11, though.
+
+      # notably: list now has size so operations modifying lists of types in an
+      # external lib won't inline correctly, and map etc. erase now return an
+      # iterator instead of void.
+
+      # sdl_enable_cpp11()
     endif()
   endif()
 elseif(USING_CLANG)
@@ -460,6 +463,7 @@ if(CMAKE_COMPILER_IS_CLANGXX)
     set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
   endif()
   #http://comments.gmane.org/gmane.comp.compilers.clang.devel/9229
+
   # goal of libc++ - http://libcxx.llvm.org/ - ABI compatibility with gcc's
   # libstdc++ for some low-level features such as exception objects, rtti and
   # memory allocation.
@@ -502,17 +506,8 @@ if(UNIX)
     set(SDL_CFLAGS_ALL "-fopenmp")
   endif()
   if(SDL_HAVE_GCC_4_8)
-    add_definitions("-Wno-delete-non-virtual-dtor")
+    #add_definitions("-Wno-delete-non-virtual-dtor")
     add_definitions("-ftemplate-backtrace-limit=0")
-
-    if (SDL_DEVELOPMENT)
-      set(SDL_O3 "-Og")
-    endif()
-    # O2 or O3 give some failing unit tests on fc20 gcc 4.8.3 - after investigating, looks like compiler bug
-    # (Og or O are fine)
-
-    # -Og should be in gcc 4.8 - http://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html - until then, -O0
-    # some statements are optimized out or get reordered, so -Og is not enabled in debug for now
   endif()
   set(SDL_UNSAFE_MATH "-funsafe-math-optimizations")
   #TODO: -ffinite-math-only viable?
@@ -955,7 +950,9 @@ add_custom_target(doc ${CMAKE_SOURCE_DIR}/doxygenate WORKING_DIRECTORY ${CMAKE_S
 
 if(${OPEN_SOURCE_RELEASE})
   sdl_quiet_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1)
+  sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0)
 else()
+  sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
   if(${SDL_DEVELOPMENT})
     # if not set, then enabled for debug only:
     sdl_quiet_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)

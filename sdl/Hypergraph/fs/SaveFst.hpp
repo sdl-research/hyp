@@ -79,12 +79,12 @@ struct SaveFst {
         FstArc fstArc(genArcs.get());
         genArcs.got();
         if (projectOutput) setInputAsOutput(fstArc.labelPair);
-        HgArc* added = addAnnotatedArc(out, outStateFor(fstArc.dst), from, fstArc.labelPair, fstArc.weight,
-                                     &fstArc.annotations, annotations_);
-        if (!fstArc.annotations.empty())
-          SDL_DEBUG(Hypergraph.fs.SaveFst, "added annotated arc " << Util::print(fstArc, *out.getVocabulary())
-                                                                  << " as "
-                                                                  << Util::print(*added, out));
+        addAnnotatedArc(out, outStateFor(fstArc.dst), from, fstArc.labelPair, fstArc.weight
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
+                        ,
+                        &fstArc.annotations, annotations_
+#endif
+                        );
         ++nOut;
       }
       bool final = fst.final(state);

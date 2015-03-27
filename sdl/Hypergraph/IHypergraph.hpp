@@ -51,6 +51,7 @@
 
 #ifndef HYP__IHYPERGRAPH_HPP
 #define HYP__IHYPERGRAPH_HPP
+#include <sdl/Hypergraph/fs/Annotations.hpp>
 #pragma once
 
 /*
@@ -711,10 +712,12 @@ struct FstArc {
   LabelPair labelPair;
   Weight weight;
 
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
   /// annotations are special symbols that don't participate in the fst translation but ride with the input hg
   /// e.g. constraint open/close. they're expected before lexical/epsilon arcs and are placed before them when
   /// going back to hg/path in fs/LazyBest or fs/SaveFst
   Syms annotations;
+#endif
 
   void setDst(State const& dst_) { dst = dst_; }
   State const& getDst() const { return dst; }
@@ -742,7 +745,9 @@ struct FstArc {
   }
 
   void printLabel(std::ostream& out, IVocabulary const& vocab) const {
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
     if (!annotations.empty()) out << "annotations:" << Util::print(annotations, vocab);
+#endif
     out << '(';
     out << vocab.str(labelPair.first);
     if (labelPair.first != labelPair.second) out << ' ' << vocab.str(labelPair.second);
@@ -849,7 +854,9 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
 
   struct FstArcFor {
     void init(Self const* hg, bool allowAnnotations = false) {
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
       annotations = allowAnnotations && (true || (hg->properties() & kAnnotations));
+#endif
       // TODO: set kAnnotations prop for hgs w/ annotations
       hg_ = hg;
       sizeForLabels_ = hg->sizeForLabels();
@@ -868,6 +875,8 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
       r.dst = arc->head();
       r.weight = arc->weight();
       StateIdContainer const& tails = arc->tails();
+
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
       if (annotations) {
         StateIdContainer::const_iterator i = tails.begin(), e = tails.end();
         for (;;) {
@@ -886,7 +895,10 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
           else
             break;
         }
-      } else {
+      } else
+#endif
+      {
+
         if (tails.size() == 2) {
           StateId const t = tails[1];
           if (t < sizeForLabels_) {
@@ -898,15 +910,15 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
           r.labelPair = hg_->firstLexicalLabelPairOrEps(arc);
         }
       }
-      SDL_DEBUG_IF(!r.annotations.empty(), Hypergraph.annotations,
-                   "IHypergraph fstarc with annotations=" << annotations << ": " << r);
       return r;
     }
 
    private:
     Self const* hg_;
     StateId sizeForLabels_;
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
     bool annotations;
+#endif
   };
 
   using IHypergraphStates::final;

@@ -473,7 +473,7 @@ struct ComposeFst : TimesFn {
       // detecting empty range in advance
       LabelPair const& inLabels = inArc.labelPair;
       r.dst.input = inArc.dst;
-      r.annotations = inArc.annotations;
+      IF_SDL_HYPERGRAPH_FS_ANNOTATIONS(r.annotations = inArc.annotations;)
       r.dst.filter() = *(Filter const*)this;
       LabelPair& rLabels = r.labelPair;
       rLabels.first = inLabels.first;
