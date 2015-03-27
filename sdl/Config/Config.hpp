@@ -16,6 +16,12 @@
 #include <yaml-cpp/node/node.h>
 #include <sdl/Util/OnceFlag.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#ifdef _MSC_VER
+#define SDL_HAVE_AT_LEAST_YAML_CPP_0_5 0
+//TODO: update windows sdl-externals
+#else
+#define SDL_HAVE_AT_LEAST_YAML_CPP_0_5 1
+#endif
 
 namespace YAML {
 
@@ -48,9 +54,15 @@ namespace Config {
 
 typedef Util::StableStrings OptPath;
 
+
 template <class Key, class Val>
 inline void addKeyVal(ConfigNode& node, Key const& key, Val const& val) {
+#if SDL_HAVE_AT_LEAST_YAML_CPP_0_5
   node.force_insert(key, val);
+#else
+  // O(n) - awful
+  node[key] = val;
+#endif
 }
 
 /**
