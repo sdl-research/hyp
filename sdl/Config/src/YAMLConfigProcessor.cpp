@@ -9,10 +9,9 @@
 
    impl by skohli; amendment to immutable (return modified value) for
    yaml-& * ref safety by jgraehl
-*/
 
-#undef NDEBUG
-// temporarily, while debugging
+   XXX: Node const& might have mutable state somehow; Node (value copy) might be a shallow copy which could help
+*/
 
 #include <sdl/Config/YAMLConfigProcessor.hpp>
 #include <sdl/Path.hpp>
@@ -178,6 +177,7 @@ ConfigNode copyToTree(ConfigNode const& in) {
   return copy(in, true);
 }
 
+/// deep copy
 ConfigNode clone(ConfigNode const& in) {
 #if SDL_HAVE_AT_LEAST_YAML_CPP_0_5
   return Clone(in);
@@ -412,6 +412,23 @@ ConfigNode YAMLConfigProcessor::mergeNodes(ConfigNode const& base, ConfigNode co
 }
 
 typedef std::vector<ConfigNode> BasisNodes;
+/// we would just directly iterate over children but yaml-cpp hides a bug for us in gcc 4.9 c++11 -O3
+
+/// odd: ConfigNode const& seq => undefined node. copy => child same as parent
+inline void childNodes(ConfigNode seq, BasisNodes &children) {
+  assert(seq.IsSequence());
+  assert(!seq.IsMap());
+  children.resize(seq.size());
+  unsigned o = 0;
+  for(YAML::const_iterator i = seq.begin(), e = seq.end(); i != e; ++i)
+    children[o++] = static_cast<YAML::Node const&>(*i);
+  for(BasisNodes::const_iterator i = children.begin(), e = children.end(); i != e; ++i) {
+    if (i->is(seq))
+      SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+                    "sequence child is same as parent: '" << *i << "' with parent '" << seq << "'.");
+  }
+}
+
 inline void addBasisElement(BasisNodes& basisNodes, ConfigNode const& inBasis,
                             boost::filesystem::path const& fsPrefix, YAMLConfigProcessor const& proc) {
   OptPath const& optPath = proc.optPath();
@@ -422,7 +439,7 @@ inline void addBasisElement(BasisNodes& basisNodes, ConfigNode const& inBasis,
     SDL_INFO(Configure.YAMLConfigProcessor, "File: " << proc.getFilePath()
                                                      << "- Loading basis file: " << fsBasis.string());
     try {
-      ConfigNode loaded = loadConfig(fsBasis, optPath);
+      ConfigNode loaded = loadConfig(fsBasis, proc.optPath());
       // TODO: memoize e.g. multi-regextokenizer-in-one-file
       basisNodes.push_back(loaded);
     } catch (ConfigException& e) {
@@ -463,20 +480,24 @@ ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in,
   else {
     ConfigNode const& inBasis = childNotParent(in[kBasis], in);
     using namespace YAML;
+    //if (!inBasis.IsDefined()) return in;
     NodeType::value btype = inBasis.Type();
     if (btype == NodeType::Null || btype == NodeType::Undefined) {
-      SDL_DEBUG(Configure.expandBasis,
-                "basis: val should be a scalar (filename), sequence (of filename or map), or map; got '"
-                << inBasis << "' so ignoring.");
       return in;
     } else {
       BasisNodes basisNodes;
       std::string const& filePath = filePath_.string();
-      if (inBasis.IsSequence())
-        for (YAML::const_iterator i = inBasis.begin(), e = inBasis.end(); i != e; ++i)
-          addBasisElement(basisNodes, childNotParent(*i, inBasis), fsPrefix, *this);
-      else {
-        assert(btype == NodeType::Map);
+      if (btype == NodeType::Sequence) {
+        assert(inBasis.IsDefined());
+        assert(inBasis.IsSequence());
+        BasisNodes children;
+        childNodes(inBasis, children);
+        //        for (YAML::const_iterator i = inBasis.begin(), e = inBasis.end(); i != e; ++i)
+        /// we would just directly iterate over children but yaml-cpp hides a bug for us in gcc 4.9 c++11 -O3
+        for(BasisNodes::const_iterator i = children.begin(), e = children.end(); i != e; ++i)
+          addBasisElement(basisNodes, *i, fsPrefix, *this);
+      } else {
+        assert(btype == NodeType::Map || btype == NodeType::Scalar);
         addBasisElement(basisNodes, inBasis, fsPrefix, *this);
       }
 
