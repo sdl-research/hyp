@@ -26,7 +26,6 @@
 
 #include <sdl/Util/Math.hpp>
 #include <sdl/Util/Forall.hpp>
-#include <sdl/Util/AddMaps.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/LogMath.hpp>
 #include <sdl/Util/Constants.hpp>
@@ -168,6 +167,10 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
     if (!pMap_)
       return staticEmptyMap;
     return *pMap_;
+  }
+
+  Map const* maybeFeatures() const {
+    return pMap_.get();
   }
 
   /**
@@ -344,6 +347,11 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
     timesFeaturesBy(b);
   }
 
+  void divideBy(FeatureWeightTpl<FloatT, MapT, TakeMin> const& b) {
+    this->value_ -= b.value_;
+    divideFeaturesBy(b);
+  }
+
 
   /**
      Adds another weight to this weight (using semiring
@@ -373,6 +381,10 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
     timesBy(b);
   }
 
+  // Feature map may be shared with other FeatureWeightTpl
+  // objects. Using copy-on-write semantics.
+  shared_ptr<Map> pMap_;
+
  private:
 
   /**
@@ -383,7 +395,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
     if (b.empty()) {
     } else if (empty()) {
       pMap_ = b.pMap_;
-    } else if (pMap_ == b.pMap_) { // unlikely in the wild
+    } else if (pMap_ == b.pMap_) {
       ownMap();
       for (iterator i = pMap_->begin(), end = pMap_->end(); i != end; ++i)
         i->second *= 2;
@@ -391,6 +403,15 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
       Map& map = featuresWrite();
       for (const_iterator i = b.pMap_->begin(), end = b.pMap_->end();  i != end; ++i)
         map[i->first] += i->second;
+    }
+  }
+
+  void divideFeaturesBy(FeatureWeightTpl<FloatT, MapT, TakeMin> const& b) {
+    MapT const* map2 = b.pMap_.get();
+    if (map2) {
+      MapT &out = featuresWrite();
+      for(typename MapT::const_iterator i = map2->begin(), e = map2->end(); i != e; ++i)
+        out[i->first] -= i->second;
     }
   }
 
@@ -418,9 +439,6 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
 
   static Map const staticEmptyMap;
 
-  // Feature map may be shared with other FeatureWeightTpl
-  // objects. Using copy-on-write semantics.
-  shared_ptr<Map> pMap_;
 
 }; // end class
 
@@ -466,12 +484,8 @@ FeatureWeightTpl<FloatT, MapT, TakeMin> divide(
     FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
   typedef FeatureWeightTpl<FloatT, MapT, TakeMin> FeatW;
   typedef typename MapT::mapped_type FeatValueT;
-  FeatW result(w1.getValue() - w2.getValue());
-  if (w2.empty())
-    result.setFeatures(w1.featuresPtr());
-  else
-    addMaps(w1.features(), w2.features(),
-            Util::NeglogDivideFct<FeatValueT>(), &result.featuresWrite());
+  FeatW result(w1);
+  result.divideBy(w2);
   return result;
 }
 

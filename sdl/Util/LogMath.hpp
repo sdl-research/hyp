@@ -112,6 +112,13 @@ template <class FloatT>
 struct NeglogPlusFct {
   typedef FloatT result_type;
   typedef FloatT increment_type;
+  template <class Map>
+  inline void addToMap(Map &map, typename Map::key_type const& key, FloatT value) const {
+    std::pair<typename Map::iterator, bool> iNew = map.insert(typename Map::value_type(key, value));
+    if (iNew.second) return;
+    (*this)(value, iNew.first->second);
+  }
+
   inline FloatT operator()(const FloatT& a, const FloatT& b) const {
     if (a == std::numeric_limits<FloatT>::infinity()) {
       return b;

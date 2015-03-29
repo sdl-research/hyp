@@ -8,6 +8,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>  // crucial
+#include <sdl/Util/Move.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -24,17 +25,15 @@ template <class FloatT, class MapT, class SumT>
 void parseWeightString(std::string const& str, FeatureWeightTpl<FloatT, MapT, SumT>* weight) {
   namespace qi = boost::spirit::qi;
   std::pair<FloatT, boost::optional<std::map<typename MapT::key_type, FloatT> > > weightProxy;
-  bool ok = qi::phrase_parse(str.begin(), str.end(),
+  bool const ok = qi::phrase_parse(str.begin(), str.end(),
                              // val[key=val, key=val, ...] where the map part is optional:
                              qi::double_ >> ('[' >> ((qi::int_ >> '=' >> qi::double_) % ',') >> ']') | qi::eps,
                              qi::space, weightProxy);
-  if (!ok) {
-    SDL_THROW_LOG(Hypergraph.FeatureWeightTpl, std::runtime_error, "Could not parse '" << str << "'");
-  }
+  if (!ok)
+    SDL_THROW_LOG(Hypergraph.FeatureWeightTpl, InvalidInputException, "Could not parse '" << str << "'");
   weight->setValue(weightProxy.first);
-  if (weightProxy.second.is_initialized()) {  // it's optional, so it might not be there
-    weight->featuresWrite().swap(*weightProxy.second);
-  }
+  if (weightProxy.second.is_initialized())
+    Util::moveAssign(weight->featuresWrite(), *weightProxy.second);
 }
 
 

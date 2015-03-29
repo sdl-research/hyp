@@ -91,7 +91,6 @@
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/LogHelper.hpp>
 
-#include <sdl/Util/AddMaps.hpp>
 #include <sdl/Util/MultipliedMap.hpp>
 #include <sdl/Util/LogMath.hpp>
 
@@ -110,43 +109,46 @@ typedef FeatureWeightTpl<FeatureValue, Features, Expectation> ExpectationWeight;
    Adds another weight to this weight (using semiring
    plus). This is the version for Expectation policy.
 */
-template<class FloatT, class MapT, class SumPolicy>
-void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(
-    FeatureWeightTpl<FloatT, MapT, Expectation> const& b)
-{
+template <class FloatT, class MapT, class SumPolicy>
+void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(FeatureWeightTpl<FloatT, MapT, Expectation> const& b) {
   checkSumPolicy<Expectation>();
   if (b.isZero()) {
     // adding zero to this means do nothing. the expectations must all be zero too.
   } else if (isZero()) {
     *this = b;
   } else if (&b == this) {
-    //initially, I thought the pmap equal by pointer case would handle this, but
-    //i was wrong. ownMap() only copies if pointer wasn't unique. but the
-    //pointer will be unique if the objects are identical.
+    // initially, I thought the pmap equal by pointer case would handle this, but
+    // i was wrong. ownMap() only copies if pointer wasn't unique. but the
+    // pointer will be unique if the objects are identical.
     const FloatT neglog2 = -std::log((FloatT)2);
     this->value_ += neglog2;
     if (pMap_) {
       ownMap();
-      for (iterator i = pMap_->begin(), e = pMap_->end(); i!=e; ++i)
-        i->second += neglog2; // in prob space, we're adding p1+p2
+      for (iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
+        i->second += neglog2;  // in prob space, we're adding p1+p2
     }
   } else {
     Util::NeglogPlusFct<FloatT> neglogplus;
     neglogplus(b.value_, this->value_);
-    assert (!isZero()); // adding two nonzero things can never give a zero result
-    if (pMap_==b.pMap_) { // maps equal by pointer. doesn't imply probabilities are the same too
+    assert(!isZero());  // adding two nonzero things can never give a zero result
+    if (pMap_ == b.pMap_) {  // maps equal by pointer. doesn't imply probabilities are the same too
       if (pMap_) {
         ownMap();
         const FloatT neglog2 = -std::log((FloatT)2);
-        for (iterator i = pMap_->begin(), e = pMap_->end(); i!=e; ++i)
-          i->second += neglog2; // in prob space, we're adding p1+p2
-        //by multiplying by 2 (since the maps are the same, the joint probs are all the same)
+        for (iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
+          i->second += neglog2;  // in prob space, we're adding p1+p2
+        // by multiplying by 2 (since the maps are the same, the joint probs are all the same)
       }
     } else {
       // add (joint) expectations:
       if (!b.empty()) {
         ownMap();
-        plusByMap(*b.pMap_, neglogplus, pMap_.get());
+        MapT& thismap = *pMap_;
+        MapT *bmap = b.pMap_.get();
+        assert(&thismap != bmap);
+        if (bmap)
+          for (typename MapT::const_iterator i = bmap->begin(), e = bmap->end(); i != e; ++i)
+            neglogplus.addToMap(thismap, i->first, i->second);
       }
     }
   }
@@ -156,10 +158,8 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(
    Multiplies this weight by another weight (using semiring
    times). This is the version for Expectation policy.
 */
-template<class FloatT, class MapT, class SumPolicy>
-void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(
-    FeatureWeightTpl<FloatT, MapT, Expectation> const& b)
-{
+template <class FloatT, class MapT, class SumPolicy>
+void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(FeatureWeightTpl<FloatT, MapT, Expectation> const& b) {
   checkSumPolicy<Expectation>();
   if (isZero()) {
   } else if (b.isZero()) {
@@ -170,37 +170,41 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(
   } else {
     FloatT const aval = this->value_;
     FloatT const bval = b.value_;
+    this->value_ = aval + bval;  // pa' = pa*pb
     Util::NeglogPlusFct<FloatT> neglogplus;
-    if (pMap_ == b.pMap_) { // special (rare) case to avoid modifying map while reading from it
-      ownMap(); // note: this must occur after the test above
-      // fC[i] = logplus(costB + fC[i], costC + fC[i]) = logplus(costB, costC) + fC[i]
-      FloatT const aplusbval = neglogplus(aval, bval); // we're setting (in prob space) v'=v*(pa+pb)
-      for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i!=e; ++i)
-        i->second += aplusbval; // *=(pa+pb)
+    if (pMap_ == b.pMap_) {  // special (rare) case to avoid modifying map while reading from it
+      ownMap();  // note: this must occur after the test above
+      // fC[i] <= logplus(costB + fC[i], costC + fB[i]) = logplus(costB, costC) + fC[i]
+      FloatT const aplusbval = neglogplus(aval, bval);  // we're setting (in prob space) v'=v*(pa+pb)
+      SDL_DEBUG_ALWAYS(Hypergraph.ExpectationWeight, "same map for a*b; result[i] = a[i] + neglogplus("
+                                                     << aval << ", " << bval << ") = " << aplusbval);
+      for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
+        i->second += aplusbval;  // *=(pa+pb)
     } else {
+      assert(this != &b);
       ownMap();
       // fC[i] = logplus(costB + fC[i], costC + fB[i])
       // multiply A expectations by probB
-      for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i!=e; ++i)
+      for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
         i->second += bval;
       // then add (B expectations multiplied by probA).
       if (!b.empty()) {
-        typedef Util::NeglogTimesFct<FloatT> NTFctT;
-        typedef Util::MultipliedMap<MapT, NTFctT> MyMultipliedMap;
-        plusByMap(MyMultipliedMap(*b.pMap_, NTFctT(), aval), neglogplus, pMap_.get()); // + v2_times_p1
+        MapT& thismap = *pMap_;
+        MapT const* bmap = b.pMap_.get();
+        assert(&thismap != bmap);
+        if (bmap)
+          for (typename MapT::const_iterator i = bmap->begin(), e = bmap->end(); i != e; ++i)
+            neglogplus.addToMap(thismap, i->first, i->second + aval);
       }
     }
-    this->value_ = aval + bval; // pa' = pa*pb
-    assert(!isZero()); // we shouldn't ever underflow by adding two non-zero probs in logspace
+    assert(!isZero());  // we shouldn't ever underflow by adding two non-zero probs in logspace
   }
 }
 
 
-template<class FloatT, class MapT>
-inline
-FeatureWeightTpl<FloatT, MapT, Expectation> plus(
-    FeatureWeightTpl<FloatT, MapT, Expectation> const& w1,
-    FeatureWeightTpl<FloatT, MapT, Expectation> const& w2) {
+template <class FloatT, class MapT>
+inline FeatureWeightTpl<FloatT, MapT, Expectation> plus(FeatureWeightTpl<FloatT, MapT, Expectation> const& w1,
+                                                        FeatureWeightTpl<FloatT, MapT, Expectation> const& w2) {
   FeatureWeightTpl<FloatT, MapT, Expectation> w3(w1, true);
   w3.plusBy(w2);
   return w3;
@@ -208,11 +212,9 @@ FeatureWeightTpl<FloatT, MapT, Expectation> plus(
 
 
 /// result has p=w1.p*w2.p and feats=w1.p*w2.feats+w2.p*w1.feats
-template<class FloatT, class MapT>
-inline
-FeatureWeightTpl<FloatT, MapT, Expectation> times(
-    FeatureWeightTpl<FloatT, MapT, Expectation> const& w1,
-    FeatureWeightTpl<FloatT, MapT, Expectation> const& w2) {
+template <class FloatT, class MapT>
+inline FeatureWeightTpl<FloatT, MapT, Expectation> times(FeatureWeightTpl<FloatT, MapT, Expectation> const& w1,
+                                                         FeatureWeightTpl<FloatT, MapT, Expectation> const& w2) {
   FeatureWeightTpl<FloatT, MapT, Expectation> w3(w1, true);
   w3.timesBy(w2);
   return w3;

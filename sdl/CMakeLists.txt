@@ -515,6 +515,7 @@ if(UNIX)
   if (NOT USING_CLANG)
     set(SDL_TESTED_RELEASE_OPTIMIZATIONS "${SDL_TESTED_RELEASE_OPTIMIZATIONS} ${SDL_NO_CLANG_OPTIMIZATIONS}")
     if (SDL_HAVE_GCC_4_8)
+      set(SDL_O3 "-O")
       # -fcx-limited-range controls the default setting of the ISO C99
       # -CX_LIMITED_RANGE pragma. Nevertheless, the option applies to all
       # -languages., enabled by full -ffast-math
