@@ -62,10 +62,18 @@ struct MutableHypergraphLabels {
   LabelPairState lstate;  // for kCanonicalLex
 
   IVocabularyPtr pVocab_;
+  StateId numStates_;
 
   LabelForState iLabelForState;
   LabelForState oLabelForState;
   mutable Properties properties_;  // mutable because some are computed as needed
+
+  void clearLabelImpl(Properties prop) {
+    lstate.clear();
+    iLabelForState.clear();
+    oLabelForState.clear();
+    properties_ = prop | kFsmProperties;
+  }
 
   /**
      sets the input label (and if outputLabelFollowsInput(sid), the output label as well)
@@ -172,6 +180,25 @@ typedef std::vector<StateId> InterestedStates;
 
 template <class A>
 struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabels {
+  StateIdInterval possiblyInputTerminalLabeledStatesImpl() const {
+    return StateIdInterval(properties_ & kSortedStates ? this->sortedStatesNumNotTerminal_ : 0,
+                           iLabelForState.size());
+  }
+
+  StateIdInterval possiblyInputTerminalLabeledStates() const OVERRIDE {
+    return possiblyInputTerminalLabeledStatesImpl();
+  }
+
+  // TODO: could do truth-maintenance on this like the kFsmProperties or watching
+  // modification of our private iLabelForState
+  WhichFstComposeSpecials whichInputFstComposeSpecials() const OVERRIDE {
+    WhichFstComposeSpecials r;
+    for (StateIdInterval states(possiblyInputTerminalLabeledStatesImpl()); states.first < states.second;
+         ++states.first)
+      r.check(inputLabel(states.first));
+    return r;
+  }
+
   typedef A Arc;
   typedef IMutableHypergraph<A> MutableBase;
   typedef typename MutableBase::ArcsContainer ArcsContainer;
@@ -680,7 +707,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   void clearArcsPer(StateId N) {
-    resetArcs(inArcsPerState_, properties_& kStoreInArcs ? N : 0);
+    resetArcs(inArcsPerState_, properties_ & kStoreInArcs ? N : 0);
     resetArcs(outArcsPerState_, storesAnyOutArcs() ? N : 0);
   }
 
@@ -702,19 +729,26 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
  protected:
   void init(Properties props) {
-    assert(!(kDefaultProperties & ~props));
     this->typename_ = "sdl::MutableHypergraph";
-    fsmChecked = true;
+    properties_ = props | kFsmProperties;
+    clearStates();
+    if (!storesArcs())
+      SDL_THROW_LOG(Hypergraph, ConfigException,
+                    "Hypergraph can't store arcs - user properties didn't specify in-arcs, out-arcs, or "
+                    "first-tail-out-arcs");
+  }
+
+  void clearStates() {
     numStates_ = 0;
     this->start_ = Hypergraph::kNoState;
     this->final_ = Hypergraph::kNoState;
-    properties_ = props;
+    fsmChecked = true;
   }
 
  public:
   typedef MutableHypergraph Self;
   // improved: default props get set no matter what you pass in.
-  MutableHypergraph(Properties props = kDefaultStoreArcsPerState) { init(props | kDefaultProperties); }
+  MutableHypergraph(Properties props = kDefaultStoreArcsPerState) { init(props); }
 
   IMutableHypergraph<Arc>* clone() const OVERRIDE {
     MutableHypergraph* pHg = new MutableHypergraph<A>(properties_);
@@ -738,14 +772,10 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   StateId size() const OVERRIDE { return numStates_; }
 
   void clearImpl(Properties prop) OVERRIDE {
-    this->final_ = this->start_ = Hypergraph::kNoState;
     this->deleteArcs();
     clearArcsPer(numStates_);
-    iLabelForState.clear();
-    oLabelForState.clear();
-    numStates_ = 0;
-    properties_ = prop | kFsmProperties;
-    fsmChecked = true;
+    clearLabelImpl(prop);
+    clearStates();
   }
 
   ArcId numInArcs(StateId state) const OVERRIDE {
@@ -823,13 +853,9 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     assert(inInterestedStates_.count() == 0);
   }
 
-  void prepareAddArcsSize(StateId size) OVERRIDE {
-    resizeArcsForStates(size);
-  }
+  void prepareAddArcsSize(StateId size) OVERRIDE { resizeArcsForStates(size); }
 
-  void prepareAddArcs() OVERRIDE {
-    resizeArcsForStates(this->sizeForHeads());
-  }
+  void prepareAddArcs() OVERRIDE { resizeArcsForStates(this->sizeForHeads()); }
 
   bool firstTailOnly() const OVERRIDE {
     return (properties_ & kStoreFirstTailOutArcs) && !(properties_ & kStoreInArcs);
@@ -864,7 +890,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   void addStateIdImpl(StateId state) {
     if (state >= numStates_) {
       numStates_ = state + 1;
-      //resizeArcsForStates();
+      // resizeArcsForStates();
     }
   }
 
@@ -876,7 +902,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   void removeLastState() OVERRIDE {
     --numStates_;
-    //resizeArcsForStates();
+    // resizeArcsForStates();
   }
 
   StateId addState() OVERRIDE {
@@ -887,8 +913,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   /// If kCanonicalLex, returns known StateId for Sym, if available.
   StateId addState(Sym input) OVERRIDE {
-    if (!(properties_ & kCanonicalLex) || !input.isTerminal())
-      return addStateImpl(input);
+    if (!(properties_ & kCanonicalLex) || !input.isTerminal()) return addStateImpl(input);
     StateId* s;
     if (Util::update(lstate, LabelPair(input, NoSymbol), s))
       return (*s = addStateImpl(input));
@@ -903,9 +928,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return state;
   }
 
-  StateId addState(LabelPair const& io) {
-    return addState(input(io), output(io));
-  }
+  StateId addState(LabelPair const& io) { return addState(input(io), output(io)); }
 
   /// If kCanonicalLex is set, returns known StateId for Sym, if
   /// available.  Call only for axioms (terminal labels).
@@ -1286,13 +1309,10 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return state < inArcsPerState_.size() ? &inArcsPerState_[state] : 0;
   }
 
-  void setVocabulary(IVocabularyPtr const& pVocab) OVERRIDE {
-    pVocab_ = pVocab;
-  }
+  void setVocabulary(IVocabularyPtr const& pVocab) OVERRIDE { pVocab_ = pVocab; }
 
   IVocabularyPtr getVocabulary() const OVERRIDE { return pVocab_; }
 
-  StateId numStates_;
 
   // The in and out arcs are not in a separate State class because
   // then every state would have such vectors of in and out

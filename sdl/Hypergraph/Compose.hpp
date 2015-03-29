@@ -305,10 +305,10 @@ class EarleyParser {
     if (item->agendaWeight == Weight::zero()) {
       item->agendaWeight = agendaWeight;
       agenda_.push(item);
-      SDL_DEBUG(Hypergraph.Compose, "Pushing new item " << dbgItem(item, *this));
+      SDL_TRACE(Hypergraph.Compose, "Pushing new item " << dbgItem(item, *this));
     } else {
       plusBy(agendaWeight, item->agendaWeight);
-      SDL_DEBUG(Hypergraph.Compose, "Updated " << dbgItem(item, *this) << " to " << item->agendaWeight);
+      SDL_TRACE(Hypergraph.Compose, "Updated " << dbgItem(item, *this) << " to " << item->agendaWeight);
     }
   }
 
@@ -326,7 +326,7 @@ class EarleyParser {
   }
 
   void predict(Item* item) {
-    SDL_DEBUG(Hypergraph.Compose, "predict from " << dbgItem(item, *this));
+    SDL_TRACE(Hypergraph.Compose, "predict from " << dbgItem(item, *this));
     StateId sid = item->arc->getTail(item->dotPos);
 
     if (sid == cfg_.start()) {
@@ -404,7 +404,7 @@ class EarleyParser {
      Attempts to match a label at the current FST state.
   */
   void scan(Item* item) {
-    SDL_DEBUG(Hypergraph.Compose, "scan from " << dbgItem(item, *this));
+    SDL_TRACE(Hypergraph.Compose, "scan from " << dbgItem(item, *this));
     Sym searchLabel = cfg_.outputLabel(item->arc->getTail(item->dotPos));
     if (searchLabel == EPSILON::ID) {  // the CFG has an eps
       Item* newItem = createItem(item->from, item->to, item->arc, item->dotPos + 1);
@@ -491,7 +491,7 @@ class EarleyParser {
      incomplete one i..j.
   */
   void complete(Item* item) {
-    SDL_DEBUG(Hypergraph.Compose, "complete item " << dbgItem(item, *this));
+    SDL_TRACE(Hypergraph.Compose, "complete item " << dbgItem(item, *this));
     if (itemsTo_.size() > item->from) {
       StateId head = item->arc->head();
       forall (Item* oldItem, itemsTo_[item->from][head]) {
@@ -645,10 +645,10 @@ class EarleyParser {
      final items.
   */
   void createResultCfg() {
-    SDL_DEBUG(Hypergraph.Compose, "createResultCfg");
+    SDL_TRACE(Hypergraph.Compose, "createResultCfg");
     ItemAndMatchedArcsSet alreadyExpanded;
     forall (Item* item, finalItems_) {
-      SDL_DEBUG(Hypergraph.Compose, "Final item: " << dbgItem(item, *this));
+      SDL_TRACE(Hypergraph.Compose, "Final item: " << dbgItem(item, *this));
       StateId head = getResultCfgState(item->arc->head(), item->from, item->to);
       result_->setFinal(head);
       createResultArcs(item, head, &alreadyExpanded);
@@ -679,7 +679,7 @@ class EarleyParser {
 
   void buildChart() {
     using namespace Util;
-    SDL_DEBUG(Hypergraph.Compose, "buildChart");
+    SDL_TRACE(Hypergraph.Compose, "buildChart");
     init();
     while (!agenda_.empty()) {
       Item* item = agenda_.top();
@@ -817,14 +817,14 @@ template <class Arc>
 void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs, StateId head,
                                           ArcVecPerDotPosPtr matchedArcs, const StateIdContainer& tails,
                                           Weight w, ItemAndMatchedArcsSet* alreadyExpanded) {
-  SDL_DEBUG(Hypergraph.Compose, "createResultArcs1 for "
+  SDL_TRACE(Hypergraph.Compose, "createResultArcs1 for "
                                 << dbgItem(itemAndMatchedArcs->item, *this) << ", head=" << head
                                 << ", tails=" << Util::makePrintable(tails)
                                 << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
   using namespace Util;
   typename ItemAndMatchedArcsSet::const_iterator foundItem = alreadyExpanded->find(itemAndMatchedArcs);
   if (foundItem != alreadyExpanded->end()) {
-    SDL_DEBUG(Hypergraph.Compose, "Ignore: arc already created");
+    SDL_TRACE(Hypergraph.Compose, "Ignore: arc already created");
     delete itemAndMatchedArcs;
     return;
   }
@@ -836,7 +836,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
   if (found != backPointers_.end()) {
     forall (BackPointer bp, backPointers_[item]) {
       if (Util::isDebugBuild()) {
-        SDL_DEBUG(Hypergraph.Compose, "Found backpointers:\n " << dbgItem(bp.first, *this) << "\n "
+        SDL_TRACE(Hypergraph.Compose, "Found backpointers:\n " << dbgItem(bp.first, *this) << "\n "
                                                                << dbgItem(bp.second, *this));
       }
       Item* complete = bp.second;

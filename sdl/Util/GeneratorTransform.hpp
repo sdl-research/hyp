@@ -24,7 +24,8 @@ struct TransformedGenerator
   typedef Tag GeneratorTag;
   typedef void NonPeekable;
   TransformedGenerator() {}
-  TransformedGenerator(Gen const& gen, Trans const& t = Trans()) : Gen(gen), Trans(t) {}
+  //TransformedGenerator(TransformedGenerator const& gen) : Gen(gen), Trans(gen) {}
+  explicit TransformedGenerator(Gen const& gen, Trans const& t = Trans()) : Gen(gen), Trans(t) {}
   operator bool() const
   {
     return (bool)(Gen const&)*this;
@@ -51,7 +52,8 @@ struct TransformedGenerator<Gen, Trans, Result, PeekableT>
   typedef PeekableT GeneratorTag;
   typedef void Peekable;
   TransformedGenerator() {}
-  TransformedGenerator(Gen const& gen, Trans const& t = Trans()) : Gen(gen), Trans(t) {}
+  //TransformedGenerator(TransformedGenerator const& gen) : Gen(gen), Trans(gen) {}
+  explicit TransformedGenerator(Gen const& gen, Trans const& t = Trans()) : Gen(gen), Trans(t) {}
   Result operator()() {
     return Trans::operator()(Gen::operator()());
   }

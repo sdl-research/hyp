@@ -33,12 +33,12 @@ std::string const& IVocabulary::str(Sym sym) const {
 }
 
 Sym IVocabulary::sym(std::string const& symbol, SymbolType symType) const {
-  if (Sym::isSpecialType(symType)) return specialSymbols().sym(symbol, symType);
+  if (symType == kSpecialTerminal) return specialSymbols().sym(symbol);
   return symImpl(symbol, symType);
 }
 
 unsigned IVocabulary::getNumSymbols(SymbolType symType) const {
-  if (Sym::isSpecialType(symType)) return specialSymbols().getNumSymbols(symType);
+  if (symType == kSpecialTerminal) return specialSymbols().getNumSymbols();
   return doGetNumSymbols(symType);
 }
 
@@ -52,7 +52,7 @@ bool IVocabulary::containsSym(Sym sym) const {
 }
 
 bool IVocabulary::contains(std::string const& symbol, SymbolType symType) const {
-  if (Sym::isSpecialType(symType)) return specialSymbols().contains(symbol, symType);
+  if (symType == kSpecialTerminal) return specialSymbols().contains(symbol);
   return containsImpl(symbol, symType);
 }
 

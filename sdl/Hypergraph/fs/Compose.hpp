@@ -18,7 +18,7 @@
     arc input labels i1 and i2; output labels o1 and o2 for the arcs i1:o1 from M1 and i2:o2 from M2
 
     the composition is modified by a Filter type which affects the order in which <eps> i2 and o1 are taken,
-   so as not to introduce multiple derivations that are essentially the same
+    so as not to introduce multiple derivations that are essentially the same
 
     the derivations in the composition take input yields I1 and output yields O2
     from paths in M1 and 2 resp. that have matching inner yields O1==I2 (after
@@ -116,6 +116,54 @@ namespace sdl {
 namespace Hypergraph {
 namespace fs {
 
+
+struct FstComposeOptions : SaveFstOptions {
+  FstComposeOptions()
+      : fstCompose(true)
+      , allowDuplicatePaths(false)
+      , sortBestFirst(false)
+      , epsilonMatchingFilter(true)
+      , allowDuplicatePathsIf1Best(false) {}
+
+  template <class Arc>
+  bool willLazyFsCompose(Hypergraph::IHypergraph<Arc> const& hg) const {
+    return fstCompose && hg.isFsm();
+  }
+
+  template <class Config>
+  void configure(Config& config) {
+    SaveFstOptions::configure(config);
+    config("fst-compose", &fstCompose)
+        .self_init()("true: optimized fst1*fst2 compose (false: cfg*fst, which is slower)");
+    config("sort-best-first", &sortBestFirst).self_init()(
+        "for fst-compose, attempt to sort out-arcs best-first (ignored for non-mutable hypergraphs)");
+    config("epsilon-matching-paths", &epsilonMatchingFilter).self_init()(
+        "use a three-valued filter state that prefers matching input x:<eps> match <eps>:y directly into "
+        "x:y. this result may be larger or smaller. (TODO: seems buggy - ate some paths in testing)");
+    config("allow-duplicate-paths", &allowDuplicatePaths).self_init()(
+        "for viterbi-like (idempotent plus - i.e. plus(x, x) = x) semirings, allow repeated equivalent "
+        "paths involving epsilons. this will result in n-best duplicates, but otherwise may be faster");
+    config("allow-duplicate-paths-if-1best", &allowDuplicatePathsIf1Best).self_init()(
+        "allow-duplicate-paths only if prune-to-nbest=1 (because the downside of allow-duplicate-paths is "
+        "extra paths)");
+    config("mix-fst", &mix)(
+        "a MixFeature for scaling the fst1 arc weight into the fst2 arc weight (and assigning feature id if "
+        "fst1 is FeatureWeight). if fst1 and fst2 are both FHG, then you have fst1*(fst^scale) - the "
+        "features of both");
+  }
+
+  MixFeature<> mix;
+  bool fstCompose;
+  bool allowDuplicatePaths, allowDuplicatePathsIf1Best;
+  bool sortBestFirst;
+  bool epsilonMatchingFilter;
+  bool allowDuplicatesEffective() const {
+    return allowDuplicatePaths || allowDuplicatePathsIf1Best && pruneToNbest == 1;
+  }
+};
+
+using Vocabulary::WhichFstComposeSpecials;
+
 /**
    \return symbol doesn't consume input.
 */
@@ -158,6 +206,7 @@ struct FilterBase {
    (see
    http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en/us/pubs/archive/37568.pdf)
 
+   we treat nonconsuming 'else' (<phi>) as epsilon.
 */
 struct NoEpsilonFilter : FilterBase {
   bool allowInputEpsilon() const { return true; }
@@ -213,10 +262,14 @@ struct Epsilon1First : FilterBase {
    unbalanced/unbounded input/output epsilons aren't common, this could produce
    a smaller output.
 
+   q3' is:
+
    0 if (o[e1], i[e2]) = (x, x) with x terminal,
-   0 if (o[e1], i[e2]) = (<eps>, <eps>) and q3 = 0,
-   1 if (o[e1], i[e2]) = (, <eps>) and q3 = 2,
-   2 if (o[e1], i[e2]) = (<eps>, ) and q3 = 1,
+   0 if (o[e1], i[e2]) = (<eps>, <eps>) and q3 = 0, 'InputMatchEpsilon'
+   1 if (o[e1], i[e2]) = (, <eps>) and q3 != 2, 'MatchEpsilon'
+   2 if (o[e1], i[e2]) = (<eps>, ) and q3 != 1, 'InputEpsilon'
+
+   (0,1,2 are all final)
 
 */
 struct EpsilonCombine : Epsilon1First {
@@ -225,8 +278,10 @@ struct EpsilonCombine : Epsilon1First {
   bool allowMatchEpsilon() const { return s != 2; }
   void matchEpsilon() { s = 1; }
   bool allowInputMatchEpsilon() const { return s == 0; }
-  void inputMatchEpsilon() {}  // s = 0
-  void hashCombine(std::size_t& h) const { h ^= (h >> (s + 1)); }
+  void inputMatchEpsilon() {
+    assert(s == 0);  // because we only go from 0 to 0 for input+match epsilon.
+  }
+  void hashCombine(std::size_t& h) const { h ^= (h >> (s + 1)) + s; }
   friend inline std::ostream& operator<<(std::ostream& out, EpsilonCombine const& self) {
     out << (self.s == 2 ? '#' : self.s ? '^' : '_');
     return out;
@@ -291,13 +346,21 @@ struct HypergraphMatchFst : HypergraphFst<ArcT> {
   /**
      must have kSortedOutArcs already.
   */
-  HypergraphMatchFst(shared_ptr<Hg const> const& pHg) { init(pHg); }
+  HypergraphMatchFst(shared_ptr<Hg const> const& hg,
+                     WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
+    init(hg, which);
+  }
 
   /**
      sorts for you if needed.
   */
-  HypergraphMatchFst(Hg const& hg) { init(hg); }
-  HypergraphMatchFst(shared_ptr<Hg> const& pHg) { init(pHg); }
+  HypergraphMatchFst(shared_ptr<Hg> const& hg,
+                     WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
+    init(hg, which);
+  }
+  HypergraphMatchFst(Hg const& hg, WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
+    init(hg, which);
+  }
 
   /**
      arcs matching input. must call explicitly for epsilon, rho, etc.
@@ -307,19 +370,27 @@ struct HypergraphMatchFst : HypergraphFst<ArcT> {
     return Matches(hg().outArcsMatchingInput(sid, in), this->arcFn);
   }
 
+  WhichFstComposeSpecials whichSpecials;
+
  protected:
-  void init(shared_ptr<Hg> const& pHg) {
+  template <class Hg>
+  void initSpecials(Hg const& hg, WhichFstComposeSpecials which) {
+    whichSpecials = which.defined() ? which : hg.whichInputFstComposeSpecials();
+  }
+  void init(shared_ptr<Hg> const& pHg, WhichFstComposeSpecials which) {
     pHg->forceProperties(kSortedOutArcs);
+    initSpecials(*pHg, which);
     Base::init(boost::static_pointer_cast<Hg const>(pHg));
   }
-  void init(shared_ptr<ConstHg const> const& pHg) {
+  void init(shared_ptr<ConstHg const> const& pHg, WhichFstComposeSpecials which) {
     if (!(pHg->properties() & kSortedOutArcs))
       SDL_THROW_LOG(fs.Compose, ConfigException, "match hypergraph must have sorted out arcs");
+    initSpecials(*pHg, which);
     this->needMutable(*pHg);
     Base::init(pHg);
   }
-  void init(ConstHg const& hg) { init(ptrNoDelete(hg)); }
-  void init(Hg& hg) { init(ptrNoDelete(hg)); }
+  void init(ConstHg const& hg, WhichFstComposeSpecials which) { init(ptrNoDelete(hg), which); }
+  void init(Hg& hg, WhichFstComposeSpecials which) { init(ptrNoDelete(hg), which); }
 };
 
 /**
@@ -359,41 +430,6 @@ struct TimesByMix<FeatureWeight, FeatureWeight, typename FeatureWeight::IsFeatur
     timesBy(matchWt, r);
     return r;
   }
-};
-
-struct FstComposeOptions : SaveFstOptions {
-  FstComposeOptions()
-      : fstCompose(true), allowDuplicatePaths(true), sortBestFirst(false), epsilonMatchingFilter(false) {}
-
-  template <class Arc>
-  bool willLazyFsCompose(Hypergraph::IHypergraph<Arc> const& hg) const {
-    return fstCompose && hg.isFsm();
-  }
-
-  template <class Config>
-  void configure(Config& config) {
-    SaveFstOptions::configure(config);
-    config("fst-compose", &fstCompose)
-        .self_init()("true: optimized fst1*fst2 compose (false: cfg*fst, which is slower)");
-    config("sort-best-first", &sortBestFirst).self_init()(
-        "for fst-compose, attempt to sort out-arcs best-first (ignored for non-mutable hypergraphs)");
-    config("epsilon-matching-paths", &epsilonMatchingFilter).self_init()(
-        "use a three-valued filter state that prefers matching input x:<eps> match <eps>:y directly into "
-        "x:y. this result may be larger or smaller.");
-    config("allow-duplicate-paths", &allowDuplicatePaths).self_init()(
-        "for viterbi-like (idempotent plus - i.e. plus(x, x) = x) semirings, allow repeated equivalent "
-        "paths involving epsilons. this will result in n-best duplicates, but otherwise may be faster");
-    config("mix-fst", &mix)(
-        "a MixFeature for scaling the fst1 arc weight into the fst2 arc weight (and assigning feature id if "
-        "fst1 is FeatureWeight). if fst1 and fst2 are both FHG, then you have fst1*(fst^scale) - the "
-        "features of both");
-  }
-
-  MixFeature<> mix;
-  bool fstCompose;
-  bool allowDuplicatePaths;
-  bool sortBestFirst;
-  bool epsilonMatchingFilter;
 };
 
 /**
@@ -462,6 +498,7 @@ struct ComposeFst : TimesFn {
       return *(Filter*)this;
     }
 
+    //    enum { kPreSigma, kMidSigma, kDoneSigma };
     /**
        exact determination in advance of whether there are more arcs to come. (we could use a null arc to
        simplify)
@@ -479,61 +516,90 @@ struct ComposeFst : TimesFn {
       rLabels.first = inLabels.first;
       assert(hasMore);
       if (inLabels.second == EPSILON::ID) {  // two primary cases: input arc has epsilon output, or not.
-        rLabels.second = EPSILON::ID;
         if (matchedArcs) {  // inputMatchEpsilon
           MatchArc const& matchArc = matchedArcs();
+          assert(matchArc.labelPair.first == EPSILON::ID);
+          rLabels.second = matchArc.labelPair.second;
           r.dst.match = matchArc.dst;
           r.weight = Times::operator()(inArc.weight, matchArc.weight);
-          assert(Filter::allowInputEpsilon());  // after done w/ matchedArcs, take regular input epsilon
+          assert(Filter::allowInputEpsilon());  // because allowMatchEpsilon implies allowInputEpsilon
+          // after done w/ matchedArcs, take regular input epsilon by 'else' below:
         } else {
+          // then take just input epsilon
+          assert(Filter::allowInputEpsilon());
+          rLabels.second = EPSILON::ID;
+          r.dst.filter().inputEpsilon();
           r.weight = inArc.weight;
           r.dst.match = matchSrc;
+          hasMore = false;
         }
-        hasMore = false;
-      } else if (matchedArcs) {
-        // first matched, then sigma (if matched only, we have no input arc)
+      } else if (midSigma) {
+        assert(matchedArcs);
         MatchArc const& matchArc = matchedArcs();
-        LabelPair const& matchLabels = matchArc.labelPair;
-        Sym m1 = matchLabels.first, m2 = matchLabels.second;
-        r.dst.match = matchArc.dst;
-        if (isNonconsuming(m1)) {  // phi or eps; no input arc.
-          // assert(inLabels.second==NoSymbol); // we set this explicitly to avoid above EPSILON::ID branch
-          r.weight = Times::operator()(Weight::one(), matchArc.weight);  // explicit times vs one since input
-          // and match weights are different
-          // types. i have the result weight as
-          // an input weight.
-          rLabels.second = isNonconsuming(m2) ? EPSILON::ID : m2;
-        } else {
-          r.weight = Times::operator()(inArc.weight, matchArc.weight);
-          rLabels.second = (m1 == m2 ? inLabels.second : m2);
-          // remember that for rho and sigma we output the input symbol iff the output of the arc is also rho
-          // or sigma respectively
-        }
-        hasMore = matchedArcs || sigmaArcs;
-      } else if (sigmaArcs) {
-        MatchArc const& matchArc = sigmaArcs();
         LabelPair const& matchLabels = matchArc.labelPair;
         assert(matchLabels.first == SIGMA::ID);  // must be sigma (wildcard)
         Sym m2 = matchLabels.second;
         r.dst.match = matchArc.dst;
         r.weight = Times::operator()(inArc.weight, matchArc.weight);
         rLabels.second = (m2 == SIGMA::ID ? inLabels.second : m2);
-        hasMore = sigmaArcs;
+        hasMore = matchedArcs;
       } else {
-        SDL_THROW_LOG(Hypergraph.fs.Compose, ProgrammerMistakeException,
-                      "ArcsGen generator should have been empty (no more matching arcs)");
+        assert(matchedArcs);
+        // first matched, then sigma (if matched only, we have no input arc)
+        MatchArc const& matchArc = matchedArcs();
+        LabelPair const& matchLabels = matchArc.labelPair;
+        Sym m1 = matchLabels.first, m2 = matchLabels.second;
+        r.dst.match = matchArc.dst;
+        if (m1 == EPSILON::ID || m1 == PHI::ID) {  // phi or eps; no input arc.
+          assert(!inLabels.second);  // we'll have set this explicitly to avoid above EPSILON::ID branch
+          r.weight = Times::operator()(Weight::one(), matchArc.weight);
+          // explicit times vs one since input and match weights are different
+          // types. i have the result weight as an input weight.
+          rLabels.second = m2 == PHI::ID ? EPSILON::ID : m2;
+          if (!matchedArcs) hasMore = false;
+        } else {
+          r.weight = Times::operator()(inArc.weight, matchArc.weight);
+          rLabels.second = (m1 == m2 ? inLabels.second : m2);
+          // remember that for rho and sigma we output the input symbol iff
+          // the output of the arc is also rho or sigma respectively
+          if (!matchedArcs) {
+            assert(inLabels.second);  // else must have been phi or eps (nonconsuming) above
+            hasMore = initSigma();
+          }
+        }
       }
       return r;
     }
+
+    bool initSigma() {
+      if (match->whichSpecials.test(SIGMA::id)
+          && (matchedArcs = match->arcsMatchingInput(matchSrc, SIGMA::ID))) {
+        midSigma = true;
+        return true;
+      } else
+        return false;
+    }
+
+    bool initRho() {
+      return match->whichSpecials.test(RHO::id) && (matchedArcs = match->arcsMatchingInput(matchSrc, RHO::ID));
+    }
+
     ArcsGen() {}
-    explicit ArcsGen(Times const& times) : Times(times), hasMore(true) {}
+    ArcsGen(Times const& times, Match* match, MatchState matchSrc)
+        : Times(times), match(match), matchSrc(matchSrc), hasMore(true), midSigma(false) {}
+
+    Match* match;
     MatchArcs matchedArcs;
-    MatchArcs sigmaArcs;  // sigma arcs are always allowed in addition to matchedArcs. but since they're rare,
-    // make this a pointer?
-    InputArc inArc;  // contains input epsilon and input src state if match arc is nonconsuming. otherwise
-    // it's an actually arc
-    MatchState matchSrc;  // used if inArc output label is epsilon only
-    bool hasMore;  // done or more
+
+    /// contains input epsilon and input src state if match arc is nonconsuming. otherwise it's an actually
+    /// arc:
+    InputArc inArc;
+
+    MatchState matchSrc;  // used if inArc output label is epsilon, or for initSigma
+
+    bool hasMore, midSigma;
+    //, hasMoreSigma, initSigma;  // done or more
+    // int sigmabytes[sizeof(MatchArcs)/sizeof(int)];
 
     friend inline std::ostream& operator<<(std::ostream& out, ArcsGen const& self) {
       out << "ArcsGen {" << self.inArc << " more?=" << self.hasMore;
@@ -563,7 +629,7 @@ struct ComposeFst : TimesFn {
     ArcsGen operator()() {
       // returns the next nonempty generator, or else one with status==done (empty)
       assert(concatState != matchDone);
-      ArcsGen r((*this));  // could make peekable by r as member.
+      ArcsGen r(*this, match.get(), src.match);  // could make peekable by r as member.
       Filter& filter = r.filter();
       filter = src.filter();
 
@@ -588,32 +654,26 @@ struct ComposeFst : TimesFn {
 
       while (inArcs) {
         Sym matchSym = (r.inArc = inArcs()).labelPair.second;
-        if (matchSym == EPSILON::ID) {
-          // input epsilons don't cause us to exclude a phi in the match transducer.
-          if (filter.allowInputMatchEpsilon()
-              && (r.matchedArcs = match->arcsMatchingInput(src.match, matchSym))) {
-            r.matchSrc = src.match;  // used for input epsilon only case
-            filter.inputMatchEpsilon();
-            assert(filter.allowInputEpsilon());
-            // will also generate input epsilon (permitted by all 3 filters)
-            return r;
-          } else if (filter.allowInputEpsilon()) {
-            r.matchSrc = src.match;
-            filter.inputEpsilon();
-            return r;
-          } else
-            continue;  // skip this arc; filter doesn't allow input epsilon
-        } else {
-          bool const haveStandard = (r.matchedArcs = match->arcsMatchingInput(src.match, matchSym));
-          //TODO: can we use member 'sigma' more than once? then assign r.matchedArcs = sigma
-          bool const haveSigma = (r.sigmaArcs = match->arcsMatchingInput(src.match, SIGMA::ID));
-          bool haveRhoOrStandard = haveStandard;
-          if (haveStandard)
-            anyStandardMatch = true;
-          else
-            //TODO: can we use member 'rho' more than once? then assign r.matchedArcs = rho
-            haveRhoOrStandard = (r.matchedArcs = match->arcsMatchingInput(src.match, RHO::ID));
-          if (haveRhoOrStandard || haveSigma) {
+        if (matchSym) {
+          if (matchSym == EPSILON::ID) {
+            // input epsilons don't cause us to exclude a phi in the match transducer.
+            if (filter.allowInputMatchEpsilon()
+                && (r.matchedArcs = match->arcsMatchingInput(src.match, matchSym))) {
+              filter.inputMatchEpsilon();
+              assert(filter.allowInputEpsilon());
+              // will also generate input epsilon (permitted by all 3 filters)
+              return r;
+            } else if (filter.allowInputEpsilon()) {
+              filter.inputEpsilon();
+              return r;
+            } else
+              continue;  // skip this arc; filter doesn't allow input epsilon
+          } else {
+            if ((r.matchedArcs = match->arcsMatchingInput(src.match, matchSym)))
+              anyStandardMatch = true;  // will initSigma inside r after standard are exhausted
+            else if (r.initRho() || r.initSigma()) {
+            } else
+              continue;
             filter.normal();
             return r;
           }
@@ -621,14 +681,14 @@ struct ComposeFst : TimesFn {
       }
 
       concatState = matchDone;
-      if (!anyStandardMatch && filter.allowMatchEpsilon()
+      if (!anyStandardMatch && filter.allowMatchEpsilon() && match->whichSpecials.test(PHI::id)
           && (r.matchedArcs = match->arcsMatchingInput(src.match, PHI::ID))) {
         filter.matchEpsilon();
         r.inArc.dst = src.input;
         r.inArc.labelPair.first = EPSILON::ID;
         r.inArc.labelPair.second = NoSymbol;
 #if SDL_VALGRIND
-        r.inArc.weight = Weight::one();
+        //r.inArc.weight = Weight::one();
 #endif
         // weight is set to one in ArcsGen
         // maybe todo: keep track of eps matches also and report dead-state-ness. or caller can just detect
@@ -642,6 +702,7 @@ struct ComposeFst : TimesFn {
       return r;
     }
 
+
     ArcsGenGen(State const& src, InputPtr const& input, MatchPtr const& match, Times const& times)
         : Times(times)
         , src(src)
@@ -649,11 +710,9 @@ struct ComposeFst : TimesFn {
         , match(match)
         , concatState(matchEpsilon)
         , anyStandardMatch()
-          //TODO: why grab sigma+rho in advance before we know we need them?
-          //        , sigma(match->arcsMatchingInput(src.match, SIGMA::ID))  // consuming fallback
-          //        , rho(match->arcsMatchingInput(src.match, RHO::ID))  // consuming wildcard
-        , epsilon(src.allowMatchEpsilon() ? match->arcsMatchingInput(src.match, EPSILON::ID)
-                                          : MatchArcs())  // nonconsuming wildcard
+        , epsilon(match->whichSpecials.test(EPSILON::id) && src.allowMatchEpsilon()
+                      ? match->arcsMatchingInput(src.match, EPSILON::ID)
+                      : MatchArcs())  // nonconsuming wildcard
     {}
     State src;
     InputArcs inArcs;
@@ -661,7 +720,6 @@ struct ComposeFst : TimesFn {
     ConcatState concatState;  // because we want to emit 3 different types of arcs
     bool anyStandardMatch;
     MatchArcs epsilon;  // we don't save phi because it's not subject to reuse; it's the last thing we do
-    //MatchArcs sigma, rho;
     friend inline std::ostream& operator<<(std::ostream& out, ArcsGenGen const& self) {
       out << "ArcsGenGen[";
       out << self.src << " stage=" << self.concatState << " any=" << self.anyStandardMatch;
@@ -720,7 +778,8 @@ struct AllowDuplicateFilter<Weight, typename boost::enable_if<WeightIdempotentPl
 
 template <template <class> class FstForArc, class Filter, class InHg, class MatchHg, class ArcOut>
 void composeWithEpsilonFilterImpl(InHg const& inHg, MatchHg& matchHg, IMutableHypergraph<ArcOut>* outHg,
-                                  FstComposeOptions const& opt) {
+                                  FstComposeOptions const& opt,
+                                  WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
   typedef typename InHg::Arc Arc1;
   typedef typename MatchHg::Arc Arc2;
   IVocabularyPtr const& vocab = matchHg.getVocabulary();
@@ -732,7 +791,7 @@ void composeWithEpsilonFilterImpl(InHg const& inHg, MatchHg& matchHg, IMutableHy
   typedef ComposeFst<Input, Match, Filter, TimesByMix<typename Arc1::Weight, typename Arc2::Weight> > ComposedLazy;
   ComposedLazy composedLazy;
   composedLazy.input.reset(new Input(inHg, opt.annotations));
-  composedLazy.match.reset(new Match(matchHg));
+  composedLazy.match.reset(new Match(matchHg, which));
   composedLazy.mix = opt.mix;
   saveFst(composedLazy, *outHg, opt);
 }
@@ -746,22 +805,25 @@ void composeWithEpsilonFilterImpl(InHg const& inHg, MatchHg& matchHg, IMutableHy
 */
 template <class Filter, class Arc1, class MatchHg, class ArcOut>
 void composeWithEpsilonFilter(IMutableHypergraph<Arc1>& inHg, MatchHg& matchHg,
-                              IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt) {
+                              IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt,
+                              WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
   bool makeBestFirst = opt.sortBestFirst;
   if (makeBestFirst) inHg.forceBestFirstArcs();
-  composeWithEpsilonFilterImpl<HypergraphFst, Filter>(inHg, matchHg, outHg, opt);
+  composeWithEpsilonFilterImpl<HypergraphFst, Filter>(inHg, matchHg, outHg, opt, which);
 }
 
 template <class Filter, class Arc1, class MatchHg, class ArcOut>
 void composeWithEpsilonFilter(IMutableHypergraph<Arc1> const& inHg, MatchHg& matchHg,
-                              IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt) {
-  composeWithEpsilonFilterImpl<HypergraphFst, Filter>(inHg, matchHg, outHg, opt);
+                              IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt,
+                              WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
+  composeWithEpsilonFilterImpl<HypergraphFst, Filter>(inHg, matchHg, outHg, opt, which);
 }
 
 template <class Filter, class Arc1, class MatchHg, class ArcOut>
 void composeWithEpsilonFilter(IHypergraph<Arc1> const& inHg, MatchHg& matchHg,
-                              IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt) {
-  composeWithEpsilonFilterImpl<ConstHypergraphFst, Filter>(inHg, matchHg, outHg, opt);
+                              IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt,
+                              WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
+  composeWithEpsilonFilterImpl<ConstHypergraphFst, Filter>(inHg, matchHg, outHg, opt, which);
 }
 
 /**
@@ -772,13 +834,15 @@ void composeWithEpsilonFilter(IHypergraph<Arc1> const& inHg, MatchHg& matchHg,
 */
 template <class InHg, class MatchHg, class ArcOut>
 void compose(InHg& inHg, MatchHg& matchHg, IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt) {
-  if (opt.epsilonMatchingFilter)
-    composeWithEpsilonFilter<EpsilonCombine>(inHg, matchHg, outHg, opt);
-  else if (opt.allowDuplicatePaths)
-    composeWithEpsilonFilter<typename AllowDuplicateFilter<typename InHg::Arc::Weight>::type>(inHg, matchHg,
-                                                                                              outHg, opt);
+  WhichFstComposeSpecials which = matchHg.whichInputFstComposeSpecials();
+  SDL_DEBUG(Hypergraph.compose, which);
+  if (opt.allowDuplicatesEffective())
+    composeWithEpsilonFilter<typename AllowDuplicateFilter<typename InHg::Arc::Weight>::type>(
+        inHg, matchHg, outHg, opt, which);
+  else if (opt.epsilonMatchingFilter)
+    composeWithEpsilonFilter<EpsilonCombine>(inHg, matchHg, outHg, opt, which);
   else
-    composeWithEpsilonFilter<Epsilon1First>(inHg, matchHg, outHg, opt);
+    composeWithEpsilonFilter<Epsilon1First>(inHg, matchHg, outHg, opt, which);
 }
 }
 }

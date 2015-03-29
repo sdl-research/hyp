@@ -29,6 +29,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/String.hpp>
+#include <sdl/Vocabulary/Glue.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -388,9 +389,8 @@ class AssignTokenWeight : public StateToWeight<TW> {
   typedef TW TokenWeight;
   typedef typename TokenWeight::Weight Weight;
   typedef ArcTpl<TokenWeight> Arc;
-
   AssignTokenWeight(IHypergraph<Arc> const& hg, IVocabularyPtr const& pVoc,
-                    std::string const& glueSymbol = GLUE::TOKEN)
+                    std::string const& glueSymbol = Vocabulary::kGlueAffix)
       : hg_(hg)
       , invoc_(hg.getVocabulary().get())
       , outvoc_(pVoc)

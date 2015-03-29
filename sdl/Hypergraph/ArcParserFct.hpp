@@ -65,8 +65,7 @@ inline Sym add(IVocabulary& voc, std::string const& word, bool lex,
     return voc.add(word, kTerminal);
   else {
     if (isInAngleBrackets(word)) {
-      Sym id = Vocabulary::specialSymbols().sym(word, kSpecialTerminal);
-      if (!id) id = Vocabulary::specialSymbols().sym(word, kSpecialNonterminal);
+      Sym id = Vocabulary::specialSymbols().sym(word);
       if (id) {
         if (id == BLOCK_START::ID) {
           assert(numBlockStartSymsSeen);

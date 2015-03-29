@@ -7,17 +7,10 @@
 
 namespace sdl { namespace Hypergraph {
 
-
 inline Sym lexicalSymbol(std::string const& sym, IVocabulary &voc) {
-  Sym id = NoSymbol;
-  if(Util::isInAngleBrackets(sym)) {
-    id = Vocabulary::specialSymbols().sym(sym, kSpecialTerminal);
-    if(!id)
-      id = Vocabulary::specialSymbols().sym(sym, kSpecialNonterminal);
-  }
-  if(!id)
-    id = voc.add(sym, kTerminal);
-  return id;
+  if(Util::isInAngleBrackets(sym))
+    if (Sym id = Vocabulary::specialSymbols().sym(sym)) return id;
+  return voc.add(sym, kTerminal);
 }
 
 inline LabelPair lexicalPair(std::string const& i, std::string const& o, IVocabulary &voc) {

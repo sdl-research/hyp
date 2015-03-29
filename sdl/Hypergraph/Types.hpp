@@ -118,6 +118,8 @@ static const ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
 static const StateId kNoState = boost::integer_traits<StateId>::const_max;
 static const StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max - 1;
 
+typedef std::pair<StateId, StateId> StateIdInterval;
+
 inline StateId maxState(StateId a, StateId b) {
   if (a == kNoState) return b;
   if (b == kNoState) return a;

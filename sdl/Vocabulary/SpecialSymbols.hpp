@@ -3,81 +3,92 @@
     objects for declaring special symbols
 
     TODO: make ID a compile-time constant.
+
+    SpecialSymbols have id and index starting at 0: epsilon, sigma, phi, rho
+    (these are the Hypergraph fst composition special symbols)
 */
 
 #ifndef SDL_VOCABULARY_SPECIALSYMBOLS_HPP
 #define SDL_VOCABULARY_SPECIALSYMBOLS_HPP
 #pragma once
 
+#include <sdl/Vocabulary/SpecialSymbolVocab.hpp>
 #include <sdl/Vocabulary/SpecialSymbolsTemplate.hpp>
 #include <sdl/Exception.hpp>
 #include <sdl/Sym.hpp>
 
-#define SPECIAL_SYMBOL(Name, UnquotedSymbol, Type)              \
-  namespace sdl { \
-  namespace Vocabulary {                                        \
-  namespace Symbols {                                           \
-  struct Symbol_##Name : SpecialSymbolTemplate<Symbol_##Name> { \
-    static char const* str() { return #UnquotedSymbol; }  \
-    static SymbolType type() { return Type; }                   \
-  };                                                            \
-  }                                                             \
-  }                                                             \
-  typedef sdl::Vocabulary::Symbols::Symbol_##Name Name; \
-  }
+#include <boost/preprocessor/arithmetic/inc.hpp>
+#include <boost/preprocessor/slot/slot.hpp>
+
+#define SDL_SPECIAL_SYMBOL_INC "src/DefineSpecialSymbol.ipp"
 
 // The following include will make each special symbol X globablly
 // accessible as X::TOKEN and X::ID.
 #include <sdl/Vocabulary/SpecialSymbolsList.ipp>
 
-/**
-   Specifies the order of symbol IDs. The constructor's being defined at all
-   (and nobody instantiates a SpecialSymbolsOrder, according to grep) causes
-   instantiations of the static variables, and further, in the fixed order given
-   in SpecialSymbolsList.
+namespace sdl {
 
-   I'm not sure about whether this is standards-guaranteed or just gcc -
-   JG. Wonder if an anon free function would do it also, but there's no reason to
-   switch to that even if it does.
-
-*/
+/// causes instantiation of SpecialSymbolsTemplate classes in order, so we can
+/// fill the SpecialSymbolVoc. putting this in .cpp won't work for some reason.
 struct SpecialSymbolsOrder {
-
   SpecialSymbolsOrder() {
-
-// We re-define the macro SPECIAL_SYMBOL; this is important so that the
-// special symbols get IDs in the same order everytime we execute the
-// code. (Otherwise the order of symbols/IDs would be determined by which
-// one happens to get *accessed* first.)
-#undef SPECIAL_SYMBOL
-#define SPECIAL_SYMBOL(n, s, t) \
-  (void) sdl::n::ID; \
-  (void) sdl::n::TOKEN;
-// this seems to make a difference even in Release, so the compiler is
-// processing the instantiations even though the statements are likely
-// optimized away
+#undef SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_INC "src/OrderSpecialSymbol.ipp"
 #include <sdl/Vocabulary/SpecialSymbolsList.ipp>
   }
 };
 
-namespace sdl {
-
 /// must be a multiple of 10
-SymInt const SDL_NUM_BLOCKS = 1000;
+SymInt const SDL_NUM_BLOCKS = 10000;
 
 namespace Vocabulary {
 
 inline bool isFstComposeSpecial(Sym sym) {
-  return sym < BLOCK_END::ID;
+  return sym <= RHO::ID;
 }
+
+struct WhichFstComposeSpecials {
+  enum { knFstComposeSpecials = RHO::id + 1 };
+  char ids_;
+  WhichFstComposeSpecials() : ids_() {}
+  bool defined() const { return ids_ < (1 << knFstComposeSpecials); }
+  static WhichFstComposeSpecials undefined() {
+    WhichFstComposeSpecials r;
+    r.ids_ = 1<<knFstComposeSpecials;
+    return r;
+  }
+  bool test(SymId sym) const { return test(sym.id()); }
+  void set(SymId sym) { return set(sym.id()); }
+  bool test(SymIdInt id) const {
+    assert(id <= knFstComposeSpecials);
+    return ids_ & (1 << id);
+  }
+  void set(SymIdInt id) {
+    assert(id <= knFstComposeSpecials);
+    ids_ |= (1 << id);
+  }
+  void check(SymId sym) {
+    if (isFstComposeSpecial(sym)) set(sym);
+  }
+  friend inline std::ostream& operator<<(std::ostream &out, WhichFstComposeSpecials const& self) {
+    self.print(out);
+    return out;
+  }
+  void print(std::ostream &out) const {
+    out << "fst-compose-specials:";
+    for (SymIdInt id = 0; id < knFstComposeSpecials; ++id)
+      if (test(id))
+        out << ' ' << specialSymbols().str(specialTerminal(id));
+  }
+};
 
 inline bool specialTerminalIsAnnotation(Sym specialTerminal) {
   assert(specialTerminal.type() == kSpecialTerminal);
-  return !isFstComposeSpecial(specialTerminal);
+  return specialTerminal >= BLOCK_END::ID;
 }
 
 inline bool isAnnotation(Sym sym) {
-  return sym.type() == kSpecialTerminal && !isFstComposeSpecial(sym);
+  return sym.type() == kSpecialTerminal && specialTerminalIsAnnotation(sym);
 }
 
 /**

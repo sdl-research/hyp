@@ -145,6 +145,8 @@
 namespace sdl {
 namespace Hypergraph {
 
+using Vocabulary::WhichFstComposeSpecials;
+
 // Bug: ASSERT_VALID_HG fails on FSMs that do not store a vocab (b/c
 // it tests for lexical states). A vocab should not be required in
 // general.
@@ -313,7 +315,20 @@ struct IHypergraphStates : Resource {
                   "you can only sort a MutableHypergraph.");
   }
 
+
   StateIdRange getStateIds() const { return StateIdRange(StateIdIterator(0), StateIdIterator(size())); }
+
+  virtual StateIdInterval possiblyInputTerminalLabeledStates() const {
+    return StateIdInterval(0, this->size());
+  }
+
+  virtual WhichFstComposeSpecials whichInputFstComposeSpecials() const {
+    WhichFstComposeSpecials r;
+    for (StateIdInterval states(possiblyInputTerminalLabeledStates()); states.first < states.second;
+         ++states.first)
+      r.check(inputLabel(states.first));
+    return r;
+  }
 
   // TODO: allow setting of per-state axiom weights, or just enforce 0-tails arcs for axioms.
   /**
@@ -898,7 +913,6 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
       } else
 #endif
       {
-
         if (tails.size() == 2) {
           StateId const t = tails[1];
           if (t < sizeForLabels_) {

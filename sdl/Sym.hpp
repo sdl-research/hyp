@@ -42,7 +42,7 @@ typedef Sym SymId;
   bits 29-32 ([0...6] << 29):   SymbolType:
  ------------                -----------------------
    000 kSpecialTerminal
-   001 kSpecialNonterminal
+   001 (unused - no need for separate special nts)
    010 kVariable
    011 kPersistentNonterminal
    100 kNonterminal
@@ -51,10 +51,6 @@ typedef Sym SymId;
 
 the last is a larger (2x) space of symbols - see kLargeSizeMask vs
 kSmallSizeMask
-
-finally, we have types that don't correspond to bitmasks but are for asking
-getNumSymbols about the number of e.g. kNonSpecialTerminal or
-kNonSpecialNonterminal
 
  */
 
@@ -69,8 +65,6 @@ enum SymbolType {
   kBeginSpecial = 0,
   kSpecialTerminal = 0,
   kEndSpecialTerminal = 1u << 29,
-  kSpecialNonterminal = 1u << 29, // do we use these for anything?
-  kEndSpecialNonterminal = 2u << 29,
   kEndSpecial = 2u << 29,
 
   kVariable = 2u << 29,
@@ -142,8 +136,6 @@ struct Sym {
     switch(type) {
       case kSpecialTerminal:
         return "Special Terminal";
-      case kSpecialNonterminal:
-        return "Special Non-terminal";
       case kVariable:
         return "Variable";
       case kPersistentNonterminal:
@@ -166,8 +158,6 @@ struct Sym {
     switch(type) {
       case kSpecialTerminal:
         return "Special:";
-      case kSpecialNonterminal:
-        return "Special-NT:";
       case kVariable:
         return "Variable:";
       case kPersistentNonterminal:
@@ -228,7 +218,7 @@ struct Sym {
   }
 
   static inline bool isSpecialType(SymbolType type) {
-    return type == (SymInt)kSpecialTerminal || type == (SymInt)kSpecialNonterminal;
+    return type == (SymInt)kSpecialTerminal;
   }
 
   static inline bool isTerminalType(SymbolType type) {
@@ -501,6 +491,14 @@ inline Sym terminal(SymInt index) {
   Sym sym;
   assert(index <= kMaxTerminalIndex);
   sym.id_ = kTerminal | index;
+  return sym;
+}
+
+
+inline Sym specialTerminal(SymInt index) {
+  Sym sym;
+  assert(index <= kMaxNTIndex);
+  sym.id_ = index;
   return sym;
 }
 

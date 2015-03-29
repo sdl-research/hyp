@@ -16,6 +16,7 @@
 #include <sdl/Hypergraph/StatesTraversal.hpp>
 #include <sdl/Util/String.hpp>
 #include <sdl/Hypergraph/InArcs.hpp>
+#include <sdl/Vocabulary/Glue.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -23,8 +24,7 @@ namespace Hypergraph {
 /*
   split states based on its glue symbols(__LW_AT__).
 */
-
-const unsigned glue_len = (unsigned)GLUE::TOKEN.length();
+const unsigned glue_len = (unsigned)Vocabulary::kGlueAffix.length();
 
 enum StateType {kStart, kNoGlueNoSpace, kNoGlueSpace, kGlueLeft, kGlueRight, kGlueBoth, kSpecial, knStateType};
 
@@ -63,9 +63,9 @@ inline StateType detectSymType(Sym const& symId,
     return kSpecial;
   std::string const& sym = pVoc->str(symId);
   if (sym.length() < glue_len) return pred(sym)? kNoGlueNoSpace : kNoGlueSpace;
-  if (Util::startsWith(sym, GLUE::TOKEN))
-    return Util::endsWith(sym, GLUE::TOKEN) ? kGlueBoth : kGlueLeft;
-  else if (Util::endsWith(sym, GLUE::TOKEN))
+  if (Util::startsWith(sym, Vocabulary::kGlueAffix))
+    return Util::endsWith(sym, Vocabulary::kGlueAffix) ? kGlueBoth : kGlueLeft;
+  else if (Util::endsWith(sym, Vocabulary::kGlueAffix))
     return kGlueRight;
   else
     return pred(sym)? kNoGlueNoSpace : kNoGlueSpace;

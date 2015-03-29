@@ -1,24 +1,18 @@
-/**
-   //TODO: use this to get true compile time constants
+/** \file
+   Hypergraph arc special symbols.
 
-   #include <boost/preprocessor/slot/counter.hpp>
-   BOOST_PP_COUNTER; // 0
-   #include BOOST_PP_UPDATE_COUNTER()
-   BOOST_PP_COUNTER; // 1
-   ...
-*/
-
-// this gets multiply included - once to define the symbols, and again
-// to instantiate. the order is significant - keep the first 4 eps
-// sigma phi rho - at the start and the block symbols at the end.
-
-/* Hypergraph arc special symbols.
+   user-unfriendly include instead of preprocessor macro because there's no
+   other standard-compliant way to get a counter starting at 0 at compile time
+   (__COUNTER__ is nonstandard and can't be reset to 0 anyway)
 
    Meanings: epsilon and phi don't advance the input pointer when
    taking the arc (rho and sigma do).
 
    epsilon and sigma match any symbol; phi and rho are "else" - they
    match any symbol not explicitly named on another outgoing arc.
+
+   GOTCHA: you must keep the first 4 eps sigma phi rho - at the start and the
+   block symbols at the end.
 */
 
 /*
@@ -30,10 +24,21 @@
 /// EPSILON::ID is 0, like in OpenFst.
 /// The IDs for sigma, phi, and rho are different from the
 /// corresponding IDs in OpenFst, where they are negative numbers.
-SPECIAL_SYMBOL(EPSILON, <eps>, kSpecialTerminal)
-SPECIAL_SYMBOL(SIGMA, <sigma>, kSpecialTerminal)
-SPECIAL_SYMBOL(PHI, <phi>, kSpecialTerminal)
-SPECIAL_SYMBOL(RHO, <rho>, kSpecialTerminal)
+#define BOOST_PP_VALUE 0
+#include BOOST_PP_ASSIGN_SLOT(1)
+
+#define SDL_SPECIAL_SYMBOL_NAME EPSILON
+#define SDL_SPECIAL_SYMBOL_TEXT "eps"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME SIGMA
+#define SDL_SPECIAL_SYMBOL_TEXT "sigma"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME PHI
+#define SDL_SPECIAL_SYMBOL_TEXT "phi"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME RHO
+#define SDL_SPECIAL_SYMBOL_TEXT "rho"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // TODO: these can return to <s> and </s> for greater
 // inter-operability with third party software once
@@ -49,38 +54,65 @@ SPECIAL_SYMBOL(RHO, <rho>, kSpecialTerminal)
 //resolved is that we pay a performance price for every Sym or string -> LmId
 //lookup, which would go away if we either switched these back to <s> </s>, or
 //if we don't use those symbols at all
-SPECIAL_SYMBOL(SEG_START, <xmt-segment>, kSpecialTerminal)
-SPECIAL_SYMBOL(SEG_END, </xmt-segment>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME SEG_START
+#define SDL_SPECIAL_SYMBOL_TEXT "xmt-segment"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME SEG_END
+#define SDL_SPECIAL_SYMBOL_TEXT "/xmt-segment"
+#include SDL_SPECIAL_SYMBOL_INC
 
-SPECIAL_SYMBOL(UNK, <unk>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME UNK
+#define SDL_SPECIAL_SYMBOL_TEXT "unk"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // Used by tokenizers to mark tokens.
 // Example: <tok> 't' 'e' 's' 't' </tok>
 // IMPORTANT: placing new symbols before TOK_START and TOK_END
 // will break unit tests (hardwired values).
-SPECIAL_SYMBOL(TOK_START, <tok>, kSpecialTerminal)
-SPECIAL_SYMBOL(TOK_END, </tok>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME TOK_START
+#define SDL_SPECIAL_SYMBOL_TEXT "tok"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME TOK_END
+#define SDL_SPECIAL_SYMBOL_TEXT "/tok"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // Used by RegexTokenizer to protect expressions from being split into
 // tokens. Example: <tok-protect> 'e' '.' 'g' '.' </tok-protect>
-SPECIAL_SYMBOL(TOK_PROTECT_START, <tok-protect>, kSpecialTerminal)
-SPECIAL_SYMBOL(TOK_PROTECT_END, </tok-protect>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME TOK_PROTECT_START
+#define SDL_SPECIAL_SYMBOL_TEXT "tok-protect"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME TOK_PROTECT_END
+#define SDL_SPECIAL_SYMBOL_TEXT "/tok-protect"
+#include SDL_SPECIAL_SYMBOL_INC
 
-// SPECIAL_SYMBOL(GLUE, <glue>, kSpecialTerminal)
-SPECIAL_SYMBOL(GLUE, __LW_AT__, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME GLUE
+#define SDL_SPECIAL_SYMBOL_TEXT "glue"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // Used by TrieGrammar and Syntax decoder to separate source formula and preconditions
-SPECIAL_SYMBOL(SDL_STAR, <lw-star>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME SDL_STAR
+#define SDL_SPECIAL_SYMBOL_TEXT "lw-star"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // Used by syntax decoder to denote the start of the foreign sentence
-SPECIAL_SYMBOL(FS, <foreign-sentence>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME FS
+#define SDL_SPECIAL_SYMBOL_TEXT "foreign-sentence"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // Used by abortSegment to return the output of the canceled segment
-SPECIAL_SYMBOL(ABORTSEGMENT, <abort-segment>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME ABORTSEGMENT
+#define SDL_SPECIAL_SYMBOL_TEXT "abort-segment"
+#include SDL_SPECIAL_SYMBOL_INC
 
-SPECIAL_SYMBOL(SENT_START, <s>, kSpecialTerminal)
-SPECIAL_SYMBOL(SENT_END, </s>, kSpecialTerminal)
-SPECIAL_SYMBOL(NULL_TAG, <null>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME SENT_START
+#define SDL_SPECIAL_SYMBOL_TEXT "s"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME SENT_END
+#define SDL_SPECIAL_SYMBOL_TEXT "/s"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME NULL_TAG
+#define SDL_SPECIAL_SYMBOL_TEXT "null"
+#include SDL_SPECIAL_SYMBOL_INC
 
 //////////////////////////////
 // SDL_BLOCK symbols
@@ -89,9 +121,15 @@ SPECIAL_SYMBOL(NULL_TAG, <null>, kSpecialTerminal)
 // These are used by the decoders: They do not move any words or
 // phrases into the block or out of the block. BLOCK_START and CONSTRAINT_SUBSTITUTE get SDL_NUM_BLOCKS symbols <xmt-blockN> and <xmt-entityN> starting at N=0 (up to N = SDL_NUM_BLOCKS-1)
 
-SPECIAL_SYMBOL(BLOCK_END, </xmt-block>, kSpecialTerminal)
-SPECIAL_SYMBOL(BLOCK_START, <xmt-block>, kSpecialTerminal)
-SPECIAL_SYMBOL(CONSTRAINT_SUBSTITUTE, <xmt-entity>, kSpecialTerminal)
+#define SDL_SPECIAL_SYMBOL_NAME BLOCK_END
+#define SDL_SPECIAL_SYMBOL_TEXT "/xmt-block"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME BLOCK_START
+#define SDL_SPECIAL_SYMBOL_TEXT "xmt-block"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME CONSTRAINT_SUBSTITUTE
+#define SDL_SPECIAL_SYMBOL_TEXT "xmt-entity"
+#include SDL_SPECIAL_SYMBOL_INC
 
 // CONSTRAINT_SUBSTITUTE and BLOCK_START are actually a range of symbols, each one which prints as the same string
 // //TODO: preprocessor iteration or similar to give each one a numeric id suffix for clarity and round-trip hg io

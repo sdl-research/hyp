@@ -221,7 +221,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   virtual IVocabularyPtr hgGetVocabulary() const OVERRIDE { return this->getVocabulary(); }
 
   friend struct SortStates<A>;
-  StateId sortedStatesNumNotTerminal;  // this is set only if properties() & kSortedStates
+  StateId sortedStatesNumNotTerminal_;  // this is set only if properties() & kSortedStates
 
  public:
   typedef IHypergraph<A> Base;
@@ -254,7 +254,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   /**
      used by SortStates<A>.
   */
-  void setSortedStatesNumNotTerminal(StateId n) { sortedStatesNumNotTerminal = n; }
+  void setSortedStatesNumNotTerminal(StateId n) { sortedStatesNumNotTerminal_ = n; }
 
   /**
      remove the out arcs for a state (useful after you update Arc * such that no arcs have it as a tail)
@@ -308,22 +308,22 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   }
 
   StateId numNotTerminalStates() const OVERRIDE {
-    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal
+    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_
                                                 : this->countNumNotTerminalStates();
   }
 
   StateId maxNotTerminalState() const OVERRIDE {
-    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal - 1
+    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ - 1
                                                 : this->maxNotTerminalStateImpl();
   }
 
   StateId exactSizeForHeads() const OVERRIDE {
-    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal : this->maxNotTerminalStateImpl()
-                                                                               + 1;
+    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_
+                                                : this->maxNotTerminalStateImpl() + 1;
   }
 
   StateId sizeForHeads() const OVERRIDE {
-    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal : this->size();
+    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ : this->size();
   }
 
  private:
@@ -374,8 +374,43 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
      object skipping virtual interfaces?
   */
   OutArcsGenerator outArcsMatchingInput(StateId outFromState, Sym input) const {
-    assert(hasProperties(this->properties(), kSortedOutArcs));
-    ArcsContainer const& arcs = outFromState == kNoState ? emptyArcs_ : *this->maybeOutArcs(outFromState);
+    assert(hasProperties(this->properties(), kSortedOutArcs|kFsm));
+    if (outFromState == kNoState)
+      return OutArcsGenerator();
+    ArcsContainer const* parcs = this->maybeOutArcs(outFromState);
+    assert(parcs);
+    ArcsContainer const& arcs = *parcs;
+    if (arcs.empty())
+      return OutArcsGenerator();
+#define SDL_OPTIMIZE_MATCHING_EPSILON_SIGMA 1
+    //TODO: test actual speed vs code size improvement
+#if SDL_OPTIMIZE_MATCHING_EPSILON_SIGMA
+    if (input <= SIGMA::ID) {
+      // we always check for EPSILON and SIGMA in composition; binary search
+      // would be silly since they're always at the start of outarcs.
+      OutArcsIter b = arcs.begin(), i = b, e = arcs.end();
+      if (input == EPSILON::ID) { // optimize for a common query
+        for(;;++i)
+          if (i == e || this->inputLabel((*i)->fsmSymbolState()) != EPSILON::ID)
+            return OutArcsGenerator(b, i);
+      }
+      //TODO: maybe only optimize epsilon
+      assert(input == SIGMA::ID);
+      SymId sym;
+      for(;;++i) {
+        if (i == e)
+          return OutArcsGenerator();
+        if ((sym = this->inputLabel((*i)->fsmSymbolState())) > EPSILON::ID) {
+          if (sym != SIGMA::ID) return OutArcsGenerator();
+          b = i;
+          for(;;)
+            if (++i == e || this->inputLabel((*i)->fsmSymbolState()) != SIGMA::ID)
+              return OutArcsGenerator(b, i);
+        }
+      }
+      assert(0); // for loop is no-escape (return-only)
+    }
+#endif
     return OutArcsGenerator(std::equal_range(arcs.begin(), arcs.end(), input, CmpInputFsmLabelsMatch(*this)));
   }
 
@@ -393,7 +428,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     Properties p = this->properties();
     SDL_TRACE(Hypergraph, "clearImpl set p=" << PrintProperties(p));
     p &= ~kHasOutputLabels;
-    p |= kDefaultProperties;
+    p |= kFsmProperties;
     if (p & kStoresAnyOutArcs) p |= kSortedOutArcs;
     this->setProperties(p);
     SDL_TRACE(Hypergraph, "clear postlude prop=" << printProperties(*this));
@@ -407,14 +442,8 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
 
   void setEmpty(bool addstart = false, bool addfinal = false) {
     clear();
-    if (addstart) {
-      setStart(addState());
-    }
-    if (addfinal) {
-      setFinal(addState());
-    }
-    addProperties(kFsm);
-    addProperties(kGraph);
+    if (addstart) setStart(addState());
+    if (addfinal) setFinal(addState());
   }
 
   /// order of args: fromState -> toState with (labelState, weight) tails are (toState, labelState)
@@ -463,7 +492,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   /// call after modifying an already added arc to add a tail
   virtual void addedTail(Arc* a, StateId tail) = 0;
 
-  IMutableHypergraph() : IHypergraph<A>("sdl::IMutableHypergraph"), sortedStatesNumNotTerminal() {}
+  IMutableHypergraph() : IHypergraph<A>("sdl::IMutableHypergraph"), sortedStatesNumNotTerminal_() {}
 
   // function overwrite with covariant return type:
   virtual IMutableHypergraph<A>* clone() const OVERRIDE = 0;

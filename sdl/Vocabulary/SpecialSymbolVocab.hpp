@@ -1,7 +1,7 @@
 /** \file
 
-    handle kSpecialTerminal and kSpecialNonterminal Sym types - notice that
-    this isn't an IVocabulary (so it's faster)
+    handle kSpecialTerminal Sym type - notice that this isn't an IVocabulary (so
+    it's faster)
 */
 
 #ifndef SPECIALSYMBOLVOCABULARYIMPL_H_
@@ -33,29 +33,28 @@ class SpecialSymbolVocab {
 
   virtual ~SpecialSymbolVocab();
 
-  Sym add(std::string const& symbol, SymbolType symType);
+  Sym add(std::string const& symbol);
+  Sym addAssertId(std::string const& symbol, SymIdInt id);
 
-  std::string const& str(Sym const& id) const;
+  std::string const& str(Sym id) const;
 
-  inline Sym sym(std::string const& symbol, SymbolType symType) const {
-    assert(Sym::isSpecialType(symType));
-    return (symType == kSpecialTerminal ? vocab : ntVocab)->sym(symbol);
+  inline Sym sym(std::string const& symbol) const {
+    return vocab->sym(symbol);
   }
 
-  bool containsSym(Sym const& id) const;
+  bool containsSym(Sym id) const;
 
-  inline bool contains(std::string const& symbol, SymbolType symType) const {
-    assert(Sym::isSpecialType(symType));
-    return (symType == kSpecialTerminal ? vocab : ntVocab)->contains(symbol);
+  inline bool contains(std::string const& symbol) const {
+    // Currently all special symbols are terminals.
+    return vocab->contains(symbol);
   }
 
   inline void accept(IVocabularyVisitor& visitor) {
     vocab->accept(visitor);
-    ntVocab->accept(visitor);
   }
 
-  inline unsigned getNumSymbols(SymbolType type) const {
-    return (type == kSpecialTerminal ? vocab : ntVocab)->getNumSymbols();
+  inline unsigned getNumSymbols() const {
+    return vocab->getNumSymbols();
   }
 
   inline unsigned getNumLexicals() {
@@ -63,20 +62,21 @@ class SpecialSymbolVocab {
   }
 
   inline std::size_t getSize() const {
-    return vocab->getNumSymbols() + ntVocab->getNumSymbols();
+    return vocab->getNumSymbols();
   }
 
+  static SpecialSymbolVocab gInstance_;
  private:
   typedef BasicVocabularyImpl *BasicVocabPtr;
-  // not a scoped_ptr because we want static init to give us 0 for idempotent init()
-  BasicVocabPtr vocab, ntVocab;
+  // pimpl for safe static init (single threaded at this point) - note
+  // specialSymbolsForceInit WILL be called in static init or else bad things.
+  BasicVocabPtr vocab;
 };
 
 /// may be used after static initialization
 // extern SpecialSymbolVocab specialSymbols;
 inline SpecialSymbolVocab& specialSymbols() {
-  static SpecialSymbolVocab voc; //TODO: not threadsafe in MSVC10
-  return voc;
+  return SpecialSymbolVocab::gInstance_;
 }
 
 /// to be used during static initialization

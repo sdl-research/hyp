@@ -6,11 +6,7 @@ include(SdlHelperFunctions.cmake)
 if(DEFINED ENV{SDL_EXTERNALS_PATH})
   set(SDL_EXTERNALS_PATH $ENV{SDL_EXTERNALS_PATH})
 else()
-  if(DEFINED ENV{XMT_EXTERNALS_PATH})
-    set(SDL_EXTERNALS_PATH $ENV{XMT_EXTERNALS_PATH})
-  else()
-    message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_PATH")
-  endif()
+  message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_PATH")
 endif()
 string(REPLACE "\\" "/" SDL_EXTERNALS_PATH ${SDL_EXTERNALS_PATH})
 
@@ -367,7 +363,7 @@ if(USING_GCC)
       # external lib won't inline correctly, and map etc. erase now return an
       # iterator instead of void.
 
-      # sdl_enable_cpp11()
+      sdl_enable_cpp11()
     endif()
   endif()
 elseif(USING_CLANG)
@@ -515,7 +511,7 @@ if(UNIX)
   if (NOT USING_CLANG)
     set(SDL_TESTED_RELEASE_OPTIMIZATIONS "${SDL_TESTED_RELEASE_OPTIMIZATIONS} ${SDL_NO_CLANG_OPTIMIZATIONS}")
     if (SDL_HAVE_GCC_4_8)
-      set(SDL_O3 "-O")
+      set(SDL_O3 "-O3")
       # -fcx-limited-range controls the default setting of the ISO C99
       # -CX_LIMITED_RANGE pragma. Nevertheless, the option applies to all
       # -languages., enabled by full -ffast-math
@@ -862,6 +858,8 @@ if(NOT ANDROID)
   INCLUDE(CTest)
 endif()
 
+set(UTIL_LIBRARY_NAME sdl_util)
+
 set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
   ${TBB_LIBRARY}
   ${YAML_CPP_LIBRARY}
@@ -873,13 +871,12 @@ set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
   ${Boost_LIBRARIES}
   )
 
+
+
 set(INDIRECT_UTIL_LIB_DEPENDENCIES
   ${INDIRECT_Vocabulary_LIB_DEPENDENCIES}
   Vocabulary
   )
-
-
-set(UTIL_LIBRARY_NAME sdl_util)
 
 # Util and prereqs - used by most projects (except a few that might
 # use Util header-only)

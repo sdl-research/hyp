@@ -12,6 +12,7 @@
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Project.hpp>
 #include <sdl/Hypergraph/PruneNonBest.hpp>
+#include <sdl/graehl/shared/hex_int.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -55,10 +56,10 @@ struct SaveFst {
   SaveFst(Fst& fst, Hg& out, SaveFstOptions const& opt)
       : fst(fst), out(out), projectOutput(opt.projectOutput), annotations_(opt.annotations) {
     out.setVocabulary(fst.getVocabulary());
-    if (opt.forceOutArcs) out.forceFirstTailOutArcs();
     out.setEmpty();
+    if (opt.forceOutArcs) out.forceFirstTailOutArcs();
     Util::reserveUnorderedImpl(stateMap, opt.reserveStates);
-    out.setFinal(kNoState);
+    SDL_DEBUG(Hypergraph.fs.SaveFst, "saving to hg &"<<graehl::hex(&out)<<": "<<withProperties(out));
     out.setStart(outStateFor(fst.startState()));
   }
   void setFinal(StateId s) {
@@ -119,9 +120,10 @@ void saveFstComplete(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >
 */
 template <class Fst>
 void saveFst(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >& outHg, SaveFstOptions const& opt) {
-  if (opt.pruneToNbest == 1)
+  if (opt.pruneToNbest == 1) {
+    outHg.setEmpty();
     lazyBestToHg(fst, outHg, opt);
-  else
+  } else
     saveFstComplete(fst, outHg, opt);
 }
 

@@ -8,18 +8,15 @@ namespace sdl {
 namespace Vocabulary {
 
 // SpecialSymbolVocab specialSymbols;
+SpecialSymbolVocab SpecialSymbolVocab::gInstance_;
 
 void SpecialSymbolVocab::init() {
-  if (!vocab) {
-    assert(!ntVocab);
+  if (!vocab)
     vocab = new BasicVocabularyImpl(kSpecialTerminal);
-    ntVocab = new BasicVocabularyImpl(kSpecialNonterminal);
-  }
 }
 
 SpecialSymbolVocab::~SpecialSymbolVocab() {
   delete vocab;
-  delete ntVocab;
 }
 
 /**
@@ -58,23 +55,31 @@ static Sym addSdlNumBlocks(BasicVocabularyImpl &s, std::string const& pre) {
   return r;
 }
 
-
-Sym SpecialSymbolVocab::add(std::string const& symbol, SymbolType symType) {
-  assert(Sym::isSpecialType(symType));
-  assert(symType == kSpecialTerminal);  // Currently all special symbols are terminals.
+Sym SpecialSymbolVocab::add(std::string const& symbol) {
   if (symbol == kXmtBlockStr || symbol == kXmtEntityStr)
     return addSdlNumBlocks(*vocab, symbol);
   else
-    return vocab->add(symbol, symType);
+    return vocab->add(symbol);
 }
 
-std::string const& SpecialSymbolVocab::str(Sym const& id) const {
+Sym SpecialSymbolVocab::addAssertId(std::string const& symbol, SymIdInt id) {
+  if (symbol == kXmtBlockStr || symbol == kXmtEntityStr)
+    return addSdlNumBlocks(*vocab, symbol);
+  else {
+    Sym r = vocab->add(symbol);
+    assert(r.id() == id);
+    return r;
+  }
+}
+
+
+std::string const& SpecialSymbolVocab::str(Sym id) const {
   assert(id.isSpecial());
-  assert(id.type() == kSpecialTerminal);  // Currently all special symbols are terminals.
+  assert(id.type() == kSpecialTerminal);
   return vocab->str(id);
 }
 
-bool SpecialSymbolVocab::containsSym(Sym const& id) const {
+bool SpecialSymbolVocab::containsSym(Sym id) const {
   assert(id.isSpecial());
   assert(id.type() == kSpecialTerminal);  // currently all special symbols are terminals.
   return id < kSpecialEnd();
