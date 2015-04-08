@@ -1,6 +1,5 @@
 project (Hypergraph)
 
-sdl_quiet_compiled_setting(SDL_INLINE_HYP_CPPS 1)
 sdl_quiet_compiled_setting(GRAEHL_NAMED_SINGLE_MAIN 0)
 
 if(OPENFST_FOUND)

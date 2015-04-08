@@ -281,13 +281,17 @@ class EarleyParser {
     // traversed an FST arc)
   };  // end Item
 
-  struct ItemPriorityFct {
-    bool operator()(Item* a, Item* b) const {
-      if (a->from != b->from)
-        return a->from < b->from;
-      else
-        return a->to < a->to;
+  typedef uint64 ItemPriority;
+
+  struct ItemPriorityMap {
+    typedef Item* key_type;
+    typedef ItemPriority value_type;
+    typedef ItemPriority reference;
+    typedef boost::readable_property_map_tag category;
+    friend inline ItemPriority get(ItemPriorityMap const&, Item* key) {
+      return (((ItemPriority)key->from << 32) + key->to);
     }
+    ItemPriority const& operator[](Item* key) const { return get(*this, key); }
   };
 
   /**
@@ -766,7 +770,8 @@ class EarleyParser {
   std::vector<std::set<StateId> > alreadyPredicted_;
 
   // std::queue<Item*> agenda_;
-  std::priority_queue<Item*, std::vector<Item*>, ItemPriorityFct> agenda_;
+  //TODO: is priority necessary? do we want greatest "from" at top?
+  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority> > agenda_;
   std::set<Item*> finalItems_;
 
   typedef std::map<Item*, std::set<BackPointer> > BackPointerMap;

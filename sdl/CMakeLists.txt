@@ -352,7 +352,6 @@ if(USING_GCC)
     if(GCC_VERSION VERSION_LESS 4.9)
       add_definitions("-fno-tree-vectorize") # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53533
     else()
-      message(STATUS "Found gcc 4.9 or later, which means we're trying C++11, which should improve performance and allow for clearer code.")
       set(SDL_HAVE_GCC_4_9 1)
       # https://gcc.gnu.org/wiki/Cxx11AbiCompatibility:
 
@@ -363,7 +362,8 @@ if(USING_GCC)
       # external lib won't inline correctly, and map etc. erase now return an
       # iterator instead of void.
 
-      sdl_enable_cpp11()
+      # sdl_enable_cpp11()
+      # message(STATUS "Found gcc 4.9 or later, which means we're trying C++11, which should improve performance and allow for clearer code.")
     endif()
   endif()
 elseif(USING_CLANG)

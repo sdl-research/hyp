@@ -243,8 +243,8 @@ struct LazyBest : DistanceFn {
 
   typedef std::less<Distance> BetterDistance;
   typedef std::vector<BestP> QueueVector;
-  typedef Util::PriorityQueue<BestP, 4, BestDistancePropertyMap, BestIndexPropertyMap, BetterDistance,
-                              QueueVector, QueueIndex, Util::NonNullPointeeEqual> Queue;
+  typedef Util::d_ary_heap_indirect<BestP, 4, BestDistancePropertyMap, BestIndexPropertyMap, BetterDistance,
+                                    QueueVector, QueueIndex, Util::NonNullPointeeEqual> Queue;
   Queue queue;
 
   // at most one Expand active for a state in Queue, enforced by best map.
@@ -310,7 +310,7 @@ struct LazyBest : DistanceFn {
             = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
         Distance distance = from.distance + arc.getDistance();
         from.estimateSuccessor(distance - opt.expandMoreArcs);
-        queue.adjustTop();  // note: moving items around in queue doesn't invalidate the pointed-to Best
+        queue.adjust_top();  // note: moving items around in queue doesn't invalidate the pointed-to Best
 
         // check for new state or improvement in distance to existing
         std::pair<typename Bests::iterator, bool> iNew = bests.insert((Best*)&arc);

@@ -87,6 +87,49 @@
 namespace sdl {
 namespace Hypergraph {
 
+/// instead of nbest, nbest plus up to num-ties tied for nth place
+struct NbestPlusTies {
+  NbestId nbest, numTies;
+  NbestPlusTies(NbestId nbest = 1) : nbest(nbest), numTies() {}
+  operator NbestId() const { return nbest; }
+  template <class Config>
+  void configure(Config& config) {
+    config("num-best", &nbest)('n')
+        .self_init()("limit hypergraph paths to this many, keeping the lowest totalcost");
+    config("num-ties", &numTies)
+        .self_init()(
+            "allow this many extra same-score derivations with cost tied for the final place (if num-best > "
+            "1)");
+    config("nbest", &nbest).verbose();
+  }
+  NbestId maxnbest() { return nbest > 1 ? nbest + numTies : 1; }
+  bool multiple() const { return nbest > 1; }
+  bool enabled() const { return nbest; }
+};
+
+template <class Visitor>
+struct VisitPlusTies {
+  Visitor const& visitor;
+  NbestId nbest;
+  mutable SdlFloat lastCost;
+  VisitPlusTies(Visitor const& visitor, NbestId nbest) : visitor(visitor), nbest(nbest), lastCost() {}
+  template <class DerivP, class Weight>
+  bool operator()(DerivP const& deriv, Weight const& wtotal, NbestId n) const {
+    SdlFloat thisCost = wtotal.getValue();
+    if (n > 1 && n >= nbest && thisCost > lastCost)
+      return false;
+    else {
+      lastCost = thisCost;
+      return visitor(deriv, wtotal, n);
+    }
+  }
+};
+
+template <class Visitor>
+VisitPlusTies<Visitor> visitPlusTies(Visitor const& visitor, NbestId nbestSoft) {
+  return VisitPlusTies<Visitor>(visitor, nbestSoft);
+}
+
 template <class Arc>
 Properties propertiesForBest(IHypergraph<Arc> const& hg) {
   return hg.isGraph() ? kStoreFirstTailOutArcs : kStoreInArcs;
@@ -1204,12 +1247,15 @@ struct BestPath : TransformBase<Transform::Inplace> {
     }
 
     template <class DerivVisitor>
-    DerivP visit_nbest(NbestId nbest, DerivVisitor const& visitor, bool throwEmptySetException = false,
+    DerivP visit_nbest(NbestPlusTies nbest, DerivVisitor const& visitor, bool throwEmptySetException = false,
                        NbestId * nVisited = 0) {
-      if (opt.noFilterNeeded(nbest))
-        return visit_nbestFilter(nbest, visitor, noFilter(), throwEmptySetException, nVisited);
+      NbestId maxn = nbest.maxnbest();
+      if (opt.noFilterNeeded(nbest.nbest))
+        return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), noFilter(), throwEmptySetException,
+                                 nVisited);
       else
-        return visit_nbestFilter(nbest, visitor, filter(), throwEmptySetException, nVisited);
+        return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), filter(), throwEmptySetException,
+                                 nVisited);
     }
 
     /**
@@ -1300,25 +1346,33 @@ struct BestPath : TransformBase<Transform::Inplace> {
 
   };  // end Compute
 
+
+  template <class Visitor, class A>
+  typename Derivation<A>::DerivP visit_nbest_get_1best(Visitor const& visitor, NbestPlusTies nbest,
+                                                       IHypergraph<A> const& hg, bool throwEmptySetException,
+                                                       NbestId* nVisited = 0) const {
+    Compute<A> cb(opt, hg);
+    return cb.visit_nbest(nbest, visitor, throwEmptySetException, nVisited);
+  }
+
   // returns # visited
   template <class Visitor, class A>
-  NbestId visit_nbest(Visitor const& visitor, NbestId upToNbest, IHypergraph<A> const& hg,
+  NbestId visit_nbest(Visitor const& visitor, NbestPlusTies nbest, IHypergraph<A> const& hg,
                       bool throwEmptySetException) const {
     NbestId nVisited = 0;
-    Compute<A> cb(opt, hg);
-    cb.visit_nbest(upToNbest, visitor, throwEmptySetException, &nVisited);
+    visit_nbest_get_1best(visitor, nbest, hg, throwEmptySetException, &nVisited);
     return nVisited;
   }
 
   // returns 1best deriv
   template <class Out, class A>
-  typename Derivation<A>::DerivP out_nbest(Out& out, NbestId upToNbest, PathOutOptions const& popt,
+  typename Derivation<A>::DerivP out_nbest(Out& out, NbestPlusTies nbest, PathOutOptions const& popt,
                                            IHypergraph<A> const& hg, bool throwEmptySetException) const {
     Compute<A> cb(opt, hg);
     NbestId nVisited = 0;
     typename Derivation<A>::DerivP r
-        = cb.visit_nbest(upToNbest, popt.pathOutNbestVisitor(out, hg), throwEmptySetException, &nVisited);
-    popt.pad(out, nVisited, upToNbest);
+        = cb.visit_nbest(nbest, popt.pathOutNbestVisitor(out, hg), throwEmptySetException, &nVisited);
+    popt.pad(out, nVisited, nbest.maxnbest());
     return r;
   }
 };
@@ -1339,29 +1393,21 @@ VisitBoth<Visitor1, Visitor2> visitBoth(Visitor1 const& visitor1, Visitor2 const
   return VisitBoth<Visitor1, Visitor2>(visitor1, visitor2);
 }
 
-struct NbestPathOptions : BestPathOptions {
-  NbestPathOptions() {
-    nbest = 1;
-    Config::inits(this);
-  }
+struct NbestPathOptions : NbestPlusTies, BestPathOptions {
+  NbestPathOptions() { Config::inits(this); }
   template <class Config>
   void configure(Config& config) {
     config.is("NbestPathOptions");
     BestPathOptions::configure(config);
-    config("num-best", &nbest)('n')
-        .self_init()("limit hypergraph paths to this many, keeping the lowest totalcost");
-    config("nbest", &nbest).verbose();
+    NbestPlusTies::configure(config);
   }
-  NbestId nbest;
-  bool multiple() const { return nbest > 1; }
   /// return number of best visited. reminder: visitor returns false if you want nbest visiting to stop before
   /// nbest
   template <class Arc, class Visitor>
   NbestId visit_nbest(IHypergraph<Arc> const& hg, Visitor const& visitor,
                       bool throwEmptySetException = false) const {
-    return BestPath(*this).visit_nbest(visitor, nbest, hg, throwEmptySetException);
+    return BestPath(*this).visit_nbest(visitor, *this, hg, throwEmptySetException);
   }
-  bool enabled() const { return nbest; }
 };
 
 struct NbestHypergraphOptions : NbestPathOptions {
@@ -1419,6 +1465,8 @@ struct NbestHypergraphOptions : NbestPathOptions {
 
     /// for visit_nbest
     bool operator()(DerivP const& d, Weight const& wtotal, NbestId nbest) const {
+      typename Weight::FloatT thisCost = wtotal.getValue();
+      valueTotal = wtotal.getValue();
       if (d->axiom()) {  // empty output string
         out.addArcFsa(start, final, EPSILON::ID, wtotal);
       } else {
@@ -1429,7 +1477,6 @@ struct NbestHypergraphOptions : NbestPathOptions {
         } else
           lastHead = start;
         added = 0;
-        valueTotal = wtotal.getValue();
         d->visitTree(*this, finalIn);
         if (outOpt.epsilonFinal && added) {
           StateId preFinal = out.addState();
@@ -1476,7 +1523,6 @@ struct NbestHypergraphOptions : NbestPathOptions {
     NbestHypergraphOptions const& outOpt;
     StateId start, final, finalIn;
     bool const graph;
-
     mutable StateId lastHead;
     mutable Weight weightSince;
     mutable typename Weight::FloatT valueTotal;
@@ -1497,7 +1543,6 @@ struct NbestHypergraphOptions : NbestPathOptions {
 };
 
 struct BestPathOutOptions : PathOutOptions, NbestPathOptions {
-
   template <class Conf>
   void configure(Conf& c) {
     PathOutOptions::configure(c);
@@ -1508,7 +1553,7 @@ struct BestPathOutOptions : PathOutOptions, NbestPathOptions {
   template <class Arc>
   typename Derivation<Arc>::DerivP out_nbest(std::ostream& out, IHypergraph<Arc> const& hg) const {
     return BestPath(static_cast<BestPathOptions const&>(*this))
-        .out_nbest(out, nbest, static_cast<PathOutOptions const&>(*this), hg, !print_empty);
+        .out_nbest(out, *this, static_cast<PathOutOptions const&>(*this), hg, !print_empty);
   }
 };
 
@@ -1530,7 +1575,7 @@ struct BestPathOutToOptions : NbestHypergraphOptions, PathOutOptions {
   template <class Arc>
   typename Derivation<Arc>::DerivP out_nbest(std::ostream& out, IHypergraph<Arc> const& hg) const {
     return BestPath(static_cast<BestPathOptions const&>(*this))
-        .out_nbest(out, nbest, static_cast<PathOutOptions const&>(*this), hg, !print_empty);
+        .out_nbest(out, *this, static_cast<PathOutOptions const&>(*this), hg, !print_empty);
   }
 
   std::string outFilePrefix;
@@ -1643,17 +1688,6 @@ struct MaybeBestPathOutOptions : BestPathOutToOptions {
       o << hg;
   }
 };
-
-template <class V, class A>
-typename Derivation<A>::DerivP compute_visit_nbest(V const& v, NbestId n, IHypergraph<A> const& hg,
-                                                   BestPathOptions const& opt = BestPathOptions(),
-                                                   bool throwEmptySetException = false) {
-  BestPath::Compute<A> cb(opt, hg);
-  if (opt.noFilterNeeded(n))
-    return cb.visit_nbestFilter(n, v, cb.noFilter(), throwEmptySetException);
-  else
-    return cb.visit_nbestFilter(n, v, cb.filter(), throwEmptySetException);
-}
 
 /**
    \return whether computeTrivialBestPath will return a derivation.
@@ -1822,22 +1856,18 @@ typename Derivation<A>::DerivAndWeight bestDerivWeight(IHypergraph<A> const& hg,
 }
 
 template <class V, class A>
-typename Derivation<A>::DerivP visitNbest(V const& v, NbestId n, IHypergraph<A> const& hg,
+typename Derivation<A>::DerivP visitNbest(V const& v, NbestPlusTies n, IHypergraph<A> const& hg,
                                           BestPathOptions const& opt = BestPathOptions(),
                                           bool throwEmptySetException = false, NbestId * nVisited = 0) {
   typedef typename Derivation<A>::DerivP DerivP;
-  if (n == 1) {
+  if (n.nbest == 1) {
     typename A::Weight w;
     DerivP const& r = bestPath(hg, opt, throwEmptySetException, &w);  // no sequence point for fn params
     if (r) v(r, w, kFirstNbestId);
     if (nVisited) *nVisited = (bool)r;
     return r;
   } else {
-    BestPath::Compute<A> cb(opt, hg);
-    if (opt.noFilterNeeded(n))
-      return cb.visit_nbestFilter(n, v, cb.noFilter(), throwEmptySetException, nVisited);
-    else
-      return cb.visit_nbestFilter(n, v, cb.filter(), throwEmptySetException, nVisited);
+    return BestPath(opt).visit_nbest_get_1best(v, n, hg, throwEmptySetException, nVisited);
   }
 }
 

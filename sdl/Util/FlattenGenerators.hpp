@@ -105,7 +105,7 @@ struct FlattenGenerators : WeightFn
     return out;
   }
 
-  typedef PriorityQueue<Tip*, 4, TipPriorityPmap> Queue;
+  typedef Util::priority_queue<std::vector<Tip*>, 4, TipPriorityPmap> Queue;
   Queue queue;
   operator bool() const {
     return !queue.empty();
@@ -137,7 +137,7 @@ struct FlattenGenerators : WeightFn
       tip.base = false;
     if (tip.gen) {
       setTip(tip);
-      queue.adjustTop();
+      queue.adjust_top();
     } else
       queue.pop();
     if (wasBase) {

@@ -19,12 +19,9 @@
 #include <sdl/Util/Locale.hpp>
 #include <sdl/graehl/shared/named_main.hpp>
 
-#ifndef SDL_INLINE_HYP_CPPS
-#define SDL_INLINE_HYP_CPPS 1
-// seprate compilation => linking is actually slower
+#ifndef SDL_MINIMAL_HYP_MAIN
+#define SDL_MINIMAL_HYP_MAIN 0
 #endif
-
-#if SDL_INLINE_HYP_CPPS
 #define SDL_TRANSFORM_MAIN_LOG_WEIGHT 1
 #define SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT 1
 #include <sdl/Hypergraph/TransformMain.hpp>
@@ -32,6 +29,7 @@
 #include <sdl/Hypergraph/src/HypCompose.cpp>
 #include <sdl/Hypergraph/src/HypInside.cpp>
 #include <sdl/Hypergraph/src/HypEmpty.cpp>
+#if !SDL_MINIMAL_HYP_MAIN
 #include <sdl/Hypergraph/src/HypReweightBest.cpp>
 #include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
 #include <sdl/Hypergraph/src/HypComplement.cpp>
@@ -57,8 +55,6 @@
 #if HAVE_OPENFST
 #include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
 #endif
-#else
-#include <sdl/graehl/shared/force_link.hpp>
 #endif
 
 #if HAVE_OPENFST
@@ -67,11 +63,16 @@
 #define SDL_FOR_OPENFST_HYP_MAINS(x)
 #endif
 
-#define SDL_HYP_FOR_MAINS(x) \
+#define SDL_HYP_FOR_MAINS_MINIMAL(x) \
   x(HypBest) \
   x(HypCompose) \
   x(HypInside) \
-  x(HypEmpty) \
+  x(HypEmpty)
+
+#if SDL_MINIMAL_HYP_MAIN
+#define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x)
+#else
+#define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x) \
   x(HypReweightBest) \
   x(HypConvertCharsToTokens) \
   x(HypComplement) \
@@ -95,19 +96,8 @@
   x(HypTrie) \
   x(HypProject) \
   SDL_FOR_OPENFST_HYP_MAINS(x)
-
-
-namespace sdl {
-namespace Hypergraph {
-void forceLinkMains() {
-#if !SDL_INLINE_HYP_CPPS
-  SDL_HYP_FOR_MAINS(GRAEHL_FORCE_LINK_CLASS)
 #endif
-}
-}
-}
 
 int main(int argc, char* argv[]) {
-  sdl::Hypergraph::forceLinkMains();
   return graehl::run_named_main(argc, argv);
 }
