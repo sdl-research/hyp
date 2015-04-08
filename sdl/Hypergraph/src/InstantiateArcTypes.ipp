@@ -1,4 +1,4 @@
-// Copyright 2014-2015 SDL plc
+// Copyright 2014 SDL plc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@
     note: lack of include guard is essential.
 */
 
-#define INSTANTIATE_WEIGHT_TYPES(x) INSTANTIATE_ARC_TYPES( ArcTpl< x > ) INSTANTIATE_ARC_TYPES( ArcWithDataTpl< x > )
+#define INSTANTIATE_WEIGHT_TYPES(x) INSTANTIATE_ARC_TYPES( ArcTpl< x > )
+//INSTANTIATE_ARC_TYPES( ArcWithDataTpl< x > )
+// we use ArcWithDataTpl through its base class - copying of data isn't allowed.
 #include <sdl/Hypergraph/src/InstantiateWeightTypes.ipp>
 #undef INSTANTIATE_ARC_TYPES

@@ -1,4 +1,4 @@
-// Copyright 2014-2015 SDL plc
+// Copyright 2014 SDL plc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,34 +26,30 @@
 #include <sdl/Hypergraph/Empty.hpp>
 
 namespace sdl {
-
 namespace Hypergraph {
 
+/// r <- a-b  where b must be fsm (so we can complement then intersect)
 template <class A>
-void difference(IHypergraph<A> const& a, IHypergraph<A> const& b, IMutableHypergraph<A> *r,
-                OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties
-                )
-{
+void difference(IHypergraph<A> const& a, IHypergraph<A> const& b, IMutableHypergraph<A>* r,
+                OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties) {
   ASSERT_VALID_HG(a);
   ASSERT_VALID_HG(b);
   r->offerVocabulary(a);
   r->offerVocabulary(b);
-  if (a.getVocabulary() != b.getVocabulary()) {
+  if (a.getVocabulary() != b.getVocabulary())
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "Difference: hypergraphs must have same vocabulary");
-  }
 
   if (empty(a)) {
     r->setEmpty();
-    return;
+  } else if (!b.isFsm())
+    SDL_THROW_LOG(Hypergraph, InvalidInputException,
+                  "difference(a, b) is impossible for general CFG b - convert b to Fsm first");
+  else {
+    MutableHypergraph<A> c(kFsmOutProperties);
+    fs::complement(b, &c);
+    Hypergraph::compose(a, c, r, ComposeOptions(), onMissing);
+    ASSERT_VALID_HG(*r);
   }
-
-  if (!b.isFsm())
-    SDL_THROW_LOG(Hypergraph, InvalidInputException, "difference(a, b) is impossible for general CFG b - convert b to Fsm first");
-  MutableHypergraph<A> c(kStoreOutArcs);
-  fs::complement(b, &c);
-  sortArcs(&c);
-  compose(a, c, r, ComposeOptions(), onMissing);
-  ASSERT_VALID_HG(*r);
 }
 
 

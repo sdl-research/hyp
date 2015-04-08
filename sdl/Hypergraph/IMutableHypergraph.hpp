@@ -1,4 +1,4 @@
-// Copyright 2014-2015 SDL plc
+// Copyright 2014 SDL plc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -781,6 +781,19 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     }
   };
 };
+
+template <class Arc>
+IMutableHypergraph<Arc> const& mutableHg(IHypergraph<Arc> const& hg) {
+  assert(hg.isMutable());
+  return static_cast<IMutableHypergraph<Arc> const&>(hg);
+}
+
+
+template <class Arc>
+IMutableHypergraph<Arc> & mutableHg(IHypergraph<Arc> & hg) {
+  assert(hg.isMutable());
+  return static_cast<IMutableHypergraph<Arc> &>(hg);
+}
 
 /**
    throw exception unless properties are already (on|off), unless hg is mutable, in which case attempt to

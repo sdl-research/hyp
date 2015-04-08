@@ -1,4 +1,4 @@
-// Copyright 2014-2015 SDL plc
+// Copyright 2014 SDL plc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ struct TakeMin {
   /**
      Returns the value of a non-existent feature (namely, 0.0).
   */
-  template<class FloatT>
+  template <class FloatT>
   static FloatT getZeroFeatureValue() {
     return static_cast<FloatT>(0.0);
   }
@@ -79,7 +79,7 @@ struct Expectation {
      Returns the neg. log expectation value of a non-existent
      feature (namely, -log(0.0)).
   */
-  template<class FloatT>
+  template <class FloatT>
   static FloatT getZeroFeatureValue() {
     return FloatLimits<FloatT>::posInfinity;
   }
@@ -100,13 +100,13 @@ struct Expectation {
    the non-log value (i.e., the arc weight, e.g., a probability) times
    the feature value.
 */
-template<class T, class MapT, class SumPolicy = TakeMin>
+template <class T, class MapT, class SumPolicy = TakeMin>
 class FeatureWeightTpl : public FloatWeightTpl<T> {
  public:
   typedef T FloatT;
-  typedef void IsFeatureWeight; // used by IsFeatureWeight.hpp, FeatureWeightTpl.hpp, AlignmentFeatures.hpp
+  typedef void IsFeatureWeight;  // used by IsFeatureWeight.hpp, FeatureWeightTpl.hpp, AlignmentFeatures.hpp
 
-  typedef void HasPlusBy; // used by WeightUtil.hpp Hypergraph::plusBy
+  typedef void HasPlusBy;  // used by WeightUtil.hpp Hypergraph::plusBy
   typedef void HasTimesBy;
 
   typedef MapT Map;
@@ -128,14 +128,17 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   typedef FeatureWeightTpl<FloatT, MapT, SumPolicy> Self;
 
  public:
+#if __cplusplus >= 201103L || CPP11
+  FeatureWeightTpl() = default;
+#else
   FeatureWeightTpl() {}
+#endif
 
   /** copy ctor that immediately makes a unique writable pointer */
   FeatureWeightTpl(FeatureWeightTpl const& cpfrom, bool)
-      : Base(cpfrom),
-        pMap_(boost::make_shared<Map>(cpfrom.features())) {}
+      : Base(cpfrom), pMap_(boost::make_shared<Map>(cpfrom.features())) {}
 
-  /// default copy, operator=()
+  /// default copy, operator=(), C++11 move
 
   explicit FeatureWeightTpl(FloatT weight) : Base(weight) {}
 
@@ -143,55 +146,44 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
 
   explicit FeatureWeightTpl(int weight) : Base(weight) {}
 
-  static inline Self one() {
-    return Self(static_cast<FloatT>(0.0));
-  }
+  static inline Self one() { return Self(static_cast<FloatT>(0.0)); }
 
-  static inline Self zero() {
-    return Self(FloatLimits<FloatT>::posInfinity);
-  }
+  static inline Self zero() { return Self(FloatLimits<FloatT>::posInfinity); }
 
   typedef void HasIsZero;
-  bool isZero() const {
-    return this->value_ == FloatLimits<FloatT>::posInfinity;
-  }
+  bool isZero() const { return this->value_ == FloatLimits<FloatT>::posInfinity; }
 
   void setZero() {
     this->value_ = FloatLimits<FloatT>::posInfinity;
     pMap_.reset();
   }
+  friend inline void setZero(FeatureWeightTpl &x) { x.setZero(); }
 
   void setOne() {
     this->value_ = static_cast<FloatT>(0.0);
     pMap_.reset();
   }
+  friend inline void setOne(FeatureWeightTpl &x) { x.setOne(); }
 
   typedef void HasIsOne;
-  bool isOne() const {
-    return !this->value_ && empty();
-  }
+  bool isOne() const { return !this->value_ && empty(); }
 
   /**
      Returns const map, which may be shared with other weight
      objects.
   */
-  inline
-  Map const& features() const {
-    if (!pMap_)
-      return staticEmptyMap;
+  inline Map const& features() const {
+    if (!pMap_) return staticEmptyMap;
     return *pMap_;
   }
 
-  Map const* maybeFeatures() const {
-    return pMap_.get();
-  }
+  Map const* maybeFeatures() const { return pMap_.get(); }
 
   /**
      Returns non-const map, which is never shared with other
      weight objects (cloned here if necessary).
   */
-  inline
-  Map& featuresWrite() {
+  inline Map& featuresWrite() {
     ownMap();
     return *pMap_;
   }
@@ -199,7 +191,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   /**
      Inserts features with their values into the features map.
   */
-  template<class InputIterator>
+  template <class InputIterator>
   void insertRange(InputIterator first, InputIterator last) {
     featuresWrite().insert(first, last);
   }
@@ -207,40 +199,29 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   /**
      Inserts a feature with its value into the features map.
   */
-  void insert(key_type const& id, mapped_type const& value) {
-    featuresWrite().insert(value_type(id, value));
-  }
+  void insert(key_type const& id, mapped_type const& value) { featuresWrite().insert(value_type(id, value)); }
 
   /**
      Updates an existing feature with new value
   */
-  void update(key_type const& id, mapped_type const& value) {
-    featuresWrite()[id] = value;
-  }
+  void update(key_type const& id, mapped_type const& value) { featuresWrite()[id] = value; }
 
   /**
      Inserts a feature with its value into the features map.
   */
-  void insert(value_type const& pair) {
-    featuresWrite().insert(pair);
-  }
+  void insert(value_type const& pair) { featuresWrite().insert(pair); }
 
-  bool contains(key_type id) const {
-    return pMap_ && Util::contains(*pMap_, id);
-  }
+  bool contains(key_type id) const { return pMap_ && Util::contains(*pMap_, id); }
 
   /**
      Returns value of feature id. If feature is not stored then
      SumPolicy::getZeroFeatureValue() is returned.
   */
-  mapped_type operator[] (key_type id) const {
-    if (!pMap_)
-      return SumPolicy::template getZeroFeatureValue<mapped_type>();
+  mapped_type operator[](key_type id) const {
+    if (!pMap_) return SumPolicy::template getZeroFeatureValue<mapped_type>();
     Map const& map = *pMap_;
     const_iterator iter = map.find(id);
-    return iter == map.end() ?
-        SumPolicy::template getZeroFeatureValue<mapped_type>() :
-        iter->second;
+    return iter == map.end() ? SumPolicy::template getZeroFeatureValue<mapped_type>() : iter->second;
   }
 
   /**
@@ -259,15 +240,14 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
      sparseness of feature vectors)
   */
   template <class Fct>
-  void visitFeatureRange(key_type beginId, key_type endId,
-                         Fct const& visitFeature) const {
+  void visitFeatureRange(key_type beginId, key_type endId, Fct const& visitFeature) const {
     assert(endId >= beginId);
-    if (!pMap_)
-      return;
+    if (!pMap_) return;
     MapT const& map = *pMap_;
     typedef const_iterator Iter;
-    for (Iter lower = map.lower_bound(beginId), end = map.end(); lower!=end; ++lower) {
-      // used to iterate until upper_bound but that search is superfluous - we can just check value as we iterate
+    for (Iter lower = map.lower_bound(beginId), end = map.end(); lower != end; ++lower) {
+      // used to iterate until upper_bound but that search is superfluous - we can just check value as we
+      // iterate
       if (lower->first >= endId) break;
       visitFeature(*lower);
     }
@@ -279,75 +259,48 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   }
 
   struct AddFeature {
-    Map &map;
-    AddFeature(Self &self)
-        : map(self.featuresWrite())
-    {}
-    void operator()(value_type const& val) const {
-      map.insert(val);
-    }
+    Map& map;
+    AddFeature(Self& self) : map(self.featuresWrite()) {}
+    void operator()(value_type const& val) const { map.insert(val); }
   };
 
-  const_iterator begin() const {
-    return features().begin();
-  }
+  const_iterator begin() const { return features().begin(); }
 
-  const_iterator end() const {
-    return features().end();
-  }
+  const_iterator end() const { return features().end(); }
 
-  iterator begin() {
-    return featuresWrite().begin();
-  }
+  iterator begin() { return featuresWrite().begin(); }
 
-  iterator end() {
-    return featuresWrite().end();
-  }
+  iterator end() { return featuresWrite().end(); }
 
   bool operator==(Self const& other) const {
-    if (this->value_ != other.value_)
-      return false;
-    if (empty())
-      return other.empty();
-    if (!other.pMap_)
-      return false;
+    if (this->value_ != other.value_) return false;
+    if (empty()) return other.empty();
+    if (!other.pMap_) return false;
     return *pMap_ == *other.pMap_;
   }
 
-  bool operator!=(Self const& other) const {
-    return !(*this == other);
-  }
+  bool operator!=(Self const& other) const { return !(*this == other); }
 
   /**
      Calls empty() on the features map.
   */
-  bool empty() const {
-    return !pMap_ || pMap_->empty();
-  }
+  bool empty() const { return !pMap_ || pMap_->empty(); }
 
   /**
      Calls size() on the features map.
   */
-  std::size_t size() const {
-    return pMap_ ? pMap_->size() : 0;
-  }
+  std::size_t size() const { return pMap_ ? pMap_->size() : 0; }
 
   /**
      Removes all features (weight value is unaffected)
   */
-  void removeFeatures() {
-    pMap_.reset();
-  }
+  void removeFeatures() { pMap_.reset(); }
 
   DEFINE_OPENFST_COMPAT_FUNCTIONS(Feature)
 
-  void setFeatures(shared_ptr<Map> const& pMap) {
-    pMap_ = pMap;
-  }
+  void setFeatures(shared_ptr<Map> const& pMap) { pMap_ = pMap; }
 
-  shared_ptr<Map> const& featuresPtr() const {
-    return pMap_;
-  }
+  shared_ptr<Map> const& featuresPtr() const { return pMap_; }
 
   /**
      Multiplies this weight by another weight (using semiring
@@ -355,7 +308,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   */
   void timesBy(FeatureWeightTpl<FloatT, MapT, TakeMin> const& b) {
     // TODO: check that INF+x=x+INF=INF (or else short circuit on zero())
-    checkSumPolicy<TakeMin>(); // this weight must also use TakeMin
+    checkSumPolicy<TakeMin>();  // this weight must also use TakeMin
     this->value_ += b.value_;
     timesFeaturesBy(b);
   }
@@ -371,9 +324,8 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
      plus). This is the version for TakeMin policy.
   */
   void plusBy(FeatureWeightTpl<FloatT, MapT, TakeMin> const& b) {
-    checkSumPolicy<TakeMin>(); // this weight must also use TakeMin
-    if (!b.isZero()
-        && this->value_ > b.value_) {
+    checkSumPolicy<TakeMin>();  // this weight must also use TakeMin
+    if (!b.isZero() && this->value_ > b.value_) {
       *this = b;
     }
   }
@@ -387,19 +339,16 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
      contribution (of existing feature weights).
   */
   void timesByScaled(FeatureWeightTpl<FloatT, MapT, TakeMin> const& b, FloatT scale) {
-    this->value_ += scale*b.value_;
+    this->value_ += scale * b.value_;
     timesFeaturesBy(b);
   }
-  void timesByScaled(FeatureWeightTpl<FloatT, MapT, Expectation> const& b, FloatT) {
-    timesBy(b);
-  }
+  void timesByScaled(FeatureWeightTpl<FloatT, MapT, Expectation> const& b, FloatT) { timesBy(b); }
 
   // Feature map may be shared with other FeatureWeightTpl
   // objects. Using copy-on-write semantics.
   shared_ptr<Map> pMap_;
 
  private:
-
   /**
      Multiplies this weight by another weight (using semiring
      times). This is the version for TakeMin policy.
@@ -410,11 +359,10 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
       pMap_ = b.pMap_;
     } else if (pMap_ == b.pMap_) {
       ownMap();
-      for (iterator i = pMap_->begin(), end = pMap_->end(); i != end; ++i)
-        i->second *= 2;
+      for (iterator i = pMap_->begin(), end = pMap_->end(); i != end; ++i) i->second *= 2;
     } else {
       Map& map = featuresWrite();
-      for (const_iterator i = b.pMap_->begin(), end = b.pMap_->end();  i != end; ++i)
+      for (const_iterator i = b.pMap_->begin(), end = b.pMap_->end(); i != end; ++i)
         map[i->first] += i->second;
     }
   }
@@ -422,8 +370,8 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   void divideFeaturesBy(FeatureWeightTpl<FloatT, MapT, TakeMin> const& b) {
     MapT const* map2 = b.pMap_.get();
     if (map2) {
-      MapT &out = featuresWrite();
-      for(typename MapT::const_iterator i = map2->begin(), e = map2->end(); i != e; ++i)
+      MapT& out = featuresWrite();
+      for (typename MapT::const_iterator i = map2->begin(), e = map2->end(); i != e; ++i)
         out[i->first] -= i->second;
     }
   }
@@ -444,7 +392,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
      SumPolicy of this class is not the same as the passed sum policy
      (OtherSumPolicy).
   */
-  template<class OtherSumPolicy>
+  template <class OtherSumPolicy>
   void checkSumPolicy() {
     typedef boost::is_same<SumPolicy, OtherSumPolicy> SamePolicy;
     BOOST_STATIC_ASSERT(SamePolicy::value);
@@ -453,48 +401,39 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   static Map const staticEmptyMap;
 
 
-}; // end class
+};  // end class
 
 
-template<class FloatT, class MapT, class SumPolicy>
-MapT const
-FeatureWeightTpl<FloatT, MapT, SumPolicy>::staticEmptyMap;
+template <class FloatT, class MapT, class SumPolicy>
+MapT const FeatureWeightTpl<FloatT, MapT, SumPolicy>::staticEmptyMap;
 
-template<class FloatT, class MapT, class SumPolicy>
-inline
-bool approxEqual(FeatureWeightTpl<FloatT, MapT, SumPolicy> const& w1,
-                 FeatureWeightTpl<FloatT, MapT, SumPolicy> const& w2,
-                 FloatT epsilon = FloatConstants<FloatT>::epsilon) {
-  return Util::floatEqual(w1.getValue(), w2.getValue(), epsilon)
-      && w1.size() == w2.size()
-      && std::equal(w1.begin(), w1.end(),
-                    w2.begin(),
-                    Util::ApproxEqualMapFct<MapT>(epsilon));
+template <class FloatT, class MapT, class SumPolicy>
+inline bool approxEqual(FeatureWeightTpl<FloatT, MapT, SumPolicy> const& w1,
+                        FeatureWeightTpl<FloatT, MapT, SumPolicy> const& w2,
+                        FloatT epsilon = FloatConstants<FloatT>::epsilon) {
+  return Util::floatEqual(w1.getValue(), w2.getValue(), epsilon) && w1.size() == w2.size()
+         && std::equal(w1.begin(), w1.end(), w2.begin(), Util::ApproxEqualMapFct<MapT>(epsilon));
 }
 
 // for Expectation instead of TakeMin, see ExpectationWeight.hpp
-template<class FloatT, class MapT>
-FeatureWeightTpl<FloatT, MapT, TakeMin> plus(
-    FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
-    FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
+template <class FloatT, class MapT>
+FeatureWeightTpl<FloatT, MapT, TakeMin> plus(FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
+                                             FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
   return w1.getValue() < w2.getValue() ? w1 : w2;
 }
 
 // for Expectation instead of TakeMin, see ExpectationWeight.hpp
-template<class FloatT, class MapT>
-FeatureWeightTpl<FloatT, MapT, TakeMin> times(
-    FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
-    FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
+template <class FloatT, class MapT>
+FeatureWeightTpl<FloatT, MapT, TakeMin> times(FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
+                                              FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
   FeatureWeightTpl<FloatT, MapT, TakeMin> r(w1, true);
   r.timesBy(w2);
   return r;
 }
 
-template<class FloatT, class MapT>
-inline
-FeatureWeightTpl<FloatT, MapT, TakeMin> divide(
-    FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
-    FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
+template <class FloatT, class MapT>
+inline FeatureWeightTpl<FloatT, MapT, TakeMin> divide(FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
+                                                      FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
   typedef FeatureWeightTpl<FloatT, MapT, TakeMin> FeatW;
   typedef typename MapT::mapped_type FeatValueT;
   FeatW result(w1);
@@ -502,18 +441,15 @@ FeatureWeightTpl<FloatT, MapT, TakeMin> divide(
   return result;
 }
 
-template<class FloatT, class MapT, class SumPolicy>
-std::ostream& operator<<(std::ostream& out,
-                         FeatureWeightTpl<FloatT, MapT, SumPolicy> const& weight) {
+template <class FloatT, class MapT, class SumPolicy>
+std::ostream& operator<<(std::ostream& out, FeatureWeightTpl<FloatT, MapT, SumPolicy> const& weight) {
   out << weight.getValue();
-  if (!weight.empty())
-    Util::printRange(out, weight, Util::RangeSep(",", "[","]"));
+  if (!weight.empty()) Util::printRange(out, weight, Util::RangeSep(",", "[", "]"));
   return out;
 }
 
-template<class FloatT, class MapT, class SumPolicy>
-void parseWeightString(std::string const& str,
-                       FeatureWeightTpl<FloatT, MapT, SumPolicy>* weight);
+template <class FloatT, class MapT, class SumPolicy>
+void parseWeightString(std::string const& str, FeatureWeightTpl<FloatT, MapT, SumPolicy>* weight);
 
 /**
    Adds delta (default: 1) to value of feature id. Either insert(id, delta), or
@@ -523,20 +459,23 @@ void parseWeightString(std::string const& str,
 
 */
 template <class FeatureWt>
-inline void incrementFeatureValue(FeatureWt &wt
-                                  , typename FeatureWt::FeatureIdT id
-                                  , typename FeatureWt::FeatureValueT delta = typename FeatureWt::FeatureValueT(1.0)) {
+inline void incrementFeatureValue(FeatureWt& wt, typename FeatureWt::FeatureIdT id,
+                                  typename FeatureWt::FeatureValueT delta
+                                  = typename FeatureWt::FeatureValueT(1.0)) {
   wt.featuresWrite()[id] += delta;
 }
 
 template <class Float, class Map>
-FeatureWeightTpl<Float, Map, Expectation> divide(FeatureWeightTpl<Float, Map, Expectation> const& w1, FeatureWeightTpl<Float, Map, Expectation> const&) {
+FeatureWeightTpl<Float, Map, Expectation> divide(FeatureWeightTpl<Float, Map, Expectation> const& w1,
+                                                 FeatureWeightTpl<Float, Map, Expectation> const&) {
   SDL_THROW_LOG(Hypergraph.FeatureWeightTpl, UnimplementedException, "TODO: divide ExpectationWeight?");
   return w1;
 }
 
-template<class FloatT, class MapT, class SumPolicy>
-inline char const* weightName(FeatureWeightTpl<FloatT, MapT, SumPolicy> *) { return "Feature"; }
+template <class FloatT, class MapT, class SumPolicy>
+inline char const* weightName(FeatureWeightTpl<FloatT, MapT, SumPolicy>*) {
+  return "Feature";
+}
 
 
 }}

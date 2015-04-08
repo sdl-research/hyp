@@ -1,4 +1,4 @@
-// Copyright 2014-2015 SDL plc
+// Copyright 2014 SDL plc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -210,9 +210,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   static ArcFilter filterTrue() { return (ArcFilter)fnFilterTrue; }
   static ArcFilter filterFalse() { return (ArcFilter)fnFilterFalse; }
 
-  ArcTpl() : head_(Hypergraph::kNoState), tails_(), weight_() {
-    setOne(weight_);
-  }
+  ArcTpl() : head_(Hypergraph::kNoState), tails_(), weight_() { setOne(weight_); }
 
   explicit ArcTpl(Weight const& w) : weight_(w) {}
 
@@ -229,12 +227,8 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
       : head_(head), tails_(1, tail), weight_(w) {}
 
   // for ConvertCharsToTokens
-  ArcTpl(Head head, Weight const& w)
-      : head_(head), weight_(w) {}
-  ArcTpl(Head head, StateId tail)
-      : head_(head), tails_(1, tail) {
-    setOne(weight_);
-  }
+  ArcTpl(Head head, Weight const& w) : head_(head), weight_(w) {}
+  ArcTpl(Head head, StateId tail) : head_(head), tails_(1, tail) { setOne(weight_); }
 
   /**
      for binarization - head set later
@@ -245,6 +239,26 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
     tails_[1] = lexState;
   }
 
+#if __cplusplus >= 201103L || CPP11
+/// move
+#if 0
+  ArcTpl(ArcTpl&& o) noexcept  : head_(o.head_), tails_(std::move(o.tails_)), weight_(std::move(o.weight_))
+  {}
+  ArcTpl& operator=(ArcTpl&& o) noexcept
+      {
+    assert(&o != this); // std::vector doesn't check for self-move so why should we?
+    head_ = o.head_;
+    tails_ = std::move(o.tails_);
+    weight_ = std::move(o.weight_);
+  }
+#else
+  // virtual dtor might have prevented automatic use of these
+  ArcTpl(ArcTpl && o) = default;
+  ArcTpl& operator=(ArcTpl && o) = default;
+#endif
+  ArcTpl(ArcTpl const& o) = default;
+  ArcTpl& operator=(ArcTpl const& o) = default;
+#endif
   /**
      for making a copy with a tail id substitution. this could be a free fn but
      this is more efficient (no extra copying).
@@ -496,8 +510,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
   ArcWithDataTpl() : Base(), data_(NULL), deleter_(NULL) {}
 
-  ArcWithDataTpl(StateId head, StateIdContainer const& tails,
-                 Weight const& w = Weight::one())
+  ArcWithDataTpl(StateId head, StateIdContainer const& tails, Weight const& w = Weight::one())
       : Base(head, tails, w), data_(NULL), deleter_(NULL) {}
 
   ArcWithDataTpl(StateId from, StateId label, Weight const& w, StateId to)
@@ -558,6 +571,36 @@ class ArcWithDataTpl : public ArcTpl<W> {
   }
 
   bool isDataEmpty() const { return data_ == NULL; }
+
+#if __cplusplus >= 201103L || CPP11
+  /// move
+  ArcWithDataTpl(ArcWithDataTpl&& o) noexcept : Base(static_cast<Base&&>(o)),
+                                                data_(o.data_),
+                                                deleter_(o.deleter_) {
+    o.deleter_ = 0;
+  }
+  ArcWithDataTpl& operator=(ArcWithDataTpl&& o) noexcept {
+    Base::operator=(static_cast<Base&&>(o));
+    data_ = o.data_;
+    deleter_ = o.deleter_;
+    o.deleter_ = 0;
+  }
+#endif
+  /**
+     alternative to making copy private: don't copy data. we could copy data but
+     not deleter but then lifetime of source (may have been temporary) isn't
+     known. this way programmer errors referencing copied data will be noticed.
+
+     another alternative: change from deleter ptr to delete-or-clone ptr, or
+     just use boost::shared_ptr<void> which does refcount/delete
+  */
+  ArcWithDataTpl(ArcWithDataTpl const& o) : Base(static_cast<Base const&>(o)), data_(), deleter_() {}
+
+  ArcWithDataTpl& operator=(ArcWithDataTpl const& o) {
+    operator=(static_cast<Base const&>(o));
+    data_ = 0;
+    deleter_ = 0;
+  }
 
  private:
   void* data_;

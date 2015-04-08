@@ -1,4 +1,4 @@
-// Copyright 2014-2015 SDL plc
+// Copyright 2014 SDL plc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -218,13 +218,32 @@ class EarleyParser {
   typedef TailId DotPos;
 
   struct Item {
-    Item() : from(kNoState), to(kNoState), arc(NULL), dotPos(0), lastWasPhiOrEps(false) {}
+    Item()
+        : from(kNoState)
+        , to(kNoState)
+        , arc(NULL)
+        , dotPos(0)
+        , agendaWeight(HUGE_VAL)
+        , chartWeight(HUGE_VAL)
+        , lastWasPhiOrEps(false) {}
 
     Item(StateId from_, StateId to_, Arc* arc_, TailId dotPos_ = 0)
-        : from(from_), to(to_), arc(arc_), dotPos(dotPos_), lastWasPhiOrEps(false) {}
+        : from(from_)
+        , to(to_)
+        , arc(arc_)
+        , dotPos(dotPos_)
+        , agendaWeight(HUGE_VAL)
+        , chartWeight(HUGE_VAL)
+        , lastWasPhiOrEps(false) {}
 
     Item(StateId from_, StateId to_, Arc* arc_, TailId dotPos_, bool lastWasPhiOrEps_)
-        : from(from_), to(to_), arc(arc_), dotPos(dotPos_), lastWasPhiOrEps(lastWasPhiOrEps_) {}
+        : from(from_)
+        , to(to_)
+        , arc(arc_)
+        , dotPos(dotPos_)
+        , agendaWeight(HUGE_VAL)
+        , chartWeight(HUGE_VAL)
+        , lastWasPhiOrEps(lastWasPhiOrEps_) {}
 
     bool isComplete() const { return dotPos == arc->getNumTails(); }
 
@@ -315,7 +334,7 @@ class EarleyParser {
   // for an example
   void pushAgendaItem(Item* item, Weight agendaWeight) {
     Hypergraph::removeFeatures(agendaWeight);
-    if (item->agendaWeight == Weight::zero()) {
+    if (isZero(item->agendaWeight)) {
       item->agendaWeight = agendaWeight;
       agenda_.push(item);
       SDL_TRACE(Hypergraph.Compose, "Pushing new item " << dbgItem(item, *this));
@@ -698,11 +717,11 @@ class EarleyParser {
       Item* item = agenda_.top();
       agenda_.pop();
       Weight agendaWeight = item->agendaWeight;
-      item->agendaWeight = Weight::zero();
+      setZero(item->agendaWeight);
       Weight oldChartWeight = item->chartWeight;
       plusBy(agendaWeight, item->chartWeight);
       // Enter into chart, unless already there
-      if (oldChartWeight == Weight::zero()) {
+      if (isZero(oldChartWeight)) {
         const bool isComplete = item->isComplete();
         const bool isFinalReached = isComplete && cfg_.final() == item->arc->head()
                                     && fst_.start() == item->from && fst_.final() == item->to;
@@ -894,11 +913,14 @@ void EarleyParser<Arc>::createResultArcs(Item* item, StateId head, ItemAndMatche
 
 ///
 
-struct ComposeOptions {
+struct ComposeOptions : fs::FstComposeOptions {
   explicit ComposeOptions() {}
 
   template <class Configure>
   void configure(Configure const& config) {
+    fs::FstComposeOptions::configure(config);
+    config.is("Compose");
+    config("CFG*FST compose (for better speed, prune before composing)");
     // currently no options here
   }
 };
@@ -990,7 +1012,10 @@ void compose(HgMaybeConstCfg& cfgIn, HgMaybeConstFst& fstIn, IMutableHypergraph<
   typename HgMaybeConstFst::ConstImmutablePtr pFstCopy = ensureProperties(fstIn, reqFstProp, 0, 0, onMissing);
   SDL_DEBUG(Hypergraph.Compose, "compose fst props post: " << printProperties(*pFstCopy));
 
-  composeImpl(*pCfgCopy, *pFstCopy, resultCfg, opts);
+  if (false && pFstCopy->isMutable() && pCfgCopy->isFsmLike())
+    fs::compose(*pCfgCopy, mutableHg(*pFstCopy), resultCfg, opts);
+  else
+    composeImpl(*pCfgCopy, *pFstCopy, resultCfg, opts);
   SDL_DEBUG(Hypergraph.Compose, "composed: props=" << resultCfg->properties() << "\n" << *resultCfg);
 }
 
@@ -1000,13 +1025,13 @@ void intersect(HgMaybeConstCfg& hgCfg, HgMaybeConstFst& hgFst, IMutableHypergrap
   if (hgCfg.hasOutputLabels() || hgFst.hasOutputLabels()) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "intersection is for non-transducing hypergraphs/fsts");
   }
-  compose(hgCfg, hgFst, pHgResult, ComposeOptions(), onMissing);
+  Hypergraph::compose(hgCfg, hgFst, pHgResult, ComposeOptions(), onMissing);
 }
 
 template <class Arc>
 struct ComposeTransform;
 
-struct ComposeTransformOptions : ComposeOptions, TransformOptionsBase, fs::FstComposeOptions {
+struct ComposeTransformOptions : ComposeOptions, TransformOptionsBase {
   template <class Arc>
   struct TransformFor {
     typedef ComposeTransform<Arc> type;
@@ -1019,10 +1044,7 @@ struct ComposeTransformOptions : ComposeOptions, TransformOptionsBase, fs::FstCo
   template <class Config>
   void configure(Config& config) {
     ComposeOptions::configure(config);
-    FstComposeOptions::configure(config);
     if (addFstOption) config("fst", &fst)("name of fst hypergraph resource (VHG or FHG)").require();
-    config.is("Compose");
-    config("CFG*FST compose (for better speed, prune before composing)");
   }
 
   bool configureVocabulary() const { return false; }
@@ -1132,11 +1154,11 @@ struct ComposeTransform : TransformBase<Transform::Inout> {
     SDL_DEBUG(Compose, "transform input hg vocabulary @ " << r.get() << " should match fst vocabulary @"
                                                           << (fst ? fst->getVocabulary().get() : NULL));
     if (fst && r.get() != fst->getVocabulary().get()) {
-      SDL_THROW_LOG(
-          Hypergraph.Compose, ConfigException,
-          "fst '" << fstname << "' has different vocabulary '" << vocabName(fst->getVocabulary().get())
-          << "' from input vocabulary '" << vocabName(r.get())
-          << "' - reconfigure so 'input-vocab' agrees with 'hg-resource.vocabulary:' or 'compose.vocabulary:'.");
+      SDL_THROW_LOG(Hypergraph.Compose, ConfigException,
+                    "fst '" << fstname << "' has different vocabulary '"
+                            << vocabName(fst->getVocabulary().get()) << "' from input vocabulary '"
+                            << vocabName(r.get()) << "' - reconfigure so 'input-vocab' agrees with "
+                                                     "'hg-resource.vocabulary:' or 'compose.vocabulary:'.");
     }
     return r;
   }
