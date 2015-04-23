@@ -22,7 +22,7 @@
 
 #if defined(_MSC_VER) || defined(ANDROID)
 //TODO@SK: boost is failing to find icu at link time. investigate whether icuin.lib or icudt.lib should be used, or possibly the debug versions instead of release
-// e.g. missing icu_48::Calendar::createInstance(...)
+// e.g. missing icu_54::Calendar::createInstance(...)
 # define SDL_BOOST_LOCALE 0
 #else
 # define SDL_BOOST_LOCALE 1

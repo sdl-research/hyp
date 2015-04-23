@@ -34,7 +34,7 @@ void adlSwap(T &to, T &from) {
 
 template <class T>
 void moveAssign(T &to, T &from) {
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
   to = std::move(from);
 #else
   adlSwap(to, from);

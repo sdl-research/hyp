@@ -79,7 +79,6 @@ endmacro()
 # i tried setting these variables in a function using set(VAR "val" PARENT_SCOPE) per stackoverflow and it didn't work.
 # so we use macros for setting globals
 macro(sdl_enable_cpp11)
-  message(STATUS "using c++11 - adding #define CPP11 1 since gcc pre-4.7 didn't bump __cplusplus")
   set(SDL_CPP11 1)
   sdl_add_cflags("-std=c++11")
   if (CMAKE_COMPILER_IS_GNUXX)
@@ -92,7 +91,6 @@ macro(sdl_enable_cpp11)
       # but this will only work if you install newer clang + libc++ - not an old xcode version
     endif()
   endif()
-  add_definitions("-DCPP11=1")
 
   #TODO@JG: investigate performance / regression changes between USE_BOOST_UNORDERED_SET 0 and 1
   add_definitions("-DUSE_BOOST_UNORDERED_SET=1")

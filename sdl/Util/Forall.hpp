@@ -43,7 +43,7 @@
 #define forall (a, b) for (a : b)
 #define SDL_UTIL_forall(a, b) for (a : b)
 #else
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
 #define SDL_UTIL_forall(a, b) for (a : b)
 #else
 #define SDL_UTIL_forall BOOST_FOREACH

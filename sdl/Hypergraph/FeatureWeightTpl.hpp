@@ -128,7 +128,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   typedef FeatureWeightTpl<FloatT, MapT, SumPolicy> Self;
 
  public:
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
   FeatureWeightTpl() = default;
 #else
   FeatureWeightTpl() {}

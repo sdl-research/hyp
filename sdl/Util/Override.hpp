@@ -62,7 +62,7 @@
 #define SDL_FINAL final
 #else
 #if __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 7
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
 #if !defined(HAVE_CPP11_FINAL)
 #define HAVE_CPP11_FINAL 1
 #endif

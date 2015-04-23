@@ -239,7 +239,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
     tails_[1] = lexState;
   }
 
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
 /// move
 #if 0
   ArcTpl(ArcTpl&& o) noexcept  : head_(o.head_), tails_(std::move(o.tails_)), weight_(std::move(o.weight_))
@@ -572,7 +572,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
   bool isDataEmpty() const { return data_ == NULL; }
 
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
   /// move
   ArcWithDataTpl(ArcWithDataTpl&& o) noexcept : Base(static_cast<Base&&>(o)),
                                                 data_(o.data_),

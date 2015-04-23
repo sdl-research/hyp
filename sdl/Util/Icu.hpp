@@ -59,7 +59,7 @@ inline Slice toSlice(icu::StringPiece const& s) {
 namespace Util {
 
 #ifdef _WIN32
-typedef icu_48::Normalizer2 IcuNormalizer2;
+typedef icu_54::Normalizer2 IcuNormalizer2;
 #else
 typedef icu::Normalizer2 IcuNormalizer2;
 #endif

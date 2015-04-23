@@ -33,13 +33,13 @@ template <typename Symbol>
 struct SpecialSymbolTemplate {
   static std::string const TOKEN;
   static Sym const ID_LINKED;
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
   static constexpr Sym ID = {Symbol::id};
 #else
   static Sym const ID;  // = { Symbol::id };
 #endif
 };
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
 template <typename Symbol>
 Sym constexpr SpecialSymbolTemplate<Symbol>::ID;
 #else

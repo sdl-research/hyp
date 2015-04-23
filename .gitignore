@@ -28,3 +28,5 @@ xmtpath.sh
 hyp-tutorial.out
 hyp-tutorial.toc
 hyp-tutorial.aux
+dependency-reduced-pom.xml
+sdl/CMakeLists.txt.user

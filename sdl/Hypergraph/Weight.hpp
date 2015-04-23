@@ -106,7 +106,7 @@ class FloatWeightTpl : public WeightBase {
   bool isOne() const { return !value_; }
   friend inline void setOne(FloatWeightTpl& x) { x.value_ = 0; }
 
-#if __cplusplus >= 201103L || CPP11
+#if __cplusplus >= 201103L
   FloatWeightTpl() = default;  // uninitialized
 #else
   FloatWeightTpl() {}  // uninitialized

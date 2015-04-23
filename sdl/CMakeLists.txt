@@ -28,6 +28,11 @@ endif()
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
+if(SDL_CHECK_LICENSE)
+  message(STATUS "Enabling license/authentication check")
+  add_definitions(-DSDL_CHECK_LICENSE)
+endif()
+
 if(NOT DEFINED SDL_DEBUG_SYMBOLS)
   set(SDL_DEBUG_SYMBOLS on)
 elseif (SDL_PRODUCTION AND CMAKE_BUILD_TYPE MATCHES "Release")
@@ -276,7 +281,7 @@ if(WIN32)
   add_definitions(-DWIN32 -D_SCL_SECURE_NO_WARNINGS -D__TBB_NO_IMPLICIT_LINKAGE)
 
   # Set Boost options
-  set(SDL_BOOST_MINOR 55)
+  set(SDL_BOOST_MINOR 57)
   set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
   set(Boost_ADDITIONAL_VERSIONS "1.${SDL_BOOST_MINOR}" "1.${SDL_BOOST_MINOR}.0")
   set(Boost_find_version "1.${SDL_BOOST_MINOR}.0")
@@ -353,17 +358,11 @@ if(USING_GCC)
       add_definitions("-fno-tree-vectorize") # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53533
     else()
       set(SDL_HAVE_GCC_4_9 1)
-      # https://gcc.gnu.org/wiki/Cxx11AbiCompatibility:
 
-      # summary: libstdc++ is *nearly* binary ABI compatible; see details; it's
-      # best to rebuild all the libs with -std=c++11, though.
+      #TODO: change to 1 once we have rebuilt all relevant (C++) externals
+      sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
 
-      # notably: list now has size so operations modifying lists of types in an
-      # external lib won't inline correctly, and map etc. erase now return an
-      # iterator instead of void.
-
-      # sdl_enable_cpp11()
-      # message(STATUS "Found gcc 4.9 or later, which means we're trying C++11, which should improve performance and allow for clearer code.")
+      sdl_enable_cpp11()
     endif()
   endif()
 elseif(USING_CLANG)
@@ -533,16 +532,16 @@ if(UNIX)
   endif()
 
   if(LINUX)
-    set(Boost_find_version 1.55.0)
+    set(Boost_find_version 1.57.0)
     set(Boost_NO_SYSTEM_PATHS 1)
-    set(SDL_BOOST_MINOR 55)
-    set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_55_0")
+    set(SDL_BOOST_MINOR 57)
+    set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_57_0")
     set(Boost_COMPILER "-gcc44")
     set(Boost_USE_STATIC_LIBS OFF)
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
     set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
-    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-4.8")
+    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-5.4")
 
   endif()
 
@@ -741,12 +740,7 @@ if(SDL_UNIT_TEST_NO_SHARED)
 endif()
 
 if(SDL_UNIT_TEST_NO_SHARED)
-  if(SDL_BOOST_MINOR EQUAL 49)
-    #something changed about boost unit test between 1.49 and 1.55.
-    if(UNIX)
-      add_definitions(-DBOOST_TEST_DYN_LINK)
-    endif()
-  elseif(NOT WIN32)
+  if(NOT WIN32)
     add_library(boost_unit_test_framework STATIC IMPORTED)
     list(APPEND Boost_LIBRARIES boost_unit_test_framework)
     if (APPLE)
@@ -760,7 +754,7 @@ if(SDL_UNIT_TEST_NO_SHARED)
     endif()
     MESSAGE(STATUS "Boost unit test framework: ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC}")
 
-    #see http://www.boost.org/doc/libs/1_55_0/libs/test/doc/html/utf/compilation.html#utf.flag.alt-init-api
+    #see http://www.boost.org/doc/libs/1_57_0/libs/test/doc/html/utf/compilation.html#utf.flag.alt-init-api
 
     set_target_properties(boost_unit_test_framework PROPERTIES IMPORTED_LOCATION ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC})
   endif()
