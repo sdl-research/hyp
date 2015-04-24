@@ -718,7 +718,7 @@ class EarleyParser {
     SDL_TRACE(Hypergraph.Compose, "buildChart");
     init();
     while (!agenda_.empty()) {
-      Item* item = agenda_.top();
+      Item* item = agenda_.front();
       agenda_.pop();
       Weight agendaWeight = item->agendaWeight;
       setZero(item->agendaWeight);
@@ -769,9 +769,20 @@ class EarleyParser {
   // foreach position and CFG state
   std::vector<std::set<StateId> > alreadyPredicted_;
 
-  // std::queue<Item*> agenda_;
-  //TODO: is priority necessary? do we want greatest "from" at top?
-  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority> > agenda_;
+// TODO: it's unclear what queueing discipline is required - the only
+// interesting-looking cfg*fst composition test we have is in
+// regtest-compose-cfg-unbin.yml
+#if 1
+  std::queue<Item*> agenda_;
+#else
+  // here we have intentionally placed the earliest spans to be processed
+  // first. this represents a change from markus' code as he left it, but
+  // reflects his recollected intent. the fact that tests passed while we had
+  // the opposite (std::greater) indicates that it may not matter, or we need
+  // better tests.
+  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::less<ItemPriority> > agenda_;
+#endif
+
   std::set<Item*> finalItems_;
 
   typedef std::map<Item*, std::set<BackPointer> > BackPointerMap;

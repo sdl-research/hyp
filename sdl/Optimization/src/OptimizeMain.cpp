@@ -64,7 +64,7 @@ sdl::Util::DefaultLocaleFastCout initCout;
 std::string getLibraryName(std::string const& stem) {
 #if defined _WIN64 || defined _WIN32
   return stem + "-shared.dll";
-#elif defined __APPLE__
+#elif defined(__APPLE__)
   return "lib" + stem + "-shared.dylib";
 #else
   return "lib" + stem + "-shared.so";
