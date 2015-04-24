@@ -362,7 +362,7 @@ if(USING_GCC)
       #TODO: change to 1 once we have rebuilt all relevant (C++) externals
       sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
 
-      sdl_enable_cpp11()
+      #sdl_enable_cpp11()
     endif()
   endif()
 elseif(USING_CLANG)

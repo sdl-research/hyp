@@ -122,7 +122,7 @@ class L2RegularizeFct : public IRegularizeFct<FloatT> {
 template <class FloatT>
 class IObjectiveFunction {
  protected:
-  boost::shared_ptr<IRegularizeFct<FloatT> > regularize_;
+  sdl::shared_ptr<IRegularizeFct<FloatT> > regularize_;
 
  public:
   virtual void setRegularizeFct(IRegularizeFct<FloatT>* f) { regularize_.reset(f); }

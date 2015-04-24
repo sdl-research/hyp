@@ -51,7 +51,6 @@ using boost::static_pointer_cast;
 using boost::dynamic_pointer_cast;
 using boost::const_pointer_cast;
 
-
 template <class Ptr>
 struct PrintPtr {
   Ptr const& ptr;

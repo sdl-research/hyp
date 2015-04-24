@@ -134,13 +134,13 @@ struct FstComposeOptions : SaveFstOptions {
   FstComposeOptions()
       : fstCompose(true)
       , allowDuplicatePaths(false)
-      , sortBestFirst(false)
+      , sortBestFirst(true)
       , epsilonMatchingFilter(true)
       , allowDuplicatePathsIf1Best(false) {}
 
   template <class Arc>
   bool willLazyFsCompose(Hypergraph::IHypergraph<Arc> const& hg) const {
-    return fstCompose && hg.isFsm();
+    return fstCompose && hg.isFsm() && usingLazyBest();
   }
 
   template <class Config>
@@ -149,7 +149,7 @@ struct FstComposeOptions : SaveFstOptions {
     config("fst-compose", &fstCompose)
         .self_init()("true: optimized fst1*fst2 compose (false: cfg*fst, which is slower)");
     config("sort-best-first", &sortBestFirst).self_init()(
-        "for fst-compose, attempt to sort out-arcs best-first (ignored for non-mutable hypergraphs)");
+        "for fst-compose, if not saving whole output HG attempt to sort out-arcs best-first (ignored for non-mutable hypergraphs)");
     config("epsilon-matching-paths", &epsilonMatchingFilter).self_init()(
         "use a three-valued filter state that prefers matching input x:<eps> match <eps>:y directly into "
         "x:y. this result may be larger or smaller. (TODO: seems buggy - ate some paths in testing)");
@@ -820,7 +820,7 @@ template <class Filter, class Arc1, class MatchHg, class ArcOut>
 void composeWithEpsilonFilter(IMutableHypergraph<Arc1>& inHg, MatchHg& matchHg,
                               IMutableHypergraph<ArcOut>* outHg, FstComposeOptions const& opt,
                               WhichFstComposeSpecials which = WhichFstComposeSpecials::undefined()) {
-  bool makeBestFirst = opt.sortBestFirst;
+  bool makeBestFirst = opt.sortBestFirst && opt.usingLazyBest();
   if (makeBestFirst) inHg.forceBestFirstArcs();
   composeWithEpsilonFilterImpl<HypergraphFst, Filter>(inHg, matchHg, outHg, opt, which);
 }

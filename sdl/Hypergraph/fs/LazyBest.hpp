@@ -69,8 +69,8 @@ struct LazyBestOptions {
   void configure(Config& config) {
     config.is("LazyBest");
     config("best-first lazy fst best-path search");
-    config("expand-more-arcs", &expandMoreArcs)(
-        "to counter for slightly not-best-first arcs, estimate the cost of the next arc as the last arc less "
+    config("expand-more-arcs", &expandMoreArcs).verbose()(
+        "to counter for slightly not-best-first-sorted arcs, estimate the cost of the next arc as the last arc less "
         "this margin. if this is INF then every arc of a state will be expanded when it's reached").init(0);
     config("remove-epsilon", &removeEpsilon)
         .init(true)("possibly remove some epsilon transitions in the result (if prune-to-nbest: 1)");
@@ -195,18 +195,6 @@ struct LazyBest : DistanceFn {
 
 
  private:
-  /**
-     for unordered_set.
-  */
-  struct BestHandle {
-    Best* p;
-    bool operator==(BestHandle const& o) const { return p->dst == o.p->dst; }
-    friend inline std::size_t hash_value(BestHandle const& o) { return boost::hash<State>()(o.p->dst); }
-    Best* operator->() const { return p; }
-    operator Best*() const { return p; }
-    Best& operator*() const { return *p; }
-  };
-
 
   typedef Best* BestP;
 
@@ -274,8 +262,8 @@ struct LazyBest : DistanceFn {
       // we don't bother to allocate out of pool because you're not allowed to use
       // any of the data structures after constructor, which does all the work
       seed.setDst(start);
-      seed.initDistance(0);
       seed.init(fst);
+      seed.heuristic = seed.distance = seed.estimatedSuccessorDistance = 0;
       bests.insert(&seed);
       queue.push(&seed);
       bestToFinal(bestPathOut);
@@ -322,6 +310,7 @@ struct LazyBest : DistanceFn {
           bestForDst->init(fst, &from);
           const_cast<BestP&>(*iNew.first) = bestForDst;  // same key/hash/equal so ok
           queue.push(bestForDst);
+          assert(bestForDst->index <= queue.size());
           // TODO: valgrind jump depends on uninit warning - compile w/ option for d_ary_heap that prevent
           // this?
         } else {
@@ -332,7 +321,8 @@ struct LazyBest : DistanceFn {
           bestForDst->improveArc(arc);  // set new better arc; doesn't change key/hash/equal
           bestForDst->init(fst, &from);  // set new src state, reset generator
           bestForDst->initDistance(distance);
-          queue.update(bestForDst);
+          queue.push_or_update(bestForDst);
+          assert(bestForDst->index <= queue.size());
         }
       } else  // no more arcs
         queue.pop();

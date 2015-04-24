@@ -136,7 +136,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
 
   /** copy ctor that immediately makes a unique writable pointer */
   FeatureWeightTpl(FeatureWeightTpl const& cpfrom, bool)
-      : Base(cpfrom), pMap_(boost::make_shared<Map>(cpfrom.features())) {}
+      : Base(cpfrom), pMap_(sdl::make_shared<Map>(cpfrom.features())) {}
 
   /// default copy, operator=(), C++11 move
 
@@ -382,9 +382,9 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   */
   void ownMap() {
     if (!pMap_)
-      pMap_ = boost::make_shared<Map>();
+      pMap_ = sdl::make_shared<Map>();
     else if (!pMap_.unique())
-      pMap_ = boost::make_shared<Map>(*pMap_);
+      pMap_ = sdl::make_shared<Map>(*pMap_);
   }
 
   /**

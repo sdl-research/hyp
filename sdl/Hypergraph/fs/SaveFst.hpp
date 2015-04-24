@@ -35,6 +35,10 @@ struct SaveFstOptions : LazyBestOptions, PruneToNbestOptions {
   std::size_t reserveStates;
   bool forceOutArcs;
 
+  bool usingLazyBest() const {
+    return pruneToNbest == 1;
+  }
+
   SaveFstOptions() : PruneToNbestOptions(0), reserveStates(1000000), forceOutArcs(true) {}
   template <class Config>
   void configure(Config& config) {
@@ -133,7 +137,7 @@ void saveFstComplete(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >
 */
 template <class Fst>
 void saveFst(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >& outHg, SaveFstOptions const& opt) {
-  if (opt.pruneToNbest == 1) {
+  if (opt.usingLazyBest()) {
     outHg.setEmpty();
     lazyBestToHg(fst, outHg, opt);
   } else

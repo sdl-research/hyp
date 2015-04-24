@@ -130,7 +130,7 @@ int main(int ac, char* av[]) {
       std::cout << '\n' << "The YAML config file must contain a module of type 'OptimizationProcedure'\n"
                 << "with the following options:\n\n";
       Config::showHelp(std::cout, &config);
-      return 0;
+      Util::quickExit(0);
     }
 
     SDL_INFO(Optimization.OptimizeMain, "Float type: " << getSdlFloatName());
@@ -220,10 +220,10 @@ int main(int ac, char* av[]) {
 
   } catch (std::exception const& e) {
     std::cerr << e.what() << '\n';
-    return -1;
+    Util::quickExit(1);
   }
   Util::quickExit(0);
   // helps w/ undiagnosed shared-object-related static destruction double-free bug (by skipping static
   // destructors)
-  return 0;
+  return 0; // unreachable
 }

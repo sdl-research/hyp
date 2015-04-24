@@ -46,7 +46,7 @@ GCC_DIAG_OFF(maybe-uninitialized)
 #endif
 #include <boost/lexical_cast.hpp>
 #if HAVE_GCC_4_6
-    GCC_DIAG_ON(maybe-uninitialized)
+GCC_DIAG_ON(maybe-uninitialized)
 #endif
 
 namespace sdl {

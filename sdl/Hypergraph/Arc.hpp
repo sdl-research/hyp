@@ -592,7 +592,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
      known. this way programmer errors referencing copied data will be noticed.
 
      another alternative: change from deleter ptr to delete-or-clone ptr, or
-     just use boost::shared_ptr<void> which does refcount/delete
+     just use sdl::shared_ptr<void> which does refcount/delete
   */
   ArcWithDataTpl(ArcWithDataTpl const& o) : Base(static_cast<Base const&>(o)), data_(), deleter_() {}
 
