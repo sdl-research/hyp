@@ -23,30 +23,26 @@ namespace Hypergraph {
 #define USAGE_HypCompose "Compose cfg*fsm*...*fsm"
 
 struct HypCompose : TransformMain<HypCompose> {
-  static bool nbestHypergraphDefault() { return false; } // for backward compat w/ regtests mostly
+  static bool nbestHypergraphDefault() { return false; }  // for backward compat w/ regtests mostly
 
-  HypCompose()
-      : TransformMain<HypCompose>("Compose", USAGE_HypCompose)
-  {
+  HypCompose() : TransformMain<HypCompose>("Compose", USAGE_HypCompose) {
     opt.require_ins();
     composeOpt.addFstOption = false;
     composeOpt.fstCompose = true;
   }
 
-  void declare_configurable() {
-    this->configurable(&composeOpt);
-  }
+  void declare_configurable() { this->configurable(&composeOpt); }
 
   static BestOutput bestOutput() { return kBestOutput; }
   static LineInputs lineInputs() { return kNoLineInputs; }
 
   ComposeTransformOptions composeOpt;
 
-  Properties properties(int i) const {  //0 is out, 1 is cfg, 2 and on are all fsms
-    return kDefaultProperties
-        | kStoreFirstTailOutArcs
-        ;
+#if 0
+  Properties properties(int i) const {  //0 is out, 1 is cfg (or if fst*fst we want outarcs), 2 and on are all fsms
+    return i == 1 ? (kComposeCfgRequiredProperties|kFsmOutProperties) : kFsmOutProperties;
   }
+#endif
 
   enum {
     has_transform1 = false,
@@ -56,13 +52,13 @@ struct HypCompose : TransformMain<HypCompose> {
   char const* transform2sep() const { return " * "; }
 
   template <class Arc>
-  bool transform2mm(IMutableHypergraph<Arc> & hg1, IMutableHypergraph<Arc> & hg2, IMutableHypergraph<Arc> *result) {
+  bool transform2mm(IMutableHypergraph<Arc>& hg1, IMutableHypergraph<Arc>& hg2,
+                    IMutableHypergraph<Arc>* result) {
     ComposeTransform<Arc> c(composeOpt);
     c.setFst(hg2);
     c.inout(hg1, result);
     return true;
   }
-
 };
 
 

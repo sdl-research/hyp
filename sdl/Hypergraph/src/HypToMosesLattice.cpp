@@ -60,6 +60,7 @@ struct HypToMosesLattice {
       std::string const& file = vm["input-file"].as<std::string>();
       input.init(file);
     }
+    //TODO: configurable logging
     Util::initLoggerFromConfig(logConfigFile, "HypToMosesLattice", Util::kLogInfo);
     IVocabularyPtr pVoc = Vocabulary::createDefaultVocab();
     std::istream& instream = input.getStream();

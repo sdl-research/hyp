@@ -137,7 +137,7 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
     if (initlogger) {
       Util::InitLoggerOptions& opts = logOpt;
       opts.setConsoleUnlessFile();
-      opts.setVerbose(this->verbose);
+      opts.verbose = this->verbose;
       Util::initLogger(name(), opts);
     }
   }

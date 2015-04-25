@@ -146,11 +146,14 @@ sdl_enable_debug_info()
 
 if(UNIX)
   if(NOT CMAKE_COMPILER_IS_CLANGXX)
-    sdl_linker_flags(-shared-libgcc)
+    #sdl_linker_flags(-shared-libgcc)
+
+  ## supposedly shared-libgcc is required if you want to catch exceptions across
+  ## library / program boundaries e.g. in main (without the exception simply
+  ## triggering abort(). however, other documentation online suggests that this
+  ## is a bogus practice and leads to a false sense of 'everything works fine'
+  ## when running on a different linux than you built on.
   endif()
-  ## shared-libgcc is required if you want to catch exceptions across library /
-  ## program boundaries e.g. in main (without the exception simply triggering
-  ## abort()
   if(SDL_GPROF)
     add_definitions("-pg")
     sdl_linker_flags(-pg)
@@ -327,7 +330,9 @@ set(SDL_NO_CLANG_OPTIMIZATIONS "-fcx-limited-range -fno-signaling-nans -fno-roun
 
 # c++11
 if(USING_GCC)
-  add_definitions("-fno-threadsafe-statics") # these are nice but MSVC doesn't provide them so we shouldn't pay the cost
+  #TODO: perf test - if no harm, keep c++11 threadsafe statics (we don't know
+  #where in c++11 stdlib they're relied upon)
+  # add_definitions("-fno-threadsafe-statics") # these are nice but MSVC doesn't provide them anyway
   add_definitions("-Wno-deprecated") # FC12/libraries/svmtool++/include/svmtool/tagger.h
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
   message(STATUS "found gcc version ${GCC_VERSION}")
@@ -491,7 +496,7 @@ if(UNIX)
     endif()
     set(ANDROID_SYS_ROOT "$ENV{ANDROID_STANDALONE_TOOLCHAIN}/sysroot")
     set(CMAKE_CXX_FLAGS "         -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar --sysroot=${ANDROID_SYS_ROOT}")
-  else(ANDROID)
+  else()
     set(CMAKE_CXX_FLAGS "${SDL_PTHREAD_ARG} -fPIC -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar -march=core2")
   endif()
 
@@ -661,8 +666,8 @@ if (SDL_DEBUG_SYMBOLS)
       # dwarf-3 or 4 should do a better job dealing with locals whose address changes
       # from one part of a fn to the next
       if(SDL_HAVE_GCC_4_7)
-        set(SDL_DEBUG_INFO_GCC_ARG "-gdwarf-4")
-        #set(SDL_DEBUG_INFO_GCC_ARG "-g")
+        #set(SDL_DEBUG_INFO_GCC_ARG "-gdwarf-4")
+        set(SDL_DEBUG_INFO_GCC_ARG "-g")
       else()
         #set(SDL_DEBUG_INFO_GCC_ARG "-gdwarf-3")
         #dwarf-3 seems to create 500mb executable xmt and 1.0gb executable libxmt (they're normal size once stripped)

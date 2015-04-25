@@ -97,7 +97,7 @@ struct TransformMainBase : HypergraphMainBase {
   typedef FeatureWeight featureSemiring;
 
   std::string arcType;
-  graehl::hex_int<Properties> default_properties;
+  boost::optional<PrintProperties> hg_properties;
 
   enum { viterbi = 1, log = 2, expectation = 4, feature = 8 };
   enum { kAllSemirings = (viterbi | log | expectation | feature) };
@@ -111,7 +111,6 @@ struct TransformMainBase : HypergraphMainBase {
                     bool nbestHypergraphDefault = false)
       : HypergraphMainBase(n, usage, ver, hmainOpt)
       , arcType(semiringsList(defaultSemiring))
-      , default_properties((kDefaultProperties | kStoreOutArcs))
       , allowedSemirings(semirings)
       , bestOutputs(bestOutputs == kBestOutput)
       , bestOptDesc(MaybeBestPathOutOptions::caption())
@@ -202,7 +201,7 @@ struct TransformMainBase : HypergraphMainBase {
     c("arc-type", &arcType)('a')("Weight semiring: " + qual + semiringsUsage()).verbose(ambig);
     // TODO: use SDL_ENUM for arcType
 
-    c("properties", &default_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
+    c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
     if (multiInputs && this->multifile == HypergraphMainOpt::kMultiFile)
       c("reload", &reloadOnMultiple)(
           "for each of the inputs, re-read the rest of the transducers again each time (saves memory) if "
@@ -214,14 +213,18 @@ struct TransformMainBase : HypergraphMainBase {
 
   void finish_configure_more() OVERRIDE {
     this->configurable(this);
-    if (bestOutputs)
+    if (bestOutputs) {
       this->configurable(&optBestOutputs);
-    else
+    } else
       optBestOutputs.disableNbest();
   }
 
+  Properties properties_else(Properties p = kFsmOutProperties) const {
+    return hg_properties ? withArcs(*hg_properties) : kFsmOutProperties;
+  }
+
   Properties properties(int i) const {  // i=0 means output
-    return default_properties ? (Properties)default_properties : kStoreInArcs;
+    return properties_else();
   }
 
   virtual void validate_parameters_more() OVERRIDE {
@@ -459,7 +462,7 @@ struct TransformMain : TransformMainBase {
 
     // cascade[0] is an in/out hg.
     bool transformInput(unsigned inputLine, bool reload, bool free) {
-      Hp olast;  // h: recent input. o: recent output
+      Hp olast;  // o: recent output
       std::string olast_name;
       if (!cascade.size()) return false;
       olast = cascade[0];
@@ -539,10 +542,12 @@ struct TransformMain : TransformMainBase {
     typedef shared_ptr<IMutableHypergraph<Arc> > Hp;
     Hp& h = c.cascade[0];
     bool allok = true;
+    unsigned ninputs = 0;
     for (;;) {
       h.reset(new MutableHypergraph<Arc>(inputProperties(0)));
       h->setVocabulary(this->vocab());
       if (!optInputs.nextHypergraph(h.get())) break;
+      ++ninputs;
       if (impl().hasInputTransform()) {
         unsigned input = 0;
         SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", pre-transform");
@@ -552,7 +557,7 @@ struct TransformMain : TransformMainBase {
       }
       if (!c.transformInput((unsigned)optInputs.lineno, reload, free)) allok = false;
     }
-    return allok;
+    return allok && ninputs;
   }
 };
 

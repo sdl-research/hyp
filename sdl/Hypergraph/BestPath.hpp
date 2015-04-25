@@ -94,13 +94,13 @@ struct NbestPlusTies {
   operator NbestId() const { return nbest; }
   template <class Config>
   void configure(Config& config) {
-    config("num-best", &nbest)('n')
+    config("nbest", &nbest)('n')
         .self_init()("limit hypergraph paths to this many, keeping the lowest totalcost");
     config("num-ties", &numTies)
         .self_init()(
             "allow this many extra same-score derivations with cost tied for the final place (if num-best > "
             "1)");
-    config("nbest", &nbest).verbose();
+    config("num-best", &nbest).alias();
   }
   NbestId maxnbest() { return nbest > 1 ? nbest + numTies : 1; }
   bool multiple() const { return nbest > 1; }
@@ -1673,7 +1673,7 @@ struct MaybeBestPathOutOptions : BestPathOutToOptions {
   template <class Conf>
   void configure(Conf& c) {
     BestPathOutToOptions::configure(c);
-    c("enable-best", &enable)("print best path(s) if enabled; otherwise print hypergraph instead").init(enable);
+    c("enable-best", &enable)("print best path(s) if enabled; otherwise print hypergraph instead").self_init();
   }
 
   template <class Arc>

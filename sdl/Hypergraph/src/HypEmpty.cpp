@@ -54,10 +54,10 @@ struct HypEmpty : TransformMain<HypEmpty> { // note base class CRTP (google it)
   static LineInputs lineInputs() { return kNoLineInputs; }
 
   Properties properties(int i) const {
-    return default_properties ? (Properties)default_properties : kStoreOutArcs;
+    return this->properties_else(kStoreOutArcs|kDefaultProperties);
     // bottom-up reachability for CFG requires kStoreOutArcs but for graph only
-    // requires kStoreFirstTailOutArcs. allows command line -p 0x10 for first
-    // tail only
+    // requires kStoreFirstTailOutArcs. allows command line -p
+    // first-tail-out-arcs for first tail only
   }
   enum { has_transform1 = false, has_transform2 = false, has_inplace_input_transform = true };
   bool printFinal() const { return false; }
