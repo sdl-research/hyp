@@ -55,7 +55,7 @@ void initLogger(std::string const& appname, Util::InitLoggerOptions opts) {
 }
 
 void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerOptions const& opts) {
-  defaultLocale();
+  //defaultLocale();
   if (!opts.xmlConfigFile.empty()) {
     if (opts.verbose) std::cerr << "Logging xml configuration from: " << opts.xmlConfigFile << '\n';
     log4cxx::xml::DOMConfigurator::configure(opts.xmlConfigFile);
@@ -96,11 +96,11 @@ void initLoggerConsole(char const* name, LogLevel level) {
 
 #else
 void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerOptions const& opts) {
-  defaultLocale();
+  //defaultLocale();
 }
 
 void initLogger(std::string const& appname, Util::InitLoggerOptions opts) {
-  defaultLocale();
+  //defaultLocale();
 }
 
 void initLoggerConsole(char const* name, LogLevel level) {

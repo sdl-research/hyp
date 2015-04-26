@@ -769,7 +769,7 @@ class EarleyParser {
 // TODO: it's unclear what queueing discipline is required - the only
 // interesting-looking cfg*fst composition test we have is in
 // regtest-compose-cfg-unbin.yml
-#if 1
+#if 0
   std::queue<Item*> agenda_;
 #else
   // here we have intentionally placed the earliest spans to be processed

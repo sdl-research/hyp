@@ -51,7 +51,6 @@ struct HypToMosesLattice {
       std::cout << "Converts SDL lattice format to PLF format (used by Moses)\n";
       return EXIT_SUCCESS;
     }
-    Util::defaultLocale();
     Util::Input input;
     if (vm.count("input-file")) {
       std::string const& file = vm["input-file"].as<std::string>();

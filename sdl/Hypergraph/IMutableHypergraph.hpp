@@ -444,7 +444,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     SDL_TRACE(Hypergraph, "clear postlude prop=" << printProperties(*this));
   }
 
-  void clear() { clear(this->properties()); }
+  void clear() { clear(this->hgUncomputedProperties()); }
 
   void setEmptyIfNoArcs(bool addstart = true, bool addfinal = false) {
     if (this->prunedEmpty()) setEmpty(addstart, addfinal);

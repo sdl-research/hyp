@@ -215,6 +215,9 @@ struct IHypergraphStates : Resource {
   */
   virtual Properties properties() const = 0;
 
+  /// may exclude computed properties (like kFsmProperties)
+  virtual Properties hgUncomputedProperties() const { return properties(); }
+
   /** fast estimate for reserving storage for # of edges (getNumEdges may be linear time in #states) */
   virtual std::size_t estimatedNumEdges() const { return size(); }
 

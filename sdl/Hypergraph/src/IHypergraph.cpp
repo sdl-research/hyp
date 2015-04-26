@@ -50,7 +50,7 @@ bool IHypergraphStates::prunedEmpty() const {
   Properties p = properties();
   if (p & kStoreInArcs)
     return numInArcs(sfinal) == 0;
-  else if ((p & kStoresAnyArcs) && sstart != Hypergraph::kNoState)
+  else if ((p & kStoresAnyOutArcs) && sstart != Hypergraph::kNoState)
     return numOutArcs(sstart) == 0;
   return false;
 }

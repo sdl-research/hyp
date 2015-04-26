@@ -364,10 +364,13 @@ if(USING_GCC)
     else()
       set(SDL_HAVE_GCC_4_9 1)
 
-      #TODO: change to 1 once we have rebuilt all relevant (C++) externals
-      sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
-
-      sdl_enable_cpp11()
+      if(OPEN_SOURCE_RELEASE)
+        sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
+      else()
+        #TODO: change to 1 once we have rebuilt all relevant (C++) externals
+        sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
+        sdl_enable_cpp11()
+      endif()
     endif()
   endif()
 elseif(USING_CLANG)
@@ -597,6 +600,7 @@ if(UNIX)
 
     if(CMAKE_COMPILER_IS_GNUCXX)
       #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
+      # probably not safe to run reseulting exe across different linux/libc versions
     else()
       #clang
       add_definitions("-Wno-mismatched-tags -Wno-gnu")
@@ -902,6 +906,10 @@ if(OPEN_SOURCE_RELEASE)
   sdl_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 0)
   sdl_compiled_setting(SDL_OBJECT_COUNT 0)
   sdl_compiled_setting(SDL_ENCRYPT 0)
+  sdl_compiled_setting(SDL_FIX_LOCALE 0)
+  sdl_compiled_setting(SDL_BOOST_LOCALE 0)
+  sdl_compiled_setting(SDL_FAST_COUT 0)
+  sdl_compiled_setting(GRAEHL_FILEARGS_DEFAULT_LARGE_BUF 0)
 else()
   sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
   if(SDL_DEVELOPMENT)

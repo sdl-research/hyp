@@ -46,8 +46,6 @@
 #define HYPERGRAPH_PREPEND_HYP(MAINCLASS) sdl::Hypergraph::Hyp ## MAINCLASS
 #define HYPERGRAPH_NAMED_MAIN(MAINCLASS) GRAEHL_NAMED_MAIN(MAINCLASS, HYPERGRAPH_PREPEND_HYP(MAINCLASS))
 
-static sdl::Util::DefaultLocaleFastCout initCout;
-
 namespace sdl {
 namespace Hypergraph {
 
@@ -93,8 +91,6 @@ struct HypergraphMainOpt {
 };
 
 struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
-  sdl::Util::DefaultLocaleFastCout* forceLinkInitCout;
-
   NO_INIT_OR_ASSIGN_MEMBER(HypergraphMainBase)
   Util::SearchDirs searchDirs;
   bool initlogger;
@@ -108,7 +104,6 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
       : graehl::main(n, usage, ver, opt.multifile, opt.random, opt.input)
       , HypergraphMainOpt(opt)
       , initlogger(opt.initlogger) {
-    forceLinkInitCout = &initCout;
     this->opt.add_help = opt.helpOptions;
     init();
   }

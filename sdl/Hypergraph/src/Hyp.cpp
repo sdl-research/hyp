@@ -54,6 +54,10 @@
 #endif
 #endif
 
+#if SDL_FIX_LOCALE
+sdl::Util::DefaultLocaleFastCout initCout;
+#endif
+
 #if HAVE_OPENFST
 #define SDL_FOR_OPENFST_HYP_MAINS(x) x(HypToReplaceFst)
 #else

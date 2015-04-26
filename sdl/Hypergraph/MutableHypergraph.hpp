@@ -281,6 +281,10 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return properties_;
   }
 
+  Properties hgUncomputedProperties() const OVERRIDE {
+    return properties_;
+  }
+
   /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
   bool hgOutputLabelFollowsInput(StateId state) const OVERRIDE { return outputLabelBare(state) == NoSymbol; }
 
