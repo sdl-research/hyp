@@ -1,3 +1,12 @@
+#SET( letters "" "\;a" b c "d\;d" )
+#JOIN("${letters}" ":" output)
+#MESSAGE("${output}") # :;a:b:c:d;d
+function(join VALUES GLUE OUTPUT)
+  string (REGEX REPLACE "([^\\]|^);" "\\1${GLUE}" _TMP_STR "${VALUES}")
+  string (REGEX REPLACE "[\\](.)" "\\1" _TMP_STR "${_TMP_STR}") #fixes escaping
+  set (${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
+endfunction()
+
 macro(sdl_add_library_named LIBNAME)
   sdl_add_library(${LIBNAME} "" INCLUDE_ONLY ${ARGN})
   set_target_properties(${LIBNAME} PROPERTIES OUTPUT_NAME_RELEASE "${LIBNAME}")
@@ -12,7 +21,7 @@ endmacro()
 # -> xmt/CompiledSettings.cpp
 #TODO: USAGE string arg to pass to compiledSettings.py (and structured char const* settings[][3] ?)
 macro(sdl_exe_linker_flags)
-  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ARGN}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ARGN}")
   message(STATUS "xmt exe-only linker flags += ${ARGN}")
 endmacro()
 
