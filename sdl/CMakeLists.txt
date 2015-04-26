@@ -912,6 +912,33 @@ sdl_finish_cflags()
 
 # Add subdirectories and find their unit test executables.
 
+if(OPEN_SOURCE_RELEASE)
+  MESSAGE(STATUS "OPEN_SOURCE_RELEASE: setting defines")
+  sdl_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1)
+  sdl_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0)
+  sdl_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 0)
+  sdl_compiled_setting(SDL_OBJECT_COUNT 0)
+  sdl_compiled_setting(SDL_ENCRYPT 0)
+  sdl_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0)
+else()
+  sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
+  if(SDL_DEVELOPMENT)
+    MESSAGE(STATUS "!OPEN_SOURCE_RELEASE AND SDL_DEVELOPMENT: SDL_ASSERT_THREAD_SPECIFIC")
+    # if not set, then enabled for debug only:
+    sdl_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
+  endif()
+  if(SDL_DEBUG)
+    if(SDL_PRODUCTION)
+      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
+    else()
+      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 1)
+      # ~1% runtime cost but can tell you exactly what type of object leaks in single thread
+    endif()
+  else()
+    sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
+  endif()
+endif()
+
 # IMPORTANT: if you want to make changes to settings that affect these, do it
 # before this point in the file
 foreach(subDirectory ${subDirectories})
@@ -944,24 +971,3 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose
 # Generate Doxygen target
 #
 add_custom_target(doc ${CMAKE_SOURCE_DIR}/doxygenate WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-if(${OPEN_SOURCE_RELEASE})
-  sdl_quiet_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1)
-  sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0)
-else()
-  sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
-  if(${SDL_DEVELOPMENT})
-    # if not set, then enabled for debug only:
-    sdl_quiet_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
-  endif()
-  if(${SDL_DEBUG})
-    if(${SDL_PRODUCTION})
-      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
-    else()
-      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 1)
-      # ~1% runtime cost but can tell you exactly what type of object leaks in single thread
-    endif()
-  else()
-    sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
-  endif()
-endif()

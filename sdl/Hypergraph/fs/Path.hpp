@@ -55,7 +55,9 @@ struct FstArcNoState {
       , annotations(arc.annotations)
 #endif
   {
+#if SDL_HYPERGRAPH_FS_ANNOTATIONS
     SDL_DEBUG_IF(!annotations.empty(), Hypergraph.fs.Path, "fs arc Annotations: " << annotations);
+#endif
   }
 
   void printLabel(std::ostream& out) const {
@@ -115,9 +117,9 @@ struct PrependForInputStateCached : PrependForInputStateIdFn {
 
 template <class Arc>
 Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail, LabelPair const& labelPair,
-                     typename Arc::Weight const& wt,
+                     typename Arc::Weight const& wt
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
-                     Syms const* annotations, bool annotate
+                     , Syms const* annotations, bool annotate
 #endif
                      ) {
   Arc* add = new Arc(wt);
