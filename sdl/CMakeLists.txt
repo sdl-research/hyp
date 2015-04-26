@@ -148,11 +148,11 @@ if(UNIX)
   if(NOT CMAKE_COMPILER_IS_CLANGXX)
     #sdl_linker_flags(-shared-libgcc)
 
-  ## supposedly shared-libgcc is required if you want to catch exceptions across
-  ## library / program boundaries e.g. in main (without the exception simply
-  ## triggering abort(). however, other documentation online suggests that this
-  ## is a bogus practice and leads to a false sense of 'everything works fine'
-  ## when running on a different linux than you built on.
+    ## supposedly shared-libgcc is required if you want to catch exceptions across
+    ## library / program boundaries e.g. in main (without the exception simply
+    ## triggering abort(). however, other documentation online suggests that this
+    ## is a bogus practice and leads to a false sense of 'everything works fine'
+    ## when running on a different linux than you built on.
   endif()
   if(SDL_GPROF)
     add_definitions("-pg")
@@ -447,7 +447,6 @@ if(CMAKE_COMPILER_IS_CLANGXX)
     message(INFO "using clang (static) analyzer, which might slow compilation - disable USE_CLANG_ANALYZER cmake option if you want full speed")
   endif()
   if (USE_CLANG_SANITIZE)
-
     add_definitions("-fno-omit-frame-pointer -O1 -fno-optimize-sibling-calls")
     message(INFO "using clang sanitize, which might have significant (2-3x) runtime overhead - disable USE_CLANG_SANITIZE cmake option if you want full speed")
     message(INFO "using clang sanitizes: ${SDL_CLANG_SANITIZES}")
@@ -573,61 +572,45 @@ if(UNIX)
 
   if(APPLE)
     set(APPLE_USE_ICU_49 0)
-    set(APPLE_USE_BOOST_1_54 1)
+    if(APPLE_USE_ICU_49)
+      set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-49")
+    else()
+      set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-4.8")
+    endif()
 
     find_path(FOUND_LOG4CXX_ROOT include/log4cxx/logger.h PATHS ${LOG4CXX_ROOT})
     if(NOT FOUND_LOG4CXX_ROOT)
-      message(ERROR "Could not find log4cxx installation. Please
-       install it system-wide or specify location with -DLOG4CXX_ROOT")
-   endif()
-   set(LOG4CXX_ROOT ${FOUND_LOG4CXX_ROOT})
+      message(ERROR "Could not find log4cxx installation. Please install it system-wide or specify location with -DLOG4CXX_ROOT")
+    endif()
+    set(LOG4CXX_ROOT ${FOUND_LOG4CXX_ROOT})
 
-   set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-   if(APPLE_USE_ICU_49)
-     set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-49")
-   else()
-     set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-4.8")
-   endif()
+    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(Boost_find_version 1.57.0)
+    #set(Boost_NO_SYSTEM_PATHS 0)
+    #set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_49_0")
+    set(BOOST_ROOT "/usr/local")
 
-
-   if(APPLE_USE_BOOST_1_54)
-     set(Boost_find_version 1.54.0)
-     set(Boost_NO_SYSTEM_PATHS 1)
-     set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_54_0")
-   else()
-     set(Boost_find_version 1.49.0)
-     #set(Boost_NO_SYSTEM_PATHS 1)
-     #set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_49_0")
-     set(BOOST_ROOT "/usr/local")
-   endif()
-   if(APPLE_USE_BOOST_1_54)
-     # https://svn.boost.org/trac/boost/ticket/8092 std::move not defined in xcode libstdc++ with --std=c++11
-     # sdl_enable_cpp11()
-   else()
-     # sdl_enable_cpp11()
-   endif()
-
-   set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
-   set(Boost_USE_STATIC_LIBS OFF)
+    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
+    set(Boost_USE_STATIC_LIBS OFF)
 
 
-   if(CMAKE_COMPILER_IS_GNUCXX)
-     #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
-   else()
-     #clang
-     add_definitions("-Wno-mismatched-tags -Wno-gnu")
+    if(CMAKE_COMPILER_IS_GNUCXX)
+      #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
+    else()
+      #clang
+      add_definitions("-Wno-mismatched-tags -Wno-gnu")
 
-     #tinyxml
-     #NOTE: -Woverloaded-virtual is a VERY valuable warning, which is unfortunately useless given the amount of externals lib violations that show up in the compile. try compiling on windows; I've selectively disabled an equivalent warning for some of the externals.
-     add_definitions("-Wno-overloaded-virtual")
-     #boost:
-     add_definitions("-Wunneeded-internal-declaration -Wno-bool-conversions -Wno-attributes -Wno-char-subscripts")
-     # kenlm
-     add_definitions("-Wno-unused-function")
-   endif()
+      #tinyxml
+      #NOTE: -Woverloaded-virtual is a VERY valuable warning, which is unfortunately useless given the amount of externals lib violations that show up in the compile. try compiling on windows; I've selectively disabled an equivalent warning for some of the externals.
+      add_definitions("-Wno-overloaded-virtual")
+      #boost:
+      add_definitions("-Wunneeded-internal-declaration -Wno-bool-conversions -Wno-attributes -Wno-char-subscripts")
+      # kenlm
+      add_definitions("-Wno-unused-function")
+    endif()
 
- endif() # APPLE
+  endif() # APPLE
 
 endif() # UNIX
 
@@ -666,8 +649,8 @@ if (SDL_DEBUG_SYMBOLS)
       # dwarf-3 or 4 should do a better job dealing with locals whose address changes
       # from one part of a fn to the next
       if(SDL_HAVE_GCC_4_7)
-        #set(SDL_DEBUG_INFO_GCC_ARG "-gdwarf-4")
-        set(SDL_DEBUG_INFO_GCC_ARG "-g")
+        set(SDL_DEBUG_INFO_GCC_ARG "-gdwarf-4")
+        #set(SDL_DEBUG_INFO_GCC_ARG "-g")
       else()
         #set(SDL_DEBUG_INFO_GCC_ARG "-gdwarf-3")
         #dwarf-3 seems to create 500mb executable xmt and 1.0gb executable libxmt (they're normal size once stripped)
@@ -919,7 +902,6 @@ if(OPEN_SOURCE_RELEASE)
   sdl_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 0)
   sdl_compiled_setting(SDL_OBJECT_COUNT 0)
   sdl_compiled_setting(SDL_ENCRYPT 0)
-  sdl_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0)
 else()
   sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
   if(SDL_DEVELOPMENT)

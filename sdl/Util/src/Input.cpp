@@ -1,11 +1,8 @@
 // Copyright 2014 SDL plc
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 //     http://www.apache.org/licenses/LICENSE-2.0
-//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +35,6 @@ LineOptions nfclineWarnOnly(false, false);
 
 void Input::init(std::string const& filename, bool mayDecrypt, bool allowNullFile) {
   decrypted.reset();
-  SDL_TRACE(Util.Input, "Reading input file '" << filename << "'");
   using namespace std;
   if (!mayDecrypt || special_input_filename(filename) || Util::endsWith(filename, kGzSuffix)
       || Util::startsWith(filename, kPipePrefix) || Util::startsWith(filename, kPipePrefix2)) {
