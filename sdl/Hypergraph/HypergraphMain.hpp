@@ -100,12 +100,19 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt, Util::Inputs {
     this->opt.add_verbose = true;
     this->opt.add_help = opt.helpOptions;
     this->opt.add_log_file = false;  // using log4cxx instead
+    this->opt.add_quiet = false;
   }
   void multipleInputs(int maxin = 0) {
     assert(!configured);
     max_inputs = maxin;
     inputEnabled = true;
     multifile = true;
+  }
+
+  void disableDefaultCmdlineOptions() {
+    inputEnabled = false;
+    verbose = 0;
+    opt.disable();
   }
 
  private:

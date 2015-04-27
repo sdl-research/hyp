@@ -110,7 +110,7 @@ struct SaveFst {
           setFinal(finalSt);
           if (!needsEpsilon) return from;
         }
-        out.addArcEpsilon(from, *outFinal);
+        out.addArcEpsilon(from, *outFinal); //TODO: addArcGraphEpsilon ?
       }
       return from;
     } else {

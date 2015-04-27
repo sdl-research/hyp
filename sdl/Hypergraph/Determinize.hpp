@@ -397,7 +397,7 @@ struct DeterminizeFsa {
     }
     // POST: anyadded iff need to destroy pcqs if it's not newly added to explored
     SDL_DETERMINIZE_ASSERT(checkseeniff(*pcqs)); // POST if SDL_DETERMINIZE_SORT: seen iff pcqs
-    StateId* cid;
+    StateId* cid = 0; // init to quiet false warning
     StateId subsetState;
     if (!anyadded || Util::update(explored, pcqs, cid)) {
       subsetState = o->addState();

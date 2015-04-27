@@ -274,7 +274,6 @@ struct Inputs : InputsOptions {
   }
   std::istream& inputStream() const { return *input(); }
   operator Ins const&() const { return inputs; }
-  InputsOptions conf;
   Input configurableSingleInput;
   template <class Config>
   void configure(Config& config) {

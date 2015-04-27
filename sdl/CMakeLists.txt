@@ -366,7 +366,9 @@ if(USING_GCC)
       # can't because tbb-4.3.1 is .so only
       # -static-libstdc++
       # sdl_exe_linker_flags("-static-libgcc") #then log4cxx link fails (because we didn't build that lib w/ same option?)
-
+      if (APPLE)
+        include_directories(/usr/local/include/c++/5.1.0)
+      endif()
       #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs
       sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
       sdl_enable_cpp11()
