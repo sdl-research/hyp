@@ -103,15 +103,11 @@ class FloatWeightTpl : public WeightBase {
   bool isOne() const { return !value_; }
   friend inline void setOne(FloatWeightTpl& x) { x.value_ = 0; }
 
-#if 0 && __cplusplus >= 201103L
-  /// we prefer callers to explicitly initialize. in general weights don't
-  /// default-init to one or zero (uninit is invalid). catch miscreants w/
-  /// valgrind
-
-  FloatWeightTpl() = default;  // uninitialized but an explicit weight() init would then 0-init?
-#else
   /// uninitialized - we want users to explicitly init to zero or one as
   /// appropriate e.g. vector<ViterbiWeight>(N, ViterbiWeight::zero())
+#if __cplusplus >= 201103L
+  FloatWeightTpl() = default;  // uninitialized but an explicit weight() init would then 0-init?
+#else
   FloatWeightTpl() {}
 #endif
 

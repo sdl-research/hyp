@@ -25,8 +25,7 @@ struct HypCompose : TransformMain<HypCompose> {
   HypCompose() : TransformMain<HypCompose>("Compose", USAGE_HypCompose) {
     composeOpt.addFstOption = false;
     composeOpt.fstCompose = true;
-    assert(this->multifile);
-    assert(this->has2());
+    this->configureProperties = true;
   }
 
   void declare_configurable() { this->configurable(&composeOpt); }
@@ -34,10 +33,10 @@ struct HypCompose : TransformMain<HypCompose> {
   static BestOutput bestOutput() { return kBestOutput; }
   static LineInputs lineInputs() { return kNoLineInputs; }
 
-
   // 1 is first input which may be cfg
   //Properties properties(int i) const { return (i == 1 ? kStoreInArcs : kStoreInArcs) | kFsmOutProperties; }
-  Properties properties(int i) const { return kFsmOutProperties; }
+  //TODO: seems we have a bug in cfg*fst compose unless kStoreOutArcs?
+  Properties properties(int i) const { return kStoreInArcs | kStoreOutArcs; }
 
   ComposeTransformOptions composeOpt;
 

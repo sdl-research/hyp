@@ -117,6 +117,7 @@ std::string const& kPipePrefix("/proc/self/fd/");
 std::string const& kPipePrefix2("/dev/fd/");
 }
 
+struct NullInputTag {};
 /**
    Represents input, either from STDIN (default, or filename '-'), or
    from a file if setFilename is called (or constructed with string
@@ -141,7 +142,7 @@ struct Input : InputStream {
 
   Input() : InputStream(stdin_filename) {}
 
-  Input(bool) {}
+  Input(NullInputTag) {}
 
   /**
      STDIN (default, or filename '-'), or
@@ -257,7 +258,7 @@ inline void swap(Input& a, Input& b) {
 
 struct Inputs : InputsOptions {
   std::size_t size() const { return inputs.size(); }
-  Inputs(InputsOptions const& conf = InputsOptions()) : InputsOptions(conf), configurableSingleInput(false)  {
+  Inputs(InputsOptions const& conf = InputsOptions()) : InputsOptions(conf), configurableSingleInput(NullInputTag())  {
     assert(configurableSingleInput.isNull());
     inputs.reserve(16);
   }
