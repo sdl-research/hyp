@@ -311,7 +311,7 @@ struct IHypergraphStates : Resource {
   */
   bool isFsmLike() const {
     Properties const p = properties();
-    return p & kFsm || p & kGraph && p & kOneLexical;
+    return (p & kFsm) || ((p & kGraph) && (p & kOneLexical));
   }
 
   /// returns an exact count of not-temrinal-labeled states

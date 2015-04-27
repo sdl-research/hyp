@@ -91,17 +91,13 @@ struct CmpInputLabelWithSearchLabel {
       : fst_(fst), sid_(sid), searchLabel_(searchLabel) {}
 
   bool operator()(ArcId a, ArcId b) const {
-    bool result;
     if (a == fakeArcId) {
       A* otherArc = fst_.outArc(sid_, b);
-      Sym otherLabel = fst_.inputLabel((otherArc->getTail(1)));
-      result = searchLabel_ < otherLabel;
+      return searchLabel_ < fst_.inputLabel((otherArc->getTail(1)));
     } else {
       A* otherArc = fst_.outArc(sid_, a);
-      Sym otherLabel = fst_.inputLabel((otherArc->getTail(1)));
-      result = otherLabel < searchLabel_;
+      return searchLabel_ > fst_.inputLabel((otherArc->getTail(1)));
     }
-    return result;
   }
 
   const IHypergraph<A>& fst_;
@@ -120,29 +116,25 @@ ArcIdIterator searchLabel(const IHypergraph<A>& hg, StateId sid, Sym label) {
 // TODO: try Index.hpp registry, which uses hashing.
 template <class T>
 class Registry {
- public:
   // TODO: use unordered_set
   typedef std::set<T*, Util::LessByValue<T> > TSet;
-
-  Registry() {}
+  TSet set_;
+ public:
 
   ~Registry() {
     forall (T* item, set_) { delete item; }
   }
 
-  T* insert(T* pT) {
-    std::pair<typename TSet::iterator, bool> p = set_.insert(pT);
-    const bool wasInserted = p.second;
-    if (!wasInserted) {
-      delete pT;
+  /// delete p if it was already in set; return version in set.
+  T* insert(T* p) {
+    std::pair<typename TSet::iterator, bool> iNew = set_.insert(p);
+    if (iNew.second)
+      return p;
+    else {
+      delete p;
+      return *iNew.first;
     }
-    return *p.first;
   }
-
-  void erase(T* pT) { set_.erase(pT); }
-
- private:
-  TSet set_;
 };
 
 // only used in debug mode, for nicer output
@@ -766,9 +758,15 @@ class EarleyParser {
   // foreach position and CFG state
   std::vector<std::set<StateId> > alreadyPredicted_;
 
-  /// work on leftmost spans first - see Hypergraph2/regtest-compose3.yml
-  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::less<ItemPriority> > agenda_;
+#if 1
+  std::queue<Item*> agenda_;
+#else
+  /// work on leftmost spans first? (std::less) - see Hypergraph2/regtest-compose3.yml
+  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority> > agenda_;
+#endif
+  //TODO: maybe std::priority_queue w/ old comparison object (no ItemPriorityMap) was correct?
 
+  /// queue (no priority): bad. less: bad. greater: bad. problem w/ HypCompose props?
   std::set<Item*> finalItems_;
 
   typedef std::map<Item*, std::set<BackPointer> > BackPointerMap;

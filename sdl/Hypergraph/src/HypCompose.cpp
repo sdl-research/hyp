@@ -34,12 +34,12 @@ struct HypCompose : TransformMain<HypCompose> {
   static BestOutput bestOutput() { return kBestOutput; }
   static LineInputs lineInputs() { return kNoLineInputs; }
 
-  ComposeTransformOptions composeOpt;
 
-  Properties
-  properties(int i) const {  // 0 is out, 1 is cfg (or if fst*fst we want outarcs), 2 and on are all fsms
-    return i == 1 ? (kStoreInArcs | kFsmOutProperties) : kFsmOutProperties;
-  }
+  // 1 is first input which may be cfg
+  //Properties properties(int i) const { return (i == 1 ? kStoreInArcs : kStoreInArcs) | kFsmOutProperties; }
+  Properties properties(int i) const { return kFsmOutProperties; }
+
+  ComposeTransformOptions composeOpt;
 
   enum {
     has_transform1 = false,

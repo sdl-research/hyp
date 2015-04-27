@@ -137,7 +137,7 @@ struct FstComposeOptions : SaveFstOptions {
 
   template <class Arc>
   bool willLazyFsCompose(Hypergraph::IHypergraph<Arc> const& hg) const {
-    return fstCompose && hg.isFsm() && usingLazyBest();
+    return fstCompose && hg.isFsmLike() && usingLazyBest();
   }
 
   template <class Config>

@@ -221,9 +221,6 @@ struct TransformMainBase : HypergraphMainBase {
     return hg_properties ? withArcs(*hg_properties) : kFsmOutProperties;
   }
 
-  Properties properties(int i) const {  // i=0 means output
-    return properties_else();
-  }
 
   virtual void validate_parameters_more() OVERRIDE {
     semirings_type sr = semiringFor(arcType);
@@ -319,7 +316,8 @@ struct TransformMain : TransformMainBase {
                               unsigned n) {  // from n=1...#input files.
     if (impl().has_inplace_input_transform) return impl().inputTransformInPlace(*h, n);
     shared_ptr<IMutableHypergraph<Arc> > i = h;
-    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(impl().properties(n));
+    assert(n);
+    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(inputProperties(n - 1));
     h.reset(m);
     return impl().inputTransform((IHypergraph<Arc> const&)*i, m, n);
   }
@@ -342,7 +340,7 @@ struct TransformMain : TransformMainBase {
   bool transform1InPlaceP(shared_ptr<IMutableHypergraph<Arc> >& h) {
     if (impl().has_inplace_transform1) return impl().transform1InPlace(*h);
     shared_ptr<IMutableHypergraph<Arc> > i = h;
-    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(impl().properties(0));
+    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(outputProperties());
     h.reset(m);
     return impl().transform1((IHypergraph<Arc> const&)*i, m);
   }
@@ -366,7 +364,7 @@ struct TransformMain : TransformMainBase {
   bool transform2InPlaceP(shared_ptr<IMutableHypergraph<Arc> >& io, shared_ptr<IMutableHypergraph<Arc> >& i2) {
     if (impl().has_inplace_transform2) return impl().transform2InPlace(*io, *i2);
     shared_ptr<IMutableHypergraph<Arc> > i = io;
-    io.reset(new MutableHypergraph<Arc>(impl().properties(0)));
+    io.reset(new MutableHypergraph<Arc>(outputProperties()));
     io->setVocabulary(this->vocab());
     return impl().transform2pp(i, i2, io.get());
   }
@@ -418,15 +416,14 @@ struct TransformMain : TransformMainBase {
   bool hasInputTransform() const { return impl().has_inplace_input_transform || impl().has_input_transform; }
 
   bool outEvery() const {
-    assert(!impl().out_every_default());
     return false;
   }
 
   char const* transform2sep() const { return " * "; }
 
-  Properties inputProperties(unsigned input) const { return withArcs(impl().properties(input + 1)); }
+  Properties inputProperties(unsigned input) const { return implProperties(input + 1); }
 
-  Properties outputProperties() const { return withArcs(impl().properties(0)); }
+  Properties outputProperties() const { return implProperties(0); }
 
 // #define HTRANSFORM2_MSG(v, msg, aname, bname) HYPERGRAPH_DBG_MSG(v, "Transforming by " << this->name() <<
 // "(a, b) with a=" << aname << " b=" << bname << " " << msg << '\n')
@@ -548,6 +545,19 @@ struct TransformMain : TransformMainBase {
     }
     return allok && ninputs;
   }
+
+  /// i=0 means output (i=1 means input+output if in-place)
+  Properties properties(int i) const {
+    return kFsmOutProperties;
+  }
+
+  /// can override this to *not* favor cmdline props for some hgs
+  Properties properties_default(int i) const {
+    return hg_properties ? withArcs(*hg_properties) : impl().properties(i);
+  }
+
+ private:
+  Properties implProperties(int i) const { return withArcs(impl().properties_default(i)); }
 };
 
 
