@@ -41,7 +41,7 @@
 
 namespace graehl {
 
-static char const* const bit_names_delim = "|,"; // | is nice but hard to cmdline-arg-quote; , is easier
+static char const* const bit_names_delim = "|,";  // | is nice but hard to cmdline-arg-quote; , is easier
 
 template <class Int = unsigned>
 struct bit_names {
@@ -170,13 +170,14 @@ struct named_bits : hex_int<Int> {
   friend void string_to_impl(std::string const& s, named_bits& n) {
     std::string::size_type d = s.find_first_of(bit_names_delim);
     n = 0;
-    if (d == std::string::npos)
-      string_to_impl(s, n.base());
-    else {
+    Names parser(n);
+    if (d == std::string::npos) {
+      parser(s);
+    } else {
       char delim[2];
       delim[1] = 0;
       delim[0] = s[d];
-      split_noquote(s, parse_bit_names<NameList, Int>(n), delim);
+      split_noquote(s, parser, delim);
     }
   }
 

@@ -934,7 +934,7 @@ else()
     if(SDL_PRODUCTION)
       sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
     else()
-      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 1)
+      sdl_quiet_compiled_setting(SDL_OBJECT_COUNT 0)
       # ~1% runtime cost but can tell you exactly what type of object leaks in single thread
     endif()
   else()

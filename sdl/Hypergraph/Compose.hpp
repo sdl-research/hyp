@@ -927,7 +927,7 @@ struct ComposeOptions : fs::FstComposeOptions {
 
 namespace {
 const Properties kComposeFstRequiredProperties = kFsm | kStoreOutArcs | kSortedOutArcs;
-const Properties kComposeCfgRequiredProperties = kStoreInArcs | kStoreOutArcs;  // TODO: need out-arcs?
+const Properties kComposeCfgRequiredProperties = kStoreInArcs;  // TODO: need out-arcs?
 }
 
 /*

@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   IMutableHypergraph<Arc>* hyp2 = readHyp<Arc>(std::string(argv[2]), voc);
   sortArcs(hyp2);
 
-  double tstart, tend;
+  double tstart = 0, tend;
   fs::FstComposeOptions opt;
   opt.allowDuplicatePathsIf1Best = false;
   opt.pruneToNbest = argc > 3 && argv[3][0] == '1';
@@ -66,31 +66,32 @@ int main(int argc, char** argv) {
   fprintf(stderr, "prune-to-nbest=%d\n", opt.pruneToNbest);
   BestPathOutToOptions best;
   best.nbest = 100;
-  for (int dup = 0; dup < 2; ++dup) {
-    for (int eps = 0; eps < 2; ++eps) {
-      if (dup && eps) break;
-      opt.allowDuplicatePaths = dup;
-      opt.epsilonMatchingFilter = eps;
-      MutableHypergraph<Arc> hyp3(kFsmOutProperties);
-      fprintf(stderr, "Composing dup=%d eps=%d...\n", dup, eps);
-      for (int i = 0; i <= N; ++i) {
-        if (i == 1)  // warm up cache
-          tstart = graehl::monotonic_time();
-        fs::compose(*hyp1, *hyp2, &hyp3, opt);
+  if (N)
+    for (int dup = 0; dup < 2; ++dup) {
+      for (int eps = 0; eps < 2; ++eps) {
+        if (dup && eps) break;
+        opt.allowDuplicatePaths = dup;
+        opt.epsilonMatchingFilter = eps;
+        MutableHypergraph<Arc> hyp3(kFsmOutProperties);
+        fprintf(stderr, "Composing dup=%d eps=%d...\n", dup, eps);
+        for (int i = 0; i <= N; ++i) {
+          if (i == 1)  // warm up cache
+            tstart = graehl::monotonic_time();
+          fs::compose(*hyp1, *hyp2, &hyp3, opt);
+        }
+        tend = graehl::monotonic_time();
+        double dt = tend - tstart;
+        fprintf(stderr, "Elapsed dup=%d eps=%d time: %.6f seconds N=%d seconds-per=%g\n", dup, eps, dt, N,
+                dt / N);
+        std::cout << hyp3 << '\n';
+        try {
+          best.outputForId(hyp3, std::cerr);
+        } catch (std::exception& e) {
+          fprintf(stderr, "ERROR: %s\n", e.what());
+        }
+        std::cout << "\n\n";
       }
-      tend = graehl::monotonic_time();
-      double dt = tend - tstart;
-      fprintf(stderr, "Elapsed dup=%d eps=%d time: %.6f seconds N=%d seconds-per=%g\n", dup, eps, dt, N,
-              dt / N);
-      std::cout << hyp3 << '\n';
-      try {
-        best.outputForId(hyp3, std::cerr);
-      } catch (std::exception& e) {
-        fprintf(stderr, "ERROR: %s\n", e.what());
-      }
-      std::cout << "\n\n";
     }
-  }
   delete hyp1;
   delete hyp2;
   return EXIT_SUCCESS;
