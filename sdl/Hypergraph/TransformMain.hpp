@@ -459,14 +459,14 @@ struct TransformMain : TransformMainBase {
       std::string olast_name;
       if (!cascade.size()) return false;
       olast = cascade[0];
-      olast_name = main.inputs.inputs[0].name;
+      olast_name = main.inputs[0].name;
       std::ostringstream o_name;
       o_name << olast_name;
       Util::Sep oname_sep = main.impl().transform2sep();
       if (this->inputs.empty()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "no input files");
       for (unsigned input = 1, ninput = (unsigned)cascade.size(); input < ninput; ++input) {
         Hp& h = cascade[input];  // h: input hg (that we may free)
-        Util::Input in(main.inputs.inputs[input]);
+        Util::Input in(main.inputs[input]);
         if (!h) {
           h.reset(new H(main.inputProperties(input)));
           if (!*in)
