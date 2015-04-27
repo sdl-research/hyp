@@ -766,16 +766,8 @@ class EarleyParser {
   // foreach position and CFG state
   std::vector<std::set<StateId> > alreadyPredicted_;
 
-// TODO: it's unclear what queueing discipline is required - the only
-// interesting-looking cfg*fst composition test we have is in
-// regtest-compose-cfg-unbin.yml
-#if 1
-  std::queue<Item*> agenda_;
-#else
-  // see RegressionTests/Hypergraph2/compose3.stdout-expected - with less it's
-  // wrong (markus thought it should be less)
-  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority> > agenda_;
-#endif
+  /// work on leftmost spans first - see Hypergraph2/regtest-compose3.yml
+  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::less<ItemPriority> > agenda_;
 
   std::set<Item*> finalItems_;
 

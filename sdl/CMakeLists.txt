@@ -367,6 +367,10 @@ if(USING_GCC)
       # -static-libstdc++
       # sdl_exe_linker_flags("-static-libgcc") #then log4cxx link fails (because we didn't build that lib w/ same option?)
       if (APPLE)
+        # mac build isn't well supported currently (external lib builds weren't
+        # maintained for it), and it seems like `brew install boost` and `brew
+        # install gcc-5` don't understand _GLIBCXX_USE_CXX11_ABI, so likely a
+        # manual build of all libs is needed
         include_directories(/usr/local/include/c++/5.1.0)
       endif()
       #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs

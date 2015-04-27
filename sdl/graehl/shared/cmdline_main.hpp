@@ -159,7 +159,7 @@ struct base_options {
     add_verbose = false;
     add_quiet = true;
   }
-  bool disable() {
+  void disable() {
     no_ins();
     add_out_file = false;
     add_config_file = false;
@@ -169,7 +169,6 @@ struct base_options {
     add_debug_level = false;
     positional_in = positional_out = false;
   }
-
 };
 
 /**
