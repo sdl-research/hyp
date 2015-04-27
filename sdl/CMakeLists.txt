@@ -366,10 +366,12 @@ if(USING_GCC)
       # can't because tbb-4.3.1 is .so only
       # -static-libstdc++
       # sdl_exe_linker_flags("-static-libgcc") #then log4cxx link fails (because we didn't build that lib w/ same option?)
-      #TODO: change to 1 once we have rebuilt all relevant (C++) externals
+
+      #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs
       sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
       sdl_enable_cpp11()
       if(OPEN_SOURCE_RELEASE)
+        sdl_exe_linker_flags("-static-libgcc")
       else()
       endif()
     endif()

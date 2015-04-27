@@ -62,11 +62,13 @@
 
 #include <sdl/graehl/shared/bit_arithmetic.hpp>
 #include <sdl/graehl/shared/hex_int.hpp>
-#include <sdl/graehl/shared/word_spacer.hpp>
+#include <sdl/graehl/shared/string_to.hpp>
 
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Override.hpp>
 #include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/Flag.hpp>
+#include <sdl/Util/StringBuilder.hpp>
 
 #define INFO_TRANSFORM(x) LOG_INFO_NAMESTR(this->logname, x)
 #define DEBUG_TRANSFORM(x) LOG_DEBUG_NAMESTR(this->logname, #x << " = " << x)
@@ -80,6 +82,7 @@ struct TransformMainBase : HypergraphMainBase {
  protected:
   void init() {
     multiInputs = false;
+    HypergraphMainOpt::multifile = false;
     logname = "LW.TransformMain";
   }
 
@@ -127,12 +130,11 @@ struct TransformMainBase : HypergraphMainBase {
   std::string semiringsUsage() const { return semiringsList(allowedSemirings); }
 
   static std::string semiringsList(semirings_type x) {
-    std::ostringstream o;
-    graehl::word_spacer sp('|');
-    if (x & viterbi) o << sp << "viterbi";
-    if (x & log) o << sp << "log";
-    if (x & expectation) o << sp << "expectation";
-    if (x & feature) o << sp << "feature";
+    Util::StringBuilder o;
+    if (x & viterbi) o.append_space('|')("viterbi");
+    if (x & log) o.append_space('|')("log");
+    if (x & expectation) o.append_space('|')("expectation");
+    if (x & feature) o.append_space('|')("feature");
     return o.str();
   }
 
@@ -187,7 +189,7 @@ struct TransformMainBase : HypergraphMainBase {
   typedef ArcTpl<featureSemiring> featureArc;
 
   NO_INIT_OR_ASSIGN_MEMBER(TransformMainBase)
-
+  Util::Flag useProperties;
   template <class Config>
   void configure(Config& c) {
     // doesn't defer to cmdline_main because cmdline_main registers itself as configurable(this) also
@@ -197,7 +199,8 @@ struct TransformMainBase : HypergraphMainBase {
 
     c("arc-type", &arcType)('a')("Weight semiring: " + qual + semiringsUsage()).verbose(ambig);
     // TODO: use SDL_ENUM for arcType
-
+    if (useProperties)
+      ;
     c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
     if (multiInputs && this->multifile == HypergraphMainOpt::kMultiFile)
       c("reload", &reloadOnMultiple)(
@@ -227,8 +230,8 @@ struct TransformMainBase : HypergraphMainBase {
   virtual void validate_parameters_more() OVERRIDE {
     semirings_type sr = semiringFor(arcType);
     if (!(sr & allowedSemirings))
-      SDL_THROW_LOG(Hypergraph, InvalidInputException, "semiring type " + arcType + " not allowed - use one of "
-                                              << semiringsUsage());
+      SDL_THROW_LOG(Hypergraph, InvalidInputException,
+                    "semiring type " + arcType + " not allowed - use one of " << semiringsUsage());
   }
 };
 
@@ -268,9 +271,8 @@ struct TransformMain : TransformMainBase {
     optInputs.setChars();
   }
   TransformMain(std::string const& n, std::string const& usage, std::string const& ver = "v1")
-      : TransformMainBase(n, usage, ver, HypergraphMainOpt(multiFile(), CRTP::randomSeed()),
-                          CRTP::semirings(), CRTP::bestOutput(), CRTP::defaultSemiring(),
-                          CRTP::nbestHypergraphDefault())
+      : TransformMainBase(n, usage, ver, HypergraphMainOpt(multiFile(), CRTP::randomSeed()), CRTP::semirings(),
+                          CRTP::bestOutput(), CRTP::defaultSemiring(), CRTP::nbestHypergraphDefault())
       , inputOptDesc(InputHypergraphs::caption()) {
     HypergraphMainOpt::multifile = multiFile();
     TransformMainBase::multiInputs = (CRTP::lineInputs() == kLineInputs);
@@ -497,8 +499,7 @@ struct TransformMain : TransformMainBase {
           o_name << oname_sep << in.name;
           bool ok = impl().transform2InPlaceP(olast, h);
           olast_name = o_name.str();
-          HTRANSFORM2_MSG(6, "result=" << olast_name << " (success=" << ok << "):\n" << *olast, aname,
-                          in.name);
+          HTRANSFORM2_MSG(6, "result=" << olast_name << " (success=" << ok << "):\n" << *olast, aname, in.name);
           if (!ok) return false;
         }
         if (input == 1) cascade[0].reset();
@@ -508,7 +509,9 @@ struct TransformMain : TransformMainBase {
         bool finalok = impl().transform1InPlaceP(olast);
         if (!finalok) return false;
       }
-      if (impl().printFinal()) { main.optBestOutputs.output(main.out(), *olast, graehl::utos(inputLine)); }
+      if (impl().printFinal()) {
+        main.optBestOutputs.output(main.out(), *olast, graehl::utos(inputLine));
+      }
       return true;
     }
   };
