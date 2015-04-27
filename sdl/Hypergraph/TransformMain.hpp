@@ -442,7 +442,6 @@ struct TransformMain : TransformMainBase {
     typedef std::vector<Hp> Hps;
     TransformMain& main;
 
-    Util::Inputs const& inputs;
     Hps cascade;  // parallel to inputs (input is first). the rest are lazily loaded from inputs if needed.
     std::string const& appname;
 
@@ -463,7 +462,6 @@ struct TransformMain : TransformMainBase {
       std::ostringstream o_name;
       o_name << olast_name;
       Util::Sep oname_sep = main.impl().transform2sep();
-      if (this->inputs.empty()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "no input files");
       for (unsigned input = 1, ninput = (unsigned)cascade.size(); input < ninput; ++input) {
         Hp& h = cascade[input];  // h: input hg (that we may free)
         Util::Input in(main.inputs[input]);
