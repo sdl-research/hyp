@@ -41,6 +41,7 @@ struct HypEmpty : TransformMain<HypEmpty> { // note base class CRTP (google it)
   HypEmpty() : TransformMain<HypEmpty>("Empty", USAGE_HypEmpty)
   {
     this->multipleInputs();
+    this->configureProperties = true;
   }
   HypEmptyOptions empty;
 

@@ -16,10 +16,11 @@ namespace Hypergraph {
 
 struct HypBest : TransformMain<HypBest> {
   HypBest() : TransformMain<HypBest>("Best", BestPathOptions::usage()) {
+    this->configureProperties = true;
     optBestOutputs.enable = true;
     // since best-paths is now an optional standard part of TransformMain, there's not much going on here
   }
-  Properties properties(int i) const { return kDefaultProperties | kStoreInArcs | kStoreFirstTailOutArcs; }
+  Properties properties(int i) const { return this->properties_else(kFsmOutProperties | kStoreInArcs); }
   enum { has_inplace_input_transform = false, has_transform1 = false };
   static int defaultSemiring() { return TransformMainBase::viterbi; }
   static BestOutput bestOutput() { return kBestOutput; }

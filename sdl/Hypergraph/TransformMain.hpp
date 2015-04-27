@@ -188,7 +188,7 @@ struct TransformMainBase : HypergraphMainBase {
   typedef ArcTpl<featureSemiring> featureArc;
 
   NO_INIT_OR_ASSIGN_MEMBER(TransformMainBase)
-  Util::Flag useProperties;
+  Util::Flag configureProperties;
   template <class Config>
   void configure(Config& c) {
     // doesn't defer to cmdline_main because cmdline_main registers itself as configurable(this) also
@@ -198,7 +198,7 @@ struct TransformMainBase : HypergraphMainBase {
 
     c("arc-type", &arcType)('a')("Weight semiring: " + qual + semiringsUsage()).verbose(ambig);
     // TODO: use SDL_ENUM for arcType
-    if (useProperties)
+    if (configureProperties)
       c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
     if (firstInputFileHasMultipleHgs && multifile)
       c("reload", &reloadOnMultiple)(
