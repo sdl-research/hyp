@@ -211,11 +211,23 @@ struct Sym {
     return id;
   }
 
+#include <graehl/shared/warning_push.h>
+  GCC_DIAG_IGNORE(uninitialized);
+#if HAVE_GCC_4_8
+  GCC_DIAG_IGNORE(maybe-uninitialized);
+/* because of this (RuleBinarySerializer) gem: (doesn't understand that
+ * code.decode, a virtual fn, will set SymInt x:
+
+   Sym.hpp:207:17: warning: ‘x’ may be used uninitialized in this function
+     [-Wmaybe-uninitialized] id_ = index | type;
+ */
+#endif
   void set(SymInt index, SymbolType type) {
     assert(!isPersistentType(type));
     assert(index <= kSmallSizeMask || index <= kLargeSizeMask && (SymInt)type == kLargeSizeMask);
     id_ = index | type;
   }
+#include <graehl/shared/warning_pop.h>
 
   /**
      "constructor" (static factory method). that just sets id_ to identifier.
