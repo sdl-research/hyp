@@ -96,16 +96,17 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt, Util::Inputs {
       , graehl::main(n, usage, ver, false, opt.random, false)
       , HypergraphMainOpt(opt)
       , initlogger(opt.initlogger) {
+    this->opt.no_ins();
+    this->opt.add_verbose = true;
     this->opt.add_help = opt.helpOptions;
     this->opt.add_log_file = false;  // using log4cxx instead
   }
   void multipleInputs(int maxin = 0) {
     assert(!configured);
-    max_ins = maxin;
+    max_inputs = maxin;
     inputEnabled = true;
     multifile = true;
   }
-
 
  private:
   Util::Flag configured, validated;

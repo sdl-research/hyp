@@ -104,7 +104,7 @@ struct InitLoggerOptions {
         "1=Info");
     c("log-config", &xmlConfigFile)("optional log4cxx xml config file");
     c("console", &console)("log to stderr").init(true).verbose();
-    c("verbose", &verbose)("verbose initialization info").init(true).verbose();
+    c("log-init-details", &verbose)("verbose initialization info").init(true).verbose();
     c("remove-appenders", &removeAppenders)("remove existing log4cxx appenders first").init(false).verbose();
     c("overwrite-file", &overwriteFile)("overwrite existing output file [log-path]").init(true).verbose();
     c("multithread-layout", &multiThread)("use multithreaded log layout (show thread id")

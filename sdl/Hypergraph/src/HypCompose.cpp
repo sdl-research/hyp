@@ -25,6 +25,8 @@ struct HypCompose : TransformMain<HypCompose> {
   HypCompose() : TransformMain<HypCompose>("Compose", USAGE_HypCompose) {
     composeOpt.addFstOption = false;
     composeOpt.fstCompose = true;
+    assert(this->multifile);
+    assert(this->has2());
   }
 
   void declare_configurable() { this->configurable(&composeOpt); }

@@ -231,19 +231,19 @@ struct InputsOptions {
   bool multifile;
   bool positional;
   /// 0: no max
-  unsigned min_ins;
-  unsigned max_ins;
+  unsigned min_inputs;
+  unsigned max_inputs;
   InputsOptions(bool multiple = true)
-      : inputEnabled(true), multifile(multiple), positional(true), max_ins(), min_ins(1) {}
+      : inputEnabled(true), multifile(multiple), positional(true), max_inputs(), min_inputs(1) {}
 
   std::string input_help() const {
     assert(inputEnabled);
     StringBuilder s;
     if (multifile) {
-      s("Multiple input files (- for STDIN); at least ")(min_ins);
-      if (max_ins) s(" and at most ")(max_ins);
+      s("Multiple input files (- for STDIN); at least ")(min_inputs);
+      if (max_inputs) s(" and at most ")(max_inputs);
     } else {
-      s(min_ins ? "Required input" : "Input");
+      s(min_inputs ? "Required input" : "Input");
       s(" file (- for STDIN)");
     }
     if (positional) s("; positional args ok");
@@ -256,8 +256,10 @@ inline void swap(Input& a, Input& b) {
 }
 
 struct Inputs : InputsOptions {
+  std::size_t size() const { return inputs.size(); }
   Inputs(InputsOptions const& conf = InputsOptions()) : InputsOptions(conf), configurableSingleInput(false)  {
     assert(configurableSingleInput.isNull());
+    inputs.reserve(16);
   }
   typedef std::vector<Input> Ins;
   Ins inputs;
@@ -279,7 +281,7 @@ struct Inputs : InputsOptions {
     if (!inputEnabled) return;
     std::string const& help = input_help();
     if (multifile) {
-      config("in", &inputs)(help).eg("infileN.gz").positional(positional, max_ins);
+      config("in", &inputs)(help).eg("infileN.gz").positional(positional, max_inputs);
     } else {
       config("in", &configurableSingleInput)(help).eg("infileN.gz").positional(positional);
     }
@@ -289,7 +291,7 @@ struct Inputs : InputsOptions {
   void validate() {
     if (!validated.first()) return;
     if (!inputEnabled) return;
-    if (!multifile && max_ins) max_ins = 1;
+    if (!multifile && max_inputs) max_inputs = 1;
     if (!configurableSingleInput.isNull()) {
       if (inputs.empty()) {
         inputs.push_back(Input());
@@ -300,13 +302,13 @@ struct Inputs : InputsOptions {
       configurableSingleInput.setNull();
       assert(configurableSingleInput.isNull());
     }
-    if (min_ins == 1 && inputs.empty()) inputs.push_back(stdin_arg());
+    if (min_inputs == 1 && inputs.empty()) inputs.push_back(stdin_arg());
     unsigned nin = inputs.size();
-    if (max_ins && nin > max_ins)
-      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << min_ins << " to " << max_ins
+    if (max_inputs && nin > max_inputs)
+      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << min_inputs << " to " << max_inputs
                                                                 << " inputs, but got " << nin);
-    if (min_ins > nin)
-      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << min_ins << " to " << max_ins
+    if (min_inputs > nin)
+      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << min_inputs << " to " << max_inputs
                                                                 << " inputs, but got only " << nin);
   }
 };

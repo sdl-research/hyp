@@ -911,10 +911,12 @@ if(OPEN_SOURCE_RELEASE)
   sdl_compiled_setting(SDL_OBJECT_COUNT 0) #necessary
   sdl_compiled_setting(SDL_ENCRYPT 0) #necessary?
 
-#  sdl_compiled_setting(SDL_FIX_LOCALE 0) # optional - debugging buggy Hyp best --in filename (vs Hyp Best < filename)
-#  sdl_compiled_setting(SDL_BOOST_LOCALE 0) # optional
-#  sdl_compiled_setting(SDL_FAST_COUT 0) # optional
-#  sdl_compiled_setting(GRAEHL_FILEARGS_DEFAULT_LARGE_BUF 0) #optional
+  if(APPLE)
+    sdl_compiled_setting(SDL_FIX_LOCALE 0) # optional except on my mac
+    sdl_compiled_setting(SDL_BOOST_LOCALE 0) # optional
+  endif()
+  #  sdl_compiled_setting(SDL_FAST_COUT 0) # optional
+  #  sdl_compiled_setting(GRAEHL_FILEARGS_DEFAULT_LARGE_BUF 0) #optional
 else()
   sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
   if(SDL_DEVELOPMENT)

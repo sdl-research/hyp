@@ -442,11 +442,11 @@ struct TransformMain : TransformMainBase {
     typedef std::vector<Hp> Hps;
     TransformMain& main;
 
-    istream_args const& ins;
-    Hps cascade;  // parallel to ins (input is first). the rest are lazily loaded from ins if needed.
+    Util::Inputs const& inputs;
+    Hps cascade;  // parallel to inputs (input is first). the rest are lazily loaded from inputs if needed.
     std::string const& appname;
 
-    Cascade(TransformMain& main) : main(main), ins(main.ins), cascade(ins.size()), appname(main.name()) {}
+    Cascade(TransformMain& main) : main(main), cascade(main.inputs.size()), appname(main.name()) {}
 
     std::string const& name() const { return appname; }
 
@@ -459,14 +459,14 @@ struct TransformMain : TransformMainBase {
       std::string olast_name;
       if (!cascade.size()) return false;
       olast = cascade[0];
-      olast_name = ins[0].name;
+      olast_name = main.inputs.inputs[0].name;
       std::ostringstream o_name;
       o_name << olast_name;
       Util::Sep oname_sep = main.impl().transform2sep();
-      if (this->ins.empty()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "no input files");
+      if (this->inputs.empty()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "no input files");
       for (unsigned input = 1, ninput = (unsigned)cascade.size(); input < ninput; ++input) {
         Hp& h = cascade[input];  // h: input hg (that we may free)
-        Util::Input in(ins[input]);
+        Util::Input in(main.inputs.inputs[input]);
         if (!h) {
           h.reset(new H(main.inputProperties(input)));
           if (!*in)
@@ -528,10 +528,10 @@ struct TransformMain : TransformMainBase {
     bool reload = (t3 && reloadOnMultiple);
     bool free = optInputs.single() || reload;
 
-    Cascade<Weight> c(*this);
+    Cascade<Weight> cascade(*this);
 
     typedef shared_ptr<IMutableHypergraph<Arc> > Hp;
-    Hp& h = c.cascade[0];
+    Hp& h = cascade.cascade[0];
     bool allok = true;
     unsigned ninputs = 0;
     for (;;) {
@@ -546,7 +546,7 @@ struct TransformMain : TransformMainBase {
         if (!inputOk) return false;
         SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", post-transform");
       }
-      if (!c.transformInput((unsigned)optInputs.lineno, reload, free)) allok = false;
+      if (!cascade.transformInput((unsigned)optInputs.lineno, reload, free)) allok = false;
     }
     return allok && ninputs;
   }
