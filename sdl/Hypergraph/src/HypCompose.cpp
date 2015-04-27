@@ -17,7 +17,7 @@
 namespace sdl {
 namespace Hypergraph {
 
-#define USAGE_HypCompose "Compose cfg*fsm*...*fsm"
+#define USAGE_HypCompose "Compose cfg*fsm*...*fsm. you may use --properties=first-tail-out-arcs if not cfg."
 
 struct HypCompose : TransformMain<HypCompose> {
   static bool nbestHypergraphDefault() { return false; }  // for backward compat w/ regtests mostly
@@ -33,10 +33,8 @@ struct HypCompose : TransformMain<HypCompose> {
   static BestOutput bestOutput() { return kBestOutput; }
   static LineInputs lineInputs() { return kNoLineInputs; }
 
-  // 1 is first input which may be cfg
-  //Properties properties(int i) const { return (i == 1 ? kStoreInArcs : kStoreInArcs) | kFsmOutProperties; }
-  //TODO: seems we have a bug in cfg*fst compose unless kStoreOutArcs?
-  Properties properties(int i) const { return kStoreInArcs | kStoreOutArcs; }
+  // 1 is first input which may be cfg. if cfg composing then need outarcs.
+  Properties properties(int i) const { return i == 1 ? (kStoreInArcs | kStoreOutArcs) : kStoreOutArcs; }
 
   ComposeTransformOptions composeOpt;
 

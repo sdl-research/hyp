@@ -119,8 +119,8 @@ class Registry {
   // TODO: use unordered_set
   typedef std::set<T*, Util::LessByValue<T> > TSet;
   TSet set_;
- public:
 
+ public:
   ~Registry() {
     forall (T* item, set_) { delete item; }
   }
@@ -764,7 +764,7 @@ class EarleyParser {
   /// work on leftmost spans first? (std::less) - see Hypergraph2/regtest-compose3.yml
   Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority> > agenda_;
 #endif
-  //TODO: maybe std::priority_queue w/ old comparison object (no ItemPriorityMap) was correct?
+  // TODO: maybe std::priority_queue w/ old comparison object (no ItemPriorityMap) was correct?
 
   /// queue (no priority): bad. less: bad. greater: bad. problem w/ HypCompose props?
   std::set<Item*> finalItems_;
@@ -927,7 +927,7 @@ struct ComposeOptions : fs::FstComposeOptions {
 
 namespace {
 const Properties kComposeFstRequiredProperties = kFsm | kStoreOutArcs | kSortedOutArcs;
-const Properties kComposeCfgRequiredProperties = kStoreInArcs;
+const Properties kComposeCfgRequiredProperties = kStoreInArcs | kStoreOutArcs;  // TODO: need out-arcs?
 }
 
 /*
@@ -987,7 +987,8 @@ void composeImpl(IHypergraph<A> const& cfg, IHypergraph<A> const& fst, IMutableH
 template <class HgMaybeConstCfg, class HgMaybeConstFst, class A>
 void compose(HgMaybeConstCfg& cfgIn, HgMaybeConstFst& fstIn, IMutableHypergraph<A>* resultCfg,
              ComposeOptions opts = ComposeOptions(),
-             OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties) {
+             OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties,
+             bool const useFstComposeIfPossible = false) {
   typedef IHypergraph<A> H;
   typedef shared_ptr<H const> HP;
 
@@ -1003,8 +1004,9 @@ void compose(HgMaybeConstCfg& cfgIn, HgMaybeConstFst& fstIn, IMutableHypergraph<
 
   Properties fstProp = fstIn.properties();
   Properties reqFstProp = kComposeFstRequiredProperties;
-  if (fstProp
-      & kStoreFirstTailOutArcs) {  // store first-tail out arc per state or store all arcs out per state.
+
+  if (useFstComposeIfPossible && (fstProp & kStoreFirstTailOutArcs)) {
+    // store first-tail out arc per state or store all arcs out per state.
     reqFstProp |= kStoreFirstTailOutArcs;
     reqFstProp &= ~kStoreOutArcs;
   }
@@ -1012,7 +1014,7 @@ void compose(HgMaybeConstCfg& cfgIn, HgMaybeConstFst& fstIn, IMutableHypergraph<
   typename HgMaybeConstFst::ConstImmutablePtr pFstCopy = ensureProperties(fstIn, reqFstProp, 0, 0, onMissing);
   SDL_DEBUG(Hypergraph.Compose, "compose fst props post: " << printProperties(*pFstCopy));
 
-  if (false && pFstCopy->isMutable() && pCfgCopy->isFsmLike())
+  if (useFstComposeIfPossible && pFstCopy->isMutable() && pCfgCopy->isFsmLike())
     fs::compose(*pCfgCopy, mutableHg(*pFstCopy), resultCfg, opts);
   else
     composeImpl(*pCfgCopy, *pFstCopy, resultCfg, opts);
