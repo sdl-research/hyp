@@ -73,10 +73,10 @@ struct HypergraphMainOpt : Util::InputsOptions {
     helpOptions = true;
   }
 
-  HypergraphMainOpt(MultiFile multiFile, RandomSeed randomSeed)  //=kNoRandomSeed
+  HypergraphMainOpt(bool multiFile, RandomSeed randomSeed)  //=kNoRandomSeed
   {
     init();
-    multifile = multiFile == kMultiFile;
+    multifile = multiFile;
     random = randomSeed;
   }
 

@@ -20,7 +20,6 @@ namespace Hypergraph {
 struct HypUnion : TransformMain<HypUnion> {
 
   HypUnion() : TransformMain<HypUnion>("Union", USAGE_HypUnion) {
-    opt.require_ins();
     configureInputs();
   }
 

@@ -40,7 +40,7 @@ struct HypEmptyOptions {
 struct HypEmpty : TransformMain<HypEmpty> { // note base class CRTP (google it)
   HypEmpty() : TransformMain<HypEmpty>("Empty", USAGE_HypEmpty)
   {
-    opt.require_ins();
+    this->multipleInputs();
   }
   HypEmptyOptions empty;
 

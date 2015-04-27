@@ -23,7 +23,6 @@ struct HypCompose : TransformMain<HypCompose> {
   static bool nbestHypergraphDefault() { return false; }  // for backward compat w/ regtests mostly
 
   HypCompose() : TransformMain<HypCompose>("Compose", USAGE_HypCompose) {
-    opt.require_ins();
     composeOpt.addFstOption = false;
     composeOpt.fstCompose = true;
   }
@@ -35,11 +34,9 @@ struct HypCompose : TransformMain<HypCompose> {
 
   ComposeTransformOptions composeOpt;
 
-#if 0
   Properties properties(int i) const {  //0 is out, 1 is cfg (or if fst*fst we want outarcs), 2 and on are all fsms
-    return i == 1 ? (kComposeCfgRequiredProperties|kFsmOutProperties) : kFsmOutProperties;
+    return i == 1 ? (kStoreInArcs|kFsmOutProperties) : kFsmOutProperties;
   }
-#endif
 
   enum {
     has_transform1 = false,

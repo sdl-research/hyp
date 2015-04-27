@@ -200,8 +200,7 @@ struct TransformMainBase : HypergraphMainBase {
     c("arc-type", &arcType)('a')("Weight semiring: " + qual + semiringsUsage()).verbose(ambig);
     // TODO: use SDL_ENUM for arcType
     if (useProperties)
-      ;
-    c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
+      c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
     if (multiInputs && this->multifile == HypergraphMainOpt::kMultiFile)
       c("reload", &reloadOnMultiple)(
           "for each of the inputs, re-read the rest of the transducers again each time (saves memory) if "
@@ -241,7 +240,6 @@ struct TransformMain : TransformMainBase {
   // (BOOST_STATIC_CONSTANT might work too)
 
   //* \return kMultiFile for binary transforms e.g. compose */
-  MultiFile multiFile() const { return impl().has2() ? kMultiFile : kNoMultiFile; }
   static LineInputs lineInputs() { return kLineInputs; }
   static BestOutput bestOutput() { return kNoBestOutput; }
   static RandomSeed randomSeed() { return kNoRandomSeed; }
@@ -271,10 +269,9 @@ struct TransformMain : TransformMainBase {
     optInputs.setChars();
   }
   TransformMain(std::string const& n, std::string const& usage, std::string const& ver = "v1")
-      : TransformMainBase(n, usage, ver, HypergraphMainOpt(multiFile(), CRTP::randomSeed()), CRTP::semirings(),
+      : TransformMainBase(n, usage, ver, HypergraphMainOpt(impl().has2(), CRTP::randomSeed()), CRTP::semirings(),
                           CRTP::bestOutput(), CRTP::defaultSemiring(), CRTP::nbestHypergraphDefault())
       , inputOptDesc(InputHypergraphs::caption()) {
-    HypergraphMainOpt::multifile = multiFile();
     TransformMainBase::multiInputs = (CRTP::lineInputs() == kLineInputs);
     reloadOnMultiple = (CRTP::reloadInputs() == kReloadInputs);
     configuredInputs = false;
