@@ -81,8 +81,7 @@ namespace Hypergraph {
 struct TransformMainBase : HypergraphMainBase {
  protected:
   void init() {
-    multiInputs = false;
-    HypergraphMainOpt::multifile = false;
+    firstInputFileHasMultipleHgs = false;
     logname = "LW.TransformMain";
   }
 
@@ -106,10 +105,10 @@ struct TransformMainBase : HypergraphMainBase {
   char const* logname;  // set this if you use LOG_TRANSFORM
 
   TransformMainBase(std::string const& n, std::string const& usage, std::string const& ver,
-                    HypergraphMainOpt hmainOpt = HypergraphMainOpt(), int semirings = kAllSemirings,
+                    bool multiple, HypergraphMainOpt hmainOpt = HypergraphMainOpt(), int semirings = kAllSemirings,
                     BestOutput bestOutputs = kNoBestOutput, int defaultSemiring = viterbi,
                     bool nbestHypergraphDefault = false)
-      : HypergraphMainBase(n, usage, ver, hmainOpt)
+      : HypergraphMainBase(n, usage, ver, multiple, hmainOpt)
       , arcType(semiringsList(defaultSemiring))
       , allowedSemirings(semirings)
       , bestOutputs(bestOutputs == kBestOutput)
@@ -201,13 +200,13 @@ struct TransformMainBase : HypergraphMainBase {
     // TODO: use SDL_ENUM for arcType
     if (useProperties)
       c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
-    if (multiInputs && this->multifile == HypergraphMainOpt::kMultiFile)
+    if (firstInputFileHasMultipleHgs && multifile)
       c("reload", &reloadOnMultiple)(
           "for each of the inputs, re-read the rest of the transducers again each time (saves memory) if "
           "there are more than 2 inputs");
   }
 
-  bool multiInputs;  // multiple inputs[0] lines or hgs
+  bool firstInputFileHasMultipleHgs;  // multiple inputs[0] lines or hgs
   bool reloadOnMultiple;  // for inputs 2...n, free then re-parse for each input (saves memory if n is large)
 
   void finish_configure_more() OVERRIDE {
@@ -238,8 +237,6 @@ template <class CRTP>  // google CRTP if you're confused
 struct TransformMain : TransformMainBase {
   // override as appropriate; these are fn rather than anon. enum so we can have the correct type
   // (BOOST_STATIC_CONSTANT might work too)
-
-  //* \return kMultiFile for binary transforms e.g. compose */
   static LineInputs lineInputs() { return kLineInputs; }
   static BestOutput bestOutput() { return kNoBestOutput; }
   static RandomSeed randomSeed() { return kNoRandomSeed; }
@@ -269,10 +266,10 @@ struct TransformMain : TransformMainBase {
     optInputs.setChars();
   }
   TransformMain(std::string const& n, std::string const& usage, std::string const& ver = "v1")
-      : TransformMainBase(n, usage, ver, HypergraphMainOpt(impl().has2(), CRTP::randomSeed()), CRTP::semirings(),
+      : TransformMainBase(n, usage, ver, impl().has2(), HypergraphMainOpt(CRTP::randomSeed()), CRTP::semirings(),
                           CRTP::bestOutput(), CRTP::defaultSemiring(), CRTP::nbestHypergraphDefault())
       , inputOptDesc(InputHypergraphs::caption()) {
-    TransformMainBase::multiInputs = (CRTP::lineInputs() == kLineInputs);
+    TransformMainBase::firstInputFileHasMultipleHgs = true;
     reloadOnMultiple = (CRTP::reloadInputs() == kReloadInputs);
     configuredInputs = false;
   }
@@ -524,13 +521,10 @@ struct TransformMain : TransformMainBase {
   bool runWeight() {
     typedef ArcTpl<Weight> Arc;
     impl().template prepare<Arc>();
-    if (!multiInputs) {
-      optInputs.lines = false;
-      optInputs.multiple = false;
-    }
-    optInputs.setIn(first_input());
+    optInputs.multiple = !firstInputFileHasMultipleHgs;
+    optInputs.setIn(this->input());
 
-    bool t3 = ins.size() > 2 && impl().has2();
+    bool t3 = inputs.size() > 2 && impl().has2();
     bool reload = (t3 && reloadOnMultiple);
     bool free = optInputs.single() || reload;
 

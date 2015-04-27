@@ -38,6 +38,8 @@ struct HypTrie : HypergraphMainBase {
     wordlist.unigram_addk = 0;
     wordlist.chars = false;
     wordlist.counts = false;
+
+    multifile = false;
   }
 
   void declare_configurable() { this->configurable(&stringUnionFromWordList); }
@@ -47,7 +49,7 @@ struct HypTrie : HypergraphMainBase {
 
   void run() {
     HG hg(kFsmOutProperties);
-    stringUnionFromWordList.build(this->in(), &hg);
+    stringUnionFromWordList.build(this->inputStream(), &hg);
     this->out() << hg;
   }
 

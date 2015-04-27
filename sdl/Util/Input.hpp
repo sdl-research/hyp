@@ -29,6 +29,7 @@
 #include <sdl/Util/ArrayStream.hpp>
 #include <sdl/Util/String.hpp>
 #include <sdl/Util/StringBuilder.hpp>
+#include <sdl/Util/Flag.hpp>
 
 namespace sdl {
 namespace Util {
@@ -140,6 +141,8 @@ struct Input : InputStream {
 
   Input() : InputStream(stdin_filename) {}
 
+  Input(bool) {}
+
   /**
      STDIN (default, or filename '-'), or
       from a file if setFilename is called (or constructed with string
@@ -163,6 +166,7 @@ struct Input : InputStream {
 
   Input(Input const& o) : InputStream(o), decrypted(o.decrypted) {}
 
+
   void operator=(Input const& o) {
     InputStream::operator=((InputStream const&)o);
     decrypted = o.decrypted;
@@ -185,6 +189,7 @@ struct Input : InputStream {
   Input(std::string const& filenamePrefix, std::string const& id)
       : InputStream(fileForId(filenamePrefix, id)) {}
 
+  bool isNull() const { return InputStream::is_none(); }
   /**
      set to null. this is different from -0, which presents a valid writable stream (targeted at something
      like /dev/null)
@@ -222,16 +227,17 @@ inline Input stdinInput() {
 }
 
 struct InputsOptions {
-  bool enabled;
+  bool inputEnabled;
   bool multifile;
   bool positional;
   /// 0: no max
   unsigned min_ins;
   unsigned max_ins;
-  InputsOptions() : enabled(), multifile(), positional(true), max_ins(), min_ins(1) {}
+  InputsOptions(bool multiple = true)
+      : inputEnabled(true), multifile(multiple), positional(true), max_ins(), min_ins(1) {}
 
   std::string input_help() const {
-    assert(enabled);
+    assert(inputEnabled);
     StringBuilder s;
     if (multifile) {
       s("Multiple input files (- for STDIN); at least ")(min_ins);
@@ -249,48 +255,58 @@ inline void swap(Input& a, Input& b) {
   a.swapWith(b);
 }
 
-struct Inputs {
-  typedef std::vector<Input> Ins;
-  Ins ins;
-  Input const& first_input() const {
-    assert(opt.enabled);
-    assert(!singleInput); // call validate() first
-    if (ins.empty()) SDL_THROW_LOG(Hypergraph.Main, ConfigException, "no inputs (--in or positional)");
-    return ins.front();
+struct Inputs : InputsOptions {
+  Inputs(InputsOptions const& conf = InputsOptions()) : InputsOptions(conf), configurableSingleInput(false)  {
+    assert(configurableSingleInput.isNull());
   }
-  operator Ins const&() const { return ins; }
-  InputsOptions opt;
-  Input singleInput;
+  typedef std::vector<Input> Ins;
+  Ins inputs;
+  /// return the first input
+  Input const& input() const {
+    assert(validated);
+    assert(inputEnabled);
+    assert(configurableSingleInput.isNull());  // call validate() first
+    if (inputs.empty()) SDL_THROW_LOG(Util.Inputs, ConfigException, "no inputs (--in or positional)");
+    assert(!inputs.empty());
+    return inputs.front();
+  }
+  std::istream& inputStream() const { return *input(); }
+  operator Ins const&() const { return inputs; }
+  InputsOptions conf;
+  Input configurableSingleInput;
   template <class Config>
   void configure(Config& config) {
-    if (!opt.enabled) return;
-    std::string const& help = opt.input_help();
-    if (opt.multifile) {
-      config("in", &ins)(help).eg("infileN.gz").positional(opt.positional, opt.max_ins);
+    if (!inputEnabled) return;
+    std::string const& help = input_help();
+    if (multifile) {
+      config("in", &inputs)(help).eg("infileN.gz").positional(positional, max_ins);
     } else {
-      config("in", &singleInput)(help).eg("infileN.gz").positional(opt.positional);
+      config("in", &configurableSingleInput)(help).eg("infileN.gz").positional(positional);
     }
   }
   friend inline void validate(Inputs& x) { x.validate(); }
+  Util::Flag validated;
   void validate() {
-    if (!opt.enabled) return;
-    if (!opt.multifile && opt.max_ins) opt.max_ins = 1;
-    if (singleInput) {
-      assert(!opt.multifile);
-      if (ins.empty()) {
-        ins.push_back(Input());
-        swap(ins.back(), singleInput);
+    if (!validated.first()) return;
+    if (!inputEnabled) return;
+    if (!multifile && max_ins) max_ins = 1;
+    if (!configurableSingleInput.isNull()) {
+      if (inputs.empty()) {
+        inputs.push_back(Input());
+        inputs.back().swapWith(configurableSingleInput);
       } else
-        SDL_THROW_LOG(Util.Input, ProgrammerMistakeException, "single-input option somehow resulted in multiple ("<<ins.size()<<") inputs");
-      singleInput.reset();
+        SDL_THROW_LOG(Util.Input, ProgrammerMistakeException,
+                      "single-input option somehow resulted in multiple (" << inputs.size() << ") inputs");
+      configurableSingleInput.setNull();
+      assert(configurableSingleInput.isNull());
     }
-    if (opt.min_ins == 1 && ins.empty()) ins.push_back(stdin_arg());
-    unsigned nin = ins.size();
-    if (opt.max_ins && nin > opt.max_ins)
-      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << opt.min_ins << " to " << opt.max_ins
+    if (min_ins == 1 && inputs.empty()) inputs.push_back(stdin_arg());
+    unsigned nin = inputs.size();
+    if (max_ins && nin > max_ins)
+      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << min_ins << " to " << max_ins
                                                                 << " inputs, but got " << nin);
-    if (opt.min_ins > nin)
-      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << opt.min_ins << " to " << opt.max_ins
+    if (min_ins > nin)
+      SDL_THROW_LOG(Util.Input, ConfigException, "wanted from " << min_ins << " to " << max_ins
                                                                 << " inputs, but got only " << nin);
   }
 };

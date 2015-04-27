@@ -34,8 +34,9 @@ struct HypCompose : TransformMain<HypCompose> {
 
   ComposeTransformOptions composeOpt;
 
-  Properties properties(int i) const {  //0 is out, 1 is cfg (or if fst*fst we want outarcs), 2 and on are all fsms
-    return i == 1 ? (kStoreInArcs|kFsmOutProperties) : kFsmOutProperties;
+  Properties
+  properties(int i) const {  // 0 is out, 1 is cfg (or if fst*fst we want outarcs), 2 and on are all fsms
+    return i == 1 ? (kStoreInArcs | kFsmOutProperties) : kFsmOutProperties;
   }
 
   enum {

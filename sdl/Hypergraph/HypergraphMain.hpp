@@ -51,8 +51,7 @@ namespace sdl {
 namespace Hypergraph {
 
 /// named options for HypergraphMainBase
-struct HypergraphMainOpt : Util::InputsOptions {
-  enum MultiFile { kNoMultiFile = 0, kMultiFile = 1 };
+struct HypergraphMainOpt {
   enum RandomSeed { kNoRandomSeed = 0, kRandomSeed = 1 };
   Util::InitLoggerOptions logOpt;
   RandomSeed random;
@@ -62,10 +61,6 @@ struct HypergraphMainOpt : Util::InputsOptions {
   HypergraphMainOpt() { init(); }
 
   void init() {
-    InputsOptions::positional = true;
-    InputsOptions::enabled = true;
-    InputsOptions::multifile = false;
-    InputsOptions::min_ins = 1;
     logOpt.setRemoveAppenders(true).setOverwriteFile(true);
     searchDirsOpt = false;
     initlogger = true;
@@ -73,17 +68,12 @@ struct HypergraphMainOpt : Util::InputsOptions {
     helpOptions = true;
   }
 
-  HypergraphMainOpt(bool multiFile, RandomSeed randomSeed)  //=kNoRandomSeed
+  HypergraphMainOpt(RandomSeed randomSeed)  //=kNoRandomSeed
   {
     init();
-    multifile = multiFile;
     random = randomSeed;
   }
 
-  static inline HypergraphMainOpt noInput(HypergraphMainOpt opt = HypergraphMainOpt()) {
-    opt.enabled = false;
-    return opt;
-  }
   bool helpOptions;
   static inline HypergraphMainOpt noHelp(HypergraphMainOpt opt = HypergraphMainOpt()) {
     opt.helpOptions = false;
@@ -91,11 +81,8 @@ struct HypergraphMainOpt : Util::InputsOptions {
   }
 };
 
-struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
-  Util::Inputs inputs;
+struct HypergraphMainBase : graehl::main, HypergraphMainOpt, Util::Inputs {
   NO_INIT_OR_ASSIGN_MEMBER(HypergraphMainBase)
-  Util::Input const& first_input() const { return inputs.first_input(); }
-  std::istream& in() const { return *first_input(); }
   Util::SearchDirs searchDirs;
   bool initlogger;
   IVocabularyPtr const& vocab() const {
@@ -104,33 +91,35 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
   }
 
   HypergraphMainBase(std::string const& n, std::string const& usage, std::string const& ver = "v1",
-                     HypergraphMainOpt const& opt = HypergraphMainOpt())
-      : graehl::main(n, usage, ver, false, opt.random, false)
+                     bool multiple = true, HypergraphMainOpt const& opt = HypergraphMainOpt())
+      : Util::Inputs(multiple)
+      , graehl::main(n, usage, ver, false, opt.random, false)
       , HypergraphMainOpt(opt)
       , initlogger(opt.initlogger) {
     this->opt.add_help = opt.helpOptions;
     this->opt.add_log_file = false;  // using log4cxx instead
   }
-
   void multipleInputs(int maxin = 0) {
+    assert(!configured);
     max_ins = maxin;
-    InputsOptions::enabled = true;
+    inputEnabled = true;
     multifile = true;
   }
 
 
  private:
+  Util::Flag configured, validated;
   mutable IVocabularyPtr pVoc;
 
  public:
   virtual void finish_configure_more() {}
 
   virtual void finish_configure_extra() {
-    inputs.opt = *this;
-    if (inputs.opt.enabled) this->configurable(&inputs);
+    if (inputEnabled) this->configurable((Util::Inputs*)this);
     if (initlogger) this->configurable(&logOpt);
     if (searchDirsOpt) this->configurable(&searchDirs);
     finish_configure_more();
+    configured = true;
   }
 
   void initlog() {
@@ -144,7 +133,7 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt {
 
   virtual void validate_parameters_extra() {
     initlog();
-    inputs.validate();
+    Util::Inputs::validate();
     validate_parameters_more();
   }
 

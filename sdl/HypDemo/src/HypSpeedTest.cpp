@@ -28,6 +28,7 @@ char const* usage = "measure performance of compose (excluding file input): HypS
 #include <sdl/Hypergraph/fs/Compose.hpp>
 #include <sdl/Hypergraph/SortArcs.hpp>
 #include <sdl/Hypergraph/BestPath.hpp>
+#include <sdl/graehl/shared/monotonic_time.hpp>
 
 using namespace sdl;
 using namespace sdl::Hypergraph;
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
   IMutableHypergraph<Arc>* hyp2 = readHyp<Arc>(std::string(argv[2]), voc);
   sortArcs(hyp2);
 
-  struct timespec tstart = {0, 0}, tend = {0, 0};
+  double tstart, tend;
   fs::FstComposeOptions opt;
   opt.allowDuplicatePathsIf1Best = false;
   opt.pruneToNbest = argc > 3 && argv[3][0] == '1';
@@ -74,11 +75,11 @@ int main(int argc, char** argv) {
       fprintf(stderr, "Composing dup=%d eps=%d...\n", dup, eps);
       for (int i = 0; i <= N; ++i) {
         if (i == 1)  // warm up cache
-          clock_gettime(CLOCK_MONOTONIC, &tstart);
+          tstart = graehl::monotonic_time();
         fs::compose(*hyp1, *hyp2, &hyp3, opt);
       }
-      clock_gettime(CLOCK_MONOTONIC, &tend);
-      double dt = seconds(tend.tv_sec, tend.tv_nsec) - seconds(tstart.tv_sec, tstart.tv_nsec);
+      tend = graehl::monotonic_time();
+      double dt = tend - tstart;
       fprintf(stderr, "Elapsed dup=%d eps=%d time: %.6f seconds N=%d seconds-per=%g\n", dup, eps, dt, N,
               dt / N);
       std::cout << hyp3 << '\n';
