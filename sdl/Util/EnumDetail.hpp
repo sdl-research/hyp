@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -220,12 +220,5 @@ inline std::string simplifedEnumName(std::string str) {
    prepends k to each Enum name per coding standards.
 **/
 #define SDL_DETAIL_ENUM_PREPEND_k(d, data, elem) BOOST_PP_CAT(data, elem)
-
-/**
-   generates enum free fns in enum's namespace
-**/
-#define SDL_DETAIL_ENUM_DEF(name, elems)                                                        \
-  SDL_DETAIL_ENUM_TYPE_INFO(name, BOOST_PP_LIST_TRANSFORM(SDL_DETAIL_ENUM_PREPEND_k, k, elems), \
-                            BOOST_PP_LIST_TRANSFORM(SDL_DETAIL_TOSTRING, _, elems))
 
 #endif

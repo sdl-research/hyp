@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -114,6 +114,21 @@ struct AutoFree {
     return r;
   }
   ~AutoFree() { std::free(toFree); }
+};
+
+template <class T>
+struct AutoDestroy {
+  AutoDestroy(T *p) : p_(p) {}
+  T *p_;
+  void destroy() {
+    assert(p_);
+    p_->~T();
+    p_ = 0;
+  }
+  ~AutoDestroy() {
+    if (p_)
+      p_->~T();
+  }
 };
 
 template <class T>

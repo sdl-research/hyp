@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -325,7 +325,7 @@ struct InArcs : AdjacentArcsBase<Arc, mustStoreNatively> {
           goto nonEmptyStack;
         } else if (!closed.test(pushState) && (selfLoopIsBackEdge || pushState != openState)
                    && ++nBack > maxBackEdges) {
-          SDL_WARN(Hypergraph.BestPath, "aborting acyclic best after over "
+          SDL_INFO(Hypergraph.BestPath, "aborting acyclic best after over "
                                         << maxBackEdges << " back edges; this most recent one is " << *arc);
           return nBack;
         }

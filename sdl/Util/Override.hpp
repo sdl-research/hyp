@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -54,12 +54,17 @@
 #if defined(_MSC_VER)
 #define OVERRIDE override
 #define SDL_FINAL
+#define NOEXCEPT
 #elif defined(__clang__)
+#define NOEXCEPT noexcept
 #define OVERRIDE override
 #define SDL_FINAL final
 #else
 #if __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 7
 #if __cplusplus >= 201103L
+#if !defined(HAVE_CPP11_NOEXCEPT)
+#define HAVE_CPP11_NOEXCEPT 1
+#endif
 #if !defined(HAVE_CPP11_FINAL)
 #define HAVE_CPP11_FINAL 1
 #endif

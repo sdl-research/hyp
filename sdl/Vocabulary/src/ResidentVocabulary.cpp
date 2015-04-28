@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -92,6 +92,10 @@ bool ResidentVocabulary::_contains(std::string const& symbol, SymbolType symType
 
 bool ResidentVocabulary::_containsSym(Sym symId) const {
   return getVocab(symId.type()).containsSym(symId);
+}
+
+bool ResidentVocabulary::_boundsSym(Sym symId) const {
+  return getVocab(symId.type()).boundsSym(symId);
 }
 
 unsigned ResidentVocabulary::_GetNumSymbols(SymbolType symType) const {

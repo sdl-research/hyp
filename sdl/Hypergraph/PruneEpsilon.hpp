@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -116,7 +116,9 @@ void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWe
   SDL_DEBUG(Hypergraph.PruneEpsilon, "after pruneSimplePathGraphEpsilon:\n" << hg);
 }
 
-struct PruneEpsilonOptions : TransformBase<Transform::Inplace> {
+struct PruneEpsilon;
+
+struct PruneEpsilonOptions {
   bool pruneEpsilon, keepEpsilonWeights, pathPruneAllStates;
   PruneEpsilonOptions(bool pruneEpsilon = false, bool keepEpsilonWeights = true, bool pathPruneAllStates = true)
       : pruneEpsilon(pruneEpsilon)
@@ -133,6 +135,17 @@ struct PruneEpsilonOptions : TransformBase<Transform::Inplace> {
   }
   bool enabled() const { return pruneEpsilon; }
   template <class Arc>
+  struct TransformFor {
+    typedef PruneEpsilon type;
+  };
+};
+
+struct PruneEpsilon : TransformBase<Transform::Inplace>, PruneEpsilonOptions {
+  PruneEpsilon(PruneEpsilonOptions const& opt = PruneEpsilonOptions())
+      : PruneEpsilonOptions(opt)
+  {}
+  bool enabled() const { return pruneEpsilon; }
+  template <class Arc>
   bool needs(IMutableHypergraph<Arc>& h) const {
     return pruneEpsilon;
   }
@@ -142,18 +155,9 @@ struct PruneEpsilonOptions : TransformBase<Transform::Inplace> {
     if (pruneEpsilon) pruneSimplePathGraphEpsilon(hg, keepEpsilonWeights, pathPruneAllStates);
   }
   template <class Arc>
-  struct TransformFor {
-    typedef PruneEpsilonOptions type;
-  };
-  template <class Arc>
   void inplace(IMutableHypergraph<Arc>& hg) const {
     maybePruneEpsilon(hg);
   }
-};
-
-template <class Arc>
-struct TransformFor<PruneEpsilonOptions, Arc> {
-  typedef PruneEpsilonOptions type;
 };
 
 

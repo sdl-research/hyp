@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -133,6 +133,7 @@ struct ResidentVocabulary : IVocabulary {
   std::string const& _Str(Sym) const;
   Sym _Sym(std::string const&, SymbolType symType) const;
   bool _containsSym(Sym symbolId) const;
+  bool _boundsSym(Sym symbolId) const;
   bool _contains(std::string const& symbol, SymbolType symType) const;
   void _Accept(IVocabularyVisitor& visitor);
   void _AcceptType(IVocabularyVisitor&, SymbolType);
@@ -144,7 +145,6 @@ struct ResidentVocabulary : IVocabulary {
   std::size_t _GetSize() const;
   Sym _AddSymbolMustBeNew(std::string const&, SymbolType);
 
- private:
   inline BasicVocabularyImpl& getVocab(SymbolType type) {
     return const_cast<BasicVocabularyImpl&>(const_cast<ResidentVocabulary const*>(this)->getVocab(type));
   }
@@ -162,6 +162,7 @@ struct ResidentVocabulary : IVocabulary {
         SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid type of vocabulary requested.");
     }
   }
+ private:
 
  protected:
   BasicVocabularyImpl vocabTerminal;

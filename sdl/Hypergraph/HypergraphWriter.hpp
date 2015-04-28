@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -27,67 +27,66 @@
 namespace sdl {
 namespace Hypergraph {
 
-template <class A>
-inline std::ostream& writeState(std::ostream& out, StateId sid, const IHypergraph<A>& hg) {
-  out << sid;
-  IVocabularyPtr pVoc = hg.getVocabulary();
-  Sym inId = hg.inputLabel(sid);
-  Sym outId = hg.outputLabel(sid);
-  if (inId || outId) {
-    out << '(';
-    if (inId) {
-      writeLabel(out, inId, pVoc);
-      if (outId && outId != inId) writeLabel(out << ' ', outId, pVoc);
-    } else
-      writeLabel(out << ' ', outId, pVoc);
-    // note: could be that we didn't have any input label, but we do have an
-    // output label. then we'll see ( out-label) - the space is needed to
-    // distinguish this from (in-label)!
-    out << ')';
-  }
-  return out;
+inline void printState(std::ostream& out, StateId s, IHypergraphStates const* hg = 0) {
+  if (hg)
+    printState(out, s, *hg);
+  else
+    out << s;
 }
 
-template <class A>
-void print(std::ostream& o, StateId s, IHypergraph<A> const& hg) {
-  writeState(o, s, hg);
+inline void print(std::ostream& o, StateId s, IHypergraphStates const& hg) {
+  printState(o, s, hg);
 }
 
-#if !SDL_64BIT_STATE_ID
-template <class A>
-void print(std::ostream& o, std::size_t s, IHypergraph<A> const& hg) {
-  writeState(o, (StateId)s, hg);
+inline void print(std::ostream& o, StateId s, IHypergraphStates const* hg) {
+  printState(o, s, hg);
 }
-#endif
 
-/**
-   Writes an arc; use this you have the hg (for its vocabulary); otherwise
-   operator<< will do.
-*/
-template <class A>
-std::ostream& writeArc(std::ostream& out, const A& arc, const IHypergraph<A>& hg) {
-  writeState(out, arc.head(), hg) << " <- ";
-  StateIdContainer const& tails = arc.tails();
-  for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i)
-    writeState(out, *i, hg) << " ";
-  out << "/ " << arc.weight();
-  return out;
-}
+#if _MSC_VER
 
 template <class A>
 void print(std::ostream& o, A const& a, IHypergraph<A> const& hg) {
-  writeArc(o, a, hg);
+  printArc(o, &a, hg);
 }
-
-template <class Arc>
-void print(std::ostream& o, ArcHandle ap, IHypergraph<Arc> const& hg) {
-  writeArc(o, *(Arc const*)ap, hg);
-}
-
 template <class A>
 void print(std::ostream& o, A* ap, IHypergraph<A> const& hg) {
-  writeArc(o, *ap, hg);
+  printArc(o, ap, hg);
 }
+template <class A>
+void print(std::ostream& o, A const& a, IHypergraph<A> const* hg) {
+  printArc(o, &a, hg);
+}
+template <class A>
+void print(std::ostream& o, A* ap, IHypergraph<A> const* hg) {
+  printArc(o, ap, hg);
+}
+
+#else
+
+#if !SDL_64BIT_STATE_ID
+template <class A>
+void print(std::ostream& o, std::size_t s, IHypergraphStates const& hg) {
+  printState(o, (StateId)s, hg);
+}
+#endif
+
+template <class A>
+void print(std::ostream& o, A const& a, IHypergraphStates const& hg) {
+  printArc(o, &a, hg);
+}
+template <class A>
+void print(std::ostream& o, A* ap, IHypergraphStates const& hg) {
+  printArc(o, ap, hg);
+}
+template <class A>
+void print(std::ostream& o, A const& a, IHypergraphStates const* hg) {
+  printArc(o, &a, hg);
+}
+template <class A>
+void print(std::ostream& o, A* ap, IHypergraphStates const* hg) {
+  printArc(o, ap, hg);
+}
+#endif
 
 /**
    Write a hypergraph in text format.
@@ -102,20 +101,20 @@ struct HypergraphTextWriter {
 
   virtual ~HypergraphTextWriter() {}
 
-  virtual void write(std::ostream& out, IHypergraph<Arc> const& hypergraph) const {
-    StateId startState = hypergraph.start();
+  virtual void write(std::ostream& out, IHypergraph<Arc> const& hg) const {
+    StateId startState = hg.start();
     if (startState != Hypergraph::kNoState) {
-      writeStateText(out, hypergraph, startState);
+      printStateText(out, hg, startState);
     }
-    for (StateId i = 0, N = hypergraph.size(); i < N; ++i)
-      if (i != startState) writeStateText(out, hypergraph, i);
+    for (StateId i = 0, N = hg.size(); i < N; ++i)
+      if (i != startState) printStateText(out, hg, i);
   }
 
   /**
      May write in or out arcs (depending what is stored per
      state in the hypergraph)
   */
-  virtual void writeStateText(std::ostream& out, IHypergraph<Arc> const& hypergraph, StateId sid) const = 0;
+  virtual void printStateText(std::ostream& out, IHypergraph<Arc> const& hg, StateId s) const = 0;
 };
 
 /**
@@ -130,19 +129,22 @@ class HypergraphTextWriter_Bottomup : public HypergraphTextWriter<A> {
 
   HypergraphTextWriter_Bottomup(IVocabularyPtr pVoc) : pVoc_(pVoc) {}
 
-  void writeStateText(std::ostream& out, IHypergraph<A> const& hypergraph, StateId sid) const {
-    if (hypergraph.final() == sid) {
+  void printStateText(std::ostream& out, IHypergraph<A> const& hg, StateId s) const {
+    if (hg.final() == s) {
       out << "FINAL <- ";
-      writeState(out, sid, hypergraph) << '\n';
+      printState(out, s, hg);
+      out << '\n';
     }
-    if (hypergraph.start() == sid) {
+    if (hg.start() == s) {
       out << "START <- ";
-      writeState(out, sid, hypergraph) << '\n';
+      printState(out, s, hg);
+      out << '\n';
     }
-    for (ArcId aid = 0, N = hypergraph.numOutArcs(sid); aid < N; ++aid) {
-      A* arc = hypergraph.outArc(sid, aid);
+    for (ArcId aid = 0, N = hg.numOutArcs(s); aid < N; ++aid) {
+      A* arc = hg.outArc(s, aid);
       if (arcsWritten_.find(arc) == arcsWritten_.end()) {
-        writeArc(out, *arc, hypergraph) << '\n';
+        printArc(out, arc, hg);
+        out << '\n';
         arcsWritten_.insert(arc);
       }
     }
@@ -165,18 +167,20 @@ class HypergraphTextWriter_Topdown : public HypergraphTextWriter<A> {
 
   HypergraphTextWriter_Topdown(IVocabularyPtr pVoc) : pVoc_(pVoc) {}
 
-  void writeStateText(std::ostream& out, IHypergraph<A> const& hypergraph, StateId sid) const {
-    if (hypergraph.final() == sid) {
+  void printStateText(std::ostream& out, IHypergraph<A> const& hg, StateId s) const {
+    if (hg.final() == s) {
       out << "FINAL <- ";
-      writeState(out, sid, hypergraph) << '\n';
+      printState(out, s, hg);
+      out << '\n';
     }
-    if (hypergraph.start() == sid) {
+    if (hg.start() == s) {
       out << "START <- ";
-      writeState(out, sid, hypergraph) << '\n';
+      printState(out, s, hg);
+      out << '\n';
     }
-    for (ArcId aid = 0, N = hypergraph.numInArcs(sid); aid < N; ++aid) {
-      // out << *hypergraph.inArc(sid, aid) << '\n';
-      writeArc(out, *hypergraph.inArc(sid, aid), hypergraph) << '\n';
+    for (ArcId aid = 0, N = hg.numInArcs(s); aid < N; ++aid) {
+      printArc(out, hg.inArc(s, aid), hg);
+      out << '\n';
     }
   }
 
@@ -185,26 +189,26 @@ class HypergraphTextWriter_Topdown : public HypergraphTextWriter<A> {
 };
 
 template <class A>
-std::ostream& writeHypergraph(std::ostream& out, const IHypergraph<A>& hypergraph, bool fullEmptyCheck = false) {
-  bool e = fullEmptyCheck ? empty(hypergraph) : hypergraph.prunedEmpty();
-  SDL_TRACE(Hypergraph.writeHypergraph, "writing hg props="<<PrintProperties(hypergraph.properties()));
+std::ostream& writeHypergraph(std::ostream& out, const IHypergraph<A>& hg, bool fullEmptyCheck = false) {
+  bool e = fullEmptyCheck ? empty(hg) : hg.prunedEmpty();
+  SDL_TRACE(Hypergraph.writeHypergraph, "writing hg props=" << PrintProperties(hg.properties()));
   if (!e) {
-    IVocabularyPtr pVoc = hypergraph.getVocabulary();
+    IVocabularyPtr pVoc = hg.getVocabulary();
     shared_ptr<HypergraphTextWriter<A> > w;
-    if (hypergraph.storesInArcs())
+    if (hg.storesInArcs())
       w.reset(new HypergraphTextWriter_Topdown<A>(pVoc));
-    else if (hypergraph.storesOutArcs())
+    else if (hg.storesOutArcs())
       w.reset(new HypergraphTextWriter_Bottomup<A>(pVoc));
     else
       SDL_THROW_LOG(Hypergraph, InvalidInputException, "Hypergraph does not store arcs, cannot write");
-    w->write(out, hypergraph);
+    w->write(out, hg);
   }
   return out;
 }
 
 template <class Arc>
-inline std::ostream& operator<<(std::ostream& out, IHypergraph<Arc> const& hypergraph) {
-  writeHypergraph(out, hypergraph);
+inline std::ostream& operator<<(std::ostream& out, IHypergraph<Arc> const& hg) {
+  writeHypergraph(out, hg);
   return out;
 }
 
@@ -220,7 +224,7 @@ struct WithProperties {
     self.print(out);
     return out;
   }
-  void print(std::ostream& out) const { out << PrintProperties(hg.properties()) << "\n" << hg; }
+  void print(std::ostream& out) const { out << PrintProperties(hg.properties()) << '\n' << hg; }
 };
 
 template <class Arc>

@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,6 +28,13 @@ namespace sdl { namespace Hypergraph {
    contiguous range of feature ids.
 */
 struct FeatureIdRange {
+  bool operator==(FeatureIdRange const& o) const {
+    return begin == o.begin && end == o.end;
+  }
+  bool operator!=(FeatureIdRange const& o) const {
+    return !(*this == o);
+  }
+
   struct Unlimited {};
   FeatureId begin, end;
 

@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -1167,13 +1167,13 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   /// mere optimization over IHypergraph::visitArcs
   virtual void visitArcs(ArcVisitor const& v) const OVERRIDE {
     if (properties_ & kStoreInArcs) {
-      for (StateId s = 0, n = inArcsPerState_.size(); s < n; ++s)  // so you can add states in visitor
+      for (StateId s = 0, n = (StateId)inArcsPerState_.size(); s < n; ++s)  // so you can add states in visitor
         for (ArcIter i = inArcsPerState_[s].begin(), e = inArcsPerState_[s].end(); i != e; ++i) v(*i);
     } else if (properties_ & kStoreFirstTailOutArcs) {
-      for (StateId s = 0, n = outArcsPerState_.size(); s < n; ++s)  // so you can add states in visitor
+      for (StateId s = 0, n = (StateId)outArcsPerState_.size(); s < n; ++s)  // so you can add states in visitor
         for (ArcIter i = outArcsPerState_[s].begin(), e = outArcsPerState_[s].end(); i != e; ++i) v(*i);
     } else
-      this->forArcs(v);
+      IHypergraph<Arc>::forArcs(v);
   }
 
  public:
@@ -1207,8 +1207,6 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       properties_ &= ~kSortedOutArcs;
       forall (StateId t, tails) { Util::atExpand(outArcsPerState_, t).push_back(arc); }
     }
-    SDL_TRACE(PhraseBased.Hypergraph.addArc,
-              gseq << "added " << *arc << " ; new #inarcs=" << (storesInArcs() ? numInArcs(arc->head()) : 0));
   }
 
   typedef std::vector<ArcsContainer> AdjacentArcs;
@@ -1326,6 +1324,10 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   void setVocabulary(IVocabularyPtr const& pVocab) OVERRIDE { pVocab_ = pVocab; }
 
   IVocabularyPtr getVocabulary() const OVERRIDE { return pVocab_; }
+
+  IVocabulary *vocab() const OVERRIDE {
+    return pVocab_.get();
+  }
 
 
   // The in and out arcs are not in a separate State class because

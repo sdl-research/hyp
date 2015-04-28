@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -57,14 +57,14 @@ inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const& voc
 }
 
 
-inline void writeLabel(std::ostream& out, Sym sym, IVocabulary* voc, SymbolQuotation quote = kQuoted) {
-  if (voc)
+inline void writeLabel(std::ostream& out, Sym sym, IVocabulary const* voc, SymbolQuotation quote = kQuoted) {
+  if (voc && voc->containsSym(sym))
     writeLabel(out, sym, *voc, quote);
   else
     writeLabel(out, sym);
 }
-inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary* voc, SymbolQuotation quote = kQuoted) {
-  if (voc)
+inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const* voc, SymbolQuotation quote = kQuoted) {
+  if (voc && voc->containsSym(sym))
     writeLabel(out, sym, *voc, quote);
   else
     writeLabel(out, sym);

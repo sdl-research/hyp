@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -487,6 +487,9 @@ class AssignTokenWeight : public StateToWeight<TW> {
 */
 template <class Arc>
 void detokenize(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* pHgResult) {
+  if (!hgInput.storesInArcs())
+    SDL_THROW_LOG(Hypergraph.ConvertCharsToTokens, ConfigException,
+                  "detokenize requires indexing in-arcs");
   SDL_DEBUG(Hypergraph.detokenize, "detokenize()");
   SDL_TRACE(Hypergraph.detokenize, hgInput);
   using namespace ConvertCharsToTokensUtil;
@@ -510,7 +513,6 @@ void detokenize(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* pHgRes
   boost::ptr_vector<TokenWeight> distances;
   DetokenizeUtil::AssignTokenWeight<TokenWeight> tokenWt(mapped, pHgResult->getVocabulary());
   insideAlgorithm(mapped, &distances, tokenWt, false);
-
   using AssembleTokensUtil::ConstructResultArcForeachIncomingToken;
   typedef ConstructResultArcForeachIncomingToken<Arc, TokenWeight> ConstructResult;
   ConstructResult statesVisitor(hgInput, distances, pHgResult);

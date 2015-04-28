@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -36,6 +36,8 @@
 
 namespace sdl {
 
+
+
 template <class It1, class It2>
 bool equalPodArray(It1 begin1, It2 begin2, std::size_t n) {
   return !std::memcmp(&*begin1, &*begin2, n * sizeof(*begin1));
@@ -66,6 +68,14 @@ typename C::value_type* arrayBegin(C& c) {
 #else
   return &*c.begin();
 #endif
+}
+
+template <class C>
+typename C::value_type * zeroArrayBegin(C & c) {
+  typedef typename C::value_type Val;
+  Val *r = arrayBegin(c);
+  std::memset(r, 0, sizeof(Val) * c.size());
+  return r;
 }
 
 template <class C>

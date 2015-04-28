@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -211,20 +211,14 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
 
   explicit ArcTpl(Weight const& w) : weight_(w) {}
 
-  ArcTpl(Weight const& w, StateId srcState, StateId lexState) : tails_(2), weight_(w) {
-    tails_[0] = srcState;
-    tails_[1] = lexState;
-  }
+  typedef typename W::FloatT Cost;
 
   ArcTpl(Weight const& w, StateId srcState) : tails_(1, srcState), weight_(w) {}
 
-  // for PhraseDecoder / ArcWithDataTpl
-  template <class Cost>
-  ArcTpl(StateId head, StateId tail, Cost w)
-      : head_(head), tails_(1, tail), weight_(w) {}
-
   // for ConvertCharsToTokens
   ArcTpl(Head head, Weight const& w) : head_(head), weight_(w) {}
+  /// does NOT set weight to 1 or head
+  explicit ArcTpl(StateId tail) : tails_(1, tail) {}
   ArcTpl(Head head, StateId tail) : head_(head), tails_(1, tail) { setOne(weight_); }
 
   /**
@@ -234,6 +228,11 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
     setOne(weight_);
     tails_[0] = srcState;
     tails_[1] = lexState;
+  }
+
+  /// for GraphInlineInputLabels expandInputLabels - otherwise will crash (these aren't real stateids)
+  void appendInline(Sym s) {
+    tails_.push_back((StateId)s.id_);
   }
 
 #if __cplusplus >= 201103L
@@ -288,18 +287,24 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   // for ConvertCharsToTokens and hypergraph
   ArcTpl(StateId h, Weight const& w, StateId t) : head_(h), tails_(1, t), weight_(w) {}
 
+  ArcTpl(StateId h, Cost c, StateId t) : head_(h), tails_(1, t), weight_(c) {}
+
   /**
      For simple arcs like in a finite-state machine.
      TODO Maybe remove, since it is easy to mis-use and directly use
      a label here, instead of a state that has the label.
   */
-  ArcTpl(StateId from, StateId label, Weight const& w, StateId to) : head_(to), tails_(), weight_(w) {
-    tails_.push_back(from);
-    tails_.push_back(label);
+  ArcTpl(StateId from, StateId label, Weight const& w, StateId to) : head_(to), tails_(2), weight_(w) {
+    tails_[0] = from;
+    tails_[1] = label;
   }
 
-  // default copy c'tor
+  ArcTpl(StateId from, StateId label, Cost c, StateId to) : head_(to), tails_(2), weight_(c) {
+    tails_[0] = from;
+    tails_[1] = label;
+  }
 
+  // default copy/move/etc c'tor
 
   virtual ~ArcTpl() {}
 
@@ -315,7 +320,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
     assert(isFsmArc());
     return tails_[0];
   }
-  StateId getGraphSrc() const {
+  StateId graphSrc() const {
     assert(!tails_.empty());
     return tails_[0];
   }
@@ -372,7 +377,6 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
     return std::memcmp(a.begin(), b.begin(), asz * sizeof(StateId)) < 0;
   }
 
- private:
   StateId head_;
   StateIdContainer tails_;
   Weight weight_;
@@ -505,21 +509,18 @@ class ArcWithDataTpl : public ArcTpl<W> {
   static ArcFilter filterFalse() { return (ArcFilter)fnFilterFalse; }
 
 
-  ArcWithDataTpl() : Base(), data_(NULL), deleter_(NULL) {}
+  ArcWithDataTpl() : Base(), data_(), deleter_() {}
 
-  ArcWithDataTpl(StateId head, StateIdContainer const& tails, Weight const& w = Weight::one())
-      : Base(head, tails, w), data_(NULL), deleter_(NULL) {}
+  ArcWithDataTpl(StateId head, StateIdContainer const& tails,
+                 Weight const& w = Weight::one())
+      : Base(head, tails, w), data_(), deleter_() {}
 
   ArcWithDataTpl(StateId from, StateId label, Weight const& w, StateId to)
-      : Base(from, label, w, to), data_(NULL), deleter_(NULL) {}
-
-  template <class Cost>
-  ArcWithDataTpl(StateId head, StateId tail, Cost const& w)
-      : Base(head, tail, w), data_(NULL), deleter_(NULL) {}
+      : Base(from, label, w, to), data_(), deleter_() {}
 
   template <class Cost>
   ArcWithDataTpl(StateId head, Cost const& w, StateId tail)
-      : Base(head, w, tail), data_(NULL), deleter_(NULL) {}
+      : Base(head, w, tail), data_(), deleter_() {}
 
   virtual ~ArcWithDataTpl() {
     if (deleter_ && data_) deleter_->dispose(data_);
@@ -556,6 +557,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
   void* getData() const { return data_; }
 
+  void* release() { deleter_ = 0; return data_; }
   /// \return ref to data_ contents, assuming data_ points at a type T directly
   template <class T>
   T& dataAs() const {
@@ -599,8 +601,8 @@ class ArcWithDataTpl : public ArcTpl<W> {
     deleter_ = 0;
   }
 
- private:
   void* data_;
+ private:
   ArcWithDataDeleter const* deleter_;
 };
 

@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -123,6 +123,13 @@ MutableHypergraph<Arc>* newEmptySameVocabulary(IHypergraph<Arc> const& hg) {
 }
 
 template <class Arc>
+MutableHypergraph<Arc>* newEmptyHg(IVocabularyPtr const& voc) {
+  MutableHypergraph<Arc>* r = new MutableHypergraph<Arc>;
+  r->setVocabulary(voc);
+  return r;
+}
+
+template <class Arc>
 bool emptyInToOut(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* presult_hg) {
   presult_hg->setVocabulary(hg.getVocabulary());
   if (hg.prunedEmpty()) {
@@ -141,10 +148,10 @@ bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IMutableHypergraph<Arc>
     return false;
 }
 
-template <class Arc>
-bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IHypergraph<Arc> >& presult_hg) {
+template <class Arc, class OutputArc>
+bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IHypergraph<OutputArc> >& presult_hg) {
   if (hg.prunedEmpty()) {
-    presult_hg.reset(newEmptySameVocabulary(hg));
+    presult_hg.reset(newEmptyHg<OutputArc>(hg.getVocabulary()));
     return true;
   } else
     return false;

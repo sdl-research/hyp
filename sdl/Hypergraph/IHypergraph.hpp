@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -197,6 +197,10 @@ struct IHypergraphStates : Resource {
 
   virtual IVocabularyPtr getVocabulary() const = 0;
 
+  virtual IVocabulary *vocab() const {
+    return getVocabulary().get();
+  }
+
   /**
      \return whether (approximately) best-first (lowest weight) outarcs. unlike hasSortedArcs, this is not
      invalidated by adding new arcs
@@ -229,7 +233,14 @@ struct IHypergraphStates : Resource {
   virtual void forceFirstTailOutArcs() {
     if (!storesOutArcs())
       SDL_THROW_LOG(Hypergraph.forceFirstTailOutArcs, ConfigException,
-                    "hypergraph doesn't have at least FirstTailOutArcs");
+                    "hypergraph doesn't have at least first-tail-out-arcs");
+  }
+
+  /// so you can use GraphInlineInputLabels
+  virtual void forceNotAllOutArcs() {
+    if (storesAllOutArcs())
+      SDL_THROW_LOG(Hypergraph.forceFirstTailOutArcs, ConfigException,
+                    "hypergraph should not store *all* out-arcs");
   }
 
   // TODO: one or both of start/final state should just be direct data members (for
@@ -772,26 +783,22 @@ struct FstArc {
     return out;
   }
 
-  void printLabel(std::ostream& out, IVocabulary const& vocab) const {
+  void printLabel(std::ostream& out, IVocabulary const* vocab) const {
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
     if (!annotations.empty()) out << "annotations:" << Util::print(annotations, vocab);
 #endif
     out << '(';
-    out << vocab.str(labelPair.first);
-    if (labelPair.first != labelPair.second) out << ' ' << vocab.str(labelPair.second);
+    out << vocab->str(labelPair.first);
+    if (labelPair.first != labelPair.second) out << ' ' << vocab->str(labelPair.second);
     out << ')';
   }
-  void print(std::ostream& out, IVocabulary const& vocab) const {
+  void print(std::ostream& out, IVocabulary const* vocab) const {
     out << dst << "<-";
     printLabel(out, vocab);
     printWeight(out);
   }
-  void print(std::ostream& out, IVocabularyPtr const& pvocab) const { print(out, *pvocab); }
 
-  friend inline void print(std::ostream& out, FstArc const& self, IVocabularyPtr const& pvocab) {
-    self.print(out, pvocab);
-  }
-  friend inline void print(std::ostream& out, FstArc const& self, IVocabulary const& pvocab) {
+  friend inline void print(std::ostream& out, FstArc const& self, IVocabulary const* pvocab) {
     self.print(out, pvocab);
   }
 };
@@ -1362,7 +1369,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
       for (StateId i = 0; i < N; ++i)
         for (ArcId a = 0, f = numInArcs(i); a < f; ++a) {
           Arc* pa = inArc(i, a);
-          adjs[pa->getGraphSrc()].push_back(pa);
+          adjs[pa->graphSrc()].push_back(pa);
         }
     }
   }
@@ -1427,7 +1434,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
       typename ArcsContainer::iterator o0 = arcs.begin(), o = o0;
       for (; i < N; ++i) {
         Arc* a = this->outArc(st, i);
-        if (a->getGraphSrc() == st) *o++ = a;
+        if (a->graphSrc() == st) *o++ = a;
       }
       arcs.resize((ArcId)(o - o0));
     }
@@ -1658,6 +1665,43 @@ PrintOutArcs<Arc> printOutArcs(IHypergraph<Arc> const& hg, StateId s) {
 
 inline PrintProperties printProperties(IHypergraphStates const& hg) {
   return PrintProperties(hg.properties());
+}
+
+void printState(std::ostream& out, StateId sid, IHypergraphStates const& hg, bool inlineLabel = false);
+void printArcTails(std::ostream& out, StateIdContainer const& tails, IHypergraphStates const* hg, bool inlineGraphLabels = false);
+
+template <class Arc>
+void printArc(std::ostream& out, Arc const* arc, IHypergraphStates const* hg) {
+  bool inlineGraphLabels = hasProperties(hg->properties(), kGraphInlineInputLabels);
+  printState(out, arc->head_, hg);
+  out << " <- ";
+  printArcTails(out, arc->tails_, hg, inlineGraphLabels);
+  out << " / " << arc->weight_;
+}
+
+template <class Arc>
+void printArc(std::ostream& out, Arc const* arc, IHypergraphStates const& hg) {
+  printArc(out, arc, &hg);
+}
+
+template <class Arc>
+struct PrintArc {
+  Arc* arc;
+  IHypergraphStates const* hg;
+  PrintArc(Arc* arc, IHypergraphStates const* hg) : arc(arc), hg(hg) {}
+  PrintArc(Arc* arc, IHypergraphStates const& hg) : arc(arc), hg(&hg) {}
+  friend inline std::ostream& operator<<(std::ostream& out, PrintArc const& self) {
+    self.print(out);
+    return out;
+  }
+  void print(std::ostream& out) const {
+    printArc(out, arc, hg);
+  }
+};
+
+template <class Arc, class Hg>
+PrintArc<Arc> printArc(Arc* arc, Hg const& hg) {
+  return PrintArc<Arc>(arc, hg);
 }
 
 

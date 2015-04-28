@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -327,6 +327,24 @@ inline std::ostream& operator<<(std::ostream& out, IVocabularyPtr const& p) {
     out << "[no vocab]";
   return out;
 }
+
+inline void printSym(std::ostream& out, Sym sym, IVocabulary const* voc) {
+  if (voc && voc->containsSym(sym))
+    out << voc->str(sym);
+  else
+    out << sym;
+}
+
+struct PrintSym {
+  Sym sym;
+  IVocabulary const* voc;
+  PrintSym(Sym sym, IVocabulary const* voc) : sym(sym), voc(voc) {}
+  friend inline std::ostream& operator<<(std::ostream& out, PrintSym const& self) {
+    self.print(out);
+    return out;
+  }
+  void print(std::ostream& out) const { printSym(out, sym, voc); }
+};
 
 
 }

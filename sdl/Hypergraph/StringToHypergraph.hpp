@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -118,7 +118,6 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
 
   typedef typename Arc::Weight Weight;
   typedef FeatureInsertFct<Weight> FI;
-  FI insertFeature;
 
   for (Position i = 0, n = inputTokens.size(); i != n; ++i) {
     std::string const& token = inputTokens[i];
@@ -129,8 +128,8 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
     Weight& weight = pArc->weight();
     assert(opts.inputFeatures != NULL);
     forall (FeatureId featureId, opts.inputFeatures->getFeaturesForInputPosition(i)) {
-      insertFeature(&weight, (typename FI::key_type)featureId, 1);
-      if (opts.tokens) opts.tokens->insert(symId, (typename FI::key_type)featureId);
+      FI::insertNew(&weight, featureId, 1);
+      if (opts.tokens) opts.tokens->insert(symId, featureId);
     }
     inputWeights.reweight(i, weight);
     pHgResult->addArc(pArc);

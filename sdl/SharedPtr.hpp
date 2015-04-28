@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -47,6 +47,21 @@ using boost::make_shared;
 using boost::static_pointer_cast;
 using boost::dynamic_pointer_cast;
 using boost::const_pointer_cast;
+
+template <class Ptr>
+Ptr ifEnabled(bool enabled, Ptr const& p) {
+  return enabled ? p : Ptr();
+}
+
+template <class Val>
+Val *ptrIfEnabled(bool enabled, Val &p) {
+  return enabled ? &p : NULL;
+}
+
+template <class Val>
+Val const* ptrIfEnabled(bool enabled, Val const& p) {
+  return enabled ? &p : NULL;
+}
 
 template <class Ptr>
 struct PrintPtr {

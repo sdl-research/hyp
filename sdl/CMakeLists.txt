@@ -282,6 +282,7 @@ if(WIN32)
   #add_definitions(-D_SECURE_SCL=0) # Causes end-iterator-dereference errors for debug Windows builds
 
   add_definitions(-DWIN32 -D_SCL_SECURE_NO_WARNINGS -D__TBB_NO_IMPLICIT_LINKAGE)
+  # -DCRT_NO_DEPRECATE # could be used to get builtin vsnprintf if we want to try that
 
   # Set Boost options
   set(SDL_BOOST_MINOR 57)

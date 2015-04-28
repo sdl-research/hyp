@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -185,6 +185,10 @@ class BasicVocabularyImpl {
   Sym sym(std::string const& symbol) const {
     SymInt const i = symbols_.find(symbol);
     return i == kNullIndex ? NoSymbol : symForIndex(i);
+  }
+
+  bool boundsSym(Sym sym) const {
+    return sym.index() < offset_ + symbols_.size();
   }
 
   bool containsSym(Sym sym) const {

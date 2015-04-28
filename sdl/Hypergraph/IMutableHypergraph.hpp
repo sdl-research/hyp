@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -83,6 +83,7 @@ struct IMutableHypergraphBase {
   // that). \return whether labels are in fact canonical
   virtual bool rebuildCanonicalLex() = 0;
 
+  /// respects kCanonicalLex property
   virtual StateId addState(Sym inputLabel) = 0;
 
   /**
@@ -336,14 +337,22 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ : this->size();
   }
 
+
+  /**
+     if on, set bit, else clear it. does not do anything except change the
+     property bit value so should be used by library writers only.
+
+     TODO: make protected?
+  */
+  virtual void setPropertyBit(Properties bit, bool on = true) {
+    Properties p = this->hgUncomputedProperties();
+    setProperties(on ? (bit | p) : (~bit & p));
+  }
+
  private:
   /// accept value naively. post: getProperties() returns p
   virtual void setProperties(Properties p) = 0;
 
-  virtual void setPropertyBit(Properties bit, bool on = true) {
-    Properties p = this->properties();
-    setProperties(on ? (bit | p) : (~bit & p));
-  }
 
   template <class Arc, class SortPolicy>
   friend void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp);
@@ -384,41 +393,38 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
      object skipping virtual interfaces?
   */
   OutArcsGenerator outArcsMatchingInput(StateId outFromState, Sym input) const {
-    assert(hasProperties(this->properties(), kSortedOutArcs|kFsm));
-    if (outFromState == kNoState)
-      return OutArcsGenerator();
+    assert(hasProperties(this->properties(), kSortedOutArcs | kFsm));
+    if (outFromState == kNoState) return OutArcsGenerator();
     ArcsContainer const* parcs = this->maybeOutArcs(outFromState);
     assert(parcs);
     ArcsContainer const& arcs = *parcs;
-    if (arcs.empty())
-      return OutArcsGenerator();
+    if (arcs.empty()) return OutArcsGenerator();
 #define SDL_OPTIMIZE_MATCHING_EPSILON_SIGMA 1
-    //TODO: test actual speed vs code size improvement
+// TODO: test actual speed vs code size improvement
 #if SDL_OPTIMIZE_MATCHING_EPSILON_SIGMA
     if (input <= SIGMA::ID) {
       // we always check for EPSILON and SIGMA in composition; binary search
       // would be silly since they're always at the start of outarcs.
       OutArcsIter b = arcs.begin(), i = b, e = arcs.end();
-      if (input == EPSILON::ID) { // optimize for a common query
-        for(;;++i)
+      if (input == EPSILON::ID) {  // optimize for a common query
+        for (;; ++i)
           if (i == e || this->inputLabel((*i)->fsmSymbolState()) != EPSILON::ID)
             return OutArcsGenerator(b, i);
       }
-      //TODO: maybe only optimize epsilon
+      // TODO: maybe only optimize epsilon
       assert(input == SIGMA::ID);
       SymId sym;
-      for(;;++i) {
-        if (i == e)
-          return OutArcsGenerator();
+      for (;; ++i) {
+        if (i == e) return OutArcsGenerator();
         if ((sym = this->inputLabel((*i)->fsmSymbolState())) > EPSILON::ID) {
           if (sym != SIGMA::ID) return OutArcsGenerator();
           b = i;
-          for(;;)
+          for (;;)
             if (++i == e || this->inputLabel((*i)->fsmSymbolState()) != SIGMA::ID)
               return OutArcsGenerator(b, i);
         }
       }
-      assert(0); // for loop is no-escape (return-only)
+      assert(0);  // for loop is no-escape (return-only)
     }
 #endif
     return OutArcsGenerator(std::equal_range(arcs.begin(), arcs.end(), input, CmpInputFsmLabelsMatch(*this)));
@@ -464,7 +470,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   }
 
   Arc* addArcGraph(StateId fromState, StateId toState, Weight weight = Weight::one()) {
-    Arc* a = new Arc(toState, fromState, weight);
+    Arc* a = new Arc(toState, weight, fromState);
     addArc(a);
     return a;
   }
@@ -521,6 +527,13 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   void forceFirstTailOutArcsOnly() {
     this->forceFirstTailOutArcs();
     removeInArcs();
+  }
+
+  void forceNotAllOutArcs() OVERRIDE {
+    Properties p = this->hgUncomputedProperties();
+    if ((p & kStoreOutArcs) && !(p & kStoreFirstTailOutArcs)) {
+      this->forceFirstTailOutArcs();
+    }
   }
 
   void forceOnlyProperties(Properties properties) {
@@ -681,9 +694,38 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
 
   ArcsContainer const* maybeOutArcsConst(StateId state) const { return maybeOutArcs(state); }
 
+  ArcsContainer const* maybeArcsConst(StateId state, bool inarcs) const {
+    return inarcs ? maybeInArcs(state) : maybeOutArcs(state);
+  }
+
   /// if any arcs were modified structurally (or states labels changed), you
   /// should call this so kGraph and kFsm will be recomputed properly
   virtual void notifyArcsModified() = 0;
+
+  /// faster than IHypergraph::forArcs
+  template <class V>
+  void forArcs(V const& v) const {
+    Properties p = this->properties();
+    bool inarcs = p & kStoreInArcs;
+    if (!inarcs)
+      if (!(p & kStoreFirstTailOutArcs)) return IHypergraph<Arc>::forArcs(v);
+    for (StateId s = 0, N = this->size(); s < N; ++s) {
+      ArcsContainer const* p = maybeArcsConst(s, inarcs);
+      if (!p) continue;
+      for (typename ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v(*i);
+    }
+  }
+
+  template <class V>
+  void forArcs(StateId s, V const& v) const {
+    Properties p = this->properties();
+    bool inarcs = p & kStoreInArcs;
+    for (StateId s = 0, N = this->size(); s < N; ++s) {
+      ArcsContainer const* p = maybeArcsConst(s, inarcs);
+      if (!p) continue;
+      for (typename ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v(*i);
+    }
+  }
 
   /**
      \return whether projectOutput is a noop, i.e. that the output symbols will change when the input symbols
@@ -785,11 +827,20 @@ IMutableHypergraph<Arc> const& mutableHg(IHypergraph<Arc> const& hg) {
   return static_cast<IMutableHypergraph<Arc> const&>(hg);
 }
 
+template <class Arc>
+IMutableHypergraph<Arc> const& mutableHg(IMutableHypergraph<Arc> const& hg) {
+  return hg;
+}
 
 template <class Arc>
-IMutableHypergraph<Arc> & mutableHg(IHypergraph<Arc> & hg) {
+IMutableHypergraph<Arc>& mutableHg(IHypergraph<Arc>& hg) {
   assert(hg.isMutable());
-  return static_cast<IMutableHypergraph<Arc> &>(hg);
+  return static_cast<IMutableHypergraph<Arc>&>(hg);
+}
+
+template <class Arc>
+IMutableHypergraph<Arc> & mutableHg(IMutableHypergraph<Arc> & hg) {
+  return hg;
 }
 
 /**
@@ -841,6 +892,18 @@ inline void forceInArcs(IHypergraph<Arc>& hg) {
     if (mhg)
       mhg->forceInArcs();
     else
+      SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, "input hg doesn't have inarcs");
+  }
+}
+
+template <class Arc>
+inline void forceInArcsOnly(IHypergraph<Arc>& hg) {
+  if (!hg.storesInArcs()) {
+    IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
+    if (mhg) {
+      mhg->forceInArcs();
+      mhg->removeOutArcs();
+    } else
       SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, "input hg doesn't have inarcs");
   }
 }

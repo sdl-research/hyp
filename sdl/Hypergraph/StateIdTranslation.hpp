@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -74,7 +74,6 @@
 namespace sdl {
 namespace Hypergraph {
 
-typedef unordered_map<StateId, StateId> StateIdMap;
 // TODO: use vector? kNoState for unset
 
 // map stateids from source to copy or compacted hg. this is either a lazy complete mapping or partial

@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -45,7 +45,8 @@
                                                << EnumTypeInfo<MyEnum>::getInfo());
   }
   inline MyEnum getValue(MyEnum, const std::string& val) { return EnumTypeInfo<MyEnum>::parse(val); }
-  inline MyEnum getValueExact(MyEnum, const std::string& val) { return EnumTypeInfo<MyEnum>::parseExact(val); }
+  inline MyEnum getValueExact(MyEnum, const std::string& val) { return EnumTypeInfo<MyEnum>::parseExact(val);
+ }
   inline std::string type_string(MyEnum const& in);
   inline std::string allowed_values(MyEnum const& in);
   inline std::string example_value(MyEnum const& in);
@@ -84,7 +85,8 @@
     return in;
   }
   inline std::ostream& operator<<(std::ostream& out, MyEnum val) { return out << to_string_impl(val); }
-  struct MyEnumIterator : public boost::iterator_facade<MyEnumIterator, MyEnum, boost::forward_traversal_tag> {
+  struct MyEnumIterator : public boost::iterator_facade<MyEnumIterator, MyEnum, boost::forward_traversal_tag>
+ {
     MyEnumIterator(bool) : val_((MyEnum)0) {}
     MyEnumIterator(MyEnum p) : val_(p) {}
     MyEnumIterator() : val_(knMyEnum) {}
@@ -107,6 +109,14 @@
 
 #include <sdl/Util/EnumDetail.hpp>
 
-#define SDL_ENUM(MyEnum, size, elems) SDL_DETAIL_ENUM_DEF(MyEnum, BOOST_PP_TUPLE_TO_LIST(size, elems))
+/**
+   e.g. c++11 doesn't need size: SDL_ENUM(name, BOOST_PP_TUPLE_TO_LIST(elems)
+**/
+#define SDL_ENUM_DEF(name, elems)                                                               \
+  SDL_DETAIL_ENUM_TYPE_INFO(name, BOOST_PP_LIST_TRANSFORM(SDL_DETAIL_ENUM_PREPEND_k, k, elems), \
+                            BOOST_PP_LIST_TRANSFORM(SDL_DETAIL_TOSTRING, _, elems))
+
+#define SDL_ENUM(name, size, elems) SDL_ENUM_DEF(name, BOOST_PP_TUPLE_TO_LIST(size, elems))
+
 
 #endif

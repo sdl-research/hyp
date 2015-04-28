@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -24,18 +24,41 @@
 #define SDL_UTIL_MAP_HPP
 #pragma once
 
-#include <utility>
-#include <stdexcept>
-#include <boost/utility/enable_if.hpp>
 
 #include <sdl/Util/Contains.hpp>
 #include <sdl/Exception.hpp>
 #include <sdl/Util/SortedMap.hpp>
 #include <sdl/Util/Sorted.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <sdl/Util/String.hpp>
+#include <utility>
+#include <stdexcept>
+#include <algorithm>
+#include <boost/utility/enable_if.hpp>
 
 namespace sdl {
 namespace Util {
+
+template <class Map, class Prefix>
+bool keyStartsWith(Map &map, Prefix const& prefix, typename Map::iterator &begin, typename Map::iterator &end) {
+  typename Map::iterator i = map.lower_bound(prefix), e = map.end();
+  if (i == e || !startsWith(i->first, prefix)) return false;
+  begin = i;
+  for(;;) {
+    if (++i == e || !startsWith(i->first, prefix)) {
+      end = i;
+      return true;
+    }
+  }
+}
+
+template <class Map, class Prefix>
+void eraseKeyStartsWith(Map &map, Prefix const& prefix) {
+  typename Map::iterator i, e;
+  if (keyStartsWith(map, prefix, i, e))
+    map.erase(i, e);
+}
+
 
 /**
    set map[k] = val, returning true if any previous value existed.

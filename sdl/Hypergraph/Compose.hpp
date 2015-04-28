@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -300,7 +300,7 @@ class EarleyParser {
     }
     out << (item->from == kNoState ? -1 : item->from) << ".." << (item->to == kNoState ? -1 : item->to)
         << ", [";
-    writeArc(out, *item->arc, hg);
+    printArc(out, item->arc, &hg);
     out << "], dot=" << item->dotPos << ", lastEpsPhi=" << (item->lastWasPhiOrEps ? "y" : "n")
         << ", agendaw=" << item->agendaWeight << ", chartw=" << item->chartWeight << "]";
     return out;

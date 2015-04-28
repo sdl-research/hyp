@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -320,7 +320,7 @@ TakeUtf8<Bytes> takeUtf8(Bytes& bytes, TokenSpans* spans = 0) {
 
 
 struct TakeUnicodes : ITakeAlignedChars {
-  explicit TakeUnicodes(Unicodes* unicodes = 0, TokenSpans* spans = 0) : unicodes(unicodes), spans(spans) {}
+  explicit TakeUnicodes(Unicodes* unicodes, TokenSpans* spans = 0) : unicodes(unicodes), spans(spans) {}
   Unicodes* unicodes;
   TokenSpans* spans;
   TakeUnicodes() : spans() {}

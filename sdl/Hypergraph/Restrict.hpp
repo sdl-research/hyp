@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -77,6 +77,7 @@ struct Restrict : TransformBase<Transform::Inplace>
 };
 
 
+///Prepare: CRTP inheritance
 template <class Prepare, class A>
 struct RestrictPrepare : Restrict<A>
 {
@@ -85,12 +86,19 @@ struct RestrictPrepare : Restrict<A>
   RestrictPrepare() {
     samePropertiesOut=clearOut=true;
   }
+
   static inline bool isInplace(IHypergraph<A> const&h, IMutableHypergraph<A> &m) {
     return &h==&m;
   }
+
+  /// CRTP inheritance of Prepare from this
+  Prepare *impl() {
+   return static_cast<Prepare *>(this);
+  }
+
   void prepare(IHypergraph<A> const &h, IMutableHypergraph<A> &m)
   {
-    Prepare *p=(Prepare *)this;
+    Prepare *p=impl();
     if (clearOut&&!isInplace(h, m)) {
       if (samePropertiesOut)
         m.clear(h.properties());
@@ -124,11 +132,16 @@ struct RestrictPrepare : Restrict<A>
     Restrict<A>::inout(h, o);
     complete();
   }
+  bool needsRestrict(IHypergraph<A> & h) {
+    return true;
+  }
   void inplace(IMutableHypergraph<A> &m) {
     if (m.prunedEmpty()) return;
-    prepare(m, m);
-    Restrict<A>::inplace(m);
-    complete();
+    if (impl()->needsRestrict(m)) {
+      prepare(m, m);
+      Restrict<A>::inplace(m);
+      complete();
+    }
   }
 };
 

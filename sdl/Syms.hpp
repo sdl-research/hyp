@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -105,80 +105,6 @@ struct SymsHashOperator
 
 };
 
-namespace detail {
-#if defined(_MSC_VER) && !defined(snprintf)
-# define snprintf sprintf_s
-#endif
-/**
-   helpers for idStr(sym) etc.
-*/
-inline std::string toString(unsigned id) {
-  using namespace std;
-  char buf[2+(sizeof(id)*5)/2];
-  // log_10(2^8) = 2.4, less than 5/2. 1 for null term, 1 for rounding
-  // no - sign for unsigned
-  return string(buf, snprintf(buf, sizeof(buf), "%u", id));
-}
-inline std::string toString(std::size_t id) {
-  using namespace std;
-  char buf[2+(sizeof(id)*5)/2];
-  // log_10(2^8) = 2.4, less than 5/2. 1 for null term, 1 for rounding -
-  // no - sign for unsigned
-  return string(buf, snprintf(buf, sizeof(buf), "%zu", id));
-}
-}
-
-
-inline std::string indexStr(Sym sym) {
-  return detail::toString(sym.id());
-}
-inline std::string idStr(Sym sym) {
-  return detail::toString(sym.id());
-}
-inline std::string typedIndexStr(Sym sym) {
-  return sym.getTypeNameShort() + indexStr(sym);
-}
-
-inline std::string str(Sym sym, IVocabulary const* pVoc) {
-  return pVoc->str(sym);
-}
-inline std::string typedStr(Sym sym, IVocabulary const* pVoc) {
-  return sym.getTypeNameShort() + str(sym, pVoc);
-}
-
-
-inline std::string orId(Sym sym, IVocabulary const* pVoc) {
-  return pVoc ? str(sym, pVoc) : idStr(sym);
-}
-inline std::string orIndex(Sym sym, IVocabulary const* pVoc) {
-  return pVoc ? str(sym, pVoc) : indexStr(sym);
-}
-inline std::string orTypedIndex(Sym sym, IVocabulary const* pVoc) {
-  return pVoc ? str(sym, pVoc) : typedIndexStr(sym);
-}
-inline std::string typedStrOrIndex(Sym sym, IVocabulary const* pVoc) {
-  return pVoc ? typedStr(sym, pVoc) : typedIndexStr(sym);
-}
-
-
-inline std::string str(Sym sym, IVocabularyPtr const& pVoc) {
-  return str(sym, pVoc.get());
-}
-inline std::string typedStr(Sym sym, IVocabularyPtr const& pVoc) {
-  return typedStr(sym, pVoc.get());
-}
-inline std::string orId(Sym sym, IVocabularyPtr const& pVoc) {
-  return orId(sym, pVoc.get());
-}
-inline std::string orIndex(Sym sym, IVocabularyPtr const& pVoc) {
-  return orIndex(sym, pVoc.get());
-}
-inline std::string orTypedIndex(Sym sym, IVocabularyPtr const& pVoc) {
-  return orTypedIndex(sym, pVoc.get());
-}
-inline std::string typedStrOrIndex(Sym sym, IVocabularyPtr const& pVoc) {
-  return typedStrOrIndex(sym, pVoc.get());
-}
 
 inline std::ostream& operator<<(std::ostream& os, Syms const& ngram) {
   Util::printRange(os, ngram, Util::RangeSep(" ","<",">"));
@@ -201,7 +127,7 @@ inline Sym const* lexicalInteriorLength(Syms const& syms, SymsIndex &lenInterior
       while (--len && !(++interior)->isLexical()) ;
       Psym last = interior + len;
       while (last > interior && !(--last)->isLexical()) ;
-      len = last - interior;
+      len = (SymsIndex)(last - interior);
     }
     assert(!len || interior->isLexical() && interior[len-1].isLexical());
     lenInterior = len;
@@ -243,7 +169,6 @@ inline void print(std::ostream &out, Syms const& phrase, IVocabulary const* voca
 */
 inline void print(std::ostream &out, Syms const& phrase, IVocabulary const& vocab) {
   Util::printRangeState(out, &vocab, phrase);
-  //  Vocabulary::lookupAndPrintSymbols(phrase, &vocab, out);
 }
 
 inline void print(std::ostream &out, Syms const& phrase, IVocabularyPtr const& vocab) {

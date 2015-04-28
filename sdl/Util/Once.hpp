@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include <boost/static_assert.hpp>
 #include <sdl/Util/PointerSet.hpp>
+#include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
 namespace Util {
@@ -95,6 +96,16 @@ template <class F>
 VisitOnceRef<F> makeVisitOnceRef(F const& f, PointerSet* once) {
   return VisitOnceRef<F>(f, once);
 }
+
+struct CheckOnce {
+  mutable Once once_;
+  template <class V>
+  void operator()(V const* p) const {
+    if (!once_.first(p))
+      SDL_THROW_LOG(Once.CheckOnce, ProgrammerMistakeException, "pointer " << (void*)p
+                                                                           << " was seen more than once");
+  }
+};
 
 
 }}

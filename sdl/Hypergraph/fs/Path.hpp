@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -74,18 +74,25 @@ struct FstArcNoState {
     return out;
   }
 
-  void printLabel(std::ostream& out, IVocabulary& vocab) const {
+  void printLabel(std::ostream& out, IVocabulary const* vocab) const {
     out << '(';
-    out << vocab.str(labelPair.first);
-    if (labelPair.first != labelPair.second) out << ' ' << vocab.str(labelPair.second);
+    out << vocab->str(labelPair.first);
+    if (labelPair.first != labelPair.second) out << ' ' << vocab->str(labelPair.second);
     out << ')';
   }
-  void print(std::ostream& out, IVocabulary& vocab) const {
+  void print(std::ostream& out, IVocabulary const& vocab) const {
+    printLabel(out, &vocab);
+    printWeight(out);
+  }
+  void print(std::ostream& out, IVocabulary const* vocab) const {
     printLabel(out, vocab);
     printWeight(out);
   }
   void print(std::ostream& out, IVocabularyPtr const& pvocab) const { print(out, *pvocab); }
   friend inline void print(std::ostream& out, FstArcNoState const& self, IVocabularyPtr const& pvocab) {
+    self.print(out, pvocab);
+  }
+  friend inline void print(std::ostream& out, FstArcNoState const& self, IVocabulary const* pvocab) {
     self.print(out, pvocab);
   }
 };

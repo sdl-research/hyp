@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -40,6 +40,7 @@ namespace Util {
 
 struct Sep {
   char const* s;
+  void reset(char const* s_) { s = s_; }
   mutable bool squelch;
   // mutable since if ostream << Sep isn't const, then boost lazy test writer stream compile fails
   Sep(char const* s = " ") : s(s), squelch(true) {}

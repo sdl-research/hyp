@@ -75,7 +75,7 @@
 #endif
 
 // in unix we already have a C99 compliant ::snprintf
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(CRT_NO_DEPRECATE)
 
 #ifndef snprintf
 #define snprintf C99snprintf

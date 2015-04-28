@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -97,7 +97,6 @@ struct ZeroInitializedArray
   bool operator < (ZeroInitializedArray const& o) const {
     return cmp(o) < 0;
   }
-  ZeroInitializedArray() { zero(); }
 
   friend inline std::size_t hash_value(ZeroInitializedArray const& self) {
     return self.hash();
@@ -110,7 +109,24 @@ struct ZeroInitializedArray
   void setMinusOne() {
     std::memset(space, -1, sizeof(space));
   }
-  ZeroInitializedArray(bool) { setMinusOne(); }
+
+  ZeroInitializedArray() { zero(); }
+  explicit ZeroInitializedArray(bool) { setMinusOne(); }
+#if __cplusplus >= 201103L
+  ZeroInitializedArray(ZeroInitializedArray &&)=default;
+  ZeroInitializedArray& operator=(ZeroInitializedArray &&)=default;
+  ZeroInitializedArray(ZeroInitializedArray const&)=default;
+  ZeroInitializedArray& operator=(ZeroInitializedArray const&)=default;
+#endif
+  friend inline void swap(ZeroInitializedArray & x1, ZeroInitializedArray & x2) {
+    x1.swap(x2);
+  }
+  void swap(ZeroInitializedArray &o) {
+    ZeroInitializedArray tmp;
+    tmp = o;
+    o = *this;
+    *this = tmp;
+  }
 };
 
 /// all 1 bits
@@ -133,6 +149,7 @@ struct ZeroInitializedHeapArray
   T *space;
   std::size_t N;
 
+  bool empty() const { return !N; }
   std::size_t size() const { return N; }
   std::size_t bytes() const { return N * sizeof(T); }
 
@@ -167,9 +184,34 @@ struct ZeroInitializedHeapArray
   ZeroInitializedHeapArray(std::size_t NT) { init(NT); }
 
   ZeroInitializedHeapArray(ZeroInitializedHeapArray const& other) {
-    space = alloc_unconstructed(other.N);
+    copyImpl(other);
+  }
+  ZeroInitializedHeapArray& operator=(ZeroInitializedHeapArray const& other) {
+    free();
+    copyImpl(other);
+    return *this;
+  }
+
+  void copyImpl(ZeroInitializedHeapArray const& other) {
+    alloc_unconstructed(other.N);
     memcpy_from(other.space);
   }
+
+#if __cplusplus >= 201103L
+  ZeroInitializedHeapArray(ZeroInitializedHeapArray &&o) {
+    space = o.space;
+    N = o.N;
+    o.space = 0;
+  }
+  ZeroInitializedHeapArray& operator=(ZeroInitializedHeapArray &&o) {
+    assert(this != &o);
+    free();
+    space = o.space;
+    N = o.N;
+    o.space = 0;
+    return *this;
+  }
+#endif
 
   ~ZeroInitializedHeapArray() {
     free();
@@ -194,6 +236,14 @@ struct ZeroInitializedHeapArray
       std::memset(space, 0, bytes());
   }
 
+  void reinit(std::size_t NT) {
+    if (N != NT) {
+      free();
+      alloc_unconstructed(NT);
+    }
+    zero();
+  }
+
   int cmp(ZeroInitializedHeapArray const& o) const {
     return N == o.N ? std::memcmp(space, o.space, bytes()) :
         N < o.N ? -1 : 1;
@@ -211,11 +261,125 @@ struct ZeroInitializedHeapArray
     return MurmurHash64(begin(), bytes(), seed + N);
   }
 
+  void swapSameSize(ZeroInitializedHeapArray &o) {
+    T *tmp = o.space;o.space = space;space = tmp;
+  }
+  friend inline void swap(ZeroInitializedHeapArray & x1, ZeroInitializedHeapArray & x2) {
+    x1.swap(x2);
+  }
+  void swap(ZeroInitializedHeapArray &o) {
+    std::size_t tmp = N; o.N = N; N = tmp;
+    swapSameSize(o);
+  }
+
  private:
   void free()
   {
     UserAllocator::free((char*)space);
   }
+};
+
+/// uncopyable (but can swap/move). can't == < or zero without passing in size from outside
+template <class T, class UserAllocator = Pool::default_user_allocator_new_delete>
+struct UnsizedArray
+{
+  typedef T* const_iterator;
+  typedef T* iterator;
+  typedef T value_type;
+
+  T *space;
+
+  bool empty() const { return !space; }
+
+  T *begin() const {
+    return space;
+  }
+
+  template <class I>
+  T &operator[](I i) const { return space[i]; }
+  operator T*() const { return space; }
+
+  /**
+     init() methods may not be called except on default constructed array (i.e. doesn't free previous).
+  */
+  void init() {
+    space = 0;
+  }
+
+  /**
+     don't call unless you free() or clear() first.
+  */
+  void init(std::size_t N) {
+    alloc_unconstructed(N);
+    zero(N);
+  }
+
+  UnsizedArray() { init(); }
+
+  explicit UnsizedArray(std::size_t N) { init(N); }
+
+  ~UnsizedArray() {
+    free();
+  }
+
+  void memcpy_from(void const* from, unsigned N) {
+    std::memcpy(space, from, N * sizeof(T));
+  }
+
+  void clear() {
+    free();
+    init();
+  }
+
+  void alloc_unconstructed(std::size_t N) {
+    space = (T*)UserAllocator::malloc(N * sizeof(T));
+  }
+
+  void zero(std::size_t N) {
+    std::memset(space, 0, N * sizeof(T));
+  }
+
+  void reinit(std::size_t N) {
+    free();
+    alloc_unconstructed(N);
+    zero(N);
+  }
+
+  void swapSameSize(UnsizedArray &o) {
+    T *tmp = o.space;o.space = space;space = tmp;
+  }
+  friend inline void swap(UnsizedArray & x1, UnsizedArray & x2) {
+    x1.swapSameSize(x2);
+  }
+
+#if __cplusplus >= 201103L
+  UnsizedArray(UnsizedArray &&o) {
+    space = o.space;
+    o.space = 0;
+  }
+  UnsizedArray& operator=(UnsizedArray &&o) {
+    assert(this != &o);
+    free();
+    space = o.space;
+    o.space = 0;
+    return *this;
+  }
+  UnsizedArray(UnsizedArray const&o) = delete;
+  UnsizedArray& operator=(UnsizedArray const&o) = delete;
+#endif
+ private:
+  void free()
+  {
+    UserAllocator::free((char*)space);
+  }
+#if !(__cplusplus >= 201103L)
+  void operator=(UnsizedArray const& other) {
+    std::abort();
+  }
+  UnsizedArray(UnsizedArray const& other) {
+    std::abort();
+  }
+#endif
 };
 
 

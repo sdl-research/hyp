@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -49,10 +49,19 @@ struct Matrix {
   Matrix(size_type n, size_type m, T const& default_value = T())
       : rows_(n), cols_(m), container_(n * m, default_value) {}
 
-  Matrix(const Matrix<T>& other)
-      : rows_(other.getNumRows()), cols_(other.getNumCols()), container_(other.container_) {}
+  // default copy, move, assign, etc
 
-  ~Matrix() {}
+  friend inline void swap(Matrix & x1, Matrix & x2) {
+    x1.swap(x2);
+  }
+
+  void swap(Matrix &o) {
+    size_type t;
+    t = o.rows_; o.rows_ = rows_; rows_ = t;
+    t = o.cols_; o.cols_ = cols_; cols_ = t;
+    container_.swap(o.container_);
+  }
+
 
   void setJustDiagonal(T const& onDiag) {
     size_type const N = std::min(rows_, cols_);

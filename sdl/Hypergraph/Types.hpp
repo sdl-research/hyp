@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include <map>
 
 #include <sdl/Types.hpp>
+
 #include <sdl/Features.hpp>
 #include <sdl/Util/BitSet.hpp>
 #include <boost/static_assert.hpp>
@@ -70,6 +71,7 @@
 #include <sdl/Syms.hpp>
 #include <sdl/IVocabulary-fwd.hpp>
 #include <sdl/Util/SmallVector.hpp>
+#include <sdl/Util/Unordered.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -137,6 +139,8 @@ inline StateId maxState(StateId a, StateId b) {
 }
 
 typedef std::map<FeatureId, FeatureValue> Features;
+
+typedef unordered_map<StateId, StateId> StateIdMap;
 
 }  // Hypergraph
 

@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -44,7 +44,6 @@ class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
   MapHypergraph(IHypergraph<FromA> const& hg, Mapper mapper = Mapper()) : hg_(hg), mapper_(mapper) {
     this->setStartFinalFrom(hg);
   }
-
   ~MapHypergraph() {
     // TODO: memory leak if memoization is turned off
     forall (typename ArcsMap::value_type pairOldNewArcs, oldArcsToNewArcs_) {

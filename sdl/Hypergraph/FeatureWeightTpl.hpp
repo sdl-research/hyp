@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -135,7 +135,9 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   FeatureWeightTpl(FeatureWeightTpl const& cpfrom, bool)
       : Base(cpfrom), pMap_(sdl::make_shared<Map>(cpfrom.features())) {}
 
-  /// default copy, operator=(), C++11 move
+  /// copy, operator=(), C++11 moves are all default
+
+  FeatureWeightTpl(FloatT weight, shared_ptr<Map> const& pMap) : Base(weight), pMap_(pMap) {}
 
   explicit FeatureWeightTpl(FloatT weight) : Base(weight) {}
 
@@ -154,13 +156,13 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
     this->value_ = FloatLimits<FloatT>::posInfinity;
     pMap_.reset();
   }
-  friend inline void setZero(FeatureWeightTpl &x) { x.setZero(); }
+  friend inline void setZero(FeatureWeightTpl& x) { x.setZero(); }
 
   void setOne() {
     this->value_ = static_cast<FloatT>(0.0);
     pMap_.reset();
   }
-  friend inline void setOne(FeatureWeightTpl &x) { x.setOne(); }
+  friend inline void setOne(FeatureWeightTpl& x) { x.setOne(); }
 
   typedef void HasIsOne;
   bool isOne() const { return !this->value_ && empty(); }
@@ -296,6 +298,9 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   DEFINE_OPENFST_COMPAT_FUNCTIONS(Feature)
 
   void setFeatures(shared_ptr<Map> const& pMap) { pMap_ = pMap; }
+#if __cplusplus >= 201103L
+  void setFeatures(shared_ptr<Map>&& pMap) { pMap_ = std::move(pMap); }
+#endif
 
   shared_ptr<Map> const& featuresPtr() const { return pMap_; }
 

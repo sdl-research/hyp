@@ -1,4 +1,4 @@
-// Copyright 2014 SDL plc
+// Copyright 2014-2015 SDL plc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -125,6 +125,9 @@ const PropertiesInt kConstraintStarts = 0x2000ULL;
 /// fixed state endBlock(id) is the graph source
 const PropertiesInt kConstraintEnds = 0x4000ULL;
 
+/// stateids for all but first tail are Sym.id_ (see GraphInlineInputLabels)
+const PropertiesInt kGraphInlineInputLabels = 0x8000ULL;
+
 const PropertiesInt kPropertyEnd = kConstraintEnds << 1;
 const PropertiesInt kAllProperties = kPropertyEnd - 1;
 
@@ -164,7 +167,8 @@ struct PropertyNames {
     b("shared-label-states", kCanonicalLex);
     b("constraint-starts", kConstraintStarts);
     b("constraint-ends", kConstraintEnds);
-    // TODO: these names are better; update the kSortedStates etc. var names
+    b("graph-inline-input-labels", kGraphInlineInputLabels);
+    // TODO: make kXyZz names match the "xy-zz" strings (which are better nomenclature)
   }
 };
 
