@@ -29,7 +29,7 @@
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
-
+#include <sdl/Util/Sep.hpp>
 #include <sdl/Util/Print.hpp>
 #include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/VoidIf.hpp>
@@ -37,33 +37,6 @@
 
 namespace sdl {
 namespace Util {
-
-struct Sep {
-  char const* s;
-  void reset(char const* s_) { s = s_; }
-  mutable bool squelch;
-  // mutable since if ostream << Sep isn't const, then boost lazy test writer stream compile fails
-  Sep(char const* s = " ") : s(s), squelch(true) {}
-  operator char const*() {
-    if (squelch) {
-      squelch = false;
-      return "";
-    } else
-      return s;
-  }
-  template <class O>
-  void print(O& o) const {
-    if (squelch)
-      squelch = false;
-    else
-      o << s;
-  }
-  friend inline std::ostream& operator<<(std::ostream& out, Sep const& self) {
-    self.print(out);
-    return out;
-  }
-  void leadingSeparator() { squelch = false; }
-};
 
 struct multiline {};
 struct multilineNoBrace {};

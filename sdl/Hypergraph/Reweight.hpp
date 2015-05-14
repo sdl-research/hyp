@@ -148,7 +148,7 @@ struct ReweightOptions : TransformOptionsBase {
     if (clearFeatures)
       wt = Weight((typename Weight::FloatT)newcost);
     else
-      wt.setValue(newcost);
+      wt.value_ = newcost;
   }
 };
 

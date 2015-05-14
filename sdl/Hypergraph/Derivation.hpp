@@ -893,36 +893,6 @@ typename Derivation<Arc>::DerivP singleDerivation(IHypergraph<Arc> const& hg, St
   return ret;
 }
 
-
-///TODO: remove
-template <class Arc>
-typename Derivation<Arc>::DerivP singleDerivationFsmOut(IHypergraph<Arc> const& hg, StateSet& seen,
-                                                        typename Derivation<Arc>::DerivP const& bottomUpPart,
-                                                        StateId from, StateId final) {
-  // assert(hg.isFsm())
-  assert(from != kNoState);
-  assert(final != kNoState);
-  if (from == final) return bottomUpPart;
-  typedef Derivation<Arc> Deriv;
-  typedef typename Deriv::DerivP Child;
-  typedef typename Deriv::children_type Children;
-  if (!Util::latch(seen, from))
-    SDL_THROW2(CycleException, "Cycle observed - state appeared twice in stack:", from);
-  ArcId nr = hg.numOutArcs(from);
-  if (nr != 1) {
-    if (nr > 1)
-      SDL_THROW3(MultipleDerivationsException, from, " state has >1 outgoing arcs:", nr);
-    else
-      SDL_THROW2(EmptySetException, "No outgoing arcs for state", from);
-  }
-  Arc* arc = hg.outArc(from, 0);
-  if (!arc->isFsmArc()) SDL_THROW(NonFsmHypergraphException, Util::print(arc, hg));
-  Child ret = Deriv::construct(arc, 2); //TODO: Deriv::construct(arc, bottomUpPart)
-  ret->children[0] = bottomUpPart;
-  ret->children[1] = Deriv::kAxiom;
-  return singleDerivationFsmOut(hg, seen, ret, arc->head(), final);
-}
-
 template <class Arc>
 typename Derivation<Arc>::DerivP singleDerivationGraphOut(IHypergraph<Arc> const& hg, StateSet& seen,
                                                         typename Derivation<Arc>::DerivP const& bottomUpPart,

@@ -1517,10 +1517,10 @@ struct NbestHypergraphOptions : NbestPathOptions {
           if (outOpt.pushWeightValueToStart)
             setOneValue(weightSince);  // because we already put the total value on the first w
         } else if (outOpt.pushWeightValueToStart)
-          weightSince.setValue(valueTotal);
+          weightSince.value_ = valueTotal;
         added = out.addArcFst(lastHead, final, labelPair,
                               weightSince);  // we'll change 'final' later if this wasn't the last one
-        weightSince = Weight::one();
+        setOne(weightSince);
       }
     }
 

@@ -76,11 +76,13 @@ typedef IcuNormalizer2 const* IcuNormalizer2Ptr;
 extern IcuNormalizer2Ptr gNfc, gNfkc, gNfd, gNfkd;
 
 /// not ok for s == out. does NOT assign to out if s is already normalized.
-bool maybeIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString &out, IcuNormalizer2Ptr normalize);
+bool maybeIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString& out, IcuNormalizer2Ptr normalize);
 
 
-/// checks exactly whether s was normalized. normalizes into out if it wasn't. this is slower than maybeIcuNormalize but has the same result except the return value is strictly reflecting the normalization status of s.
-bool neededIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString &out, IcuNormalizer2Ptr normalize);
+/// checks exactly whether s was normalized. normalizes into out if it wasn't. this is slower than
+/// maybeIcuNormalize but has the same result except the return value is strictly reflecting the normalization
+/// status of s.
+bool neededIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString& out, IcuNormalizer2Ptr normalize);
 
 /// ok for utf8 == out since we make a copy. does NOT assign to out if utf8 is already normalized.
 bool maybeIcuNormalize(icu::StringPiece utf8, std::string& out, IcuNormalizer2Ptr normalize);
@@ -275,7 +277,9 @@ inline void warnNotNfc(icu::StringPiece const& utf8) {
   SDL_WARN(Icu.Nfc, "'" << toSlice(utf8) << "' (utf8) is not normal-form-composed (NFC)");
 }
 
-inline bool maybeIcuNormalizeWarn(icu::UnicodeString const& s, icu::UnicodeString &out, IcuNormalizer2Ptr norm, bool warnIfUnnormalized, char const* normalizationName = "normal-form-composed (NFC)") {
+inline bool maybeIcuNormalizeWarn(icu::UnicodeString const& s, icu::UnicodeString& out,
+                                  IcuNormalizer2Ptr norm, bool warnIfUnnormalized,
+                                  char const* normalizationName = "normal-form-composed (NFC)") {
   if (warnIfUnnormalized) {
     if (neededIcuNormalize(s, out, norm)) {
       warnUnnormalized(s, normalizationName);
@@ -289,13 +293,13 @@ inline bool maybeIcuNormalizeWarn(icu::UnicodeString const& s, icu::UnicodeStrin
 /// \param[out] buf <- (s -> nfc) and wasNfc <- false, returning buf;
 /// or else wasNfc <- true, returning s (Illegal input is replaced with U+FFFD)
 inline UnicodeString const& maybeNormalizedToNfc(UnicodeString const& s, UnicodeString& buf, bool& wasNfc,
-                                          bool warnIfNotNfc = false, bool K = false) {
+                                                 bool warnIfNotNfc = false, bool K = false) {
 
   return maybeIcuNormalizeWarn(s, buf, K ? gNfkc : gNfc, warnIfNotNfc) ? buf : s;
 }
 
-inline UnicodeString maybeNormalizedToNfc(icu::UnicodeString const& s, bool& wasNfc, bool warnIfNotNfc = false,
-                                          bool K = false) {
+inline UnicodeString maybeNormalizedToNfc(icu::UnicodeString const& s, bool& wasNfc,
+                                          bool warnIfNotNfc = false, bool K = false) {
   UnicodeString buf;
   return maybeNormalizedToNfc(s, buf, wasNfc, warnIfNotNfc, K);
 }
@@ -345,8 +349,12 @@ inline LocalePtr getLocalePtr(std::string const& icuLanguageName = "en",
   if (icuLanguageName == "en_GB")  // bad ISO. should be UK
     return LocalePtr(&Locale::getUK(), DoNothing());
   LocalePtr r((new Locale(icuLanguageName.c_str(), country)));
-  std::string describeArgs = "locale config: language(ISO-639)=" + icuLanguageName;
-  if (country) describeArgs += " country(ISO-3166)=" + icuCountryCode;
+  std::string describeArgs("locale config: language(ISO-639)=");
+  describeArgs += icuLanguageName;
+  if (country) {
+    describeArgs += " country(ISO-3166)=";
+    describeArgs += icuCountryCode;
+  }
   if (r->isBogus()) SDL_THROW_LOG(ICU.Locale, ConfigException, "got bogus ICU Locale for " << describeArgs);
   std::string isoLanguage = r->getISO3Language();
   if (isoLanguage.empty())
@@ -370,7 +378,7 @@ struct IcuLocaleConfig {
       SDL_THROW_LOG(
           IcuLocaleConfig, ConfigException,
           "don't specify a language_country (e.g. en_US) --language while also specifying --country: "
-          << to_string_impl());
+              << to_string_impl());
     pLocale = getLocalePtr(language, country);
   }
   template <class Config>

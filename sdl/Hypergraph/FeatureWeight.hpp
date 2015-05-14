@@ -38,9 +38,6 @@ typedef FeatureWeightTpl<FeatureValue, Features, TakeMin> FeatureWeight;
    typedef FeatureWeightTpl<float,
                          Features
                          > FeatureWeightStr;
-
-   If you use such additional types, don't forget to define a custom
-   parseWeightString function in the .cpp file.
  */
 
 }}

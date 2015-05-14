@@ -337,14 +337,13 @@ class Index {
   // kNullFreelistIndex
 };
 
-///
 
 /**
    canonical pointers to equivalent objects
 
-   \author Markus Dreyer
+   (used only by Hypergraph/Compose)
 
-   //TODO: defaults don't compare contents of pointer, so what's the point? if this is unused, delete it
+   \author Markus Dreyer
    */
 template <class Ptr, class Hash, class Pred = NonNullPointeeEqualExpensive>
 class Registry {

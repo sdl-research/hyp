@@ -96,7 +96,7 @@ struct Arc {
   Arc()
       : head(kNoState)
   {}
-  std::vector<ParserUtil::State> tails;
+  std::vector<State> tails;
   std::string weightStr;
 };
 

@@ -19,42 +19,46 @@
 
 #include <cctype>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-struct IsChar
-{
+struct IsChar {
   template <class Config>
-  void configure(Config &config) {
+  void configure(Config& config) {
     config.is("IsChar");
-    config("char", &x)
-        ("character to split on e.g. ' '");
+    config("char", &x)("character to split on e.g. ' '");
   }
   char x;
   IsChar(char x = '\0') : x(x) {}
   typedef bool result_type;
-  bool operator()(char c) const
-  {
-    return c == x;
-  }
+  bool operator()(char c) const { return c == x; }
 };
 
-struct IsSpaceChar
-{
+struct IsSpaceChar {
   typedef bool result_type;
-  bool operator()(char c) const
-  {
-    return c == ' ';
-  }
+  bool operator()(char c) const { return c == ' '; }
 };
 
-struct IsSpace
-{
+struct IsSpace {
   typedef bool result_type;
-  bool operator()(char c) const
-  {
+  bool operator()(char c) const {
     // Cast required so we don't pass negative values for c >= 128
     // (when the caller actually passes "unsigned char")
-    return std::isspace((unsigned char) c);
+    return std::isspace((unsigned char)c);
+  }
+};
+
+/** predicate, true iff non-isspace char.
+
+    needed instead of std::not1<IsSpace> because windows compile couldn't handle it */
+struct NotSpace {
+  typedef bool result_type;
+  bool operator()(char c) const {
+#ifdef _WIN32
+    return (c & 0x80) || !std::isspace(c);
+#else
+    return !std::isspace(c);
+#endif
   }
 };
 

@@ -187,7 +187,7 @@ struct Path {
   }
   void computeWeight(Weight& weight) {
     if (isDistanceWeight(&weight))
-      weight.setValue(totalDistance);
+      weight.value_ = totalDistance;
     else if (*this) {
       weight = Weight::one();
       forall (FstArc const& arc, arcs) { timesBy(arc.weight, weight); }

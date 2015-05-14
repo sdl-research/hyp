@@ -23,6 +23,7 @@
 #include <sdl/Types.hpp>
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/ZeroInitializedArray.hpp>
+#include <sdl/Util/Fields.hpp>
 
 namespace sdl {
 
@@ -76,6 +77,13 @@ struct AddToFeatures {
   void operator()(std::string const& name, FeatureValue val) const { features[name] += val; }
 };
 
+/// overwrite to with vals from from. return true if the keys were disjoint (no overwrites)
+inline bool disjointUnion(Features& to, Features const& from) {
+  std::size_t expect = to.size() + from.size();
+  for (Features::const_iterator i = from.begin(), e = from.end(); i != e; ++i) to[i->first] = i->second;
+  return to.size() == expect;
+}
+
 #if SDL_EXTERNAL_FEATURES_SWAP_ONLY || __cplusplus >= 201103L
 // move but not copy
 typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
@@ -83,6 +91,53 @@ typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
 // can copy
 typedef Util::ZeroInitializedHeapArray<FeatureValue> DenseFeatures;
 #endif
+
+FeatureValue const kLnToFeatureValue
+    = (FeatureValue)(-1. / std::log(10.));  // multiply ln(prob) by this for neglog10 cost (e^x)
+
+/// if str has e.g. "myfeat=4.3 ...", sets to["myfeat"]=4.3 (to may be filled
+/// with features already; only the ones named in str are overwritten)
+inline void addFeatures(Features& to, Slice const& str) {
+  // TODO .cpp
+  using namespace Util;
+  // TODO .cpp
+  FieldGenerator fields(str, ' ');
+  for (; fields; fields.got()) {
+    Field f = fields.get();
+    if (!f.empty()) {
+      Pchar eq = f.find_first('=');
+      if (!eq)
+        SDL_THROW_LOG(Features.addFeatures, RuleFormatException, "addFeatures - bad name=val format for '"
+                                                                     << f << "' in " << Util::Field(str));
+      FeatureValue& val = to[std::string(f.first, eq)];
+      f.first = eq + 1;
+      if (f.first + 2 < f.second && f.first[0] == 'e' && f.first[1] == '^') {
+        f.first += 2;
+        val = kLnToFeatureValue * f.toReal<FeatureValue>();
+      } else
+        val = f.toReal<FeatureValue>();
+    }
+  }
+}
+
+inline void addFeatures(Features& to, std::string const& str) {
+  addFeatures(to, toSlice(str));
+}
+
+inline void readNamedFeatures(std::istream& in, Features& f) {
+  // TODO .cpp (in what lib?)
+  FeatureEntry x;
+  while (in >> x.first) {
+    if (in >> x.second) {
+      if (!f.insert(x).second)
+        SDL_WARN(Features.readNamedFeatures, "duplicate feature weight for '"
+                                                 << x.first << " " << x.second
+                                                 << "' in 'name val' file - keeping previous weight");
+    } else
+      SDL_THROW_LOG(Features.readNamedFeatures, FileFormatException, "couldn't read feature weight for '"
+                                                                         << x.first << "'");
+  }
+}
 
 
 }

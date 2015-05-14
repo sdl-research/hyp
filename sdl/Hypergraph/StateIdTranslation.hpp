@@ -80,7 +80,7 @@ namespace Hypergraph {
 
 // TODO: version of this that supports kCanonicalLex
 
-// TODO: use dynamically expanded, or prealloced, vector w/ explicit Constants::kNoState mapping - more
+// TODO: use dynamically expanded, or prealloced, vector w/ explicit kNoState mapping - more
 // efficient except in very sparse cases
 
 // note: for 2-best and worse, you don't have the same derivation for each instance of a vertex, necessarily.

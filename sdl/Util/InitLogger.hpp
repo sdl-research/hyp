@@ -41,7 +41,7 @@ namespace Util {
 /**
    \return timestamped appname-xxxxxx.log.
 */
-std::string logFileName(std::string const& appname);
+std::string logFileName(std::string appname);
 
 struct InitLoggerOptions {
   int verbose;  // chattier about log init. if 1 or more, activates Info.

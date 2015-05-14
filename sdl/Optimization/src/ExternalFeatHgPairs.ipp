@@ -27,13 +27,10 @@ namespace Optimization {
 
 namespace bfs = boost::filesystem;
 
-template<class Arc>
+template <class Arc>
 ExternalFeatHgPairs<Arc>::ExternalFeatHgPairs(std::string const& location)
-    : location_(location)
-    , weights_(NULL)
-{
-  SDL_INFO(Optimization.ExternalFeatHgPairs, "Reading training archive from '"
-           << location << "'");
+    : location_(location), weights_(NULL) {
+  SDL_INFO(Optimization.ExternalFeatHgPairs, "Reading training archive from '" << location << "'");
 
   bfs::path pth1(bfs::path(location_) / bfs::path("size.txt"));
   std::ifstream in1(pth1.string().c_str());
@@ -46,25 +43,19 @@ ExternalFeatHgPairs<Arc>::ExternalFeatHgPairs(std::string const& location)
   SDL_DEBUG(Optimization, "ExternalFeatHgPairs num feats: " << numParams_);
 }
 
-template<class Arc>
-typename ExternalFeatHgPairs<Arc>::value_type
-ExternalFeatHgPairs<Arc>::operator[](TrainingDataIndex i) {
+template <class Arc>
+typename ExternalFeatHgPairs<Arc>::value_type ExternalFeatHgPairs<Arc>::operator[](TrainingDataIndex i) {
   int numThousands = i / 1000;
-  bfs::path pth(bfs::path(location_)
-                / bfs::path("hg")
-                / bfs::path(sdl::lexical_cast<std::string>(numThousands))
+  bfs::path pth(bfs::path(location_) / bfs::path("hg") / bfs::path(sdl::lexical_cast<std::string>(numThousands))
                 / (sdl::lexical_cast<std::string>(i) + ".hg"));
 
-  // We don't actually make use of the symbols
   // TODO: remove or pass in
-  shared_ptr<PerProcessVocabulary> voc(
-      new PerProcessVocabulary(Vocabulary::createDefaultVocab()));
+  shared_ptr<PerProcessVocabulary> voc(new PerProcessVocabulary(Vocabulary::createDefaultVocab()));
 
   std::ifstream in(pth.string().c_str());
   SDL_DEBUG(Optimization, "Loading hypergraphs from " << pth.string());
-  Hypergraph::IHypergraphsIteratorTpl<Arc>* iter =
-      Hypergraph::IHypergraphsIteratorTpl<Arc>::create(
-          in, Hypergraph::kDashesSeparatedHg, voc);
+  Hypergraph::IHypergraphsIteratorTpl<Arc>* iter
+      = Hypergraph::IHypergraphsIteratorTpl<Arc>::create(in, Hypergraph::kDashesSeparatedHg, voc);
   iter->setHgProperties(Hypergraph::kStoreInArcs | Hypergraph::kStoreOutArcs);
   IHg* hg1 = iter->value();
   iter->next();
@@ -79,27 +70,25 @@ ExternalFeatHgPairs<Arc>::operator[](TrainingDataIndex i) {
   return value_type(IHgPtr(hg1), IHgPtr(hg2));
 }
 
-template<class Arc>
+template <class Arc>
 void ExternalFeatHgPairs<Arc>::push_back(value_type const&) {
   SDL_THROW_LOG(Optimization.ExternalFeatHgPairs, UnimplementedException,
                 "Cannot push back to ExternalFeatHgPairs -- it's read-only");
 }
 
-template<class Arc>
-void ExternalFeatHgPairs<Arc>::setFeatureWeights(FloatT const* featWeights,
-                                                 FeatureId numParams) {
+template <class Arc>
+void ExternalFeatHgPairs<Arc>::setFeatureWeights(FloatT const* featWeights, FeatureId numParams) {
   boost::lock_guard<boost::mutex> lock(mutex_);
   weights_ = featWeights;
   numParams_ = numParams;
   SDL_DEBUG(Optimization, "Received " << numParams << " feature weights");
 }
 
-template<class Arc>
-void ExternalFeatHgPairs<Arc>::setFeatureWeights(TrainingDataIndex begin,
-                                                 TrainingDataIndex end,
-                                                 FloatT const* featWeights,
-                                                 FeatureId numParams) {
+template <class Arc>
+void ExternalFeatHgPairs<Arc>::setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end,
+                                                 FloatT const* featWeights, FeatureId numParams) {
   setFeatureWeights(featWeights, numParams);
 }
+
 
 }}

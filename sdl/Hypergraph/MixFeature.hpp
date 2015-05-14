@@ -102,7 +102,7 @@ struct MixFeature {
   /** for FeatureWeight (and later, ExpectationWeight) */
   template <class FloatT>
   void addWeighted(FeatureValueT featureValueDelta, FloatWeightTpl<FloatT>& w) const {
-    w.setValue((FloatT)(w.getValue() + scale * featureValueDelta));
+    w.value_ = (FloatT)(w.getValue() + scale * featureValueDelta);
   }
 
   // TODO: support an "overwrite feature id=featureValueDelta" vs. an "add delta"

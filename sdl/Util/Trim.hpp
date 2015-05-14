@@ -28,54 +28,62 @@
 #include <algorithm>
 #include <functional>
 #include <cctype>
+#include <sdl/Types.hpp>
+#include <sdl/Util/IsChar.hpp>
 
 namespace sdl {
 namespace Util {
 
-/** predicate, true iff non-isspace char.
-
-    needed instead of std::not1<IsSpace> because windows compile couldn't handle it */
-struct NotSpace
-{
-  typedef bool result_type;
-  bool operator()(char c) const
-  {
-#ifdef _WIN32
-    return (c & 0x80) || !std::isspace(c);
-#else
-    return !std::isspace(c);
-#endif
-  }
-};
-
 /// trim from start
-static inline std::string &leftTrim(std::string &s) {
-  s.erase(s.begin(), std::find_if (s.begin(), s.end(), NotSpace()));
+inline std::string& leftTrim(std::string& s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), NotSpace()));
   return s;
+}
+
+inline Pchar leftTrimBegin(Slice s) {
+  return std::find_if(s.first, s.second, NotSpace());
+}
+
+inline std::string::const_iterator leftTrimBegin(std::string const& s) {
+  return std::find_if(s.begin(), s.end(), NotSpace());
 }
 
 /**
 
-   \return maximum iter on [begin, end) with pred(*iter)==true, else return end. this is like find_if (c.rbegin(), c.rend(), pred)+1).base() except you get end rather than begin if not found.
+   \return maximum iter on [begin, end) with pred(*iter)==true, else return end. this is like find_if
+   (c.rbegin(), c.rend(), pred)+1).base() except you get end rather than begin if not found.
 */
 
 template <class Iter, class Pred>
-inline Iter findLast(Iter begin, Iter const& end, Pred pred)
-{
+inline Iter findLast(Iter begin, Iter const& end, Pred pred) {
   Iter i = end;
-  while (i>begin) {
+  while (i > begin) {
     --i;
-    if (pred(*i))
-      return i;
+    if (pred(*i)) return i;
   }
   return end;
 }
 
+
+template <class Iter, class Pred>
+inline Iter findEnd(Iter begin, Iter const& end, Pred pred) {
+  Iter i = end;
+  while (i > begin) {
+    --i;
+    if (pred(*i)) return ++i;
+  }
+  return end;
+}
+
+inline std::string::const_iterator rightTrimEnd(std::string const& s) {
+  return findEnd(s.begin(), s.end(), NotSpace());
+}
+
 /// trim from end
-static inline std::string &rightTrim(std::string &s) {
+static inline std::string& rightTrim(std::string& s) {
   std::string::iterator end = s.end();
   std::string::iterator i = findLast(s.begin(), s.end(), NotSpace());
-  if (i==end)
+  if (i == end)
     s.clear();
   else
     s.erase(++i, end);
@@ -83,7 +91,7 @@ static inline std::string &rightTrim(std::string &s) {
 }
 
 /// trim from both ends
-static inline std::string &trim(std::string &s) {
+static inline std::string& trim(std::string& s) {
   return leftTrim(rightTrim(s));
 }
 

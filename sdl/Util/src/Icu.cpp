@@ -16,7 +16,7 @@
 namespace sdl {
 namespace Util {
 
-bool neededIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString &out, IcuNormalizer2Ptr norm) {
+bool neededIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString& out, IcuNormalizer2Ptr norm) {
   UErrorCode err = U_ZERO_ERROR;
   bool const normed = norm->isNormalized(s, err);
   assert(U_SUCCESS(err));
@@ -26,7 +26,7 @@ bool neededIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString &out, Ic
   return true;
 }
 
-bool maybeIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString &out, IcuNormalizer2Ptr norm) {
+bool maybeIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString& out, IcuNormalizer2Ptr norm) {
   using namespace icu;
   UErrorCode err = U_ZERO_ERROR;
   int nfcPrefixLen = norm->spanQuickCheckYes(s, err);
@@ -45,7 +45,7 @@ bool maybeIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString &out, Icu
   }
 }
 
-bool maybeIcuNormalize(icu::StringPiece utf8, std::string &out, IcuNormalizer2Ptr normalize) {
+bool maybeIcuNormalize(icu::StringPiece utf8, std::string& out, IcuNormalizer2Ptr normalize) {
   icu::UnicodeString u(icu::UnicodeString::fromUTF8(utf8)), buf;
   if (maybeIcuNormalize(u, buf, normalize)) {
     fromIcu(buf, out);
@@ -107,7 +107,7 @@ UParseError& IcuErrorCode::storeParseError() {
 
 std::string IcuErrorCode::parseError() const {
   if (!optParse) return "";
-  std::string r = parseErrorString(*optParse);
+  std::string const& r = parseErrorString(*optParse);
   return r.empty() ? r : " parsing: " + r;
 }
 

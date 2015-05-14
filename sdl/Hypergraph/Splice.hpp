@@ -96,12 +96,9 @@ struct SpliceStateOptions
 {
   template <class Out>
   void print(Out &o) const {
-    for (int i = 0; i<2; ++i) {
-      std::string prei = hgName(i)+"-";
-      for (int j = 0; j<2; ++j) {
-        o << prei << stateName(j) << "=" << sf[i][j]<<'\n';
-      }
-    }
+    for (int i = 0; i<2; ++i)
+      for (int j = 0; j<2; ++j)
+        o << hgName(i) << '-' << stateName(j) << "=" << sf[i][j]<<'\n';
   }
   template <class C, class T>
   friend std::basic_ostream<C, T>& operator<<(std::basic_ostream<C, T> &o, SpliceStateOptions const& self)
@@ -144,11 +141,12 @@ struct SpliceStateOptions
   {
     c.is("Splice (insert one hg inside part of another)");
     c(caption());
-    std::string pre;
     for (int i = 0; i<2; ++i) {
-      std::string prei = pre+hgName(i)+"-";
+      std::string prei(hgName(i));
+      prei.push_back('-');
       for (int j = 0; j<2; ++j) {
-        std::string optName = prei+stateName(j);
+        std::string optName(prei);
+        optName += stateName(j);
         c(optName, &sf[i][j])("state id for "+optName+stateHelp());
       }
     }

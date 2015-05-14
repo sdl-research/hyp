@@ -188,7 +188,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   friend inline std::size_t hash_value(ArcTpl const& self) { return self.hash(); }
   std::size_t hash() const {
     using namespace Util;
-    return MurmurHash(tails_.begin(), sizeof(StateId) * tails_.size(), mixedbits(head_) + hashWeight(weight_));
+    return MurmurHash(tails_.begin(), sizeof(StateId) * tails_.size(), mixedbits(head_) + Util::hashFloat(weight_.value_));
   }
 
   typedef sdl::Hypergraph::StateIdContainer StateIdContainer;
@@ -290,9 +290,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
   ArcTpl(StateId h, Cost c, StateId t) : head_(h), tails_(1, t), weight_(c) {}
 
   /**
-     For simple arcs like in a finite-state machine.
-     TODO Maybe remove, since it is easy to mis-use and directly use
-     a label here, instead of a state that has the label.
+     fsm arc
   */
   ArcTpl(StateId from, StateId label, Weight const& w, StateId to) : head_(to), tails_(2), weight_(w) {
     tails_[0] = from;

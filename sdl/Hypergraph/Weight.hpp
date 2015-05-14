@@ -43,7 +43,7 @@
 // OpenFst weight compatability - needed for ToReplaceFst
 #define DEFINE_OPENFST_COMPAT_FUNCTIONS(name)            \
   static std::string const& Type() {                     \
-    static const std::string r = #name;                  \
+    static const std::string r(#name);                   \
     return r;                                            \
   }                                                      \
   static const Self One() { return Self::one(); }        \
@@ -60,7 +60,7 @@
 #define SDL_DEFINE_FLOATWT_CMP(c, cmp)                \
   template <class T>                                  \
   bool operator cmp(c<T> const& w1, c<T> const& w2) { \
-    return w1.getValue() cmp w2.getValue();           \
+    return w1.value_ cmp w2.value_;           \
   }
 
 #define SDL_DEFINE_FLOATWT_CMPS(c) \
@@ -92,7 +92,7 @@ class FloatWeightTpl : public WeightBase {
   typedef T FloatT;
 
   static inline FloatT kOneValue() { return 0; }
-
+  //TODO: C++11 constexpr
   static inline FloatT kZeroValue() { return std::numeric_limits<T>::infinity(); }
 
   typedef void HasIsZero;
@@ -120,10 +120,9 @@ class FloatWeightTpl : public WeightBase {
 
   T getValue() const { return value_; }
 
-  void setValue(T v) { value_ = v; }
-  void setValue(DoubleT v) { value_ = (T)v; }
-  void setValue(int v) { value_ = (T)v; }
-  void setValue(std::size_t v) { value_ = (T)v; }
+  void set(std::string const& s) {
+    value_ = sdl::lexical_cast<T>(s);
+  }
 
   T value_;
 };
@@ -136,51 +135,42 @@ std::istream& operator>>(std::istream& i, FloatWeightTpl<T>& x) {
 }
 template <class T>
 std::ostream& operator<<(std::ostream& o, FloatWeightTpl<T> const& x) {
-  return o << x.getValue();
-}
-
-/// Use this (guaranteed to be correct) and not sdl::lexical_cast<Weight> (not, e.g. ExpectationWeight)
-// TODO: Remove this.
-template <class T>
-void parseWeightString(std::string const& str, FloatWeightTpl<T>* w) {
-  if (!str.empty()) {
-    w->setValue(sdl::lexical_cast<T>(str));
-  }
+  return o << x.value_;
 }
 
 template <class T>
 inline std::size_t hashWeight(const FloatWeightTpl<T>& w) {
-  return Util::hashFloat(w.getValue());
+  return Util::hashFloat(w.value_);
 }
 
 template <class T>
 inline bool approxEqual(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
                         T epsilon = FloatConstants<T>::epsilon) {
-  return Util::floatEqual(w1.getValue(), w2.getValue(), epsilon);
+  return Util::floatEqual(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
 inline bool approxGreaterOrEqual(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
                                  T epsilon = FloatConstants<T>::epsilon) {
-  return Util::approxGreaterOrEqual(w1.getValue(), w2.getValue(), epsilon);
+  return Util::approxGreaterOrEqual(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
 inline bool approxLessOrEqual(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
                               T epsilon = FloatConstants<T>::epsilon) {
-  return Util::approxLessOrEqual(w1.getValue(), w2.getValue(), epsilon);
+  return Util::approxLessOrEqual(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
 inline bool definitelyGreater(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
                               T epsilon = FloatConstants<T>::epsilon) {
-  return Util::definitelyGreater(w1.getValue(), w2.getValue(), epsilon);
+  return Util::definitelyGreater(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
 inline bool definitelyLess(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
                            T epsilon = FloatConstants<T>::epsilon) {
-  return Util::definitelyLess(w1.getValue(), w2.getValue(), epsilon);
+  return Util::definitelyLess(w1.value_, w2.value_, epsilon);
 }
 
 // all 3 of approx equal, greater, less may be true simultaneously (if same eps, then approxEqual <=>
@@ -191,6 +181,8 @@ class BooleanWeight : public FloatWeightTpl<bool> {
   typedef bool FloatT;
 
   BooleanWeight() : FloatWeightTpl<bool>() {}
+  static inline bool kOneValue() { return 1; }
+  static inline bool kZeroValue() { return 0; }
 
   // explicit only because somebody was wrongly activating this implicitly (they should use safe_bool idiom?)
   explicit BooleanWeight(bool v) : FloatWeightTpl<bool>(v) {}
@@ -231,7 +223,7 @@ class ViterbiWeightTpl : public FloatWeightTpl<T> {
   ViterbiWeightTpl(typename Base::DoubleT v) : Base(v) {}
 
   Self& operator=(Base const& other) {
-    this->setValue(other.getValue());
+    this->value_ = other.value_;
     return *this;
   }
 
@@ -253,7 +245,7 @@ class ViterbiWeightTpl : public FloatWeightTpl<T> {
 
 template <class T>
 ViterbiWeightTpl<T> plus(ViterbiWeightTpl<T> const& w1, ViterbiWeightTpl<T> const& w2) {
-  return w1.getValue() < w2.getValue() ? w1 : w2;
+  return w1.value_ < w2.value_ ? w1 : w2;
 }
 
 template <class T>
@@ -266,12 +258,12 @@ template <class T>
 inline ViterbiWeightTpl<T> times(ViterbiWeightTpl<T> const& w1, ViterbiWeightTpl<T> const& w2) {
   if (w1 == ViterbiWeightTpl<T>::zero() || w2 == ViterbiWeightTpl<T>::zero())
     return ViterbiWeightTpl<T>::zero();
-  return ViterbiWeightTpl<T>(w1.getValue() + w2.getValue());
+  return ViterbiWeightTpl<T>(w1.value_ + w2.value_);
 }
 
 template <class T>
 inline bool less(ViterbiWeightTpl<T> const& w1, ViterbiWeightTpl<T> const& w2) {
-  return w1.getValue() < w2.getValue();
+  return w1.value_ < w2.value_;
 }
 
 template <class T>
@@ -279,17 +271,17 @@ inline ViterbiWeightTpl<T> divide(ViterbiWeightTpl<T> const& w1, ViterbiWeightTp
   if (w1 == ViterbiWeightTpl<T>::zero() || w2 == ViterbiWeightTpl<T>::zero())
     // Technically can't divide by 0. but practically ok.
     return ViterbiWeightTpl<T>::zero();
-  return ViterbiWeightTpl<T>(w1.getValue() - w2.getValue());
+  return ViterbiWeightTpl<T>(w1.value_ - w2.value_);
 }
 
 template <class T>
 inline ViterbiWeightTpl<T> invert(ViterbiWeightTpl<T> const& w) {
-  return ViterbiWeightTpl<T>(-w.getValue());
+  return ViterbiWeightTpl<T>(-w.value_);
 }
 
 template <class T>
 inline ViterbiWeightTpl<T> pow(ViterbiWeightTpl<T> const& w, T k) {
-  return ViterbiWeightTpl<T>(k * w.getValue());
+  return ViterbiWeightTpl<T>(k * w.value_);
 }
 
 template <class T>
@@ -319,7 +311,7 @@ class LogWeightTpl : public FloatWeightTpl<T> {
   static inline LogWeightTpl<T> zero() { return LogWeightTpl<T>(FloatLimits<T>::posInfinity); }
 
   Self& operator=(Base const& other) {
-    this->setValue(other.getValue());
+    this->value_ = other.value_;
     return *this;
   }
 
@@ -335,8 +327,8 @@ LogWeightTpl<T> plus(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
   if (w1 == LogWeightTpl<T>::zero()) return w2;
   if (w2 == LogWeightTpl<T>::zero()) return w1;
 
-  const T f1 = w1.getValue();
-  const T f2 = w2.getValue();
+  const T f1 = w1.value_;
+  const T f2 = w2.value_;
   const T d = f2 - f1;  // d>0 means prob1>prob2
   if (d > 0)
     return LogWeightTpl<T>(f1 - Util::logExp(-d));
@@ -349,14 +341,14 @@ LogWeightTpl<T> minus(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
   typedef LogWeightTpl<T> W;
   if (w2 == W::zero()) return w1;
 
-  const T f1 = w1.getValue();
-  const T f2 = w2.getValue();
+  const T f1 = w1.value_;
+  const T f2 = w2.value_;
   const T d = f1 - f2;  // d>0 means prob1>prob2
   if (d < 0)  // w1>w2 because cost1 < cost2
     return W(f1 - Util::logExpMinus(d));
   else if (d >= FloatConstants<T>::epsilon)
     SDL_THROW_LOG(Hypergraph.Weight, LogNegativeException,
-                  "a-b=" << w1.getValue() - w2.getValue()
+                  "a-b=" << w1.value_ - w2.value_
                          << " greater than epsilon=" << FloatConstants<T>::epsilon);
   return W::zero();
 }
@@ -364,12 +356,12 @@ LogWeightTpl<T> minus(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
 template <class T>
 inline LogWeightTpl<T> times(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
   if (w1 == LogWeightTpl<T>::zero() || w2 == LogWeightTpl<T>::zero()) return LogWeightTpl<T>::zero();
-  return LogWeightTpl<T>(w1.getValue() + w2.getValue());
+  return LogWeightTpl<T>(w1.value_ + w2.value_);
 }
 
 template <class T>
 inline bool less(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
-  return w1.getValue() < w2.getValue();
+  return w1.value_ < w2.value_;
 }
 
 template <class T>
@@ -378,33 +370,33 @@ inline LogWeightTpl<T> divide(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& 
     // Technically can't divide by zero. but practically ok.
     return LogWeightTpl<T>::zero();
   }
-  return LogWeightTpl<T>(w1.getValue() - w2.getValue());
+  return LogWeightTpl<T>(w1.value_ - w2.value_);
 }
 
 template <class T>
 inline LogWeightTpl<T> invert(LogWeightTpl<T> const& w) {
-  return LogWeightTpl<T>(-w.getValue());
+  return LogWeightTpl<T>(-w.value_);
 }
 
 template <class T>
 inline LogWeightTpl<T> pow(LogWeightTpl<T> const& w, T k) {
-  return LogWeightTpl<T>(k * w.getValue());
+  return LogWeightTpl<T>(k * w.value_);
 }
 
 typedef LogWeightTpl<float> LogWeight;
 typedef ViterbiWeightTpl<float> ViterbiWeight;
 
 inline BooleanWeight plus(BooleanWeight const& w1, BooleanWeight const& w2) {
-  return BooleanWeight(w1.getValue() || w2.getValue());
+  return BooleanWeight(w1.value_ || w2.value_);
 }
 
 
 inline BooleanWeight times(BooleanWeight const& w1, BooleanWeight const& w2) {
-  return BooleanWeight(w1.getValue() && w2.getValue());
+  return BooleanWeight(w1.value_ && w2.value_);
 }
 
 inline bool less(BooleanWeight const& w1, BooleanWeight const& w2) {
-  return w1.getValue() < w2.getValue();
+  return w1.value_ < w2.value_;
 }
 
 inline BooleanWeight divide(BooleanWeight const& w1, BooleanWeight const& w2) {

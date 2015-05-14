@@ -481,7 +481,7 @@ struct TransformMain : TransformMainBase {
         }
         // now h holds input, olast holds recent output
         if (impl().has2()) {
-          std::string aname = o_name.str();
+          std::string const& aname = o_name.str();
           HTRANSFORM2_MSG(6, "a@" << (void*)olast.get() << ":\n" << *olast << "\nb@" << (void*)h.get()
                                   << "=:\n" << *h,
                           aname, in.name);

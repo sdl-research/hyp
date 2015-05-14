@@ -95,8 +95,7 @@ struct HypToReplaceFst {
         if (vm.count("stem")) {
           throw std::runtime_error("Do not provide both --stem and --symbols.");
         }
-        std::string filename = vm["symbols"].as<std::string>();
-        syms.reset(fst::SymbolTable::ReadText(filename));
+        syms.reset(fst::SymbolTable::ReadText(vm["symbols"].as<std::string>()));
         userProvidedSymbolTable = true;
       } else {
         syms.reset(new fst::SymbolTable(""));
@@ -134,7 +133,8 @@ struct HypToReplaceFst {
 
       // Could also use LogArc and ".log-fst"
       typedef fst::StdArc FArc;
-      const std::string fstName = stem + ".std-fst";
+      std::string fstName(stem);
+      fstName += ".std-fst";
 
       // Convert to OpenFst ReplaceFst:
       Util::AutoDelete<fst::Fst<FArc> > result(sdl::Hypergraph::toReplaceFst<FArc>(hg, syms));
@@ -172,7 +172,8 @@ struct HypToReplaceFst {
         Util::Output out(fstName);
         minimized.Write(*out, opts);
 
-        const std::string symsName = stem + ".syms";
+        std::string symsName(stem);
+        symsName += ".syms";
         std::cerr << "Writing " << symsName << '\n';
         syms->WriteText(symsName);
       }

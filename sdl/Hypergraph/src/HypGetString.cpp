@@ -24,8 +24,7 @@ struct HypGetString : TransformMain<HypGetString> {  // note base class CRTP (go
   enum { has_transform1 = false, has_inplace_input_transform = 1 };
   template <class Arc>
   bool inputTransformInPlace(IMutableHypergraph<Arc>& hg, int lineno) const {
-    std::string str = sdl::Hypergraph::getString(hg);
-    out() << str << '\n';
+    out() << sdl::Hypergraph::getString(hg) << '\n';
     return true;
   }
 };

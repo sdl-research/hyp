@@ -142,15 +142,7 @@ typedef std::map<FeatureId, FeatureValue> Features;
 
 typedef unordered_map<StateId, StateId> StateIdMap;
 
-}  // Hypergraph
 
-namespace Constants {
-using Hypergraph::kNoArc;
-using Hypergraph::kNoState;
-}
-
-// end Constants ns
-
-}
+}}
 
 #endif

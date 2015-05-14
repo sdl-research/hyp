@@ -354,6 +354,10 @@ class TokenWeightTpl {
     return 0;
   }
 
+  void set(std::string const& str) {
+    SDL_THROW_LOG(Hypergraph.NgramWeightTpl, UnimplementedException, "Not implemented");
+  }
+
  private:
   TokenMapPtr pTokens_;
   IVocabularyPtr pVoc_;
@@ -365,11 +369,6 @@ TokenWeightTpl<W> TokenWeightTpl<W>::kOne;
 
 template <class W>
 TokenWeightTpl<W> TokenWeightTpl<W>::kZero(Token(kNoState, kNoState, false), W::zero());
-
-template <class W>
-inline void parseWeightString(std::string const& str, TokenWeightTpl<W>*) {
-  SDL_THROW_LOG(Hypergraph.TokenWeight, std::runtime_error, "Not implemented");
-}
 
 template <class W>
 inline std::ostream& operator<<(std::ostream& out, TokenWeightTpl<W> const& tokWeight) {

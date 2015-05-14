@@ -228,7 +228,7 @@ W weightOrZero(std::string const& str) {
   if (str.empty())
     return W::zero();
   W r;
-  parseWeightString(str, &r);
+  r.set(str);
   return r;
 }
 
@@ -237,7 +237,7 @@ W weightOrOne(std::string const& str) {
   if (str.empty())
     return W::one();
   W r;
-  parseWeightString(str, &r);
+  r.set(str);
   return r;
 }
 
@@ -337,7 +337,7 @@ bool ApproxEqual(Weight const& a, Weight const& b, float epsilon) {
 
 template <class Weight>
 void setOneValue(Weight &w) {
-  w.setValue(Weight::kOneValue());
+  w.value_ = Weight::kOneValue();
 }
 
 }}

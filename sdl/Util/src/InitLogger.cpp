@@ -41,10 +41,12 @@ std::size_t gLogSeqXmt = 0;
 namespace sdl {
 namespace Util {
 
-std::string logFileName(std::string const& appname) {
+std::string logFileName(std::string appname) {
   boost::posix_time::ptime currentTime = boost::posix_time::second_clock::local_time();
-  std::string time = boost::posix_time::to_iso_string(currentTime);
-  return appname + "-" + time + ".log";
+  appname.push_back('-');
+  appname += boost::posix_time::to_iso_string(currentTime);
+  appname += ".log";
+  return appname;
 }
 
 // TODO: free memory for valgrind?
@@ -55,7 +57,7 @@ void initLogger(std::string const& appname, Util::InitLoggerOptions opts) {
 }
 
 void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerOptions const& opts) {
-  //defaultLocale();
+  // defaultLocale();
   if (!opts.xmlConfigFile.empty()) {
     if (opts.verbose) std::cerr << "Logging xml configuration from: " << opts.xmlConfigFile << '\n';
     log4cxx::xml::DOMConfigurator::configure(opts.xmlConfigFile);
@@ -64,13 +66,12 @@ void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerO
   log4cxx::LoggerPtr g_pStatsDBLogger(log4cxx::Logger::getRootLogger());
   if (opts.removeAppenders) g_pStatsDBLogger->removeAllAppenders();
   log4cxx::LogString logStrLayout;
-  std::string layout = opts.patternLayout.empty()
-                           ? (opts.multiThread ? "%-4t %-5p %c{2} - %m%n" : "%-5p %c{2} - %m%n")
-                           : opts.patternLayout;
+  std::string layout(opts.patternLayout);
+  if (layout.empty()) layout = (opts.multiThread ? "%-4t %-5p %c{2} - %m%n" : "%-5p %c{2} - %m%n");
   log4cxx::helpers::Transcoder::decode(layout, logStrLayout);
   log4cxx::PatternLayout* pLayout = new log4cxx::PatternLayout(logStrLayout);
   if (!opts.file.empty()) {
-    std::string logFile = opts.file == "AUTO" ? logFileName(appname) : opts.file;
+    std::string const& logFile = opts.file == "AUTO" ? logFileName(appname) : opts.file;
     if (opts.verbose) std::cerr << "Log: " << logFile << '\n';
     log4cxx::LogString logFileName;
     log4cxx::helpers::Transcoder::decode(logFile, logFileName);
@@ -96,11 +97,11 @@ void initLoggerConsole(char const* name, LogLevel level) {
 
 #else
 void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerOptions const& opts) {
-  //defaultLocale();
+  // defaultLocale();
 }
 
 void initLogger(std::string const& appname, Util::InitLoggerOptions opts) {
-  //defaultLocale();
+  // defaultLocale();
 }
 
 void initLoggerConsole(char const* name, LogLevel level) {

@@ -352,14 +352,14 @@ struct BuildStringUnion {
     if (useascii) {  // this must come last.
       Weight wa, wsa;
       if (greedyWeight)
-        parseWeightString(opt.wGreedyAscii, &wa);
+        wa.set(opt.wGreedyAscii);
       else
         wa = Weight::one();
 
       if (opt.wStartGreedyAscii.empty())
         wsa = wa;
       else
-        parseWeightString(opt.wStartGreedyAscii, &wsa);
+        wsa.set(opt.wStartGreedyAscii);
 
       timesBy(perTokenWeight, wsa);
       StateId stAscii
@@ -376,7 +376,7 @@ struct BuildStringUnion {
     }
     if (!opt.whitespaceTokens.empty()) {
       Weight wSpace;
-      wSpace.setValue(opt.whitespaceBreakCost);
+      wSpace.value_ = opt.whitespaceBreakCost;
       LabelPair deleteSpace;
       deleteSpace.second = EPSILON::ID;
       forall (std::string const& spaceStr, opt.whitespaceTokens) {
@@ -417,8 +417,8 @@ struct BuildStringUnion {
 
   /// if s is empty, leaves w alone
   static void maybeParseWeight(std::string const& s, Weight& w) {
-    if (s.empty()) return;
-    parseWeightString(s, &w);
+    if (!s.empty())
+      w.set(s);
   }
 
   BuildStringUnion(WS const& ws, HG& hg, StringUnionOptions const& opt = StringUnionOptions())

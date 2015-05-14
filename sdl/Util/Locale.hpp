@@ -13,8 +13,8 @@
     helpers for system locale.
 */
 
-#ifndef LWUTIL_LOCALE__HPP
-#define LWUTIL_LOCALE__HPP
+#ifndef SDL_UTIL_LOCALE__HPP
+#define SDL_UTIL_LOCALE__HPP
 #pragma once
 
 #ifndef SDL_FIX_LOCALE
@@ -65,7 +65,7 @@ inline void defaultLocale() {
 
 */
 #if SDL_BOOST_LOCALE
-  std::string sysLocale = boost::locale::util::get_system_locale(true);
+  std::string const& sysLocale = boost::locale::util::get_system_locale(true);
   boost::locale::generator localeGen;
   std::locale::global(localeGen(sysLocale));
   ::setlocale(LC_ALL, sysLocale.c_str());

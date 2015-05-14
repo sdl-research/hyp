@@ -48,7 +48,7 @@ void visitStates(IHypergraph<Arc> const& hg, IStatesVisitor *visitor) {
 
 struct PrintStatesVisitor : public IStatesVisitor {
   PrintStatesVisitor(std::ostream& out = std::cout,
-                     std::string separator = "\n")
+                     std::string const& separator = "\n")
       : out_(out), separator_(separator) {}
 
   void visit(StateId sid) {

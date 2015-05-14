@@ -24,13 +24,13 @@
 namespace sdl {
 namespace Util {
 
-inline void initLoggerFromConfig(std::string& logConfigFile, char const* progname = "xmt",
+inline void initLoggerFromConfig(std::string const& logConfigFile, char const* progname = "xmt",
                                  LogLevel defaultLevel = kLogInfo) {
   if (logConfigFile.empty())
     initLogger(progname, logLevel(defaultLevel));
   else {
-    logConfigFile = Util::findFile()(logConfigFile);
-    log4cxx::xml::DOMConfigurator::configure(logConfigFile);
+    std::string const& lf = Util::findFile()(logConfigFile);
+    log4cxx::xml::DOMConfigurator::configure(lf);
     Util::findFile().activateLogging();
   }
 }

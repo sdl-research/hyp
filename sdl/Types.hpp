@@ -56,6 +56,10 @@ inline std::size_t len(Slice const& slice) {
   return (std::size_t)(slice.second - slice.first);
 }
 
+inline bool empty(Slice const& slice) {
+  return slice.second == slice.first;
+}
+
 /// not valid after str is destroyed
 inline Slice toSlice(std::string const& str) {
   return Slice(arrayBegin(str), arrayEnd(str));

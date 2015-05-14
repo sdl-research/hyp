@@ -68,9 +68,11 @@ toReplaceFst(IHypergraph<HgArc> const& hg, fst::SymbolTable* fsyms) {
   std::vector<LabelFstPair> fsts;
 
   fsyms->AddSymbol(EPSILON::TOKEN); // in OpenFst, eps must be first (=0)
-  std::string root =
-      "nonterminal_#" + sdl::lexical_cast<std::string>(finalState);
+  std::string root("nonterminal_#");
+  root += sdl::lexical_cast<std::string>(finalState);
   FLabel fRootLabel = fsyms->AddSymbol(root);
+
+  IVocabulary *voc = hg.vocab();
 
   while (!queue.empty()) {
     StateId sid = queue.front();
@@ -79,8 +81,10 @@ toReplaceFst(IHypergraph<HgArc> const& hg, fst::SymbolTable* fsyms) {
     queue.pop();
 
     // Each HG state gets an FST "nonterminal"
-    std::string token = "nonterminal_#" + sdl::lexical_cast<std::string>(sid);
-    FLabel nonterm = fsyms->AddSymbol(token);
+    std::string nt("nonterminal_#");
+    std::string::size_type ntlen = nt.size();
+    nt += sdl::lexical_cast<std::string>(sid);
+    FLabel nonterm = fsyms->AddSymbol(nt);
     fst::MutableFst<FstArc>* fst = new fst::VectorFst<FstArc>();
     FStateId startState = fst->AddState();
     fst->SetStart(startState);
@@ -93,18 +97,17 @@ toReplaceFst(IHypergraph<HgArc> const& hg, fst::SymbolTable* fsyms) {
         StateId tailId = arc->getTail(t);
         FLabel flabel;
         std::string token;
-        if (hg.hasLexicalLabel(tailId)) {
-          token = hg.getVocabulary()->str(hg.inputLabel(tailId));
-        }
+        if (hg.hasLexicalLabel(tailId))
+          flabel = fsyms->AddSymbol(voc->str(hg.inputLabel(tailId)));
         else {
-          // Nonterminal: Gets its own Fst
-          token = "nonterminal_#" + sdl::lexical_cast<std::string>(tailId);
+          nt.resize(ntlen);
+          nt += sdl::lexical_cast<std::string>(tailId);
+          flabel = fsyms->AddSymbol(nt);
           if (onQueue.find(tailId) == onQueue.end()) {
             queue.push(tailId);
             onQueue.insert(tailId);
           }
         }
-        flabel = fsyms->AddSymbol(token);
         FStateId nextState = fst->AddState();
         FWeight fweight =
             (t == 0) ? FWeight(arc->weight().getValue()) : FWeight::One();

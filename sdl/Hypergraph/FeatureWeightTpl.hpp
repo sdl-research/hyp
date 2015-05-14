@@ -125,6 +125,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   typedef FeatureWeightTpl<FloatT, MapT, SumPolicy> Self;
 
  public:
+  void set(std::string const&);
 #if __cplusplus >= 201103L
   FeatureWeightTpl() = default;
 #else
@@ -159,7 +160,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   friend inline void setZero(FeatureWeightTpl& x) { x.setZero(); }
 
   void setOne() {
-    this->value_ = static_cast<FloatT>(0.0);
+    this->value_ = (FloatT)0;
     pMap_.reset();
   }
   friend inline void setOne(FeatureWeightTpl& x) { x.setOne(); }
@@ -450,9 +451,6 @@ std::ostream& operator<<(std::ostream& out, FeatureWeightTpl<FloatT, MapT, SumPo
   return out;
 }
 
-template <class FloatT, class MapT, class SumPolicy>
-void parseWeightString(std::string const& str, FeatureWeightTpl<FloatT, MapT, SumPolicy>* weight);
-
 /**
    Adds delta (default: 1) to value of feature id. Either insert(id, delta), or
    set (*this)[id] += delta. this is useful for computing count features in
@@ -481,5 +479,7 @@ inline char const* weightName(FeatureWeightTpl<FloatT, MapT, SumPolicy>*) {
 
 
 }}
+
+#include <sdl/Hypergraph/src/FeatureWeight.ipp>
 
 #endif

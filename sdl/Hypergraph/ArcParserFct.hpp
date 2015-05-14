@@ -34,7 +34,6 @@
 #include <sdl/Hypergraph/SymbolPrint.hpp>
 #include <sdl/Hypergraph/Exception.hpp>
 #include <sdl/Hypergraph/ArcParser.hpp>
-#include <sdl/Hypergraph/Weight.hpp> // for parseWeightString
 #include <sdl/Hypergraph/ParsedArcsToHg.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Contains.hpp>

@@ -11,6 +11,9 @@
 /** \file
 
     to hold hypergraph arcs to be converted later to a particular vocabulary.
+
+    TODO: this slows reading hypergraphs. instead, expose vocabulary to parser
+    and skip the middleman?
 */
 
 #ifndef PARSEDARCS_JG_2014_01_14_HPP

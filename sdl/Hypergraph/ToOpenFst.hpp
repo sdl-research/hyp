@@ -118,7 +118,7 @@ struct StateNamesSymbolTable : public IVocabularySymbolTable {
 
   virtual string Find(int64 key) const OVERRIDE {
     Sym l = ssym[key];
-    if (l == NoSymbol) return sdl::lexical_cast<string>(key);
+    if (l == NoSymbol) return sdl::lexical_cast<std::string>(key);
     return pVoc->str(l);
   }
 };

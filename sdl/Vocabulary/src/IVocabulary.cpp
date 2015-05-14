@@ -39,6 +39,7 @@ Sym IVocabulary::getVariableId(unsigned index) const {
 
 std::string const& IVocabulary::str(Sym sym) const {
   if (sym.isSpecial()) return specialSymbols().str(sym);
+  assert(containsSymImpl(sym));
   return strImpl(sym);
 }
 

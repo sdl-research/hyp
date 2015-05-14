@@ -66,7 +66,7 @@ struct SetWeightValueVisitor : boost::noncopyable {
   SetWeightValueVisitor(FloatT val) : val_(val) {}
 
   void operator()(Arc* pArc) const {
-    pArc->weight().setValue(val_);
+    pArc->weight_.value_ = val_;
   }
 
   FloatT val_;
@@ -163,7 +163,7 @@ struct InsertWeightsVisitor {
       SDL_DEBUG_BUILD(assert(it->first < nweights_));
       weightVal += weights_[it->first] * it->second;
     }
-    w.setValue(weightVal);
+    w.value_ = weightVal;
   }
 
   FloatT const* weights_;
@@ -186,16 +186,15 @@ struct InsertSparseWeightsVisitor {
   {}
 
   void operator()(Arc* arc) const {
-    FloatT weightVal(static_cast<FloatT>(0.0));
-    Map const& map = arc->weight().features();
-    for (typename Map::const_iterator it = map.begin(); it != map.end();
-         ++it) {
-      typename Map::const_iterator weightsIter = featWeightsMap_.find(it->first);
-      if (weightsIter != featWeightsMap_.end()) {
-        weightVal += weightsIter->second * it->second;
-      }
+    FloatT weightVal(0.0);
+    Map const& map = arc->weight_.features();
+    for (typename Map::const_iterator i = map.begin(), end = map.end(); i != end;
+         ++i) {
+      typename Map::const_iterator weightsIter = featWeightsMap_.find(i->first);
+      if (weightsIter != featWeightsMap_.end())
+        weightVal += weightsIter->second * i->second;
     }
-    arc->weight().setValue(weightVal);
+    arc->weight_.value_ = weightVal;
   }
 
   Map const& featWeightsMap_;

@@ -33,6 +33,7 @@ void parsedArcsToHg(ParsedArcs const& arcs
 {
   assert(result->size() == 0);
   typedef typename Arc::Weight Weight;
+  typedef typename Weight::FloatT Cost;
 
   // increments on each <xmt-blockN> symbol
   std::size_t numBlockStartSymsSeen = 0;
@@ -91,17 +92,18 @@ void parsedArcsToHg(ParsedArcs const& arcs
       forall (ParserUtil::State t, wrappedArc->tails) {
         arc->addTail(t.id);
       }
-      if (!wrappedArc->weightStr.empty()) {
-        Weight w;
+      std::string const& wtstr = wrappedArc->weightStr;
+      if (wtstr.empty()) {
+        setOne(arc->weight_);
+      } else {
         try {
-          parseWeightString(wrappedArc->weightStr, &w);
+          arc->weight_.set(wtstr);
         }
         catch(std::exception& e) {
           SDL_THROW_LOG(Hypergraph.ArcParserFct, FileFormatException,
                         inFilename << ":" << linenum
                         << ":syntax error (bad weight '" << wrappedArc->weightStr << "'): " << e.what());
         }
-        arc->setWeight(w);
       }
       result->addArc(arc);
     }

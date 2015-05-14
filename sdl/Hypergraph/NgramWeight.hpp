@@ -105,6 +105,11 @@ class NgramWeightTpl {
   typedef NgramWeightTpl<W> Self;
 
  public:
+
+  void set(std::string const& str) {
+    SDL_THROW_LOG(Hypergraph.NgramWeightTpl, UnimplementedException, "Not implemented");
+  }
+
   typedef typename W::FloatT FloatT;  // not useful except to make IHypergraph<Arc>::heuristic compile
   static Self kOne;
   static Self kZero;
@@ -306,11 +311,6 @@ NgramWeightTpl<W> NgramWeightTpl<W>::kOne;
 
 template <class W>
 NgramWeightTpl<W> NgramWeightTpl<W>::kZero(false, false);
-
-template <class W>
-void parseWeightString(std::string const& str, NgramWeightTpl<W>* w) {
-  SDL_THROW_LOG(Hypergraph.NgramWeightTpl, std::runtime_error, "Not implemented");
-}
 
 template <class W>
 NgramWeightTpl<W> plus(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> const& w2) {

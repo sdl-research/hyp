@@ -159,10 +159,11 @@ struct TokenSplitPolicy {
   types. The policy class decides the types for each state and connects them with
   arcs.
 
-  //TODO: remove template SplitPolicy
+  used by CharDetokModule
   */
-template<class Arc, class SplitPolicy>
-struct SplitStateVisitor : public IStatesVisitor, public SplitPolicy {
+template<class Arc>
+struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
+  typedef TokenSplitPolicy<Arc> SplitPolicy;
   typedef typename SplitPolicy::StateSplits StateSplits;
 
   enum { kUnsplitState = (StateId)-1 };

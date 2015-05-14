@@ -53,15 +53,16 @@ struct Field : Slice {
   Field(Pchar begin, Pchar end) : Slice(begin, end) {}
 
   Field(Slice const& o) : Slice(o) {}
-  explicit Field(char const* word) : Slice(word, word + std::strlen(word)) {}
-  explicit Field(std::string const& word) : Slice(arrayBegin(word), arrayEnd(word)) {}
-  explicit Field(std::vector<char> const& word) : Slice(arrayBegin(word), arrayEnd(word)) {}
-  explicit Field(boost::iterator_range<std::string::const_iterator> const& word)
+  Field(Field const& o) : Slice(o) {}
+  Field(char const* word) : Slice(word, word + std::strlen(word)) {}
+  Field(std::string const& word) : Slice(arrayBegin(word), arrayEnd(word)) {}
+  Field(std::vector<char> const& word) : Slice(arrayBegin(word), arrayEnd(word)) {}
+  Field(boost::iterator_range<std::string::const_iterator> const& word)
       : Slice(arrayBegin(word), arrayEnd(word)) {}
   template <class Iter>
-  explicit Field(boost::sub_match<Iter> const& word)
+  Field(boost::sub_match<Iter> const& word)
       : Slice(&*word.first, &*word.second) {}
-  explicit Field(std::string::const_iterator begin, std::string::const_iterator end)
+  Field(std::string::const_iterator begin, std::string::const_iterator end)
       : Slice(&*begin, &*end) {}
   typedef Pchar const_iterator;
   typedef Pchar iterator;
