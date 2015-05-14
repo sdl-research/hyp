@@ -60,12 +60,20 @@ inline void printNamedFeatures(std::ostream& out, Features const& features) {
     out << featSep << i->first << "=" << i->second;
 }
 
-struct AddToFeatures {
-  Features &features;
-  AddToFeatures(Features &features) : features(features) {}
-  void operator()(std::string const& name, FeatureValue val) const {
-    features[name] += val;
+struct PrintNamedFeatures {
+  Features const& features;
+  PrintNamedFeatures(Features const& features) : features(features) {}
+  friend inline std::ostream& operator<<(std::ostream& out, PrintNamedFeatures const& self) {
+    self.print(out);
+    return out;
   }
+  void print(std::ostream& out) const { printNamedFeatures(out, features); }
+};
+
+struct AddToFeatures {
+  Features& features;
+  AddToFeatures(Features& features) : features(features) {}
+  void operator()(std::string const& name, FeatureValue val) const { features[name] += val; }
 };
 
 #if SDL_EXTERNAL_FEATURES_SWAP_ONLY || __cplusplus >= 201103L
@@ -75,6 +83,7 @@ typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
 // can copy
 typedef Util::ZeroInitializedHeapArray<FeatureValue> DenseFeatures;
 #endif
+
 
 }
 

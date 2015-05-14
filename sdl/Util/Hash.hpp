@@ -141,10 +141,6 @@ inline uint64 combinedHash(uint64 seed, uint64 hashed) {
   return seed ^ (hashed + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 }
 
-inline uint64 combinedHash(uint64 seed, uint32 hashed) {
-  return seed ^ ((uint64)hashed + 0x9e3779b9 + (seed << 6) + (seed >> 2));
-}
-
 }}
 
 #endif
