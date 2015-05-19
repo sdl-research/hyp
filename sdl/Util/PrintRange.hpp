@@ -381,6 +381,11 @@ PrintRange<Iter> makePrintable(Iter begin, Iter end) {
 }
 
 template <class Iter>
+PrintRange<Iter> arrayPrintable(Iter begin, unsigned n) {
+  return PrintRange<Iter>(begin, begin + n);
+}
+
+template <class Iter>
 PrintRange<Iter> printPrefix(Iter begin, Iter end, std::size_t maxPrefixSize) {
   return PrintRange<Iter>(begin, std::min(end, begin + maxPrefixSize));  // std::advance?
 }

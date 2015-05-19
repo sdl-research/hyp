@@ -215,6 +215,7 @@ struct AutoDeleteAll : std::vector<T*> {
 template <class T>
 struct AutoDeleteArray {
   operator T*() const { return toDelete; }
+  T* begin() const { return toDelete; }
   T* toDelete;
   void reset(T* array) { toDelete = array; }
   AutoDeleteArray(T* toDelete = 0) : toDelete(toDelete) {}
