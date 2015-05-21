@@ -106,18 +106,26 @@ inline uint64 hashPointer(void const* p) {
   return mixbitsQuick((uint64)p);
 }
 
+
+template <class V>
+inline uint64 hashPointer(V const* p) {
+  return mixbitsQuick(pointerSignificantBits(p));
+}
+
 struct HashPointer {
   inline uint64 operator()(void const* p) const { return mixbitsQuick((uint64)p); }
   // for TBB: HashCompare
   static inline bool equal(void const* a, void const* b) { return a==b; }
   static inline uint64 hash(void const* p) { return mixbitsQuick((uint64)p); }
+
+  template <class V>
+  inline uint64 operator()(V const* p) const { return hashPointer(p); }
+  template <class V>
+  static inline bool equal(V const* a, V const* b) { return a==b; }
+  template <class V>
+  static inline uint64 hash(V const* p) { return hashPointer(p); }
 };
 
-
-template <class P>
-inline uint64 hashPointer(P const* p) {
-  return mixbitsQuick(pointerSignificantBits(p));
-}
 
 inline uint64 rotateRight(uint64 h, int shift) {
   assert(shift && shift<64 && shift>-64);

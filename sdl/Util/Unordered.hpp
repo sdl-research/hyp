@@ -28,6 +28,7 @@
 #include <boost/config.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
+
 // TODO: find something higher performance - some tests have shown older boost
 // versions having awful perf for memory with either int or string keys (Google
 // dense_hash_map?). also, if using new enough compiler, expect high performance
@@ -40,16 +41,7 @@
 #include <sdl/Util/Compare.hpp>
 #include <sdl/Util/Contains.hpp>
 #include <sdl/Util/Map.hpp>
-#include <cmath>  //ceil
-
-#define DEFAULTHASH_CONCRETE(type, arg, expr)               \
-  namespace boost {                                         \
-  template <>                                               \
-  struct hash<type> {                                       \
-    std::size_t operator()(type const& arg) const { expr; } \
-  };                                                        \
-  }
-
+#include <cmath>
 
 namespace sdl {
 

@@ -19,14 +19,15 @@
 
 #ifndef SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING
 #ifdef _MSC_VER
-//because ms build has more warnings right now
-# define SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING 1
+// because ms build has more warnings right now
+#define SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING 1
 #else
-# define SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING 0
+#define SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING 0
 #endif
 #endif
 
 #include <sdl/Util/Constants.hpp>
+#include <sdl/graehl/shared/epsilon.hpp>
 
 namespace sdl {
 namespace Util {
@@ -36,55 +37,60 @@ namespace Util {
    be negative; prevents frequent unsigned-numbers bug when performing
    a - b and b > a.
  */
-template<class U>
+template <class U>
 U unsignedSubtract(U a, U b) {
   return b < a ? a - b : 0;
 }
 
-template<class U>
+template <class U>
 U unsignedDiff(U a, U b) {
   return b < a ? a - b : b - a;
 }
 
-template<class FloatT, class FloatT2>
-inline bool floatEqual(FloatT d1, FloatT2 d2,
-                       FloatT epsilon = FloatConstants<FloatT>::epsilon) {
-  return d1 <= d2 + epsilon && d2 <= d1 + epsilon;
+/**
+   Approximate equal, For floating-point comparisons
+*/
+template <class FloatT>
+inline bool floatEqual(FloatT d1, FloatT d2, FloatT epsilon = 1e-7) {
+#if 0
+  //  return d1 <= d2 + epsilon && d2 <= d1 + epsilon;
+  return a == b || std::fabs(a - b) < epsilon;
+// first check seems silly but helps with +inf depending on -ffast-math flags
+#else
+  return graehl::within_epsilon_or_ieee_apart(d1, d2, epsilon);
+  /// this will scale gracefully down toward 0 or toward +inf: anything really close will
+  /// compare equal, even if epsilon is too small e.g. cost=1000 and
+  /// epsilon=1e-5 - this would be a relative error of only 1e-8
+#endif
 }
 
-template<class FloatT, class FloatT2>
-inline bool approxGreaterOrEqual(FloatT d1, FloatT2 d2,
-                                 FloatT epsilon = FloatConstants<FloatT>::epsilon) {
+template <class FloatT, class FloatT2>
+inline bool approxGreaterOrEqual(FloatT d1, FloatT2 d2, FloatT epsilon = FloatConstants<FloatT>::epsilon) {
   return d1 + epsilon > d2;
 }
 
-template<class FloatT, class FloatT2>
-inline bool approxLessOrEqual(FloatT d1, FloatT2 d2,
-                              FloatT epsilon = FloatConstants<FloatT>::epsilon) {
+template <class FloatT, class FloatT2>
+inline bool approxLessOrEqual(FloatT d1, FloatT2 d2, FloatT epsilon = FloatConstants<FloatT>::epsilon) {
   return d1 < d2 + epsilon;
 }
 
-template<class FloatT, class FloatT2>
-inline bool definitelyGreater(FloatT d1, FloatT2 d2,
-                              FloatT epsilon = FloatConstants<FloatT>::epsilon) {
+template <class FloatT, class FloatT2>
+inline bool definitelyGreater(FloatT d1, FloatT2 d2, FloatT epsilon = FloatConstants<FloatT>::epsilon) {
   return d1 > d2 + epsilon;
 }
 
-template<class FloatT, class FloatT2>
-inline bool definitelyLess(FloatT d1, FloatT2 d2,
-                           FloatT epsilon = FloatConstants<FloatT>::epsilon) {
+template <class FloatT, class FloatT2>
+inline bool definitelyLess(FloatT d1, FloatT2 d2, FloatT epsilon = FloatConstants<FloatT>::epsilon) {
   return d1 + epsilon < d2;
 }
 
 /**
    For use as predicate in std::equal, etc.
  */
-template<class FloatT>
+template <class FloatT>
 struct ApproxEqualFct {
   ApproxEqualFct(FloatT eps) : epsilon(eps) {}
-  bool operator()(FloatT f1, FloatT f2) const {
-    return floatEqual(f1, f2, epsilon);
-  }
+  bool operator()(FloatT f1, FloatT f2) const { return floatEqual(f1, f2, epsilon); }
   FloatT epsilon;
 };
 
@@ -92,47 +98,45 @@ struct ApproxEqualFct {
    Tests if the keys in map are equal and the values are
    approximately equal. For use as predicate in std::equal, etc.
  */
-template<class MapT>
+template <class MapT>
 struct ApproxEqualMapFct {
-  typedef typename MapT::value_type ValueT;   // i.e., key/value pair
-  typedef typename MapT::mapped_type MappedT; // i.e., value
+  typedef typename MapT::value_type ValueT;  // i.e., key/value pair
+  typedef typename MapT::mapped_type MappedT;  // i.e., value
   ApproxEqualMapFct(MappedT eps) : epsilon(eps) {}
-  bool operator()(ValueT const& pair1,
-                  ValueT const& pair2) const {
-    return pair1.first == pair2.first
-        && floatEqual(pair1.second, pair2.second, epsilon);
+  bool operator()(ValueT const& pair1, ValueT const& pair2) const {
+    return pair1.first == pair2.first && floatEqual(pair1.second, pair2.second, epsilon);
   }
   MappedT epsilon;
 };
 
 
 template <class Float>
-struct BiggerFloat
-{
+struct BiggerFloat {
   typedef double type;
 };
 
 template <>
-struct BiggerFloat<double>
-{
+struct BiggerFloat<double> {
   typedef long double type;
 };
 
 template <class Float>
-struct OtherFloat
-{
+struct OtherFloat {
   typedef double type;
 };
 
 template <>
-struct OtherFloat<double>
-{
+struct OtherFloat<double> {
   typedef float type;
 };
 
-template <typename T> int sgn(T val) {
+/// TODO: this may be un-optimizable and could be specialized for several types (just check msb for intN and
+/// float and double)
+template <typename T>
+int sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
+
 
 }}
 

@@ -28,6 +28,7 @@
 #include <sdl/Util/AsciiCase.hpp>
 #include <sdl/Util/Chomp.hpp>
 #include <boost/regex.hpp>
+#include <sdl/Util/Math.hpp>
 
 namespace sdl {
 namespace Util {
@@ -70,14 +71,6 @@ inline LinesNoTrailingSpacesIterator linesNoTrailingSpacesEnd() {
   return LinesNoTrailingSpacesIterator();
 }
 
-/**
-   Approximate equal, For floating-point comparisons
-*/
-template <class T>
-bool floatEqual(T a, T b, T epsilon = 1e-6) {
-  return a == b || std::fabs(a - b) < epsilon;
-  // first check seems silly but helps with +inf depending on -ffast-math flags
-}
 
 template <class T>
 bool floatEqualWarn(T a, T b, T epsilon = (T)1e-6, char const* first_name = "GOT",
