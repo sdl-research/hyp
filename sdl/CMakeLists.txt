@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.7)
+cmake_minimum_required(VERSION 3.1)
 project (sdl)
 
 include(SdlHelperFunctions.cmake)
@@ -30,7 +30,7 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 if(SDL_CHECK_LICENSE)
   message(STATUS "Enabling license/authentication check")
-  add_definitions(-DSDL_CHECK_LICENSE)
+  sdl_compiled_setting(SDL_CHECK_LICENSE 1)
 endif()
 
 if(NOT DEFINED SDL_DEBUG_SYMBOLS)
@@ -80,7 +80,7 @@ endif()
 
 # speedup; see xmt/LexicalCast.hpp for rationale
 add_definitions(-DBOOST_LEXICAL_CAST_ASSUME_C_LOCALE)
-add_definitions(-DU_HAVE_STD_STRING=1)
+add_definitions(-DU_HAVE_STD_STRING)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
   set(SDL_DEBUG 1)
@@ -278,8 +278,8 @@ if(WIN32)
 
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG")
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /LTCG")
-  add_definitions(-D_WINSOCKAPI_=1) # but then db.h needs help - see BDBConfig.cpp
-  #add_definitions(-D_SECURE_SCL=0) # Causes end-iterator-dereference errors for debug Windows builds
+  sdl_compiled_setting(_WINSOCKAPI_ 1) # but then db.h needs help - see BDBConfig.cpp
+  #sdl_compiled_setting(_SECURE_SCL 0) # Causes end-iterator-dereference errors for debug Windows builds
 
   add_definitions(-DWIN32 -D_SCL_SECURE_NO_WARNINGS -D__TBB_NO_IMPLICIT_LINKAGE)
   # -DCRT_NO_DEPRECATE # could be used to get builtin vsnprintf if we want to try that
@@ -347,9 +347,9 @@ if(USING_GCC)
       set(SDL_HAVE_GCC_4_8 1)
 
       if(LINUX)
-        add_definitions(-DUINT64_DIFFERENT_FROM_SIZE_T=0)
+        sdl_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 0)
       else()
-        add_definitions(-DUINT64_DIFFERENT_FROM_SIZE_T=1)
+        sdl_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 1)
       endif()
       #add_definitions(-Wextra) # enable only temporarily, since it's too much - see http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
       add_definitions(-fmax-errors=3) # quit after this many
@@ -640,15 +640,15 @@ endif()
 # Suppress warnings/errors for Production builds
 if(SDL_SUPPRESS_IGNORABLE_WARNINGS)
   MESSAGE(STATUS "SDL_SUPPRESS_IGNORABLE_WARNINGS: Suppressing ignorable warnings and errors log messages")
-  add_definitions(-DSDL_SUPPRESS_IGNORABLE_WARNINGS=1)
+  sdl_compiled_setting(SDL_SUPPRESS_IGNORABLE_WARNINGS 1)
 else()
-  add_definitions(-DSDL_SUPPRESS_IGNORABLE_WARNINGS=0)
+  sdl_compiled_setting(SDL_SUPPRESS_IGNORABLE_WARNINGS 0)
 endif()
 
 # CA-7791 Suppress source code locations in log messages; used when building in release mode for external customers
 if(SDL_SUPPRESS_SOURCE_LOCATION)
   MESSAGE(STATUS "SDL_SUPPRESS_SOURCE_LOCATION: Suppressing source code location in log messages")
-  add_definitions(-DSDL_SUPPRESS_SOURCE_LOCATION)
+  sdl_compiled_setting(SDL_SUPPRESS_SOURCE_LOCATION 1)
 endif()
 
 # debugging flags:
@@ -685,7 +685,7 @@ MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 if(WIN32)
   set(LINK_DEPENDENCIES ${LINK_DEPENDENCIES} ${ICU_LIBRARIES})
 endif()
-add_definitions(-DHAVE_ICU)
+sdl_compiled_setting(HAVE_ICU 1)
 
 find_package(TBB)
 MESSAGE(STATUS "TBB Library: ${TBB_LIBRARY}")
@@ -779,7 +779,7 @@ message(STATUS "yaml-cpp include directory: ${YAML_CPP_INCLUDE_DIR}")
 
 find_package(ZLIB)
 MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
-add_definitions(-DHAVE_ZLIB)
+sdl_compiled_setting(HAVE_ZLIB 1)
 
 if(NOT ANDROID)
   find_package (Log4CXX)
