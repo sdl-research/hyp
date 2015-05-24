@@ -52,16 +52,10 @@ U unsignedDiff(U a, U b) {
 */
 template <class FloatT>
 inline bool floatEqual(FloatT d1, FloatT d2, FloatT epsilon = 1e-7) {
-#if 0
-  //  return d1 <= d2 + epsilon && d2 <= d1 + epsilon;
-  return a == b || std::fabs(a - b) < epsilon;
-// first check seems silly but helps with +inf depending on -ffast-math flags
-#else
   return graehl::within_epsilon_or_ieee_apart(d1, d2, epsilon);
   /// this will scale gracefully down toward 0 or toward +inf: anything really close will
   /// compare equal, even if epsilon is too small e.g. cost=1000 and
   /// epsilon=1e-5 - this would be a relative error of only 1e-8
-#endif
 }
 
 template <class FloatT, class FloatT2>

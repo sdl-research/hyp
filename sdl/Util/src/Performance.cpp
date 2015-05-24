@@ -33,6 +33,10 @@ std::string Elapsed::str() const
 void Performance::init(StringConsumer const& s)
 {
   stringConsumer = s;
+  restart();
+}
+
+void Performance::restart() {
   start.measureMemory();
   timer.start();
 }

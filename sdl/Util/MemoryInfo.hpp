@@ -34,7 +34,6 @@ namespace Util {
 double physicalMemoryBytes();
 double physicalMemoryGB();
 
-
 class MemoryInfo {
  public:
 

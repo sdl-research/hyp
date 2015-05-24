@@ -24,16 +24,15 @@
 #include <log4cxx/logger.h>
 #endif
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-struct LogInfo
-{
-  explicit LogInfo(std::string const& logname) : logname(logname) {
-  }
-  std::string logname; //TODO: save log4cxx object? for now, let logging cfg change and we reflect that always. this is used for infos only so perf. shouldn't matter. would use:
+struct LogInfo {
+  explicit LogInfo(std::string const& logname) : logname(logname) {}
+  std::string logname;  // TODO: save log4cxx object? for now, let logging cfg change and we reflect that
+                        // always. this is used for infos only so perf. shouldn't matter. would use:
   //  LoggerPtr plog;
-  void operator()(std::string const& msg) const
-  {
+  void operator()(std::string const& msg) const {
 #ifdef NLOG
     std::cerr << logname << ": " << msg << '\n';
 #else
@@ -42,33 +41,22 @@ struct LogInfo
   }
 };
 
-inline StringConsumer logInfo(std::string const& module, std::string const& prefix="sdl.")
-{
-  return LogInfo(prefix+module);
+inline StringConsumer logInfo(std::string const& module, std::string const& prefix = "sdl.") {
+  return LogInfo(prefix + module);
 }
 
 
-struct LogAtLevel
-{
-  explicit LogAtLevel(std::string const& logname_, LogLevel level = kLogInfo) {
-    set(logname_, level);
-  }
-  LogAtLevel(std::string const& logname_, LogLevelPtr levelptr) {
-    set(logname_, levelptr);
-  }
+struct LogAtLevel {
+  explicit LogAtLevel(std::string const& logname_, LogLevel level = kLogInfo) { set(logname_, level); }
+  LogAtLevel(std::string const& logname_, LogLevelPtr levelptr) { set(logname_, levelptr); }
   LogAtLevel(std::string const& logname_, std::string const& levelName, LogLevel fallbacklevel = kLogInfo) {
     set(logname_, levelName, fallbacklevel);
   }
-  void setLevel(std::string const& name, LogLevel fallbacklevel = kLogInfo)
-  {
+  void setLevel(std::string const& name, LogLevel fallbacklevel = kLogInfo) {
     plevel = logLevel(name, fallbacklevel);
   }
-  void setLevel(LogLevel level = kLogInfo)
-  {
-    plevel = logLevel(level);
-  }
-  void set(std::string logname_)
-  {
+  void setLevel(LogLevel level = kLogInfo) { plevel = logLevel(level); }
+  void set(std::string logname_) {
     logname = logname_;
 #ifndef NLOG
     plog = log4cxx::Logger::getLogger(logname);
@@ -86,11 +74,11 @@ struct LogAtLevel
     set(logname_);
     plevel = levelptr;
   }
-  std::string logname; //TODO: save log4cxx object? for now, let logging cfg change and we reflect that always. this is used for warnings only so perf. shouldn't matter. would use:
+  std::string logname;  // TODO: save log4cxx object? for now, let logging cfg change and we reflect that
+                        // always. this is used for warnings only so perf. shouldn't matter. would use:
   LoggerPtr plog;
   LogLevelPtr plevel;
-  void operator()(std::string const& msg) const
-  {
+  void operator()(std::string const& msg) const {
 #ifdef NLOG
     std::cerr << logname << ": " << msg << '\n';
 #else
@@ -99,15 +87,17 @@ struct LogAtLevel
   }
 };
 
-inline StringConsumer logAtLevel(std::string const& module, std::string const& level, std::string const& prefix = SDL_LOG_PREFIX_STR, LogLevel fallbacklevel = kLogInfo)
-{
-  return LogAtLevel(prefix+module, level, fallbacklevel);
+inline StringConsumer logAtLevel(std::string const& module, std::string const& level,
+                                 std::string const& prefix = SDL_LOG_PREFIX_STR,
+                                 LogLevel fallback = kLogInfo) {
+  return LogAtLevel(prefix + module, level, fallback);
 }
 
-inline StringConsumer logAtLevel(std::string const& module, LogLevel level = kLogInfo, std::string const& prefix = SDL_LOG_PREFIX_STR)
-{
-  return LogAtLevel(prefix+module, level);
+inline StringConsumer logAtLevel(std::string const& module, LogLevel level = kLogInfo,
+                                 std::string const& prefix = SDL_LOG_PREFIX_STR) {
+  return LogAtLevel(prefix + module, level);
 }
+
 
 }}
 
