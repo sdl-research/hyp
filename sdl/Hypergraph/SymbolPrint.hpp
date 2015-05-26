@@ -63,7 +63,8 @@ inline void writeLabel(std::ostream& out, Sym sym, IVocabulary const* voc, Symbo
   else
     writeLabel(out, sym);
 }
-inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const* voc, SymbolQuotation quote = kQuoted) {
+inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const* voc,
+                       SymbolQuotation quote = kQuoted) {
   if (voc && voc->containsSym(sym))
     writeLabel(out, sym, *voc, quote);
   else
@@ -80,7 +81,7 @@ inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabularyPtr const& 
 }
 
 template <class Arc>
-void print(std::ostream& o, sdl::Sym sym, IHypergraph<Arc> const& hg, SymbolQuotation quote = kQuoted) {
+void print(std::ostream& o, Sym sym, IHypergraph<Arc> const& hg, SymbolQuotation quote = kQuoted) {
 
   Hypergraph::writeLabel(o, sym, hg.getVocabulary(), quote);
 }
@@ -88,19 +89,19 @@ void print(std::ostream& o, sdl::Sym sym, IHypergraph<Arc> const& hg, SymbolQuot
 }  // ns
 
 /* these are in NS sdl so they can be found by Printer */
-inline void print(std::ostream& o, sdl::Sym sym, IVocabulary& voc, Hypergraph::SymbolQuotation quote) {
+inline void print(std::ostream& o, Sym sym, IVocabulary& voc, Hypergraph::SymbolQuotation quote) {
 
   Hypergraph::writeLabel(o, sym, voc, quote);
 }
-inline void print(Util::StringBuilder& o, sdl::Sym sym, IVocabulary& voc, Hypergraph::SymbolQuotation quote) {
+inline void print(Util::StringBuilder& o, Sym sym, IVocabulary& voc, Hypergraph::SymbolQuotation quote) {
 
   Hypergraph::writeLabel(o, sym, voc, quote);
 }
 
-inline void print(std::ostream& o, sdl::Sym sym, IVocabularyPtr const& pVoc, Hypergraph::SymbolQuotation quote) {
+inline void print(std::ostream& o, Sym sym, IVocabularyPtr const& pVoc, Hypergraph::SymbolQuotation quote) {
   Hypergraph::writeLabel(o, sym, pVoc, quote);
 }
-inline void print(Util::StringBuilder& o, sdl::Sym sym, IVocabularyPtr const& pVoc,
+inline void print(Util::StringBuilder& o, Sym sym, IVocabularyPtr const& pVoc,
                   Hypergraph::SymbolQuotation quote) {
   Hypergraph::writeLabel(o, sym, pVoc, quote);
 }

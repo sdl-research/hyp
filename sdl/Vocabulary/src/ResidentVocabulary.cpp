@@ -33,7 +33,7 @@ Sym ResidentVocabulary::getTerminal(std::string const& word) const {
   return vocabTerminal.sym(word);
 }
 
-void ResidentVocabulary::loadTerminals(const std::string& terminalPath) {
+void ResidentVocabulary::loadTerminals(std::string const& terminalPath) {
   std::string entry;
   std::vector<std::string> strings;
 
@@ -46,7 +46,7 @@ void ResidentVocabulary::loadTerminals(const std::string& terminalPath) {
   }
 }
 
-void ResidentVocabulary::loadNonterminals(const std::string& nonTerminalPath) {
+void ResidentVocabulary::loadNonterminals(std::string const& nonTerminalPath) {
   std::string entry;
   std::vector<std::string> strings;
 

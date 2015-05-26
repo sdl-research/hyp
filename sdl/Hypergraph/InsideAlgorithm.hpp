@@ -79,7 +79,7 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
   void visit(StateId sid) {
     // topo visit calls for tails first. so all the distances_[tail] are already computed.
     std::size_t const cntInArcs = hg_.numInArcs(sid);
-    bool axiom = hg_.isAxiom(sid);
+   bool axiom = hg_.isAxiom(sid);
     Weight& sum = Util::atExpandPtr(distances_, sid, kZero);
     // keeping this reference is ok because there's no recursion in loops below:
     if (axiom) {
@@ -184,14 +184,14 @@ void insideAlgorithm(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtF
 
 template <class Arc, class StateWtFn, class Distances>
 void insideAlgorithm(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtFn const& stateWtFn,
-                     bool includingAxioms) {
+                    bool includingAxioms) {
   insideAlgorithmMaybeAxioms(includingAxioms, hg, pDistances, stateWtFn, ArcWeight<typename Arc::Weight>());
 }
 
 
 template <class Arc>
 void insideAlgorithm(IHypergraph<Arc> const& hg, boost::ptr_vector<typename Arc::Weight>* pDistances,
-                     bool includingAxioms = false) {
+                    bool includingAxioms = false) {
   insideAlgorithm(hg, pDistances, OneStateWeight<typename Arc::Weight>(), includingAxioms);
 }
 

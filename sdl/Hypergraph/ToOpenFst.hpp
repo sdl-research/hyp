@@ -64,7 +64,7 @@ struct IVocabularySymbolTable : public fst::SymbolTable {  // unfortunate: this 
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  void AddTable(const SymbolTable& table) OVERRIDE { SDL_THROW0(UnimplementedException); }
+  void AddTable(SymbolTable const& table) OVERRIDE { SDL_THROW0(UnimplementedException); }
   virtual string CheckSum() const OVERRIDE {
     SDL_THROW0(UnimplementedException);
     return string();
@@ -81,7 +81,7 @@ struct IVocabularySymbolTable : public fst::SymbolTable {  // unfortunate: this 
     SDL_THROW0(UnimplementedException);
     return false;
   }
-  virtual int64 Find(const string& symbol) const OVERRIDE {
+  virtual int64 Find(string const& symbol) const OVERRIDE {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
@@ -108,7 +108,7 @@ struct StateNamesSymbolTable : public IVocabularySymbolTable {
 
   template <class A>
   explicit StateNamesSymbolTable(IHypergraph<A> const& h, LabelType labelType = kInput,
-                                 bool allowLexical = false)
+                                bool allowLexical = false)
       : IVocabularySymbolTable(h.getVocabulary()), ssym(h.size(), NoSymbol) {
     for (StateId s = 0, ns = ssym.size(); s != ns; ++s) {
       Sym i = h.label(s, labelType);

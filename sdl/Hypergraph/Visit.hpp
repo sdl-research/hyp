@@ -65,7 +65,7 @@ struct IHypergraph;
 /**
    state visitors:
 
-   bool stateVisit(IHypergraph<Arc> const& hg, StateId s) const;
+  bool stateVisit(IHypergraph<Arc> const& hg, StateId s) const;
 */
 
 template <class Arc, class V>
@@ -114,7 +114,7 @@ bool visitLabeledStates(IHypergraph<Arc> const& hg, V const& v) {
 /**
    arc visitors:
 
-   bool arcVisit(IHypergraph<Arc> const& hg, Arc *arc) const;
+  bool arcVisit(IHypergraph<Arc> const& hg, Arc *arc) const;
 
    as soon as a visitor returns false, we stop.
 
@@ -234,7 +234,7 @@ struct MutableAcceptArc {
 };
 
 /**
-   void visitArc(Arc * arc) adapter for visitArcs
+  void visitArc(Arc * arc) adapter for visitArcs
 */
 template <class V>
 AcceptArc<V> acceptArc(V const* visitArc) {
@@ -242,7 +242,7 @@ AcceptArc<V> acceptArc(V const* visitArc) {
 }
 
 /**
-   void visitArc(Arc * arc) adapter for visitArcs
+  void visitArc(Arc * arc) adapter for visitArcs
 */
 template <class V>
 MutableAcceptArc<V> mutableAcceptArc(V& visitArc) {

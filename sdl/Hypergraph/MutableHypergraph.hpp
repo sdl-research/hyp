@@ -170,7 +170,7 @@ struct MutableHypergraphLabels {
   }
 
   bool forceCanonicalLexImpl() {
-    bool nodup = true;
+   bool nodup = true;
     for (StateId s = 0, e = size(); s < e; ++s) {
       Sym i = iLabelForState[s];
       if (i.isTerminal())
@@ -281,9 +281,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return properties_;
   }
 
-  Properties hgUncomputedProperties() const OVERRIDE {
-    return properties_;
-  }
+  Properties hgUncomputedProperties() const OVERRIDE { return properties_; }
 
   /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
   bool hgOutputLabelFollowsInput(StateId state) const OVERRIDE { return outputLabelBare(state) == NoSymbol; }
@@ -412,7 +410,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   std::size_t restrict(StateIdTranslation& x, ArcFilter const& keep) OVERRIDE {
     ArcFilter keepa = keep ? keep : Arc::filterTrue();
     if (x.identity()) return restrict(keep);
-    bool adding = x.stateAdding();
+   bool adding = x.stateAdding();
     // TODO: special case !x.frozen - faster than checking when translating
     ArcPointers<A> arcs(*this);
     clearArcsPer(this->numStates_);
@@ -479,7 +477,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       }
       rebuildOutArcs();
     } else {
-      bool addFirst = properties_ & kStoreFirstTailOutArcs;
+     bool addFirst = properties_ & kStoreFirstTailOutArcs;
       ArcPointers<A> arcs(*this);
       StateId ns = (StateId)outArcsPerState_.size();
       Util::reinit(outArcsPerState_, ns);
@@ -631,8 +629,8 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     properties_ &= ~(kFsmProperties);  // need to do this up front because isFsmCheck itself may check
     // properties via prunedEmpty
     fsmChecked = true;
-    bool f, one;
-    bool g = IHypergraph<Arc>::isGraphCheck(f, one);
+   bool f, one;
+   bool g = IHypergraph<Arc>::isGraphCheck(f, one);
     if (f) properties_ |= kFsm;
     if (g) properties_ |= kGraph;
     if (one) properties_ |= kOneLexical;
@@ -884,7 +882,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   /// no resize needed / removes ability to modify hg while holding maybeOutArcs
   /// ref (see addArc - resizes indices as needed)
-  inline void resizeArcsForStates(StateId size) {
+  void resizeArcsForStates(StateId size) {
     if (properties_ & kStoreInArcs) inArcsPerState_.resize(size);
     if (storesAnyOutArcs()) outArcsPerState_.resize(size);
   }
@@ -980,7 +978,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   bool hasTerminalLabel(StateId state) const OVERRIDE { return inputLabelImpl(state).isTerminal(); }
 
-  inline bool hasTerminalLabelImpl(StateId state) const { return inputLabelImpl(state).isTerminal(); }
+  bool hasTerminalLabelImpl(StateId state) const { return inputLabelImpl(state).isTerminal(); }
 
   bool isFsmArc(Arc const& a) const OVERRIDE {
     StateIdContainer const& tails = a.tails();
@@ -1162,15 +1160,17 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     properties_ &= ~Adder::removeProperties;
   }
 
-  inline bool storesAnyOutArcs() const { return properties_ & kStoresAnyOutArcs; }
+  bool storesAnyOutArcs() const { return properties_ & kStoresAnyOutArcs; }
 
   /// mere optimization over IHypergraph::visitArcs
   virtual void visitArcs(ArcVisitor const& v) const OVERRIDE {
     if (properties_ & kStoreInArcs) {
-      for (StateId s = 0, n = (StateId)inArcsPerState_.size(); s < n; ++s)  // so you can add states in visitor
+      for (StateId s = 0, n = (StateId)inArcsPerState_.size(); s < n;
+           ++s)  // so you can add states in visitor
         for (ArcIter i = inArcsPerState_[s].begin(), e = inArcsPerState_[s].end(); i != e; ++i) v(*i);
     } else if (properties_ & kStoreFirstTailOutArcs) {
-      for (StateId s = 0, n = (StateId)outArcsPerState_.size(); s < n; ++s)  // so you can add states in visitor
+      for (StateId s = 0, n = (StateId)outArcsPerState_.size(); s < n;
+           ++s)  // so you can add states in visitor
         for (ArcIter i = outArcsPerState_[s].begin(), e = outArcsPerState_[s].end(); i != e; ++i) v(*i);
     } else
       IHypergraph<Arc>::forArcs(v);
@@ -1325,9 +1325,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   IVocabularyPtr getVocabulary() const OVERRIDE { return pVocab_; }
 
-  IVocabulary *vocab() const OVERRIDE {
-    return pVocab_.get();
-  }
+  IVocabulary* vocab() const OVERRIDE { return pVocab_.get(); }
 
 
   // The in and out arcs are not in a separate State class because

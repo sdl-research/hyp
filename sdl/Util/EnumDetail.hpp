@@ -22,6 +22,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <cassert>
 
 #include <boost/preprocessor/list/at.hpp>
 #include <boost/preprocessor/list/enum.hpp>
@@ -35,7 +36,6 @@
 
 #include <graehl/shared/warning_compiler.h>
 #include <graehl/shared/warning_push.h>
-#include <boost/range/iterator_range.hpp>
 #include <graehl/shared/warning_pop.h>
 
 #include <sdl/Util/strcasecmp.hpp>
@@ -120,7 +120,7 @@ inline std::string simplifedEnumName(std::string str) {
 **/
 #define SDL_DETAIL_ENUM_TYPE_INFO(name, elems, nameList)                                                      \
   enum name { BOOST_PP_LIST_ENUM(elems), kn##name };                                                          \
-  static std::string emit(name val) {                                                                         \
+  inline std::string emit(name val) {                                                                         \
     std::string str;                                                                                          \
     switch (val) {                                                                                            \
       BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_EMIT_TO_STRING_CASE, nameList, elems)                               \
@@ -130,7 +130,7 @@ inline std::string simplifedEnumName(std::string str) {
     sdl::Util::canonicalizeEnumName(str);                                                                     \
     return str;                                                                                               \
   }                                                                                                           \
-  static std::string emitCased(name val) {                                                                    \
+  inline std::string emitCased(name val) {                                                                    \
     switch (val) {                                                                                            \
       BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_emitCased, nameList, elems)                                         \
       default:                                                                                                \
@@ -165,13 +165,13 @@ inline std::string simplifedEnumName(std::string str) {
   }                                                                                                           \
   SDL_DETAIL_GET_VALUE_EXACT_STRING_TO_ENUM(name, elems, nameList)                                            \
   SDL_DETAIL_ENUM_ALLOWED_VALUES(name, nameList)                                                              \
-  inline void string_to_impl(const std::string& str, name& out) {                                             \
+  inline void string_to_impl(std::string const& str, name& out) {                                             \
     out = kNames##name[str];                                                                                  \
     if (out == kn##name)                                                                                      \
       SDL_THROW_LOG(Enum, ::sdl::ConfigException,                                                             \
                     "Invalid " #name " enum: " << str << " - should be one of " << allowed_values(out));      \
   }                                                                                                           \
-  inline name getValue(name, const std::string& val) { return kNames##name[val]; }                            \
+  inline name getValue(name, std::string const& val) { return kNames##name[val]; }                            \
   inline std::string type_string(name const& in) {                                                            \
     return std::string(BOOST_PP_STRINGIZE(name)) + std::string(": ") + allowed_values(in);                    \
   }                                                                                                           \
@@ -196,21 +196,7 @@ inline std::string simplifedEnumName(std::string str) {
     string_to_impl(str, val);                                                                                 \
     return in;                                                                                                \
   }                                                                                                           \
-  inline std::ostream& operator<<(std::ostream& out, name val) { return out << to_string_impl(val); }         \
-  struct name##Iterator : public boost::iterator_facade<name##Iterator, name, boost::forward_traversal_tag> { \
-    name##Iterator(bool) : val_((name)0) {}                                                                   \
-    name##Iterator(name p) : val_(p) {}                                                                       \
-    name##Iterator() : val_(kn##name) {}                                                                      \
-                                                                                                              \
-   private:                                                                                                   \
-    friend class boost::iterator_core_access;                                                                 \
-    void increment() { ++val_; }                                                                              \
-    bool equal(name##Iterator const& other) const { return val_ == other.val_; }                              \
-    name& dereference() const { return (name&)val_; }                                                         \
-    unsigned val_;                                                                                            \
-  };                                                                                                          \
-  typedef boost::iterator_range<name##Iterator> name##Range;                                                  \
-  inline name##Range all##name() { return name##Range(name##Iterator(false), name##Iterator()); }
+  inline std::ostream& operator<<(std::ostream& out, name val) { return out << to_string_impl(val); }
 
 // end SDL_DETAIL_ENUM_TYPE_INFO
 

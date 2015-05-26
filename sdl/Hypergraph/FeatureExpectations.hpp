@@ -10,7 +10,8 @@
 // limitations under the License.
 /** \file
 
-    compute expectation of feature values over probability distribution (weight values are logprobs).
+    compute expectation of feature values over probability distribution (weight
+    values are logprobs). used by Optimization.
 */
 
 #ifndef HYP__HYPERGRAPH_FEATUREEXPECTATIONS_HPP

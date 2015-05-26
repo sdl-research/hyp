@@ -63,7 +63,7 @@ typedef Util::dynamic_bitset<std::size_t, std::allocator<std::size_t> > BitSet;
 /// boost::dynamic_bitset - see diffs vs. master in
 /// https://github.com/graehl/boost/tree/dynamic_bitset
 #define SDL_BITSET_OPEN_NAMESPACE \
-  namespace sdl { \
+  namespace sdl {                 \
   namespace Util {
 #define SDL_BITSET_CLOSE_NAMESPACE \
   }                                \
@@ -80,7 +80,7 @@ struct SetBitsIter : std::iterator<std::forward_iterator_tag, bool> {
   SetBitsIter() : b(), i(B::npos) {}
   explicit SetBitsIter(B const& b) : b(&b), i(b.find_first()) {}
   typedef SetBitsIter Self;
-  inline void advance() {
+  void advance() {
     UTIL_DBG_MSG(10, "advance " << i << " = ");
     i = b->find_next(i);
     CUTIL_DBG_MSG(10, b->find_next(i) << "\n");
@@ -126,8 +126,8 @@ typedef SetBitsIter<std::size_t> BitSetOnesIter;
 
 struct PrintSetBits {
   template <class I, class A>
-  inline friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b,
-                           PrintSetBits const& p) {
+  friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b,
+                    PrintSetBits const& p) {
     typedef SetBitsIter<I, A> Set;
     printRange(o, Set(b), Set());
   }
@@ -137,16 +137,15 @@ struct PrintSetBits {
 // 0)
 struct PrintBitsRightToLeft {
   template <class I, class A>
-  inline friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b,
-                           PrintBitsRightToLeft const& p) {
+  friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b,
+                    PrintBitsRightToLeft const& p) {
     o << b;
   }
 };
 
 struct PrintBits {
   template <class I, class A>
-  inline friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b,
-                           PrintBits const& p) {
+  friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b, PrintBits const& p) {
     o << "Bits:\n";
     for (typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type i = 0, e = b.size(); i != e; ++i)
       o << ' ' << i << '=' << b.test(i) << '\n';
@@ -189,8 +188,8 @@ sdl::Util::SetBitsIter<I, A> range_end(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A
 }
 
 template <class I, class A>
-typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type range_calculate_size(
-    SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
+typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type
+range_calculate_size(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
   return c.count();
 }
 
@@ -365,15 +364,15 @@ void reset(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>& v,
 }
 
 template <class I, class A>
-typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type find_first(
-    SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& v) {
+typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type
+find_first(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& v) {
   return v.find_first();
 }
 
 template <class I, class A>
-typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type find_next(
-    SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& v,
-    typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type i) {
+typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type
+find_next(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& v,
+          typename SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>::size_type i) {
   return v.find_next(i);
 }
 

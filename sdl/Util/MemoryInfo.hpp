@@ -39,7 +39,7 @@ class MemoryInfo {
 
   // Singleton
   MemoryInfo();
-  MemoryInfo(const MemoryInfo&);
+  MemoryInfo(MemoryInfo const&);
 
   static MemoryInfo instance_;
   static MemoryInfo& instance() { return instance_; };
@@ -52,7 +52,7 @@ class MemoryInfo {
   enum { buflen = 64 };
 
   char memoryFilename[buflen];
-  std::string getColumn(const std::string& s, unsigned columnNumber);
+  std::string getColumn(std::string const& s, unsigned columnNumber);
 
 };
 

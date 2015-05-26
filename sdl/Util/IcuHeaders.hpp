@@ -48,7 +48,7 @@ unicode/utf8.h defines macros for UTF-8 with semantics parallel to the UTF-16 ma
 #include "unicode/utf8.h"
 #include "unicode/uchar.h"
 
-int32_t countWhiteSpace(const StringPiece &sp) {
+int32_t countWhiteSpace(StringPiece const& sp) {
   const char *s=sp.data();
   int32_t length=sp.length();
   int32_t count;

@@ -21,7 +21,7 @@
    TODO: try vector of pair<id, weight> for use up to size N, then switch to
    something else.  (maybe vector always faster in practice, can sort before doing
    times/plus operations, or on every insertion). also, small_vector to handle
-   inline 1 or 2 features (like alignments)
+    1 or 2 features (like alignments)
 
 */
 
@@ -172,7 +172,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
      Returns const map, which may be shared with other weight
      objects.
   */
-  inline Map const& features() const {
+  Map const& features() const {
     if (!pMap_) return staticEmptyMap;
     return *pMap_;
   }
@@ -183,7 +183,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
      Returns non-const map, which is never shared with other
      weight objects (cloned here if necessary).
   */
-  inline Map& featuresWrite() {
+  Map& featuresWrite() {
     ownMap();
     return *pMap_;
   }
@@ -261,7 +261,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   struct AddFeature {
     Map& map;
     AddFeature(Self& self) : map(self.featuresWrite()) {}
-    void operator()(value_type const& val) const { map.insert(val); }
+   void operator()(value_type const& val) const { map.insert(val); }
   };
 
   const_iterator begin() const { return features().begin(); }

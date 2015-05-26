@@ -56,7 +56,7 @@ struct ArcCopyFct {
 
   typedef unordered_map<StateId, StateId> StatePairMap;
 
-  ArcCopyFct(const IHypergraph<Arc>& source, IMutableHypergraph<Arc>* pTarget)
+  ArcCopyFct(IHypergraph<Arc> const& source, IMutableHypergraph<Arc>* pTarget)
       : source_(source), pTarget_(pTarget) {}
 
   void operator()(Arc* pArc) const {
@@ -93,7 +93,7 @@ struct ArcCopyFct {
    Adds the sourceFst to the pTargetFst.
 */
 template <class Arc>
-void fstUnion(const IHypergraph<Arc>& sourceFst, IMutableHypergraph<Arc>* pTargetFst) {
+void fstUnion(IHypergraph<Arc> const& sourceFst, IMutableHypergraph<Arc>* pTargetFst) {
   SDL_DEBUG(Hypergraph.Union, "Enter fstUnion");
   ASSERT_VALID_HG(sourceFst);
   if (empty(sourceFst)) {  // FIXME: this is not a cheap operation. prunedEmpty is, though.
@@ -126,7 +126,7 @@ void fstUnion(const IHypergraph<Arc>& sourceFst, IMutableHypergraph<Arc>* pTarge
 
 
 template <class Arc>
-void hgUnion(const IHypergraph<Arc>& sourceHg, IMutableHypergraph<Arc>* pTargetHg) {
+void hgUnion(IHypergraph<Arc> const& sourceHg, IMutableHypergraph<Arc>* pTargetHg) {
   if (sourceHg.isFsm() && pTargetHg->isFsm()) {
     fstUnion(sourceHg, pTargetHg);
   } else {

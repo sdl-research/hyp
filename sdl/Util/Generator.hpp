@@ -27,8 +27,8 @@
    Arc *peek() const { return *i; }
    Arc *get() const { return *i; }
    operator bool() const { return i != end; }
-   void pop() { ++i; }
-   void got() { ++i; }
+  void pop() { ++i; }
+  void got() { ++i; }
    Arc *operator()() {
     Arc *r = get();
     got();
@@ -41,7 +41,7 @@
    EXAMPLE (using a non-peekable generator):
 
    template <class LMimpl>
-   void printVocab(LMimpl &lm)
+  void printVocab(LMimpl &lm)
    {
    typename LMimpl::StringIdPairGenerator stringIds=lm.getStringIdPairGenerator();
    while(stringIds)
@@ -51,7 +51,7 @@
    EXAMPLE (using a peekable generator):
 
    template <class LMimpl>
-   void printVocab(LMimpl &lm)
+  void printVocab(LMimpl &lm)
    {
    typename LMimpl::StringIdPairGenerator stringIds=lm.getStringIdPairGenerator();
    while(stringIds) {
@@ -91,7 +91,7 @@
    int state;
    MyGenerator(int state=1) : state(state) {}
    int peek() const { return state; }
-   void pop() { --state; }
+  void pop() { --state; }
    operator bool() const {return state;}
    };
 
@@ -100,7 +100,7 @@
    // for functions selecting between peekable and not:
 
    template <class Gen>
-   bool peekable(typename boost::enable_if<is_void<typename Gen::Peekable>,Gen>::type &gen) { return true; }
+  bool peekable(typename boost::enable_if<is_void<typename Gen::Peekable>,Gen>::type &gen) { return true; }
 
    also:
 

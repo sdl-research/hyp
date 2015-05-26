@@ -44,16 +44,14 @@ namespace Hypergraph {
    than Floyd-Warshall.
 
 */
-template<class Arc, class ArcWtFn>
-void floydWarshallInit(IHypergraph<Arc> const& hg
-                       , Util::Matrix<typename ArcWtFn::Weight> *pdistances
-                       , ArcWtFn arcWtFn)
-{
+template <class Arc, class ArcWtFn>
+void floydWarshallInit(IHypergraph<Arc> const& hg, Util::Matrix<typename ArcWtFn::Weight>* pdistances,
+                       ArcWtFn arcWtFn) {
   typedef typename ArcWtFn::Weight Weight;
-  Util::Matrix<Weight> & dist=*pdistances;
+  Util::Matrix<Weight>& dist = *pdistances;
   dist.setDiagonal(Weight::one(), Weight::zero());
   for (StateId tail = 0, numStates = (StateId)dist.getNumRows(); tail < numStates; ++tail) {
-    Weight *rowTail = dist.row(tail);
+    Weight* rowTail = dist.row(tail);
     forall (ArcId aid, hg.outArcIds(tail)) {
       Arc* arc = hg.outArc(tail, aid);
       StateId head = arc->head();
@@ -71,20 +69,20 @@ void floydWarshallInit(IHypergraph<Arc> const& hg
 
    from http://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
 */
-template<class Weight>
+template <class Weight>
 void floydWarshallOverMatrix(Util::Matrix<Weight>* pdistances) {
-  Util::Matrix<Weight> & dist=*pdistances;
+  Util::Matrix<Weight>& dist = *pdistances;
   std::size_t const n = dist.getNumRows();
-  assert(n==dist.getNumCols());
+  assert(n == dist.getNumCols());
   for (StateId k = 0; k < n; ++k) {
-    Weight *rowk = dist.row(k);
+    Weight* rowk = dist.row(k);
     for (StateId i = 0; i < n; ++i) {
-      if (k==i) continue; // needed so log semiring has correct results
-      Weight *rowi = dist.row(i);
+      if (k == i) continue;  // needed so log semiring has correct results
+      Weight* rowi = dist.row(i);
       Weight const& wik = rowi[k];
       if (isZero(wik)) continue;
       for (StateId j = 0; j < n; ++j) {
-        if (i==j) continue;
+        if (i == j) continue;
         Weight const& wkj = rowk[j];
         if (isZero(wkj)) continue;
         Hypergraph::plusBy(times(wik, wkj), rowi[j]);
@@ -100,21 +98,17 @@ void floydWarshallOverMatrix(Util::Matrix<Weight>* pdistances) {
    assumes distances was initialized to all Weight::zero() - note: Weight() may
    be Weight::one()
 */
-template<class Arc, class ArcWtFn>
-void floydWarshall(IHypergraph<Arc> const& hg
-                   , Util::Matrix<typename ArcWtFn::Weight>* distances
-                   , ArcWtFn const& arcWtFn)
-{
+template <class Arc, class ArcWtFn>
+void floydWarshall(IHypergraph<Arc> const& hg, Util::Matrix<typename ArcWtFn::Weight>* distances,
+                   ArcWtFn const& arcWtFn) {
   if (!hg.isFsm())
-    SDL_THROW_LOG(Hypergraph, ConfigException,
-                  "Current floydWarshall implementation needs FSM input");
+    SDL_THROW_LOG(Hypergraph, ConfigException, "Current floydWarshall implementation needs FSM input");
   floydWarshallInit(hg, distances, arcWtFn);
   floydWarshallOverMatrix(distances);
 }
 
-template<class Arc>
-void floydWarshall(IHypergraph<Arc> const& hg,
-                   Util::Matrix<typename Arc::Weight>* distances) {
+template <class Arc>
+void floydWarshall(IHypergraph<Arc> const& hg, Util::Matrix<typename Arc::Weight>* distances) {
   floydWarshall(hg, distances, ArcWeight<typename Arc::Weight>());
 }
 
@@ -161,18 +155,19 @@ void floydWarshall(IHypergraph<Arc> const& hg,
    to adjacency list
 */
 
-#define SDL_ALL_PAIRS_REQUIRES_SORTED_DAG "FSM input (topologically sorted, nonlexical states first) with out-arcs"
+#define SDL_ALL_PAIRS_REQUIRES_SORTED_DAG \
+  "FSM input (topologically sorted, nonlexical states first) with out-arcs"
 
 struct KeepAll {
   template <class A>
-  bool operator()(A const& a) const { return true; }
+  bool operator()(A const& a) const {
+    return true;
+  }
 };
 
-template <class InHypergraph
-          , class KeepFn = KeepAll
-          , class ArcWtFn = ArcWeight<typename InHypergraph::Arc::Weight>
-          , bool ZeroDroppedPaths = true>
-struct AllPairsSortedDag : private ArcWtFn, private KeepFn { // empty base class opt.
+template <class InHypergraph, class KeepFn = KeepAll,
+          class ArcWtFn = ArcWeight<typename InHypergraph::Arc::Weight>, bool ZeroDroppedPaths = true>
+struct AllPairsSortedDag : private ArcWtFn, private KeepFn {  // empty base class opt.
   typedef InHypergraph InputHypergraph;
   typedef typename InputHypergraph::Arc Arc;
   typedef typename ArcWtFn::Weight Weight;
@@ -181,29 +176,24 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn { // empty base class
   enum { kZeroDropped = ZeroDroppedPaths };
 
   InputHypergraph const& hg;
-  Distances &distances;
-  StateId nStates; // # nonlex states (topo sorted => 0...nStates-1 are those)
+  Distances& distances;
+  StateId nStates;  // # nonlex states (topo sorted => 0...nStates-1 are those)
   Weight const oneWeight;
   Weight const zeroWeight;
 
   KeepFn const& keep() const { return *this; }
   ArcWtFn const& arcWeight() const { return *this; }
 
-  AllPairsSortedDag(InputHypergraph const& hg
-                    , Distances &distances
-                    , KeepFn keepFn = KeepFn()
-                    , ArcWtFn arcWtFn = ArcWtFn()
-                    , Weight const& oneWeight = Weight::one()
-                    , Weight const& zeroWeight = Weight::zero()
-                    )
+  AllPairsSortedDag(InputHypergraph const& hg, Distances& distances, KeepFn keepFn = KeepFn(),
+                    ArcWtFn arcWtFn = ArcWtFn(), Weight const& oneWeight = Weight::one(),
+                    Weight const& zeroWeight = Weight::zero())
       : ArcWtFn(arcWtFn)
       , KeepFn(keepFn)
       , hg(hg)
       , distances(distances)
       , nStates((StateId)distances.getNumRows())
       , oneWeight(oneWeight)
-      , zeroWeight(zeroWeight)
-  {
+      , zeroWeight(zeroWeight) {
     //    if (!hg.isFsm() || !hg.storesOutArcs())
     // SDL_THROW_LOG(Hypergraph, ConfigException,
     // "Current AllPairsSortedDag implementation needs " SDL_ALL_PAIRS_REQUIRES_SORTED_DAG);
@@ -218,36 +208,35 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn { // empty base class
      (maybe) improve destination cost from->to (weight=distanceTo)
      with partial path from->via (weight=viaWt), using arc via->to (weight=arcWt)
   */
-  inline void improve(Weight &distanceTo, Weight const& viaWt, Weight const& arcWt) {
+  void improve(Weight& distanceTo, Weight const& viaWt, Weight const& arcWt) {
     Hypergraph::plusBy(times(viaWt, arcWt), distanceTo);
   }
 
-  inline void checkTopoSort(StateId from, StateId to) {
-    if (to<=from)
-      SDL_THROW_LOG(Hypergraph, CycleException,
-                    "AllPairsSortedDag found cycle-causing arc " << from << "->" << to << " (requires " SDL_ALL_PAIRS_REQUIRES_SORTED_DAG ")");
+  void checkTopoSort(StateId from, StateId to) {
+    if (to <= from)
+      SDL_THROW_LOG(Hypergraph, CycleException, "AllPairsSortedDag found cycle-causing arc "
+                                                    << from << "->" << to
+                                                    << " (requires " SDL_ALL_PAIRS_REQUIRES_SORTED_DAG ")");
   }
 
   void compute() {
-    for (StateId from = 0; from<nStates; ++from) { // ultimate source
-      Weight *distancesFrom = distances.row(from);
+    for (StateId from = 0; from < nStates; ++from) {  // ultimate source
+      Weight* distancesFrom = distances.row(from);
       distancesFrom[from] = oneWeight;
-      for (StateId via = from; via<nStates; ++via) {
-        Weight &viaWt = distancesFrom[via];
-        if (viaWt==zeroWeight)
-          continue;
-        //TODO: slight speedup: maintain reachability set (log n or bit vector, instead of n)
+      for (StateId via = from; via < nStates; ++via) {
+        Weight& viaWt = distancesFrom[via];
+        if (viaWt == zeroWeight) continue;
+        // TODO: slight speedup: maintain reachability set (log n or bit vector, instead of n)
 
         if (!keep()(viaWt)) {
-          if (kZeroDropped)
-            viaWt = zeroWeight;
-          continue; // we already don't care for from->via. definitely don't continue it.
+          if (kZeroDropped) viaWt = zeroWeight;
+          continue;  // we already don't care for from->via. definitely don't continue it.
         }
 
         // for outarcs of via:
         ArcId nArcs = hg.numOutArcs(via);
-        for (ArcId a = 0; a<nArcs; ++a) {
-          Arc const& arc=*hg.outArc(via, a);
+        for (ArcId a = 0; a < nArcs; ++a) {
+          Arc const& arc = *hg.outArc(via, a);
           ArcId to = arc.head();
           checkTopoSort(from, to);
           assert(to < distances.getNumCols());
@@ -260,20 +249,19 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn { // empty base class
 };
 
 template <class InputHypergraph, class KeepFn, class ArcWtFn>
-void allPairsSortedDag(InputHypergraph const& hg
-                       , Util::Matrix<typename ArcWtFn::Weight> &distances
-                       , KeepFn const& keepFn
-                       , ArcWtFn const& arcWtFn
-                       , bool zeroDroppedPaths = true
-                       , typename ArcWtFn::Weight const& oneWeight = ArcWtFn::Weight::one()
-                       , typename ArcWtFn::Weight const& zeroWeight = ArcWtFn::Weight::zero())
-{
+void allPairsSortedDag(InputHypergraph const& hg, Util::Matrix<typename ArcWtFn::Weight>& distances,
+                       KeepFn const& keepFn, ArcWtFn const& arcWtFn, bool zeroDroppedPaths = true,
+                       typename ArcWtFn::Weight const& oneWeight = ArcWtFn::Weight::one(),
+                       typename ArcWtFn::Weight const& zeroWeight = ArcWtFn::Weight::zero()) {
   distances.fill(zeroWeight);
   if (zeroDroppedPaths)
-    AllPairsSortedDag<InputHypergraph, KeepFn, ArcWtFn, true> compute(hg, distances, keepFn, arcWtFn, oneWeight, zeroWeight);
+    AllPairsSortedDag<InputHypergraph, KeepFn, ArcWtFn, true> compute(hg, distances, keepFn, arcWtFn,
+                                                                      oneWeight, zeroWeight);
   else
-    AllPairsSortedDag<InputHypergraph, KeepFn, ArcWtFn, false> compute(hg, distances, keepFn, arcWtFn, oneWeight, zeroWeight);
+    AllPairsSortedDag<InputHypergraph, KeepFn, ArcWtFn, false> compute(hg, distances, keepFn, arcWtFn,
+                                                                       oneWeight, zeroWeight);
 }
+
 
 }}
 

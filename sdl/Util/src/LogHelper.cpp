@@ -25,7 +25,11 @@ std::size_t nextLogSeq() {
 }
 #endif
 
-bool gFinishedLogging = false;
+bool gFinishedLogging
+#if __GNUC__
+__attribute__ ((used))
+#endif
+= false;
 
 void finishLogging() {
   gFinishedLogging = true;

@@ -20,9 +20,10 @@
 #include <sdl/IntTypes.hpp>
 #include <graehl/shared/hash_murmur.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-using graehl::MurmurHash; // std::size_t MurmurHash( const void * key, int len, uint64_t seed = 0)
+using graehl::MurmurHash;  // std::size_t MurmurHash( const void * key, int len, uint64_t seed = 0)
 using graehl::MurmurHash64;
 
 /**
@@ -32,7 +33,7 @@ using graehl::MurmurHash64;
    that both Xorshift and multiplication (multiplied by an odd integer) are
    invertible in the residue field of power-of-two.
 */
-inline void mixbits(uint64 &h) {
+inline void mixbits(uint64& h) {
   h ^= h >> 23;
   h *= 0x2127599bf4325c37ULL;
   h ^= h >> 47;
@@ -42,7 +43,7 @@ inline void mixbits(uint64 &h) {
    return h well-mixed (every input bit affects every output bit) without
    ruining evenness-of-distribution properties.
 */
-inline void mixbitsPerfect(uint64 &h) {
+inline void mixbitsPerfect(uint64& h) {
   h = (~h) + (h << 21);
   h = h ^ (h >> 24);
   h = (h + (h << 3)) + (h << 8);
@@ -89,15 +90,18 @@ inline uint32 mixbits32(uint32 h) {
 */
 template <class P>
 inline uint64 pointerSignificantBits(P const* p) {
-  return ((uint64)p) >>
-      (sizeof(P) < 2 ? 0 :
-       sizeof(P) < 4 ? 1 :
-       sizeof(P) < 8 ? 2 :
-       sizeof(P) < 16 ? 3 :
-       sizeof(P) < 32 ? 4 :
-       sizeof(P) < 64 ? 5 :
-       sizeof(P) < 128 ? 6 :
-       sizeof(P) < 256 ? 7 : 8);
+  return ((uint64)p)
+         >> (sizeof(P) < 2 ? 0 : sizeof(P) < 4 ? 1 : sizeof(P) < 8
+                                                         ? 2
+                                                         : sizeof(P) < 16
+                                                               ? 3
+                                                               : sizeof(P) < 32
+                                                                     ? 4
+                                                                     : sizeof(P) < 64
+                                                                           ? 5
+                                                                           : sizeof(P) < 128
+                                                                                 ? 6
+                                                                                 : sizeof(P) < 256 ? 7 : 8);
   // no harm done if larger: you might have 1 or more trailing 0s, but 8 fewer than before
   // could use boost integer log2.
 }
@@ -113,22 +117,28 @@ inline uint64 hashPointer(V const* p) {
 }
 
 struct HashPointer {
-  inline uint64 operator()(void const* p) const { return mixbitsQuick((uint64)p); }
+  uint64 operator()(void const* p) const { return mixbitsQuick((uint64)p); }
   // for TBB: HashCompare
-  static inline bool equal(void const* a, void const* b) { return a==b; }
+  static inline bool equal(void const* a, void const* b) { return a == b; }
   static inline uint64 hash(void const* p) { return mixbitsQuick((uint64)p); }
 
   template <class V>
-  inline uint64 operator()(V const* p) const { return hashPointer(p); }
+  uint64 operator()(V const* p) const {
+    return hashPointer(p);
+  }
   template <class V>
-  static inline bool equal(V const* a, V const* b) { return a==b; }
+  static inline bool equal(V const* a, V const* b) {
+    return a == b;
+  }
   template <class V>
-  static inline uint64 hash(V const* p) { return hashPointer(p); }
+  static inline uint64 hash(V const* p) {
+    return hashPointer(p);
+  }
 };
 
 
 inline uint64 rotateRight(uint64 h, int shift) {
-  assert(shift && shift<64 && shift>-64);
+  assert(shift && shift < 64 && shift > -64);
   return (h >> shift) | (h << (64 - shift));
 }
 
@@ -140,14 +150,14 @@ inline uint64 hashFloat(float v) {
   return *reinterpret_cast<uint32 const*>(&v);
 }
 
-inline uint64 mixedbitsMedium(uint64 h)
-{
+inline uint64 mixedbitsMedium(uint64 h) {
   return h + 0x9e3779b9 + (h << 6) + (h >> 2);
 }
 
 inline uint64 combinedHash(uint64 seed, uint64 hashed) {
   return seed ^ (hashed + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 }
+
 
 }}
 

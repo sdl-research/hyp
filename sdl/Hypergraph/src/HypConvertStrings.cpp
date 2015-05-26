@@ -50,7 +50,7 @@ struct HypConvertStrings : HypergraphMainBase {
     typedef ArcTpl<Weight> Arc;
 
     std::string line;
-    bool first = true;
+   bool first = true;
     std::size_t linei = 0;
     MutableHypergraph<Arc> hg;
     hg.setVocabulary(pVoc);

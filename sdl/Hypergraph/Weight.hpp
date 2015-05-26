@@ -139,36 +139,36 @@ std::ostream& operator<<(std::ostream& o, FloatWeightTpl<T> const& x) {
 }
 
 template <class T>
-inline std::size_t hashWeight(const FloatWeightTpl<T>& w) {
+inline std::size_t hashWeight(FloatWeightTpl<T> const& w) {
   return Util::hashFloat(w.value_);
 }
 
 template <class T>
-inline bool approxEqual(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
+inline bool approxEqual(FloatWeightTpl<T> const& w1, FloatWeightTpl<T> const& w2,
                         T epsilon = FloatConstants<T>::epsilon) {
   return Util::floatEqual(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
-inline bool approxGreaterOrEqual(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
+inline bool approxGreaterOrEqual(FloatWeightTpl<T> const& w1, FloatWeightTpl<T> const& w2,
                                  T epsilon = FloatConstants<T>::epsilon) {
   return Util::approxGreaterOrEqual(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
-inline bool approxLessOrEqual(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
+inline bool approxLessOrEqual(FloatWeightTpl<T> const& w1, FloatWeightTpl<T> const& w2,
                               T epsilon = FloatConstants<T>::epsilon) {
   return Util::approxLessOrEqual(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
-inline bool definitelyGreater(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
+inline bool definitelyGreater(FloatWeightTpl<T> const& w1, FloatWeightTpl<T> const& w2,
                               T epsilon = FloatConstants<T>::epsilon) {
   return Util::definitelyGreater(w1.value_, w2.value_, epsilon);
 }
 
 template <class T>
-inline bool definitelyLess(const FloatWeightTpl<T>& w1, const FloatWeightTpl<T>& w2,
+inline bool definitelyLess(FloatWeightTpl<T> const& w1, FloatWeightTpl<T> const& w2,
                            T epsilon = FloatConstants<T>::epsilon) {
   return Util::definitelyLess(w1.value_, w2.value_, epsilon);
 }

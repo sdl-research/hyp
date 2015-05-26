@@ -89,7 +89,7 @@ struct HypToReplaceFst {
       }
 
 #if HAVE_OPENFST
-      bool userProvidedSymbolTable = false;
+     bool userProvidedSymbolTable = false;
       Util::AutoDelete<fst::SymbolTable> syms;
       if (vm.count("symbols")) {
         if (vm.count("stem")) {

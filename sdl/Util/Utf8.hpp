@@ -342,7 +342,7 @@ struct FixUnicode {
   /// return false if in is already normalized, else normalize(in, storage)
   bool maybeNormalize(std::string const& string, std::string& storage) const {
     if (cleanupEnabled()) {
-      bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
+     bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
       if (valid && !modifiesControlChars(string))
         return false;
       else {
@@ -365,7 +365,7 @@ struct FixUnicode {
 
   void normalize(std::string& string) const {
     if (cleanupEnabled()) {
-      bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
+     bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
       if (!valid || modifiesControlChars(string)) normalize(string, valid);
     }
   }

@@ -30,9 +30,7 @@ namespace Vocabulary {
 */
 class SpecialSymbolVocab {
  public:
-  explicit SpecialSymbolVocab() {
-    init();
-  }
+  explicit SpecialSymbolVocab() { init(); }
 
   /**
      idempotent, but should be called before threads start. this happens in
@@ -48,36 +46,27 @@ class SpecialSymbolVocab {
 
   std::string const& str(Sym id) const;
 
-  inline Sym sym(std::string const& symbol) const {
-    return vocab->sym(symbol);
-  }
+  Sym sym(std::string const& symbol) const { return vocab->sym(symbol); }
 
   bool containsSym(Sym id) const;
 
-  inline bool contains(std::string const& symbol) const {
+  bool contains(std::string const& symbol) const {
     // Currently all special symbols are terminals.
     return vocab->contains(symbol);
   }
 
-  inline void accept(IVocabularyVisitor& visitor) {
-    vocab->accept(visitor);
-  }
+  void accept(IVocabularyVisitor& visitor) { vocab->accept(visitor); }
 
-  inline unsigned getNumSymbols() const {
-    return vocab->getNumSymbols();
-  }
+  unsigned getNumSymbols() const { return vocab->getNumSymbols(); }
 
-  inline unsigned getNumLexicals() {
-    return vocab->getNumSymbols();
-  }
+  unsigned getNumLexicals() { return vocab->getNumSymbols(); }
 
-  inline std::size_t getSize() const {
-    return vocab->getNumSymbols();
-  }
+  std::size_t getSize() const { return vocab->getNumSymbols(); }
 
   static SpecialSymbolVocab gInstance_;
+
  private:
-  typedef BasicVocabularyImpl *BasicVocabPtr;
+  typedef BasicVocabularyImpl* BasicVocabPtr;
   // pimpl for safe static init (single threaded at this point) - note
   // specialSymbolsForceInit WILL be called in static init or else bad things.
   BasicVocabPtr vocab;

@@ -131,7 +131,7 @@ struct Evictable : Config::INamed {
   }
 
   bool maybeInitProcessAndThread() {
-    bool r = false;
+   bool r = false;
     if (maybeInitProcess(kPhase0)) r = true;
     if (maybeInitProcess(kPhase1)) r = true;
     if (maybeInitProcess()) r = true;

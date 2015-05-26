@@ -385,7 +385,7 @@ class ArcTpl SDL_OBJECT_TRACK_BASE(ArcTpl<W>) {
    use printArc instead.
 */
 template <class W>
-std::ostream& operator<<(std::ostream& out, const ArcTpl<W>& arc) {
+std::ostream& operator<<(std::ostream& out, ArcTpl<W> const& arc) {
   out << arc.head() << " <- ";
   forall (StateId sid, arc.tails()) { out << sid << " "; }
   out << "/ " << arc.weight();

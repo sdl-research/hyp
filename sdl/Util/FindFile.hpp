@@ -45,7 +45,7 @@ typedef std::vector<std::string> Dirs;
 
 std::string findExistingFile(std::string const& filename, Dirs const& searchDirs, bool doLogging = true);
 
-void splitFilePath(const std::string& resolvedPath, std::string* pStrDir, std::string* pStrFileName);
+void splitFilePath(std::string const& resolvedPath, std::string* pStrDir, std::string* pStrFileName);
 
 std::string absPath(std::string const& path);
 

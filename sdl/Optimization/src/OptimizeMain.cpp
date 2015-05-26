@@ -79,11 +79,11 @@ int main(int ac, char* av[]) {
 
     std::string configFile;
     std::string modelName, searchSpaceSectionName, optimizeSectionName;
-    bool help;
-    bool checkIntersection;
-    bool checkGradients;
+   bool help;
+   bool checkIntersection;
+   bool checkGradients;
     std::string logConfigFile;
-    bool testMode;
+   bool testMode;
     sdl::AddOption opt(generic);
 
     opt("config,c", po::value(&configFile)->default_value("./SDLConfig.yml"),
@@ -164,7 +164,7 @@ int main(int ac, char* av[]) {
     }
 
     SDL_DEBUG(Optimization.OptimizeMain, "Config file: " << configFile);
-    bool showEffective = true;
+   bool showEffective = true;
     int verbosity = 1;
 
     Optimization::OptimizationProcedureOptions optProcConfig;
@@ -188,7 +188,7 @@ int main(int ac, char* av[]) {
       SDL_THROW_LOG(Optimization, IOException, "Could not load shared lib");
     }
 
-    void* loadFct = NULL;
+   void* loadFct = NULL;
     if (!(loadFct = Util::loadProc(myLib, "load"))) {
       SDL_THROW_LOG(Optimization, IOException, "Could not use 'load' function from " << libName);
     }
@@ -199,7 +199,7 @@ int main(int ac, char* av[]) {
                                                << searchSpaceSectionName << "' in " << configFile);
     }
 
-    void* obj = ((void* (*)(Resources::ResourceManager&, ConfigNode&, bool))(loadFct))(
+   void* obj = ((void* (*)(Resources::ResourceManager&, ConfigNode&, bool))(loadFct))(
         resourceManager, node, Optimization::kIsOptimize);
     typedef Optimization::ICreateSearchSpace<Optimization::Arc> SearchSpace;
     shared_ptr<SearchSpace> searchSpace(reinterpret_cast<SearchSpace*>(obj));

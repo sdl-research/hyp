@@ -267,12 +267,12 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
   std::vector<std::vector<StateIdContainer> > newStatesForTailsPerArc;
   forall (ArcId aid, hg.inArcIds(head)) {
     std::vector<StateIdContainer> newStatesForTails;
-    bool allTailsAreUnion = true;
+   bool allTailsAreUnion = true;
     Arc* arc = hg.inArc(head, aid);
     forall (StateId tailId, arc->tails()) {
       NewStateInfo* p = addStatesRecurse(hg, tailId, headSpan, hgStateIdToSpan, result, resultSpanToStateIds,
                                          resultArcs, newStateInfos, opts);
-      bool isUnion = p->first;
+     bool isUnion = p->first;
       if (!isUnion) allTailsAreUnion = false;
       newStatesForTails.push_back(p->second);
     }

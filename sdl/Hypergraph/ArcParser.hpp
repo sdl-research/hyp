@@ -31,7 +31,7 @@ struct ArcParser {
 
   ArcParser();
 
-  ParserUtil::Arc* parse(const std::string& str) const;
+  ParserUtil::Arc* parse(std::string const& str) const;
 
   shared_ptr<Impl> pImpl_;
 

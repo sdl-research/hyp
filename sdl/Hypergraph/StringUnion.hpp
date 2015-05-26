@@ -299,7 +299,7 @@ struct BuildStringUnion {
     StateId* sf = opt.sf[SpliceStateOptions::kTargetHg];
     sf[SpliceStateOptions::kStart] = trieStart;
     StateId entityFinal = entityHg->final();
-    bool outFromFinal = countOutArcs(*entityHg, entityFinal);
+   bool outFromFinal = countOutArcs(*entityHg, entityFinal);
     sf[SpliceStateOptions::kFinal] = outFromFinal ? safeEndStringThenFinal() : getEndStringThenFinal();
     Splice<A> splice(entityHg, opt);
     inplace(hg, splice);
@@ -333,7 +333,7 @@ struct BuildStringUnion {
       hg.setFinal(realFinal);
     }
 
-    bool unkUnigram = !opt.unkUnigramWeight.empty();
+   bool unkUnigram = !opt.unkUnigramWeight.empty();
     if (unkUnigram)
       hg.addArcFsa(trieStart, getEndStringThenFinal(), wildcard, times(unkUnigramWeight, perTokenWeight));
     if (opt.xmtBlock && !(opt.xmtBlockViaUnkUnigram && unkUnigram))
@@ -347,8 +347,8 @@ struct BuildStringUnion {
       hg.addArcFsa(stIgnore, start, output(t));  // unless close tag
     }
     buildTrie(ws);
-    bool greedyWeight = !opt.wGreedyAscii.empty();
-    bool useascii = greedyWeight || !opt.wStartGreedyAscii.empty();
+   bool greedyWeight = !opt.wGreedyAscii.empty();
+   bool useascii = greedyWeight || !opt.wStartGreedyAscii.empty();
     if (useascii) {  // this must come last.
       Weight wa, wsa;
       if (greedyWeight)
@@ -395,10 +395,10 @@ struct BuildStringUnion {
   struct Separator {
     LabelPair labels;
     StateId labelState;
-    bool epsInput;  // epsilon
-    bool epsOutput;
-    bool epsBoth;
-    void init(HG& hg, std::string const& inputOrEmpty, std::string const& outputOrEmpty) {
+   bool epsInput;  // epsilon
+   bool epsOutput;
+   bool epsBoth;
+   void init(HG& hg, std::string const& inputOrEmpty, std::string const& outputOrEmpty) {
       IVocabulary& voc = *hg.getVocabulary();
       labelState = hg.addState(
           labels = makeLabelPair(lexicalOrEpsilon(inputOrEmpty, voc), lexicalOrEpsilon(outputOrEmpty, voc)));

@@ -98,7 +98,7 @@ class FormattedOstreamIterator : public std::iterator<std::output_iterator_tag, 
   }
   void insert_word();
 
-  void write_word(const std::string& word);
+  void write_word(std::string const& word);
 
   std::ostream* os_;
   std::string word_buffer_;

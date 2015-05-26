@@ -68,7 +68,7 @@ struct ArcReverserFsInPlace {
 };
 
 template <class Arc>
-void reverseFsm(const IHypergraph<Arc>& inhg, IMutableHypergraph<Arc>* result) {
+void reverseFsm(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
   if (!inhg.isFsm()) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseFsm called on CFG");
   }
@@ -114,7 +114,7 @@ void reverseCfg(IMutableHypergraph<Arc>& h) {
 }
 
 template <class Arc>
-void reverse(const IHypergraph<Arc>& inhg, IMutableHypergraph<Arc>* result) {
+void reverse(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
   if (inhg.isFsm())
     fs::reverseFsm(inhg, result);
   else {

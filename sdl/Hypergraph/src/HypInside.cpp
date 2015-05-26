@@ -93,7 +93,7 @@ void printDistances(IHypergraph<Arc> const& hg, bool allPairs, bool dag, StateId
 }
 
 template <class Arc>
-void process(const std::string& file, unsigned ngramMax = 0, bool allPairs = false, bool dag = false) {
+void process(std::string const& file, unsigned ngramMax = 0, bool allPairs = false, bool dag = false) {
   std::cerr << "file=" << file << " ngramMax=" << ngramMax << "\n";
   Util::Input in(file);
   MutableHypergraph<Arc> hg(kDefaultProperties
@@ -130,9 +130,9 @@ struct HypInside {
     namespace po = boost::program_options;
     using namespace std;
     try {
-      bool help = false;
+     bool help = false;
       unsigned ngramMax = 0;
-      bool allPairs = false, dag = false;
+     bool allPairs = false, dag = false;
       string file = "-", arcType = "log";
       po::options_description generic("Allowed options");
       sdl::AddOption opt(generic);

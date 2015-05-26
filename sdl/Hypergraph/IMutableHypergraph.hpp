@@ -72,7 +72,7 @@ struct IMutableHypergraphBase {
   */
   virtual void setLabelPair(StateId state, LabelPair io) = 0;
 
-  inline void setLabelPair(StateId state, Sym in, Sym out = NoSymbol) {
+  void setLabelPair(StateId state, Sym in, Sym out = NoSymbol) {
     setLabelPair(state, LabelPair(in, out));
   }
 
@@ -108,7 +108,7 @@ struct IMutableHypergraphBase {
 
   virtual StateId addState(Sym inputLabel, Sym outputLabel) = 0;
 
-  inline StateId addState(LabelPair io) { return addState(input(io), output(io)); }
+   StateId addState(LabelPair io) { return addState(input(io), output(io)); }
 
   virtual void setInputLabel(StateId state, Sym label) = 0;
 
@@ -365,17 +365,17 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
        \return whether input label of fsm arc a < that of b.
     */
     template <class Arc>
-    bool operator()(Arc const* b, Sym id) const {
+   bool operator()(Arc const* b, Sym id) const {
       return fsm.inputLabel(b->fsmSymbolState()) < id;
     }
 
     template <class Arc>
-    bool operator()(Sym id, Arc const* b) const {
+   bool operator()(Sym id, Arc const* b) const {
       return id < fsm.inputLabel(b->fsmSymbolState());
     }
 
     template <class Arc>
-    bool operator()(Arc const* a, Arc const* b) const {
+   bool operator()(Arc const* a, Arc const* b) const {
       return fsm.inputLabel(a->fsmSymbolState()) < fsm.inputLabel(b->fsmSymbolState());
     }
   };
@@ -614,10 +614,10 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     Properties remove = off & p;
     if (remove) {
       if (remove & kStoreInArcs) this->removeInArcs();
-      bool const removeOut = remove & kStoreOutArcs;
-      bool const removeFirstOut = remove & kStoreFirstTailOutArcs;
-      bool const haveOut = p & kStoreOutArcs;
-      bool const haveFirstOut = p & kStoreFirstTailOutArcs;
+     bool const removeOut = remove & kStoreOutArcs;
+     bool const removeFirstOut = remove & kStoreFirstTailOutArcs;
+     bool const haveOut = p & kStoreOutArcs;
+     bool const haveFirstOut = p & kStoreFirstTailOutArcs;
       if (removeOut && !haveFirstOut || removeFirstOut && !haveOut) this->removeOutArcs();
       if (removeFirstOut) this->setProperties(p & ~kStoreFirstTailOutArcs);
       if (remove & kCanonicalLex) this->clearCanonicalLex();
@@ -706,7 +706,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   template <class V>
   void forArcs(V const& v) const {
     Properties p = this->properties();
-    bool inarcs = p & kStoreInArcs;
+   bool inarcs = p & kStoreInArcs;
     if (!inarcs)
       if (!(p & kStoreFirstTailOutArcs)) return IHypergraph<Arc>::forArcs(v);
     for (StateId s = 0, N = this->size(); s < N; ++s) {
@@ -719,7 +719,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   template <class V>
   void forArcs(StateId s, V const& v) const {
     Properties p = this->properties();
-    bool inarcs = p & kStoreInArcs;
+   bool inarcs = p & kStoreInArcs;
     for (StateId s = 0, N = this->size(); s < N; ++s) {
       ArcsContainer const* p = maybeArcsConst(s, inarcs);
       if (!p) continue;
@@ -762,9 +762,9 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
      => kGraph), we do that too
   */
   virtual bool checkGraph() {
-    bool fsm;
-    bool one;
-    bool graph = this->isGraphCheck(fsm, one);
+   bool fsm;
+   bool one;
+   bool graph = this->isGraphCheck(fsm, one);
     setPropertiesAt(kGraph, graph);
     setPropertiesAt(kFsm, fsm);
     setPropertiesAt(kOneLexical, one);
@@ -814,7 +814,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
  private:
   struct SetInLabelToOut {
     template <class H, class SI>
-    bool operator()(H const& hg, SI state) const {
+   bool operator()(H const& hg, SI state) const {
       const_cast<Self&>(static_cast<Self const&>(hg)).setInputLabel(state, hg.outputLabel(state));
       return true;
     }

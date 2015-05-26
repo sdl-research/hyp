@@ -34,11 +34,15 @@ if(SDL_CHECK_LICENSE)
 endif()
 
 if(NOT DEFINED SDL_DEBUG_SYMBOLS)
-  set(SDL_DEBUG_SYMBOLS on)
-elseif (SDL_PRODUCTION AND CMAKE_BUILD_TYPE MATCHES "Release")
-  set(SDL_DEBUG_SYMBOLS on)
-else()
-  set(SDL_DEBUG_SYMBOLS off)
+  if (SDL_PRODUCTION)
+    if(CMAKE_BUILD_TYPE MATCHES "Release")
+      set(SDL_DEBUG_SYMBOLS on)
+    else()
+      set(SDL_DEBUG_SYMBOLS on)
+    endif()
+  else()
+    set(SDL_DEBUG_SYMBOLS on)
+  endif()
 endif()
 
 if(WIN32)
@@ -129,6 +133,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMMAND}" MATCH
   set(USING_GCC 1)
   set(CMAKE_COMPILER_IS_GNUXX 1)
   message(STATUS "c++ is gnu")
+  #  SET (CMAKE_AR "gcc-ar")
+  #  SET (CMAKE_NM "gcc-nm")
+  #  SET (CMAKE_RANLIB "gcc-ranlib")
 else()
   set(USING_MSVC 1)
   set(CMAKE_COMPILER_IS_MSVC 1)
@@ -364,9 +371,11 @@ if(USING_GCC)
       add_definitions("-fno-tree-vectorize") # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53533
     else()
       set(SDL_HAVE_GCC_4_9 1)
-      # can't because tbb-4.3.1 is .so only
-      # -static-libstdc++
-      # sdl_exe_linker_flags("-static-libgcc") #then log4cxx link fails (because we didn't build that lib w/ same option?)
+      # -static-libstdc++ (can't because tbb-4.3.1 is .so only)
+
+      # sdl_exe_linker_flags("-static-libgcc") # (fails log4cxx)
+
+      sdl_linker_flags("-lstdc++ -lm -fwhole-program")
       if (APPLE)
         # mac build isn't well supported currently (external lib builds weren't
         # maintained for it), and it seems like `brew install boost` and `brew
@@ -509,7 +518,9 @@ if(UNIX)
     set(ANDROID_SYS_ROOT "$ENV{ANDROID_STANDALONE_TOOLCHAIN}/sysroot")
     set(CMAKE_CXX_FLAGS "         -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar --sysroot=${ANDROID_SYS_ROOT}")
   else()
-    set(CMAKE_CXX_FLAGS "${SDL_PTHREAD_ARG} -fPIC -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar -march=core2")
+    set(SDL_CC_TUNE_ARGS "-march=core2 -mtune=generic")
+    set(SDL_CC_TUNE_ARGS "-march=native")
+    set(CMAKE_CXX_FLAGS "${SDL_PTHREAD_ARG} -fPIC -Wall -Wno-unused-variable -Wno-parentheses -Wno-sign-compare -Wno-reorder -Wreturn-type -Wno-strict-aliasing -Wno-multichar ${SDL_CC_TUNE_ARGS}")
   endif()
 
   set(SDL_Og "-O0")
@@ -522,22 +533,35 @@ if(UNIX)
     add_definitions("-ftemplate-backtrace-limit=0")
   endif()
   set(SDL_UNSAFE_MATH "-funsafe-math-optimizations")
-  #TODO: -ffinite-math-only viable?
   set(SDL_TESTED_RELEASE_OPTIMIZATIONS "-fassociative-math -fno-signed-zeros -fno-trapping-math -fno-math-errno -freciprocal-math")
   if (NOT USING_CLANG)
     set(SDL_TESTED_RELEASE_OPTIMIZATIONS "${SDL_TESTED_RELEASE_OPTIMIZATIONS} ${SDL_NO_CLANG_OPTIMIZATIONS}")
     if (SDL_HAVE_GCC_4_8)
-      set(SDL_O3 "-O3")
-      # -fcx-limited-range controls the default setting of the ISO C99
-      # -CX_LIMITED_RANGE pragma. Nevertheless, the option applies to all
-      # -languages., enabled by full -ffast-math
+      #set(SDL_O3 "-Ofast") # adds only -ffinite-math-only but breaks some release-mode unit tests on nan
+      set(SDL_O3_ADDL "-fcx-limited-range -funsafe-math-optimizations")
+      set(SDL_O3 "-O3 --param allow-store-data-races=1 ${SDL_O3_ADDL}")
     endif()
   endif()
-  set(SDL_RELEASE_OPTIMIZATIONS "-DNDEBUG -fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
+  #-fmerge-all-constants violates separate C++ address for each constant but that's fine by us
+  set(SDL_ALIGN_LOOPS_ETC_TO "1")
+  # 1 means don't align - icache/noop vs align benefit tradeoff; 0 means let gcc
+  # choose (supposedly bad in some cases - might pad only if #padding <10; 16 is
+  # the most favorable possible for the CPU but does waste some space)
+  # align-loops=16 depends - helpful if loop executes enough times
+  set(SDL_RELEASE_OPTIMIZATIONS "-fno-keep-static-consts -fmerge-all-constants -DNDEBUG -falign-functions=${SDL_ALIGN_LOOPS_ETC_TO} -falign-loops=${SDL_ALIGN_LOOPS_ETC_TO} -falign-jumps=${SDL_ALIGN_LOOPS_ETC_TO} -falign-labels=1 -fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
+  #align-labels=1 is good because you need to avoid noop cost.
+  if (NOT SDL_DEBUG_SYMBOLS)
+    if(CMAKE_BUILD_TYPE MATCHES "ReleaseXXX")
+      # apparently doesn't work for us (fPIC or cmake isn't using the right gcc
+      # tools or we didn't build gcc 5 right)? see
+      # https://gcc.gnu.org/wiki/LinkTimeOptimizationFAQ (/usr/bin/ar segfault via /local/gcc/bin/gcc-ar)
+      sdl_linker_flags("-flto")
+      add_definitions("-flto")
+      MESSAGE(INFO "Release build with !SDL_DEBUG_SYMBOLS - trying -flto (link time optimization")
+    endif()
+  endif()
 
   set(CMAKE_CXX_FLAGS_DEBUG "${SDL_Og} ${SDL_DEBUG_INFO_GCC_ARG} ${SDL_CFLAGS_ALL} ${SDL_UNSAFE_MATH}")
-
-  set(SDL_GCC_4_8_TESTED_RELEASE_OPTIMIZATIONS "")
 
   set(CMAKE_CXX_FLAGS_RELEASE "${SDL_O3} ${SDL_CFLAGS_ALL} -Wuninitialized ${SDL_RELEASE_OPTIMIZATIONS} ${SDL_UNSAFE_MATH}")
 

@@ -49,8 +49,8 @@ struct ResidentVocabulary : IVocabulary {
   friend struct ExtendedVocabulary;
   friend class MultiVocabulary;
 
-  void loadTerminals(const std::string& terminalPath) OVERRIDE;  //, const std::string& sourcePath);
-  void loadNonterminals(const std::string& nonTerminalPath) OVERRIDE;  //, const std::string& sourcePath);
+  void loadTerminals(std::string const& terminalPath) OVERRIDE;  //, std::string const& sourcePath);
+  void loadNonterminals(std::string const& nonTerminalPath) OVERRIDE;  //, std::string const& sourcePath);
 
   void clearSinceFreeze() OVERRIDE {
     SDL_DEBUG(Leak.ResidentVocabulary.clearSinceFreeze, *this);
@@ -89,9 +89,7 @@ struct ResidentVocabulary : IVocabulary {
   */
   void _enterThreadLocal() {}
 
-  virtual Sym addImpl(std::string const& str, SymbolType symType) OVERRIDE {
-    return _Add(str, symType);
-  }
+  virtual Sym addImpl(std::string const& str, SymbolType symType) OVERRIDE { return _Add(str, symType); }
 
   virtual Sym doAddField(Slice const& word, SymbolType symType) OVERRIDE {
     return _Add(std::string(word.first, word.second), symType);
@@ -124,9 +122,7 @@ struct ResidentVocabulary : IVocabulary {
     return _AddSymbolMustBeNew(str, symType);
   }
 
-  SymInt pastFrozenTerminalIndex() const OVERRIDE {
-    return vocabTerminal.pastFrozenIndex();
-  }
+  SymInt pastFrozenTerminalIndex() const OVERRIDE { return vocabTerminal.pastFrozenIndex(); }
 
   // faster calls for ExtendedVocabulary - no need for virtual dispatch
   Sym _Add(std::string const&, SymbolType symType);
@@ -138,17 +134,15 @@ struct ResidentVocabulary : IVocabulary {
   void _Accept(IVocabularyVisitor& visitor);
   void _AcceptType(IVocabularyVisitor&, SymbolType);
   unsigned _GetNumSymbols(SymbolType) const;
-  SymInt _pastFrozenTerminalIndex() const {
-    return vocabTerminal.pastFrozenIndex();
-  }
+  SymInt _pastFrozenTerminalIndex() const { return vocabTerminal.pastFrozenIndex(); }
 
   std::size_t _GetSize() const;
   Sym _AddSymbolMustBeNew(std::string const&, SymbolType);
 
-  inline BasicVocabularyImpl& getVocab(SymbolType type) {
+  BasicVocabularyImpl& getVocab(SymbolType type) {
     return const_cast<BasicVocabularyImpl&>(const_cast<ResidentVocabulary const*>(this)->getVocab(type));
   }
-  inline BasicVocabularyImpl const& getVocab(SymbolType type) const {
+  BasicVocabularyImpl const& getVocab(SymbolType type) const {
     assert(type != kPersistentTerminal);
     assert(type != kPersistentNonterminal);
     switch (type) {
@@ -162,7 +156,6 @@ struct ResidentVocabulary : IVocabulary {
         SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid type of vocabulary requested.");
     }
   }
- private:
 
  protected:
   BasicVocabularyImpl vocabTerminal;

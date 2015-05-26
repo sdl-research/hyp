@@ -27,58 +27,45 @@ namespace Hypergraph {
 
 template <class SpecialSymbol>
 struct isSpecial {
-  bool operator()(Sym s) const {
-    return s==SpecialSymbol::ID;
-  }
+  bool operator()(Sym s) const { return s == SpecialSymbol::ID; }
 };
 
 struct isEps {
-  bool operator()(Sym s) const {
-    return s==EPSILON::ID;
-  }
+  bool operator()(Sym s) const { return s == EPSILON::ID; }
 };
 
 struct isRho {
-  bool operator()(Sym s) const {
-    return s==RHO::ID;
-  }
+  bool operator()(Sym s) const { return s == RHO::ID; }
 };
 
 struct isPhi {
-  bool operator()(Sym s) const {
-    return s==PHI::ID;
-  }
+  bool operator()(Sym s) const { return s == PHI::ID; }
 };
 
 struct isSigma {
-  bool operator()(Sym s) const {
-    return s==SIGMA::ID;
-  }
+  bool operator()(Sym s) const { return s == SIGMA::ID; }
 };
 
 struct Closure {
   bool converged;
-  Closure() : converged(false) {  }
+  Closure() : converged(false) {}
   typedef std::vector<StateId> Reach;
   typedef std::vector<Reach> ReachLen;
-  ReachLen reachlen; // reachlen[i] = reachable states via paths of len <=i
-  Reach const& get_reach(unsigned i) const {
-    return i < reachlen.size() ? reachlen[i] : reachlen.back();
-  }
+  ReachLen reachlen;  // reachlen[i] = reachable states via paths of len <=i
+  Reach const& get_reach(unsigned i) const { return i < reachlen.size() ? reachlen[i] : reachlen.back(); }
 };
 
 // alternative: DFS from every t to build reachable set. bit operations should make this competitive
-template <class Adjs> // e.g. vector<BitSet>
-void warshall_transitive_close(Adjs &adjs) {
+template <class Adjs>  // e.g. vector<BitSet>
+void warshall_transitive_close(Adjs& adjs) {
   typedef unsigned I;
   I N = (I)adjs.size();
   for (I t = 0; t < N; ++t) {
-    typename Adjs::value_type &a = adjs[t];
-    for (I h = 0; h<N; ++h)
-      if (Util::test(a, h)) { // t->h
+    typename Adjs::value_type& a = adjs[t];
+    for (I h = 0; h < N; ++h)
+      if (Util::test(a, h)) {  // t->h
         adjs[t] |= adjs[h];
       }
-
   }
 }
 
@@ -94,7 +81,7 @@ struct Graph {
 
   Outs outs;
   typedef unsigned I;
-  I size() const { // # vecs
+  I size() const {  // # vecs
     return (I)outs.size();
   }
 
@@ -102,15 +89,14 @@ struct Graph {
     I N = (I)as.size();
     outs.clear();
     outs.resize(N);
-    for (I i = 0; i<N; ++i)
-      Util::copyBits(as[i], outs[i]);
+    for (I i = 0; i < N; ++i) Util::copyBits(as[i], outs[i]);
   }
 
-  void toAdjs(Adjs &as) {
+  void toAdjs(Adjs& as) {
     I N = size();
     as.resize(N);
-    for (I i = 0; i<N; ++i) {
-      Adj &a = as[i];
+    for (I i = 0; i < N; ++i) {
+      Adj& a = as[i];
       a.resize(N);
       Util::setBits(a, outs[i]);
     }
@@ -125,17 +111,15 @@ struct Graph {
 
   template <class A, class LabelP>
   struct adder {
-    Outs &outs;
+    Outs& outs;
     IHypergraph<A> const& hg;
     LabelP labelPred;
-    adder(Outs &outs, IHypergraph<A> const& hg, LabelP const& labelPred) : outs(outs), hg(hg), labelPred(labelPred) {}
+    adder(Outs& outs, IHypergraph<A> const& hg, LabelP const& labelPred)
+        : outs(outs), hg(hg), labelPred(labelPred) {}
     adder(adder const& o) : outs(o.outs), hg(o.hg), labelPred(o.labelPred) {}
-    void operator()(A * a) const {
-      arc(*a);
-    }
-    void arc(A const& a) const {
-      if (labelPred(hg.getFsmInput(a)))
-        Util::add(outs[a.tails()[0]], Edge(a.head()));
+   void operator()(A* a) const { arc(*a); }
+   void arc(A const& a) const {
+      if (labelPred(hg.getFsmInput(a))) Util::add(outs[a.tails()[0]], Edge(a.head()));
     }
   };
   template <class A, class LabelP>
@@ -145,15 +129,18 @@ struct Graph {
   }
 
   template <class Out>
-  void print(Out &o) const {
-    for (unsigned i = 0; i<outs.size(); ++i) {
-      o << i<<" ->";
+  void print(Out& o) const {
+    for (unsigned i = 0; i < outs.size(); ++i) {
+      o << i << " ->";
       forall (StateId d, outs[i])
-          o<<' '<<d;
+        o << ' ' << d;
       o << '\n';
     }
   }
-  inline friend std::ostream& operator<<(std::ostream &o, Graph const& g) { g.print(o); return o; }
+  friend std::ostream& operator<<(std::ostream& o, Graph const& g) {
+    g.print(o);
+    return o;
+  }
 };
 
 

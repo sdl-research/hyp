@@ -63,7 +63,7 @@ class Node;
       - If called with longMap & multiLine set to false, longMap gets reset to true as this is invalid config. and the
         output is same as above.
  */
-std::string to_string(const Node& in, bool longMap = true, bool newLine = false, const std::string& indent="");
+std::string to_string(Node const& in, bool longMap = true, bool newLine = false, std::string const& indent="");
 
 /**
    dest=parse(str) - parses str as yaml Node (without the Config.hpp transformations).

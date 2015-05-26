@@ -41,21 +41,21 @@ enum { kSilentlyNfc = false, kWarnUnlessNfc = true };
 /// is unmodified. if warnFalsePositiveOk will warn if quick check doesn't say
 /// 'yes'
 bool maybeNormalizeToNfc(Slice in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                         bool warnFalsePositiveOk = true, bool nfkc = false);
+                        bool warnFalsePositiveOk = true, bool nfkc = false);
 
 inline bool maybeNormalizeToNfc(std::string const& in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                         bool warnFalsePositiveOk = true, bool nfkc = false) {
+                        bool warnFalsePositiveOk = true, bool nfkc = false) {
   return maybeNormalizeToNfc(toSlice(in), out, warnIfNotNfc, warnFalsePositiveOk, nfkc);
 }
 
 
 /// pre: out is empty
 void normalizeToNfc(Slice in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                    bool nfkc = false);
+                   bool nfkc = false);
 
 /// pre: out is empty
 void normalizeToNfc(std::string const& in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                    bool nfkc = false);
+                   bool nfkc = false);
 
 std::string normalizedToNfc(std::string const& s, bool nfkc = false);
 
@@ -94,7 +94,7 @@ inline void normalizeToNfcInPlace(std::string& s, bool warnIfNotNfc = kSilentlyN
 }
 
 inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = kSilentlyNfc,
-                       bool nfkc = false) {
+                      bool nfkc = false) {
   if ((bool)std::getline(in, utf8)) {
     normalizeToNfcInPlace(utf8, warnIfNotNfc, nfkc);
     return true;
@@ -103,7 +103,7 @@ inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = 
 }
 
 inline bool getlineNfcUntil(std::istream& in, std::string& utf8, char until, bool warnIfNotNfc = kSilentlyNfc,
-                            bool nfkc = false) {
+                           bool nfkc = false) {
   if ((bool)std::getline(in, utf8, until)) {
     normalizeToNfcInPlace(utf8, warnIfNotNfc, nfkc);
     return true;

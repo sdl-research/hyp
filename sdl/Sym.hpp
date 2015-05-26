@@ -590,7 +590,7 @@ template <> struct hash<sdl::Sym>
 }
 
 BOOST_CLASS_IMPLEMENTATION(sdl::Sym, object_serializable)
+//BOOST_CLASS_IMPLEMENTATION(sdl::Sym, primitive_type)
 BOOST_IS_BITWISE_SERIALIZABLE(sdl::Sym)
-//TODO@SK from JG: why isn't Sym just tagged as 'primitive'?
 
 #endif

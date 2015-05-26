@@ -514,7 +514,7 @@ struct ComposeFst : TimesFn {
        simplify)
     */
     operator bool() const { return hasMore; }
-    void setDone() { hasMore = false; }
+   void setDone() { hasMore = false; }
     Arc operator()() {
       Arc r;  // could make peekable by r as member, init by pop() once when creating. could save us from
       // detecting empty range in advance
@@ -581,7 +581,7 @@ struct ComposeFst : TimesFn {
       return r;
     }
 
-    bool initSigma() {
+   bool initSigma() {
       if (match->whichSpecials.test(SIGMA::id)
           && (matchedArcs = match->arcsMatchingInput(matchSrc, SIGMA::ID))) {
         midSigma = true;
@@ -590,7 +590,7 @@ struct ComposeFst : TimesFn {
         return false;
     }
 
-    bool initRho() {
+   bool initRho() {
       return match->whichSpecials.test(RHO::id) && (matchedArcs = match->arcsMatchingInput(matchSrc, RHO::ID));
     }
 
@@ -607,7 +607,7 @@ struct ComposeFst : TimesFn {
 
     MatchState matchSrc;  // used if inArc output label is epsilon, or for initSigma
 
-    bool hasMore, midSigma;
+   bool hasMore, midSigma;
     //, hasMoreSigma, initSigma;  // done or more
     // int sigmabytes[sizeof(MatchArcs)/sizeof(int)];
 
@@ -728,7 +728,7 @@ struct ComposeFst : TimesFn {
     InputArcs inArcs;
     MatchPtr match;
     ConcatState concatState;  // because we want to emit 3 different types of arcs
-    bool anyStandardMatch;
+   bool anyStandardMatch;
     MatchArcs epsilon;  // we don't save phi because it's not subject to reuse; it's the last thing we do
     friend inline std::ostream& operator<<(std::ostream& out, ArcsGenGen const& self) {
       out << "ArcsGenGen[";

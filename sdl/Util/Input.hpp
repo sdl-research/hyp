@@ -325,7 +325,7 @@ inline sdl::shared_ptr<std::string> readFile(std::string const& filename) {
 
 namespace boost {
 namespace program_options {
-inline void validate(boost::any& v, const std::vector<std::string>& values, sdl::Util::Input* target_type, int) {
+inline void validate(boost::any& v, std::vector<std::string> const& values, sdl::Util::Input* target_type, int) {
   v = boost::any(sdl::Util::Input(graehl::get_single_arg(v, values)));
 }
 

@@ -76,8 +76,8 @@ class simple_segregated_storage
     typedef SizeType size_type;
 
   private:
-    simple_segregated_storage(const simple_segregated_storage &);
-    void operator=(const simple_segregated_storage &);
+    simple_segregated_storage(simple_segregated_storage const&);
+   void operator=(simple_segregated_storage const&);
 
     static void * try_malloc_n(void * & start, size_type n,
         size_type partition_size);
@@ -87,12 +87,12 @@ class simple_segregated_storage
     static void split(void *list, void **listA, void **listB);
 
   protected:
-    void * first; /*!< This data member is the free list.
+   void * first; /*!< This data member is the free list.
       It points to the first chunk in the free list,
       or is equal to 0 if the free list is empty.
     */
 
-    void * find_prev(void * ptr);
+   void * find_prev(void * ptr);
 
     // for the sake of code readability :)
     static void * & nextof(void * const ptr)
@@ -116,11 +116,11 @@ class simple_segregated_storage
 
     static void * segregate(void * block,
         size_type nsz, size_type npartition_sz,
-        void * end = 0);
+       void * end = 0);
 
     // Same preconditions as 'segregate'
     // Post: !empty()
-    void add_block(void * const block,
+   void add_block(void * const block,
         const size_type nsz, const size_type npartition_sz)
     { //! Add block
       //! Segregate this block and merge its free list into the
@@ -134,7 +134,7 @@ class simple_segregated_storage
 
     // Same preconditions as 'segregate'
     // Post: !empty()
-    void add_ordered_block(void * const block,
+   void add_ordered_block(void * const block,
         const size_type nsz, const size_type npartition_sz)
     { //! add block (ordered into list)
       //! This (slower) version of add_block segregates the
@@ -142,7 +142,7 @@ class simple_segregated_storage
       //!  in the proper order.
        BOOST_POOL_VALIDATE_INTERNALS
       // Find where "block" would go in the free list
-      void * const loc = find_prev(block);
+     void * const loc = find_prev(block);
 
       // Place either at beginning or in middle/end
       if (loc == 0)
@@ -154,17 +154,17 @@ class simple_segregated_storage
 
     // default destructor.
 
-    bool empty() const
+   bool empty() const
     { //! \returns true only if simple_segregated_storage is empty.
       return (first == 0);
     }
 
-    void * malloc BOOST_PREVENT_MACRO_SUBSTITUTION()
+   void * malloc BOOST_PREVENT_MACRO_SUBSTITUTION()
     { //! Create a chunk.
       //!  \pre !empty()
       //! Increment the "first" pointer to point to the next chunk.
        BOOST_POOL_VALIDATE_INTERNALS
-      void * const ret = first;
+     void * const ret = first;
 
       // Increment the "first" pointer to point to the next chunk.
       first = nextof(first);
@@ -172,7 +172,7 @@ class simple_segregated_storage
       return ret;
     }
 
-    void free BOOST_PREVENT_MACRO_SUBSTITUTION(void * const chunk)
+   void free BOOST_PREVENT_MACRO_SUBSTITUTION(void * const chunk)
     { //! Free a chunk.
       //! \pre chunk was previously returned from a malloc() referring to the same free list.
       //! \post !empty()
@@ -182,7 +182,7 @@ class simple_segregated_storage
       BOOST_POOL_VALIDATE_INTERNALS
     }
 
-    void ordered_free(void * const chunk)
+   void ordered_free(void * const chunk)
     { //! This (slower) implementation of 'free' places the memory
       //!  back in the list in its proper order.
       //! \pre chunk was previously returned from a malloc() referring to the same free list
@@ -190,7 +190,7 @@ class simple_segregated_storage
 
       // Find where "chunk" goes in the free list
        BOOST_POOL_VALIDATE_INTERNALS
-      void * const loc = find_prev(chunk);
+     void * const loc = find_prev(chunk);
 
       // Place either at beginning or in middle/end.
       if (loc == 0)
@@ -203,14 +203,14 @@ class simple_segregated_storage
       BOOST_POOL_VALIDATE_INTERNALS
     }
 
-   void * malloc_n(size_type n, size_type partition_size);
+  void * malloc_n(size_type n, size_type partition_size);
 
     //! \pre chunks was previously allocated from *this with the same
     //!   values for n and partition_size.
     //! \post !empty()
     //! \note If you're allocating/deallocating n a lot, you should
     //!  be using an ordered pool.
-    void free_n(void * const chunks, const size_type n,
+   void free_n(void * const chunks, const size_type n,
         const size_type partition_size)
     {
        BOOST_POOL_VALIDATE_INTERNALS
@@ -222,7 +222,7 @@ class simple_segregated_storage
     // pre: chunks was previously allocated from *this with the same
     //   values for n and partition_size.
     // post: !empty()
-    void ordered_free_n(void * const chunks, const size_type n,
+   void ordered_free_n(void * const chunks, const size_type n,
         const size_type partition_size)
     { //! Free n chunks from order list.
       //! \pre chunks was previously allocated from *this with the same
@@ -235,20 +235,20 @@ class simple_segregated_storage
        BOOST_POOL_VALIDATE_INTERNALS
     }
 
-    void order()
+   void order()
     { //! Orders the storageby sorting the list of free chunks
       first = sort(first);
     }
 
 #ifdef BOOST_POOL_VALIDATE
-    void validate()
+   void validate()
     {
        int index = 0;
-       void* old = 0;
-       void* ptr = first;
+      void* old = 0;
+      void* ptr = first;
        while(ptr)
        {
-          void* pt = nextof(ptr); // trigger possible segfault *before* we update variables
+         void* pt = nextof(ptr); // trigger possible segfault *before* we update variables
           ++index;
           old = ptr;
           ptr = nextof(ptr);
@@ -299,10 +299,10 @@ void * simple_segregated_storage<SizeType>::find_prev(void * const ptr)
 //! may be cast to void **.
 template <typename SizeType>
 void * simple_segregated_storage<SizeType>::segregate(
-    void * const block,
+   void * const block,
     const size_type sz,
     const size_type partition_sz,
-    void * const end)
+   void * const end)
 {
   // Get pointer to last valid chunk, preventing overflow on size calculations
   //  The division followed by the multiplication just makes sure that
@@ -346,12 +346,12 @@ void * simple_segregated_storage<SizeType>::segregate(
 //!  an ordered free list).
 template <typename SizeType>
 void * simple_segregated_storage<SizeType>::try_malloc_n(
-    void * & start, size_type n, const size_type partition_size)
+   void * & start, size_type n, const size_type partition_size)
 {
   void * iter = nextof(start);
   while (--n != 0)
   {
-    void * next = nextof(iter);
+   void * next = nextof(iter);
     if (next != static_cast<char *>(iter) + partition_size)
     {
       // next == 0 (end-of-list) or non-contiguous chunk found

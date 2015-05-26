@@ -36,12 +36,12 @@ inline std::string type_string(path &)
 {
   return "filesystem path";
 }
-inline std::string to_string_impl(const path& val)
+inline std::string to_string_impl(path const& val)
 {
   return val.string();
 }
 
-inline void string_to_impl(const std::string& val, path& out) {
+inline void string_to_impl(std::string const& val, path& out) {
   out = path(val);
 }
 

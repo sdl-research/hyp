@@ -189,7 +189,7 @@ class HypergraphTextWriter_Topdown : public HypergraphTextWriter<A> {
 };
 
 template <class A>
-std::ostream& writeHypergraph(std::ostream& out, const IHypergraph<A>& hg, bool fullEmptyCheck = false) {
+std::ostream& writeHypergraph(std::ostream& out, IHypergraph<A> const& hg, bool fullEmptyCheck = false) {
   bool e = fullEmptyCheck ? empty(hg) : hg.prunedEmpty();
   SDL_TRACE(Hypergraph.writeHypergraph, "writing hg props=" << PrintProperties(hg.properties()));
   if (!e) {

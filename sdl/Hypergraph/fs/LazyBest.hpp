@@ -145,7 +145,7 @@ struct LazyBest : DistanceFn {
     Best(FstArc const& arc, Distance heuristic) : FstArc(arc), heuristic(heuristic) {}
 
     /// identity for Bests set:
-    bool operator==(Best const& o) const { return this->dst == o.dst; }
+   bool operator==(Best const& o) const { return this->dst == o.dst; }
     friend inline std::size_t hash_value(Best const& x) { return boost::hash<State>()(x.dst); }
     Distance distance;
 
@@ -157,26 +157,26 @@ struct LazyBest : DistanceFn {
     /**
        must call before pushing to priority queue.
     */
-    void estimateSuccessor(Distance insideMinusMargin) {
+   void estimateSuccessor(Distance insideMinusMargin) {
       estimatedSuccessorDistance = insideMinusMargin + heuristic;
     }
 
     /**
        must call before pushing to priority queue.
     */
-    void initDistance(Distance dist) {
+   void initDistance(Distance dist) {
       distance = dist;
       estimatedSuccessorDistance = dist + heuristic;
     }
 
-    void improveArc(FstArc const& arc) {
+   void improveArc(FstArc const& arc) {
       assert(arc.dst == this->dst);
       this->labelPair = arc.labelPair;
       this->weight = arc.weight;
       IF_SDL_HYPERGRAPH_FS_ANNOTATIONS(this->annotations = arc.annotations;)
     }
 
-    void init(Fst const& fst, Best* prev = 0) {
+   void init(Fst const& fst, Best* prev = 0) {
       predecessor = prev;
       arcs = fst.outArcs(this->dst);
     }

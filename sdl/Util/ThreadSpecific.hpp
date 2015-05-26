@@ -22,18 +22,18 @@
 
 
 #ifndef SDL_USE_PTHREAD_THREAD_SPECIFIC
-# if defined(_MSC_VER)
-# define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
-# else
-# if SDL_VALGRIND
-# define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
-# else
+#if defined(_MSC_VER)
+#define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
+#else
+#if SDL_VALGRIND
+#define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
+#else
 // this gives false-positive uninit conditional jump (because
 // pthread_getspecific fools valgrind). //TODO: check performance to see if
 // pthread or boost (which uses a threadlocal std::map<void *...> is faster
-# define SDL_USE_PTHREAD_THREAD_SPECIFIC 1
-# endif
-# endif
+#define SDL_USE_PTHREAD_THREAD_SPECIFIC 1
+#endif
+#endif
 #endif
 
 #include <string>
@@ -44,14 +44,15 @@
 #include <sdl/Util/ThreadId.hpp>
 
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
-# include <pthread.h>
+#include <pthread.h>
 #endif
 #include <stdint.h>
 #include <sdl/Util/Errno.hpp>
 #include <sdl/Util/Delete.hpp>
 // warning: std::uintptr_t is in C++11 only. most compilers' stdint.h will have uintptr_t, though
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 using boost::thread_specific_ptr;
 
@@ -72,15 +73,15 @@ using boost::detail::tss_cleanup_function;
 // Boost for Windows has a TSS bug. Probably fixed in 1.52
 // https://svn.boost.org/trac/boost/ticket/5696
 #if BOOST_VERSION < 105200 && defined(_WIN32)
-# define SDL_BOOST_TSS_BUG 1
+#define SDL_BOOST_TSS_BUG 1
 shared_ptr<impl::tss_cleanup_function> makeDummyTssCleanupFunction();
 #else
-# define SDL_BOOST_TSS_BUG 0
+#define SDL_BOOST_TSS_BUG 0
 #endif
 
 inline bool isThreadStackAddress(void const* p) {
   return false;
-  //TODO: pthread_attr_getstack can tell us precisely, but is it faster than using tss?
+  // TODO: pthread_attr_getstack can tell us precisely, but is it faster than using tss?
 }
 
 template <class Int>
@@ -95,39 +96,28 @@ struct ThreadSpecificInt {
   KeyOrInt ki;
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
   void check(int pthread_errno, char const* callname = "ThreadSpecificInt pthread error") {
-    if (pthread_errno)
-      throw_errno(callname);
+    if (pthread_errno) throw_errno(callname);
   }
 #endif
   enum { isThreadStack = false };
-  inline bool alreadyThreadSpecific() const {
-    return isSingleThreadProgram() || isThreadStack;
-  }
+  bool alreadyThreadSpecific() const { return isSingleThreadProgram() || isThreadStack; }
 
-  ThreadSpecificInt()
-  {
-    init(Int());
-  }
-  ThreadSpecificInt(ThreadSpecificInt const& o) {
-    init(o);
-  }
-  ThreadSpecificInt(Int i) {
-    init(i);
-  }
+  ThreadSpecificInt() { init(Int()); }
+  ThreadSpecificInt(ThreadSpecificInt const& o) { init(o); }
+  ThreadSpecificInt(Int i) { init(i); }
   ~ThreadSpecificInt() {
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
     check(::pthread_key_delete(ki.key), "pthread_key_delete");
 #endif
   }
   operator Int() const { return get(); }
-  void operator = (Int i) { set(i); }
-  void operator = (ThreadSpecificInt const& i) { set(i); }
+  void operator=(Int i) { set(i); }
+  void operator=(ThreadSpecificInt const& i) { set(i); }
   Int get() const {
-    if (alreadyThreadSpecific())
-      return ki.i;
+    if (alreadyThreadSpecific()) return ki.i;
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
     return static_cast<Int>((PtrInt)::pthread_getspecific(ki.key));
-    // will return NULL=0 if val not set on this thread
+// will return NULL=0 if val not set on this thread
 #else
     return static_cast<Int>((PtrInt)impl::get_tss_data(this));
 #endif
@@ -143,32 +133,33 @@ struct ThreadSpecificInt {
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
     (void)::pthread_setspecific(ki.key, (void const*)static_cast<PtrInt>(i));
 #else
-# if !SDL_BOOST_TSS_BUG
+#if !SDL_BOOST_TSS_BUG
     impl::set_tss_data(this, shared_ptr<impl::tss_cleanup_function>(), (void*)static_cast<PtrInt>(i), false);
-# else
+#else
     // Boost (before 1.52) bug on Windows: The cleanup function must be provided.
     impl::set_tss_data(this, makeDummyTssCleanupFunction(), (void*)static_cast<PtrInt>(i), false);
-# endif
+#endif
 #endif
   }
   typedef ThreadSpecificInt<Int> Self;
   // swaps values for this thread only
-  friend inline void swap(Self & a, Self &b) {
+  friend inline void swap(Self& a, Self& b) {
     Int tmp = a;
     a = b;
     b = tmp;
   }
- private:
 
+ private:
   void init(Int i) {
     maybeCheckSingleThread();
-    //isThreadStack = isThreadStackAddress(this); //TODO
+    // isThreadStack = isThreadStackAddress(this); //TODO
     if (alreadyThreadSpecific())
       ki.i = i;
     else {
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
       check(::pthread_key_create(&ki.key, NULL), "pthread_key_create");
-      //Upon key creation, the value NULL shall be associated with the new key in all active threads. Upon thread creation, the value NULL shall be associated with all defined keys in the new thread.
+// Upon key creation, the value NULL shall be associated with the new key in all active threads. Upon thread
+// creation, the value NULL shall be associated with all defined keys in the new thread.
 #endif
       setThreadSpecific(i);
     }
@@ -180,15 +171,11 @@ typedef ThreadSpecificInt<unsigned> ThreadSpecificUnsigned;
 typedef ThreadSpecificInt<std::size_t> ThreadSpecificSize;
 
 /** new Value() per thread. */
-template <class Value,
-          class Allocator = std::allocator<Value> >
-struct ThreadSpecific : Allocator
-{
-  Value *local_;
+template <class Value, class Allocator = std::allocator<Value> >
+struct ThreadSpecific : Allocator {
+  Value* local_;
   enum { isThreadStack = false };
-  inline bool alreadyThreadSpecific() const {
-    return isSingleThreadProgram() || isThreadStack;
-  }
+  bool alreadyThreadSpecific() const { return isSingleThreadProgram() || isThreadStack; }
   static void cleanFun(Value* p) {
     if (p) {
       p->~Value();
@@ -196,13 +183,8 @@ struct ThreadSpecific : Allocator
     }
   }
   typedef boost::thread_specific_ptr<Value> PVal;
-  ThreadSpecific(Allocator allocator = Allocator())
-      : Allocator(allocator)
-      , pVal(cleanFun)
-      , local_()
-  {}
-  ~ThreadSpecific()
-  {
+  ThreadSpecific(Allocator allocator = Allocator()) : Allocator(allocator), pVal(cleanFun), local_() {}
+  ~ThreadSpecific() {
     if (alreadyThreadSpecific())
       delete local_;
     else {
@@ -210,53 +192,48 @@ struct ThreadSpecific : Allocator
     }
   }
   PVal pVal;
-  operator Value &() { return get(); }
-  Value &get() {
+  operator Value&() { return get(); }
+  Value& get() {
     if (alreadyThreadSpecific()) {
       if (local_) return *local_;
-      local_ = (Value *)Allocator::allocate(1);
-      new(local_) Value();
+      local_ = (Value*)Allocator::allocate(1);
+      new (local_) Value();
       return *local_;
     }
-    Value *v = pVal.get();
+    Value* v = pVal.get();
     if (v) return *v;
-    v = (Value *)Allocator::allocate(1);
-    new(v) Value();
+    v = (Value*)Allocator::allocate(1);
+    new (v) Value();
     pVal.reset(v);
     return *v;
   }
   /// \return whether v needs to be constructed (will only be true once per
   /// thread) - sets v to point at thread specific value
-  bool isUnconstructed(Value *&v) {
+  bool isUnconstructed(Value*& v) {
     if (alreadyThreadSpecific()) {
       if (local_) {
         v = local_;
         return false;
       }
-      v = (Value *)Allocator::allocate(1);
+      v = (Value*)Allocator::allocate(1);
       local_ = v;
       return true;
     }
     v = pVal.get();
     if (v) return false;
-    v = (Value *)Allocator::allocate(1);
+    v = (Value*)Allocator::allocate(1);
     pVal.reset(v);
     return true;
   }
-  Value* getPtr() const {
-    return alreadyThreadSpecific() ? local_ : pVal.get();
-  }
+  Value* getPtr() const { return alreadyThreadSpecific() ? local_ : pVal.get(); }
   Value const& get() const {
-    Value *v = getPtr();
+    Value* v = getPtr();
     assert(v != NULL);
     return *v;
   }
-  bool got() const {
-    return getPtr();
-  }
+  bool got() const { return getPtr(); }
   void maybeAssign(ThreadSpecific const& o) {
-    if (o.got())
-      get() = o.get();
+    if (o.got()) get() = o.get();
   }
 
  private:

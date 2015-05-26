@@ -119,8 +119,8 @@ struct ConfigNodeFormat {
 };
 
 /** print a YAML ConfigNode in our preferred format. */
-void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bool longMap = false,
-           bool newLine = true, unsigned maxDepth = (unsigned)-1);
+void print(ConfigNode const& in, std::string const& indent, std::ostream& os, bool longMap = false,
+          bool newLine = true, unsigned maxDepth = (unsigned)-1);
 
 /**
    usage: os << Util::print(node, format).
@@ -250,13 +250,13 @@ class YamlConfigurable {
   virtual ConfigNode effective() const;
 
   /** type/name/category accessors for SDL.cpp top-level YAML configuration. */
-  const std::string& yamlType() const { return type_; }
-  const std::string& getName() const { return name_; }
+  std::string const& yamlType() const { return type_; }
+  std::string const& getName() const { return name_; }
   char const* getCategory() const { return category_.c_str(); }
 
-  void setType(const std::string& type) { type_ = type; }
-  void setCategory(const std::string& category) { category_ = category; }
-  void setName(const std::string& name) { name_ = name; }
+  void setType(std::string const& type) { type_ = type; }
+  void setCategory(std::string const& category) { category_ = category; }
+  void setName(std::string const& name) { name_ = name; }
   template <class Config>
   void configure(Config& config) {}
 

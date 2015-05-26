@@ -49,7 +49,7 @@ void printState(std::ostream& out, StateId s, IHypergraphStates const& hg, bool 
 }
 
 void printArcTails(std::ostream& out, StateIdContainer const& tails, IHypergraphStates const* hg,
-                   bool inlineGraphLabels) {
+                  bool inlineGraphLabels) {
   bool again = false;
   for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
     if (again) out << ' ';

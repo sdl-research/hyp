@@ -36,7 +36,7 @@ namespace sdl {
 namespace Util {
 
 void utf8ToCharPos(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix,
-                   bool normalizeConsecutiveWhitespace = true);
+                  bool normalizeConsecutiveWhitespace = true);
 
 void utf8ToWordSpan(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix);
 
@@ -51,7 +51,7 @@ inline void utf8ToWordSpan(std::string const& str, IAcceptString const& accept, 
 }
 
 inline void utf8ToCharPos(std::string const& str, IAcceptString const& accept, NormalizeUtf8 const& fix,
-                          bool normalizeConsecutiveWhitespace) {
+                         bool normalizeConsecutiveWhitespace) {
   if (!str.empty())
     utf8ToCharPos(arrayBegin(str), arrayEnd(str), accept, fix, normalizeConsecutiveWhitespace);
 }
@@ -76,7 +76,7 @@ std::string const kSpaceUtf8(" ");
 */
 template <class Accept>
 void utf8ToCharPosImpl(Pchar i, Pchar end, Accept const& accept, FixUnicode const& fix,
-                       bool normalizeConsecutiveWhitespace = true) {
+                      bool normalizeConsecutiveWhitespace = true) {
   bool lastWasSpace = false;
   bool firstWord = true;
   Position spaceStart = 0;
@@ -88,7 +88,7 @@ void utf8ToCharPosImpl(Pchar i, Pchar end, Accept const& accept, FixUnicode cons
       if (!normalizeConsecutiveWhitespace) {
         acceptUnicode(accept, c, pos);
       } else {
-        bool const space = unicodeSpace(c);
+       bool const space = unicodeSpace(c);
         if (space) {
           if (!lastWasSpace) spaceStart = pos;
         } else {
@@ -125,10 +125,10 @@ inline void utf8ToWordSpanImplNoNfc(Pchar i, Pchar end, Accept const& accept, Fi
     Unicode ci = utf8::unchecked::next(i);  // advances i.
     if (i > end) SDL_THROW_LOG(Utf8, InvalidInputException, "invalid utf8 input");
     Unicode c = ci;
-    bool const cremoved = !fix(c);
-    bool const cmodified = c != ci;
+   bool const cremoved = !fix(c);
+   bool const cmodified = c != ci;
     if (i == end) {
-      bool const spacelike = cremoved || unicodeSpace(c);
+     bool const spacelike = cremoved || unicodeSpace(c);
       if (spacelike) {
         if (!lastWasSpace) {
           if (wordModified)
@@ -160,7 +160,7 @@ inline void utf8ToWordSpanImplNoNfc(Pchar i, Pchar end, Accept const& accept, Fi
       }
     } else {
       // c was not deleted
-      bool const space = unicodeSpace(c);
+     bool const space = unicodeSpace(c);
       if (space) {
         if (!lastWasSpace) {
           if (wordModified)
@@ -253,7 +253,7 @@ void utf8ToWordSpanImpl(std::string const& str, Accept const& accept, NormalizeU
 
 template <class Accept>
 void utf8ToCharPosImpl(std::string const& str, Accept const& accept, NormalizeUtf8 const& fix,
-                       bool normalizeConsecutiveWhitespace) {
+                      bool normalizeConsecutiveWhitespace) {
   if (!str.empty())
     utf8ToCharPosImpl(arrayBegin(str), arrayEnd(str), accept, fix, normalizeConsecutiveWhitespace);
 }

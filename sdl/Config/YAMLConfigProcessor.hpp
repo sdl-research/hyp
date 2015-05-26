@@ -69,7 +69,7 @@ struct YAMLConfigProcessor {
   /**
       Push the Key of the node being processed on to the stack. for path() log msgs only
    */
-  void push(const std::string& key) const {
+  void push(std::string const& key) const {
     optPath_.push_back(key);
     //SDL_DEBUG(Config.PushPop, "push +" << optPath_.back() << " => " << optPath_.size());
   }
@@ -122,7 +122,7 @@ struct YAMLConfigProcessor {
   /**
       throws if there are duplicate declarations of Resource, modules or pipeline instances.
    */
-  void registerInstance(const std::string&, const std::string&, ConfigNode const&);
+  void registerInstance(std::string const&, std::string const&, ConfigNode const&);
 
   ConfigNode mergeMaps(ConfigNode const&, ConfigNode const&, bool) const;
   ConfigNode mergeSeqs(ConfigNode const& base, ConfigNode const& append) const;

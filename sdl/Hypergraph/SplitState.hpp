@@ -45,7 +45,7 @@ inline Sym detokSymbol(StateType frontType,
                          StateType currentType,
                          Sym const& origSym,
                          IVocabularyPtr pVoc,
-                         bool spaceBetween) {
+                        bool spaceBetween) {
   std::string sym = pVoc->str(origSym);
   if (currentType == kGlueLeft || currentType == kGlueBoth) {
     sym.erase(sym.begin(), sym.begin() + glue_len);
@@ -170,7 +170,7 @@ struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
   SplitStateVisitor(IHypergraph<Arc> const& hg,
                     IMutableHypergraph<Arc>* pHgResult,
                     Util::Utf8RangePred pred,
-                    bool spaceBetween):
+                   bool spaceBetween):
       SplitPolicy(hg, pred, spaceBetween),
       hg_(hg),
       outHg_(pHgResult),
@@ -203,7 +203,7 @@ struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
 
   void acceptOut(Arc *arc, StateId sid) {
     Sym const arcSym = hg_.firstLexicalOutput(arc);
-    bool const extendStart = isStart_ && !arcSym;
+   bool const extendStart = isStart_ && !arcSym;
     StateType const headType = extendStart ? kStart : this->headType(arcSym);
     StateId head = arc->head();
     if (extendStart)

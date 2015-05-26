@@ -85,7 +85,7 @@ double physicalMemoryGB() {
   return physicalMemoryBytes() * kOneOverGB;
 }
 
-MemoryInfo::MemoryInfo(const MemoryInfo&) {
+MemoryInfo::MemoryInfo(MemoryInfo const&) {
   throw UnimplementedException("no copy - use MemoryInfo::instance().getSizeInMB())");
 }
 
@@ -140,7 +140,7 @@ double MemoryInfo::getSizeInGB() {
    Returns the specified column of a string.
    (columns are blank-separated, counting from 0)
 */
-std::string MemoryInfo::getColumn(const std::string& s, unsigned columnNumber) {
+std::string MemoryInfo::getColumn(std::string const& s, unsigned columnNumber) {
   std::string::size_type start = 0;
   while (columnNumber-- > 0) {
     start = s.find(' ', start) + 1;

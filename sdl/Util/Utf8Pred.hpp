@@ -63,7 +63,7 @@ struct ChineseCharPred : std::unary_function<std::string, bool> {
       chi_char.addAll(UnicodeSet(0x2000, 0x27FF));  // symbols, including common punctuations
     }
   }
-  bool operator()(const std::string& str) const { return stringInCharSet(str, chi_char); }
+  bool operator()(std::string const& str) const { return stringInCharSet(str, chi_char); }
 
  private:
   icu::UnicodeSet chi_char;

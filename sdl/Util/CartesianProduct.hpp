@@ -37,7 +37,7 @@ void cartesianProduct(typename VectorVector::const_iterator curr, typename Vecto
     return;
   }
   typedef typename VectorVector::value_type Vector;
-  const Vector& currVec = *curr;
+  Vector const& currVec = *curr;
   for (typename Vector::const_iterator it = currVec.begin(); it != currVec.end(); it++) {
     tmpVec.push_back(*it);
     cartesianProduct(curr + 1, end, tmpVec, result);

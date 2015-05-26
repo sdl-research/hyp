@@ -37,21 +37,21 @@ struct Tokens {
     symbols.reserve(1000);
   }
 
-  inline Sym symbolForOffset(FeatureOffset offset) const {
+  Sym symbolForOffset(FeatureOffset offset) const {
     if (offset >= symbols.size())
       SDL_THROW_LOG(Hypergraph.Tokens, InvalidInputException,
                     "alignments info is incomplete for alignment word #"
-                    << offset << " - no aligned src word for id=" << offset + ids.begin);
+                        << offset << " - no aligned src word for id=" << offset + ids.begin);
     return symbols[offset];
   }
 
-  inline std::string const& stringForOffset(FeatureOffset offset) const {
+  std::string const& stringForOffset(FeatureOffset offset) const {
     return vocab->str(symbolForOffset(offset));
   }
 
-  inline Sym symbolForId(FeatureId id) const { return symbolForOffset(ids.offset(id)); }
+  Sym symbolForId(FeatureId id) const { return symbolForOffset(ids.offset(id)); }
 
-  inline std::string const& stringForId(FeatureId id) const { return vocab->str(symbolForId(id)); }
+  std::string const& stringForId(FeatureId id) const { return vocab->str(symbolForId(id)); }
 
   friend inline std::ostream& operator<<(std::ostream& out, Tokens const& self) {
     self.print(out);
@@ -70,9 +70,7 @@ struct Tokens {
     symbols.push_back(vocab->add(word, kTerminal));
   }
 
-  void operator()(Slice const& word, TokenSpan) const {
-    symbols.push_back(vocab->add(word, kTerminal));
-  }
+  void operator()(Slice const& word, TokenSpan) const { symbols.push_back(vocab->add(word, kTerminal)); }
 
   void finishPhrase(float cost = 0) const {}
 
@@ -82,7 +80,7 @@ struct Tokens {
     FeatureId const id = ids.begin + symbols.size();
     if (id >= ids.end)
       SDL_THROW_LOG(Hypergraph.Tokens, ConfigException, "too many lexical input arcs for configured range of "
-                                                        << ids);
+                                                            << ids);
     symbols.push_back(sym);
     return id;
   }
@@ -171,8 +169,8 @@ struct GetTokenSpan {
             TokenSpan& storeSpan = spans_[tail];
             if (!nullTokenSpan(storeSpan) && storeSpan != span)
               SDL_WARN(Hypergraph.Tokens, "(multiple token spans for input tail "
-                                          << tail << ": " << PrintSpan(span) << " differs from previous "
-                                          << PrintSpan(storeSpan));
+                                              << tail << ": " << PrintSpan(span) << " differs from previous "
+                                              << PrintSpan(storeSpan));
             storeSpan = span;
           }
         }

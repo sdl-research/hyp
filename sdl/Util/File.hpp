@@ -11,9 +11,6 @@
 /** \file
 
     fstream utilities
-
-    inline to avoid circular cross-lib dependency
-
 */
 
 #ifndef SDL_UTIL__FILE_JG_2014_02_12_HPP

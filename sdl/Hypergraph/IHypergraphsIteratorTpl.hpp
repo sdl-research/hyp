@@ -27,7 +27,6 @@
 
 namespace sdl {
 
-
 struct IVocabulary;
 
 namespace Hypergraph {
@@ -35,10 +34,11 @@ namespace Hypergraph {
 SDL_ENUM(InputHgType, 2, (FlatStringsHg, DashesSeparatedHg));
 
 /// pass arcs to #include <sdl/Hypergraph/ArcParserFct.hpp> parseText
-void readArcsUntil(std::istream & in, ParsedArcs &arcs, bool requireNfc = true);
+void readArcsUntil(std::istream& in, ParsedArcs& arcs, bool requireNfc = true);
 
 // fwd decls
-template<class Arc> struct IHypergraph;
+template <class Arc>
+struct IHypergraph;
 
 /**
    \author Markus Dreyer
@@ -46,13 +46,10 @@ template<class Arc> struct IHypergraph;
    Iterates over hypergraphs, which are constructed from the
    input stream (which may be in various formats).
 */
-template<class A>
-class IHypergraphsIteratorTpl {
-
- public:
+template <class A>
+struct IHypergraphsIteratorTpl {
   typedef A Arc;
 
-  inline
   virtual ~IHypergraphsIteratorTpl() {}
 
   /**
@@ -79,11 +76,12 @@ class IHypergraphsIteratorTpl {
      Factory method; constructs a hypergraph iterator from some
      input stream, which may be of various formats.
   */
-  static IHypergraphsIteratorTpl<Arc>* create(std::istream&,
-                                              InputHgType inputType,
+  static IHypergraphsIteratorTpl<Arc>* create(std::istream&, InputHgType inputType,
                                               shared_ptr<IPerThreadVocabulary> const& perThreadVocab,
-                                              shared_ptr<IFeaturesPerInputPosition> feats = shared_ptr<IFeaturesPerInputPosition>());
+                                              shared_ptr<IFeaturesPerInputPosition> feats
+                                              = shared_ptr<IFeaturesPerInputPosition>());
 };
+
 
 }}
 

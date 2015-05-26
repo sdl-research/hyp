@@ -135,7 +135,7 @@ struct ArcParserImpl : qi::grammar<Iterator, ParserUtil::Arc(), ascii::space_typ
   /**
      Parses an arc string using the boost::spirit ArcParserImpl.
   */
-  ParserUtil::Arc* parse(const std::string& str) const {
+  ParserUtil::Arc* parse(std::string const& str) const {
     Iterator iter = str.begin(), end = str.end();
     Util::AutoDelete<ParserUtil::Arc> arc(new ParserUtil::Arc());
     return (qi::phrase_parse(iter, end, *this, ascii::space, *arc) && iter == end) ?

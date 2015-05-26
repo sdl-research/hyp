@@ -122,8 +122,8 @@ struct AcyclicBest {
     muStates_ = hg.size();
     piStates_ = muStates_;
 
-    bool const outArcs = hg.storesOutArcs();
-    bool const useOutArcs = IsGraph && outArcs;
+   bool const outArcs = hg.storesOutArcs();
+   bool const useOutArcs = IsGraph && outArcs;
 
     if (!useOutArcs && !hg.storesInArcs())
       SDL_THROW_LOG(Hypergraph.AcyclicBest, ConfigException, "must store inarcs unless your hypergraph is a simple graph");
@@ -149,8 +149,6 @@ struct AcyclicBest {
     typedef typename InArcs<Arc>::ArcsContainer ArcsContainer;
 
     // topo sort (top-down) without stack-killing recursion.
-
-
     back_edges_ = 0;
     self_loops_ = 0;
     // we wouldn't need to track this except we choose to set the kAcyclic

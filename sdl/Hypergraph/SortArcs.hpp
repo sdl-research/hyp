@@ -45,8 +45,8 @@ struct EqualByWeight {
 
 template <class Arc>
 struct CmpFsmArcInput {
-  const IHypergraph<Arc>& fst;
-  CmpFsmArcInput(const IHypergraph<Arc>& fst) : fst(fst) {}
+  IHypergraph<Arc> const& fst;
+  CmpFsmArcInput(IHypergraph<Arc> const& fst) : fst(fst) {}
 
   /**
      sort together arcs w/ same input label. among those, the lowest cost (highest prob) come first.
@@ -63,8 +63,8 @@ struct CmpFsmArcInput {
 */
 template <class Arc>
 struct CmpFsmArcInputBestFirst {
-  const IHypergraph<Arc>& fst;
-  CmpFsmArcInputBestFirst(const IHypergraph<Arc>& fst) : fst(fst) {}
+  IHypergraph<Arc> const& fst;
+  CmpFsmArcInputBestFirst(IHypergraph<Arc> const& fst) : fst(fst) {}
 
   /**
      sort together arcs w/ same input label. among those, the lowest cost (highest prob) come first.

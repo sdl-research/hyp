@@ -279,7 +279,7 @@ The member function valid can be used to test for validity.
   PODptr next() const {  //! \returns next PODptr.
     return PODptr<size_type>(next_ptr(), next_size());
   }
-  void next(const PODptr& arg) const {  //! Sets next PODptr.
+  void next(PODptr const& arg) const {  //! Sets next PODptr.
     next_ptr() = arg.begin();
     next_size() = arg.total_size();
   }
@@ -408,7 +408,7 @@ class pool : protected simple_segregated_storage<typename UserAllocator::size_ty
   simple_segregated_storage<size_type>& store() {  //! \returns pointer to store.
     return *this;
   }
-  const simple_segregated_storage<size_type>& store() const {  //! \returns pointer to store.
+  simple_segregated_storage<size_type> const& store() const {  //! \returns pointer to store.
     return *this;
   }
   const size_type requested_size;
@@ -615,7 +615,7 @@ class pool : protected simple_segregated_storage<typename UserAllocator::size_ty
   // pre: 'chunk' must have been previously
   //        returned by *this.malloc(n).
   void free BOOST_PREVENT_MACRO_SUBSTITUTION(
-      void* const chunks, const size_type n) {  //! Assumes that chunk actually refers to a block of chunks.
+     void* const chunks, const size_type n) {  //! Assumes that chunk actually refers to a block of chunks.
     //!
     //! chunk must have been previously returned by t.ordered_malloc(n)
     //! spanning n * partition_sz bytes.
@@ -631,7 +631,7 @@ class pool : protected simple_segregated_storage<typename UserAllocator::size_ty
   // pre: 'chunk' must have been previously
   //        returned by *this.malloc(n).
   void ordered_free(
-      void* const chunks,
+     void* const chunks,
       const size_type
           n) {  //! Assumes that chunk actually refers to a block of chunks spanning n * partition_sz bytes;
     //! deallocates each chunk in that block.
@@ -718,11 +718,11 @@ bool pool<UserAllocator>::release_memory() {  //! pool must be ordered. Frees ev
 
     // We have to check all the chunks.  If they are *all* free (i.e., present
     //  in the free list), then we can free the block.
-    bool all_chunks_free = true;
+   bool all_chunks_free = true;
 
     // Iterate 'i' through all chunks in the memory block
     // if free starts in the memory block, be careful to keep it there
-    void* saved_free = free_p;
+   void* saved_free = free_p;
     for (char* i = ptr.begin(); i != ptr.end(); i += partition_size) {
       // If this chunk is not free
       if (i != free_p) {
@@ -748,7 +748,7 @@ bool pool<UserAllocator>::release_memory() {  //! pool must be ordered. Frees ev
     if (!all_chunks_free) {
       if (is_from(free_p, ptr.begin(), ptr.element_size())) {
         std::less<void*> lt;
-        void* const end = ptr.end();
+       void* const end = ptr.end();
         do {
           prev_free_p = free_p;
           free_p = nextof(free_p);
@@ -975,7 +975,7 @@ void* pool<UserAllocator>::ordered_malloc(
 
 template <typename UserAllocator>
 details::PODptr<typename pool<UserAllocator>::size_type> pool<UserAllocator>::find_POD(
-    void* const chunk) const {  //! find which PODptr storage memory that this chunk is from.
+   void* const chunk) const {  //! find which PODptr storage memory that this chunk is from.
   //! \returns the PODptr that holds this chunk.
   // Iterate down list to find which storage this chunk is from.
   details::PODptr<size_type> iter = list;
@@ -1005,7 +1005,7 @@ class pool {
   ~pool() { purge_memory(); }
 
   bool release_memory() {
-    bool ret = free_list.empty() ? false : true;
+   bool ret = free_list.empty() ? false : true;
     for (std::set<void*>::iterator pos = free_list.begin(); pos != free_list.end(); ++pos) {
       (user_allocator::free)(static_cast<char*>(*pos));
     }
@@ -1013,7 +1013,7 @@ class pool {
     return ret;
   }
   bool purge_memory() {
-    bool ret = free_list.empty() && used_list.empty() ? false : true;
+   bool ret = free_list.empty() && used_list.empty() ? false : true;
     for (std::set<void*>::iterator pos = free_list.begin(); pos != free_list.end(); ++pos) {
       (user_allocator::free)(static_cast<char*>(*pos));
     }
@@ -1031,7 +1031,7 @@ class pool {
   size_type get_requested_size() const { return chunk_size; }
   size_type get_size() const { return free_list.size() + used_list.size(); }
   void* malloc BOOST_PREVENT_MACRO_SUBSTITUTION() {
-    void* ret;
+   void* ret;
     if (free_list.empty()) {
       ret = (user_allocator::malloc)(chunk_size);
       VALGRIND_MAKE_MEM_UNDEFINED(ret, chunk_size);
@@ -1046,7 +1046,7 @@ class pool {
   void* ordered_malloc() { return (this->malloc)(); }
   void* ordered_malloc(size_type n) {
     if (max_alloc_size && (n > max_alloc_size)) return 0;
-    void* ret = (user_allocator::malloc)(chunk_size * n);
+   void* ret = (user_allocator::malloc)(chunk_size * n);
     used_list.insert(ret);
     return ret;
   }

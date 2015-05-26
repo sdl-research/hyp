@@ -186,7 +186,7 @@ struct SubsetStateAddMapping : public StateAddMapping<A> {
   SubsetStateAddMapping(IMutableHypergraph<A>* outHg, StateSet const& subset)
       : StateAddMapping<A>(outHg), subset(subset) {}
   virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
-  inline StateId remapImpl(StateId s) {
+   StateId remapImpl(StateId s) {
     return Util::contains(subset, s) ? this->outHg->addState() : kNoState;
   }
   virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE {
@@ -202,7 +202,7 @@ struct SubsetIdentityMapping : public StateIdMapping {
   StateSet const& subset;
   SubsetIdentityMapping(StateSet const& subset) : subset(subset) {}
   virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
-  inline StateId remapImpl(StateId s) { return Util::contains(subset, s) ? s : kNoState; }
+   StateId remapImpl(StateId s) { return Util::contains(subset, s) ? s : kNoState; }
 };
 
 struct StateIdTranslation : boost::noncopyable {
@@ -285,7 +285,7 @@ struct StateIdTranslation : boost::noncopyable {
       return *r;
   }
 
-  inline StateId stateFor(StateId s) {
+   StateId stateFor(StateId s) {
     if (s == kNoState) return s;
     StateId r = stateForImpl(s);
     // SDL_TRACE(Hypergraph.StateIdTranslation, "stateFor(" << s<<")=" << r);

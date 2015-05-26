@@ -24,7 +24,7 @@ namespace Hypergraph {
 
 template <class Arc>
 void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWeights = true,
-                                 bool pathPruneAllStates = false) {
+                                bool pathPruneAllStates = false) {
   hg.forceFirstTailOutArcsOnly();
   SDL_DEBUG(Hypergraph.PruneEpsilon, "before pruneSimplePathGraphEpsilon properties: "
                                      << PrintProperties(hg.properties()) << ":\n" << hg);

@@ -165,9 +165,9 @@ struct PerformancePer
     Elapsed start;
     boost::timer::cpu_timer timer;
     InputSize inputSize;
-    bool enabled;
+   bool enabled;
 
-    void init(PerformancePer *total, InputSize const& inputSize_)
+   void init(PerformancePer *total, InputSize const& inputSize_)
     {
       ptotal = total;
       if (ptotal && ptotal->enabled()) {
@@ -177,12 +177,12 @@ struct PerformancePer
       }
     }
 
-    void init(PerformancePer &total, InputSize const& inputSize_)
+   void init(PerformancePer &total, InputSize const& inputSize_)
     {
       init(&total, inputSize_);
     }
     template <class InputVariant>
-    void init(PerformancePer &total, InputVariant const& inputVariant)
+   void init(PerformancePer &total, InputVariant const& inputVariant)
     {
       init(&total, getVariantInputSize(inputVariant));
     }

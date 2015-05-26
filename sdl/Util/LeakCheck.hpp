@@ -57,8 +57,8 @@ namespace sdl { namespace Util {
 
 struct ILeakCheck {
   virtual void init(char const* classname = "Object",
-                    bool enableCheck = true,
-                    bool nonGlobalSoYouCanLog = true) {}
+                   bool enableCheck = true,
+                   bool nonGlobalSoYouCanLog = true) {}
   virtual void print(std::ostream &o) const {}
   virtual void start() {}
   virtual void finish() {}
@@ -103,8 +103,8 @@ struct LeakCheckBase : ILeakCheck {
   std::size_t expect;
   char const* name;
   void init(char const* classname = "Object",
-            bool enableCheck = true,
-            bool nonGlobalSoYouCanLog = true)
+           bool enableCheck = true,
+           bool nonGlobalSoYouCanLog = true)
   {
     enable = enableCheck;
     log = nonGlobalSoYouCanLog;

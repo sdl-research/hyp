@@ -59,7 +59,7 @@ void FormattedOstreamIterator::insert_word() {
   word_buffer_ = "";
 }
 
-void FormattedOstreamIterator::write_word(const std::string& word) {
+void FormattedOstreamIterator::write_word(std::string const& word) {
   *os_ << word;
   current_line_length_ += (unsigned)word.size();
   if (current_line_length_ != max_line_length_) {

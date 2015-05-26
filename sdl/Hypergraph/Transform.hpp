@@ -181,7 +181,7 @@ template <class Transform, class A>
 void inplace_always(IMutableHypergraph<A>& m, Transform& t) {
   Properties cpProp = t.inAddProps() | t.newOutAddProps();
   if (t.Inplace) {
-    bool needsc = t.needsCopy(m);
+   bool needsc = t.needsCopy(m);
     if (needsc && !t.OptionalInplace)
       SDL_THROW2(SelfModifyException, "unimplemented: needsCopy(hg) for inplace transform(hg)", t.name());
     if (!needsc) {

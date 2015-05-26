@@ -30,7 +30,7 @@
 
 namespace YAML {
 
-std::string to_string(const Node& in, bool longMap, bool newLine, const std::string& indent) {
+std::string to_string(Node const& in, bool longMap, bool newLine, std::string const& indent) {
   std::ostringstream os;
   sdl::Config::print(in, indent, os, longMap, newLine);
   return os.str();
@@ -159,7 +159,7 @@ inline bool sequenceAllScalar(YAML::const_iterator i, YAML::const_iterator end) 
   return true;
 }
 
-void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bool longMap, bool newlines,
+void print(ConfigNode const& in, std::string const& indent, std::ostream& os, bool longMap, bool newlines,
            unsigned maxDepth) {
   if (maxDepth == 0) {
     os << "...";
@@ -192,7 +192,7 @@ void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bo
       }
     } else {
       os << indent << "[ ";
-      bool first = true;
+     bool first = true;
       for (; i != end; ++i) {
         ConfigNode const& node = *i;
         if (!first) os << ", ";
@@ -213,7 +213,7 @@ void print(const ConfigNode& in, const std::string& indent, std::ostream& os, bo
       os << " { ";
     }
     if (newlines) os << '\n';
-    bool first = true;
+   bool first = true;
     for (; i != end; ++i) {
       std::string const& key = i->first.as<std::string>();
       ConfigNode const& val = i->second;
@@ -274,7 +274,7 @@ ConfigNode loadRawConfig(boost::filesystem::path const& path) {
 
 /// fully expanded starting from relative or absolute path 'basis',
 /// and interpreted via conventions specified in ../docs/xmt-configuration-with-yaml.pdf
-ConfigNode expandConfig(const ConfigNode& in, boost::filesystem::path const& filePath, OptPath const& forPath) {
+ConfigNode expandConfig(ConfigNode const& in, boost::filesystem::path const& filePath, OptPath const& forPath) {
   YAMLConfigProcessor configProc(forPath);
   configProc.setFilePath(filePath);
   return configProc.process(in, filePath.parent_path());

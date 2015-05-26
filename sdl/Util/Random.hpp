@@ -30,7 +30,8 @@ namespace Util {
 typedef graehl::random_seed RandomSeed;
 
 /**
-   Function object for uniformly distributed random numbers on [0,1). don't make copies of it unless you want to clone the hidden random state. For passing to functions that use it, use Random01Fct
+   Function object for uniformly distributed random numbers on [0,1). don't make copies of it unless you want
+   to clone the hidden random state. For passing to functions that use it, use Random01Fct
 */
 struct Random01 {
   typedef graehl::random_generator Generator;
@@ -38,55 +39,42 @@ struct Random01 {
   typedef boost::variate_generator<Generator, Distribution> Variate;
 
   Variate random01;
-  inline double operator()() {
-    return random01();
-  }
+  double operator()() { return random01(); }
 
-  Random01()
-      : random01(Generator(graehl::default_random_seed()), Distribution())
-  {}
+  Random01() : random01(Generator(graehl::default_random_seed()), Distribution()) {}
 
 
-  Random01(unsigned seed)
-      : random01(Generator(seed), Distribution())
-  {}
+  Random01(unsigned seed) : random01(Generator(seed), Distribution()) {}
 
-  void reset(unsigned seed) {
-    random01.engine().seed(seed);
-  }
-  /**
-     additional helper methods that use random01() e.g. double random0n(double n)
-  */
+  void reset(unsigned seed) { random01.engine().seed(seed); }
+/**
+   additional helper methods that use random01() e.g. double random0n(double n)
+*/
 #include <graehl/shared/random.ipp>
 };
 
 struct Random01Fct {
-  Random01 *pRandom;
-  Random01Fct(Random01 &random) : pRandom(&random) {}
-  inline double operator()() const {
-    return (*pRandom)();
-  }
+  Random01* pRandom;
+  Random01Fct(Random01& random) : pRandom(&random) {}
+  double operator()() const { return (*pRandom)(); }
   operator Random01&() const { return *pRandom; }
 };
 
 typedef ThreadSpecific<Random01> ThreadSpecificRandom01;
 
 /// if necessary, put in anon namespace (or static linkage)
-extern THREADLOCAL Random01 * gThreadRandom01;
+extern THREADLOCAL Random01* gThreadRandom01;
 
 /**
    threadRandom()() -> random on [0.0,1).
 */
-inline Random01 &threadRandom() {
-  if (!gThreadRandom01)
-    gThreadRandom01 = new Random01();
+inline Random01& threadRandom() {
+  if (!gThreadRandom01) gThreadRandom01 = new Random01();
   return *gThreadRandom01;
 }
 
 struct ThreadRandom01Fct {
-  inline double operator()() const {
-    return threadRandom()();
-  }
+  double operator()() const { return threadRandom()(); }
   operator Random01&() const { return threadRandom(); }
 };
 
@@ -97,11 +85,10 @@ struct ThreadRandom01Fct {
 extern Random01 gRandom01;
 
 struct GlobalRandom01Fct {
-  inline double operator()() const {
-    return gRandom01();
-  }
+  double operator()() const { return gRandom01(); }
   operator Random01&() const { return gRandom01; }
 };
+
 
 }}
 

@@ -41,7 +41,7 @@
 #endif
 
 #if SDL_OBJECT_COUNT
-#define SDL_OBJECT_COUNT_LOG_NAME(type, name) \
+#define SDL_OBJECT_COUNT_LOG_NAME(type, name)                                                \
   do {                                                                                       \
     if (Util::isSingleThreadProgram())                                                       \
       SDL_DEBUG_ALWAYS(Leak.ObjectCount, #name << " has " << Util::ObjectCount<type>::size() \
@@ -101,7 +101,7 @@ struct ObjectTrack {
   }
 
   /// no new objects created
-  inline void operator=(ObjectTrack const&) {}
+  void operator=(ObjectTrack const&) {}
 
   ~ObjectTrack() {
     ObjectCount<Val>::pop();

@@ -40,9 +40,7 @@ struct OnceFlagAtomic {
   /**
      first() may return true for a short time after.
   */
-  void finishNonAtomic() {
-    done_ = true;
-  }
+  void finishNonAtomic() { done_ = true; }
 
   typedef boost::mutex Mutex;
   typedef boost::lock_guard<Mutex> Lock;
@@ -56,8 +54,7 @@ struct OnceFlagAtomic {
      \return true the first time only (works across multiple threads). pre:
      mutex_ is not held by this thread or any other thread for long
   */
-  inline bool first()
-  {
+  bool first() {
     if (done_) return false;
     SDL_LOAD_FENCE();
     Lock lock(mutex_);
@@ -67,20 +64,14 @@ struct OnceFlagAtomic {
     return done_;
   }
   /** \return synonym for first() - for interface consistency with Latch.hpp */
-  friend inline bool latch(OnceFlagAtomic &once)
-  {
-    return once.first();
-  }
+  friend inline bool latch(OnceFlagAtomic& once) { return once.first(); }
 
   /** \return if first() has already returned true (peeks without modifying state) */
-  inline bool already() const
-  {
+  bool already() const {
     SDL_LOAD_FENCE();
     return done_;
   }
-  operator bool () const {
-    return already();
-  }
+  operator bool() const { return already(); }
 };
 
 

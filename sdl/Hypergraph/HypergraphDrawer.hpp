@@ -107,7 +107,7 @@ bool writeStateLabel(std::ostream& out,
 
 template<class A>
 std::ostream& drawHypergraph(std::ostream& out,
-                             const IHypergraph<A>& hg)
+                             IHypergraph<A> const& hg)
 {
   // Begin
   out << "digraph HG {\n"

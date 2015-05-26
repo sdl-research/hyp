@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    boolean that default constructs always to false. otherwise it's too easy to
+   boolean that default constructs always to false. otherwise it's too easy to
     add a bool but forget to 0-init in all constructors.
 
     flag.first() returns true the first time only

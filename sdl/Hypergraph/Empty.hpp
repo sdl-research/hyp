@@ -167,7 +167,7 @@ struct Reach {
   }
 
   bool final_reached() const {
-    bool r = Util::test(reached, final);
+   bool r = Util::test(reached, final);
     return r;
   }
 

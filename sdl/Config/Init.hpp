@@ -19,7 +19,7 @@
      int val;
 
      template <class Config>
-     void configure(Config &c) {
+    void configure(Config &c) {
        c("val", &val).init(1);
      }
 

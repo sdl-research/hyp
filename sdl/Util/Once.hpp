@@ -31,7 +31,7 @@ namespace Util {
 struct Once : public PointerSet {
   BOOST_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void*));
   template <class V>
-  inline bool first(V const* p) {
+  bool first(V const* p) {
     return this->insert((intptr_t)p).second;
   }
 };
@@ -42,8 +42,8 @@ template <class V>
 struct OnceTypedP : public unordered_set<V const*, PtrDiffHash<V> > {
   BOOST_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void*));
   // careful: don't pass by val:
-  inline bool first(V const& p) { return first(&p); }
-  inline bool first(V const* p) { return this->insert(p).second; }
+  bool first(V const& p) { return first(&p); }
+  bool first(V const* p) { return this->insert(p).second; }
 };
 
 // visit by pointer. once per pointer. visitor F is copied.
@@ -53,7 +53,7 @@ struct VisitOnce : public F {
   PointerSet* p;
   // mutating via pointer p - const helps compiler out?
   template <class V>
-  inline bool first(V const* v) const {
+  bool first(V const* v) const {
     return p->insert((intptr_t)v).second;
   }
   template <class V>
@@ -79,7 +79,7 @@ struct VisitOnceRef {
   VisitOnceRef(F const& f, PointerSet* p) : f(f), p(p) {}
   // mutating via pointer p - const helps compiler out?
   template <class V>
-  inline bool first(V const* v) const {
+  bool first(V const* v) const {
     return p->insert((intptr_t)v).second;
   }
   template <class V>

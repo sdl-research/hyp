@@ -86,7 +86,7 @@ inline Slice toSlice(std::string const& str, std::size_t begin, std::size_t end)
   return Slice(data + begin, data + end);
 }
 
-inline std::string & assignSlice(std::string & to, Slice from) {
+inline std::string& assignSlice(std::string& to, Slice from) {
   to.assign(from.first, from.second - from.first);
   return to;
 }
@@ -159,8 +159,6 @@ inline std::ostream& operator<<(std::ostream& out, sdl::Slice const& word) {
   out.write(word.first, word.second - word.first);
   return out;
 }
-
-
 }
 
 #endif

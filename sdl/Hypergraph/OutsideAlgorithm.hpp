@@ -99,7 +99,7 @@ struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
   ComputeOutsideScoreStatesVisitor(IHypergraph<Arc> const& hg,
                                    boost::ptr_vector<Weight> const& insideScores,
                                    boost::ptr_vector<Weight>* outsideScores,
-                                   bool haveInsideForAxiom)
+                                  bool haveInsideForAxiom)
       : hg_(hg)
       , final(hg.final())
       , insideScores_(insideScores)

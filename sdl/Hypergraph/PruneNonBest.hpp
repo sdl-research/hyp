@@ -227,7 +227,7 @@ void justBest(IMutableHypergraph<Arc>& hg, bool leaveSimplePathAlone = true) {
 /// Options is either PruneNonBestOptions or PruneEpsilonOptions
 template <class Arc, class Options>
 void justBest(unsigned nbest, IMutableHypergraph<Arc>& hg, Options const& pruneNonBestOrEpsilonOptions,
-              bool leaveSimplePathAlone = true) {
+             bool leaveSimplePathAlone = true) {
   if (nbest) {
     PruneNonBest<Arc> prune(nbest, pruneNonBestOrEpsilonOptions);
     prune.opt.skipAlreadySingle = leaveSimplePathAlone;
@@ -238,7 +238,7 @@ void justBest(unsigned nbest, IMutableHypergraph<Arc>& hg, Options const& pruneN
 
 template <class Arc>
 void justBest(IMutableHypergraph<Arc>& hg, PruneToNbestOptions const& pruneNonBestOrEpsilonOptions,
-              bool leaveSimplePathAlone = true) {
+             bool leaveSimplePathAlone = true) {
   if (pruneNonBestOrEpsilonOptions.pruneToNbest) {
     PruneNonBest<Arc> prune(pruneNonBestOrEpsilonOptions);
     prune.opt.skipAlreadySingle = leaveSimplePathAlone;

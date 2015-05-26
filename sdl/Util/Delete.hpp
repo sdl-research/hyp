@@ -109,7 +109,7 @@ struct AutoFree {
      \return toFree, which is no longer owned by this AutoFree.
   */
   void* release() const {
-    void* r = toFree;
+   void* r = toFree;
     toFree = 0;
     return r;
   }

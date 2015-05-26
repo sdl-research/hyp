@@ -129,13 +129,13 @@ struct Concat : TransformBase<Transform::Inplace, 0> {
 };
 
 template <class Arc>
-void hgConcat(IMutableHypergraph<Arc>* pLeftHg, const IHypergraph<Arc>& rightHg, ConcatOptions const& opt) {
+void hgConcat(IMutableHypergraph<Arc>* pLeftHg, IHypergraph<Arc> const& rightHg, ConcatOptions const& opt) {
   Concat<Arc> x(ptrNoDelete(rightHg), opt);
   inplace(*pLeftHg, x);
 }
 
 template <class Arc>
-void hgConcat(const IHypergraph<Arc>& leftHg, const IHypergraph<Arc>& rightHg,
+void hgConcat(IHypergraph<Arc> const& leftHg, IHypergraph<Arc> const& rightHg,
               IMutableHypergraph<Arc>* result, ConcatOptions const& opt) {
   Concat<Arc> x(ptrNoDelete(rightHg), opt);
   inout(leftHg, result, x);

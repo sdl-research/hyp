@@ -25,7 +25,7 @@ namespace Hypergraph {
 ArcParser::ArcParser()
     : pImpl_(new Impl()) {}
 
-ParserUtil::Arc* ArcParser::parse(const std::string& str) const {
+ParserUtil::Arc* ArcParser::parse(std::string const& str) const {
   return pImpl_->parse(str);
 }
 

@@ -22,7 +22,7 @@ namespace WriteOpenFstFormatHelper {
 
 template <class Arc>
 struct ArcWriter {
-  ArcWriter(std::ostream& out, const IHypergraph<Arc>& hg) : out_(out), hg_(hg) {}
+  ArcWriter(std::ostream& out, IHypergraph<Arc> const& hg) : out_(out), hg_(hg) {}
 
   void operator()(Arc const* arc) const {
     LabelPair l = hg_.getFsmLabelPair(*arc);
@@ -31,12 +31,12 @@ struct ArcWriter {
   }
 
   std::ostream& out_;
-  const IHypergraph<Arc>& hg_;
+  IHypergraph<Arc> const& hg_;
 };
 }
 
 template <class Arc>
-std::ostream& writeOpenFstFormat(std::ostream& out, const IHypergraph<Arc>& hg) {
+std::ostream& writeOpenFstFormat(std::ostream& out, IHypergraph<Arc> const& hg) {
   shared_ptr<IHypergraph<Arc> const> hp = ensureProperties(hg, kFsm | kGraph | kStoreOutArcs);
   if (!hg.isFsm()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "WriteOpenFstFormat needs FSM input");
   typedef WriteOpenFstFormatHelper::ArcWriter<Arc> Writer;

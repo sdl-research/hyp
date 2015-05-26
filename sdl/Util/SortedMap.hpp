@@ -15,10 +15,10 @@
     usage:
 
     template <class Map>
-    bool fnForSortedMapOnly(Map &map, typename SortedMap<Map>::type *enable=0);
+   bool fnForSortedMapOnly(Map &map, typename SortedMap<Map>::type *enable=0);
 
     template <class Map>
-    bool fnForHashedMapOnly(Map &map, typename HashedMap<Map>::type *enable=0);
+   bool fnForHashedMapOnly(Map &map, typename HashedMap<Map>::type *enable=0);
 */
 
 #ifndef SORTEDMAP_JG2012117_HPP

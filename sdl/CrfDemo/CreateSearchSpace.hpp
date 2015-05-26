@@ -162,11 +162,11 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   struct Sentence {
     std::vector<Sym> words, poss, labels;
 
-    void clear() {
+   void clear() {
       words.clear(); poss.clear(); labels.clear();
     }
 
-    void add(std::string const& line, std::set<Sym>* allLabels
+   void add(std::string const& line, std::set<Sym>* allLabels
              , IVocabularyPtr& pVoc, bool testMode) {
       std::stringstream ss(line);
       std::string word, pos, label;
@@ -562,7 +562,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         , doLogProgress_(doLogProgress)
     {}
 
-    void operator()() {
+   void operator()() {
       SDL_DEBUG(Optimization.ProcessTrainingExampleRange,
                 "Processing sentences " << begin_ << " to " << end_);
       for (std::size_t i = begin_; i < end_; ++i) {
@@ -585,7 +585,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     std::vector<Sentence> const& sents_;
     Hypergraph::IHypergraph<A> const& transitionModel_;
     typename Outer::Pairs& trainingExamples_;
-    bool doLogProgress_;
+   bool doLogProgress_;
   };
 
   ///

@@ -54,7 +54,7 @@ icu::Normalizer2 const* gNfkd = icu::Normalizer2::getNFKDInstance(nfcErr);
 #endif
 
 
-bool isNfc(const UnicodeString& s, bool K) {
+bool isNfc(UnicodeString const& s, bool K) {
   using namespace icu;
   UErrorCode err = U_ZERO_ERROR;
   assert(U_SUCCESS(err));
@@ -93,7 +93,7 @@ bool maybeNormalizeToNfc(Slice utf8, std::string& buf, bool warnIfNotNfc, bool w
       else if (warnFalsePositiveOk)
         warnNotNfc(utf8);
       else {
-        bool yes = norm->isNormalized(u.tempSubString(nfcPrefixLen, len), err);
+       bool yes = norm->isNormalized(u.tempSubString(nfcPrefixLen, len), err);
         assert(U_SUCCESS(err));
         if (!yes) warnNotNfc(utf8);
       }

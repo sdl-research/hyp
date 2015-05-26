@@ -197,9 +197,7 @@ struct IHypergraphStates : Resource {
 
   virtual IVocabularyPtr getVocabulary() const = 0;
 
-  virtual IVocabulary *vocab() const {
-    return getVocabulary().get();
-  }
+  virtual IVocabulary* vocab() const { return getVocabulary().get(); }
 
   /**
      \return whether (approximately) best-first (lowest weight) outarcs. unlike hasSortedArcs, this is not
@@ -684,7 +682,7 @@ inline bool isGraphArcImpl(HG const& hg, typename HG::Arc const& a, bool& fsm, b
   if (hg.inputLabelImpl(a.head()).isTerminal()) return (fsm = oneLexical = false);
 
   if (N == 2) {
-    bool const term1 = hg.inputLabelImpl(tails[1]).isTerminal();
+   bool const term1 = hg.inputLabelImpl(tails[1]).isTerminal();
     if (hg.inputLabelImpl(tails[0]).isTerminal()) {
       if (term1) oneLexical = false;
       return (fsm = false);
@@ -696,8 +694,8 @@ inline bool isGraphArcImpl(HG const& hg, typename HG::Arc const& a, bool& fsm, b
   } else {
     fsm = false;
     if (!N) return false;
-    bool lex = false;
-    bool const firstLabeled = hg.inputLabelImpl(tails[0]).isTerminal();
+   bool lex = false;
+   bool const firstLabeled = hg.inputLabelImpl(tails[0]).isTerminal();
     TailId i = !firstLabeled;
     for (;; ++i) {
       if (i == N) return true;
@@ -888,7 +886,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
   TailId endAnnotations(Arc const* a) const { return endAnnotations(a->tails()); }
 
   struct FstArcFor {
-    void init(Self const* hg, bool allowAnnotations = false) {
+   void init(Self const* hg, bool allowAnnotations = false) {
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
       annotations = allowAnnotations && (true || (hg->properties() & kAnnotations));
 #endif
@@ -951,7 +949,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     Self const* hg_;
     StateId sizeForLabels_;
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
-    bool annotations;
+   bool annotations;
 #endif
   };
 
@@ -1059,8 +1057,8 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     return detail::isGraphArcImpl(*this, a, fsm, oneLexical);
   }
 
-  inline bool isGraphArc(Arc const& arc) const {
-    bool ignore;
+  bool isGraphArc(Arc const& arc) const {
+   bool ignore;
     return isGraphArc(arc, ignore, ignore);
   }
 
@@ -1668,7 +1666,8 @@ inline PrintProperties printProperties(IHypergraphStates const& hg) {
 }
 
 void printState(std::ostream& out, StateId sid, IHypergraphStates const& hg, bool inlineLabel = false);
-void printArcTails(std::ostream& out, StateIdContainer const& tails, IHypergraphStates const* hg, bool inlineGraphLabels = false);
+void printArcTails(std::ostream& out, StateIdContainer const& tails, IHypergraphStates const* hg,
+                  bool inlineGraphLabels = false);
 
 template <class Arc>
 void printArc(std::ostream& out, Arc const* arc, IHypergraphStates const* hg) {
@@ -1694,9 +1693,7 @@ struct PrintArc {
     self.print(out);
     return out;
   }
-  void print(std::ostream& out) const {
-    printArc(out, arc, hg);
-  }
+  void print(std::ostream& out) const { printArc(out, arc, hg); }
 };
 
 template <class Arc, class Hg>

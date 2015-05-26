@@ -86,11 +86,11 @@ template <class FloatT>
 struct NeglogTimesFct {
   typedef FloatT result_type;
   typedef FloatT increment_type;
-  FloatT operator()(const FloatT& a, const FloatT& b) const { return a + b; }
-  inline void operator()(const FloatT& b, FloatT& a) const { a += b; }
+  FloatT operator()(FloatT const& a, FloatT const& b) const { return a + b; }
+  void operator()(FloatT const& b, FloatT& a) const { a += b; }
 
   enum { kIsCommutative = 1 };
-  static inline FloatT zeroPlus(const FloatT& b) { return b; }
+  static inline FloatT zeroPlus(FloatT const& b) { return b; }
   static inline FloatT zero() { return (FloatT)0; }
 };
 
@@ -104,11 +104,11 @@ template <class FloatT>
 struct NeglogDivideFct {
   typedef FloatT result_type;
   typedef FloatT increment_type;
-  FloatT operator()(const FloatT& a, const FloatT& b) const { return a - b; }
-  inline void operator()(const FloatT& b, FloatT& a) const { a -= b; }
+  FloatT operator()(FloatT const& a, FloatT const& b) const { return a - b; }
+  void operator()(FloatT const& b, FloatT& a) const { a -= b; }
 
   enum { kIsCommutative = 0 };
-  static inline FloatT zeroPlus(const FloatT& b) { return -b; }
+  static inline FloatT zeroPlus(FloatT const& b) { return -b; }
   static inline FloatT zero() { return (FloatT)0; }
 };
 
@@ -123,13 +123,13 @@ struct NeglogPlusFct {
   typedef FloatT result_type;
   typedef FloatT increment_type;
   template <class Map>
-  inline void addToMap(Map &map, typename Map::key_type const& key, FloatT value) const {
+  void addToMap(Map& map, typename Map::key_type const& key, FloatT value) const {
     std::pair<typename Map::iterator, bool> iNew = map.insert(typename Map::value_type(key, value));
     if (iNew.second) return;
     (*this)(value, iNew.first->second);
   }
 
-  inline FloatT operator()(const FloatT& a, const FloatT& b) const {
+  FloatT operator()(FloatT const& a, FloatT const& b) const {
     if (a == std::numeric_limits<FloatT>::infinity()) {
       return b;
     }
@@ -142,7 +142,7 @@ struct NeglogPlusFct {
       return b - log1p((FloatT)exp(b - a));
     }
   }
-  inline void operator()(const FloatT& b, FloatT& a) const {
+  void operator()(FloatT const& b, FloatT& a) const {
     if (b != std::numeric_limits<FloatT>::infinity()) {
       if (a <= b)
         a -= log1p((FloatT)exp(a - b));
@@ -152,7 +152,7 @@ struct NeglogPlusFct {
   }
 
   enum { kIsCommutative = 1 };
-  static inline FloatT zeroPlus(const FloatT& b) { return b; }
+  static inline FloatT zeroPlus(FloatT const& b) { return b; }
 };
 
 /**
@@ -165,7 +165,7 @@ template <class FloatT>
 struct NeglogSubFct {
   typedef FloatT result_type;
   typedef FloatT increment_type;
-  inline FloatT operator()(const FloatT& a, const FloatT& b) const {
+  FloatT operator()(FloatT const& a, FloatT const& b) const {
     if (b == std::numeric_limits<FloatT>::infinity()) return a;
     const FloatT d = a - b;
     if (d <= 0)
@@ -176,10 +176,10 @@ struct NeglogSubFct {
       SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
     return b;
   }
-  inline void operator()(const FloatT& b, FloatT& a) const { a = operator()(a, b); }
+  void operator()(FloatT const& b, FloatT& a) const { a = operator()(a, b); }
 
   enum { kIsCommutative = 0 };
-  static inline FloatT zeroPlus(const FloatT& b) {
+  static inline FloatT zeroPlus(FloatT const& b) {
     if (b == std::numeric_limits<FloatT>::infinity()) return b;  // zero-zero=zero
     SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
     return b;  // doesn't execute

@@ -30,8 +30,6 @@
 
 namespace sdl {
 
-// TODO: Add namespace Util
-
 // numeric limits class
 template <class T>
 class FloatLimits {

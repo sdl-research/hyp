@@ -35,7 +35,7 @@ struct Multiply2nd : public std::unary_function<T, T> {
   FloatT factor_;
   TimesFct times_fct_;
   Multiply2nd(FloatT f, TimesFct t) : factor_(f), times_fct_(t) {}
-  T operator()(const T& f) const {
+  T operator()(T const& f) const {
     return std::make_pair(f.first, times_fct_(f.second, factor_));
   }
 };
@@ -54,7 +54,7 @@ class MultipliedMap {
  public:
   typedef boost::transform_iterator<MultiplyValue,
                                     typename Map::const_iterator> const_iterator;
-  MultipliedMap(const Map& m,
+  MultipliedMap(Map const& m,
                 TimesFct times_fct,
                 mapped_type factor)
       : map_(m), times_fct_(times_fct), factor_(factor) {}
@@ -65,7 +65,7 @@ class MultipliedMap {
     return boost::make_transform_iterator(map_.end(), MultiplyValue(factor_, times_fct_));
   }
  private:
-  const Map& map_;
+  Map const& map_;
   TimesFct times_fct_;
   mapped_type factor_;
 };

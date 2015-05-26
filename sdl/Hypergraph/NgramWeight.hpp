@@ -18,10 +18,6 @@
 #define HYP__HYPERGRAPH_NGRAM_WEIGHT_HPP
 #pragma once
 
-#ifndef SDL_NGRAM_CFG_CORRECT
-// todo: permanently enable once we ensure no regressions
-#define SDL_NGRAM_CFG_CORRECT 0
-#endif
 
 #include <algorithm>
 #include <vector>
@@ -105,7 +101,6 @@ class NgramWeightTpl {
   typedef NgramWeightTpl<W> Self;
 
  public:
-
   void set(std::string const& str) {
     SDL_THROW_LOG(Hypergraph.NgramWeightTpl, UnimplementedException, "Not implemented");
   }
@@ -190,7 +185,9 @@ class NgramWeightTpl {
   }
 
   void plusBy(Self const& w2) {
-    if (w2.isZero()) { return; } else if (isZero()) {
+    if (w2.isZero()) {
+      return;
+    } else if (isZero()) {
       *this = w2;
       return;
     } else {
@@ -203,9 +200,8 @@ class NgramWeightTpl {
       if (&w2 == this) {
         // should not really happen, ever, but just in case:
         for (iterator i = ngrams_.begin(), e = ngrams_.end(); i != e; ++i)
-          Hypergraph::
-              plusBy(i->second,
-                     i->second);  // well, everybody better be ready for plusBy(*this) because I just did it.
+          Hypergraph::plusBy(i->second, i->second);
+        // well, everybody better be ready for plusBy(*this) because I just did it.
         return;
       }
       if (maxlen_ < w2.maxlen_) maxlen_ = w2.maxlen_;
@@ -276,7 +272,7 @@ class NgramWeightTpl {
       *result++ = value_type(make_shared<Ngram>(*firstNgramAndWeight->first), firstNgramAndWeight->second);
   }
 
-  inline static NgramPtr cloneNgramPtr(NgramPtr const& pNgram) { return make_shared<Ngram>(*pNgram); }
+  static NgramPtr cloneNgramPtr(NgramPtr const& pNgram) { return make_shared<Ngram>(*pNgram); }
 
   bool operator<(Self const& other) const {
     SDL_THROW_LOG(Hypergraph.NgramWeightTpl, std::runtime_error, "Not implemented");
@@ -303,8 +299,8 @@ class NgramWeightTpl {
 };
 
 template <class W>
-typename NgramWeightTpl<W>::NgramPtr NgramWeightTpl<W>::kEmptyNgram(
-    make_shared<typename NgramWeightTpl<W>::Ngram>());
+typename NgramWeightTpl<W>::NgramPtr
+    NgramWeightTpl<W>::kEmptyNgram(make_shared<typename NgramWeightTpl<W>::Ngram>());
 
 template <class W>
 NgramWeightTpl<W> NgramWeightTpl<W>::kOne;
@@ -351,12 +347,8 @@ inline NgramWeightTpl<W> times(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> co
       if (Hypergraph::isZero(wtConcat)) continue;
       NgramPtrAndWeight concatNgWt(make_shared<Ngram>(ngram1.size() + ngram2.size()), wtConcat);
       Util::copyConcatRanges(ngram1, ngram2, concatNgWt.first->begin());  //=n1+n2
-#if SDL_NGRAM_CFG_CORRECT
-      Util::updateBy(PlusBy<W>(), product.ngrams_, concatNgWt);
-#else
       assert(!Util::contains(product.ngrams_, concatNgWt.first));
       product.ngrams_.insert(concatNgWt);
-#endif
     }
   }
   if (product.size() == 0) return Ngw::kZero;  // not one. once ngrams_ grow too long, you're done.
@@ -367,7 +359,7 @@ template <class W>
 bool operator==(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> const& w2) {
   typedef typename NgramWeightTpl<W>::Ngram Ngram;
   typedef typename NgramWeightTpl<W>::NgramPtr NgramPtr;
-  if (w1.size() != w2.size()) { return false; }
+  if (w1.size() != w2.size()) return false;
   typename NgramWeightTpl<W>::const_iterator it1 = w1.begin();
   typename NgramWeightTpl<W>::const_iterator w1End = w1.end();
   typename NgramWeightTpl<W>::const_iterator it2 = w2.begin();
@@ -376,7 +368,7 @@ bool operator==(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> const& w2) {
     NgramPtr pNgram2 = it2->first;
     W const& w1 = it1->second;
     W const& w2 = it2->second;
-    if (*pNgram1 != *pNgram2 || w1 != w2) { return false; }
+    if (*pNgram1 != *pNgram2 || w1 != w2) return false;
   }
   return true;
 }

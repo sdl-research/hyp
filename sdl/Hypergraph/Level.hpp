@@ -153,7 +153,7 @@ struct Levelization : Levels {
         : remainIn(remainIn)
     {}
     template <class Arc>
-    void operator()(Arc *arc) const {
+   void operator()(Arc *arc) const {
       ++Util::atExpand(remainIn, arc->head());
     }
   };

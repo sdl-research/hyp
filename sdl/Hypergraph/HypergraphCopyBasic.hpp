@@ -122,7 +122,7 @@ void inplaceRelabel(IMutableHypergraph<A> *phg, T const& tr) {
 
 // same structure as original, but modified labels.
 template <class Arc, class T>
-void copyHypergraphRelabel(const IHypergraph<Arc>& from,
+void copyHypergraphRelabel(IHypergraph<Arc> const& from,
                            IMutableHypergraph<Arc>* to,
                            T const& tr
                            )
@@ -135,7 +135,7 @@ void copyHypergraphRelabel(const IHypergraph<Arc>& from,
    copy hypergraph 'from' into 'to'.
 */
 template<class Arc>
-void copyHypergraph(const IHypergraph<Arc>& from,
+void copyHypergraph(IHypergraph<Arc> const& from,
                     IMutableHypergraph<Arc>* to,
                     ClearAndSameProperties clearAndSameProperties = kClearAndSameProperties
                     )
@@ -148,7 +148,7 @@ void copyHypergraph(const IHypergraph<Arc>& from,
    copy hypergraph 'from', storing it (a new MutableHypergraph) in holdNew; return pointer to it.
 */
 template<class Arc>
-MutableHypergraph<Arc>* copyHypergraphNew(const IHypergraph<Arc>& from,
+MutableHypergraph<Arc>* copyHypergraphNew(IHypergraph<Arc> const& from,
                                           shared_ptr<IHypergraph<Arc> const> &holdNew,
                                           Properties prop) {
   MutableHypergraph<Arc> *r = new MutableHypergraph<Arc>(prop);
@@ -162,7 +162,7 @@ MutableHypergraph<Arc>* copyHypergraphNew(const IHypergraph<Arc>& from,
    copy hypergraph 'from' into 'to', keeping only a subset of the arcs
 */
 template<class Arc, class Keep>
-void copyHypergraphPartial(const IHypergraph<Arc>& from,
+void copyHypergraphPartial(IHypergraph<Arc> const& from,
                            IMutableHypergraph<Arc>* to,
                            Keep const& r
                            , ClearAndSameProperties clearAndSameProperties = kClearAndSameProperties
@@ -172,7 +172,7 @@ void copyHypergraphPartial(const IHypergraph<Arc>& from,
 }
 
 template<class Arc, class T, class Keep>
-void copyHypergraphRelabelPartial(const IHypergraph<Arc>& from,
+void copyHypergraphRelabelPartial(IHypergraph<Arc> const& from,
                                   IMutableHypergraph<Arc>* to,
                                   T const& tr,
                                   Keep const& r

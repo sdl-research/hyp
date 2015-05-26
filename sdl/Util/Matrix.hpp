@@ -90,7 +90,7 @@ struct Matrix {
 
   T& operator()(size_type row, size_type col) { return container_[cols_ * row + col]; }
 
-  const T& operator()(size_type row, size_type col) const { return const_cast<Matrix<T>&>(*this)(row, col); }
+  T const& operator()(size_type row, size_type col) const { return const_cast<Matrix<T>&>(*this)(row, col); }
 
   Dimensions size() const { return Dimensions(rows_, cols_); }
 
@@ -119,7 +119,7 @@ struct Matrix {
 };
 
 template <class T>
-std::ostream& operator<<(std::ostream& out, const Matrix<T>& m) {
+std::ostream& operator<<(std::ostream& out, Matrix<T> const& m) {
   bool first = true;
   typedef typename Matrix<T>::size_type size_type;
   for (size_type i = 0; i < m.getNumRows(); ++i) {

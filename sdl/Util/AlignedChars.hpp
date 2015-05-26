@@ -100,7 +100,7 @@ struct IcuNormalizeByChunks {
         return true;
       } else {
         if (normalizer->hasBoundaryBefore(c)) {
-          bool const already = !todo.isEmpty();
+         bool const already = !todo.isEmpty();
           if (normalizer->isInert(c)) {  // slower than hasBoundaryBefore so nested inside
             if (already) {
               inert = c;

@@ -56,7 +56,7 @@ struct NonSpecialInput {
 };
 
 template <class Arc>
-void complement(const IHypergraph<Arc>& inhg, IMutableHypergraph<Arc>* result) {
+void complement(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
   ASSERT_VALID_HG(inhg);
   const Sym complementSigma = RHO::ID;  // FIXME: actual SIGMA may fail in compose; check. try RHO instead?
   result->offerVocabulary(inhg);

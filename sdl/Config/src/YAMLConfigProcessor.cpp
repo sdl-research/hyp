@@ -211,7 +211,7 @@ namespace {
    If the input path is a relative path, prepends the prefix. If the path is absolute, its a No-Op.
    returns the path as boost::filesystem::path instance.
  */
-inline boost::filesystem::path addPrefixToPath(const std::string& path,
+inline boost::filesystem::path addPrefixToPath(std::string const& path,
                                                boost::filesystem::path const& fsPrefix) {
   boost::filesystem::path fsPath(path);
   if (!fsPath.is_absolute()) fsPath = fsPrefix / path;
@@ -222,7 +222,7 @@ inline boost::filesystem::path addPrefixToPath(const std::string& path,
    for x-path: config keys (and for change-working-directory) - locate relative paths relative to directory of
    yaml file
 */
-std::string addPrefixToPathString(const std::string& path, boost::filesystem::path const& fsPrefix) {
+std::string addPrefixToPathString(std::string const& path, boost::filesystem::path const& fsPrefix) {
   if (Util::isNonFilesystemPath(path)) return path;  // exclude e.g. '-' meaning STDOUT
   boost::filesystem::path fsPath(path);
   if (!fsPath.is_absolute()) {
@@ -295,7 +295,7 @@ ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem:
                                                    << " ... to: " << Util::print(expanded, oneline));
 
     assert(optPath_.size() >= optPathInitialDepth_);
-    bool rootLevel = optPath_.empty();  // TODO: or optPathInitialDepth_ == optPath_.size() ?
+   bool rootLevel = optPath_.empty();  // TODO: or optPathInitialDepth_ == optPath_.size() ?
     if (rootLevel) {
       ConfigNode const& replaced = processReplaceNodes(expanded);  // TODO: rootLevel for file vs. at end?
       if (optPath_.empty()) {
@@ -357,7 +357,7 @@ ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in,
 }
 
 ConfigNode YAMLConfigProcessor::mergeMaps(ConfigNode const& base, ConfigNode const& over,
-                                          bool skipBasisOverwrite) const {
+                                         bool skipBasisOverwrite) const {
   MapIndex overs(over);
   if (skipBasisOverwrite) overs.erase(kBasis);
   ConfigNode merged;
@@ -403,7 +403,7 @@ ConfigNode YAMLConfigProcessor::mergeSeqs(ConfigNode const& base, ConfigNode con
    if either null: return other
 */
 ConfigNode YAMLConfigProcessor::mergeNodes(ConfigNode const& base, ConfigNode const& over,
-                                           bool skipBasisOverwrite) const {
+                                          bool skipBasisOverwrite) const {
   using namespace YAML;
   NodeType::value baseType = base.Type(), overType = over.Type();
   if (baseType == NodeType::Null || baseType == NodeType::Undefined) return over;
@@ -572,7 +572,7 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
     for (const_iterator it = in.begin(), end = in.end(); it != end; ++it) {
       Node const& keyNode = it->first;
       Node const& valNode = it->second;
-      bool isSteps = false;
+     bool isSteps = false;
 
       std::string category;
       std::string key = keyNode.Scalar();
@@ -597,7 +597,7 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
       // category
       assert(!category.empty());
       NodeType::value valType = valNode.Type();
-      bool isSeq = valType == NodeType::Sequence;
+     bool isSeq = valType == NodeType::Sequence;
       if (!(isSteps && isSeq || valType == NodeType::Map))
         SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
                       "Category nodes cannot be scalar - should be map or, for category pipeline, sequence "

@@ -193,8 +193,8 @@ class OnlineOptimizer {
         makeLearningRate(numUpdates,
                          opts_.learningRateOptions);
 
-    bool useAdagrad = opts_.learningRateOptions.method == kAdagrad;
-    bool useAdagradL1 = opts_.learningRateOptions.adagradL1Strength > 0.0f;
+   bool useAdagrad = opts_.learningRateOptions.method == kAdagrad;
+   bool useAdagradL1 = opts_.learningRateOptions.adagradL1Strength > 0.0f;
 
     boost::scoped_ptr<ParameterUpdate<FloatT> > update;
     if (useAdagrad) {

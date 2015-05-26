@@ -74,7 +74,7 @@ std::string findExistingFile(std::string const& filename, Dirs const& searchDirs
                 << filename << "' " << Util::print(searchDirs, RangeSep(":", "(search directories: ", ")")));
 }
 
-void splitFilePath(const std::string& resolvedPath, std::string* pStrDir, std::string* pStrFileName) {
+void splitFilePath(std::string const& resolvedPath, std::string* pStrDir, std::string* pStrFileName) {
 
   bfs::path filePath(resolvedPath);
   if (pStrDir) *pStrDir = filePath.parent_path().string();

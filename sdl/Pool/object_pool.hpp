@@ -171,7 +171,7 @@ class object_pool: protected pool<UserAllocator>
       return *this;
     }
     //! \return The underlying boost:: \ref pool storage used by *this.
-    const pool<UserAllocator> & store() const
+    pool<UserAllocator> const& store() const
     {
       return *this;
     }
@@ -199,12 +199,12 @@ class object_pool: protected pool<UserAllocator>
       purge_memory();
     }
 
-    bool release_memory()
+   bool release_memory()
     {
       return pool<UserAllocator>::release_memory();
     }
 
-    bool purge_memory();
+   bool purge_memory();
 
     // Returns 0 if out-of-memory.
     element_type * malloc BOOST_PREVENT_MACRO_SUBSTITUTION()
@@ -216,7 +216,7 @@ class object_pool: protected pool<UserAllocator>
       return static_cast<element_type *>(store().malloc BOOST_PREVENT_MACRO_SUBSTITUTION());
     }
 
-    void free BOOST_PREVENT_MACRO_SUBSTITUTION(element_type * const chunk)
+   void free BOOST_PREVENT_MACRO_SUBSTITUTION(element_type * const chunk)
     { //! De-Allocates memory that holds a chunk of type ElementType.
       //!
       //!  Note that chunk may be 0.\n
@@ -225,7 +225,7 @@ class object_pool: protected pool<UserAllocator>
       store().free BOOST_PREVENT_MACRO_SUBSTITUTION(chunk);
     }
 
-    bool is_from(element_type * const chunk) const
+   bool is_from(element_type * const chunk) const
     { /*! \returns true  if chunk was allocated from *this or
       may be returned as the result of a future allocation from *this.
 
@@ -298,7 +298,7 @@ class object_pool: protected pool<UserAllocator>
 #   include <boost/pool/detail/pool_construct_simple.ipp>
 #endif
 #endif
-    void destroy(element_type * const chunk)
+   void destroy(element_type * const chunk)
     { //! Destroys an object allocated with \ref construct.
       //!
       //! Equivalent to:
@@ -315,7 +315,7 @@ class object_pool: protected pool<UserAllocator>
       return store().get_next_size();
     }
 
-    void set_next_size(const size_type x)
+   void set_next_size(const size_type x)
     { //! Set a new number of chunks to allocate the next time we run out of memory.
       //! \param x wanted next_size (must not be zero).
       store().set_next_size(x);
@@ -326,7 +326,7 @@ class object_pool: protected pool<UserAllocator>
       return pool<UserAllocator>::get_max_size();
     }
 
-    void set_max_size(const size_type nmax_size)
+   void set_max_size(const size_type nmax_size)
     { //! Set max_size.
       pool<UserAllocator>::set_max_size(nmax_size);
     }
@@ -348,7 +348,7 @@ bool object_pool<T, UserAllocator>::purge_memory()
     details::PODptr<size_type> next = iter;
 
     // Start 'freed_iter' at beginning of free list
-    void * freed_iter = this->first;
+   void * freed_iter = this->first;
 
     const size_type partition_size = this->alloc_size();
 

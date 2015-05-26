@@ -73,10 +73,6 @@ struct IVocabulary : Resource {
 
   virtual ~IVocabulary() {}
 
-  typedef sdl::SymbolType SymbolType;
-
-  static bool isValidSymbolType(SymbolType) { return true; }
-
   /**
      add symbol if it doesn't exist. return id of added or existing symbol of type SymbolType
   */
@@ -212,7 +208,7 @@ struct IVocabulary : Resource {
   bool contains(std::string const&, SymbolType) const;
 
   /// deprecated - just call symbolId.type()
-  inline SymbolType getSymbolType(Sym symbolId) const { return symbolId.type(); }
+  SymbolType getSymbolType(Sym symbolId) const { return symbolId.type(); }
 
   virtual void accept(IVocabularyVisitor& visitor) {
     acceptType(visitor, kTerminal);
@@ -227,8 +223,8 @@ struct IVocabulary : Resource {
 
   std::string const& getName() const { return this->name_.empty() ? kUnnamedVocabulary : this->name_; }
 
-  virtual void loadTerminals(const std::string& terminalPath) {}
-  virtual void loadNonterminals(const std::string& nonTerminalPath) {}
+  virtual void loadTerminals(std::string const& terminalPath) {}
+  virtual void loadNonterminals(std::string const& nonTerminalPath) {}
 
   /// return address of string for sym if vocab contains sym. else return null.
   virtual std::string const* strOrNull(Sym sym) const {

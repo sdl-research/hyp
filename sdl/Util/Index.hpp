@@ -91,7 +91,7 @@ struct PrintPtr {
    \author dreyer, graehl
 */
 template <class Ptr, class Id = std::size_t, class Hash = boost::hash<Ptr>, class Pred = std::equal_to<Ptr>,
-          bool UseFreeList = true>
+         bool UseFreeList = true>
 class Index {
 
  private:
@@ -130,7 +130,7 @@ class Index {
   IdType addOrExisting(Ptr k, Ptr& existing) {
     assert(!msb(freelist_));
     assert(!lsb(k));
-    bool const noneFree = UseFreeList ? freelist_ == (PointerOrFreeIndex)kNullFreelistIndex : true;
+   bool const noneFree = UseFreeList ? freelist_ == (PointerOrFreeIndex)kNullFreelistIndex : true;
     IdType const id = noneFree ? data_.size() : freelist_;
     std::pair<typename Map::iterator, bool> iNew = indexInData_.insert(typename Map::value_type(k, id));
     if (iNew.second) {
@@ -191,7 +191,7 @@ class Index {
   }
 
   IdType nextId(Ptr k) const {
-    bool const noneFree = UseFreeList ? freelist_ == (PointerOrFreeIndex)kNullFreelistIndex : true;
+   bool const noneFree = UseFreeList ? freelist_ == (PointerOrFreeIndex)kNullFreelistIndex : true;
     return noneFree ? data_.size() : freelist_;
   }
 
@@ -219,7 +219,7 @@ class Index {
     return r;
   }
 
-  void accept(const IndexVisitor<Ptr>& visitor) {
+  void accept(IndexVisitor<Ptr> const& visitor) {
     for (typename Map::iterator it = indexInData_.begin(), end = indexInData_.end(); it != end; ++it)
       visitor.visit(it->first);
   }
@@ -286,7 +286,7 @@ class Index {
     std::size_t const nkeys = data_.size();
     if (id < nkeys) {
       Ptr& key = data_[id];
-      bool const present = UseFreeList ? (bool)key && !lsb(key) : (bool)key;
+     bool const present = UseFreeList ? (bool)key && !lsb(key) : (bool)key;
       if (present) {
         assert(Util::contains(indexInData_, key));
         indexInData_.erase(key);

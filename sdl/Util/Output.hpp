@@ -54,7 +54,7 @@ struct Output : OutputStream {
     return (OutputStream const&)*this;
   }
 
-  void setFilename(const std::string& filename) {
+  void setFilename(std::string const& filename) {
     OutputStream::set(filename);
   }
 
@@ -68,7 +68,7 @@ struct Output : OutputStream {
 
 namespace boost { namespace program_options {
 inline void validate(boost::any& v,
-                     const std::vector<std::string>& values,
+                     std::vector<std::string> const& values,
                      sdl::Util::Output* target_type, int)
 {
   v = boost::any(sdl::Util::Output(graehl::get_single_arg(v, values)));

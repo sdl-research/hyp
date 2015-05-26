@@ -78,7 +78,7 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
     // Loop over all examples
     for (TrainingDataIndex i = begin; i < end; ++i) {
 
-      bool const logFirst = i == 0 && logFirstHgOnce_.first();
+     bool const logFirst = i == 0 && logFirstHgOnce_.first();
       // The hypergraph constrained to observed input and output
       IHgPtr pHgConstrained((*pHgTrainingPairs_)[i].first);
       if (logFirst)

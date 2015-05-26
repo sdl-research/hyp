@@ -66,7 +66,7 @@ inline bool isInAngleBrackets(std::string const& str) {
 */
 inline Sym add(IVocabulary& voc, std::string const& word, bool lex,
                        std::size_t* numBlockStartSymsSeen, Sym defaultSym = NoSymbol,
-                       bool increaseNumBlocks = true) {
+                      bool increaseNumBlocks = true) {
   if (word.empty()) return defaultSym;
 
   // we don't allow quoted "<special>"
@@ -95,7 +95,7 @@ LabelPair const NoSymbols(NoSymbol, NoSymbol);
 
 template <class Arc>
 void addState(ParserUtil::State& s, SymsToState* symsToState, StateId& highestStateId, IVocabulary& voc,
-              IMutableHypergraph<Arc>* result, const std::string& src, std::size_t linenum,
+              IMutableHypergraph<Arc>* result, std::string const& src, std::size_t linenum,
               std::size_t* numBlockStartSymsSeen) {
   // need to call input before output symbol so block-start is incremented (true)
   Sym const input = ArcParserFctUtil::add(voc, s.inputSymbol, s.isInputSymbolLexical,
@@ -170,7 +170,7 @@ struct ParsedArcsConsumer {
 
 template <class Arc>
 void parseText(std::istream& in, std::string const& inFilename, IMutableHypergraph<Arc>* result,
-               bool requireNfc = true) {
+              bool requireNfc = true) {
   ParsedArcs arcs;
   impl::ParsedArcsConsumer accept(arcs);
   Util::visitChompedLines(in, accept, requireNfc);

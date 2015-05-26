@@ -132,13 +132,13 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 #define LOG_DEBUG_NAMESTR(loggerName, expression)                                                       \
   do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
+    LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
 
 #if !defined(NDEBUG) || defined(SDL_ENABLE_TRACE_LOGGING)
 #define LOG_TRACE_NAMESTR(loggerName, expression)                                                       \
   do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
+    LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
 #else
 #define LOG_TRACE_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()

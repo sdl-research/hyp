@@ -102,10 +102,10 @@ struct SaveFst {
                         );
         ++nOut;
       }
-      bool final = fst.final(state);
+     bool final = fst.final(state);
       if (final) {  // a final state
         if (!outFinal) {
-          bool const needsEpsilon = nOut;
+         bool const needsEpsilon = nOut;
           StateId const finalSt = needsEpsilon ? out.addState() : from;
           setFinal(finalSt);
           if (!needsEpsilon) return from;

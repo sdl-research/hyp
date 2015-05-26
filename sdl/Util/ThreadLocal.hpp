@@ -16,7 +16,7 @@
 
      //thread safe dynamic scoping! (like perl "local")
 
-     void f() {
+    void f() {
        sdl::Util::SaveLocal<int> save(verbosity);
        verbosity=10;
        {

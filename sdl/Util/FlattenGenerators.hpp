@@ -61,11 +61,11 @@ struct FlattenGenerators : WeightFn
   typedef Result result_type;
   typedef WeightT Weight;
   struct Tip {
-    bool base; // base==0 means it's not on base
+   bool base; // base==0 means it's not on base
     Generator gen;
     value_type val;
     Weight weight; //TODO: object pool
-    bool operator<(Tip const& other) const {
+   bool operator<(Tip const& other) const {
       return weight < other.weight;
     }
   };
@@ -129,7 +129,7 @@ struct FlattenGenerators : WeightFn
   }
   void pop() {
     Tip &tip=*queue.top();
-    bool wasBase = tip.base;
+   bool wasBase = tip.base;
     if (wasBase)
       tip.base = false;
     if (tip.gen) {

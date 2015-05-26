@@ -47,7 +47,11 @@ std::string & fixUtf8(std::string &string) {
   return string;
 }
 
-Unicode gWindows1252ToUnicode[kNWindows1252Unicode] = {
+Unicode gWindows1252ToUnicode[kNWindows1252Unicode]
+#if __GNUC__
+__attribute__ ((used))
+#endif
+= {
   0x20ac, // 0x80 -> Euro Sign
   0x0081,
   0x201a, // 0x82 -> Single Low-9 Quotation Mark
