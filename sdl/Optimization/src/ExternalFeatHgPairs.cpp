@@ -8,6 +8,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+/** \file
+
+    instantiation of ExternalFeatHgPairs<Optimization::Arc>
+*/
+
 #include <sdl/Optimization/ExternalFeatHgPairs.hpp>
 #include <sdl/Optimization/src/ExternalFeatHgPairs.ipp>
 #include <sdl/Optimization/Arc.hpp>

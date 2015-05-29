@@ -41,12 +41,9 @@ namespace Hypergraph {
 void writeLabel(std::ostream& out, Sym sym);
 void writeLabel(Util::StringBuilder& out, Sym sym);
 
-
-/// could live in Vocabulary (although it prints quoted things exactly as parsable Hypergraph text format
-/// grammar)
+/// prints quoted things exactly as parseable Hypergraph text format, so safer here (than in Vocabulary)
 void writeLabel(std::ostream& out, std::string const& label, SymbolQuotation quote = kUnquoted);
 void writeLabel(Util::StringBuilder& out, std::string const& label, SymbolQuotation quote = kUnquoted);
-
 
 inline void writeLabel(std::ostream& out, Sym sym, IVocabulary const& voc, SymbolQuotation quote = kQuoted) {
   writeLabel(out, voc.str(sym), sym.isLexical() ? quote : kUnquoted);

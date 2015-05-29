@@ -10,6 +10,7 @@
 // limitations under the License.
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
 #include <iostream>
 
 namespace sdl {

@@ -77,7 +77,6 @@
 #include <sdl/SharedPtr.hpp>
 #include <sdl/Util/DefaultPrintRange.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-//#include <sdl/Util/IntSet.hpp>
 #include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Util/Latch.hpp>
 #include <sdl/Util/Compare.hpp>
@@ -86,7 +85,6 @@
 #include <sdl/Hypergraph/Graph.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/FnReference.hpp>
-#include <sdl/Util/DebugWarn.hpp>
 #include <sdl/Util/Unordered.hpp>
 
 /// 1 => use sorted vector rather than unordered map. but then needs work for >1 thread.
@@ -586,12 +584,10 @@ void determinize(IHypergraph<Arc> const& i,  // input
   }
   o->forcePropertiesOnOff(prop_on, prop_off);
   assertCanDeterminize(i, flags);
-  if (isDeterminized(i, !DET_SPECIAL_SYMBOL(flags, EPSILON))) {
+  if (isDeterminized(i, !DET_SPECIAL_SYMBOL(flags, EPSILON)))
     copyHypergraph(i, o);
-    DWARN("determinize: already determinized - simply copying.");
-    return;
-  }
-  determinize_always(i, o, flags);
+  else
+    determinize_always(i, o, flags);
 }
 
 struct Determinize : TransformBase<Transform::Inout, (kFsm | kStoreOutArcs)> {

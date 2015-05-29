@@ -26,10 +26,6 @@
 // try to cache zero and one values for CompositeWeight)
 #endif
 
-#if SDL_WEIGHT_USE_AT_STATIC_INIT
-#include <sdl/Util/CacheStaticLocal.hpp>
-#endif
-
 #include <sdl/Hypergraph/WeightsFwdDecls.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
 #include <cmath>

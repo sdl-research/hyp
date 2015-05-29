@@ -22,7 +22,6 @@
 #include <sdl/Path.hpp>
 #include <iostream>
 #include <sdl/StringConsumer.hpp>
-#include <sdl/Util/Yaml.hpp>
 #include <yaml-cpp/node/node.h>
 #include <sdl/Util/OnceFlag.hpp>
 #include <sdl/Util/LogHelper.hpp>

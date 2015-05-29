@@ -14,6 +14,8 @@
    Implements an "Optimize" standalone executable, which calls
    OptimizationProcedure to optimize (i.e., train) the feature weights
    of an SDL module, e.g., the weights of TrainableCapitalizer.
+
+   TODO: test coverage.
  */
 
 #include <iostream>

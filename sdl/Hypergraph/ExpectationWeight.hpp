@@ -101,7 +101,6 @@
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/LogHelper.hpp>
 
-#include <sdl/Util/MultipliedMap.hpp>
 #include <sdl/Util/LogMath.hpp>
 
 #include <sdl/Hypergraph/Weight.hpp>

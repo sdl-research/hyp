@@ -12,5 +12,5 @@
 #include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
 #include <sdl/Hypergraph/src/IHypergraphsIteratorTpl.cpp>
 
-#define INSTANTIATE_ARC_TYPES(ArcT) template class IHypergraphsIteratorTpl<ArcT>;
+#define INSTANTIATE_ARC_TYPES(ArcT) template struct IHypergraphsIteratorTpl<ArcT>;
 #include <sdl/Hypergraph/src/InstantiateArcTypes.ipp>

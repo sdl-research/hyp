@@ -104,7 +104,7 @@ const PropertiesInt kSortedStates = 0x200ULL;  // terminal-labeled states come l
 
 const PropertiesInt kAcyclic
     = 0x400ULL;  // if set, it's definitely acyclic. otherwise, it still might be acyclic - call
-// isAcyclic(hg)t to check (TODO: could track a separate bit for acyclic known - but usually
+// isAcyclic(hg) to check (TODO: could track a separate bit for acyclic known - but usually
 // we want to *require* acyclic). we could do something like checking fsm but that has
 // dependency drawbacks (people who don't care about the implementations that check acyclic
 // shouldn't have to compile). we could use a serial number w.r.t. modification of arcs (we

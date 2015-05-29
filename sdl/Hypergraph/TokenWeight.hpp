@@ -35,7 +35,6 @@
 #include <sdl/IntTypes.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Util/PrintRange.hpp>
-#include <sdl/Util/CacheStaticLocal.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -103,7 +102,7 @@ class Token {
     kMustExtendRight = 8,
     //    kBlockLeft = 32, // unused
     kBlockRight = 16,
-    kBlockAny = kBlockRight, // | kBlockLeft // unused
+    kBlockAny = kBlockRight,  // | kBlockLeft // unused
     kExtendable = kExtendableLeft | kExtendableRight,
     // if we don't allow extending, then have to put block syms on separate arcs (not graph arcs, but fsm)
     kDefaultTokenProperties = kExtendableLeft | kExtendableRight | kMustExtendLeft | kMustExtendRight,
@@ -253,10 +252,8 @@ inline std::ostream& operator<<(std::ostream& out, Token const& tok) {
    Note: The times operation is not commutative.
 */
 template <class W>
-class TokenWeightTpl {
-
+struct TokenWeightTpl {
   typedef TokenWeightTpl<W> Self;
-
  public:
   void allTimesBy(W const& delta) {
     for (typename TokenMap::iterator i = pTokens_->begin(), e = pTokens_->end(); i != e; ++i)
@@ -291,18 +288,9 @@ class TokenWeightTpl {
   typedef void HasIsOne;
   bool isOne() const { return pTokens_->empty(); }
 
-  static Self kOne;
-  static Self kZero;
-
-#if SDL_WEIGHT_USE_AT_STATIC_INIT
   // reasonably cheap construction. spare us the thread synch difficulty
   static inline Self one() { return Self(); }
-  // this is a little slower, so probably worth the caching overhead
-  SDL_CACHE_STATIC_LOCAL(Self, zero(), Self(Token(kNoState, kNoState, false), W::zero()))
-#else
-  static Self const& one() { return kOne; }
-  static Self const& zero() { return kZero; }
-#endif
+  static inline Self zero() { return Self(Token(kNoState, kNoState, false), W::zero()); }
 
   std::pair<iterator, bool> insert(Token const& tok, Weight const& weight) {
     return pTokens_->insert(value_type(tok, weight));
@@ -361,14 +349,7 @@ class TokenWeightTpl {
  private:
   TokenMapPtr pTokens_;
   IVocabularyPtr pVoc_;
-
-};  // end TokenWeightTpl
-
-template <class W>
-TokenWeightTpl<W> TokenWeightTpl<W>::kOne;
-
-template <class W>
-TokenWeightTpl<W> TokenWeightTpl<W>::kZero(Token(kNoState, kNoState, false), W::zero());
+};
 
 template <class W>
 inline std::ostream& operator<<(std::ostream& out, TokenWeightTpl<W> const& tokWeight) {
@@ -425,8 +406,8 @@ inline TokenWeightTpl<W> times(TokenWeightTpl<W> const& tokWeight1, TokenWeightT
     for (typename TokWt::TokenMap::const_iterator i = tokWeight2.begin(), e = tokWeight2.end(); i != e; ++i) {
       value_type const& tw2 = *i;
       Token const& tok2 = tw2.first;
-      if (tok1.empty() || tok2.empty()
-          || tok1.blockRight() || tok2.isExtendableLeft() && (tok1.mustExtendRight() || tok2.mustExtendLeft())) {
+      if (tok1.empty() || tok2.empty() || tok1.blockRight()
+          || tok2.isExtendableLeft() && (tok1.mustExtendRight() || tok2.mustExtendLeft())) {
         // concat tok1 tok2
         TokenAndWeight tw3(tw1);
         Hypergraph::timesBy(tw2.second, tw3.second);
@@ -437,10 +418,9 @@ inline TokenWeightTpl<W> times(TokenWeightTpl<W> const& tokWeight1, TokenWeightT
         else if (props2 != Token::kUnspecified)
           props3 = (props3 & ~Token::kRightExtendability) | (props2 & Token::kRightExtendability);
         StateId end2 = tok2.endState_;
-        if (end2 != kNoState)
-          tw3.first.endState_ = end2;
+        if (end2 != kNoState) tw3.first.endState_ = end2;
         product.insert(tw3);
-      } else if (tok2.isExtendable()) { // starting new token w/ tok2.
+      } else if (tok2.isExtendable()) {  // starting new token w/ tok2.
         StateId const end1 = tok1.getEndState();
         if (end1 == kNoState)
           product.insert(tw2);

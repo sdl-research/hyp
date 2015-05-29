@@ -17,12 +17,13 @@
 #define HYP__HYPERGRAPH_HYPERGRAPHWRITER_HPP
 #pragma once
 
-#include <sdl/Hypergraph/HypergraphPrint.hpp>
+//#include <sdl/Hypergraph/HypergraphPrint.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Util/Print.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/FeatureWeight.hpp>
 
 namespace sdl {
 namespace Hypergraph {

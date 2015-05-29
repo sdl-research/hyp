@@ -462,6 +462,14 @@ if(CMAKE_COMPILER_IS_CLANGXX)
     # set(SDL_CLANG_SANITIZES "${SDL_CLANG_SANITIZES} -fsanitize=integer")
   endif()
 
+  set(SDL_CLANG_COVERAGE_ARG "")
+  if (CLANG_SANITIZE_coverage OR SDL_COVERAGE)
+    message(STATUS "clang -fsanitize-coverage?")
+    #set(SDL_CLANG_COVERAGE_ARG "-fsanitize-coverage=edge") #TODO: doesn't work? clang 3.6.1
+    #-fsanitize-coverage=func -fsanitize-coverage=8bit-counters
+    #http://clang.llvm.org/docs/SanitizerCoverage.html
+  endif()
+
   add_definitions(-Qunused-arguments)
   add_definitions("-Wno-c++11-extensions -fshow-column -fshow-source-location -fcaret-diagnostics -fdiagnostics-fixit-info -fdiagnostics-parseable-fixits -fdiagnostics-print-source-range-info -fdiagnostics-show-option")
   if(USE_CLANG_ANALYZER)
@@ -472,7 +480,8 @@ if(CMAKE_COMPILER_IS_CLANGXX)
     add_definitions("-fno-omit-frame-pointer -O1 -fno-optimize-sibling-calls")
     message(INFO "using clang sanitize, which might have significant (2-3x) runtime overhead - disable USE_CLANG_SANITIZE cmake option if you want full speed")
     message(INFO "using clang sanitizes: ${SDL_CLANG_SANITIZES}")
-    add_definitions(${SDL_CLANG_SANITIZES})
+    add_definitions("${SDL_CLANG_SANITIZES}")
+    add_definitions("${SDL_CLANG_COVERAGE_ARG}")
     #${SDL_CLANG_SANITIZES}
     sdl_linker_flags(${SDL_CLANG_SANITIZES})
     SET(CMAKE_LINKER "clang++") # needed for sanitizes
@@ -684,6 +693,20 @@ if (SDL_DEBUG_SYMBOLS)
     if(APPLE)
       set(SDL_DEBUG_INFO_GCC_ARG "-g")
     elseif(UNIX)
+      if(SDL_COVERAGE)
+        message(STATUS "SDL_COVERAGE: --coverage")
+        if(USING_CLANG)
+          set(SDL_CLANG_PROFILE "-fprofile-instr-generate -fcoverage-mapping")
+          set(SDL_CLANG_PROFILE "--profile")
+          add_definitions("${SDL_CLANG_PROFILE}")
+          sdl_exe_linker_flags("${SDL_CLANG_PROFILE}")
+#          sdl_exe_linker_flags("-lprofile_rt")
+        else()
+          add_definitions("--coverage")
+          #add_definitions("-fprofile-arcs -ftest-coverage")
+          sdl_linker_flags("--coverage")
+        endif()
+      endif()
       # dwarf-3 or 4 should do a better job dealing with locals whose address changes
       # from one part of a fn to the next
       if(SDL_HAVE_GCC_4_7)
@@ -868,10 +891,12 @@ list(APPEND subDirectories
   Hypergraph
   Optimization
   Config
-  CrfDemo
   HypDemo
   )
 
+if(OPEN_SOURCE_RELEASE)
+  list(APPEND subDirectories CrfDemo)
+endif()
 
 #CTest and CDash
 if(NOT ANDROID)

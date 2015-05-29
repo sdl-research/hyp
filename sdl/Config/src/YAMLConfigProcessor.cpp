@@ -23,6 +23,14 @@
    XXX: Node const& might have mutable state somehow; Node (value copy) might be a shallow copy which could help
 */
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4146)
+#endif
+#include <yaml-cpp/yaml.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <sdl/Config/YAMLConfigProcessor.hpp>
 #include <sdl/Path.hpp>
 #include <sdl/Util/LogHelper.hpp>

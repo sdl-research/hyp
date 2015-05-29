@@ -8,21 +8,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+/** \file
+
+    TODO: test coverage is minimal (test/TestHgNgrams.cpp)
+*/
+
 #ifndef HYP__HYPERGRAPH_CONVERTWEIGHT_HPP
 #define HYP__HYPERGRAPH_CONVERTWEIGHT_HPP
 #pragma once
 
 namespace sdl {
 namespace Hypergraph {
-
-/**
-   This can be specialized for more complicated weights, e.g.,
-   FeatureWeight.
- */
-template<class FromWeight, class ToWeight>
-ToWeight convertWeight(FromWeight const& fromWeight) {
-  return ToWeight(fromWeight.getValue());
-}
 
 /**
    This can be specialized for other weights, see BlockWeight,

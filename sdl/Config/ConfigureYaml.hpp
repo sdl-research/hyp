@@ -19,8 +19,7 @@
    (see docs/configuration-xmt-library.md to see how to specify
    rootConfiguration's initialization and transfer from yamlRootNode)
 
-   TODO: allow configure() library to exclude certain options as cmdline only? (or hard coded name prefix to
-   ignore)
+   TODO: allow configure() library to exclude certain options as being cmdline only?
 
    TODO: effectiveYAML: return a YAML config object that would give current values (with and without defaults)
 */
@@ -37,7 +36,14 @@
 #define SDL_ALLOW_NON_STRING_MAP_KEY_CONFIGURE 1
 #endif
 
-
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4146)
+#endif
+#include <yaml-cpp/yaml.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include <sdl/Config/Config.hpp>
 #include <sdl/Util/Warn.hpp>
 #include <sdl/graehl/shared/configure.hpp>

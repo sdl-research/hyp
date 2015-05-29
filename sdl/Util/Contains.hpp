@@ -24,7 +24,6 @@
 #include <deque>
 #include <map>
 #include <sdl/Util/SmallVector.hpp>
-#include <sdl/Util/DebugWarn.hpp>
 #include <sdl/Util/SortedMap.hpp>
 
 namespace sdl {
