@@ -17,7 +17,6 @@
 #define HYP__HYPERGRAPH_HYPERGRAPHWRITER_HPP
 #pragma once
 
-//#include <sdl/Hypergraph/HypergraphPrint.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Util/Print.hpp>

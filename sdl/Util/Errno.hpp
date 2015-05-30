@@ -19,6 +19,8 @@
 
     which will call throw_errno iff the first argument is -1
 
+    TODO: move to ZeroMQ? only used there (but seems generally applicable to
+    C-library calls)
 */
 
 #ifndef ERRNO_JG_2013_08_12_HPP

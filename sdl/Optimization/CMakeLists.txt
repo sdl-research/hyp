@@ -8,7 +8,7 @@ include_directories(${YAML_CPP_INCLUDE_DIR})
 include_directories(${ICU_INCLUDE_DIR})
 include_directories(${TBB_INCLUDE_DIR})
 
-set (CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
+#set (CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
 
 set(LINK_DEPENDENCIES
   ${UTIL_LIBRARIES}
