@@ -942,7 +942,6 @@ endmacro()
 
 set(INDIRECT_CONFIG_LIB_DEPENDENCIES
   ${UTIL_LIBRARIES}
-  ${YAML_CPP_LIBRARY}
   )
 
 # most projects can just depend on Config and ${UTIL_LIBRARIES} because

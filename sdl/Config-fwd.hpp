@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    Config/YamlConfigure.hpp fwd decls.
+    fwd decl of sdl::ConfigNode and other Config/ConfigureYaml.hpp
 */
 
 #ifndef SDL_CONFIG_FWD_HPP
@@ -21,9 +21,6 @@
 #include <string>
 #include <iostream>
 #include <sdl/SharedPtr.hpp>
-
-/* defines type ConfigNode
- */
 
 /**
    these to/from string methods need to be found by ADL on YAML::Node.

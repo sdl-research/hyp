@@ -17,12 +17,21 @@
     YAML based implementation of configure library (see docs/)..
 */
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4146)
+#endif
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/node/impl.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <sdl/Util/StableVector.hpp>
 #include <sdl/Config-fwd.hpp>
 #include <sdl/Path.hpp>
 #include <iostream>
 #include <sdl/StringConsumer.hpp>
-#include <yaml-cpp/node/node.h>
 #include <sdl/Util/OnceFlag.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #ifdef _MSC_VER
@@ -33,7 +42,6 @@
 #endif
 
 namespace YAML {
-
 template <>
 struct convert<Node> {
   static Node const& encode(Node const& rhs) { return rhs; }
