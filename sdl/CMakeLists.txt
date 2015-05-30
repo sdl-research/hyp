@@ -892,11 +892,9 @@ list(APPEND subDirectories
   Optimization
   Config
   HypDemo
+  CrfDemo
   )
 
-if(OPEN_SOURCE_RELEASE)
-  list(APPEND subDirectories CrfDemo)
-endif()
 
 #CTest and CDash
 if(NOT ANDROID)

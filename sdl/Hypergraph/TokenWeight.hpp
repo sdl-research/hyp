@@ -252,7 +252,7 @@ inline std::ostream& operator<<(std::ostream& out, Token const& tok) {
    Note: The times operation is not commutative.
 */
 template <class W>
-struct TokenWeightTpl {
+class TokenWeightTpl {
   typedef TokenWeightTpl<W> Self;
  public:
   void allTimesBy(W const& delta) {
