@@ -106,8 +106,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
       , oldStateToNewState_(pHgResult)
       , instart_(hg.start())
       , infinal_(hg.final())
-      , inarcs_(hg.inArcs())
-  {
+      , inarcs_(hg.inArcs()) {
     if (instart_ == kNoState) {
       --instart_;
       assert(instart_ == kImpossibleNotNoState);
@@ -204,8 +203,9 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
           assert(!(tok.isComplete() && isTokenImpossibleToComplete(tok)));
           SDL_TRACE(Hypergraph.ConvertCharsToTokens,
                     (tok.isComplete() ? "Complete" : "")
-                    << (isTokenImpossibleToComplete(tok) ? "Can't be completed" : "") << ": " << tok<<" weight="<<tokWeightPair.second);
-         bool start = true;
+                        << (isTokenImpossibleToComplete(tok) ? "Can't be completed" : "") << ": " << tok
+                        << " weight=" << tokWeightPair.second);
+          bool start = true;
           StateId to = oldStateToNewState_.stateFor(tokenEndState);
           StateId const tokstart = tok.start();
           Arc* arc = tokstart == kNoState
@@ -261,7 +261,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
     forall (StateId stateid, inhg_.getStateIds()) {
       forall (ArcId aid, inhg_.inArcIds(stateid)) {
         Arc* arc = inhg_.inArc(stateid, aid);
-       bool allTailsOk = true;
+        bool allTailsOk = true;
         forall (StateId tailId, arc->tails()) {
           if (!hasIncomingTokens(tailId)) {
             allTailsOk = false;
@@ -448,8 +448,8 @@ class AssignTokenWeight : public StateToWeight<TW> {
     typename Token::Properties r = Token::kExtendable;
 
     std::string const& sym = invoc_->str(*modifysym);
-   bool const startglue = startsWithGlueSymbol(sym);
-   bool const endglue = endsWithGlueSymbol(sym);
+    bool const startglue = startsWithGlueSymbol(sym);
+    bool const endglue = endsWithGlueSymbol(sym);
 
     if (!startglue && !endglue) {
       if (invoc_ != outvoc_.get()) *modifysym = outvoc_->addTerminal(sym);
@@ -488,8 +488,7 @@ class AssignTokenWeight : public StateToWeight<TW> {
 template <class Arc>
 void detokenize(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* pHgResult) {
   if (!hgInput.storesInArcs())
-    SDL_THROW_LOG(Hypergraph.ConvertCharsToTokens, ConfigException,
-                  "detokenize requires indexing in-arcs");
+    SDL_THROW_LOG(Hypergraph.ConvertCharsToTokens, ConfigException, "detokenize requires indexing in-arcs");
   SDL_DEBUG(Hypergraph.detokenize, "detokenize()");
   SDL_TRACE(Hypergraph.detokenize, hgInput);
   using namespace ConvertCharsToTokensUtil;

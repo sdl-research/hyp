@@ -256,7 +256,7 @@ struct DeterminizeFsa {
           setValue(seenq, *j);
         return false;
       }
-   bool ret = true;
+    bool ret = true;
     if (seenq.count()) ret = false;
     for (QSet::const_iterator i = qs.begin(), e = qs.end(); i != e; ++i)  // undo resets
       setValue(seenq, *i);
@@ -293,7 +293,7 @@ struct DeterminizeFsa {
     States qrhos;  // "else" dest states
   };
   struct has_rhos {
-   bool operator()(Outi const& p) { return !p.qrhos.empty(); }
+    bool operator()(Outi const& p) { return !p.qrhos.empty(); }
   };
 
   Explored explored;
@@ -377,7 +377,7 @@ struct DeterminizeFsa {
       return *id;
     }
     QSet *pcqs = &qs, *newpcqs = 0;
-   bool anyadded = false;
+    bool anyadded = false;
     if (specialEps) {
       newpcqs = qsp.construct(qs);
       FORCE_SET(qs);
@@ -444,7 +444,7 @@ struct DeterminizeFsa {
     Delta d;
     std::vector<StateId> qrho;
     QSet& qallrho = *qsp.construct();
-   bool addrhodummy;
+    bool addrhodummy;
     forall (StateId s, qs) {
       Outi const& p = rhos[s];
       if (!p.qrhos.empty()) {
@@ -491,7 +491,7 @@ struct DeterminizeFsa {
     DeterminizeFlags t;
     Outi& l;
     addLetter(DeterminizeFlags t, Outi& l) : t(t), l(l) {}
-   void operator()(Sym s, A const& a) const {
+    void operator()(Sym s, A const& a) const {
       StateId head = a.head();
       if (IS_DET_SPECIAL_SYM(s, t, RHO))
         Util::add(l.qrhos, head);

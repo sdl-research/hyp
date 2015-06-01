@@ -93,7 +93,7 @@ bool maybeNormalizeToNfc(Slice utf8, std::string& buf, bool warnIfNotNfc, bool w
       else if (warnFalsePositiveOk)
         warnNotNfc(utf8);
       else {
-       bool yes = norm->isNormalized(u.tempSubString(nfcPrefixLen, len), err);
+        bool yes = norm->isNormalized(u.tempSubString(nfcPrefixLen, len), err);
         assert(U_SUCCESS(err));
         if (!yes) warnNotNfc(utf8);
       }

@@ -76,8 +76,8 @@ void YamlConfigurable::apply(ConfigNode const& configNode, bool showEffective, i
 
 void YamlConfigurable::logEffective(int verbosity) const {
   LOG_INFO_NAMESTR(SDL_LOG_PREFIX_STR + logname(), "effective configuration for "
-                                                   << *this << "\n "
-                                                   << YamlConfigurableEffective(*this, verbosity));
+                                                       << *this << "\n "
+                                                       << YamlConfigurableEffective(*this, verbosity));
   logEffectiveOnce_.finishNonAtomic();
 }
 
@@ -107,9 +107,9 @@ ConfigNode overrideConfig(ConfigNode const& in, ConfigPath const& replaceAt,
   if (!is_null(in)) {
     if (!in.IsMap())
       SDL_THROW_LOG(Config, ConfigException, "attempting to override config at path "
-                                             << graehl::to_string_sep(replaceAt, ".")
-                                             << " - parent was not a map node when descending to '" << key
-                                             << "'");
+                                                 << graehl::to_string_sep(replaceAt, ".")
+                                                 << " - parent was not a map node when descending to '" << key
+                                                 << "'");
     for (YAML::const_iterator i = in.begin(), e = in.end(); i != e; ++i) {
       std::string const& iKey = i->first.Scalar();
       if (iKey != key) out[iKey] = i->second;
@@ -192,7 +192,7 @@ void print(ConfigNode const& in, std::string const& indent, std::ostream& os, bo
       }
     } else {
       os << indent << "[ ";
-     bool first = true;
+      bool first = true;
       for (; i != end; ++i) {
         ConfigNode const& node = *i;
         if (!first) os << ", ";
@@ -213,7 +213,7 @@ void print(ConfigNode const& in, std::string const& indent, std::ostream& os, bo
       os << " { ";
     }
     if (newlines) os << '\n';
-   bool first = true;
+    bool first = true;
     for (; i != end; ++i) {
       std::string const& key = i->first.as<std::string>();
       ConfigNode const& val = i->second;
@@ -253,8 +253,8 @@ ConfigNode loadRawEncryptedConfig(boost::filesystem::path const& path) {
     return rawNode;
   } catch (std::exception& e) {
     SDL_THROW_LOG(Configure.loadRawConfig, ConfigException, "Error loading encrypted YAML file: '"
-                                                            << e.what() << "'. "
-                                                            << " File path: [ " << path.string() << " ]");
+                                                                << e.what() << "'. "
+                                                                << " File path: [ " << path.string() << " ]");
   }
 }
 #endif
@@ -267,8 +267,8 @@ ConfigNode loadRawConfig(boost::filesystem::path const& path) {
     return rawNode;
   } catch (std::exception& e) {
     SDL_THROW_LOG(Configure.loadRawConfig, ConfigException, "Error loading YAML file: '"
-                                                            << e.what() << "'. "
-                                                            << " File path: [ " << path.string() << " ]");
+                                                                << e.what() << "'. "
+                                                                << " File path: [ " << path.string() << " ]");
   }
 }
 
@@ -290,9 +290,9 @@ ConfigNode loadConfig(boost::filesystem::path const& path, OptPath const& forPat
         path, forPath);
   } catch (std::exception& e) {
     SDL_THROW_LOG(Configure.loadConfig, ConfigException, "Error loading YAML file: '"
-                                                         << e.what() << "'. "
-                                                         << " File path: [ " << path.string() << " ] for "
-                                                         << configure::join_opt_path(forPath));
+                                                             << e.what() << "'. "
+                                                             << " File path: [ " << path.string() << " ] for "
+                                                             << configure::join_opt_path(forPath));
   }
 }
 

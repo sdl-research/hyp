@@ -72,9 +72,7 @@ struct IMutableHypergraphBase {
   */
   virtual void setLabelPair(StateId state, LabelPair io) = 0;
 
-  void setLabelPair(StateId state, Sym in, Sym out = NoSymbol) {
-    setLabelPair(state, LabelPair(in, out));
-  }
+  void setLabelPair(StateId state, Sym in, Sym out = NoSymbol) { setLabelPair(state, LabelPair(in, out)); }
 
   virtual StateId addState() { return addStateId(nextStateId()); }
 
@@ -108,7 +106,7 @@ struct IMutableHypergraphBase {
 
   virtual StateId addState(Sym inputLabel, Sym outputLabel) = 0;
 
-   StateId addState(LabelPair io) { return addState(input(io), output(io)); }
+  StateId addState(LabelPair io) { return addState(input(io), output(io)); }
 
   virtual void setInputLabel(StateId state, Sym label) = 0;
 
@@ -365,17 +363,17 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
        \return whether input label of fsm arc a < that of b.
     */
     template <class Arc>
-   bool operator()(Arc const* b, Sym id) const {
+    bool operator()(Arc const* b, Sym id) const {
       return fsm.inputLabel(b->fsmSymbolState()) < id;
     }
 
     template <class Arc>
-   bool operator()(Sym id, Arc const* b) const {
+    bool operator()(Sym id, Arc const* b) const {
       return id < fsm.inputLabel(b->fsmSymbolState());
     }
 
     template <class Arc>
-   bool operator()(Arc const* a, Arc const* b) const {
+    bool operator()(Arc const* a, Arc const* b) const {
       return fsm.inputLabel(a->fsmSymbolState()) < fsm.inputLabel(b->fsmSymbolState());
     }
   };
@@ -558,7 +556,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   virtual void forcePropertiesOnOff(Properties on, Properties off) {
     if (on & off)
       SDL_THROW_LOG(Hypergraph.forceProperties, ConfigException, "you asked to both enable and disable "
-                                                                 << PrintProperties(on & off));
+                                                                     << PrintProperties(on & off));
     if (unknownPropertyBits(on))
       SDL_THROW_LOG(Hypergraph.forceProperties, ConfigException,
                     "you asked to turn on undefined property bits " << PrintProperties(on));
@@ -607,17 +605,17 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       add = on & ~p;
       if (add)
         SDL_THROW_LOG(Hypergraph, InvalidInputException, "Don't know how to add properties "
-                                                         << PrintProperties(add) << " in forceProperties("
-                                                         << PrintProperties(on) << ", ON); ended up with "
-                                                         << PrintProperties(p));
+                                                             << PrintProperties(add) << " in forceProperties("
+                                                             << PrintProperties(on) << ", ON); ended up with "
+                                                             << PrintProperties(p));
     }
     Properties remove = off & p;
     if (remove) {
       if (remove & kStoreInArcs) this->removeInArcs();
-     bool const removeOut = remove & kStoreOutArcs;
-     bool const removeFirstOut = remove & kStoreFirstTailOutArcs;
-     bool const haveOut = p & kStoreOutArcs;
-     bool const haveFirstOut = p & kStoreFirstTailOutArcs;
+      bool const removeOut = remove & kStoreOutArcs;
+      bool const removeFirstOut = remove & kStoreFirstTailOutArcs;
+      bool const haveOut = p & kStoreOutArcs;
+      bool const haveFirstOut = p & kStoreFirstTailOutArcs;
       if (removeOut && !haveFirstOut || removeFirstOut && !haveOut) this->removeOutArcs();
       if (removeFirstOut) this->setProperties(p & ~kStoreFirstTailOutArcs);
       if (remove & kCanonicalLex) this->clearCanonicalLex();
@@ -625,8 +623,9 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       remove = off & this->properties();
       if (remove)
         SDL_THROW_LOG(Hypergraph, InvalidInputException, "Don't know how to remove properties "
-                                                         << PrintProperties(remove) << " in forceProperties("
-                                                         << PrintProperties(off) << ", OFF)");
+                                                             << PrintProperties(remove)
+                                                             << " in forceProperties(" << PrintProperties(off)
+                                                             << ", OFF)");
     }
     assert(this->storesArcs());
   }
@@ -706,7 +705,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   template <class V>
   void forArcs(V const& v) const {
     Properties p = this->properties();
-   bool inarcs = p & kStoreInArcs;
+    bool inarcs = p & kStoreInArcs;
     if (!inarcs)
       if (!(p & kStoreFirstTailOutArcs)) return IHypergraph<Arc>::forArcs(v);
     for (StateId s = 0, N = this->size(); s < N; ++s) {
@@ -719,7 +718,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   template <class V>
   void forArcs(StateId s, V const& v) const {
     Properties p = this->properties();
-   bool inarcs = p & kStoreInArcs;
+    bool inarcs = p & kStoreInArcs;
     for (StateId s = 0, N = this->size(); s < N; ++s) {
       ArcsContainer const* p = maybeArcsConst(s, inarcs);
       if (!p) continue;
@@ -762,9 +761,9 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
      => kGraph), we do that too
   */
   virtual bool checkGraph() {
-   bool fsm;
-   bool one;
-   bool graph = this->isGraphCheck(fsm, one);
+    bool fsm;
+    bool one;
+    bool graph = this->isGraphCheck(fsm, one);
     setPropertiesAt(kGraph, graph);
     setPropertiesAt(kFsm, fsm);
     setPropertiesAt(kOneLexical, one);
@@ -814,7 +813,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
  private:
   struct SetInLabelToOut {
     template <class H, class SI>
-   bool operator()(H const& hg, SI state) const {
+    bool operator()(H const& hg, SI state) const {
       const_cast<Self&>(static_cast<Self const&>(hg)).setInputLabel(state, hg.outputLabel(state));
       return true;
     }
@@ -839,7 +838,7 @@ IMutableHypergraph<Arc>& mutableHg(IHypergraph<Arc>& hg) {
 }
 
 template <class Arc>
-IMutableHypergraph<Arc> & mutableHg(IMutableHypergraph<Arc> & hg) {
+IMutableHypergraph<Arc>& mutableHg(IMutableHypergraph<Arc>& hg) {
   return hg;
 }
 
@@ -851,11 +850,12 @@ template <class Arc>
 inline void forcePropertiesIfMutable(IHypergraph<Arc>& hg, Properties properties, bool on = true) {
   if (hasProperties(hg.properties(), properties, on)) return;
   if (!hg.isMutable())
-    SDL_THROW_LOG(Hypergraph.forcePropertiesIfMutable, ConfigException,
-                  "you may not force properties "
-                  << PrintProperties(properties) << (on ? " on" : " off")
-                  << " for immutable hg - perhaps you can configure your pipeline to produce directly the "
-                     "correct properties, or insert a step that first converts to mutable hg");
+    SDL_THROW_LOG(
+        Hypergraph.forcePropertiesIfMutable, ConfigException,
+        "you may not force properties "
+            << PrintProperties(properties) << (on ? " on" : " off")
+            << " for immutable hg - perhaps you can configure your pipeline to produce directly the "
+               "correct properties, or insert a step that first converts to mutable hg");
   static_cast<IMutableHypergraph<Arc>&>(hg).forceProperties(properties, on);
 }
 

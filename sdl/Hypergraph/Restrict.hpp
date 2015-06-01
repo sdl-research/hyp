@@ -28,33 +28,25 @@ namespace sdl {
 namespace Hypergraph {
 
 template <class A>
-struct Restrict : TransformBase<Transform::Inplace>
-{
+struct Restrict : TransformBase<Transform::Inplace> {
   typedef IHypergraph<A> H;
   typedef A Arc;
   typedef typename A::ArcFilter Filter;
 
   Filter keep;
   bool clearRemap;
-  Restrict() : clearRemap(true) { }
+  Restrict() : clearRemap(true) {}
 
-  explicit Restrict(Filter const& keep, bool clearRemap = true)
-      : keep(keep)
-      , clearRemap(clearRemap)
-  {}
+  explicit Restrict(Filter const& keep, bool clearRemap = true) : keep(keep), clearRemap(clearRemap) {}
 
   /// you must populate this if it's frozen, in which case it removes states not
   /// mapped. otherwise all states are mapped
   StateIdTranslation stateRemap;
 
-  bool trivial() const
-  {
-    return stateRemap.identity() && !keep;
-  }
+  bool trivial() const { return stateRemap.identity() && !keep; }
 
   enum { Inplace = true, OptionalInplace = true };
-  void inout(IHypergraph<A> const &h, IMutableHypergraph<A> *o)
-  {
+  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) {
     assert(stateRemap);
     if (trivial())
       copyHypergraph(h, o);
@@ -62,85 +54,74 @@ struct Restrict : TransformBase<Transform::Inplace>
       copyFilter(stateRemap, h, o, keep, kArcs, kStartFinal, kNoClear);
     }
   }
-  void inplace(IMutableHypergraph<A> &m) {
+  void inplace(IMutableHypergraph<A>& m) {
     assert(stateRemap);
     if (!trivial()) {
       m.restrict(stateRemap, keep);
     }
   }
-  void complete()
-  {
-    if (clearRemap)
-      stateRemap.clear();
+  void complete() {
+    if (clearRemap) stateRemap.clear();
     keep = Filter();
   }
 };
 
 
-///Prepare: CRTP inheritance
+/// Prepare: CRTP inheritance
 template <class Prepare, class A>
-struct RestrictPrepare : Restrict<A>
-{
+struct RestrictPrepare : Restrict<A> {
   bool samePropertiesOut;
   bool clearOut;
-  RestrictPrepare() {
-    samePropertiesOut=clearOut=true;
-  }
+  RestrictPrepare() { samePropertiesOut = clearOut = true; }
 
-  static inline bool isInplace(IHypergraph<A> const&h, IMutableHypergraph<A> &m) {
-    return &h==&m;
-  }
+  static inline bool isInplace(IHypergraph<A> const& h, IMutableHypergraph<A>& m) { return &h == &m; }
 
   /// CRTP inheritance of Prepare from this
-  Prepare *impl() {
-   return static_cast<Prepare *>(this);
-  }
+  Prepare* impl() { return static_cast<Prepare*>(this); }
 
-  void prepare(IHypergraph<A> const &h, IMutableHypergraph<A> &m)
-  {
-    Prepare *p=impl();
-    if (clearOut&&!isInplace(h, m)) {
+  bool prepare(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
+    Prepare* p = impl();
+    if (clearOut && !isInplace(h, m)) {
       if (samePropertiesOut)
         m.clear(h.properties());
       else
         m.clear();
     }
-    this->stateRemap.resetNew(p->mapping(h, m));
-    p->preparePost(h, m);
+    StateIdMapping* map = p->mapping(h, m);
+    if (map) {
+      this->stateRemap.resetNew(map);
+      p->preparePost(h, m);
+      return true;
+    } else
+      return false;
   }
-  void preparePost(IHypergraph<A> const &h, IMutableHypergraph<A> &m)
-  {
-  }
-  StateIdMapping *mapping(IHypergraph<A> const &h, IMutableHypergraph<A> &m)
-  {
+  void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {}
+  StateIdMapping* mapping(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
     assert(0);
     return 0;
   }
-  void complete()
-  {
+  void complete() {
     Restrict<A>::complete();
-    ((Prepare *)this)->completeImpl();
+    ((Prepare*)this)->completeImpl();
   }
-  void completeImpl() {
-  }
-  enum { enableInplace=true };
-  enum { Inplace=enableInplace, OptionalInplace=enableInplace };
-  void inout(IHypergraph<A> const &h, IMutableHypergraph<A> *o)
-  {
+  void completeImpl() {}
+  enum { enableInplace = true };
+  enum { Inplace = enableInplace, OptionalInplace = enableInplace };
+  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) {
     if (h.prunedEmpty()) return;
-    prepare(h,*o);
+    prepare(h, *o);
     Restrict<A>::inout(h, o);
     complete();
   }
-  bool needsRestrict(IHypergraph<A> & h) {
-    return true;
-  }
-  void inplace(IMutableHypergraph<A> &m) {
+  bool needsRestrict(IHypergraph<A>& h) { return true; }
+  void inplace(IMutableHypergraph<A>& m) {
     if (m.prunedEmpty()) return;
     if (impl()->needsRestrict(m)) {
-      prepare(m, m);
-      Restrict<A>::inplace(m);
-      complete();
+      if (prepare(m, m)) {
+        Restrict<A>::inplace(m);
+        complete();
+      } else
+        m.setEmpty();
     }
   }
 };

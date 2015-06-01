@@ -181,7 +181,7 @@ template <class Transform, class A>
 void inplace_always(IMutableHypergraph<A>& m, Transform& t) {
   Properties cpProp = t.inAddProps() | t.newOutAddProps();
   if (t.Inplace) {
-   bool needsc = t.needsCopy(m);
+    bool needsc = t.needsCopy(m);
     if (needsc && !t.OptionalInplace)
       SDL_THROW2(SelfModifyException, "unimplemented: needsCopy(hg) for inplace transform(hg)", t.name());
     if (!needsc) {
@@ -500,9 +500,9 @@ struct TransformBase {
     SDL_DEBUG(Transform, "transform input hg vocabulary @ " << hgVoc.get() << " should match vocabulary @"
                                                             << pVoc.get().get());
     if (pVoc.get() && pVoc.get() != hgVoc)
-      SDL_THROW_LOG(Hypergraph.Transform, ConfigException, "vocabulary resource '"
-                                                           << defaultVocab
-                                                           << "' didn't match input hypergraph's vocabulary");
+      SDL_THROW_LOG(Hypergraph.Transform, ConfigException,
+                    "vocabulary resource '" << defaultVocab
+                                            << "' didn't match input hypergraph's vocabulary");
     return hgVoc;
   }
 

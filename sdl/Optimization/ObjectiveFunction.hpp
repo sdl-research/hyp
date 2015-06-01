@@ -340,7 +340,7 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
                    IUpdate<FloatT>& updates)
         : obj_(obj), begin_(begin), end_(end), updates_(updates) {}
 
-   void operator()() {
+    void operator()() {
       SDL_DEBUG(Optimization, "Computing updates " << begin_ << " to " << end_);
       result_ = obj_->getUpdates(begin_, end_, updates_);
       SDL_DEBUG(Optimization, "Computing updates " << begin_ << " to " << end_ << " result: " << result_);

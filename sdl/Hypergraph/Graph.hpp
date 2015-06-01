@@ -117,8 +117,8 @@ struct Graph {
     adder(Outs& outs, IHypergraph<A> const& hg, LabelP const& labelPred)
         : outs(outs), hg(hg), labelPred(labelPred) {}
     adder(adder const& o) : outs(o.outs), hg(o.hg), labelPred(o.labelPred) {}
-   void operator()(A* a) const { arc(*a); }
-   void arc(A const& a) const {
+    void operator()(A* a) const { arc(*a); }
+    void arc(A const& a) const {
       if (labelPred(hg.getFsmInput(a))) Util::add(outs[a.tails()[0]], Edge(a.head()));
     }
   };

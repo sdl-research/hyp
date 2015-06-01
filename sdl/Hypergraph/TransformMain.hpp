@@ -104,10 +104,10 @@ struct TransformMainBase : HypergraphMainBase {
   typedef int semirings_type;
   char const* logname;  // set this if you use LOG_TRANSFORM
 
-  TransformMainBase(std::string const& n, std::string const& usage, std::string const& ver,
-                   bool multiple, HypergraphMainOpt hmainOpt = HypergraphMainOpt(), int semirings = kAllSemirings,
+  TransformMainBase(std::string const& n, std::string const& usage, std::string const& ver, bool multiple,
+                    HypergraphMainOpt hmainOpt = HypergraphMainOpt(), int semirings = kAllSemirings,
                     BestOutput bestOutputs = kNoBestOutput, int defaultSemiring = viterbi,
-                   bool nbestHypergraphDefault = false)
+                    bool nbestHypergraphDefault = false)
       : HypergraphMainBase(n, usage, ver, multiple, hmainOpt)
       , arcType(semiringsList(defaultSemiring))
       , allowedSemirings(semirings)
@@ -192,7 +192,7 @@ struct TransformMainBase : HypergraphMainBase {
   template <class Config>
   void configure(Config& c) {
     // doesn't defer to cmdline_main because cmdline_main registers itself as configurable(this) also
-   bool ambig = graehl::count_set_bits(allowedSemirings) > 1;
+    bool ambig = graehl::count_set_bits(allowedSemirings) > 1;
     std::string qual(ambig ? "" : "no choice - must be ");
     c.is("standard hypergraph options");
 
@@ -263,8 +263,9 @@ struct TransformMain : TransformMainBase {
     optInputs.setChars();
   }
   TransformMain(std::string const& n, std::string const& usage, std::string const& ver = "v1")
-      : TransformMainBase(n, usage, ver, impl().has2(), HypergraphMainOpt(CRTP::randomSeed()), CRTP::semirings(),
-                          CRTP::bestOutput(), CRTP::defaultSemiring(), CRTP::nbestHypergraphDefault())
+      : TransformMainBase(n, usage, ver, impl().has2(), HypergraphMainOpt(CRTP::randomSeed()),
+                          CRTP::semirings(), CRTP::bestOutput(), CRTP::defaultSemiring(),
+                          CRTP::nbestHypergraphDefault())
       , inputOptDesc(InputHypergraphs::caption()) {
     TransformMainBase::firstInputFileHasMultipleHgs = true;
     reloadOnMultiple = (CRTP::reloadInputs() == kReloadInputs);
@@ -287,7 +288,7 @@ struct TransformMain : TransformMainBase {
 
   int run_exit() OVERRIDE {
     std::string const& w = this->arcType;
-   bool r;
+    bool r;
     if (w == "viterbi") r = runWeight<viterbiSemiring>();
 #if SDL_TRANSFORM_MAIN_LOG_WEIGHT
     else if (w == "log")
@@ -406,7 +407,7 @@ struct TransformMain : TransformMainBase {
   template <class Arc>
   bool transform2(IHypergraph<Arc> const& i, IHypergraph<Arc> const& i2, IMutableHypergraph<Arc>* o) {
     SDL_THROW_LOG(Hypergraph, UnimplementedException, "unimplemented: has_input_transform2 -> transform2 for "
-                                                      << this->name());
+                                                          << this->name());
     return true;
   }
 
@@ -415,9 +416,7 @@ struct TransformMain : TransformMainBase {
 
   bool hasInputTransform() const { return impl().has_inplace_input_transform || impl().has_input_transform; }
 
-  bool outEvery() const {
-    return false;
-  }
+  bool outEvery() const { return false; }
 
   char const* transform2sep() const { return " * "; }
 
@@ -450,7 +449,7 @@ struct TransformMain : TransformMainBase {
     CRTP const& impl() const { return main.impl(); }
 
     // cascade[0] is an in/out hg.
-   bool transformInput(unsigned inputLine, bool reload, bool free) {
+    bool transformInput(unsigned inputLine, bool reload, bool free) {
       Hp olast;  // o: recent output
       std::string olast_name;
       if (!cascade.size()) return false;
@@ -474,7 +473,7 @@ struct TransformMain : TransformMainBase {
           parseText(*in, in.name, h.get());
           if (impl().hasInputTransform()) {
             SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", pre-transform");
-           bool inputOk = impl().inputTransformInPlaceP(h, input);
+            bool inputOk = impl().inputTransformInPlaceP(h, input);
             if (!inputOk) return false;
             SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", post-transform");
           }
@@ -486,7 +485,7 @@ struct TransformMain : TransformMainBase {
                                   << "=:\n" << *h,
                           aname, in.name);
           o_name << oname_sep << in.name;
-         bool ok = impl().transform2InPlaceP(olast, h);
+          bool ok = impl().transform2InPlaceP(olast, h);
           olast_name = o_name.str();
           HTRANSFORM2_MSG(6, "result=" << olast_name << " (success=" << ok << "):\n" << *olast, aname, in.name);
           if (!ok) return false;
@@ -495,7 +494,7 @@ struct TransformMain : TransformMainBase {
         if (free) h.reset();
       }
       if (impl().has1()) {
-       bool finalok = impl().transform1InPlaceP(olast);
+        bool finalok = impl().transform1InPlaceP(olast);
         if (!finalok) return false;
       }
       if (impl().printFinal()) {
@@ -519,15 +518,15 @@ struct TransformMain : TransformMainBase {
     optInputs.multiple = !firstInputFileHasMultipleHgs;
     optInputs.setIn(this->input());
 
-   bool t3 = inputs.size() > 2 && impl().has2();
-   bool reload = (t3 && reloadOnMultiple);
-   bool free = optInputs.single() || reload;
+    bool t3 = inputs.size() > 2 && impl().has2();
+    bool reload = (t3 && reloadOnMultiple);
+    bool free = optInputs.single() || reload;
 
     Cascade<Weight> cascade(*this);
 
     typedef shared_ptr<IMutableHypergraph<Arc> > Hp;
     Hp& h = cascade.cascade[0];
-   bool allok = true;
+    bool allok = true;
     unsigned ninputs = 0;
     for (;;) {
       h.reset(new MutableHypergraph<Arc>(inputProperties(0)));
@@ -537,7 +536,7 @@ struct TransformMain : TransformMainBase {
       if (impl().hasInputTransform()) {
         unsigned input = 0;
         SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", pre-transform");
-       bool inputOk = impl().inputTransformInPlaceP(h, input);
+        bool inputOk = impl().inputTransformInPlaceP(h, input);
         if (!inputOk) return false;
         SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", post-transform");
       }
@@ -547,9 +546,7 @@ struct TransformMain : TransformMainBase {
   }
 
   /// i=0 means output (i=1 means input+output if in-place)
-  Properties properties(int i) const {
-    return kFsmOutProperties;
-  }
+  Properties properties(int i) const { return kFsmOutProperties; }
 
   /// can override this to *not* favor cmdline props for some hgs
   Properties properties_default(int i) const {

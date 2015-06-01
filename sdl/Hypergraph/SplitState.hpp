@@ -36,16 +36,22 @@ namespace Hypergraph {
 */
 const unsigned glue_len = (unsigned)Vocabulary::kGlueAffix.length();
 
-enum StateType {kStart, kNoGlueNoSpace, kNoGlueSpace, kGlueLeft, kGlueRight, kGlueBoth, kSpecial, knStateType};
+enum StateType {
+  kStart,
+  kNoGlueNoSpace,
+  kNoGlueSpace,
+  kGlueLeft,
+  kGlueRight,
+  kGlueBoth,
+  kSpecial,
+  knStateType
+};
 
 /**
    add space to the beginning of the symbol if no glue indicator
 */
-inline Sym detokSymbol(StateType frontType,
-                         StateType currentType,
-                         Sym const& origSym,
-                         IVocabularyPtr pVoc,
-                        bool spaceBetween) {
+inline Sym detokSymbol(StateType frontType, StateType currentType, Sym const& origSym, IVocabularyPtr pVoc,
+                       bool spaceBetween) {
   std::string sym = pVoc->str(origSym);
   if (currentType == kGlueLeft || currentType == kGlueBoth) {
     sym.erase(sym.begin(), sym.begin() + glue_len);
@@ -54,42 +60,35 @@ inline Sym detokSymbol(StateType frontType,
     sym.erase(sym.end() - glue_len, sym.end());
   }
   if (frontType != kStart) {
-    if ( !(frontType == kGlueRight ||
-           frontType == kGlueBoth ||
-           currentType == kGlueLeft ||
-           currentType == kGlueBoth ||
-           (frontType == kNoGlueNoSpace && currentType == kNoGlueNoSpace) ||
-           (!spaceBetween && (frontType == kNoGlueNoSpace || currentType == kNoGlueNoSpace)))) {
+    if (!(frontType == kGlueRight || frontType == kGlueBoth || currentType == kGlueLeft
+          || currentType == kGlueBoth || (frontType == kNoGlueNoSpace && currentType == kNoGlueNoSpace)
+          || (!spaceBetween && (frontType == kNoGlueNoSpace || currentType == kNoGlueNoSpace)))) {
       sym = " " + sym;
     }
   }
   return pVoc->add(sym, kTerminal);
 }
 
-inline StateType detectSymType(Sym const& symId,
-                               Util::Utf8RangePred const& pred,
-                               IVocabularyPtr pVoc) {
-  if (symId.isSpecial())
-    return kSpecial;
+inline StateType detectSymType(Sym const& symId, Util::Utf8RangePred const& pred, IVocabularyPtr pVoc) {
+  if (symId.isSpecial()) return kSpecial;
   std::string const& sym = pVoc->str(symId);
-  if (sym.length() < glue_len) return pred(sym)? kNoGlueNoSpace : kNoGlueSpace;
+  if (sym.length() < glue_len) return pred(sym) ? kNoGlueNoSpace : kNoGlueSpace;
   if (Util::startsWith(sym, Vocabulary::kGlueAffix))
     return Util::endsWith(sym, Vocabulary::kGlueAffix) ? kGlueBoth : kGlueLeft;
   else if (Util::endsWith(sym, Vocabulary::kGlueAffix))
     return kGlueRight;
   else
-    return pred(sym)? kNoGlueNoSpace : kNoGlueSpace;
+    return pred(sym) ? kNoGlueNoSpace : kNoGlueSpace;
 }
 
 
-//TODO: merge into SplitStateVisitor? there's no other policy
-template<class Arc>
+// TODO: merge into SplitStateVisitor? there's no other policy
+template <class Arc>
 struct TokenSplitPolicy {
 
   typedef boost::array<StateId, knStateType> StateSplits;
-  TokenSplitPolicy(IHypergraph<Arc> const& hg, Util::Utf8RangePred pred, bool spaceBetween):
-      hg_(hg), pVoc_(hg.getVocabulary()), pred_(pred), spaceBetween_(spaceBetween)
-  {
+  TokenSplitPolicy(IHypergraph<Arc> const& hg, Util::Utf8RangePred pred, bool spaceBetween)
+      : hg_(hg), pVoc_(hg.getVocabulary()), pred_(pred), spaceBetween_(spaceBetween) {
     assert(hg.isGraph());
     assert(hg.hasAtMostOneLexicalTail());
   }
@@ -116,7 +115,7 @@ struct TokenSplitPolicy {
     return firstLexical ? detectSymType(firstLexical, pred_, pVoc_) : kSpecial;
   }
 
-  Sym resultingSymbol(Arc *a, Sym firstLexical, StateType type1, StateType type2) {
+  Sym resultingSymbol(Arc* a, Sym firstLexical, StateType type1, StateType type2) {
     if (firstLexical)
       return detokSymbol(type1, type2, firstLexical, pVoc_, spaceBetween_);
     else {
@@ -138,9 +137,8 @@ struct TokenSplitPolicy {
     an additionaly space may or may not be added to the begining of the symbol.
   */
   void connect(Arc* arc, Sym firstLexical, StateType type1, StateId s1, StateType type2, StateId s2,
-               IMutableHypergraph<Arc>* pHgResult)
-  {
-    //pHgResult->addStateId(s2);
+               IMutableHypergraph<Arc>* pHgResult) {
+    // pHgResult->addStateId(s2);
     StateId const labelSt = pHgResult->addState(resultingSymbol(arc, firstLexical, type1, type2));
     pHgResult->addArc(new Arc(s1, labelSt, arc->weight(), s2));
   }
@@ -161,29 +159,24 @@ struct TokenSplitPolicy {
 
   used by CharDetokModule
   */
-template<class Arc>
+template <class Arc>
 struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
   typedef TokenSplitPolicy<Arc> SplitPolicy;
   typedef typename SplitPolicy::StateSplits StateSplits;
 
   enum { kUnsplitState = (StateId)-1 };
-  SplitStateVisitor(IHypergraph<Arc> const& hg,
-                    IMutableHypergraph<Arc>* pHgResult,
-                    Util::Utf8RangePred pred,
-                   bool spaceBetween):
-      SplitPolicy(hg, pred, spaceBetween),
-      hg_(hg),
-      outHg_(pHgResult),
-      final_(kNoState),
-      maxNotTerminalState_(hg.maxNotTerminalState()),
-      startStates_(maxNotTerminalState_ + 1)
-  {
+  SplitStateVisitor(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* pHgResult, Util::Utf8RangePred pred,
+                    bool spaceBetween)
+      : SplitPolicy(hg, pred, spaceBetween)
+      , hg_(hg)
+      , outHg_(pHgResult)
+      , final_(kNoState)
+      , maxNotTerminalState_(hg.maxNotTerminalState())
+      , startStates_(maxNotTerminalState_ + 1) {
     startStates_.set(hg_.start());
     inputFinal_ = hg_.final();
-    SDL_DEBUG(Hypergraph.SplitState,
-              "hg #states="<<hg.size()
-              <<" max not-terminal state id="<<hg.maxNotTerminalState()
-              <<" final="<<inputFinal_);
+    SDL_DEBUG(Hypergraph.SplitState, "hg #states=" << hg.size() << " max not-terminal state id="
+                                                   << hg.maxNotTerminalState() << " final=" << inputFinal_);
     outHg_->setStart(start_ = outHg_->addState());
     StateSplits splits;
     splits.assign(kUnsplitState);
@@ -196,43 +189,38 @@ struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
   void visit(StateId s) {
     if (s > maxNotTerminalState_) return;
     isStart_ = startStates_.test(s);
-    if (!isStart_ && hg_.isAxiom(s))
-      return;
+    if (!isStart_ && hg_.isAxiom(s)) return;
     visitOutArcs(*this, s, hg_, hgAsMutable_);
   }
 
-  void acceptOut(Arc *arc, StateId sid) {
+  void acceptOut(Arc* arc, StateId sid) {
     Sym const arcSym = hg_.firstLexicalOutput(arc);
-   bool const extendStart = isStart_ && !arcSym;
+    bool const extendStart = isStart_ && !arcSym;
     StateType const headType = extendStart ? kStart : this->headType(arcSym);
     StateId head = arc->head();
-    if (extendStart)
-      startStates_.set(head);
+    if (extendStart) startStates_.set(head);
     assert(!hg_.hasTerminalLabel(head));
     if (head > maxNotTerminalState_) {
       assert(head != inputFinal_);
       return;
     }
     assert(head < stateSplitsFor_.size());
-    StateSplits & headSplits = stateSplitsFor_[head];
-    StateId &headSplit = headSplits[headType];
+    StateSplits& headSplits = stateSplitsFor_[head];
+    StateId& headSplit = headSplits[headType];
     assert(headType < knStateType);
     if (isStart_) {
       if (head == inputFinal_) {
-        if (final_ == kNoState)
-          final_ = outHg_->addState();
+        if (final_ == kNoState) final_ = outHg_->addState();
         this->connect(arc, arcSym, kStart, start_, headType, final_, outHg_);
       } else {
-        if (headSplit == kUnsplitState)
-          headSplit = outHg_->addState();
+        if (headSplit == kUnsplitState) headSplit = outHg_->addState();
         this->connect(arc, arcSym, kStart, start_, headType, headSplit, outHg_);
       }
     } else {
       if (headSplit == kUnsplitState) {
         headSplit = outHg_->addState();
         if (head == inputFinal_) {
-          for (std::size_t i = 0; i < StateSplits::static_size; ++i)
-            headSplits[i] = headSplit;
+          for (std::size_t i = 0; i < StateSplits::static_size; ++i) headSplits[i] = headSplit;
           final_ = headSplit;
         }
       }
@@ -244,8 +232,7 @@ struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
   }
 
   StateId finishFinal() {
-    if (final_ != kNoState)
-      outHg_->setFinal(final_);
+    if (final_ != kNoState) outHg_->setFinal(final_);
     return final_;
   }
 

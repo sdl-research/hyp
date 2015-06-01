@@ -115,7 +115,7 @@ struct Evictable : Config::INamed {
   */
   bool maybeInitProcess(InitProcessPhase phase = kPhase0) {
     if (!processInitDone_[phase].get()) {
-      SDL_LOAD_FENCE(); // correct double checked locking - see
+      SDL_LOAD_FENCE();  // correct double checked locking - see
       // http://www.aristeia.com/Papers/DDJ_Jul_Aug_2004_revised.pdf
       Lock lock(initProcessMutex_);
       if (!processInitDone_[phase].get()) {
@@ -131,7 +131,7 @@ struct Evictable : Config::INamed {
   }
 
   bool maybeInitProcessAndThread() {
-   bool r = false;
+    bool r = false;
     if (maybeInitProcess(kPhase0)) r = true;
     if (maybeInitProcess(kPhase1)) r = true;
     if (maybeInitProcess()) r = true;

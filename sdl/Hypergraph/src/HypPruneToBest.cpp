@@ -11,17 +11,17 @@
 #define USAGE_HypPruneToBest "replace hypergraph with just the nbest paths"
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
-#include <sdl/Hypergraph/PruneNonBest.hpp>
+#include <sdl/Hypergraph/PruneToBest.hpp>
 
 namespace sdl {
 namespace Hypergraph {
 
 struct HypPruneToBest : TransformMain<HypPruneToBest> {
   typedef TransformMain<HypPruneToBest> Base;
-  HypPruneToBest() : Base("PruneToBest", USAGE_HypPruneToBest), opt(1) {}
+  HypPruneToBest() : Base("PruneToBest", USAGE_HypPruneToBest), opt() {}
   void declare_configurable() { this->configurable(&opt); }
 
-  PruneToNbestOptions opt;
+  PruneToBestOptions opt;
 
   Properties properties(int i) const { return kDefaultProperties | kStoreInArcs; }
 
@@ -33,7 +33,8 @@ struct HypPruneToBest : TransformMain<HypPruneToBest> {
 
   template <class Arc>
   bool inputTransformInPlace(IMutableHypergraph<Arc>& hg, int n) const {
-    justBest(hg, opt);
+    PruneToBest<Arc> prune(opt);
+    prune.inplace(hg);
     return true;
   }
 };

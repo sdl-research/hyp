@@ -293,13 +293,13 @@ inline bool maybeIcuNormalizeWarn(icu::UnicodeString const& s, icu::UnicodeStrin
 /// \param[out] buf <- (s -> nfc) and wasNfc <- false, returning buf;
 /// or else wasNfc <- true, returning s (Illegal input is replaced with U+FFFD)
 inline UnicodeString const& maybeNormalizedToNfc(UnicodeString const& s, UnicodeString& buf, bool& wasNfc,
-                                                bool warnIfNotNfc = false, bool K = false) {
+                                                 bool warnIfNotNfc = false, bool K = false) {
 
   return maybeIcuNormalizeWarn(s, buf, K ? gNfkc : gNfc, warnIfNotNfc) ? buf : s;
 }
 
 inline UnicodeString maybeNormalizedToNfc(icu::UnicodeString const& s, bool& wasNfc,
-                                         bool warnIfNotNfc = false, bool K = false) {
+                                          bool warnIfNotNfc = false, bool K = false) {
   UnicodeString buf;
   return maybeNormalizedToNfc(s, buf, wasNfc, warnIfNotNfc, K);
 }
@@ -397,7 +397,7 @@ struct IcuErrorCode : icu::ErrorCode {
   std::string detail, prefix;
   bool assertSuccessOnDestroy;
   IcuErrorCode(std::string const& detail = "ERROR", std::string const& prefix = "sdl.IcuErrorCode",
-              bool assertSuccessOnDestroy = true)
+               bool assertSuccessOnDestroy = true)
       : detail(detail), prefix(prefix), assertSuccessOnDestroy(assertSuccessOnDestroy) {}
   ~IcuErrorCode() {
     if (assertSuccessOnDestroy) this->assertSuccess();

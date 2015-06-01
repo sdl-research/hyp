@@ -43,16 +43,16 @@
 #include <sdl/Hypergraph/SortStates.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 typedef StateId Level;
 static const Level kNoLevel = boost::integer_traits<Level>::const_max;
 
 typedef std::vector<Level> Levels;
 
-inline StateId level(Levels const& levels, StateId state)
-{
-  return state<levels.size() ? levels[state] : 0;
+inline StateId level(Levels const& levels, StateId state) {
+  return state < levels.size() ? levels[state] : 0;
 }
 
 
@@ -80,7 +80,7 @@ inline StateId level(Levels const& levels, StateId state)
    passes over the in-arcs
 */
 struct Levelization : Levels {
-  void moveTo(Levels &destLevels) {
+  void moveTo(Levels& destLevels) {
     using std::swap;
     destLevels.clear();
     swap(levels(), destLevels);
@@ -88,42 +88,36 @@ struct Levelization : Levels {
 
   Levelization() {}
   template <class Hg>
-  Levelization(Hg &hg)
-  { init(hg); }
+  Levelization(Hg& hg) {
+    init(hg);
+  }
 
   template <class Hg>
-  Levelization(Hg const& hg)
-  { init(hg); }
+  Levelization(Hg const& hg) {
+    init(hg);
+  }
 
   template <class Hg>
-  void init(Hg &hg) {
+  void init(Hg& hg) {
     init(const_cast<Hg const&>(hg));
   }
 
-  Levels &levels() {
-    return *this;
-  }
+  Levels& levels() { return *this; }
 
-  Levels const& levels() const {
-    return *this;
-  }
+  Levels const& levels() const { return *this; }
 
-  void setZeroLevel()
-  {
-    Util::clearVector(levels());
-  }
+  void setZeroLevel() { Util::clearVector(levels()); }
 
   template <class Hg>
   void init(Hg const& hg) {
     reachedFinalWithoutCycles = false;
     nLevels = 1;
     levels().clear();
-    if (hg.final()==kNoState)
-      return;
+    if (hg.final() == kNoState) return;
     if (hg.isFsm()) {
       levels().reserve(hg.size());
       StateId start = hg.start();
-      if (start!=kNoState && hg.storesOutArcs()) {
+      if (start != kNoState && hg.storesOutArcs()) {
         computeLevelsFst(hg, start);
         return;
       }
@@ -134,26 +128,21 @@ struct Levelization : Levels {
 
   typedef std::vector<ArcId> RemainingInArcs;
 
-  bool acyclic() const {
-    return reachedFinalWithoutCycles;
-  }
+  bool acyclic() const { return reachedFinalWithoutCycles; }
   /**
      1 more than the maximum return of level(s). 1 means cyclic or start==final
   */
-  Level numLevels() const {
-    return nLevels;
-  }
+  Level numLevels() const { return nLevels; }
 
  private:
-  Level nLevels; // this being >1 means acyclic; if 0, you still need acyclic() to distinguish between start=final and cyclic
+  Level nLevels;  // this being >1 means acyclic; if 0, you still need acyclic() to distinguish between
+                  // start=final and cyclic
   bool reachedFinalWithoutCycles;
   struct CountFstInArcs {
-    RemainingInArcs &remainIn;
-    explicit CountFstInArcs(RemainingInArcs &remainIn)
-        : remainIn(remainIn)
-    {}
+    RemainingInArcs& remainIn;
+    explicit CountFstInArcs(RemainingInArcs& remainIn) : remainIn(remainIn) {}
     template <class Arc>
-   void operator()(Arc *arc) const {
+    void operator()(Arc* arc) const {
       ++Util::atExpand(remainIn, arc->head());
     }
   };
@@ -167,57 +156,53 @@ struct Levelization : Levels {
   void computeLevelsFst(Hg const& hg, StateId start, bool markUnreachable = true) {
     assert(hg.storesOutArcs());
     StateId N = hg.size();
-    RemainingInArcs remainIn(N); // unlike the Hg (have in-arcs) case, we need a
+    RemainingInArcs remainIn(N);  // unlike the Hg (have in-arcs) case, we need a
     // separate array for the max vs. remaining
     if (hg.storesInArcs()) {
-      for (StateId s = 0; s<N; ++s)
-        remainIn[s] = hg.numInArcs(s);
+      for (StateId s = 0; s < N; ++s) remainIn[s] = hg.numInArcs(s);
     } else
       hg.forArcs(CountFstInArcs(remainIn));
     StateId final = hg.final();
-    assert(final!=kNoState);
+    assert(final != kNoState);
 
     Util::atExpand(levels(), start);
     reachFst(hg, remainIn, start);
 
     nLevels = levels()[final];
-    if (!remainIn[final] && (final==start || nLevels)) {
-      ++nLevels; // number of distinct levels = final level + 1 (they start at level 0)
-      // final is reachable *only* by a finite number of paths (the start->final-reaching subgraph is acyclic).
+    if (!remainIn[final] && (final == start || nLevels)) {
+      ++nLevels;  // number of distinct levels = final level + 1 (they start at level 0)
+      // final is reachable *only* by a finite number of paths (the start->final-reaching subgraph is
+      // acyclic).
       reachedFinalWithoutCycles = true;
       if (markUnreachable)
-        for (StateId s = 0, maxStoredLevel = (StateId)levels().size(); s!=maxStoredLevel; ++s)
-          if (remainIn[s])
-            levels()[s] = kNoLevel;
-    } else { // start==final or else there are cycles or else there are no paths from start->final
-      // we don't actually know whether final is reachable by any path at all! but if it is, there are infinitely many.
+        for (StateId s = 0, maxStoredLevel = (StateId)levels().size(); s != maxStoredLevel; ++s)
+          if (remainIn[s]) levels()[s] = kNoLevel;
+    } else {  // start==final or else there are cycles or else there are no paths from start->final
+      // we don't actually know whether final is reachable by any path at all! but if it is, there are
+      // infinitely many.
       setZeroLevel();
     }
   }
 
   template <class Hg>
-  void reachFst(Hg const& hg, RemainingInArcs &remainIn, StateId tail) {
+  void reachFst(Hg const& hg, RemainingInArcs& remainIn, StateId tail) {
     std::size_t nLevels = levels().size();
-    assert(tail<nLevels);
-    Level headLevel = levels()[tail]+1;
-    for (ArcId aid = 0, nArcs = hg.numOutArcs(tail); aid!=nArcs; ++aid) {
+    assert(tail < nLevels);
+    Level headLevel = levels()[tail] + 1;
+    for (ArcId aid = 0, nArcs = hg.numOutArcs(tail); aid != nArcs; ++aid) {
       StateId head = hg.outArc(tail, aid)->head();
-      if (--remainIn[head]==0) {
+      if (--remainIn[head] == 0) {
         Util::maxEq(Util::atExpand(levels(), head), headLevel);
         reachFst(hg, remainIn, head);
       }
-
     }
   }
 
  public:
-
   /**
      return level if state is connected to final, otherwise return gibberish
   */
-  Level operator()(StateId state) const {
-    return level(levels(), state);
-  }
+  Level operator()(StateId state) const { return level(levels(), state); }
 
   /**
      TODO: implement this
@@ -278,8 +263,8 @@ struct Levelization : Levels {
   */
   template <class Arc>
   struct ComputeHgLevels {
-    Level *pLevels;
-    typedef unordered_map<Arc *, Level> TailsLeft;
+    Level* pLevels;
+    typedef unordered_map<Arc*, Level> TailsLeft;
     TailsLeft tailsleft;
   };
 };

@@ -261,7 +261,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   struct AddFeature {
     Map& map;
     AddFeature(Self& self) : map(self.featuresWrite()) {}
-   void operator()(value_type const& val) const { map.insert(val); }
+    void operator()(value_type const& val) const { map.insert(val); }
   };
 
   const_iterator begin() const { return features().begin(); }

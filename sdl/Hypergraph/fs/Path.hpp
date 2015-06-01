@@ -123,7 +123,8 @@ template <class Arc>
 Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail, LabelPair const& labelPair,
                      typename Arc::Weight const& wt
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
-                     , Syms const* annotations, bool annotate
+                     ,
+                     Syms const* annotations, bool annotate
 #endif
                      ) {
   Arc* add = new Arc(wt);
@@ -132,7 +133,7 @@ Arc* addAnnotatedArc(IMutableHypergraph<Arc>& outHg, StateId head, StateId tail,
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
   SDL_DEBUG_IF(annotations, Hypergraph.fs.Path, "fs arc Annotations: " << *annotations);
   if (annotate) {
-   bool const label = labelPair.first != EPSILON::ID || labelPair.second && labelPair.second != EPSILON::ID;
+    bool const label = labelPair.first != EPSILON::ID || labelPair.second && labelPair.second != EPSILON::ID;
     TailId n = annotations->size(), labeli = 1 + n;
     tails.resize(labeli + label);
     Syms::const_iterator anno = annotations->begin();
@@ -260,7 +261,7 @@ struct Path {
   template <class Arc>
   std::size_t addToHypergraph(IMutableHypergraph<Arc>& outHg, StateId start = kNoState,
                               StateId final = kNoState, bool removeEpsilon = true, bool projectOutput = false,
-                             bool createAnnotatedGraph = true) {
+                              bool createAnnotatedGraph = true) {
     if (!*this) return 0;
     typedef typename Arc::Weight ArcWeight;
     if (final == kNoState) final = ensureFinal(outHg);
@@ -280,7 +281,7 @@ struct Path {
     Weight* addEpsTo = 0;
     std::size_t nNonEpsilonOutput = 0;
     for (;; ++i) {
-     bool const last = i == lasti;
+      bool const last = i == lasti;
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
       Syms const& annotations = i->annotations;
       TailId const nAnnotations = createAnnotatedGraph ? annotations.size() : 0;
@@ -288,10 +289,10 @@ struct Path {
       TailId const nAnnotations = 0;
 #endif
       LabelPair label = i->labelPair;
-     bool const inputEpsilon = label.first == EPSILON::ID;
-     bool const outputEpsilon = label.second == EPSILON::ID || inputEpsilon && !label.second;
+      bool const inputEpsilon = label.first == EPSILON::ID;
+      bool const outputEpsilon = label.second == EPSILON::ID || inputEpsilon && !label.second;
       nNonEpsilonOutput += outputEpsilon;
-     bool const nolabel = outputEpsilon && (projectOutput || inputEpsilon);
+      bool const nolabel = outputEpsilon && (projectOutput || inputEpsilon);
       if (!nAnnotations && removeEpsilon && nolabel) {
         if (addEpsTo)
           timesBy(i->weight, *addEpsTo);
@@ -309,7 +310,8 @@ struct Path {
                                     ,
                                     &annotations, createAnnotatedGraph
 #endif
-                                    )->weight();
+                                    )
+                        ->weight();
         tail = head;
         if (startEpsWeights) {
           timesBy(*startEpsWeights, *addEpsTo);

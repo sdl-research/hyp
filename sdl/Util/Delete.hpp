@@ -147,6 +147,10 @@ struct AutoDelete {
     toDelete = 0;
     return r;
   }
+  T* set(T *r) {
+    reset(r);
+    return r;
+  }
   AutoDelete(T* toDelete = 0) : toDelete(toDelete) {}
   AutoDelete(T const* toDelete) : toDelete((T*)toDelete) {}
   ~AutoDelete() { delete toDelete; }

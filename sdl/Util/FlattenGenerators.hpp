@@ -43,16 +43,15 @@
 #include <boost/property_map/property_map.hpp>
 #include <sdl/Pool/object_pool.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-template <class GenGen, class WeightFn
-          , class Result = typename GenGen::result_type::result_type
-          , class WeightT = typename WeightFn::result_type
-          >
-struct FlattenGenerators : WeightFn
-    , GeneratorTraits<FlattenGenerators<GenGen, WeightFn, Result, WeightT>, Result, PeekableT>
-    , intrusive_refcount<FlattenGenerators<GenGen, WeightFn, Result, WeightT>, RefCount>
-{
+template <class GenGen, class WeightFn, class Result = typename GenGen::result_type::result_type,
+          class WeightT = typename WeightFn::result_type>
+struct FlattenGenerators
+    : WeightFn,
+      GeneratorTraits<FlattenGenerators<GenGen, WeightFn, Result, WeightT>, Result, PeekableT>,
+      intrusive_refcount<FlattenGenerators<GenGen, WeightFn, Result, WeightT>, RefCount> {
   typedef boost::intrusive_ptr<FlattenGenerators> Ptr;
   GenGen gengen;
   typedef typename GenGen::result_type Generator;
@@ -61,52 +60,41 @@ struct FlattenGenerators : WeightFn
   typedef Result result_type;
   typedef WeightT Weight;
   struct Tip {
-   bool base; // base==0 means it's not on base
+    bool base;  // base==0 means it's not on base
     Generator gen;
     value_type val;
-    Weight weight; //TODO: object pool
-   bool operator<(Tip const& other) const {
-      return weight < other.weight;
-    }
+    Weight weight;  // TODO: object pool
+    bool operator<(Tip const& other) const { return weight < other.weight; }
   };
   struct TipPriorityPmap {
     typedef boost::readable_property_map_tag category;
     typedef Weight value_type;
     typedef value_type const& reference;
     typedef Tip* key_type;
-    friend inline reference get(TipPriorityPmap const&, key_type pTip) {
-      return pTip->weight;
-    }
+    friend inline reference get(TipPriorityPmap const&, key_type pTip) { return pTip->weight; }
   };
   typedef Pool::object_pool<Tip> TipPool;  // Generator, Weight may not be pod, so we use object_pool not pool
   typedef shared_ptr<TipPool> TipPoolPtr;
   TipPoolPtr pTipPool;
-  FlattenGenerators(GenGen const& gengen, WeightFn const& weightFn
-                    , TipPoolPtr pTipPool =
+  FlattenGenerators(GenGen const& gengen, WeightFn const& weightFn, TipPoolPtr pTipPool =
 #ifdef _MSC_VER
-                    TipPoolPtr(new TipPool())
+                                                                        TipPoolPtr(new TipPool())
 #else
-                    // this doesn't compile in msvc
-                    make_shared<TipPool>()
+                                                                        // this doesn't compile in msvc
+                                                                    make_shared<TipPool>()
 #endif
-                    )
-      : WeightFn(weightFn)
-      , gengen(gengen)
-      , pTipPool(pTipPool)
-  {
+                        )
+      : WeightFn(weightFn), gengen(gengen), pTipPool(pTipPool) {
     init();
   }
-  friend inline std::ostream& operator<<(std::ostream &out,
-                                         FlattenGenerators const& self) {
+  friend inline std::ostream& operator<<(std::ostream& out, FlattenGenerators const& self) {
     out << "Flatten[#queued=" << self.queue.size() << "]";
     return out;
   }
 
   typedef Util::priority_queue<std::vector<Tip*>, 4, TipPriorityPmap> Queue;
   Queue queue;
-  operator bool() const {
-    return !queue.empty();
-  }
+  operator bool() const { return !queue.empty(); }
   /**
      seed queue with the first (base position) tip.
   */
@@ -114,7 +102,7 @@ struct FlattenGenerators : WeightFn
     gengen = gengen_;
     init();
   }
-  //TODO: make non-peekable to simplify?
+  // TODO: make non-peekable to simplify?
   value_type operator()() {
     value_type r((peek()));
     pop();
@@ -128,10 +116,9 @@ struct FlattenGenerators : WeightFn
     return queue.top()->val;
   }
   void pop() {
-    Tip &tip=*queue.top();
-   bool wasBase = tip.base;
-    if (wasBase)
-      tip.base = false;
+    Tip& tip = *queue.top();
+    bool wasBase = tip.base;
+    if (wasBase) tip.base = false;
     if (tip.gen) {
       setTip(tip);
       queue.adjust_top();
@@ -142,16 +129,15 @@ struct FlattenGenerators : WeightFn
       pushBase();
     }
   }
+
  private:
-  void init() {
-    pushBase();
-  }
+  void init() { pushBase(); }
 
   /**
      a new base element is needed after popping a tip in base position (we maintain at most one)
   */
   void pushBase() {
-    Tip *pNewTip = pTipPool->construct();
+    Tip* pNewTip = pTipPool->construct();
     pNewTip->base = true;
     while (gengen) {
       pNewTip->gen = gengen();
@@ -163,7 +149,7 @@ struct FlattenGenerators : WeightFn
     }
     pTipPool->destroy(pNewTip);
   }
-  bool nextNonemptyBase(Tip *pNewTip) {
+  bool nextNonemptyBase(Tip* pNewTip) {
     pNewTip->base = true;
     while (gengen) {
       pNewTip->gen = gengen();
@@ -175,9 +161,7 @@ struct FlattenGenerators : WeightFn
     return false;
   }
 
-  void setTip(Tip &tip) {
-    tip.weight = WeightFn::operator()(tip.val = tip.gen());
-  }
+  void setTip(Tip& tip) { tip.weight = WeightFn::operator()(tip.val = tip.gen()); }
 };
 
 

@@ -234,9 +234,9 @@ class EarleyParser {
         , chartWeight(HUGE_VAL)
         , lastWasPhiOrEps(lastWasPhiOrEps_) {}
 
-   bool isComplete() const { return dotPos == arc->getNumTails(); }
+    bool isComplete() const { return dotPos == arc->getNumTails(); }
 
-   bool operator<(Item const& other) const {
+    bool operator<(Item const& other) const {
       if (from != other.from)
         return from < other.from;
       else if (to != other.to)
@@ -248,7 +248,7 @@ class EarleyParser {
       return lastWasPhiOrEps < other.lastWasPhiOrEps;
     }
 
-   bool operator==(Item const& o) const {
+    bool operator==(Item const& o) const {
       return from == o.from && to == o.to && arc == o.arc && dotPos == o.dotPos
              && lastWasPhiOrEps == o.lastWasPhiOrEps;
     }
@@ -264,7 +264,7 @@ class EarleyParser {
     TailId dotPos;
     Weight agendaWeight;
     Weight chartWeight;
-   bool lastWasPhiOrEps;  // did we create this item by using a phi
+    bool lastWasPhiOrEps;  // did we create this item by using a phi
     // transition? in that case, we can say we have
     // something lexical right before the dot (we
     // traversed an FST arc)
@@ -393,7 +393,7 @@ class EarleyParser {
     // the tree), not after some nonterminal
     if (item->dotPos > 0) {
       StateId mostRecentlyCompleted = item->arc->getTail(item->dotPos - 1);
-     bool mostRecentlyCompletedWasLexical = cfg_.outputLabel(mostRecentlyCompleted).isTerminal();
+      bool mostRecentlyCompletedWasLexical = cfg_.outputLabel(mostRecentlyCompleted).isTerminal();
       if ((!mostRecentlyCompletedWasLexical && !item->lastWasPhiOrEps)
           && mostRecentlyCompleted != cfg_.start()) {
         return;
@@ -632,10 +632,10 @@ class EarleyParser {
       boost::hash_range(hashCode, tails.begin(), tails.end());
     }
 
-   bool operator==(ItemAndMatchedArcs const& other) const {
+    bool operator==(ItemAndMatchedArcs const& other) const {
       return other.item == item && other.head == head && *other.stateIds == *stateIds && other.tails == tails;
     }
-   bool operator<(ItemAndMatchedArcs const& other) const {
+    bool operator<(ItemAndMatchedArcs const& other) const {
       if (item != other.item)
         return item < other.item;
       else if (head != other.head)
@@ -850,9 +850,9 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
                                           ArcVecPerDotPosPtr matchedArcs, StateIdContainer const& tails,
                                           Weight w, ItemAndMatchedArcsSet* alreadyExpanded) {
   SDL_TRACE(Hypergraph.Compose, "createResultArcs1 for "
-                                << dbgItem(itemAndMatchedArcs->item, *this) << ", head=" << head
-                                << ", tails=" << Util::makePrintable(tails)
-                                << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
+                                    << dbgItem(itemAndMatchedArcs->item, *this) << ", head=" << head
+                                    << ", tails=" << Util::makePrintable(tails)
+                                    << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
   using namespace Util;
   typename ItemAndMatchedArcsSet::const_iterator foundItem = alreadyExpanded->find(itemAndMatchedArcs);
   if (foundItem != alreadyExpanded->end()) {
@@ -988,7 +988,7 @@ template <class HgMaybeConstCfg, class HgMaybeConstFst, class A>
 void compose(HgMaybeConstCfg& cfgIn, HgMaybeConstFst& fstIn, IMutableHypergraph<A>* resultCfg,
              ComposeOptions opts = ComposeOptions(),
              OnMissingProperties onMissing = kModifyOrCopyEnsuringProperties,
-            bool const useFstComposeIfPossible = false) {
+             bool const useFstComposeIfPossible = false) {
   typedef IHypergraph<A> H;
   typedef shared_ptr<H const> HP;
 

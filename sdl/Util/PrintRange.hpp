@@ -48,12 +48,13 @@ struct RangeSep {
   typedef char const* S;
   S space, pre, post;
   bool spaceBefore;
+  bool index;
   RangeSep(S space = " ", S pre = "[", S post = "]", bool spaceBefore = false)
-      : space(space), pre(pre), post(post), spaceBefore(spaceBefore) {}
-  RangeSep(multiline) : space("\n "), pre("{"), post("\n}"), spaceBefore(true) {}
-  RangeSep(multilineNoBrace) : space("\n"), pre(""), post("\n"), spaceBefore(true) {}
-  RangeSep(singleline) : space(" "), pre("["), post("]"), spaceBefore() {}
-  RangeSep(commas) : space(","), pre("<"), post(">"), spaceBefore() {}
+      : space(space), pre(pre), post(post), spaceBefore(spaceBefore), index() {}
+  RangeSep(multiline) : space("\n "), pre("{"), post("\n}"), spaceBefore(true), index() {}
+  RangeSep(multilineNoBrace) : space("\n"), pre(""), post("\n"), spaceBefore(true), index() {}
+  RangeSep(singleline) : space(" "), pre("["), post("]"), spaceBefore(), index() {}
+  RangeSep(commas) : space(","), pre("<"), post(">"), spaceBefore(), index() {}
 };
 
 inline RangeSep multiLine() {
@@ -117,16 +118,22 @@ inline void adl_write(O& o, I const& i) {
 template <class Out, class Iter>
 Out& printRange(Out& out, Iter i, Iter end, RangeSep const& sep = RangeSep()) {
   out << sep.pre;
+  unsigned index = 0;
   if (sep.spaceBefore)
     for (; i != end; ++i) {
       out << sep.space;
+      if (sep.index)
+        out << index << ':';
       adlimpl::adl_write(out, *i);
+      ++index;
     }
   else {
-    Sep s(sep.space);
     for (; i != end; ++i) {
-      out << s;
+      if (index) out << sep.space;
+      if (sep.index)
+        out << index << ':';
       adlimpl::adl_write(out, *i);
+      ++index;
     }
   }
   out << sep.post;
@@ -362,7 +369,7 @@ template <class Iter>
 struct PrintRange : RangeSep {
   Iter begin;
   Iter end;
-  PrintRange(Iter begin, Iter end) : begin(begin), end(end) {}
+  PrintRange(Iter begin, Iter end, bool printIndex = false) : begin(begin), end(end) { index = printIndex; }
   PrintRange(Iter begin, Iter end, RangeSep const& sep) : RangeSep(sep), begin(begin), end(end) {}
   template <class Out>
   void print(Out& o) const {
@@ -376,13 +383,13 @@ struct PrintRange : RangeSep {
 };
 
 template <class Iter>
-PrintRange<Iter> makePrintable(Iter begin, Iter end) {
-  return PrintRange<Iter>(begin, end);
+PrintRange<Iter> makePrintable(Iter begin, Iter end, bool printIndex = false) {
+  return PrintRange<Iter>(begin, end, printIndex);
 }
 
 template <class Iter>
-PrintRange<Iter> arrayPrintable(Iter begin, unsigned n) {
-  return PrintRange<Iter>(begin, begin + n);
+PrintRange<Iter> arrayPrintable(Iter begin, unsigned n, bool printIndex = false) {
+  return PrintRange<Iter>(begin, begin + n, printIndex);
 }
 
 template <class Iter>

@@ -41,21 +41,20 @@ enum { kSilentlyNfc = false, kWarnUnlessNfc = true };
 /// is unmodified. if warnFalsePositiveOk will warn if quick check doesn't say
 /// 'yes'
 bool maybeNormalizeToNfc(Slice in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                        bool warnFalsePositiveOk = true, bool nfkc = false);
+                         bool warnFalsePositiveOk = true, bool nfkc = false);
 
 inline bool maybeNormalizeToNfc(std::string const& in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                        bool warnFalsePositiveOk = true, bool nfkc = false) {
+                                bool warnFalsePositiveOk = true, bool nfkc = false) {
   return maybeNormalizeToNfc(toSlice(in), out, warnIfNotNfc, warnFalsePositiveOk, nfkc);
 }
 
 
 /// pre: out is empty
-void normalizeToNfc(Slice in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                   bool nfkc = false);
+void normalizeToNfc(Slice in, std::string& out, bool warnIfNotNfc = kSilentlyNfc, bool nfkc = false);
 
 /// pre: out is empty
 void normalizeToNfc(std::string const& in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                   bool nfkc = false);
+                    bool nfkc = false);
 
 std::string normalizedToNfc(std::string const& s, bool nfkc = false);
 
@@ -94,7 +93,7 @@ inline void normalizeToNfcInPlace(std::string& s, bool warnIfNotNfc = kSilentlyN
 }
 
 inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = kSilentlyNfc,
-                      bool nfkc = false) {
+                       bool nfkc = false) {
   if ((bool)std::getline(in, utf8)) {
     normalizeToNfcInPlace(utf8, warnIfNotNfc, nfkc);
     return true;
@@ -103,7 +102,7 @@ inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = 
 }
 
 inline bool getlineNfcUntil(std::istream& in, std::string& utf8, char until, bool warnIfNotNfc = kSilentlyNfc,
-                           bool nfkc = false) {
+                            bool nfkc = false) {
   if ((bool)std::getline(in, utf8, until)) {
     normalizeToNfcInPlace(utf8, warnIfNotNfc, nfkc);
     return true;
@@ -117,37 +116,36 @@ struct NfcOptions {
   NfcOptions(bool nfc) : nfc(nfc), nfkc(), warnIfNotNfc(), warnIfResultNotNfc(true) {}
   template <class Config>
   void configure(Config& config) {
-    config("nfc", &nfc).self_init()(
-        "normalize input utf8 to Unicode NFC (at decode time, if there are constraints, then caller must "
-        "refer to post-NFC codepoints)");
-    config("nfkc", &nfkc).self_init()(
-        "(takes precedence over nfc) normalize input utf8 to Unicode NFKC (at decode time, if there are constraints, then caller must "
-        "refer to post-NFKC codepoints)");
+    config("nfc", &nfc)
+        .self_init()(
+            "normalize input utf8 to Unicode NFC (at decode time, if there are constraints, then caller must "
+            "refer to post-NFC codepoints)");
+    config("nfkc", &nfkc)
+        .self_init()(
+            "(takes precedence over nfc) normalize input utf8 to Unicode NFKC (at decode time, if there are "
+            "constraints, then caller must "
+            "refer to post-NFKC codepoints)");
     config("warn-if-not-nfc", &warnIfNotNfc)
         .self_init()("warn if any non-NFC input is observed (and then nfc/nfkc normalize if enabled)");
     config("warn-if-result-not-nfc", &warnIfResultNotNfc)
-        .self_init()("warn if the result isn't NFC (if nfc or nfkc normalization is enabled, then you won't ever see this warning, so it's safe to leave on)");
-    //option warn-if-not-nfkc? wait til requested.
+        .self_init()(
+            "warn if the result isn't NFC (if nfc or nfkc normalization is enabled, then you won't ever see "
+            "this warning, so it's safe to leave on)");
+    // option warn-if-not-nfkc? wait til requested.
   }
 
-  friend inline void validate(NfcOptions & x) {
-    x.validate();
-  }
+  friend inline void validate(NfcOptions& x) { x.validate(); }
   void validate() {
-    if (warnIfNotNfc)
-      warnIfResultNotNfc = true;
-    if (nfkc)
-      nfc = true;
+    if (warnIfNotNfc) warnIfResultNotNfc = true;
+    if (nfkc) nfc = true;
   }
 
   void maybeWarn(std::string const& in) const {
-    if (warnIfResultNotNfc)
-      isNfcWarn(in, false);
+    if (warnIfResultNotNfc) isNfcWarn(in, false);
   }
 
   void maybeWarn(Slice in) const {
-    if (warnIfResultNotNfc)
-      isNfcWarn(in, false);
+    if (warnIfResultNotNfc) isNfcWarn(in, false);
   }
 
   void normalize(std::string& in) const {
@@ -204,9 +202,7 @@ struct NfcOptions {
     }
   }
 
-  bool enabled() const {
-    return warnIfResultNotNfc || nfc;
-  }
+  bool enabled() const { return warnIfResultNotNfc || nfc; }
 };
 
 

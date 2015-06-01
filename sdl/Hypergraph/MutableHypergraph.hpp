@@ -170,7 +170,7 @@ struct MutableHypergraphLabels {
   }
 
   bool forceCanonicalLexImpl() {
-   bool nodup = true;
+    bool nodup = true;
     for (StateId s = 0, e = size(); s < e; ++s) {
       Sym i = iLabelForState[s];
       if (i.isTerminal())
@@ -410,7 +410,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   std::size_t restrict(StateIdTranslation& x, ArcFilter const& keep) OVERRIDE {
     ArcFilter keepa = keep ? keep : Arc::filterTrue();
     if (x.identity()) return restrict(keep);
-   bool adding = x.stateAdding();
+    bool adding = x.stateAdding();
     // TODO: special case !x.frozen - faster than checking when translating
     ArcPointers<A> arcs(*this);
     clearArcsPer(this->numStates_);
@@ -477,7 +477,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       }
       rebuildOutArcs();
     } else {
-     bool addFirst = properties_ & kStoreFirstTailOutArcs;
+      bool addFirst = properties_ & kStoreFirstTailOutArcs;
       ArcPointers<A> arcs(*this);
       StateId ns = (StateId)outArcsPerState_.size();
       Util::reinit(outArcsPerState_, ns);
@@ -629,8 +629,8 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     properties_ &= ~(kFsmProperties);  // need to do this up front because isFsmCheck itself may check
     // properties via prunedEmpty
     fsmChecked = true;
-   bool f, one;
-   bool g = IHypergraph<Arc>::isGraphCheck(f, one);
+    bool f, one;
+    bool g = IHypergraph<Arc>::isGraphCheck(f, one);
     if (f) properties_ |= kFsm;
     if (g) properties_ |= kGraph;
     if (one) properties_ |= kOneLexical;

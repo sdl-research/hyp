@@ -16,6 +16,8 @@
     TODO: speed up inside-then-outside for hg; currently results in examining in
     arcs 3 times and out arcs 2 times; could do better with 1 time each (by not
     using StatesTraversal)
+
+    TODO: also allow cyclic hg
 */
 
 

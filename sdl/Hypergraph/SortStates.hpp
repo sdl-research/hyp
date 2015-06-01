@@ -37,7 +37,7 @@ struct SortStatesOptions {
     kTerminalFirst = 1,
     kTerminalLast,
     kTopSort,  // final state goes at end, after antecedents (tails) are fully processed. start state will be
-               // at state 0 iff every state is reachable from start
+    // at state 0 iff every state is reachable from start
     kSortOrderEnd,
     kSortOrderBegin = kTerminalFirst
   };
@@ -124,7 +124,7 @@ struct CheckTopo {
     StateIdContainer const& tails = a->tails();
     forall (StateId tail, tails) {
       if (tail < endTailState) {
-       bool const violation = HeadAfterTails ? head <= tail : tail <= head;
+        bool const violation = HeadAfterTails ? head <= tail : tail <= head;
         if (violation) return false;
       }
     }
@@ -145,7 +145,7 @@ struct CheckTopoSkipAxioms {
     StateIdContainer const& tails = a->tails();
     forall (StateId tail, tails) {
       if (!hg.isAxiom(tail)) {
-       bool const violation = HeadAfterTails ? head <= tail : tail <= head;
+        bool const violation = HeadAfterTails ? head <= tail : tail <= head;
         if (violation) return false;
       }
     }
@@ -204,7 +204,7 @@ struct TopNontermOrder : IStatesVisitor {
   IHypergraph<A> const* ph;
   TopNontermOrder() {}
   TopNontermOrder(IHypergraph<A> const& hg, StateIdTranslation* pDestState_, bool reverseTopSort,
-                 bool canonLex) {
+                  bool canonLex) {
     set(hg, pDestState_, reverseTopSort);
   }
 
@@ -273,8 +273,8 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A>
   }
 
   void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
-   bool inplace = this->isInplace(h, m);
-   bool canonLex = !inplace && opt.canonicalLex;  // TODO: support for inplace also
+    bool inplace = this->isInplace(h, m);
+    bool canonLex = !inplace && opt.canonicalLex;  // TODO: support for inplace also
     if (canonLex) m.forceCanonicalLex();
     StateIdTranslation& x = this->stateRemap;
     if (opt.topological()) {

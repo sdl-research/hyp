@@ -12,11 +12,11 @@
 
     Provides efficient utf8 bytes<->unicode codepoints decoding/encoding (inline, C++)
 
-   ICU can do this but most straightforwardly does so via a UTF-16 copy in an
-   icu::UnicodeString, which is slow.
+    ICU can do this but most straightforwardly does so via a UTF-16 copy in an
+    icu::UnicodeString, which is slow.
 
-   We still need ICU, however, for character classes, transliteration, case
-   folding, and normalizing
+    We still need ICU, however, for character classes, transliteration, case
+    folding, and normalizing
 
 */
 
@@ -267,18 +267,22 @@ struct FixUnicode {
   template <class Config>
   void configure(Config& config) {
     config.is("FixUnicode");
-    config("bad-utf8-handler", &badUtf8Handler).init(kRemove)(
-        "Handle malformed UTF-8 byte sequences, by either removing them, replacing them with the UTF-8 "
-        "replacement character 0xfffd, or ignoring them. warning: the quality of our models is severely "
-        "degraded if you use Ignore for text that is not really utf8");
-    config("remove-control-characters", &removeControlChars).self_init()(
-        "Remove non-whitespace control characters (whitespace is normalized/handled by a different "
-        "mechanism).");
-    config("convert-windows-1252", &convertWindows1252).self_init()(
-        "Interpret Unicode range U+0080 - U+009F control characters as encoded Windows 1252 characters and "
-        "convert to correct Unicode equivalents (this option has precedence over removal of control "
-        "characters). If someone uses control characters for their intended purpose (unlikely) or for "
-        "another font/codepage (somewhat likely) you will get some gibberish");
+    config("bad-utf8-handler", &badUtf8Handler)
+        .init(kRemove)(
+            "Handle malformed UTF-8 byte sequences, by either removing them, replacing them with the UTF-8 "
+            "replacement character 0xfffd, or ignoring them. warning: the quality of our models is severely "
+            "degraded if you use Ignore for text that is not really utf8");
+    config("remove-control-characters", &removeControlChars)
+        .self_init()(
+            "Remove non-whitespace control characters (whitespace is normalized/handled by a different "
+            "mechanism).");
+    config("convert-windows-1252", &convertWindows1252)
+        .self_init()(
+            "Interpret Unicode range U+0080 - U+009F control characters as encoded Windows 1252 characters "
+            "and "
+            "convert to correct Unicode equivalents (this option has precedence over removal of control "
+            "characters). If someone uses control characters for their intended purpose (unlikely) or for "
+            "another font/codepage (somewhat likely) you will get some gibberish");
   }
 
 
@@ -342,7 +346,7 @@ struct FixUnicode {
   /// return false if in is already normalized, else normalize(in, storage)
   bool maybeNormalize(std::string const& string, std::string& storage) const {
     if (cleanupEnabled()) {
-     bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
+      bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
       if (valid && !modifiesControlChars(string))
         return false;
       else {
@@ -365,7 +369,7 @@ struct FixUnicode {
 
   void normalize(std::string& string) const {
     if (cleanupEnabled()) {
-     bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
+      bool const valid = badUtf8Handler == kUnsafe_Ignore || validUtf8(string);
       if (!valid || modifiesControlChars(string)) normalize(string, valid);
     }
   }

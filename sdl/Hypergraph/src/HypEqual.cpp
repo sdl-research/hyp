@@ -28,7 +28,7 @@ struct HypEqual : TransformMain<HypEqual> {
   bool transform2InPlace(IMutableHypergraph<Arc>& l, IHypergraph<Arc> const& r) {
     SDL_DEBUG(Hypergraph.HgEqual, "Equal input 1:\n" << l);
     SDL_DEBUG(Hypergraph.HgEqual, "Equal input 2:\n" << r);
-   bool const eq = fs::equal(l, r);
+    bool const eq = fs::equal(l, r);
     std::cout << eq << '\n';
     SDL_DEBUG(Hypergraph.HgEqual, "Result:\n" << eq);
     return eq;

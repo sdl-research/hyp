@@ -63,9 +63,7 @@ struct WeightedStrings {
   typedef unordered_set<Sym> Unigrams;
   Unigrams unigrams;
   void addChar(Sym s) {
-    if (unigramk) {
-     bool added = unigrams.insert(s).second;
-    }
+    if (unigramk) bool added = unigrams.insert(s).second;
     strings.back().push_back(s);
   }
   std::size_t addedLength() const { return strings.back().size(); }

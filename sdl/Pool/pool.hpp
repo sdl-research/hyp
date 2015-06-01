@@ -1005,7 +1005,7 @@ class pool {
   ~pool() { purge_memory(); }
 
   bool release_memory() {
-   bool ret = free_list.empty() ? false : true;
+    bool ret = free_list.empty() ? false : true;
     for (std::set<void*>::iterator pos = free_list.begin(); pos != free_list.end(); ++pos) {
       (user_allocator::free)(static_cast<char*>(*pos));
     }
@@ -1013,7 +1013,7 @@ class pool {
     return ret;
   }
   bool purge_memory() {
-   bool ret = free_list.empty() && used_list.empty() ? false : true;
+    bool ret = free_list.empty() && used_list.empty() ? false : true;
     for (std::set<void*>::iterator pos = free_list.begin(); pos != free_list.end(); ++pos) {
       (user_allocator::free)(static_cast<char*>(*pos));
     }

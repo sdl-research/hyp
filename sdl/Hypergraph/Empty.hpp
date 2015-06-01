@@ -36,18 +36,13 @@ namespace Hypergraph {
 // exactly the right way, so this isn't used.
 struct CountUniqueTails {
   mutable Util::BitSet seen;
-  CountUniqueTails(StateId nStates)
-      : seen(nStates)
-  {}
-  TailId operator()(StateIdContainer const& tails) const {
-    return (*this)(tails.begin(), tails.end());
-  }
+  CountUniqueTails(StateId nStates) : seen(nStates) {}
+  TailId operator()(StateIdContainer const& tails) const { return (*this)(tails.begin(), tails.end()); }
   TailId operator()(StateId const* b, StateId const* e) const {
     TailId sum = 0;
     for (StateId const* i = b; i != e; ++i)
       if (Util::latch(seen, *i)) ++sum;
-    for (StateId const* i = b; i != e; ++i)
-      seen.reset(*i);
+    for (StateId const* i = b; i != e; ++i) seen.reset(*i);
     return sum;
   }
 };
@@ -58,43 +53,37 @@ struct Reach {
   typedef shared_ptr<H const> HP;
   HP h;
   StateSet reached;
-  typedef unordered_map<Arc *, unsigned> TailsLeft;
+  typedef unordered_map<Arc*, unsigned> TailsLeft;
   TailsLeft tailsleft;
   bool computeUseful;
   Util::Graph outside;
 
-  shared_ptr<StateSet> useful(StateId goal) const
-  {
+  shared_ptr<StateSet> useful(StateId goal) const {
     assert(computeUseful);
     shared_ptr<StateSet> r(new StateSet());
-    StateSet &useful = *r;
+    StateSet& useful = *r;
     Util::VertexColors c;
     Util::dfsColor(outside, c, goal);
     StateId N = (StateId)c.size();
-    assert(N==h->size());
+    assert(N == h->size());
     useful.clear();
     useful.resize(N);
-    for (StateId s = 0, e = (StateId)c.size(); s!=e; ++s)
-      if (s == goal ? Util::test(reached, s) : c[s] != Util::unvisitedColor())
-        useful.set(s);
+    for (StateId s = 0, e = (StateId)c.size(); s != e; ++s)
+      if (s == goal ? Util::test(reached, s) : c[s] != Util::unvisitedColor()) useful.set(s);
     return r;
   }
 
-  shared_ptr<StateSet> useful() const
-  {
-    return useful(final);
-  }
+  shared_ptr<StateSet> useful() const { return useful(final); }
 
-  //TODO: special case for fsm/graph - no need for tail count - every arc is
-  //immediately usable. and no need to make a copy if storing first tail only
+  // TODO: special case for fsm/graph - no need for tail count - every arc is
+  // immediately usable. and no need to make a copy if storing first tail only
 
   Reach(IHypergraph<Arc> const& hg, bool computeUseful = false, bool stopAtFinal = false)
       : reached(hg.size())
       , computeUseful(computeUseful)
       , outside((Util::GraphSize)(computeUseful ? hg.size() : 0))
       , stopAtFinal(stopAtFinal)
-      , final(hg.final())
-  {
+      , final(hg.final()) {
     if (hg.isGraph()) {
       StateId const start = hg.start();
       if (start != kNoState) {
@@ -102,7 +91,7 @@ struct Reach {
         assert(h->storesOutArcs());
         reachGraph(start);
         return;
-      } // else fall through to CFG case:
+      }  // else fall through to CFG case:
     }
     h = ensureOutArcs(hg);
     assert(h->storesAllOutArcs());
@@ -119,7 +108,7 @@ struct Reach {
     return tails;
   }
 
-  bool tailFinishes(Arc *arc) {
+  bool tailFinishes(Arc* arc) {
     assert(tailsleft[arc]);
     return --tailsleft[arc] == 0;
   }
@@ -134,19 +123,18 @@ struct Reach {
     assert(state != kNoState);
     if (!Util::latch(reached, state)) return;
     if (stopAtFinal && state == final) return;
-    for (ArcId i = 0, f = h->numOutArcs(state); i < f; ++i)
-      reachGraph(h->outArc(state, i));
+    for (ArcId i = 0, f = h->numOutArcs(state); i < f; ++i) reachGraph(h->outArc(state, i));
   }
 
-  void reachGraph(Arc *arc) {
+  void reachGraph(Arc* arc) {
     StateId const head = arc->head();
     reachArc(arc, head);
     reachGraph(head);
   }
 
-  void reachArc(Arc *arc, StateId head) {
+  void reachArc(Arc* arc, StateId head) {
     if (computeUseful) {
-      for(StateIdContainer::const_iterator i = arc->tails().begin(), e = arc->tails().end(); i != e; ++i) {
+      for (StateIdContainer::const_iterator i = arc->tails().begin(), e = arc->tails().end(); i != e; ++i) {
         StateId tail = *i;
         boost::add_edge(head, tail, outside);
       }
@@ -156,8 +144,8 @@ struct Reach {
   void reach(StateId s) {
     if (!Util::latch(reached, s)) return;
     if (stopAtFinal && s == final) return;
-    for (ArcId a = 0, f = h->numOutArcs(s); a!=f; ++a) {
-      Arc *arc = h->outArc(s, a);
+    for (ArcId a = 0, f = h->numOutArcs(s); a != f; ++a) {
+      Arc* arc = h->outArc(s, a);
       if (tailFinishes(arc)) {
         StateId const head = arc->head();
         reachArc(arc, head);
@@ -167,7 +155,7 @@ struct Reach {
   }
 
   bool final_reached() const {
-   bool r = Util::test(reached, final);
+    bool r = Util::test(reached, final);
     return r;
   }
 
@@ -187,8 +175,7 @@ bool empty(IHypergraph<A> const& hg) {
 }
 
 template <class A>
-bool pruneEmpty(IMutableHypergraph<A> & a)
-{
+bool pruneEmpty(IMutableHypergraph<A>& a) {
   if (empty(a)) {
     a.setEmpty();
     return true;

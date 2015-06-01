@@ -77,7 +77,6 @@ struct CopyRestrict {
   Filter keep;
   CopyRestrict(StateIdTranslation &stateRemap, IMutableHypergraph<A> *o, Filter const& keep = A::filterTrue())
       : stateRemap(stateRemap), o(o), keep(keep) {
-    assert(stateRemap.stateAdding());
   }
   typedef void result_type;
   A a;

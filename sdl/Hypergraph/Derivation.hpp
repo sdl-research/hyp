@@ -185,38 +185,38 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     typedef C result_type;
     /// open node, (if return value was true) child, childClose ..., close node
     /// note: !d.axiom()
-   bool open(result_type&, Deriv const&) const { return true; }
+    bool open(result_type&, Deriv const&) const { return true; }
     /// visitors/computers get called with axiom() to determine the initial value
     C axiom(StateId state) const { return C(); }
-   void child(result_type& r, Deriv const& p, Deriv const& c, TailId i) const {}
+    void child(result_type& r, Deriv const& p, Deriv const& c, TailId i) const {}
     // (void)r;(void)p;(void)c;(void)i; } // for -Wunused
-   void childClose(result_type& r, result_type const& cr, Deriv const& p, Deriv const& c, TailId i) const {}
-   void close(result_type& r, Deriv const& d) const {}
+    void childClose(result_type& r, result_type const& cr, Deriv const& p, Deriv const& c, TailId i) const {}
+    void close(result_type& r, Deriv const& d) const {}
     /// since we use a vector to hold the result_type for a state, you need to use non-default values if you
     /// don't want to revisit the same subtree repeatedly. return true always if you don't mind
-   bool finished(result_type& r) const { return true; }
+    bool finished(result_type& r) const { return true; }
   };
 
   // works only for non alternative same-head deriv, e.g. 1best
   struct ComputeWeight : public ComputeOnceBase<Weight> {
-   bool open(Weight& r, Deriv const& d) {
+    bool open(Weight& r, Deriv const& d) {
       r = d.arc().weight();
       return true;
     }
     Weight axiom(StateId) { return Weight::one(); }
-   void childClose(Weight& r, Weight const& cr, Deriv const& p, Deriv const& c, TailId i) const {
+    void childClose(Weight& r, Weight const& cr, Deriv const& p, Deriv const& c, TailId i) const {
       timesBy(cr, r);
     }
-   bool finished(Weight& w) const { return !(w == Weight::zero()); }
+    bool finished(Weight& w) const { return !(w == Weight::zero()); }
   };
 
   struct ComputeCost : public ComputeOnceBase<FeatureValue> {
-   bool open(FeatureValue& r, Deriv const& d) {
+    bool open(FeatureValue& r, Deriv const& d) {
       r = d.arc().weight().getValue();
       return true;
     }
     Weight axiom(StateId) { return (FeatureValue)0; }
-   void childClose(FeatureValue& r, FeatureValue const& cr, Deriv const& p, Deriv const& c, TailId i) const {
+    void childClose(FeatureValue& r, FeatureValue const& cr, Deriv const& p, Deriv const& c, TailId i) const {
       r += cr;
     }
   };
@@ -273,22 +273,22 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
 
   struct VisitTreeBase {
     // return true to expand children
-   bool open(StateId head, Deriv const& d) const { return true; }
-   void child(Deriv const& p, Deriv const& c, TailId i) const {}
-   void close(StateId head, Deriv const& d) const {}
+    bool open(StateId head, Deriv const& d) const { return true; }
+    void child(Deriv const& p, Deriv const& c, TailId i) const {}
+    void close(StateId head, Deriv const& d) const {}
   };
 
   struct VisitDfsBase {
     // return true to expand children
-   bool open(Deriv const& d) const { return true; }
-   void child(Deriv const& p, Deriv const& c, TailId i) const {}
-   void close(Deriv const& d) const {}
+    bool open(Deriv const& d) const { return true; }
+    void child(Deriv const& p, Deriv const& c, TailId i) const {}
+    void close(Deriv const& d) const {}
   };
 
   struct SetColorSafe : public VisitDfsBase {
     int c;
     explicit SetColorSafe(int c) : c(c) {}
-   void close(Deriv const& d) const { d.color = c; }
+    void close(Deriv const& d) const { d.color = c; }
   };
 
   // postfix sequence of pair <StateId, Arc *>. axioms get <StateId, NULL>. output iter O gets Arc *
@@ -297,15 +297,15 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     Out o;
     WhichDerivationStates whichStates;  // actually, stateids
     VisitOut(Out o, WhichDerivationStates whichStates = kWholeTree) : o(o), whichStates(whichStates) {}
-   void out(StateId head, Arc* a) {
-     bool add = whichStates == kWholeTree || a && whichStates == kNonLeafOnly
+    void out(StateId head, Arc* a) {
+      bool add = whichStates == kWholeTree || a && whichStates == kNonLeafOnly
                  || !a && whichStates == kLeafOnly;
       if (add) {
         *o = StateArc(head, a);
         ++o;
       }
     }
-   void close(StateId head, Deriv const& d) { out(head, d.a); }
+    void close(StateId head, Deriv const& d) { out(head, d.a); }
   };
 
   template <class Out>
@@ -323,12 +323,12 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
   struct VisitArcsOut : public VisitTreeBase {
     Out o;
     VisitArcsOut(Out o) : o(o) {}
-   void out(Arc* a = 0) const {
+    void out(Arc* a = 0) const {
       if (!a) return;
       *o = a;
       ++o;
     }
-   void close(StateId, Deriv const& d) const { out(d.a); }
+    void close(StateId, Deriv const& d) const { out(d.a); }
   };
 
   template <class Out>
@@ -412,18 +412,18 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
 
 
   struct ColorCycleGuard {
-   void prepare(Derivation const& d) const { d.setColorSafe(); }
-   void openNoCycle(Derivation const& d) const {
+    void prepare(Derivation const& d) const { d.setColorSafe(); }
+    void openNoCycle(Derivation const& d) const {
       d.assertUnopened();
       d.color = opened;
     }
-   void closeNoCycle(Derivation const& d) const { d.color = closed; }
+    void closeNoCycle(Derivation const& d) const { d.color = closed; }
   };
 
   struct NoCycleGuard {
-   void prepare(Derivation const& d) const {}
-   void openNoCycle(Derivation const& d) const {}
-   void closeNoCycle(Derivation const& d) const {}
+    void prepare(Derivation const& d) const {}
+    void openNoCycle(Derivation const& d) const {}
+    void closeNoCycle(Derivation const& d) const {}
   };
 
   StateId headUnlessAxiom(StateId elseState = kNoState) const { return a ? a->head() : elseState; }
@@ -432,13 +432,13 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     StateId head;
     Derivation const* dp;
     TailId pushChild;  // 0 = open. -1 = close.
-   bool isPop() const { return pushChild == (TailId)-1; }
-   void setPop() { pushChild = (TailId)-1; }
+    bool isPop() const { return pushChild == (TailId)-1; }
+    void setPop() { pushChild = (TailId)-1; }
     TreeVisitItem(StateId head, Derivation const* dp, TailId pushChild)
         : head(head), dp(dp), pushChild(pushChild) {}
 
     template <class Out>
-   void print(Out& o) const {
+    void print(Out& o) const {
       o << head << '[' << pushChild << ']' << '=' << dp;
     }
 
@@ -465,7 +465,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
       agenda.push(TreeVisitItem(head, d, 0));
       while (!agenda.empty()) processAgenda();
     }
-   void processAgenda() {
+    void processAgenda() {
       TreeVisitItem tv(agenda.top());
       agenda.pop();
       Derivation const& d = *tv.dp;  // we never have null deriv p; instead, axiom placeholder with d.a==0.
@@ -498,11 +498,11 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
       }
     }
 
-   bool openGuarded(StateId head, Derivation const& d) {
+    bool openGuarded(StateId head, Derivation const& d) {
       CycleGuard::openNoCycle(d);
       return v.open(head, d);
     }
-   void closeGuarded(StateId head, Derivation const& d) {
+    void closeGuarded(StateId head, Derivation const& d) {
       CycleGuard::closeNoCycle(d);
       v.close(head, d);
     }
@@ -532,7 +532,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
       agenda.push(d);
       while (!agenda.empty()) processAgenda();
     }
-   void processAgenda() {
+    void processAgenda() {
       DP dp = agenda.top();
       agenda.pop();
       if (Util::lsb(dp)) return v.close(*Util::withoutLsb(dp));
@@ -628,11 +628,11 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     Hg const& hg;
     unsigned levels;
     VisitPrint(Out& o, Hg const& hg, unsigned levels = (unsigned)-1) : o(o), hg(hg), levels(levels) {}
-   bool open(Deriv const& d) { return d.openPrint(o, hg, levels); }
-   void child(Deriv const& p, Deriv const& c, TailId i) const {
+    bool open(Deriv const& d) { return d.openPrint(o, hg, levels); }
+    void child(Deriv const& p, Deriv const& c, TailId i) const {
       if (i) o << ' ';
     }
-   void close(Deriv const& d) {
+    void close(Deriv const& d) {
       ++levels;
       o << '}';
     }
@@ -674,7 +674,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     StateIdTranslation& sx;
     IMutableHypergraph<A>& o;
     ToHypergraphOnce(StateIdTranslation& sx, IMutableHypergraph<A>& o) : sx(sx), o(o) {}
-   bool open(Deriv const& d) const {
+    bool open(Deriv const& d) const {
       if (d.axiom()) return false;
       A* a = sx.copyArc(d.arc());
       o.addArc(a);
@@ -697,20 +697,20 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
 
   // best means that this is a 1-best derivation, so no need to split in case of subtree sharing
   IMutableHypergraph<A>* translateToHypergraphNew(IHypergraph<A> const& i, bool keepStateIds = kRenumberStates,
-                                                 bool best = kIsNonBest) {
+                                                  bool best = kIsNonBest) {
     IMutableHypergraph<A>* pOut = new MutableHypergraph<A>();
     translateToHypergraph(i, *pOut, keepStateIds, best);
     return pOut;
   }
   shared_ptr<IMutableHypergraph<A> > translateToHypergraph(IHypergraph<A> const& i,
-                                                          bool keepStateIds = kRenumberStates,
-                                                          bool best = kIsNonBest) {
+                                                           bool keepStateIds = kRenumberStates,
+                                                           bool best = kIsNonBest) {
     return shared_ptr<IMutableHypergraph<A> >(translateToHypergraphNew(i, keepStateIds, best));
   }
 
   // TODO: specify output vocab != input vocab?
   void translateToHypergraph(IHypergraph<A> const& i, IMutableHypergraph<A>& o,
-                            bool keepStateIds = kRenumberStates, bool best = kIsNonBest) {
+                             bool keepStateIds = kRenumberStates, bool best = kIsNonBest) {
     if (!best)
       translateToSingleDerivationHypergraph(i, o);
     else {
@@ -721,7 +721,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
   }
 
   void translateToHypergraph(StateIdTranslation& sx, IMutableHypergraph<A>& o, bool best = kIsNonBest,
-                            bool resetColor = true) {
+                             bool resetColor = true) {
     ToHypergraphOnce v(sx, o);
     visitDfs(v);
   }
@@ -790,7 +790,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     ToSingleDerivationHypergraph(IHypergraph<Arc> const& ihg, IMutableHypergraph<Arc>& o)
         : ihg(ihg), o(o), forAxiom(ihg.size(), kNoState) {}
 
-   bool open(NewStateAndInArc& r, Deriv const& d) {
+    bool open(NewStateAndInArc& r, Deriv const& d) {
       Arc const& arc = d.arc();
       r.second
           = new Arc(arc, r.first = o.addState());  // sets new head; tails to be overwritten in childClose
@@ -798,11 +798,11 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
       return true;
     }
 
-   void childClose(NewStateAndInArc& rSt, NewStateAndInArc const& cSt, Deriv const&, Deriv const&, TailId i) {
+    void childClose(NewStateAndInArc& rSt, NewStateAndInArc const& cSt, Deriv const&, Deriv const&, TailId i) {
       rSt.second->tails()[i] = cSt.first;
     }
 
-   void close(NewStateAndInArc& r, Deriv const&) {
+    void close(NewStateAndInArc& r, Deriv const&) {
       o.addArc(r.second);  // couldn't add until we have finalized state ids for tails (children)
     }
   };

@@ -70,8 +70,7 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
       , kZero(Weight::zero())
       , hg_(hg)
       , distances_(distances)
-      , maxNonAxiom_(0)
-  {}
+      , maxNonAxiom_(0) {}
 
   /**
      Computes the distance to a particular state.
@@ -79,15 +78,14 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
   void visit(StateId sid) {
     // topo visit calls for tails first. so all the distances_[tail] are already computed.
     std::size_t const cntInArcs = hg_.numInArcs(sid);
-   bool axiom = hg_.isAxiom(sid);
+    bool axiom = hg_.isAxiom(sid);
     Weight& sum = Util::atExpandPtr(distances_, sid, kZero);
     // keeping this reference is ok because there's no recursion in loops below:
     if (axiom) {
       setOne(sum);
       return;
     }
-    if (!IncludingAxioms && sid > maxNonAxiom_)
-      maxNonAxiom_ = sid;
+    if (!IncludingAxioms && sid > maxNonAxiom_) maxNonAxiom_ = sid;
     for (ArcId aid = 0; aid < cntInArcs; ++aid) {
       Arc const& arc = *hg_.inArc(sid, aid);
       Weight prod(Weight::one());
@@ -121,8 +119,7 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
   }
 
   ~ComputeDistanceStatesVisitor() {
-    if (!IncludingAxioms)
-      distances_.resize(maxNonAxiom_ + 1);
+    if (!IncludingAxioms) distances_.resize(maxNonAxiom_ + 1);
   }
 
  private:
@@ -149,7 +146,7 @@ void insideAlgorithmWithAxioms(IHypergraph<Arc> const& hg, Distances* pDistances
   shared_ptr<HG const> phg = ensureProperties(hg, kStoreInArcs);
 
   SDL_DEBUG(Hypergraph.InsideAlgorithm, "Start inside alg on hypergraph, setting distances for states [0,..."
-                                        << maxNotTerminal << "]:\n" << hg);
+                                            << maxNotTerminal << "]:\n" << hg);
 
   // Traverse states in topsorted order, and compute distance for each state:
   ComputeDistanceStatesVisitor<HG, StateWtFn, ArcWtFn, Distances, IncludingAxioms> distanceComputer(
@@ -184,14 +181,14 @@ void insideAlgorithm(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtF
 
 template <class Arc, class StateWtFn, class Distances>
 void insideAlgorithm(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtFn const& stateWtFn,
-                    bool includingAxioms) {
+                     bool includingAxioms) {
   insideAlgorithmMaybeAxioms(includingAxioms, hg, pDistances, stateWtFn, ArcWeight<typename Arc::Weight>());
 }
 
 
 template <class Arc>
 void insideAlgorithm(IHypergraph<Arc> const& hg, boost::ptr_vector<typename Arc::Weight>* pDistances,
-                    bool includingAxioms = false) {
+                     bool includingAxioms = false) {
   insideAlgorithm(hg, pDistances, OneStateWeight<typename Arc::Weight>(), includingAxioms);
 }
 

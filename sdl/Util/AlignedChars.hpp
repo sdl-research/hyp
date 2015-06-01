@@ -100,7 +100,7 @@ struct IcuNormalizeByChunks {
         return true;
       } else {
         if (normalizer->hasBoundaryBefore(c)) {
-         bool const already = !todo.isEmpty();
+          bool const already = !todo.isEmpty();
           if (normalizer->isInert(c)) {  // slower than hasBoundaryBefore so nested inside
             if (already) {
               inert = c;
@@ -123,7 +123,7 @@ struct IcuNormalizeByChunks {
             todo.setTo((UChar32)c);
             if (already) return true;
           }
-        } else { // keep accumulating
+        } else {  // keep accumulating
           growSpan(nextSpan, span);
           todo += (UChar32)c;
         }
@@ -179,9 +179,7 @@ struct IcuNormalizeByChunks {
     take(taker);
   }
 
-  void clearNextSpan() {
-    nextSpan = kMinTokenSpan;
-  }
+  void clearNextSpan() { nextSpan = kMinTokenSpan; }
 
   void normalizeTodo() {
     assert(!todo.isEmpty());

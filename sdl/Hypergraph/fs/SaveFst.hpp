@@ -21,7 +21,7 @@
 #include <sdl/Hypergraph/fs/Fst.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Project.hpp>
-#include <sdl/Hypergraph/PruneNonBest.hpp>
+#include <sdl/Hypergraph/PruneToBest.hpp>
 #include <sdl/graehl/shared/hex_int.hpp>
 
 namespace sdl {
@@ -32,9 +32,7 @@ struct SaveFstOptions : LazyBestOptions, PruneToNbestOptions {
   std::size_t reserveStates;
   bool forceOutArcs;
 
-  bool usingLazyBest() const {
-    return pruneToNbest == 1;
-  }
+  bool usingLazyBest() const { return pruneToNbest == 1; }
 
   SaveFstOptions() : PruneToNbestOptions(0), reserveStates(1000000), forceOutArcs(true) {}
   template <class Config>
@@ -43,7 +41,8 @@ struct SaveFstOptions : LazyBestOptions, PruneToNbestOptions {
     PruneToNbestOptions::configure(config);
     config("reserve-states", &reserveStates)(
         "expect about this many result states (too high wastes memory; too low may be ~10% slower from "
-        "copying").self_init();
+        "copying")
+        .self_init();
     config("force-out-arcs", &forceOutArcs)("make result store (first-tail-only) fst out arcs").self_init();
   }
   friend inline void validate(SaveFstOptions& x) { x.validate(); }
@@ -73,7 +72,7 @@ struct SaveFst {
     out.setEmpty();
     if (opt.forceOutArcs) out.forceFirstTailOutArcs();
     Util::reserveUnorderedImpl(stateMap, opt.reserveStates);
-    SDL_DEBUG(Hypergraph.fs.SaveFst, "saving to hg &"<<graehl::hex(&out)<<": "<<withProperties(out));
+    SDL_DEBUG(Hypergraph.fs.SaveFst, "saving to hg &" << graehl::hex(&out) << ": " << withProperties(out));
     out.setStart(outStateFor(fst.startState()));
   }
   void setFinal(StateId s) {
@@ -102,15 +101,15 @@ struct SaveFst {
                         );
         ++nOut;
       }
-     bool final = fst.final(state);
+      bool final = fst.final(state);
       if (final) {  // a final state
         if (!outFinal) {
-         bool const needsEpsilon = nOut;
+          bool const needsEpsilon = nOut;
           StateId const finalSt = needsEpsilon ? out.addState() : from;
           setFinal(finalSt);
           if (!needsEpsilon) return from;
         }
-        out.addArcEpsilon(from, *outFinal); //TODO: addArcGraphEpsilon ?
+        out.addArcEpsilon(from, *outFinal);  // TODO: addArcGraphEpsilon ?
       }
       return from;
     } else {

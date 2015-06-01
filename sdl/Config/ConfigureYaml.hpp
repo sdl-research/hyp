@@ -163,7 +163,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
       actions, even though technically vector and map are leaves */
   struct Subtree {
     ConfigNode root;
-   bool exists() const { return !is_null(root); }
+    bool exists() const { return !is_null(root); }
 
     /** for missing/dup key errors. */
     StringConsumer warn;
@@ -207,7 +207,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     /// any child of a non-required struct that has no yaml path for it gets
     /// ignored in the store phase (if you want an error for a missing node it
     /// needs to be .require()
-   bool nothingToStore;
+    bool nothingToStore;
 
     Subtree(ConfigNode const& n, std::string const& pathname, StringConsumer const& warn, bool nothingToStore)
         : root(n)
@@ -221,18 +221,18 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
           YamlScalarRef key = i->first.Scalar();
           if (!Util::supplyMissing(unprocessedMapChildren, key, i->second))
             trouble(fullname(key) + " duplicated in YAML map; " + "was: " + (std::string const&)key + ": "
-                    + to_string(i->second) + ", and now: " + to_string(i->second),
+                        + to_string(i->second) + ", and now: " + to_string(i->second),
                     true);
         }
       }
     }
 
-   void trouble(std::string const& msg, bool throwException = true) const {
+    void trouble(std::string const& msg, bool throwException = true) const {
       warn(msg);
       if (throwException) throw ConfigException(msg);
     }
 
-   bool finished;
+    bool finished;
 
     /**
        may throw. call just before destructor (this used to be done in
@@ -240,7 +240,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
        complain about things that would have been recognized had we continued
        walking the configure() tree without exception
     */
-   void finish() {
+    void finish() {
       if (finished) return;
       finished = true;
       const bool allow = unrecognizedOpt.enable, warn = unrecognizedOpt.warn,
@@ -252,7 +252,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
         std::string const& key = keyNode.first;
         if (warn || !allow)
           trouble(key + ": " + to_string(keyNode.second) + " - '" + fullname(key)
-                  + "' is an unrecognized option (check spelling ? )",
+                      + "' is an unrecognized option (check spelling ? )",
                   !allow);
         if (store) (*unrecognizedOpt.unrecognized_storage)[key] = to_string(keyNode.second);
       }
@@ -261,7 +261,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
       self.print(out);
       return out;
     }
-   void print(std::ostream& out) const {
+    void print(std::ostream& out) const {
       YAML::Emitter em;
       em << root;
       out << em.c_str();
@@ -277,15 +277,15 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
       values into our configured objects. Actions other than store don'\t
       reference the input Yaml at all. */
   struct Context : boost::noncopyable {
-   bool nothingToStore() const { return stack.empty() ? false : top().nothingToStore; }
-   void setNothingToStore() { top().nothingToStore = true; }
+    bool nothingToStore() const { return stack.empty() ? false : top().nothingToStore; }
+    void setNothingToStore() { top().nothingToStore = true; }
 
     /// null unless we're about to store a map or sequence element
     boost::optional<ConfigNode> collectionElementConfig;
     /** set a one-shot register (collectionElementConfig) that modifies the next
        node() call since we already retrived the subconfig (lookup depends on
      * seq or map). */
-   void pushCollectionYaml(ConfigNode const& subconfig) {
+    void pushCollectionYaml(ConfigNode const& subconfig) {
       assert(!collectionElementConfig);
       collectionElementConfig = subconfig;
     }
@@ -293,7 +293,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     typedef boost::ptr_vector<Subtree> Stack;
     Stack stack;
 
-   bool ignore() {
+    bool ignore() {
       if (nothingToStore()) {
         collectionElementConfig.reset();
         return true;
@@ -322,12 +322,12 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
       assert(!stack.empty());
       return stack.back();
     }
-   void push(Subtree* sub) {
+    void push(Subtree* sub) {
       if (!stack.empty() && top().root.is(sub->root))
         throw ConfigException("infinite loop in yaml subtree " + top().rootstr());
       stack.push_back(sub);
     }
-   void pop() {
+    void pop() {
       top().finish();
       stack.pop_back();
     }
@@ -337,7 +337,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     }
     friend std::string to_string(Context const& x) { return x.str(); }
     template <class O>
-   void print(O& o) const {
+    void print(O& o) const {
       o << to_string(*this);
     }
     template <class Ch, class Tr>
@@ -385,7 +385,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
   bool init_tree(configure::store_config, Val*, Conf const& conf) const {
     assert(conf.depth || root);
     ConfigNode const& yaml = conf.depth ? ctx->node(conf.name()) : root;
-   bool const shouldStore = conf.depth ? yaml.IsDefined() : true;
+    bool const shouldStore = conf.depth ? yaml.IsDefined() : true;
     SDL_TRACE(ConfigureYaml, "store=" << shouldStore << " init_tree " << conf.path_name() << ": "
                                       << Util::print(yaml, Config::kShallow));
     ctx->push(new Subtree(yaml, conf.path_name(), warn, !shouldStore));
@@ -701,7 +701,7 @@ GCC_DIAG_IGNORE(uninitialized)
     validate them. */
 template <class Val>
 void applyYaml(ConfigNode const& yamlRoot, Val* pRootVal, char const* component = "configure",
-              bool init = true, bool validate = true, bool verbose = true, bool trace = true) {
+               bool init = true, bool validate = true, bool verbose = true, bool trace = true) {
   StringConsumer warn = Util::logWarning(component);
   LOG_TRACE_NAMESTR(kLogPrefix + component, "applyYaml node:\n" << Util::print(yamlRoot, Config::oneline));
   if (init) configure::configure_init(pRootVal, warn);
@@ -722,13 +722,13 @@ void applyYaml(ConfigNode const& yamlRoot, Val* pRootVal, char const* component 
   if (validate) configure::validate_stored(pRootVal, warn);
   if (verbose)
     LOG_INFO_NAMESTR(kLogPrefix + component, "effective (YAML applied) configuration for "
-                                             << component << ":\n" << printEffective(*pRootVal, component)
-                                             << "\n");
+                                                 << component << ":\n" << printEffective(*pRootVal, component)
+                                                 << "\n");
 }
 
 template <class Val>
 void applyYaml(ConfigNode const& yamlRoot, Val* pRootVal, std::string const& component, bool init = true,
-              bool validate = true, bool verbose = true) {
+               bool validate = true, bool verbose = true) {
   applyYaml(yamlRoot, pRootVal, component.c_str(), init, validate, verbose);
 }
 

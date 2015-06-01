@@ -130,9 +130,9 @@ struct HypInside {
     namespace po = boost::program_options;
     using namespace std;
     try {
-     bool help = false;
+      bool help = false;
       unsigned ngramMax = 0;
-     bool allPairs = false, dag = false;
+      bool allPairs = false, dag = false;
       string file = "-", arcType = "log";
       po::options_description generic("Allowed options");
       sdl::AddOption opt(generic);

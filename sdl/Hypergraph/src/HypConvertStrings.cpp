@@ -8,7 +8,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#define USAGE_HypConvertStrings "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL byte separates outputs"
+#define USAGE_HypConvertStrings                                                                              \
+  "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL " \
+  "byte separates outputs"
 #define TRANSFORM_MAIN
 #include <sdl/Hypergraph/HypergraphMain.hpp>
 #include <sdl/Hypergraph/LineToHypergraph.hpp>
@@ -35,12 +37,9 @@ namespace sdl {
 namespace Hypergraph {
 
 struct HypConvertStrings : HypergraphMainBase {
-  HypConvertStrings() : HypergraphMainBase("ConvertStrings", USAGE_HypConvertStrings)
-  {}
+  HypConvertStrings() : HypergraphMainBase("ConvertStrings", USAGE_HypConvertStrings) {}
 
-  void declare_configurable() {
-    this->configurable(&opt);
-  }
+  void declare_configurable() { this->configurable(&opt); }
 
   LineToHypergraph opt;
   void run() {
@@ -50,14 +49,13 @@ struct HypConvertStrings : HypergraphMainBase {
     typedef ArcTpl<Weight> Arc;
 
     std::string line;
-   bool first = true;
+    bool first = true;
     std::size_t linei = 0;
     MutableHypergraph<Arc> hg;
     hg.setVocabulary(pVoc);
     opt.hgProperties = kStoreInArcs;
     while (Util::getlineNfc(in(), line)) {
-      if (!first)
-        std::cout<<'\0'; // TODO: deprecated
+      if (!first) std::cout << '\0';  // TODO: deprecated
       opt.toHypergraph(line, &hg, ++linei);
       std::cout << hg;
       first = false;

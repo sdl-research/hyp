@@ -16,7 +16,7 @@
 
     a("first");
     a("word");
-   bool keepSendingPhrases = a.finishPhrase(cost);
+    bool keepSendingPhrases = a.finishPhrase(cost);
 
 */
 

@@ -43,41 +43,37 @@ struct OnlineOptimizerOptions {
   LearningRateOptions learningRateOptions;
 };
 
-template<class FloatT>
+template <class FloatT>
 class ParameterUpdate : public IUpdate<FloatT> {
  public:
-  ParameterUpdate(FloatT *params, FeatureId numParams)
+  ParameterUpdate(FloatT* params, FeatureId numParams)
       : params_(params)
       , rate_(1.0)
 #if SDL_IS_DEBUG_BUILD
       , numParams_(numParams)
 #endif
-  {}
+  {
+  }
 
   void update(FeatureId index, FloatT value) OVERRIDE {
     SDL_DEBUG_BUILD(assert(index < numParams_));
     params_[index] -= rate_ * value;
   }
 
-  virtual void setRate(FloatT rate) {
-    rate_ = rate;
-  }
+  virtual void setRate(FloatT rate) { rate_ = rate; }
 
   virtual void incTimeStep() {}
 
  protected:
-  FloatT *params_;
+  FloatT* params_;
   FloatT rate_;
   SDL_DEBUG_BUILD(FeatureId const numParams_);
 };
 
-template<class FloatT>
+template <class FloatT>
 struct AdagradParameterUpdate : public ParameterUpdate<FloatT> {
-  AdagradParameterUpdate(FloatT *params, FeatureId numParams, FloatT eta)
-      : ParameterUpdate<FloatT>(params, numParams)
-      , eta_(eta)
-      , prevGrads_(numParams, (FloatT)0)
-  {
+  AdagradParameterUpdate(FloatT* params, FeatureId numParams, FloatT eta)
+      : ParameterUpdate<FloatT>(params, numParams), eta_(eta), prevGrads_(numParams, (FloatT)0) {
     SDL_INFO(OnlineOptimizer, "Adagrad eta: " << eta_);
   }
 
@@ -100,26 +96,22 @@ struct AdagradParameterUpdate : public ParameterUpdate<FloatT> {
   Adagrad with L1 regularization is implemented after Chris Dyer's
   notes, http://www.ark.cs.cmu.edu/cdyer/adagrad.pdf.
  */
-template<class FloatT>
+template <class FloatT>
 struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
-  AdagradL1ParameterUpdate(FloatT *params, FeatureId numParams
-                           , FloatT eta
-                           , FloatT l1Strength)
+  AdagradL1ParameterUpdate(FloatT* params, FeatureId numParams, FloatT eta, FloatT l1Strength)
       : ParameterUpdate<FloatT>(params, numParams)
-      , eta_(eta), l1Strength_(l1Strength)
+      , eta_(eta)
+      , l1Strength_(l1Strength)
       , timeStep_(1)
       , prevGrads_(numParams, (FloatT)0)
-      , prevGradsSquared_(numParams, (FloatT)0)
-  {
+      , prevGradsSquared_(numParams, (FloatT)0) {
     SDL_INFO(OnlineOptimizer, "Adagrad L1 strength: " << l1Strength_ << ", eta: " << eta_);
   }
 
   /// No-op since Adagrad sets its own feature-specific learning rates
   void setRate(FloatT rate) OVERRIDE {}
 
-  void incTimeStep() OVERRIDE {
-    ++timeStep_;
-  }
+  void incTimeStep() OVERRIDE { ++timeStep_; }
 
   void update(FeatureId index, FloatT value) OVERRIDE {
     if (!value) return;
@@ -127,8 +119,8 @@ struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
     prevGradsSquared_[index] += value * value;
     FloatT const absAvgGrad = std::abs(prevGrads_[index]) / timeStep_;
     if (absAvgGrad > l1Strength_) {
-      FloatT const rate = Util::sgn(prevGrads_[index]) * (timeStep_ * eta_
-                                                     / std::sqrt(prevGradsSquared_[index]));
+      FloatT const rate = Util::sgn(prevGrads_[index])
+                          * (timeStep_ * eta_ / std::sqrt(prevGradsSquared_[index]));
       this->params_[index] = rate * (l1Strength_ - absAvgGrad);
     } else
       this->params_[index] = 0.0f;
@@ -154,15 +146,12 @@ struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
    TODO Implement mini-batch updates.
    TODO Support infinite training data.
  */
-template<class FloatT>
+template <class FloatT>
 class OnlineOptimizer {
  public:
+  OnlineOptimizer(OnlineOptimizerOptions const& opts) : opts_(opts) {}
 
-  OnlineOptimizer(OnlineOptimizerOptions const& opts)
-      : opts_(opts) {}
-
-  FloatT optimize(DataObjectiveFunction<FloatT>& objFct,
-                  std::vector<FloatT>& params) {
+  FloatT optimize(DataObjectiveFunction<FloatT>& objFct, std::vector<FloatT>& params) {
     return optimize(objFct, arrayBegin(params), params.size());
   }
 
@@ -173,12 +162,10 @@ class OnlineOptimizer {
 
       \params The initial params, which must have correct size.
    */
-  FloatT optimize(DataObjectiveFunction<FloatT>& objFct,
-                  FloatT *params, FeatureId numParams)
-  {
+  FloatT optimize(DataObjectiveFunction<FloatT>& objFct, FloatT* params, FeatureId numParams) {
     const std::size_t numExamples = objFct.getNumExamples();
-    SDL_INFO(OnlineOptimizer, "Starting online optimization on " << numExamples
-             << " training examples with " << opts_.numEpochs << " epochs");
+    SDL_INFO(OnlineOptimizer, "Starting online optimization on " << numExamples << " training examples with "
+                                                                 << opts_.numEpochs << " epochs");
 
     // Create a vector of indices that we can shuffle, for processing
     // the training examples in random order:
@@ -189,24 +176,21 @@ class OnlineOptimizer {
     }
 
     const std::size_t numUpdates = opts_.numEpochs * objFct.getNumExamples();
-    shared_ptr<ILearningRate> pLearningRate =
-        makeLearningRate(numUpdates,
-                         opts_.learningRateOptions);
+    shared_ptr<ILearningRate> pLearningRate = makeLearningRate(numUpdates, opts_.learningRateOptions);
 
-   bool useAdagrad = opts_.learningRateOptions.method == kAdagrad;
-   bool useAdagradL1 = opts_.learningRateOptions.adagradL1Strength > 0.0f;
+    bool useAdagrad = opts_.learningRateOptions.method == kAdagrad;
+    bool useAdagradL1 = opts_.learningRateOptions.adagradL1Strength > 0.0f;
 
     boost::scoped_ptr<ParameterUpdate<FloatT> > update;
     if (useAdagrad) {
       if (useAdagradL1)
-        update.reset(new AdagradL1ParameterUpdate<FloatT>(
-            params, numParams, opts_.learningRateOptions.adagradRate,
-            opts_.learningRateOptions.adagradL1Strength));
+        update.reset(new AdagradL1ParameterUpdate<FloatT>(params, numParams,
+                                                          opts_.learningRateOptions.adagradRate,
+                                                          opts_.learningRateOptions.adagradL1Strength));
       else
-        update.reset(new AdagradParameterUpdate<FloatT>(
-            params, numParams, opts_.learningRateOptions.adagradRate));
-    }
-    else
+        update.reset(
+            new AdagradParameterUpdate<FloatT>(params, numParams, opts_.learningRateOptions.adagradRate));
+    } else
       update.reset(new ParameterUpdate<FloatT>(params, numParams));
 
     // Iterate over all training examples opts_.numEpochs times:
@@ -216,24 +200,21 @@ class OnlineOptimizer {
       objFct.initFunctionValue();
       for (std::size_t i = 0; i < numExamples; ++i, ++cntSteps) {
         objFct.setFeatureWeights(i, i + 1, params, numParams);
-        if (!useAdagrad) // AdaGrad sets its own learning rate
+        if (!useAdagrad)  // AdaGrad sets its own learning rate
           update->setRate(static_cast<FloatT>((*pLearningRate)(cntSteps)));
         FloatT fctDiff = objFct.getUpdates(i, i + 1, *update);
         objFct.increaseFunctionValue(fctDiff);
         update->incTimeStep();
       }
-      SDL_INFO(OnlineOptimizer, "Epoch " << epoch << ", function value: "
-               << objFct.getFunctionValue());
-    } // epochs
+      SDL_INFO(OnlineOptimizer, "Epoch " << epoch << ", function value: " << objFct.getFunctionValue());
+    }  // epochs
 
-    SDL_INFO(OnlineOptimizer, "Finished online optimization, function value: "
-             << objFct.getFunctionValue());
+    SDL_INFO(OnlineOptimizer, "Finished online optimization, function value: " << objFct.getFunctionValue());
     return objFct.getFunctionValue();
   }
 
  private:
   OnlineOptimizerOptions opts_;
-
 };
 
 

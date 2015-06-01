@@ -46,9 +46,10 @@ unsigned const kReserveForBestPathString = 500;
 
 
 template <class Arc>
-void appendBestPathStringForDeriv(Util::StringBuilder& out, typename Derivation<Arc>::child_type const& deriv, IHypergraph<Arc> const& hg,
+void appendBestPathStringForDeriv(Util::StringBuilder& out, typename Derivation<Arc>::child_type const& deriv,
+                                  IHypergraph<Arc> const& hg,
                                   DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
-                                 bool printWeight = false) {
+                                  bool printWeight = false) {
   if (printWeight) out(deriv->weight())(' ');
   textFromDeriv(out, deriv, hg, opts);
 }
@@ -57,7 +58,7 @@ template <class Arc>
 Util::StringBuilder& bestPathString(Util::StringBuilder& out, IHypergraph<Arc> const& hg,
                                     BestPathOptions const& bestPathOpts = BestPathOptions(),
                                     DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
-                                   bool printWeight = false,
+                                    bool printWeight = false,
                                     char const* fallbackIfNoDerivation = "[no derivation exists]") {
   typename Derivation<Arc>::child_type deriv = bestPath(hg, bestPathOpts);
   if (!deriv)
@@ -72,7 +73,7 @@ Util::StringBuilder& bestPathString(Util::StringBuilder& out, IHypergraph<Arc> c
 template <class Arc>
 std::string bestPathString(IHypergraph<Arc> const& hg, BestPathOptions const& bestPathOpts = BestPathOptions(),
                            DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
-                          bool printWeight = false,
+                           bool printWeight = false,
                            char const* fallbackIfNoDerivation = "[no derivation exists]") {
   typename Derivation<Arc>::child_type deriv = bestPath(hg, bestPathOpts);
   if (!deriv)
@@ -94,8 +95,7 @@ Syms& bestPathSymsAppend(Syms& syms, IHypergraph<Arc> const& hg,
 template <class Arc>
 Syms& bestPathSymsAppend(Syms& syms, FeatureValue& cost, IHypergraph<Arc> const& hg,
                          BestPathOptions const& bestPathOpts = BestPathOptions(),
-                         WhichSymbolOptions const& opts = WhichSymbolOptions())
-{
+                         WhichSymbolOptions const& opts = WhichSymbolOptions()) {
   typename Derivation<Arc>::DerivAndWeight derivWeight = bestDerivWeight(hg, bestPathOpts);
   if (boost::get<0>(derivWeight)) {
     cost = boost::get<1>(derivWeight).getValue();
@@ -124,7 +124,7 @@ std::string nbestString(IHypergraph<Arc> const& hg, unsigned nbest,
 // Simplified interface (without best path options):
 template <class Arc>
 std::string bestPathString(IHypergraph<Arc> const& hg, DerivationStringOptions const& opts,
-                          bool printWeight = false) {
+                           bool printWeight = false) {
   return bestPathString(hg, BestPathOptions(), opts, printWeight);
 }
 
@@ -221,7 +221,7 @@ struct SymReplace {
   Sym escSpace;
   Sym space;
   SymReplace(IVocabulary* vocab, std::string const& escSpaceStr = Util::kEscSpace,
-               std::string const& spaceStr = Util::kSpace)
+             std::string const& spaceStr = Util::kSpace)
       : escSpace(escSpaceStr.empty() ? NoSymbol : vocab->sym(escSpaceStr, kTerminal))
       , space(vocab->add(spaceStr, kTerminal)) {}
   void operator()(Syms& syms, IVocabulary*) const {
@@ -325,7 +325,7 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
     skipOriginalSym = skipOriginalWord ? voc->sym(*skipOriginalWord, kTerminal) : NoSymbol;
     hgBase = &hg;
     SDL_DEBUG(Hypergraph.BestPathString, "RunPipeline visitor for Translitate etc. computing "
-                                         << options.nbest << "-best for hg:\n " << hg);
+                                             << options.nbest << "-best for hg:\n " << hg);
     options.visit_nbest(hg, *this, Hypergraph::kThrowEmptySetException);
   }
 

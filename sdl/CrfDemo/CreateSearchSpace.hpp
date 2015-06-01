@@ -71,7 +71,7 @@ struct CrfDemoConfig {
   std::size_t numThreads;
 };
 
-template<class A>
+template <class A>
 class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   typedef A Arc;
   typedef typename Arc::Weight Weight;
@@ -83,8 +83,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
  public:
   CreateSearchSpace(ConfigNode const& yamlConfig)
-      : pVoc_(Vocabulary::createDefaultVocab())
-      , testMode_(false) {
+      : pVoc_(Vocabulary::createDefaultVocab()), testMode_(false) {
     Config::applyYaml(yamlConfig, &opts_);
   }
 
@@ -102,9 +101,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   void writeLabelsFile(std::string const& fname) {
     SDL_INFO(CrfDemo, "Writing labels file '" << fname << "'");
     Util::Output output(fname);
-    forall (Sym labelId, allLabels_) {
-      *output << pVoc_->str(labelId) << '\n';
-    }
+    forall (Sym labelId, allLabels_) { *output << pVoc_->str(labelId) << '\n'; }
   }
 
   void readLabelsPerPosFile(std::string const& fname) {
@@ -125,27 +122,20 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   void writeLabelsPerPosFile(std::string const& fname) {
     SDL_INFO(CrfDemo, "Writing labels-per-pos file '" << fname << "'");
     Util::Output output(fname);
-    for (LabelsPerPosMap::const_iterator it = labelsPerPos_.begin();
-         it != labelsPerPos_.end(); ++it) {
+    for (LabelsPerPosMap::const_iterator it = labelsPerPos_.begin(); it != labelsPerPos_.end(); ++it) {
       *output << pVoc_->str(it->first);
-      forall (Sym labelId, it->second) {
-        *output << "\t" << pVoc_->str(labelId);
-      }
+      forall (Sym labelId, it->second) { *output << "\t" << pVoc_->str(labelId); }
       *output << '\n';
     }
   }
 
   ///
 
-  Hypergraph::IMutableHypergraph<Arc>*
-  getUnclampedHypergraph(Optimization::IInput const& observedInput) {
+  Hypergraph::IMutableHypergraph<Arc>* getUnclampedHypergraph(Optimization::IInput const& observedInput) {
     return NULL;
   }
 
-  shared_ptr< Optimization::IFeatureHypergraphPairs<Arc> >
-  getFeatureHypergraphPairs() const {
-    return pairs_;
-  }
+  shared_ptr<Optimization::IFeatureHypergraphPairs<Arc> > getFeatureHypergraphPairs() const { return pairs_; }
 
   std::size_t getNumFeatures() { return opts_.numFeatures; }
 
@@ -162,12 +152,13 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   struct Sentence {
     std::vector<Sym> words, poss, labels;
 
-   void clear() {
-      words.clear(); poss.clear(); labels.clear();
+    void clear() {
+      words.clear();
+      poss.clear();
+      labels.clear();
     }
 
-   void add(std::string const& line, std::set<Sym>* allLabels
-             , IVocabularyPtr& pVoc, bool testMode) {
+    void add(std::string const& line, std::set<Sym>* allLabels, IVocabularyPtr& pVoc, bool testMode) {
       std::stringstream ss(line);
       std::string word, pos, label;
       ss >> word >> pos >> label;
@@ -177,9 +168,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       words.push_back(pVoc->add(word, kTerminal));
       poss.push_back(pVoc->add(pos, kTerminal));
       labels.push_back(pVoc->add(label, kTerminal));
-      SDL_DEBUG(CrfDemo, "id(" << word << "): " << words.back()) ;
-      SDL_DEBUG(CrfDemo, "id(" << pos << "): " << poss.back()) ;
-      SDL_DEBUG(CrfDemo, "id(" << label << "): " << labels.back()) ;
+      SDL_DEBUG(CrfDemo, "id(" << word << "): " << words.back());
+      SDL_DEBUG(CrfDemo, "id(" << pos << "): " << poss.back());
+      SDL_DEBUG(CrfDemo, "id(" << label << "): " << labels.back());
       if (!testMode) {
         allLabels->insert(labels.back());
       }
@@ -209,29 +200,25 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2).str();
   }
 
-  std::string createFeatureName(std::string const& prefix,
-                                Sym sym1, Sym sym2, Sym sym3) const {
+  std::string createFeatureName(std::string const& prefix, Sym sym1, Sym sym2, Sym sym3) const {
     if (opts_.meaningfulFeatureNames)
-      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym1))("_")(pVoc_->str(sym2))("_")(pVoc_->str(sym3)).str();
+      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym1))("_")(pVoc_->str(sym2))("_")(pVoc_->str(sym3))
+          .str();
     else
       return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2)("_")(sym3).str();
   }
 
-  std::string createFeatureName(std::string const& prefix,
-                                std::string const& sym1,
-                                std::string const& sym2,
+  std::string createFeatureName(std::string const& prefix, std::string const& sym1, std::string const& sym2,
                                 std::string const& sym3) const {
     return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2)("_")(sym3).str();
   }
 
-  std::string createFeatureName(std::string const& prefix,
-                                std::string const& sym1,
+  std::string createFeatureName(std::string const& prefix, std::string const& sym1,
                                 std::string const& sym2) const {
     return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2).str();
   }
 
-  std::string createFeatureName(std::string const& prefix,
-                                std::string const& sym1) const {
+  std::string createFeatureName(std::string const& prefix, std::string const& sym1) const {
     return Util::StringBuilder(prefix)("_")(sym1).str();
   }
 
@@ -254,12 +241,10 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     IMutableHypergraph<Arc>* model = new MutableHypergraph<Arc>();
     model->setVocabulary(pVoc_);
 
-    std::vector<Sym> historyNames; // just for more meaningful feature names
+    std::vector<Sym> historyNames;  // just for more meaningful feature names
     historyNames.reserve(allLabels_.size() + 1);
     historyNames.push_back(EPSILON::ID);
-    forall (Sym label, allLabels_) {
-      historyNames.push_back(label);
-    }
+    forall (Sym label, allLabels_) { historyNames.push_back(label); }
 
     std::size_t numStates = allLabels_.size() + 2;
     for (std::size_t i = 0; i < numStates; ++i) {
@@ -273,8 +258,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       std::set<Sym>::const_iterator symIter = allLabels_.begin();
       for (StateId t = 1; t < finalState; ++t, ++symIter) {
         Weight weight(0.0f);
-        weight.insert(getFeatureId(createFeatureName("bi", historyNames[s], historyNames[t])),
-                      1.0f);
+        weight.insert(getFeatureId(createFeatureName("bi", historyNames[s], historyNames[t])), 1.0f);
         model->addArc(new Arc(Head(t), Tails(s, model->addState(*symIter)), weight));
 
         // Final arcs
@@ -282,8 +266,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
           Weight weight(0.0f);
           weight.insert(getFeatureId(createFeatureName("bi", historyNames[s], historyNames[t])),
                         1.0f);  // s, then t
-          weight.insert(getFeatureId(createFeatureName("end", historyNames[t])),
-                        1.0f);                  // t, then end
+          weight.insert(getFeatureId(createFeatureName("end", historyNames[t])), 1.0f);  // t, then end
           model->addArc(new Arc(Head(finalState), Tails(s, model->addState(*symIter)), weight));
         }
       }
@@ -294,12 +277,8 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   }
 
   // shortcut
-  Sym sym(std::string const& str) {
-    return pVoc_->add(str, kNonterminal);
-  }
-  Sym termSym(std::string const& str) {
-    return pVoc_->add(str, kTerminal);
-  }
+  Sym sym(std::string const& str) { return pVoc_->add(str, kNonterminal); }
+  Sym termSym(std::string const& str) { return pVoc_->add(str, kTerminal); }
 
   Hypergraph::IHypergraph<Arc>* createHierarchicalModel() {
     using namespace Hypergraph;
@@ -308,7 +287,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     model->setVocabulary(pVoc_);
     // model->setStart(model->addState());
 
-    std::set<Sym> nonterminals; // NP, VP, ...
+    std::set<Sym> nonterminals;  // NP, VP, ...
     forall (Sym label, allLabels_) {
       std::string const& str = pVoc_->str(label);
       if (str.length() > 2 && (str[0] == 'I' || str[0] == 'B') && str[1] == '-') {
@@ -335,20 +314,25 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       Sym nt0 = sym(ntStr + "0");
       stateId[nt0] = model->addState(nt0);
 
-      Weight weight1(0.0f); weight1.insert(getFeatureId(createFeatureName("short", nt)), 1.0f);
-      model->addArc(new Arc(Head(stateId[nt]), Tails(stateId[b]), weight1)); // (NP) <- (B-NP)
+      Weight weight1(0.0f);
+      weight1.insert(getFeatureId(createFeatureName("short", nt)), 1.0f);
+      model->addArc(new Arc(Head(stateId[nt]), Tails(stateId[b]), weight1));  // (NP) <- (B-NP)
 
-      Weight weight2(0.0f); weight2.insert(getFeatureId(createFeatureName("long", nt)), 1.0f);
-      model->addArc(new Arc(Head(stateId[nt]), Tails(stateId[b], stateId[nt0]), weight2)); // (NP) <- (B-NP) (NP0)
+      Weight weight2(0.0f);
+      weight2.insert(getFeatureId(createFeatureName("long", nt)), 1.0f);
+      model->addArc(
+          new Arc(Head(stateId[nt]), Tails(stateId[b], stateId[nt0]), weight2));  // (NP) <- (B-NP) (NP0)
 
-      Weight weight3(0.0f); weight3.insert(getFeatureId(createFeatureName("short_sub", nt)), 1.0f);
-      model->addArc(new Arc(Head(stateId[nt0]), Tails(stateId[i]), weight3)); // (NP0) <- (I-NP)
+      Weight weight3(0.0f);
+      weight3.insert(getFeatureId(createFeatureName("short_sub", nt)), 1.0f);
+      model->addArc(new Arc(Head(stateId[nt0]), Tails(stateId[i]), weight3));  // (NP0) <- (I-NP)
 
-      Weight weight4(0.0f); weight4.insert(getFeatureId(createFeatureName("long_sub", nt)), 1.0f);
+      Weight weight4(0.0f);
+      weight4.insert(getFeatureId(createFeatureName("long_sub", nt)), 1.0f);
       model->addArc(new Arc(Head(stateId[nt0]), Tails(stateId[i], stateId[nt0]), weight4));
     }
 
-    Sym O = termSym("O"); // similar to "B-NP", etc.: it's a terminal symbol
+    Sym O = termSym("O");  // similar to "B-NP", etc.: it's a terminal symbol
     nonterminals.insert(O);
     stateId[O] = model->addState(O);
 
@@ -377,8 +361,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
           weight.insert(getFeatureId(createFeatureName("tri_nt", nt1Str, nt2Str, nt3Str)), 1.0f);
           weight.insert(getFeatureId(createFeatureName("bi_nt", nt2Str, nt3Str)), 1.0f);
           weight.insert(getFeatureId(createFeatureName("uni_nt", nt3Str)), 1.0f);
-          model->addArc(new Arc(Head(stateId[nt23]),
-                                Tails(stateId[nt12], stateId[nt3]), weight));
+          model->addArc(new Arc(Head(stateId[nt23]), Tails(stateId[nt12], stateId[nt3]), weight));
         }
       }
     }
@@ -397,8 +380,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         weight.insert(getFeatureId(createFeatureName("tri_nt", "eps", nt1Str, nt2Str)), 1.0f);
         weight.insert(getFeatureId(createFeatureName("bi_nt", nt1Str, nt2Str)), 1.0f);
         weight.insert(getFeatureId(createFeatureName("uni_nt", nt2Str)), 1.0f);
-        model->addArc(new Arc(Head(stateId[nt12]),
-                              Tails(stateId[epsNt1], stateId[nt2]), weight));
+        model->addArc(new Arc(Head(stateId[nt12]), Tails(stateId[epsNt1], stateId[nt2]), weight));
       }
     }
 
@@ -411,8 +393,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       Weight weight(0.0f);
       weight.insert(getFeatureId(createFeatureName("bi_nt", "eps", ntStr)), 1.0f);
       weight.insert(getFeatureId(createFeatureName("uni_nt", ntStr)), 1.0f);
-      model->addArc(new Arc(Head(stateId[epsNt]),
-                            Tails(stateId[nt]), weight));
+      model->addArc(new Arc(Head(stateId[epsNt]), Tails(stateId[nt]), weight));
     }
 
     Sym final0 = sym("FINAL0");
@@ -428,8 +409,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         weight.insert(getFeatureId(createFeatureName("tri_nt", nt1Str, nt2Str, "FINAL")), 1.0f);
         weight.insert(getFeatureId(createFeatureName("bi_nt", nt2Str, "FINAL")), 1.0f);
         weight.insert(getFeatureId(createFeatureName("uni_nt", "FINAL")), 1.0f);
-        model->addArc(new Arc(Head(stateId[final0]),
-                              Tails(stateId[nt12]), weight));
+        model->addArc(new Arc(Head(stateId[final0]), Tails(stateId[nt12]), weight));
       }
     }
 
@@ -441,8 +421,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       weight.insert(getFeatureId(createFeatureName("tri_nt", "eps", nt1Str, "FINAL")), 1.0f);
       weight.insert(getFeatureId(createFeatureName("bi_nt", nt1Str, "FINAL")), 1.0f);
       weight.insert(getFeatureId(createFeatureName("uni_nt", "FINAL")), 1.0f);
-      model->addArc(new Arc(Head(stateId[final0]),
-                            Tails(stateId[epsNt1]), weight));
+      model->addArc(new Arc(Head(stateId[final0]), Tails(stateId[epsNt1]), weight));
     }
 
     model->setFinal(stateId[final0]);
@@ -464,26 +443,22 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     return model;
   }
 
-  void addLabelArc(Hypergraph::IMutableHypergraph<Arc>* hg
-                   , Sym word, Sym pos, Sym label
-                   , Hypergraph::StateId from, Hypergraph::StateId to) const {
+  void addLabelArc(Hypergraph::IMutableHypergraph<Arc>* hg, Sym word, Sym pos, Sym label,
+                   Hypergraph::StateId from, Hypergraph::StateId to) const {
     Weight weight(0.0f);
     weight.insert(getFeatureId(createFeatureName("word+label", word, label)), 1.0f);
     weight.insert(getFeatureId(createFeatureName("pos+label", pos, label)), 1.0f);
     weight.insert(getFeatureId(createFeatureName("label", label)), 1.0f);
 
     using namespace Hypergraph;
-    hg->addArc(new Arc(Head(to),
-                       Tails(from, hg->addState(label)),
-                       weight));
+    hg->addArc(new Arc(Head(to), Tails(from, hg->addState(label)), weight));
   }
 
-  enum HypergraphType {kClamped = 1, kUnclamped = 2};
+  enum HypergraphType { kClamped = 1, kUnclamped = 2 };
 
-  Hypergraph::IHypergraph<Arc>*
-  createSearchSpace(Sentence const& sent
-                    , Hypergraph::IHypergraph<Arc> const& transitionModel
-                    , HypergraphType hgType) const {
+  Hypergraph::IHypergraph<Arc>* createSearchSpace(Sentence const& sent,
+                                                  Hypergraph::IHypergraph<Arc> const& transitionModel,
+                                                  HypergraphType hgType) const {
     using namespace Hypergraph;
     IMutableHypergraph<Arc>* result = new MutableHypergraph<Arc>(kFsmOutProperties);
     result->setVocabulary(pVoc_);
@@ -494,33 +469,28 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     result->setStart(0);
 
     for (std::size_t i = 0; i < sent.words.size(); ++i) {
-      if (hgType == kClamped) { // add the observed (gold) label (clamped, nominator)
+      if (hgType == kClamped) {  // add the observed (gold) label (clamped, nominator)
         addLabelArc(result, sent.words[i], sent.poss[i], sent.labels[i], i, i + 1);
-      }
-      else {
+      } else {
         // forall (Sym label, allLabels_) { // add all possible labels (unclamped, denominator)
         std::set<Sym> const* labels = &allLabels_;
         LabelsPerPosMap::const_iterator iter = labelsPerPos_.find(sent.poss[i]);
         if (iter != labelsPerPos_.end()) {
           labels = &(iter->second);
         }
-        forall (Sym label, *labels) {
-          addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1);
-        }
+        forall (Sym label, *labels) { addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1); }
       }
     }
 
     result->setFinal(sent.words.size());
-    IMutableHypergraph<Arc>* composed =
-        new MutableHypergraph<Arc>(kCanonicalLex | kStoreOutArcs | kStoreInArcs);
+    IMutableHypergraph<Arc>* composed
+        = new MutableHypergraph<Arc>(kCanonicalLex | kStoreOutArcs | kStoreInArcs);
 
     if (opts_.fstCompose) {
       ComposeTransformOptions cOpt;
       cOpt.fstCompose = true;
-      Hypergraph::fs::compose(
-          *result, (IMutableHypergraph<Arc> const&)transitionModel, composed, cOpt);
-    }
-    else {
+      Hypergraph::fs::compose(*result, (IMutableHypergraph<Arc> const&)transitionModel, composed, cOpt);
+    } else {
       Hypergraph::compose(transitionModel, *result, composed);
     }
 
@@ -531,13 +501,10 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     return composed;
   }
 
-  void processTrainingSentence(Sentence const& sent,
-                               Hypergraph::IHypergraph<Arc> const& transitionModel,
+  void processTrainingSentence(Sentence const& sent, Hypergraph::IHypergraph<Arc> const& transitionModel,
                                Pairs& pairs) {
-    Hypergraph::IHypergraph<Arc>* clamped =
-        createSearchSpace(sent, transitionModel, kClamped);
-    Hypergraph::IHypergraph<Arc>* unclamped =
-        createSearchSpace(sent, transitionModel, kUnclamped);
+    Hypergraph::IHypergraph<Arc>* clamped = createSearchSpace(sent, transitionModel, kClamped);
+    Hypergraph::IHypergraph<Arc>* unclamped = createSearchSpace(sent, transitionModel, kUnclamped);
     boost::lock_guard<boost::mutex> lock(mutex_);
     pairs.push_back(value_type(IHgPtr(clamped), IHgPtr(unclamped)));
   }
@@ -549,32 +516,28 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     typedef CreateSearchSpace<A> Outer;
 
-    ProcessTrainingExampleRange(Outer& o
-                                , std::size_t begin
-                                , std::size_t end
-                                , std::vector<Sentence> const& sents
-                                , Hypergraph::IHypergraph<A> const& transitionModel
-                                , typename Outer::Pairs& trainingExamples
-                                , bool doLogProgress
-                                )
-        : outer_(o), begin_(begin), end_(end), sents_(sents)
-        , transitionModel_(transitionModel), trainingExamples_(trainingExamples)
-        , doLogProgress_(doLogProgress)
-    {}
+    ProcessTrainingExampleRange(Outer& o, std::size_t begin, std::size_t end,
+                                std::vector<Sentence> const& sents,
+                                Hypergraph::IHypergraph<A> const& transitionModel,
+                                typename Outer::Pairs& trainingExamples, bool doLogProgress)
+        : outer_(o)
+        , begin_(begin)
+        , end_(end)
+        , sents_(sents)
+        , transitionModel_(transitionModel)
+        , trainingExamples_(trainingExamples)
+        , doLogProgress_(doLogProgress) {}
 
-   void operator()() {
-      SDL_DEBUG(Optimization.ProcessTrainingExampleRange,
-                "Processing sentences " << begin_ << " to " << end_);
+    void operator()() {
+      SDL_DEBUG(Optimization.ProcessTrainingExampleRange, "Processing sentences " << begin_ << " to " << end_);
       for (std::size_t i = begin_; i < end_; ++i) {
-        SDL_DEBUG(Optimization.ProcessTrainingExampleRange,
-                  "Processing sentence " << i);
+        SDL_DEBUG(Optimization.ProcessTrainingExampleRange, "Processing sentence " << i);
         outer_.processTrainingSentence(sents_[i], transitionModel_, trainingExamples_);
 
         if (doLogProgress_) {
           std::size_t blockSize = (end_ - begin_) / 10.0f;
-          if (blockSize && (i-begin_+1) % blockSize == 0) {
-            SDL_INFO(CrfDemo,
-                     (((i-begin_+1.0f) / (end_ - begin_)) * 100.0f) << "% processed");
+          if (blockSize && (i - begin_ + 1) % blockSize == 0) {
+            SDL_INFO(CrfDemo, (((i - begin_ + 1.0f) / (end_ - begin_)) * 100.0f) << "% processed");
           }
         }
       }
@@ -585,7 +548,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     std::vector<Sentence> const& sents_;
     Hypergraph::IHypergraph<A> const& transitionModel_;
     typename Outer::Pairs& trainingExamples_;
-   bool doLogProgress_;
+    bool doLogProgress_;
   };
 
   ///
@@ -593,17 +556,12 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   void prepareTraining() {
     Util::Performance performance("CrfDemo.prepareTraining", std::cerr);
 
-    if (!opts_.writeTrainArchivePath.empty()) {      // Write archive?
-      pairs_.reset(
-          new Optimization::WriteFeatureHypergraphPairs<Arc>(
-              opts_.writeTrainArchivePath));
-    }
-    else if (!opts_.readTrainArchivePath.empty()) {  // Read archive?
-      pairs_.reset(
-          new Optimization::ExternalFeatHgPairs<Arc>(opts_.readTrainArchivePath));
+    if (!opts_.writeTrainArchivePath.empty()) {  // Write archive?
+      pairs_.reset(new Optimization::WriteFeatureHypergraphPairs<Arc>(opts_.writeTrainArchivePath));
+    } else if (!opts_.readTrainArchivePath.empty()) {  // Read archive?
+      pairs_.reset(new Optimization::ExternalFeatHgPairs<Arc>(opts_.readTrainArchivePath));
       return;
-    }
-    else {                                            // Construct HGs
+    } else {  // Construct HGs
       pairs_.reset(new Optimization::InMemoryFeatureHypergraphPairs<Arc>());
     }
 
@@ -616,8 +574,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       if (line.empty()) {
         sents.push_back(sent);
         sent.clear();
-      }
-      else {
+      } else {
         sent.add(line, &allLabels_, pVoc_, testMode_);
       }
     }
@@ -632,39 +589,34 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       }
     }
 
-    Hypergraph::IHypergraph<Arc>* transitionModel =
-        opts_.transitionModel == kUnigram ? createUnigramModel() :
-        opts_.transitionModel == kBigram ? createBigramModel() :
-        opts_.transitionModel == kHierarchical ? createHierarchicalModel() :
-        createBihierarchicalModel();
+    Hypergraph::IHypergraph<Arc>* transitionModel
+        = opts_.transitionModel == kUnigram
+              ? createUnigramModel()
+              : opts_.transitionModel == kBigram ? createBigramModel() : opts_.transitionModel == kHierarchical
+                                                                             ? createHierarchicalModel()
+                                                                             : createBihierarchicalModel();
     SDL_INFO(CrfDemo, "Extracting features");
 
     if (opts_.numThreads < 2) {
       std::size_t cnt = 0;
-      forall (Sentence const& sent, sents) {
-        processTrainingSentence(sent, *transitionModel, *pairs_);
-      }
-    }
-    else { // multi-threaded:
+      forall (Sentence const& sent, sents) { processTrainingSentence(sent, *transitionModel, *pairs_); }
+    } else {  // multi-threaded:
       std::size_t numProducers = opts_.numThreads;
       boost::thread_group producer_threads;
 
       std::size_t size = sents.size();
       std::size_t blockSize = size / numProducers;
-      std::size_t numProducerThreads =
-          (numProducers * blockSize == size) ? numProducers : numProducers + 1;
+      std::size_t numProducerThreads = (numProducers * blockSize == size) ? numProducers : numProducers + 1;
 
       typedef Util::AutoDeleteAll<ProcessTrainingExampleRange> Producers;
       Producers producers;
       producers.reserve(numProducerThreads);
-      ProcessTrainingExampleRange *update;
+      ProcessTrainingExampleRange* update;
       for (std::size_t i = 0; i < numProducerThreads; ++i) {
         TrainingDataIndex begin = i * blockSize;
-        TrainingDataIndex end = (i == numProducerThreads-1) ? size : (i+1) * blockSize;
-        producers.push_back(
-            update = new ProcessTrainingExampleRange(
-                *this, begin, end,
-                sents, *transitionModel, *pairs_, i==0));
+        TrainingDataIndex end = (i == numProducerThreads - 1) ? size : (i + 1) * blockSize;
+        producers.push_back(update = new ProcessTrainingExampleRange(*this, begin, end, sents,
+                                                                     *transitionModel, *pairs_, i == 0));
         // boost::ref prevents copy:
         producer_threads.create_thread(boost::ref(*update));
       }
@@ -685,25 +637,23 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     if (!opts_.writeTrainArchivePath.empty()
         && !opts_.readTrainArchivePath.empty()) {  // Read after we've just written
-      boost::this_thread::sleep(boost::posix_time::milliseconds(1000)); // just in case
-      pairs_.reset(
-          new Optimization::ExternalFeatHgPairs<Arc>(opts_.readTrainArchivePath));
+      boost::this_thread::sleep(boost::posix_time::milliseconds(1000));  // just in case
+      pairs_.reset(new Optimization::ExternalFeatHgPairs<Arc>(opts_.readTrainArchivePath));
     }
   }
 
-  std::string getName() const {
-    return "CrfDemo";
-  }
+  std::string getName() const { return "CrfDemo"; }
 
  private:
   IVocabularyPtr pVoc_;
-  shared_ptr< Optimization::IFeatureHypergraphPairs<Arc> > pairs_;
+  shared_ptr<Optimization::IFeatureHypergraphPairs<Arc> > pairs_;
   CrfDemoConfig opts_;
   std::set<Sym> allLabels_;
   boost::unordered_map<Sym, std::set<Sym> > labelsPerPos_;
   bool testMode_;
   boost::mutex mutex_;
 };
+
 
 }}
 

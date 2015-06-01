@@ -26,6 +26,7 @@
 #include <sdl/Hypergraph/src/HypCompose.cpp>
 #include <sdl/Hypergraph/src/HypInside.cpp>
 #include <sdl/Hypergraph/src/HypEmpty.cpp>
+#include <sdl/Hypergraph/src/HypPruneToBest.cpp>
 #if !SDL_MINIMAL_HYP_MAIN
 #include <sdl/Hypergraph/src/HypReweightBest.cpp>
 #include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
@@ -40,7 +41,6 @@
 #include <sdl/Hypergraph/src/HypConcat.cpp>
 #include <sdl/Hypergraph/src/HypReverse.cpp>
 #include <sdl/Hypergraph/src/HypReweight.cpp>
-#include <sdl/Hypergraph/src/HypPruneToBest.cpp>
 #include <sdl/Hypergraph/src/HypToMosesLattice.cpp>
 #include <sdl/Hypergraph/src/HypConvertStrings.cpp>
 #include <sdl/Hypergraph/src/HypDraw.cpp>

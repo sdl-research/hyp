@@ -145,17 +145,23 @@ struct FstComposeOptions : SaveFstOptions {
     SaveFstOptions::configure(config);
     config("fst-compose", &fstCompose)
         .self_init()("true: optimized fst1*fst2 compose (false: cfg*fst, which is slower)");
-    config("sort-best-first", &sortBestFirst).self_init()(
-        "for fst-compose, if not saving whole output HG attempt to sort out-arcs best-first (ignored for non-mutable hypergraphs)");
-    config("epsilon-matching-paths", &epsilonMatchingFilter).self_init()(
-        "use a three-valued filter state that prefers matching input x:<eps> match <eps>:y directly into "
-        "x:y. this result may be larger or smaller. (TODO: seems buggy - ate some paths in testing)");
-    config("allow-duplicate-paths", &allowDuplicatePaths).self_init()(
-        "for viterbi-like (idempotent plus - i.e. plus(x, x) = x) semirings, allow repeated equivalent "
-        "paths involving epsilons. this will result in n-best duplicates, but otherwise may be faster");
-    config("allow-duplicate-paths-if-1best", &allowDuplicatePathsIf1Best).self_init()(
-        "allow-duplicate-paths only if prune-to-nbest=1 (because the downside of allow-duplicate-paths is "
-        "extra paths)");
+    config("sort-best-first", &sortBestFirst)
+        .self_init()(
+            "for fst-compose, if not saving whole output HG attempt to sort out-arcs best-first (ignored for "
+            "non-mutable hypergraphs)");
+    config("epsilon-matching-paths", &epsilonMatchingFilter)
+        .self_init()(
+            "use a three-valued filter state that prefers matching input x:<eps> match <eps>:y directly into "
+            "x:y. this result may be larger or smaller. (TODO: seems buggy - ate some paths in testing)");
+    config("allow-duplicate-paths", &allowDuplicatePaths)
+        .self_init()(
+            "for viterbi-like (idempotent plus - i.e. plus(x, x) = x) semirings, allow repeated equivalent "
+            "paths involving epsilons. this will result in n-best duplicates, but otherwise may be faster");
+    config("allow-duplicate-paths-if-1best", &allowDuplicatePathsIf1Best)
+        .self_init()(
+            "allow-duplicate-paths only if prune-to-nbest=1 (because the downside of allow-duplicate-paths "
+            "is "
+            "extra paths)");
     config("mix-fst", &mix)(
         "a MixFeature for scaling the fst1 arc weight into the fst2 arc weight (and assigning feature id if "
         "fst1 is FeatureWeight). if fst1 and fst2 are both FHG, then you have fst1*(fst^scale) - the "
@@ -514,7 +520,7 @@ struct ComposeFst : TimesFn {
        simplify)
     */
     operator bool() const { return hasMore; }
-   void setDone() { hasMore = false; }
+    void setDone() { hasMore = false; }
     Arc operator()() {
       Arc r;  // could make peekable by r as member, init by pop() once when creating. could save us from
       // detecting empty range in advance
@@ -581,7 +587,7 @@ struct ComposeFst : TimesFn {
       return r;
     }
 
-   bool initSigma() {
+    bool initSigma() {
       if (match->whichSpecials.test(SIGMA::id)
           && (matchedArcs = match->arcsMatchingInput(matchSrc, SIGMA::ID))) {
         midSigma = true;
@@ -590,7 +596,7 @@ struct ComposeFst : TimesFn {
         return false;
     }
 
-   bool initRho() {
+    bool initRho() {
       return match->whichSpecials.test(RHO::id) && (matchedArcs = match->arcsMatchingInput(matchSrc, RHO::ID));
     }
 
@@ -607,7 +613,7 @@ struct ComposeFst : TimesFn {
 
     MatchState matchSrc;  // used if inArc output label is epsilon, or for initSigma
 
-   bool hasMore, midSigma;
+    bool hasMore, midSigma;
     //, hasMoreSigma, initSigma;  // done or more
     // int sigmabytes[sizeof(MatchArcs)/sizeof(int)];
 
@@ -698,7 +704,7 @@ struct ComposeFst : TimesFn {
         r.inArc.labelPair.first = EPSILON::ID;
         r.inArc.labelPair.second = NoSymbol;
 #if SDL_VALGRIND
-        //r.inArc.weight = Weight::one();
+// r.inArc.weight = Weight::one();
 #endif
         // weight is set to one in ArcsGen
         // maybe todo: keep track of eps matches also and report dead-state-ness. or caller can just detect
@@ -728,7 +734,7 @@ struct ComposeFst : TimesFn {
     InputArcs inArcs;
     MatchPtr match;
     ConcatState concatState;  // because we want to emit 3 different types of arcs
-   bool anyStandardMatch;
+    bool anyStandardMatch;
     MatchArcs epsilon;  // we don't save phi because it's not subject to reuse; it's the last thing we do
     friend inline std::ostream& operator<<(std::ostream& out, ArcsGenGen const& self) {
       out << "ArcsGenGen[";

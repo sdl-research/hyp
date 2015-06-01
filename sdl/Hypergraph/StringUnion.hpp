@@ -122,31 +122,39 @@ struct StringUnionOptions {
     c("unweighted", &unweighted)("use weight one (unweighted) for all words");
     c('u')("unk-weight", &unkUnigramWeight)(
         "add a wildcard transition with this weight (to start state only) for oov chars that adds end-string "
-        "symbols. since these are oov chars, ").self_init();
+        "symbols. since these are oov chars, ")
+        .self_init();
     c("wildcard-is-rho", &wildcardIsRho)(
         "the wildcard used in unk-weight only applies to chars not seen (in which case unk-weight doesn't "
         "matter. however, if ne.fsa-file starts accepting an unknown-to-wordlist character but doesn't "
         "complete it with a token, this should be false, or else you will fail to derive some strings. "
-        "otherwise the default, true, is better").self_init();
-    c('l')("loop", &loop)(
-        "accept String* rather than just String (final = start state unless weight-stop!=0)").self_init();
+        "otherwise the default, true, is better")
+        .self_init();
+    c('l')("loop",
+           &loop)("accept String* rather than just String (final = start state unless weight-stop!=0)")
+        .self_init();
     c('s')("stop-weight", &endOfTokenSequenceWeight)(
         "go to final state from start with this weight (epsilon); use only with --loop. this is the "
-        "probability of generating no more words").self_init();
+        "probability of generating no more words")
+        .self_init();
     // TODO: separate end of tok weight vs end of sentence weight
-    c('T')("tok-weight", &perTokenWeight)(
-        "cost for each token e.g. 1-[stop-weight]. unset means prob = 1 (cost 0)").self_init();
+    c('T')("tok-weight",
+           &perTokenWeight)("cost for each token e.g. 1-[stop-weight]. unset means prob = 1 (cost 0)")
+        .self_init();
     c('t')("ignore-tags", &ignoreTags)("ignore tokens between <ignore-tag> ... </ignore-tag>").self_init();
     c("xmt-block", &xmtBlock)(
         "force <xmt-blockN> and </xmt-block> in a token to be single-character words - effectively forcing a "
         "token to end on the left and start on the right of the block open or close tag. this already "
         "happens by default (see xmt-block-via-unk-unigram) if you allow the unk-weight novel-character "
-        "backoff.").self_init();
+        "backoff.")
+        .self_init();
     c("xmt-block-via-unk-unigram", &xmtBlockViaUnkUnigram)(
         "allow the unk-weight unigram cost to apply for xmt-block tokens (should be harmless except for the "
-        "extra weight, and faster)").self_init();
-    c('b')("begin-string", &beginString)(
-        "also output this token before each recognized word. empty means epsilon").self_init();
+        "extra weight, and faster)")
+        .self_init();
+    c('b')("begin-string",
+           &beginString)("also output this token before each recognized word. empty means epsilon")
+        .self_init();
     c('e')("end-string", &endString)("also output this token after each recognized word. empty means epsilon")
         .self_init();
     c('E')("input-end-string", &endStringInput)("input token expected after words. empty means epsilon")
@@ -161,19 +169,24 @@ struct StringUnionOptions {
     c("whitespace-break-cost", &whitespaceBreakCost)(
         "if for some reason you have whitespace-tokens allowed as part of named entities or words, you can "
         "increase this in order to see more of those space-embedded words. the default is a negative cost - "
-        "a high reward for deleting the space and forcing a token break").init(-100);
+        "a high reward for deleting the space and forcing a token break")
+        .init(-100);
     c('w')("whitespace-tokens", &whitespaceTokens)(
         "TODO: these (multiple args allowed) tokens are deleted, but 1 or more of them force a token "
-        "boundary on either side").self_init();
+        "boundary on either side")
+        .self_init();
     c('A')("greedy-ascii-weight", &wGreedyAscii)(
         "combine consecutive printable non-space ascii (unicode codepoints 33-127, i.e. '!'-'~') chars into "
         "a single token, with this weight per character (empty weight string=disabled). this means that "
-        "ascii characters don't propose unk-weight single-character words.").self_init();
-    c("start-greedy-ascii-weight", &wStartGreedyAscii)(
-        "if set, a different weight for the first character of an ascii-run token.").self_init();
+        "ascii characters don't propose unk-weight single-character words.")
+        .self_init();
+    c("start-greedy-ascii-weight",
+      &wStartGreedyAscii)("if set, a different weight for the first character of an ascii-run token.")
+        .self_init();
     c("avoid-epsilon", &avoidEpsilon)(
         "(in case begin and end string are both epsilon) make the trie nondeterministic in input symbol to "
-        "avoid epsilon transitions").init(true);
+        "avoid epsilon transitions")
+        .init(true);
   }
 };
 
@@ -299,7 +312,7 @@ struct BuildStringUnion {
     StateId* sf = opt.sf[SpliceStateOptions::kTargetHg];
     sf[SpliceStateOptions::kStart] = trieStart;
     StateId entityFinal = entityHg->final();
-   bool outFromFinal = countOutArcs(*entityHg, entityFinal);
+    bool outFromFinal = countOutArcs(*entityHg, entityFinal);
     sf[SpliceStateOptions::kFinal] = outFromFinal ? safeEndStringThenFinal() : getEndStringThenFinal();
     Splice<A> splice(entityHg, opt);
     inplace(hg, splice);
@@ -327,13 +340,14 @@ struct BuildStringUnion {
     }
     LastTrie triep;
     if (endOfTokenSequenceWeight != Weight::one()) {
-      if (!opt.loop) SDL_THROW_LOG(Hypergraph, InvalidInputException, "--stop-weight is allowed only with --loop");
+      if (!opt.loop)
+        SDL_THROW_LOG(Hypergraph, InvalidInputException, "--stop-weight is allowed only with --loop");
       realFinal = hg.addState();
       hg.addArcFsa(loopEndState, realFinal, EPSILON::ID, endOfTokenSequenceWeight);
       hg.setFinal(realFinal);
     }
 
-   bool unkUnigram = !opt.unkUnigramWeight.empty();
+    bool unkUnigram = !opt.unkUnigramWeight.empty();
     if (unkUnigram)
       hg.addArcFsa(trieStart, getEndStringThenFinal(), wildcard, times(unkUnigramWeight, perTokenWeight));
     if (opt.xmtBlock && !(opt.xmtBlockViaUnkUnigram && unkUnigram))
@@ -347,8 +361,8 @@ struct BuildStringUnion {
       hg.addArcFsa(stIgnore, start, output(t));  // unless close tag
     }
     buildTrie(ws);
-   bool greedyWeight = !opt.wGreedyAscii.empty();
-   bool useascii = greedyWeight || !opt.wStartGreedyAscii.empty();
+    bool greedyWeight = !opt.wGreedyAscii.empty();
+    bool useascii = greedyWeight || !opt.wStartGreedyAscii.empty();
     if (useascii) {  // this must come last.
       Weight wa, wsa;
       if (greedyWeight)
@@ -395,10 +409,10 @@ struct BuildStringUnion {
   struct Separator {
     LabelPair labels;
     StateId labelState;
-   bool epsInput;  // epsilon
-   bool epsOutput;
-   bool epsBoth;
-   void init(HG& hg, std::string const& inputOrEmpty, std::string const& outputOrEmpty) {
+    bool epsInput;  // epsilon
+    bool epsOutput;
+    bool epsBoth;
+    void init(HG& hg, std::string const& inputOrEmpty, std::string const& outputOrEmpty) {
       IVocabulary& voc = *hg.getVocabulary();
       labelState = hg.addState(
           labels = makeLabelPair(lexicalOrEpsilon(inputOrEmpty, voc), lexicalOrEpsilon(outputOrEmpty, voc)));
@@ -417,8 +431,7 @@ struct BuildStringUnion {
 
   /// if s is empty, leaves w alone
   static void maybeParseWeight(std::string const& s, Weight& w) {
-    if (!s.empty())
-      w.set(s);
+    if (!s.empty()) w.set(s);
   }
 
   BuildStringUnion(WS const& ws, HG& hg, StringUnionOptions const& opt = StringUnionOptions())
