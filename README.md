@@ -12,11 +12,12 @@ machine learning. Their use arises naturally in parsing, syntax-based
 machine translation and other tree-based models, as well as in logic
 and weighted logic programming.
 
-This library and the `Hyp*` command line tools provide data structures
+This library and the `hyp` command line tools provide data structures
 for hypergraphs as well as many algorithms: `compose`, `project`,
-`invert`, the shortest path algorithm, the inside and outside
-algorithm, and more. In addition, it provides functionality to
-optimize hypergraph feature weights from training data.
+`invert`, `union`, `concatenate`, the shortest path algorithm, the
+inside and outside algorithm, and more. In addition, it provides
+functionality to optimize hypergraph feature weights from training
+data.
 
 ## Documentation
 
