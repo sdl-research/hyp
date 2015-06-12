@@ -25,6 +25,8 @@ xmtpath.sh
 *.bbl
 *.blg
 *.dvi
+hyp-tutorial.log
+texput.log
 hyp-tutorial.out
 hyp-tutorial.toc
 hyp-tutorial.aux

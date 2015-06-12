@@ -36,6 +36,6 @@ sdl_quiet_compiled_setting(GRAEHL_NAMED_SINGLE_MAIN 0) #mandatory
 sdl_quiet_compiled_setting(SDL_MINIMAL_HYP_MAIN 0)
 
 # Hyp.cpp includes all the other Hyp*.cpp sources now (single executable w/ argv[0] or argv[1] dispatch)
-sdl_add_executable(Hyp ${PROJECT_SOURCE_DIR} INCLUDE_ONLY src/Hyp.cpp)
+sdl_add_executable(hyp ${PROJECT_SOURCE_DIR} INCLUDE_ONLY src/Hyp.cpp)
 #TODO: UTIL_LIBRARY_NAME is already in LINK_DEPENDENCIES
-target_link_libraries(Hyp ${PROJECT_NAME} ${LINK_DEPENDENCIES} Hypergraph ${UTIL_LIBRARY_NAME})
+target_link_libraries(hyp ${PROJECT_NAME} ${LINK_DEPENDENCIES} Hypergraph ${UTIL_LIBRARY_NAME})
