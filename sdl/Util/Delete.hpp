@@ -109,7 +109,7 @@ struct AutoFree {
      \return toFree, which is no longer owned by this AutoFree.
   */
   void* release() const {
-   void* r = toFree;
+    void* r = toFree;
     toFree = 0;
     return r;
   }
@@ -118,16 +118,15 @@ struct AutoFree {
 
 template <class T>
 struct AutoDestroy {
-  AutoDestroy(T *p) : p_(p) {}
-  T *p_;
+  AutoDestroy(T* p) : p_(p) {}
+  T* p_;
   void destroy() {
     assert(p_);
     p_->~T();
     p_ = 0;
   }
   ~AutoDestroy() {
-    if (p_)
-      p_->~T();
+    if (p_) p_->~T();
   }
 };
 
@@ -147,33 +146,31 @@ struct AutoDelete {
     toDelete = 0;
     return r;
   }
-  T* set(T *r) {
+  T* set(T* r) {
     reset(r);
     return r;
   }
   AutoDelete(T* toDelete = 0) : toDelete(toDelete) {}
   AutoDelete(T const* toDelete) : toDelete((T*)toDelete) {}
   ~AutoDelete() { delete toDelete; }
-  void clone(T const& r) {
-    reset(new T(r));
-  }
+  void clone(T const& r) { reset(new T(r)); }
 #if __cplusplus >= 201103L
-  AutoDelete(AutoDelete &&o) {
+  AutoDelete(AutoDelete&& o) {
     toDelete = o.toDelete;
     o.toDelete = 0;
   }
-  AutoDelete& operator=(AutoDelete &&o) {
+  AutoDelete& operator=(AutoDelete&& o) {
     assert(this != &o);
     reset(o.toDelete);
     o.toDelete = 0;
     return *this;
   }
-  AutoDelete(AutoDelete const&o) = delete;
-  AutoDelete& operator=(AutoDelete const&o) = delete;
+  AutoDelete(AutoDelete const& o) = delete;
+  AutoDelete& operator=(AutoDelete const& o) = delete;
 #else
  private:
   AutoDelete(AutoDelete const&) { std::abort(); }
-  void operator=(AutoDelete const&o) { std::abort(); }
+  void operator=(AutoDelete const& o) { std::abort(); }
 #endif
 };
 
@@ -221,12 +218,14 @@ struct AutoDeleteArray {
   operator T*() const { return toDelete; }
   T* begin() const { return toDelete; }
   T* toDelete;
+  void init(std::size_t n, T const& x) {
+    toDelete = new T[n];
+    std::uninitialized_fill(toDelete, toDelete + n, x);
+  }
   void reset(T* array) { toDelete = array; }
   AutoDeleteArray(T* toDelete = 0) : toDelete(toDelete) {}
   explicit AutoDeleteArray(std::size_t n) : toDelete(new T[n]()) {}
-  AutoDeleteArray(std::size_t n, T const& x) : toDelete(new T[n]) {
-    std::uninitialized_fill(toDelete, toDelete + n, x);
-  }
+  AutoDeleteArray(std::size_t n, T const& x) { init(n, x); }
   ~AutoDeleteArray() { delete[] toDelete; }
 
  private:

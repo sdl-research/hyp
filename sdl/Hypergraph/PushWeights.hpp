@@ -52,6 +52,7 @@ enum { kPushWeightsInsideAxiom = false };
 struct PushWeights;
 
 struct PushWeightsOptions : TransformOptionsBase {
+  static char const* name() { return "PushWeights"; }
   static char const* caption() {
     return "Modify Arc Weights (real-valued costs), optionally (in order 1-5):";
   }
@@ -95,6 +96,7 @@ struct PushCostsToStart {
   MHG* mhg;
   StateId N, start, final;
   Util::AutoDeleteArray<SdlFloat> inside, outside;
+  SdlFloat* outside0;
   PushCostsToStart(HG& hg, PushWeightsOptions const& = PushWeightsOptions())
       : hg(hg)
       , mhg(hg.isMutable() ? static_cast<MHG*>(&hg) : 0)
@@ -102,7 +104,7 @@ struct PushCostsToStart {
       , start(hg.start())
       , final(hg.final())
       , inside(N)
-      , outside(N) {
+      , outside(N, HUGE_VAL) {
     if (hg.prunedEmpty()) return;
     if (!hg.isGraph() || start == kNoState)
       SDL_THROW_LOG(Hypergraph.PushCostsToStart, ConfigException,
@@ -117,29 +119,27 @@ struct PushCostsToStart {
       else
         SDL_THROW_LOG(Hypergraph.PushCostsToStart, ConfigException,
                       "non-mutable hg had no finite-cost paths - can't PushCostsToStart");
+      return;
     }
-    outsideCosts(hg, &outside[0], inside, N);
-    if (graehl::is_inf(outside[start])) goto empty;
+    outside0 = outside;
+    assert(graehl::is_inf(*outside0));
+    outsideCosts(hg, outside0, inside, N, (float)HUGE_VAL, false);
+    assert(start < N);
+    outside0[start] = inside[final];
+    assert(outside0[final] == 0);
     hg.forArcs(*this);
   }
 
-  /**
-     telescoping: for a path S ->(w1) t ->(w2) u ->(w3) F, we have:
-
-     w1 *= outside[t]y
-     w2 *= outside[u]/outside[t]
-     w3 *= 1/outside[u]
-
-     so the weight for any path is the same (commutative semiring w/ division, e.g. log or viterbi)
-  */
   void operator()(Arc* pArc) const {
     Arc& arc = *pArc;
     StateId head = arc.head_;
     StateId tail = arc.tails_[0];
     SdlFloat& cost = arc.weight_.value_;
-    cost = outside[head];
-    if (tail != start) cost -= outside[tail];
     assert(head < N);
+    assert(tail < N);
+    // we want the new outsides to be as small as possible without going
+    // negative. TODO: prove correct for cyclic graphs
+    cost += outside0[head] - (tail != start ? outside0[tail] : 0);
   }
 };
 
@@ -176,7 +176,6 @@ struct PushWeightsToFinal {
         SDL_THROW_LOG(Hypergraph.PushCostsToStart, ConfigException,
                       "non-mutable hg had no finite-cost paths - can't PushCostsToStart");
     }
-    assert(N == (StateId)inside.size());
     hg.forArcs(*this);
   }
   /**
@@ -211,7 +210,9 @@ struct PushWeightsToFinal {
     Arc& arc = *pArc;
     StateId head = arc.head_;
     Weight& weight = arc.weight();
-    if (head < N) {
+    StateId ninside = inside.size();
+    assert(ninside <= N);
+    if (head < ninside) {
       if (head != final) {
         Weight const& divhead = inside[head];
         if (isZero(divhead)) {  // avoid zero division
@@ -236,15 +237,12 @@ void pushWeightsToStart(IHypergraph<Arc>& hg, PushWeightsOptions const& config =
   PushCostsToStart<Arc> push(hg, config);
 }
 
-struct PushWeights : TransformBase<Transform::Inplace, kStoreInArcs>, PushWeightsOptions {
+struct PushWeights : TransformBase<Transform::Inplace, kStoreInArcs | kStoreOutArcs>, PushWeightsOptions {
   explicit PushWeights(PushWeightsOptions const& opt) : PushWeightsOptions(opt) {}
   PushWeights() {}
 
-  /**
-     modifies arc weights but not structure. IHypergraph const& allows this (!).
-  */
   template <class Arc>
-  void inplace(IHypergraph<Arc>& hg) const {
+  void inplace(IMutableHypergraph<Arc>& hg) const {
     if (pushToFinal)
       PushWeightsToFinal<Arc>(hg, *this);
     else

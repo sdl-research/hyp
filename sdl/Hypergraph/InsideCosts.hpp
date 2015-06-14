@@ -11,6 +11,8 @@
 /** \file
 
   viterbi (VHG/FHG-appropriate) inside costs.
+
+  TODO: allow !isGraph and allow cycles (see AcyclicBest, BestPath)
 */
 
 #ifndef INSIDECOSTS_JG_2015_06_14_HPP
@@ -18,8 +20,9 @@
 #pragma once
 
 #include <sdl/Util/Delete.hpp>
-#include <sdl/Hypergraph/InsideAlgorithm.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Util/MinMax.hpp>
+
 namespace sdl {
 namespace Hypergraph {
 
@@ -55,7 +58,7 @@ void insideCosts(IHypergraph<Arc> const& hg, SdlFloat* inside, StateId N) {
         "TODO: support non-graph for insideCosts (see PruneToBest for approach for with-cycle CFG)");
   Util::AutoDeleteArray<StateId> revorder(N);
   StateId *b = &revorder[0], *e = b;
-  char* color = (char*)&inside;
+  char* color = (char*)inside;
   std::memset(color, 0, N);
   reverseTopologicalOutArcsGraph(hg, hg.start(), e, color, N);
   std::fill(inside, inside + N, (float)HUGE_VAL);
@@ -88,13 +91,7 @@ void insideCosts(IHypergraph<Arc> const& hg, SdlFloat* inside, StateId N) {
       }
     }
   }
-}
-
-template <class Arc>
-void insideCosts(IHypergraph<Arc> const& hg, std::vector<SdlFloat>& inside, StateId N = kNoState) {
-  if (N == kNoState) N = hg.sizeForHeads();
-  inside.resize(N);
-  insideCosts(hg, inside, N);
+  SDL_TRACE(InsideCosts, "inside:  " << Util::arrayPrintable(&inside[0], N, true));
 }
 
 

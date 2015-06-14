@@ -290,15 +290,15 @@ struct IHypergraphStates : Resource {
   bool isGraph() const { return properties() & kGraph; }
 
   /**
-     \return bound M such that only states s < M can be a head or have graph
-     first-tail out-arcs (for CFG there's no such restriction on tails). this
-     may return larger than maxNotTerminalState for efficiency.
+     \return bound M such that only states s < M can be a head or start state (for graphs, this means all
+     graph source/target states are <M)
+
+     may return larger than exactSizeForHeads for efficiency.
   */
   virtual StateId sizeForHeads() const { return exactSizeForHeads(); }
 
   /**
-     \return tight bound M such that only states s < M can be a head or have graph
-     first-tail out-arcs (for CFG there's no such restriction on tails).
+     \return tight bound M such that only states s < M can be a head or start state
   */
   virtual StateId exactSizeForHeads() const { return maxNotTerminalState() + 1; }
 
@@ -886,7 +886,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     void init(Self const* hg, bool allowAnnotations = false) {
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
       annotations = allowAnnotations && (true || (hg->properties() & kAnnotations));
-      // TODO: detect annotations property for compose speedup
+// TODO: detect annotations property for compose speedup
 #endif
       // TODO: set kAnnotations prop for hgs w/ annotations
       hg_ = hg;
@@ -917,7 +917,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
           }
           StateId const t = *i;
           if (t >= sizeForLabels_) {
-            //TODO: test
+            // TODO: test
             r.labelPair.first = r.labelPair.second = EPSILON::ID;
             break;
           }
@@ -928,7 +928,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
             break;
         }
       } else
-        //TODO: test
+// TODO: test
 #endif
       {
         if (tails.size() == 2) {
@@ -1194,7 +1194,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     if (properties() & kStoreOutArcs)
       return forArcsOutAny(tail, v);
     else
-      //TODO: test
+      // TODO: test
       for (StateId state = 0, e = size(); state < e; ++state)
         for (ArcId a = 0, f = numInArcs(state); a != f; ++a) {
           Arc* pa = inArc(state, a);
@@ -1210,7 +1210,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     if (head == kNoState) return false;
     Properties p = properties();
     if (p & kStoreInArcs)
-      //TODO: test
+      // TODO: test
       return forArcsInAny(head, v);
     else {
       bool storefirst = p & kStoreFirstTailOutArcs;
@@ -1218,7 +1218,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
         for (ArcId a = 0, f = numOutArcs(state); a != f; ++a) {
           Arc* pa = outArc(state, a);
           if (pa->head_ == head && (storefirst || !firstTailOnly || pa->tails_[0] == state))
-            //TODO: test
+            // TODO: test
             if (v(pa)) return true;
         }
     }

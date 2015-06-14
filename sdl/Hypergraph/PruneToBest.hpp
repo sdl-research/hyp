@@ -184,7 +184,9 @@ struct ArcInBest {
   Predecessor pi;
   Inside inside;
   SdlFloat worstAllowedCost;
-  std::vector<SdlFloat> outside;
+  typedef Util::AutoDeleteArray<SdlFloat> Outside;
+  shared_ptr<Outside> outside;
+  SdlFloat* outside0;
   StateId start, N;
   ArcInBest(IHypergraph<A> const& hg, PruneToBestOptions const& opt)
       : phg(&dynamic_cast<MutableHypergraph<A> const&>(hg))
@@ -212,15 +214,16 @@ struct ArcInBest {
       // TODO: separate impl class for efficiency? we don't care about pi ...
       pi = Predecessor();
       worstAllowedCost = inside[final] + opt.beam;
-      SDL_DEBUG(PruneToBest, "worst allowed: " << worstAllowedCost << " final=" << final << " start=" << start);
-      outside.resize(N, HUGE_VAL);
-      outsideCosts(hg, &outside[0], inside, N,
+      SDL_TRACE(PruneToBest, "worst allowed (before beam-plus-states, epsilon): "
+                                 << worstAllowedCost << " final=" << final << " start=" << start);
+      outside.reset(new Outside(N, (float)HUGE_VAL));
+      outsideCosts(hg, (outside0 = *outside), inside, N,
                    opt.beamPlusStates ? HUGE_VAL : opt.beamEpsilon + worstAllowedCost);
       if (opt.beamPlusStates) {
         typedef std::pair<SdlFloat, StateId> S;
         Util::TopK<S> topk(opt.beamPlusStates);
         for (unsigned i = 0; i < N; ++i) {
-          SdlFloat c = outside[i];
+          SdlFloat c = outside0[i];
           if (hg.isAxiom(i)) inside[i] = 0;
           c += inside[i];
           if (!is_null(c) && c > worstAllowedCost) topk.add(S(c, i));
@@ -228,11 +231,10 @@ struct ArcInBest {
         topk.filter(true);
         if (!topk.topk.empty()) worstAllowedCost = topk.topk.back().first;
       }
-      SDL_DEBUG(PruneToBest, "worst allowed: " << worstAllowedCost << " final=" << final << " start=" << start);
       worstAllowedCost += opt.beamEpsilon;
-      SDL_DEBUG(PruneToBest, "worst allowed w/ epsilon: " << worstAllowedCost);
-      SDL_DEBUG(PruneToBest, "inside:  " << Util::arrayPrintable(&inside[0], N, true));
-      SDL_DEBUG(PruneToBest, "outside: " << Util::arrayPrintable(&outside[0], N, true));
+      SDL_DEBUG(PruneToBest, "worst allowed: " << worstAllowedCost);
+      SDL_TRACE(PruneToBest, "inside:  " << Util::arrayPrintable(&inside[0], N, true));
+      SDL_TRACE(PruneToBest, "outside: " << Util::arrayPrintable(outside0, N, true));
     }
   }
   void justForGoal(StateId goal, StateId nStates) {
@@ -244,7 +246,7 @@ struct ArcInBest {
     assert(inside);
     StateId h = a->head_;
     assert(h < N);
-    SdlFloat c = outside[h] + a->weight_.value_;
+    SdlFloat c = outside0[h] + a->weight_.value_;
     for (StateIdContainer::const_iterator i = a->tails_.begin(), e = a->tails_.end(); i != e; ++i) {
       StateId t = *i;
       if (t < N) c += inside[t];

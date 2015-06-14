@@ -60,7 +60,6 @@
 #include <sdl/Hypergraph/InputHypergraphs.hpp>
 #include <sdl/Hypergraph/BestPath.hpp>
 
-#include <sdl/graehl/shared/bit_arithmetic.hpp>
 #include <sdl/graehl/shared/hex_int.hpp>
 #include <sdl/graehl/shared/string_to.hpp>
 
@@ -69,14 +68,35 @@
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/Flag.hpp>
 #include <sdl/Util/StringBuilder.hpp>
-
-#define INFO_TRANSFORM(x) LOG_INFO_NAMESTR(this->logname, x)
-#define DEBUG_TRANSFORM(x) LOG_DEBUG_NAMESTR(this->logname, #x << " = " << x)
-#define WARN_TRANSFORM(x) LOG_WARN_NAMESTR(this->logname, x)
-#define ERROR_TRANSFORM(x) LOG_ERROR_NAMESTR(this->logname, x)
+#include <sdl/graehl/shared/configure_named_bits.hpp>
 
 namespace sdl {
 namespace Hypergraph {
+
+enum {
+  kViterbiSemiring = 1 << 0,
+#if SDL_TRANSFORM_MAIN_LOG_WEIGHT
+  kLogSemiring = 1 << 1,
+#endif
+#if SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT
+  kExpectationSemiring = 1 << 2,
+#endif
+  kFeatureSemiring = 1 << 3
+};
+struct SemiringNames {
+  template <class Bits>
+  static void bits(Bits& bits) {
+    bits("viterbi", kViterbiSemiring);
+#if SDL_TRANSFORM_MAIN_LOG_WEIGHT
+    bits("log", kLogSemiring);
+#endif
+#if SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT
+    bits("expectation", kExpectationSemiring);
+#endif
+    bits("feature", kFeatureSemiring);
+  }
+};
+typedef graehl::named_bits<SemiringNames, int> Semirings;
 
 struct TransformMainBase : HypergraphMainBase {
  protected:
@@ -91,25 +111,24 @@ struct TransformMainBase : HypergraphMainBase {
   enum ReloadInputs { kResidentInputs = 0, kReloadInputs = 1 };
 
   typedef ExpectationWeight expectationSemiring;
-  typedef LogWeightTpl<float> logSemiring;
-  typedef ViterbiWeightTpl<float> viterbiSemiring;
+  typedef LogWeightTpl<SdlFloat> logSemiring;
+  typedef ViterbiWeightTpl<SdlFloat> viterbiSemiring;
   typedef FeatureWeight featureSemiring;
 
-  std::string arcType;
+  Semirings arcType;
   boost::optional<PrintProperties> hg_properties;
 
-  enum { viterbi = 1, log = 2, expectation = 4, feature = 8 };
-  enum { kAllSemirings = (viterbi | log | expectation | feature) };
+  typedef int SemiringsSet;
 
-  typedef int semirings_type;
+
   char const* logname;  // set this if you use LOG_TRANSFORM
 
   TransformMainBase(std::string const& n, std::string const& usage, std::string const& ver, bool multiple,
-                    HypergraphMainOpt hmainOpt = HypergraphMainOpt(), int semirings = kAllSemirings,
-                    BestOutput bestOutputs = kNoBestOutput, int defaultSemiring = viterbi,
-                    bool nbestHypergraphDefault = false)
+                    HypergraphMainOpt hmainOpt = HypergraphMainOpt(),
+                    Semirings semirings = Semirings::allbits, BestOutput bestOutputs = kNoBestOutput,
+                    Semirings defaultSemiring = kViterbiSemiring, bool nbestHypergraphDefault = false)
       : HypergraphMainBase(n, usage, ver, multiple, hmainOpt)
-      , arcType(semiringsList(defaultSemiring))
+      , arcType(defaultSemiring)
       , allowedSemirings(semirings)
       , bestOutputs(bestOutputs == kBestOutput)
       , bestOptDesc(MaybeBestPathOutOptions::caption())
@@ -117,7 +136,7 @@ struct TransformMainBase : HypergraphMainBase {
     init();
   }
 
-  semirings_type allowedSemirings;
+  Semirings allowedSemirings;
 
   // these control the appearance of cmdline options that activate
   // alternative input options and output options (lines = paths, or
@@ -126,61 +145,10 @@ struct TransformMainBase : HypergraphMainBase {
   MaybeBestPathOutOptions optBestOutputs;
   OD bestOptDesc;
 
-  std::string semiringsUsage() const { return semiringsList(allowedSemirings); }
+  std::string semiringsUsage() const { return to_string_impl(allowedSemirings); }
 
-  static std::string semiringsList(semirings_type x) {
-    Util::StringBuilder o;
-    if (x & viterbi) o.append_space('|')("viterbi");
-    if (x & log) o.append_space('|')("log");
-    if (x & expectation) o.append_space('|')("expectation");
-    if (x & feature) o.append_space('|')("feature");
-    return o.str();
-  }
-
-  static semirings_type semiringFor(std::string const& s) {
-    if (s == "viterbi") return viterbi;
-    if (s == "log") return log;
-    if (s == "expectation") return expectation;
-    if (s == "feature") return feature;
-    if (s == "VHG") return viterbi;
-    if (s == "LHG") return log;
-    if (s == "EHG") return expectation;
-    if (s == "FHG") return feature;
-    SDL_THROW_LOG(Hypergraph, InvalidInputException, "unknown semiring type " << s);
-  }
-
-  void only_viterbi() {
-    allowedSemirings = 0;
-    default_viterbi();
-  }
-  void default_viterbi() {
-    arcType = "viterbi";
-    allowedSemirings |= viterbi;
-  }
-  void only_log() {
-    allowedSemirings = 0;
-    default_log();
-  }
-  void default_log() {
-    arcType = "log";
-    allowedSemirings |= log;
-  }
-  void only_expectation() {
-    allowedSemirings = 0;
-    default_expectation();
-  }
-  void default_expectation() {
-    arcType = "expectation";
-    allowedSemirings |= expectation;
-  }
-  void only_feature() {
-    allowedSemirings = 0;
-    default_feature();
-  }
-  void default_feature() {
-    arcType = "feature";
-    allowedSemirings |= feature;
-  }
+  void only(Semirings x) { arcType = allowedSemirings = x; }
+  void addDefault(Semirings x) { allowedSemirings |= (arcType = x); }
 
   typedef ArcTpl<viterbiSemiring> viterbiArc;
   typedef ArcTpl<logSemiring> logArc;
@@ -192,14 +160,15 @@ struct TransformMainBase : HypergraphMainBase {
   template <class Config>
   void configure(Config& c) {
     // doesn't defer to cmdline_main because cmdline_main registers itself as configurable(this) also
-    bool ambig = graehl::count_set_bits(allowedSemirings) > 1;
+    bool ambig = allowedSemirings.count_set_bits() > 1;
     std::string qual(ambig ? "" : "no choice - must be ");
-    c.is("standard hypergraph options");
 
-    c("arc-type", &arcType)('a')("Weight semiring: " + qual + semiringsUsage()).verbose(ambig);
+    c("arc-type", &arcType)('a')
+        .self_init()("Hypergraph arc weight semiring type: " + qual + semiringsUsage())
+        .verbose(ambig);
     // TODO: use SDL_ENUM for arcType
     if (configureProperties)
-      c("properties", &hg_properties)('p')("Hypergraph property bit vector suggestion if nonzero").init(0);
+      c("properties", &hg_properties)('p')("optional hypergraph properties suggestion (in-arcs,out-arcs,etc)");
     if (firstInputFileHasMultipleHgs && multifile)
       c("reload", &reloadOnMultiple)(
           "for each of the inputs, re-read the rest of the transducers again each time (saves memory) if "
@@ -218,15 +187,13 @@ struct TransformMainBase : HypergraphMainBase {
   }
 
   Properties properties_else(Properties p = kFsmOutProperties) const {
-    return hg_properties ? withArcs(*hg_properties) : kFsmOutProperties;
+    return hg_properties ? withArcs(*hg_properties) : p;
   }
 
-
   virtual void validate_parameters_more() OVERRIDE {
-    semirings_type sr = semiringFor(arcType);
-    if (!(sr & allowedSemirings))
+    if (!(arcType.i & allowedSemirings.i))
       SDL_THROW_LOG(Hypergraph, InvalidInputException,
-                    "semiring type " + arcType + " not allowed - use one of " << semiringsUsage());
+                    "semiring type " << arcType << " not allowed - use one of " << semiringsUsage());
   }
 };
 
@@ -238,8 +205,8 @@ struct TransformMain : TransformMainBase {
   static BestOutput bestOutput() { return kNoBestOutput; }
   static RandomSeed randomSeed() { return kNoRandomSeed; }
   static ReloadInputs reloadInputs() { return kResidentInputs; }
-  static int semirings() { return kAllSemirings; }
-  static int defaultSemiring() { return TransformMainBase::viterbi; }
+  static Semirings semirings() { return Semirings::allbits; }
+  static Semirings defaultSemiring() { return kViterbiSemiring; }
   static bool nbestHypergraphDefault() { return true; }
   bool printFinal() const { return true; }
   enum {
@@ -287,21 +254,29 @@ struct TransformMain : TransformMainBase {
   CRTP const& impl() const { return *static_cast<CRTP const*>(this); }
 
   int run_exit() OVERRIDE {
-    std::string const& w = this->arcType;
     bool r;
-    if (w == "viterbi") r = runWeight<viterbiSemiring>();
+    switch (arcType) {
+      case kViterbiSemiring:
+        r = runWeight<ViterbiWeightTpl<SdlFloat> >();
+        break;
 #if SDL_TRANSFORM_MAIN_LOG_WEIGHT
-    else if (w == "log")
-      r = runWeight<logSemiring>();
+      case kLogSemiring:
+        r = runWeight<LogWeightTpl<SdlFloat> >();
+        break;
 #endif
 #if SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT
-    else if (w == "expectation")
-      r = runWeight<expectationSemiring>();
+      case kExpectationSemiring:
+        r = runWeight<ExpectationWeight>();
+        break;
 #endif
-    else if (w == "feature")
-      r = runWeight<featureSemiring>();
-    else
-      SDL_THROW_LOG(Hypergraph, InvalidInputException, name() + ": unknown weight semiring type name: " + w);
+      case kFeatureSemiring:
+        r = runWeight<FeatureWeight>();
+        break;
+      default:
+        SDL_THROW_LOG(Hypergraph, InvalidInputException,
+                      this->name() << ": unknown weight semiring type name: " << arcType);
+    }
+
     if (!r) {
       warn("Aborted early (transform returned false).");
       return 1;
@@ -463,6 +438,8 @@ struct TransformMain : TransformMainBase {
         Util::Input in(main.inputs[input]);
         if (!h) {
           h.reset(new H(main.inputProperties(input)));
+          SDL_TRACE(Hypergraph.transformInput, "reading hypergraph with properties "
+                                                   << PrintProperties(h->properties()));
           if (!*in)
             SDL_THROW_LOG(Hypergraph.TransformMain, FileException, "invalid input hg file: " << in.name);
           h->setVocabulary(main.vocab());
@@ -530,6 +507,7 @@ struct TransformMain : TransformMainBase {
     unsigned ninputs = 0;
     for (;;) {
       h.reset(new MutableHypergraph<Arc>(inputProperties(0)));
+      SDL_TRACE(TransformMain, "reading hypergraph with properties " << PrintProperties(h->properties()));
       h->setVocabulary(this->vocab());
       if (!optInputs.nextHypergraph(h.get())) break;
       ++ninputs;
@@ -550,11 +528,11 @@ struct TransformMain : TransformMainBase {
 
   /// can override this to *not* favor cmdline props for some hgs
   Properties properties_default(int i) const {
-    return hg_properties ? withArcs(*hg_properties) : impl().properties(i);
+    return hg_properties ? withArcs(*hg_properties) : implProperties(i);
   }
 
  private:
-  Properties implProperties(int i) const { return withArcs(impl().properties_default(i)); }
+  Properties implProperties(int i) const { return withArcs(impl().properties(i)); }
 };
 
 

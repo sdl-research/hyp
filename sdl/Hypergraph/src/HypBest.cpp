@@ -22,7 +22,7 @@ struct HypBest : TransformMain<HypBest> {
   }
   Properties properties(int i) const { return this->properties_else(kFsmOutProperties | kStoreInArcs); }
   enum { has_inplace_input_transform = false, has_transform1 = false };
-  static int defaultSemiring() { return TransformMainBase::viterbi; }
+  static Semirings defaultSemiring() { return kViterbiSemiring; }
   static BestOutput bestOutput() { return kBestOutput; }
   static LineInputs lineInputs() { return kNoLineInputs; }
 

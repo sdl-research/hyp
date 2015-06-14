@@ -450,7 +450,6 @@ struct BestPathOptions : graehl::BestTreeOptions {
 
 typedef graehl::BestTreeStats BestPathStats;
 
-// TODO: benefit from hypergraph SortStates - only allocate #nonlex for mu, pi
 struct BestPath : TransformBase<Transform::Inplace> {
   BestPathOptions opt;
   BestPath() {}

@@ -31,65 +31,79 @@ struct QueueDistance {};
 
 template <class Arc, class InsideCost>
 void outsideCosts(IHypergraph<Arc> const& hg, SdlFloat* outside, InsideCost const& inside,
-                  StateId N = kNoState, SdlFloat onlyCostsBelow = HUGE_VAL) {
+                  StateId N = kNoState, SdlFloat onlyCostsBelow = HUGE_VAL, bool insideHasAxioms = true) {
   if (!hg.storesInArcs())
     SDL_THROW_LOG(OutsideCosts, ConfigException, "can't get outsideCosts without in-arcs");
   if (N == kNoState) N = hg.sizeForHeads();
-  SDL_TRACE(OutsideCosts, "N="<<N<<" onlyCostsBelow="<<onlyCostsBelow);
+  SDL_TRACE(OutsideCosts, "N=" << N << " onlyCostsBelow=" << onlyCostsBelow
+                               << " insideHasAxioms=" << insideHasAxioms);
   typedef std::vector<StateId> OutsidePlan;
   OutsidePlan outsidePlan;
   typedef std::pair<SdlFloat, StateId> S;
   typedef std::vector<S> Q;
   graehl::priority_queue<Q> q;
   S s(S(0, hg.final()));
+  if (s.second == kNoState) return;
   outside[s.second] = s.first;
   q.push(s);
   Util::BitSet popped(N);
+  StateIdContainer nonaxioms;
   for (;;) {
     s = q.top();
     q.pop();
-    if (Util::latch(popped, s.second) || s.first < outside[s.second]) {
-      // might loop infinitely if negative cost effective cycle.
-      SDL_TRACE(OutsideCosts, "reaching from head "<<s.second<<" cost="<<s.first);
-      for (ArcId ai = 0, ae = hg.numInArcs(s.second); ai < ae; ++ai) {
-        Arc* a = hg.inArc(s.second, ai);
+    StateId head = s.second;
+    if (Util::latch(popped, head)) {
+      // prevent infinite loop if cycles (compromise accuracy on
+      // effective-negative-cost outside edges)
+      SDL_TRACE(OutsideCosts, "reaching from head " << head << " cost=" << s.first);
+      for (ArcId ai = 0, ae = hg.numInArcs(head); ai < ae; ++ai) {
+        Arc* a = hg.inArc(head, ai);
         StateIdContainer const& tails = a->tails_;
         StateIdContainer::const_iterator b = tails.begin(), e = tails.end(), i;
         SdlFloat c = s.first + a->weight_.value_;
+        if (!insideHasAxioms) nonaxioms.clear();
         for (i = b; i != e; ++i) {
           StateId t = *i;
           if (t < N) {
-            if (is_null(inside[t]))
-              goto nexta;
-            c += inside[t];
+            if (insideHasAxioms || !hg.isAxiom(t)) {
+              SdlFloat it = inside[t];
+              if (is_null(it)) goto nexta;
+              c += it;
+              if (!insideHasAxioms) nonaxioms.push_back(t);
+            }
           }
         }
         if (c < onlyCostsBelow) {
-          for (i = b; i != e; ++i) {
+          if (insideHasAxioms)
+            i = b;
+          else {
+            i = nonaxioms.begin();
+            e = nonaxioms.end();
+          }
+          for (; i != e; ++i) {
             StateId t = *i;
-            SdlFloat& ot = outside[t];
+            SdlFloat ot2 = c;
             if (t < N) {
-              SdlFloat ot2 = c - inside[t];
+              SdlFloat& ot = outside[t];
+              ot2 -= inside[t];
               if (ot2 < ot) {
                 q.push(S(ot2, t));
+                SDL_TRACE(OutsideCosts, "reached top-down " << t << " outside=" << ot2);
                 ot = ot2;
-              }
-            } else
-              Util::minEq(ot, c);
+              } else
+                Util::minEq(ot, c);
+            }
           }
+        } else {
+          SDL_TRACE(OutsideCosts, "pruned " << c << " >= " << onlyCostsBelow);
         }
       }
-     nexta: ;
+    nexta:
+      ;
     }
     if (q.empty()) break;
   }
-}
-
-template <class A, class OutsideCost, class InsideCost>
-void outsideCostsResize(IHypergraph<A> const& hg, OutsideCost& out, InsideCost const& in,
-                        StateId N = kNoState, SdlFloat onlyCostsBelow = HUGE_VAL) {
-  out.resize(N == kNoState ? hg.sizeForHeads() : N, (SdlFloat)HUGE_VAL);
-  outsideCosts(hg, &out[0], in, N, onlyCostsBelow);
+  SDL_TRACE(OutsideCosts, "outside: " << Util::arrayPrintable(outside, N, true));
 }
 
 
