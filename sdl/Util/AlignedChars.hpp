@@ -95,6 +95,7 @@ struct IcuNormalizeByChunks {
                                             << ")");
       if (c == kNoMoreUnicode) {
         if (todo.isEmpty()) return false;
+        // TODO: test
         normalizeTodo();
         normalizedSpan = nextSpan;
         return true;
@@ -124,6 +125,7 @@ struct IcuNormalizeByChunks {
             if (already) return true;
           }
         } else {  // keep accumulating
+          // TODO: test
           growSpan(nextSpan, span);
           todo += (UChar32)c;
         }
@@ -134,6 +136,7 @@ struct IcuNormalizeByChunks {
   /// after next(), visits current chunk's chars (doesn't clear chunk)
   template <class Taker>
   void take(Taker& taker) {
+    // TODO: test
     using namespace icu;
     UText utext = UTEXT_INITIALIZER;
     LocalUTextPointer close(&utext);
@@ -171,6 +174,7 @@ struct IcuNormalizeByChunks {
   /// normalize and take the whole of chars as a single chunk (since we don't care about span)
   template <class Taker>
   void takeAll(Taker& taker) {
+    // TODO: test
     Unicode c;
     while ((c = chars.next())) {
       if (c == kNoMoreUnicode) break;
@@ -201,6 +205,7 @@ struct CharsFromUtf8Impl : FixUnicode {
   explicit CharsFromUtf8Impl(std::vector<char> const& bytes)
       : chars(arrayBegin(bytes), arrayEnd(bytes)), i() {}
   Unicode next() {
+    // TODO: test
     for (; chars.first < chars.second; ++chars.first) {
       ++i;
       Unicode c = utf8::next(chars.first, chars.second);
@@ -273,6 +278,7 @@ struct CharsFromUnicodeStringImpl {
     return chars.next32PostInc();
   }
   Unicode nextWithSpan(TokenSpan& span) {
+    // TODO: test
     if (!chars.hasNext()) return kNoMoreUnicode;
     span.first = i;
     span.second = ++i;
@@ -294,6 +300,7 @@ struct TakeUtf8 : ITakeAlignedChars {
   Bytes* bytes;
   TokenSpans* spans;
   virtual void take(Unicode c) {
+    // TODO: test
     if (spans) {
       Position i = spans->empty() ? 0 : spans->back().second;
       spans->push_back(TokenSpan(i, i + 1));
@@ -387,21 +394,16 @@ inline void alignedNormalize(Slice utf8, IcuNormalizer2Ptr normalizer, ITakeAlig
 template <class Utf8String, class OutUtf8String>
 inline void alignedNormalize(Utf8String const& str, IcuNormalizer2Ptr normalizer, OutUtf8String& out,
                              TokenSpans* spans = 0) {
-#if 1
   CharsFromUtf8Impl chars(str);
   IcuNormalizeUtf8ByChunks norm(chars, gNfc);
   if (spans) {
     TakeUtf8<OutUtf8String> take(&out, spans);
     norm.takeAllWithSpan(take);
   } else {
+    // TODO: test
     TakeUtf8<OutUtf8String> take(&out);
     norm.takeAll(take);
   }
-#else
-  CharsFromUtf8 chars(str);
-  TakeUtf8<OutUtf8String> take(&out, spans);
-  alignedNormalize(chars, normalizer, take);
-#endif
 }
 
 

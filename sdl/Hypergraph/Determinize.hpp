@@ -86,6 +86,7 @@
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/Unordered.hpp>
+#include <sdl/Hypergraph/OperateOn.hpp>
 
 /// 1 => use sorted vector rather than unordered map. but then needs work for >1 thread.
 #define SDL_DETERMINIZE_SORT 0
@@ -576,7 +577,7 @@ void assertCanDeterminize(IHypergraph<Arc> const& i, DeterminizeFlags flags) {
 template <class Arc>
 void determinize(IHypergraph<Arc> const& i,  // input
                  IMutableHypergraph<Arc>* o,  // output
-                 DeterminizeFlags flags = DETERMINIZE_INPUT, Properties prop_on = kStoreFirstTailOutArcs,
+                 DeterminizeFlags flags = DETERMINIZE_INPUT, Properties prop_on = kFsmOutProperties,
                  Properties prop_off = 0  // kStoreInArcs
                  ) {
   if (empty(i)) {
@@ -590,13 +591,58 @@ void determinize(IHypergraph<Arc> const& i,  // input
     determinize_always(i, o, flags);
 }
 
-struct Determinize : TransformBase<Transform::Inout, (kFsm | kStoreOutArcs)> {
+struct Determinize;
+struct DeterminizeOptions {
+  static char const* caption() {
+    return "Determinize an unweighted FSA hypergraph -- input symbols only. TODO: support sigma, phi, "
+           "weights, outputs.";
+  }
+  static char const* name() { return "Determinize"; }
+  template <class Arc>
+  struct TransformFor {
+    typedef Determinize type;
+  };
+
+  template <class Config>
+  void configure(Config const& c) {
+    c.is(name());
+    c(caption());
+    c("epsilon-ordinary", &epsilonOrdinary).self_init()("treat <eps> as regular symbol for determinization");
+    c("rho-ordinary", &rhoOrdinary).self_init()("treat <rho> as regular symbol for determinization");
+    c("phi-ordinary", &phiOrdinary).self_init()("treat <phi> as regular symbol for determinization");
+    c("sigma-ordinary", &sigmaOrdinary).self_init()("treat <sigma> as regular symbol for determinization");
+    c("determinize-by", &operateOn).self_init()("what symbols to determinize on");
+  }
   DeterminizeFlags flags;
+  OperateOn operateOn;
+  DeterminizeOptions()
+      : flags(), operateOn(kOperateOnInput), epsilonOrdinary(), rhoOrdinary(), phiOrdinary(), sigmaOrdinary() {}
+  bool epsilonOrdinary;
+  bool rhoOrdinary;
+  bool phiOrdinary;
+  bool sigmaOrdinary;
+  friend inline void validate(DeterminizeOptions& x) { x.validate(); }
+  void validate() {
+    graehl::set_mask(flags, DETERMINIZE_INPUT, operateOn == kOperateOnInput);
+    graehl::set_mask(flags, DETERMINIZE_OUTPUT, operateOn == kOperateOnOutput);
+    graehl::set_mask(flags, DETERMINIZE_FST, operateOn == kOperateOnInputOutput);
+    graehl::set_mask(flags, DETERMINIZE_EPSILON_NORMAL, epsilonOrdinary);
+    graehl::set_mask(flags, DETERMINIZE_RHO_NORMAL, rhoOrdinary);
+    graehl::set_mask(flags, DETERMINIZE_PHI_NORMAL, phiOrdinary);
+    graehl::set_mask(flags, DETERMINIZE_SIGMA_NORMAL, sigmaOrdinary);
+  }
+};
+
+struct Determinize : TransformBase<Transform::Inout, (kFsm | kStoreOutArcs)>, DeterminizeOptions {
+  typedef DeterminizeOptions Config;
   Properties prop_on, prop_off;
-  Determinize(DeterminizeFlags flags = DETERMINIZE_INPUT, Properties prop_on = kStoreOutArcs,
-              Properties prop_off = 0  // kStoreInArcs
-              )
-      : flags(flags), prop_on(prop_on), prop_off(prop_off) {}
+  Determinize(DeterminizeOptions const& opt) : DeterminizeOptions(opt) { validate(); }
+  Determinize(DeterminizeFlags flags_ = DETERMINIZE_INPUT, Properties prop_on = kFsmOutProperties,
+              Properties prop_off = 0)
+      : prop_on(prop_on), prop_off(prop_off) {
+    flags = flags_;
+  }
+
   Properties outAddProps() const { return prop_on; }
   Properties outSubProps() const { return prop_off; }
   template <class H>
@@ -618,7 +664,7 @@ struct Determinize : TransformBase<Transform::Inout, (kFsm | kStoreOutArcs)> {
 template <class A>
 IHypergraph<A> const& determinized(IHypergraph<A> const& i, shared_ptr<IHypergraph<A> const>& p,
                                    DeterminizeFlags flags = DETERMINIZE_INPUT,
-                                   Properties newOn = kFsm | kStoreOutArcs, Properties newOff = kStoreInArcs) {
+                                   Properties newOn = kFsmOutProperties, Properties newOff = kStoreInArcs) {
   p = ptrNoDelete(i);
   Determinize d(flags, newOn, newOff);
   inplace(p, d);
@@ -628,7 +674,7 @@ IHypergraph<A> const& determinized(IHypergraph<A> const& i, shared_ptr<IHypergra
 template <class A>
 shared_ptr<IHypergraph<A> const> determinized(IHypergraph<A> const& i,
                                               DeterminizeFlags flags = DETERMINIZE_INPUT,
-                                              Properties newOn = kFsm | kStoreOutArcs,
+                                              Properties newOn = kFsmOutProperties,
                                               Properties newOff = kStoreInArcs) {
   shared_ptr<IHypergraph<A> const> p = ptrNoDelete(i);
   Determinize d(flags, newOn, newOff);

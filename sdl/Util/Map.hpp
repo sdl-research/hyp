@@ -31,6 +31,7 @@
 #include <sdl/Util/Sorted.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <sdl/Util/String.hpp>
+#include <sdl/Util/VoidIf.hpp>
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
@@ -39,12 +40,24 @@
 namespace sdl {
 namespace Util {
 
+
+template <class Map, class Enable = void>
+struct ValueCopyable {
+  typedef typename Map::value_type type;
+};
+
+template <class Map>
+struct ValueCopyable<Map, typename Util::VoidIf<typename Map::key_type>::type> {
+  typedef std::pair<typename Map::key_type, typename Map::mapped_type> type;
+};
+
+
 template <class Map, class Prefix>
-bool keyStartsWith(Map &map, Prefix const& prefix, typename Map::iterator &begin, typename Map::iterator &end) {
+bool keyStartsWith(Map& map, Prefix const& prefix, typename Map::iterator& begin, typename Map::iterator& end) {
   typename Map::iterator i = map.lower_bound(prefix), e = map.end();
   if (i == e || !startsWith(i->first, prefix)) return false;
   begin = i;
-  for(;;) {
+  for (;;) {
     if (++i == e || !startsWith(i->first, prefix)) {
       end = i;
       return true;
@@ -53,10 +66,9 @@ bool keyStartsWith(Map &map, Prefix const& prefix, typename Map::iterator &begin
 }
 
 template <class Map, class Prefix>
-void eraseKeyStartsWith(Map &map, Prefix const& prefix) {
+void eraseKeyStartsWith(Map& map, Prefix const& prefix) {
   typename Map::iterator i, e;
-  if (keyStartsWith(map, prefix, i, e))
-    map.erase(i, e);
+  if (keyStartsWith(map, prefix, i, e)) map.erase(i, e);
 }
 
 
@@ -194,7 +206,7 @@ inline bool update(Map& map, typename Map::value_type& keyValPair) {
 
     \return true iff k wasn't in m (val was inserted) . */
 template <class Map>
-inline bool update(Map& map, typename Map::key_type const& key, typename Map::mapped_type & val) {
+inline bool update(Map& map, typename Map::key_type const& key, typename Map::mapped_type& val) {
   std::pair<typename Map::iterator, bool> i = map.insert(typename Map::value_type(key, val));
   if (!i.second) val = i.first->second;
   return i.second;

@@ -136,7 +136,7 @@ struct Levelization : Levels {
 
  private:
   Level nLevels;  // this being >1 means acyclic; if 0, you still need acyclic() to distinguish between
-                  // start=final and cyclic
+  // start=final and cyclic
   bool reachedFinalWithoutCycles;
   struct CountFstInArcs {
     RemainingInArcs& remainIn;
@@ -161,6 +161,7 @@ struct Levelization : Levels {
     if (hg.storesInArcs()) {
       for (StateId s = 0; s < N; ++s) remainIn[s] = hg.numInArcs(s);
     } else
+      // TODO: test
       hg.forArcs(CountFstInArcs(remainIn));
     StateId final = hg.final();
     assert(final != kNoState);

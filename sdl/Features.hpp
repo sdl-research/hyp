@@ -125,7 +125,8 @@ inline void addFeatures(Features& to, std::string const& str) {
 }
 
 inline void readNamedFeatures(std::istream& in, Features& f) {
-  // TODO .cpp (in what lib?)
+  // TODO: test
+  // TODO .cpp (as for everything in this root dir, in what lib? Util?)
   FeatureEntry x;
   while (in >> x.first) {
     if (in >> x.second) {

@@ -34,6 +34,7 @@ Sym ResidentVocabulary::getTerminal(std::string const& word) const {
 }
 
 void ResidentVocabulary::loadTerminals(std::string const& terminalPath) {
+  // TODO: test
   std::string entry;
   std::vector<std::string> strings;
 
@@ -47,6 +48,7 @@ void ResidentVocabulary::loadTerminals(std::string const& terminalPath) {
 }
 
 void ResidentVocabulary::loadNonterminals(std::string const& nonTerminalPath) {
+  // TODO: test
   std::string entry;
   std::vector<std::string> strings;
 
@@ -99,14 +101,7 @@ bool ResidentVocabulary::_boundsSym(Sym symId) const {
 }
 
 unsigned ResidentVocabulary::_GetNumSymbols(SymbolType symType) const {
-  switch (symType) {
-    case kLexicalTerminal:
-      return getVocab(kTerminal).getNumSymbols();
-    case kRegularNonterminal:
-      return getVocab(kNonterminal).getNumSymbols();
-    default:
-      return getVocab(symType).getNumSymbols();
-  }
+  return getVocab(symType).getNumSymbols();
 }
 
 std::size_t ResidentVocabulary::_GetSize() const {

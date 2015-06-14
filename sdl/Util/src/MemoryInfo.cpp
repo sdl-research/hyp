@@ -11,7 +11,7 @@
 #include <sdl/Exception.hpp>
 #include <sdl/Util/Sprintf.hpp>
 #include <iostream>
-#include <cstddef> // size_t
+#include <cstddef>  // size_t
 #include <stdexcept>
 #include <map>
 #include <iostream>
@@ -38,7 +38,7 @@
 #if __linux__
 #include <sys/types.h>
 #include <unistd.h>
-//man -2 getpid
+// man -2 getpid
 #endif
 
 #if defined(__MACH__) || defined(__FreeBSD__) || defined(__APPLE__)
@@ -50,26 +50,25 @@ namespace sdl {
 namespace Util {
 
 double physicalMemoryBytes() {
+// TODO: test
 #if defined(_SC_PHYS_PAGES) && defined(_SC_PAGESIZE)
   {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGESIZE);
-    if (pages != -1 && page_size != -1)
-      return (double)pages * (double)page_size;
+    if (pages != -1 && page_size != -1) return (double)pages * (double)page_size;
   }
 #endif
 #ifdef HW_PHYSMEM
   {
     unsigned physmem;
     size_t len = sizeof physmem;
-    static int mib[2] = { CTL_HW, HW_PHYSMEM };
+    static int mib[2] = {CTL_HW, HW_PHYSMEM};
 
-    if (sysctl (mib, sizeof(mib) / sizeof(mib[0]), &physmem, &len, NULL, 0) == 0
-        && len == sizeof (physmem))
+    if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &physmem, &len, NULL, 0) == 0 && len == sizeof(physmem))
       return (double)physmem;
   }
 #endif
-  //TODO: windows
+  // TODO: windows
   return 0;
 }
 
@@ -93,21 +92,19 @@ MemoryInfo::MemoryInfo(MemoryInfo const&) {
    TODO Make this work on non-unix platforms too
 */
 MemoryInfo::MemoryInfo() {
-  C99snprintf(memoryFilename, buflen-1, "/proc/%d/stat", getpid());
+  C99snprintf(memoryFilename, buflen - 1, "/proc/%d/stat", getpid());
 }
 
 MemoryInfo MemoryInfo::instance_;
 
 #ifdef _WIN32
 std::size_t MemoryInfo::getSize() {
-  SDL_TRACE(MemoryInfo,
-            "MemoryInfo::getSize() not yet supported on Windows.");
+  SDL_TRACE(MemoryInfo, "MemoryInfo::getSize() not yet supported on Windows.");
   return 0;
 }
 #elif __APPLE__
 std::size_t MemoryInfo::getSize() {
-  SDL_TRACE(MemoryInfo,
-            "MemoryInfo::getSize() not yet supported on Apple.");
+  SDL_TRACE(MemoryInfo, "MemoryInfo::getSize() not yet supported on Apple.");
   return 0;
 }
 #else
@@ -117,10 +114,11 @@ std::size_t MemoryInfo::getSize() {
   SDL_DEBUG(Util.MemoryInfo, "reading " << memoryFilename);
   std::ifstream memoryFileStream(memoryFilename);
   if (!memoryFileStream)
-    SDL_THROW_LOG(Util.MemoryInfo, FileException, "couldn't open process stat file '" << memoryFilename << "' for memory usage");
+    SDL_THROW_LOG(Util.MemoryInfo, FileException, "couldn't open process stat file '"
+                                                      << memoryFilename << "' for memory usage");
   std::getline(memoryFileStream, line);
-  const std::string val0 = getColumn(line, 22); // virtual memory size column
-  if (val0.empty()) { // TODO@MD: Fix for non-linux systems
+  const std::string val0 = getColumn(line, 22);  // virtual memory size column
+  if (val0.empty()) {  // TODO@MD: Fix for non-linux systems
     return 0;
   }
   std::size_t val = sdl::lexical_cast<std::size_t>(val0);
@@ -129,10 +127,12 @@ std::size_t MemoryInfo::getSize() {
 #endif
 
 double MemoryInfo::getSizeInMB() {
+  // TODO: test
   return getSize() * kOneOverMB;
 }
 
 double MemoryInfo::getSizeInGB() {
+  // TODO: test
   return getSize() * kOneOverGB;
 }
 

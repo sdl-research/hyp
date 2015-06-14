@@ -200,13 +200,14 @@ struct IHypergraphStates : Resource {
   virtual IVocabulary* vocab() const { return getVocabulary().get(); }
 
   /**
-     \return whether (approximately) best-first (lowest weight) outarcs. unlike hasSortedArcs, this is not
-     invalidated by adding new arcs
+     properties() & kOutArcsSortedBestFirst: whether (approximately) best-first
+     (lowest weight) outarcs. unlike hasSortedArcs, this is not invalidated by
+     adding new arcs
   */
-  bool hasBestFirstArcs() const;
 
   /**
-     \return whether sorted by input label (best-first for same input label) outarcs.
+     \return (properties() & kSortedOutArcs): whether sorted by input label
+     (best-first for same input label) outarcs.
   */
   bool hasSortedArcs() const;
 
@@ -425,7 +426,7 @@ struct IHypergraphStates : Resource {
   */
   template <class Arc>
   Sym firstLexicalInputTpl(Arc const* a) const {
-    StateIdContainer const& tails = a->tails();
+    StateIdContainer const& tails = a->tails_;
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       Sym const sym = inputLabel(*i);
       if (sym.isLexical()) return sym;
@@ -435,7 +436,7 @@ struct IHypergraphStates : Resource {
 
   template <class Arc>
   Sym firstLexicalOutputTpl(Arc const* a) const {
-    StateIdContainer const& tails = a->tails();
+    StateIdContainer const& tails = a->tails_;
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       Sym const sym = outputLabel(*i);
       if (sym.isLexical()) return sym;
@@ -445,7 +446,7 @@ struct IHypergraphStates : Resource {
 
   template <class Arc>
   LabelPair firstLexicalLabelPairTpl(Arc const* a) const {
-    StateIdContainer const& tails = a->tails();
+    StateIdContainer const& tails = a->tails_;
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       LabelPair const pair = labelPair(*i);
       if (pair.first.isLexical() || pair.second.isLexical()) return pair;
@@ -455,7 +456,7 @@ struct IHypergraphStates : Resource {
 
   template <class Arc>
   LabelPair firstLexicalInputLabelPairTpl(Arc const* a) const {
-    StateIdContainer const& tails = a->tails();
+    StateIdContainer const& tails = a->tails_;
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       LabelPair const pair = labelPair(*i);
       if (pair.first.isLexical()) return pair;
@@ -465,7 +466,7 @@ struct IHypergraphStates : Resource {
 
   template <class Arc>
   LabelPair firstLexicalOutputLabelPairTpl(Arc const* a) const {
-    StateIdContainer const& tails = a->tails();
+    StateIdContainer const& tails = a->tails_;
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       LabelPair const pair = labelPair(*i);
       if (output(pair).isLexical()) return pair;
@@ -588,9 +589,10 @@ struct IHypergraphStates : Resource {
     }
   }
 
-  bool hasStart() const;
+  /** start() == kNoState means no start state (which is not required for CFG
+   * anyway - every lexical leaf is an axiom) */
 
-  bool hasFinal() const;
+  /** final() == kNoState means prunedEmpty() - no derivations */
 
   bool storesArcs() const;
 
@@ -676,10 +678,10 @@ namespace detail {
 */
 template <class HG>
 inline bool isGraphArcImpl(HG const& hg, typename HG::Arc const& a, bool& fsm, bool& oneLexical) {
-  StateIdContainer const& tails = a.tails();
+  StateIdContainer const& tails = a.tails_;
   TailId N = tails.size();
 
-  if (hg.inputLabelImpl(a.head()).isTerminal()) return (fsm = oneLexical = false);
+  if (hg.inputLabelImpl(a.head_).isTerminal()) return (fsm = oneLexical = false);
 
   if (N == 2) {
     bool const term1 = hg.inputLabelImpl(tails[1]).isTerminal();
@@ -701,35 +703,30 @@ inline bool isGraphArcImpl(HG const& hg, typename HG::Arc const& a, bool& fsm, b
       if (i == N) return true;
       StateId const tail = tails[i];
       Sym const sym = hg.inputLabelImpl(tail);
-      if (sym.isLexical()) {
+      if (sym.isLexical())
         break;
-      } else if (!sym.isSpecialTerminal()) {
+      else if (!sym.isSpecialTerminal()) {
         oneLexical = false;  // best assume not since we return early
         return false;
-      } else if (hg.elseHasLexicalOutputLabelImpl(tail)) {
+      } else if (hg.elseHasLexicalOutputLabelImpl(tail))
         break;
-      }
     }
     for (;;) {
       if (++i == N) return true;
       StateId const tail = tails[i];
       Sym const sym = hg.inputLabelImpl(tail);
-      if (sym.isLexical()) {
+      if (sym.isLexical())
         break;
-      } else if (!sym.isSpecialTerminal()) {
+      else if (!sym.isSpecialTerminal()) {
         oneLexical = false;  // best assume not since we return early
         return false;
-      } else if (hg.elseHasLexicalOutputLabelImpl(tail)) {
+      } else if (hg.elseHasLexicalOutputLabelImpl(tail))
         break;
-      }
     }
     oneLexical = false;
     for (;;) {
       if (++i == N) return true;
-      if (!hg.inputLabelImpl(tails[i]).isTerminal()) {
-        oneLexical = false;
-        return false;
-      }
+      if (!hg.inputLabelImpl(tails[i]).isTerminal()) return false;
     }
   }
   assert(0);  // can't reach
@@ -868,7 +865,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     return firstLexicalTail(&tails[0], tails.size());
   }
 
-  TailId firstLexicalTail(Arc const* a) const { return firstLexicalTail(a->tails()); }
+  TailId firstLexicalTail(Arc const* a) const { return firstLexicalTail(a->tails_); }
 
   /// annotations are special terminals other than eps, rho, sigma, phi (the
   /// compose-specials) and if they appear on graphs must occupy tails 1...k consecutive. (only before
@@ -883,12 +880,13 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     return endAnnotations(&tails[0], tails.size());
   }
 
-  TailId endAnnotations(Arc const* a) const { return endAnnotations(a->tails()); }
+  TailId endAnnotations(Arc const* a) const { return endAnnotations(a->tails_); }
 
   struct FstArcFor {
     void init(Self const* hg, bool allowAnnotations = false) {
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
       annotations = allowAnnotations && (true || (hg->properties() & kAnnotations));
+      // TODO: detect annotations property for compose speedup
 #endif
       // TODO: set kAnnotations prop for hgs w/ annotations
       hg_ = hg;
@@ -905,9 +903,9 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
 
     result_type operator()(Arc const* arc) const {
       result_type r;
-      r.dst = arc->head();
-      r.weight = arc->weight();
-      StateIdContainer const& tails = arc->tails();
+      r.dst = arc->head_;
+      r.weight = arc->weight_;
+      StateIdContainer const& tails = arc->tails_;
 
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
       if (annotations) {
@@ -919,6 +917,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
           }
           StateId const t = *i;
           if (t >= sizeForLabels_) {
+            //TODO: test
             r.labelPair.first = r.labelPair.second = EPSILON::ID;
             break;
           }
@@ -929,6 +928,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
             break;
         }
       } else
+        //TODO: test
 #endif
       {
         if (tails.size() == 2) {
@@ -1028,7 +1028,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
      lexical)label, first does not.
   */
   virtual bool isFsmArc(Arc const& a) const {
-    StateIdContainer const& tails = a.tails();
+    StateIdContainer const& tails = a.tails_;
     return tails.size() == 2 && !hasTerminalLabel(tails[0]) && hasTerminalLabel(tails[1]);
   }
 
@@ -1173,7 +1173,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     return n > 0 && outArc(state, 0)->fsmSrc() == state;
   }
 
-  // v(inputLabel(a->tails()[1]), a) - input label only (fsa)
+  // v(inputLabel(a->tails_[1]), a) - input label only (fsa)
   template <class V>
   void forArcsFsa(StateId state, V const& v) const {
     for (ArcId a = 0, f = numOutArcs(state); a < f; ++a) {
@@ -1190,13 +1190,15 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
 
   template <class V>
   bool forArcsOutSearch(StateId tail, V const& v) const {
+    if (tail == kNoState) return false;
     if (properties() & kStoreOutArcs)
       return forArcsOutAny(tail, v);
     else
+      //TODO: test
       for (StateId state = 0, e = size(); state < e; ++state)
         for (ArcId a = 0, f = numInArcs(state); a != f; ++a) {
           Arc* pa = inArc(state, a);
-          if (Util::contains(pa->tails(), tail))
+          if (Util::contains(pa->tails_, tail))
             if (v(tail, pa)) return true;
         }
     return false;
@@ -1205,15 +1207,21 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
   // v(a) -> bool. continue search only if false
   template <class V>
   bool forArcsInSearch(StateId head, V const& v, bool firstTailOnly = true) const {
-    if (storesInArcs())
+    if (head == kNoState) return false;
+    Properties p = properties();
+    if (p & kStoreInArcs)
+      //TODO: test
       return forArcsInAny(head, v);
-    else
+    else {
+      bool storefirst = p & kStoreFirstTailOutArcs;
       for (StateId state = 0, e = size(); state < e; ++state)
         for (ArcId a = 0, f = numOutArcs(state); a != f; ++a) {
           Arc* pa = outArc(state, a);
-          if (pa->head() == head && (!firstTailOnly || pa->tails()[0] == state))
+          if (pa->head_ == head && (storefirst || !firstTailOnly || pa->tails_[0] == state))
+            //TODO: test
             if (v(pa)) return true;
         }
+    }
     return false;
   }
 
@@ -1381,7 +1389,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
       for (StateId i = 0; i < N; ++i)
         for (ArcId a = 0, f = numOutArcs(i); a < f; ++a) {
           Arc* pa = outArc(i, a);
-          adjs[pa->head()].push_back(pa);
+          adjs[pa->head_].push_back(pa);
         }
     }
   }
@@ -1421,6 +1429,12 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
     ArcId i = 0, N = this->numOutArcs(st);
     arcs.resize(N);
     for (; i < N; ++i) arcs[i] = this->outArc(st, i);
+  }
+
+  virtual void outAdjStates(StateId st, StateIdContainer& adjStates) const {
+    ArcId i = 0, N = this->numOutArcs(st);
+    adjStates.resize(N);
+    for (; i < N; ++i) adjStates[i] = this->outArc(st, i)->head_;
   }
 
   virtual void getFirstTailOutArcs(StateId st, ArcsContainer& arcs, bool allowNonFirstTail = true) const {
@@ -1485,7 +1499,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
   void forArcsOutFirstTail(StateId state, V const& v) const {
     for (ArcId a = 0, f = numOutArcs(state); a < f; ++a) {
       Arc* pa = outArc(state, a);
-      typename Arc::StateIdContainer const& tails = pa->tails();
+      typename Arc::StateIdContainer const& tails = pa->tails_;
       assert(!tails.empty());
       StateId t0 = *tails.begin();
       if (t0 == state) v(pa);
@@ -1560,7 +1574,7 @@ StateId maxTail(IHypergraph<A> const& h) {
   if (h.storesInArcs()) {
     for (StateId state = 0; state < N; ++state) {
       for (ArcId t = 0, e = h.numInArcs(state); t != e; ++t) {
-        StateIdContainer const& tails = h.inArc(state, t)->tails();
+        StateIdContainer const& tails = h.inArc(state, t)->tails_;
         if (tails.empty()) continue;
         StateId mt = *boost::max_element(tails);
         if (r == kNoState || mt > r) r = mt;
@@ -1585,7 +1599,7 @@ StateId maxHead(IHypergraph<A> const& h) {
   if (h.storesOutArcs()) {
     for (StateId state = 0; state < N; ++state) {
       for (ArcId t = 0, e = h.numOutArcs(state); t != e; ++t) {
-        StateId hd = h.outArc(state, t)->head();
+        StateId hd = h.outArc(state, t)->head_;
         if (r == kNoState || hd > r) r = hd;
       }
     }
@@ -1612,13 +1626,13 @@ StateId maxState(IHypergraph<A> const& h) {
 
 template <class Arc>
 bool isEpsilonLikeGraphArcAnyWeight(IHypergraph<Arc> const& hg, Arc const& arc) {
-  StateIdContainer const& tails = arc.tails();
+  StateIdContainer const& tails = arc.tails_;
   return tails.size() <= 1 || hg.labelPair(tails[1]) == kEpsilonLabelPair;
 }
 
 template <class Arc>
 bool isEpsilonLikeGraphArc(IHypergraph<Arc> const& hg, Arc const& arc) {
-  return isOne(arc.weight()) && isEpsilonLikeGraphArcAnyWeight(hg, arc);
+  return isOne(arc.weight_) && isEpsilonLikeGraphArcAnyWeight(hg, arc);
 }
 
 template <class Arc>

@@ -52,8 +52,11 @@ struct IteratorGenerator
   IteratorGenerator(IteratorGenerator const& o) : iBegin(o.iBegin), iEnd(o.iEnd) {}
   IteratorGenerator(iterator iBegin, iterator iEnd) : iBegin(iBegin), iEnd(iEnd) {}
   IteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd) : iBegin(pairBeginEnd.first), iEnd(pairBeginEnd.second) {}
+  //TODO: test
   Result peek() const { return *iBegin; }
+  //TODO: test
   void pop() { ++iBegin; }
+  //TODO: test
   operator bool() const { return iBegin!=iEnd; }
 };
 

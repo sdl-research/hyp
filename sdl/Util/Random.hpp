@@ -69,6 +69,7 @@ extern THREADLOCAL Random01* gThreadRandom01;
    threadRandom()() -> random on [0.0,1).
 */
 inline Random01& threadRandom() {
+  //TODO: test
   if (!gThreadRandom01) gThreadRandom01 = new Random01();
   return *gThreadRandom01;
 }

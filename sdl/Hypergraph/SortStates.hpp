@@ -242,11 +242,11 @@ struct TopNontermOrder : IStatesVisitor {
   }
 };
 
+// RestrictPrepare(restrict.hpp) is a Transform template that helps fill out and use a
+// StateIdTranslation and offer both inout and inplace.
 template <class A>
-struct SortStates : public RestrictPrepare<SortStates<A>, A>
-                    // RestrictPrepare(restrict.hpp) is a Transform template that helps fill out and use a
-                    // StateIdTranslation and offer both inout and inplace. (CRTP)
-                    {
+struct SortStates : public RestrictPrepare<SortStates<A>, A> {
+  static char const* name() { return "SortStates"; }
   SortStatesOptions opt;
   SortStates(SortStatesOptions const& opt = SortStatesOptions()) : opt(opt) {
     opt.validate();

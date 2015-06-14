@@ -35,12 +35,14 @@ std::string const kNullDbtStr("[NULL]");
 
 template <class Dbt>
 Escape3 escapeLimited(Dbt* dbt) {
+  // TODO: test
   return dbt ? Escape3(dbt->get_data(), dbt->get_size(), kLimitLogChars)
              : Escape3(kNullDbtStr.data(), kNullDbtStr.size());
 }
 
 template <class Dbt>
 Escape3 escapeLimitedLen(Dbt* dbt) {
+  // TODO: test
   return dbt ? Escape3(dbt->get_data(), dbt->get_size(), kLimitLogChars, true)
              : Escape3(kNullDbtStr.data(), kNullDbtStr.size(), kLimitLogChars, true);
 }

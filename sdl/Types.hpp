@@ -69,6 +69,11 @@ inline Slice toSlice(std::vector<char> const& str) {
   return Slice(arrayBegin(str), arrayEnd(str));
 }
 
+inline std::string& assignSlice(std::string& to, Slice from) {
+  to.assign(from.first, from.second - from.first);
+  return to;
+}
+
 inline Slice toSlice(Pchar str, std::size_t len) {
   return Slice(str, str + len);
 }
@@ -85,12 +90,6 @@ inline Slice toSlice(std::string const& str, std::size_t begin, std::size_t end)
   Pchar data = arrayBegin(str);
   return Slice(data + begin, data + end);
 }
-
-inline std::string& assignSlice(std::string& to, Slice from) {
-  to.assign(from.first, from.second - from.first);
-  return to;
-}
-
 
 typedef uint32 Unicode;  // a unicode codepoint (character, not necessarily a single glyph, e.g. roman numeral
 // three (looks like iii) is a single codepoint
@@ -159,6 +158,8 @@ inline std::ostream& operator<<(std::ostream& out, sdl::Slice const& word) {
   out.write(word.first, word.second - word.first);
   return out;
 }
+
+
 }
 
 #endif

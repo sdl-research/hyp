@@ -49,11 +49,5 @@ void removeBlockSymbols(Syms const& ngram, Syms& result) {
     if (!Vocabulary::isBlockSymbol(*i)) result.push_back(*i);
 }
 
-Syms removeBlockSymbols(Syms const& ngram) {
-  Syms result;
-  removeBlockSymbols(ngram, result);
-  return result;
-}
-
 
 }}

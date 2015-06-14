@@ -69,11 +69,15 @@ struct ResidentVocabulary : IVocabulary {
   }
 
   virtual void addSymbolCounts(SymbolType type, SymbolCounts& symbols) const OVERRIDE {
+    // TODO: test
     symbols.thread += _GetNumSymbols(type);
     symbols.symbolType = type;
   }
 
-  void enterThreadLocal() OVERRIDE { _enterThreadLocal(); }
+  void enterThreadLocal() OVERRIDE {
+    // TODO: test
+    _enterThreadLocal();
+  }
 
   virtual Sym addTerminal(std::string const& word) OVERRIDE;
   virtual Sym getTerminal(std::string const& word) const OVERRIDE;
@@ -112,13 +116,17 @@ struct ResidentVocabulary : IVocabulary {
 
   virtual std::size_t doGetSize() const OVERRIDE { return _GetSize(); }
 
-  virtual void accept(IVocabularyVisitor& visitor) OVERRIDE { return _Accept(visitor); }
+  virtual void accept(IVocabularyVisitor& visitor) OVERRIDE {
+    // TODO: test
+    return _Accept(visitor);
+  }
 
   virtual void acceptType(IVocabularyVisitor& visitor, SymbolType symType) OVERRIDE {
     return _AcceptType(visitor, symType);
   }
 
   virtual Sym doAddSymbolMustBeNew(std::string const& str, SymbolType symType) OVERRIDE {
+    // TODO: test
     return _AddSymbolMustBeNew(str, symType);
   }
 
@@ -143,8 +151,6 @@ struct ResidentVocabulary : IVocabulary {
     return const_cast<BasicVocabularyImpl&>(const_cast<ResidentVocabulary const*>(this)->getVocab(type));
   }
   BasicVocabularyImpl const& getVocab(SymbolType type) const {
-    assert(type != kPersistentTerminal);
-    assert(type != kPersistentNonterminal);
     switch (type) {
       case kTerminal:
         return vocabTerminal;
@@ -153,7 +159,7 @@ struct ResidentVocabulary : IVocabulary {
       case kVariable:
         return vocabVariable;
       default:
-        SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid type of vocabulary requested.");
+        SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid symbol type " << type << " requested.");
     }
   }
 

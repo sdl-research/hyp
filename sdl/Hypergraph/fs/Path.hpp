@@ -269,7 +269,7 @@ struct Path {
       outHg.setStart(final);
       return 0;
     }
-    if (start == kNoState) start = ensureStart(outHg);
+    if (start == kNoState) start = outHg.ensureStart();
     if (arcs.empty()) {
       outHg.addArcFsa(start, final, EPSILON::ID, ArcWeight(totalDistance));
       return 0;

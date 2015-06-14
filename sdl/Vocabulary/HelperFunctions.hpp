@@ -139,7 +139,6 @@ void terminalStringsToSignature(std::vector<std::string> const& strs, Syms* syms
    Removes block symbols from ngram
  */
 void removeBlockSymbols(Syms const& ngram, Syms& result);
-Syms removeBlockSymbols(Syms const& ngram);
 }
 
 struct PrintSyms {

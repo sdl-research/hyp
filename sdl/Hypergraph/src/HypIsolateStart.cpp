@@ -8,9 +8,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#define USAGE_HypIsolateStart                                                                                \
-  "Create the complement (determinize first if necessary) of an unweighted fsa hypergraph -- input symbols " \
-  "only"
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/IsolateStartState.hpp>
@@ -18,8 +15,9 @@
 namespace sdl {
 namespace Hypergraph {
 
-struct HypIsolateStart : TransformMain<HypIsolateStart> {  // note base class CRTP (google it)
-  HypIsolateStart() : TransformMain<HypIsolateStart>("IsolateStart", USAGE_HypIsolateStart) {}
+struct HypIsolateStart : TransformMain<HypIsolateStart> {
+  HypIsolateStart()
+      : TransformMain<HypIsolateStart>(IsolateStartState::name(), IsolateStartState::caption()) {}
   IsolateStartState iso;
   enum { has_inplace_transform1 = true };
   template <class Arc>

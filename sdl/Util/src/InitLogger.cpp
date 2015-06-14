@@ -42,6 +42,7 @@ namespace sdl {
 namespace Util {
 
 std::string logFileName(std::string appname) {
+  // TODO: test
   boost::posix_time::ptime currentTime = boost::posix_time::second_clock::local_time();
   appname.push_back('-');
   appname += boost::posix_time::to_iso_string(currentTime);
@@ -71,6 +72,7 @@ void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerO
   log4cxx::helpers::Transcoder::decode(layout, logStrLayout);
   log4cxx::PatternLayout* pLayout = new log4cxx::PatternLayout(logStrLayout);
   if (!opts.file.empty()) {
+    // TODO: test
     std::string const& logFile = opts.file == "AUTO" ? logFileName(appname) : opts.file;
     if (opts.verbose) std::cerr << "Log: " << logFile << '\n';
     log4cxx::LogString logFileName;

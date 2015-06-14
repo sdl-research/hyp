@@ -403,7 +403,7 @@ struct TransformBase {
     applyFinalOutput = o.applyFinalOutput;
   }
 
-  static char const* name() { return "TransformBase"; }
+  // static char const* name() { return "TransformBase"; } // subclass should 'override' this
 
   template <class A>
   bool checkInputs(IHypergraph<A> const& h) const {
@@ -553,8 +553,7 @@ struct TransformOptionsBase : ForceArcs {
 
   /// heading for options/help
   static char const* caption() { return "Options"; }
-  /// all lc options struct name
-  static char const* name() { return "transform"; }
+
   void validate() {}
 };
 

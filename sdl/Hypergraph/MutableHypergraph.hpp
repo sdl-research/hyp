@@ -324,7 +324,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
                                                             << " #inarcs: " << numInArcs(state));
     if (state >= inArcsPerState_.size()) return;
     ArcsContainer& arcs = inArcsPerState_[state];
-    if (storesAnyOutArcs()) {
+    if (storesOutArcsImpl()) {
       SDL_TRACE(Hypergraph.deleteInArcs, "before deleteInArcs(" << state << "): " << *this);
       if (properties_ & kStoreFirstTailOutArcs) {
         Util::PointerSet deleted;
@@ -650,7 +650,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   void setNumStates(StateId N) {
     if (properties_ & kStoreInArcs) inArcsPerState_.resize(N);
-    if (storesAnyOutArcs()) outArcsPerState_.resize(N);
+    if (storesOutArcsImpl()) outArcsPerState_.resize(N);
     numStates_ = N;
   }
 
@@ -720,7 +720,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   void clearArcsPer(StateId N) {
     resetArcs(inArcsPerState_, properties_ & kStoreInArcs ? N : 0);
-    resetArcs(outArcsPerState_, storesAnyOutArcs() ? N : 0);
+    resetArcs(outArcsPerState_, storesOutArcsImpl() ? N : 0);
   }
 
   void setLabelPairImpl(StateId state, LabelPair io) {
@@ -795,7 +795,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return state < inArcsPerState_.size() ? inArcsPerState_[state].size() : 0;
   }
   ArcId numOutArcs(StateId state) const OVERRIDE {
-    assert(storesAnyOutArcs());
+    assert(storesOutArcsImpl());
     return state < outArcsPerState_.size() ? outArcsPerState_[state].size() : 0;
   }
 
@@ -806,13 +806,13 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   Arc* outArc(StateId state, ArcId aid) const OVERRIDE {
-    assert(storesAnyOutArcs());
+    assert(storesOutArcsImpl());
     assert(state < outArcsPerState_.size());
     return outArcsPerState_[state][aid];
   }
 
   bool storesInArcs() const { return properties_ & kStoreInArcs; }
-  bool storesOutArcs() const { return storesAnyOutArcs(); }
+  bool storesOutArcs() const { return storesOutArcsImpl(); }
 
   typedef typename IHypergraph<Arc>::AdjsPtr AdjsPtr;
 
@@ -884,7 +884,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   /// ref (see addArc - resizes indices as needed)
   void resizeArcsForStates(StateId size) {
     if (properties_ & kStoreInArcs) inArcsPerState_.resize(size);
-    if (storesAnyOutArcs()) outArcsPerState_.resize(size);
+    if (storesOutArcsImpl()) outArcsPerState_.resize(size);
   }
 
   void addStateImpl() {
@@ -1160,7 +1160,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     properties_ &= ~Adder::removeProperties;
   }
 
-  bool storesAnyOutArcs() const { return properties_ & kStoresAnyOutArcs; }
+  bool storesOutArcsImpl() const { return properties_ & kStoresAnyOutArcs; }
 
   /// mere optimization over IHypergraph::visitArcs
   virtual void visitArcs(ArcVisitor const& v) const OVERRIDE {
@@ -1302,12 +1302,12 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   ArcsContainer const* maybeOutArcs(StateId state) const OVERRIDE {
-    assert(storesAnyOutArcs());
+    assert(storesOutArcsImpl());
     return state < outArcsPerState_.size() ? &outArcsPerState_[state] : &this->emptyArcs_;
   }
 
   ArcsContainer* maybeOutArcs(StateId state) OVERRIDE {
-    assert(storesAnyOutArcs());
+    assert(storesOutArcsImpl());
     return state < outArcsPerState_.size() ? &outArcsPerState_[state] : 0;
   }
 

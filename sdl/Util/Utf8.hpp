@@ -520,10 +520,6 @@ DecodeUtf8Range<typename boost::range_const_iterator<ByteRange>::type> decodeUtf
 }
 
 
-/// This is not in-place because result may have different # of bytes. invalid utf8 bytes get
-/// kUnicodeReplacementChar
-std::string fixedUtf8(std::string const& str);
-
 /// in-place - if input is valid already, this is more efficient
 std::string& fixUtf8(std::string& str);
 

@@ -53,6 +53,7 @@ struct WeightedStrings {
   void closeString() {}
   Sym charId(std::string const& s) const { return lexicalSymbol(s, *voc); }
   bool operator()(std::string const& s) {
+    // TODO: test
     if (!s.empty()) addChar(charId(s));
     return true;
   }

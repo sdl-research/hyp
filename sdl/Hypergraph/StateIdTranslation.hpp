@@ -145,14 +145,12 @@ struct StateAddMapping : public StateIdMapping {
   StateAddMapping(IMutableHypergraph<A>* outHg) : outHg(outHg) {}
   virtual StateId remap(StateId s) OVERRIDE {
     StateId r = outHg->addState();
-    SDL_TRACE(Hypergraph.StateIdTranslation,
-              "StateAddMapping remap outhg=" << outHg << " s=" << s << " -> r=" << r
-                                             << " numStates=" << outHg->size());
+    SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s
+                                                                            << " -> r=" << r
+                                                                            << " numStates=" << outHg->size());
     return r;
   }
-  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE {
-    return outHg->addState(io);
-  }
+  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE { return outHg->addState(io); }
 };
 
 template <class A>
@@ -165,15 +163,13 @@ struct StateAddIdentityMapping : public StateIdMapping {
   // we don't declare this as identity because we want to make sure remap is actually called
   virtual StateId remap(StateId s) OVERRIDE {
     StateId r = outHg->addStateId(s);
-    SDL_TRACE(Hypergraph.StateIdTranslation,
-              "StateAddMapping remap outhg=" << outHg << " s=" << s << " -> r=" << r
-                                             << " numStates=" << outHg->size());
+    SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s
+                                                                            << " -> r=" << r
+                                                                            << " numStates=" << outHg->size());
     assert(r == s);
     return s;
   }
-  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE {
-    return outHg->addState(io);
-  }
+  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE { return outHg->addState(io); }
 };
 
 template <class A>
@@ -186,9 +182,7 @@ struct SubsetStateAddMapping : public StateAddMapping<A> {
   SubsetStateAddMapping(IMutableHypergraph<A>* outHg, StateSet const& subset)
       : StateAddMapping<A>(outHg), subset(subset) {}
   virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
-   StateId remapImpl(StateId s) {
-    return Util::contains(subset, s) ? this->outHg->addState() : kNoState;
-  }
+  StateId remapImpl(StateId s) { return Util::contains(subset, s) ? this->outHg->addState() : kNoState; }
   virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE {
     return Util::contains(subset, s) ? this->outHg->addState(io) : kNoState;
   }
@@ -202,7 +196,7 @@ struct SubsetIdentityMapping : public StateIdMapping {
   StateSet const& subset;
   SubsetIdentityMapping(StateSet const& subset) : subset(subset) {}
   virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
-   StateId remapImpl(StateId s) { return Util::contains(subset, s) ? s : kNoState; }
+  StateId remapImpl(StateId s) { return Util::contains(subset, s) ? s : kNoState; }
 };
 
 struct StateIdTranslation : boost::noncopyable {
@@ -281,11 +275,13 @@ struct StateIdTranslation : boost::noncopyable {
     if (s == kNoState) return s;
     if (frozenMap) return existingState(s);
     StateId* r;
-    if (Util::update(cache, s, r)) { return (*r = map->remap(s)); } else
+    if (Util::update(cache, s, r)) {
+      return (*r = map->remap(s));
+    } else
       return *r;
   }
 
-   StateId stateFor(StateId s) {
+  StateId stateFor(StateId s) {
     if (s == kNoState) return s;
     StateId r = stateForImpl(s);
     // SDL_TRACE(Hypergraph.StateIdTranslation, "stateFor(" << s<<")=" << r);
@@ -302,7 +298,9 @@ struct StateIdTranslation : boost::noncopyable {
   StateId addStateImpl(StateId s, LabelPair const& io) {
     if (frozenMap) return existingState(s);
     StateId* r;
-    if (Util::update(cache, s, r)) { return (*r = map->remapForLabelPair(s, io)); } else
+    if (Util::update(cache, s, r)) {
+      return (*r = map->remapForLabelPair(s, io));
+    } else
       return *r;
   }
 
@@ -348,7 +346,9 @@ struct StateIdTranslation : boost::noncopyable {
         tails[i] = ti;
       }
       return new A(head, tails, a.weight());
-    } else { return copyArcWithMappedStates(*this, a); }
+    } else {
+      return copyArcWithMappedStates(*this, a);
+    }
   }
 
   template <class A>
@@ -359,13 +359,16 @@ struct StateIdTranslation : boost::noncopyable {
 
   template <class A>
   void transferLabels(IHypergraph<A> const& ihg, IMutableHypergraph<A>& ohg) {
-    if (frozenMap) { transferLabelsPartial(ihg, ohg); } else {
+    if (frozenMap) {
+      transferLabelsPartial(ihg, ohg);
+    } else {
       StateId s = 0, e = ihg.size();
       StateId onStates = ohg.size();  // lower bound on true number of states
       for (; s != e; ++s)
         if (ihg.hasLabel(s)) {
           StateId so = stateFor(s);
           if (!stateAddingMap && so >= onStates) {
+            // TODO: test
             ohg.addStateId(so);
             onStates = ohg.size();
           }
@@ -377,7 +380,9 @@ struct StateIdTranslation : boost::noncopyable {
   template <class Out>
   void print(Out& o) const {
     o << map->name();
-    if (identityMap) { o << "=Identity"; } else {
+    if (identityMap) {
+      o << "=Identity";
+    } else {
       if (frozenMap) o << "(frozen)";
       o << "= {" << Util::print(cache, Util::multiLine()) << "}";
     }

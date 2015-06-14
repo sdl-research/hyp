@@ -17,6 +17,7 @@ namespace sdl {
 namespace Util {
 
 bool neededIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString& out, IcuNormalizer2Ptr norm) {
+  // TODO: test
   UErrorCode err = U_ZERO_ERROR;
   bool const normed = norm->isNormalized(s, err);
   assert(U_SUCCESS(err));
@@ -77,7 +78,8 @@ std::string icuCountriesList(const char* sep) {
 
 
 std::string parseErrorString(UParseError const& e) {
-  if (!(e.preContext[0] || e.postContext[0])) return "";
+  // TODO: test
+  if (!(e.preContext[0] || e.postContext[0])) return std::string();
   graehl::string_builder append;
   append("ICU error");
   if (e.line > 0) {
@@ -106,7 +108,8 @@ UParseError& IcuErrorCode::storeParseError() {
 }
 
 std::string IcuErrorCode::parseError() const {
-  if (!optParse) return "";
+  // TODO: test
+  if (!optParse) return std::string();
   std::string const& r = parseErrorString(*optParse);
   return r.empty() ? r : " parsing: " + r;
 }
@@ -142,6 +145,7 @@ unsigned toIcuReplacing(UnicodeString& ustr, icu::StringPiece utf8) {
   int32 actualSize, replaced;
   u_strFromUTF8WithSub(out, bytes, &actualSize, utf8.data(), bytes, 0xFFFD, &replaced, &status);
   if (!U_SUCCESS(status)) {
+    //TODO: test
     ustr.releaseBuffer(0);
     return kIcuErrorInReplacing;
   } else {

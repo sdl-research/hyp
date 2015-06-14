@@ -26,80 +26,41 @@ namespace sdl {
 namespace Util {
 
 template <class Gen, class Trans, class Result = typename Trans::result_type, class Tag = typename Gen::GeneratorTag>
-struct TransformedGenerator
-    : protected Gen, protected Trans
-    , public GeneratorTraitsBase<Result, Tag>
-{
+struct TransformedGenerator : protected Gen, protected Trans, public GeneratorTraitsBase<Result, Tag> {
+  // TODO: test
   typedef Result result_type;
   typedef Tag GeneratorTag;
   typedef void NonPeekable;
   TransformedGenerator() {}
-  //TransformedGenerator(TransformedGenerator const& gen) : Gen(gen), Trans(gen) {}
+  // TransformedGenerator(TransformedGenerator const& gen) : Gen(gen), Trans(gen) {}
   explicit TransformedGenerator(Gen const& gen, Trans const& t = Trans()) : Gen(gen), Trans(t) {}
-  operator bool() const
-  {
-    return (bool)(Gen const&)*this;
-  }
-  bool operator !() const {
-    return !(bool)(Gen const&)*this;
-  }
+  operator bool() const { return (bool)(Gen const&)*this; }
+  bool operator!() const { return !(bool)(Gen const&)*this; }
 
-  Result operator()() {
-    return Trans::operator()(Gen::operator()());
-  }
-  Result get() {
-    return Trans::operator()(Gen::operator()());
-  }
+  Result operator()() { return Trans::operator()(Gen::operator()()); }
+  Result get() { return Trans::operator()(Gen::operator()()); }
   void got() {}
 };
 
 template <class Gen, class Trans, class Result>
 struct TransformedGenerator<Gen, Trans, Result, PeekableT>
-    : protected Gen, protected Trans
-    , public GeneratorTraitsBase<Result, PeekableT>
-{
+    : protected Gen, protected Trans, public GeneratorTraitsBase<Result, PeekableT> {
   typedef Result result_type;
   typedef PeekableT GeneratorTag;
   typedef void Peekable;
   TransformedGenerator() {}
-  //TransformedGenerator(TransformedGenerator const& gen) : Gen(gen), Trans(gen) {}
+  // TransformedGenerator(TransformedGenerator const& gen) : Gen(gen), Trans(gen) {}
   explicit TransformedGenerator(Gen const& gen, Trans const& t = Trans()) : Gen(gen), Trans(t) {}
-  Result operator()() {
-    return Trans::operator()(Gen::operator()());
-  }
-  operator bool() const
-  {
-    return (bool)(Gen const&)*this;
-  }
-  bool operator !() const {
-    return !(bool)(Gen const&)*this;
-  }
-  void pop()
-  {
-    Gen::pop();
-  }
-  void got()
-  {
-    Gen::pop();
-  }
+  Result operator()() { return Trans::operator()(Gen::operator()()); }
+  operator bool() const { return (bool)(Gen const&)*this; }
+  bool operator!() const { return !(bool)(Gen const&)*this; }
+  void pop() { Gen::pop(); }
+  void got() { Gen::pop(); }
   /// peek may be const or non-const depending on Gen
-  Result peek() const
-  {
-    return Trans::operator()(Gen::peek());
-  }
-  Result peek()
-  {
-    return Trans::operator()(Gen::peek());
-  }
-  Result get() const
-  {
-    return Trans::operator()(Gen::peek());
-  }
-  Result get()
-  {
-    return Trans::operator()(Gen::peek());
-  }
-
+  Result peek() const { return Trans::operator()(Gen::peek()); }
+  Result peek() { return Trans::operator()(Gen::peek()); }
+  Result get() const { return Trans::operator()(Gen::peek()); }
+  Result get() { return Trans::operator()(Gen::peek()); }
 };
 
 

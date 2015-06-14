@@ -911,17 +911,17 @@ void EarleyParser<Arc>::createResultArcs(Item* item, StateId head, ItemAndMatche
   return createResultArcs1(irts, head, matchedArcs, tails, Weight::one(), alreadyExpanded);
 }
 
-///
-
 struct ComposeOptions : fs::FstComposeOptions {
   explicit ComposeOptions() {}
-
+  static char const* name() { return "Compose"; }
+  static char const* caption() {
+    return "CFG*FST or FST*FST compose (for better speed, prune before composing)";
+  }
   template <class Configure>
   void configure(Configure const& config) {
     fs::FstComposeOptions::configure(config);
-    config.is("Compose");
-    config("CFG*FST compose (for better speed, prune before composing)");
-    // currently no options here
+    config.is(name());
+    config(caption());
   }
 };
 
@@ -929,14 +929,6 @@ namespace {
 const Properties kComposeFstRequiredProperties = kFsm | kStoreOutArcs | kSortedOutArcs;
 const Properties kComposeCfgRequiredProperties = kStoreInArcs;  // TODO: need out-arcs?
 }
-
-/*
-  struct ComposeFstPrepareTransform : TransformBase<Transform::Inplace, kComposeFstRequiredProperties>
-  {
-  template <class A>
-  bool needs(IHypergraph<A> const& h) const { return false; }
-  };
-*/
 
 template <class A>
 void composeImpl(IHypergraph<A> const& cfg, IHypergraph<A> const& fst, IMutableHypergraph<A>* resultCfg,
@@ -1060,12 +1052,12 @@ struct ComposeTransformOptions : ComposeOptions, TransformOptionsBase {
 // using a configurable fn object. fs compose supports this already but
 // it's not exposed to module.
 template <class FstArc>
-struct ComposeTransform : TransformBase<Transform::Inout> {
+struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptions {
 
   typedef TransformBase<Transform::Inout> Base;
-  ComposeTransformOptions opt;
 
-  ComposeTransform(ComposeTransformOptions const& opt = ComposeTransformOptions()) : opt(opt) {}
+  ComposeTransform(ComposeTransformOptions const& opt = ComposeTransformOptions())
+      : ComposeTransformOptions(opt) {}
 
   typedef IMutableHypergraph<FstArc> FST;
   typedef shared_ptr<FST> FstPtr;
@@ -1079,10 +1071,9 @@ struct ComposeTransform : TransformBase<Transform::Inout> {
 
   template <class ResourceManager>
   void loadResourcesThread(ResourceManager& mgr) {
-    if (!opt.fst.empty()) {
-      fstname = opt.fst;
-      FstPtr& fst = pFst();
-      mgr.getResource(opt.fst, fst);
+    if (!fst.empty()) {
+      fstname = fst;
+      mgr.getResource(fst, pFst());
       resourceNeedsCheck_.set(true);
     }
   }
@@ -1147,7 +1138,7 @@ struct ComposeTransform : TransformBase<Transform::Inout> {
       resourceNeedsCheck_.set(false);
     }
     forcePropertiesIfMutable(hg, kComposeCfgRequiredProperties);
-    composeImpl(hg, fst, pResultHg, opt);
+    composeImpl(hg, fst, pResultHg, *this);
   }
 
   IVocabularyPtr checkVocab(IHypergraph<FstArc> const& hg) {
@@ -1175,7 +1166,7 @@ struct ComposeTransform : TransformBase<Transform::Inout> {
     pResultHg->setVocabulary(checkVocab(hgIn));
 
     IHypergraph<Arc>& hg = const_cast<IHypergraph<Arc>&>(hgIn);
-    if (opt.fstCompose) {
+    if (fstCompose) {
       if (!hg.isMutable())
         SDL_WARN(Hypergraph.Compose,
                  "fst*fst composition not possible as configured; first fst is not mutable. falling back to "
@@ -1186,7 +1177,7 @@ struct ComposeTransform : TransformBase<Transform::Inout> {
       else {
         SDL_DEBUG(Hypergraph.Compose, "input is mutable fst - using fst*fst composition");
         SDL_DEBUG(Hypergraph.Compose, hg);
-        fs::compose((IMutableHypergraph<Arc>&)(hg), *fst, pResultHg, (fs::FstComposeOptions const&)opt);
+        fs::compose((IMutableHypergraph<Arc>&)(hg), *fst, pResultHg, (fs::FstComposeOptions const&)*this);
         return;
       }
     }

@@ -156,58 +156,6 @@ struct ByPtr : Before {
   }
 };
 
-template <class Value, class Before = Ascending>
-struct Sorted : std::vector<Value> {
-  Sorted() {}
-  template <class Range>
-  explicit Sorted(Range const& r) {
-    set(r);
-  }
-  template <class Iter>
-  Sorted(Iter i, Iter end) {
-    set(i, end);
-  }
-
-  template <class Range>
-  void set(Range const& r) {
-    Util::reinitRange(*this, r);
-    sort();
-  }
-  template <class Iter>
-  void set(Iter i, Iter end) {
-    Util::reinit(*this, i, end);
-    sort();
-  }
-  void sort() { std::sort(this->begin(), this->end(), Before()); }
-};
-
-template <class Map, class Enable = void>
-struct ValueCopyable {
-  typedef typename Map::value_type type;
-};
-
-template <class Map>
-struct ValueCopyable<Map, typename Util::VoidIf<typename Map::key_type>::type> {
-  typedef std::pair<typename Map::key_type, typename Map::mapped_type> type;
-};
-
-/// shortcut for a constructor call e.g. in a forall (...). we're hoping return
-/// value optimization saves us from an actual copy
-template <class Before, class Range>
-inline Sorted<typename ValueCopyable<Range>::type, Before> sorted(Range const& r) {
-  return Sorted<typename ValueCopyable<Range>::type, Before>(r);
-}
-
-template <class Before, class Range>
-inline Sorted<typename ValueCopyable<Range>::type, Before> sorted(Range const& r, Before const&) {
-  return Sorted<typename ValueCopyable<Range>::type, Before>(r);
-}
-
-template <class Map>
-inline Sorted<std::pair<typename Map::key_type, typename Map::mapped_type> > sortedByKey(Map const& r) {
-  return Sorted<typename ValueCopyable<Map>::type, FirstAscending>(r);
-}
-
 template <class Vec, class Index = std::size_t>
 struct IndexedLess {
   Vec const& vec;

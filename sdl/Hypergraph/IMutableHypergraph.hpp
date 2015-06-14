@@ -687,6 +687,15 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
 
   virtual ArcsContainer* maybeOutArcs(StateId state) = 0;
 
+  void outAdjStates(StateId st, StateIdContainer& adjStates) const OVERRIDE {
+    ArcsContainer const* a = maybeOutArcs(st);
+    if (a) {
+      ArcId N = a->size();
+      adjStates.resize(N);
+      for (unsigned i = 0; i < N; ++i) adjStates[i] = (*a)[i]->head_;
+    }
+  }
+
   virtual ArcsContainer const* maybeOutArcs(StateId state) const = 0;
 
   ArcsContainer const* maybeInArcsConst(StateId state) const { return maybeInArcs(state); }
@@ -857,19 +866,6 @@ inline void forcePropertiesIfMutable(IHypergraph<Arc>& hg, Properties properties
             << " for immutable hg - perhaps you can configure your pipeline to produce directly the "
                "correct properties, or insert a step that first converts to mutable hg");
   static_cast<IMutableHypergraph<Arc>&>(hg).forceProperties(properties, on);
-}
-
-/**
-   return start state (existing start state, else create new one)
-*/
-template <class Arc>
-StateId ensureStart(IMutableHypergraph<Arc>& hg) {
-  StateId s = hg.start();
-  if (s == kNoState) {
-    s = hg.addState();
-    hg.setStart(s);
-  }
-  return s;
 }
 
 /**

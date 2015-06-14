@@ -37,15 +37,15 @@
 
 //TODO: optionally include severity numeric level in header.
 
-/// controlling DBGM and UTIL_DBG_MSG:
-/// set to 1 for debugging a release build, else leave unset for debug only (see below).
+/// SDL_DEBUG_ENABLE emits code for DBGM and UTIL_DBG_MSG:
+
 //#define SDL_DEBUG_ENABLE 1
 
 #ifndef SDL_DEBUG_ENABLE
 #ifdef NDEBUG
 # define SDL_DEBUG_ENABLE 0
 #else
-# define SDL_DEBUG_ENABLE 1
+# define SDL_DEBUG_ENABLE 0
 #endif
 #endif
 
@@ -66,10 +66,10 @@
 #define OSTR_DBG std::cerr
 
 // you must DECLARE_DBG_CH(ch) first
-# define IFDBGENV(ch, level, x) do {if (DBG_MAX_LEVEL>=level && ch##_DBG_LEVEL>=level) {x;}}while(0)
+# define IFDBGENV(ch, level, x) do {if (SDL_DBG_MAX_LEVEL>=level && ch##_DBG_LEVEL>=level) {x;}}while(0)
 
-#ifndef DBG_MAX_LEVEL
-# define DBG_MAX_LEVEL 999
+#ifndef SDL_DBG_MAX_LEVEL
+# define SDL_DBG_MAX_LEVEL 999
 // decrease this to lose even overhead of if-enabled check; sets max effective level of getenv_int("{Channelname}_DBG");
 #endif
 
@@ -79,14 +79,14 @@
 #endif
 
 // TODO: should be controllable by environment var, too
-#ifndef DBG_WITH_LINEINFO
+#ifndef SDL_DBG_WITH_LINEINFO
 // show :FILE:LINE after that
-# define DBG_WITH_LINEINFO 1
+# define SDL_DBG_WITH_LINEINFO 0
 #endif
 
-#ifndef DBG_START_NEWLINE
+#ifndef SDL_DBG_START_NEWLINE
 // start new message with newline just in case
-# define DBG_START_NEWLINE 1
+# define SDL_DBG_START_NEWLINE 1
 #endif
 
 
@@ -100,16 +100,16 @@
 #include <graehl/shared/warning_compiler.h>
 CLANG_DIAG_OFF(unneeded-internal-declaration)
 CLANG_DIAG_OFF(unused-function)
-#if DBG_WITH_LINEINFO
+#if SDL_DBG_WITH_LINEINFO
 namespace {
 inline std::string shortDebugFilename(std::string const& name) {
   std::string::size_type from=name.find_last_of('/');
   return from==std::string::npos ? name : std::string(name, from);
 }
 }
-# define DBG_LINE_INFO <<':'<< shortDebugFilename(__FILE__) << ":" << __LINE__
+# define SDL_DBG_LINE_INFO <<':'<< shortDebugFilename(__FILE__) << ":" << __LINE__
 #else
-# define DBG_LINE_INFO
+# define SDL_DBG_LINE_INFO
 #endif
 CLANG_DIAG_ON(unused-function)
 CLANG_DIAG_ON(unneeded-internal-declaration)
@@ -118,23 +118,23 @@ CLANG_DIAG_ON(unneeded-internal-declaration)
 //static local var means env var is checked once (like singleton)
 #define DECLARE_DBG_CH(ch) DECLARE_DBG_LEVEL(ch)
 
-#if DBGHEADER_SHOW_LVL
-# define DBGVERBOSITY(n) <<"(" << n<<")"
+#if SDL_DBGHEADER_SHOW_LVL
+# define SDL_DBGVERBOSITY(n) <<"(" << n<<")"
 #else
-# define DBGVERBOSITY(n)
+# define SDL_DBGVERBOSITY(n)
 #endif
 
-#if DBG_START_NEWLINE
-# define DBG_INIT_NL "\n"
+#if SDL_DBG_START_NEWLINE
+# define SDL_DBG_INIT_NL "\n"
 #else
-# define DBG_INIT_NL
+# define SDL_DBG_INIT_NL
 #endif
 
-#define DBGHEADER(ch, n) DBG_INIT_NL #ch DBGVERBOSITY(n) DBG_LINE_INFO <<": "
+#define SDL_DBGHEADER(ch, n) SDL_DBG_INIT_NL #ch SDL_DBGVERBOSITY(n) SDL_DBG_LINE_INFO <<": "
 
 #if SDL_DEBUG_ENABLE
 #  define DBGX(ch, n, x) IFDBGENV(ch, n, x)
-#  define DBGM(ch, n, x) IFDBGENV(ch, n, OSTR_DBG << DBGHEADER(ch, n) << x)
+#  define DBGM(ch, n, x) IFDBGENV(ch, n, OSTR_DBG << SDL_DBGHEADER(ch, n) << x)
 #  define DBGMC(ch, n, x) IFDBGENV(ch, n, OSTR_DBG << x)
 #else
 #  define DBGX(ch, n, x)

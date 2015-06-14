@@ -92,15 +92,7 @@ template <class Arc>
 struct PruneToBest;
 
 struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
- private:
-  void init() {
-    single = true;
-    beam = NAN;
-    beamEpsilon = 1e-5;
-    beamPlusStates = 0;
-  }
-
- public:
+  static char const* name() { return "PruneToBest"; }
   PruneToBestOptions(unsigned defaultNbest = 1) : PruneToNbestOptions(defaultNbest) { init(); }
   template <class Opt>
   PruneToBestOptions(unsigned defaultNbest, Opt const& opt)
@@ -119,7 +111,6 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
     return !is_null(beam);
   }
   bool pruning() const { return !is_null(beam) || single; }
-  static char const* name() { return "prune-non-best"; }
   template <class Config>
   void configure(Config& config) {
     PruneToNbestOptions::configure(config);
@@ -169,6 +160,14 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
     out << "single=" << single << " beam-width=" << beam << " beam-plus-states=" << beamPlusStates
         << " pruning=" << pruning();
   }
+
+ private:
+  void init() {
+    single = true;
+    beam = NAN;
+    beamEpsilon = 1e-5;
+    beamPlusStates = 0;
+  }
 };
 
 /// lightweight copy, expensive constructor (computes best path)
@@ -200,8 +199,7 @@ struct ArcInBest {
     empty = !N;
     if (empty) return;
     ComputeBest best(opt, hg);
-    if (beaming)
-    empty = !best.best();
+    if (beaming) empty = !best.best();
     if (empty) return;
     inarcs = hg.storesInArcs();
     StateId final = hg.final();
@@ -216,14 +214,14 @@ struct ArcInBest {
       worstAllowedCost = inside[final] + opt.beam;
       SDL_DEBUG(PruneToBest, "worst allowed: " << worstAllowedCost << " final=" << final << " start=" << start);
       outside.resize(N, HUGE_VAL);
-      outsideCosts(hg, &outside[0], inside, N, opt.beamPlusStates ? HUGE_VAL : opt.beamEpsilon + worstAllowedCost);
+      outsideCosts(hg, &outside[0], inside, N,
+                   opt.beamPlusStates ? HUGE_VAL : opt.beamEpsilon + worstAllowedCost);
       if (opt.beamPlusStates) {
         typedef std::pair<SdlFloat, StateId> S;
         Util::TopK<S> topk(opt.beamPlusStates);
         for (unsigned i = 0; i < N; ++i) {
           SdlFloat c = outside[i];
-          if (hg.isAxiom(i))
-            inside[i] = 0;
+          if (hg.isAxiom(i)) inside[i] = 0;
           c += inside[i];
           if (!is_null(c) && c > worstAllowedCost) topk.add(S(c, i));
         }
@@ -284,26 +282,25 @@ struct ArcInBest {
 };
 
 template <class A>
-struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
+struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
   typedef RestrictPrepare<PruneToBest<A>, A> Base;
   void inplace(IMutableHypergraph<A>& hg) {
-    SDL_DEBUG(PruneToBest, "pruning "<<hg);
-    if (opt.pruning()) Base::inplace(hg);
-    PruneEpsilon pruneEpsilon(opt);
+    SDL_DEBUG(PruneToBest, "pruning " << hg);
+    if (pruning()) Base::inplace(hg);
+    PruneEpsilon pruneEpsilon(*this);
     pruneEpsilon.inplace(hg);
   }
-  PruneToBestOptions opt;
   PruneToBest() {}
   template <class Opt>
   PruneToBest(Opt const& opt)
-      : opt(opt) {}
+      : PruneToBestOptions(opt) {}
   template <class Opt>
   PruneToBest(unsigned defaultNbest, Opt const& opt)
-      : opt(defaultNbest, opt) {}
+      : PruneToBestOptions(defaultNbest, opt) {}
 
   bool needsRestrict(IHypergraph<A>& hg) {
-    if (opt.skipAlreadySingle && hg.isMutable() && hasTrivialBestPath(hg, hg.final(), hg.start())) {
-      PruneEpsilon pruneEpsilon(opt);
+    if (skipAlreadySingle && hg.isMutable() && hasTrivialBestPath(hg, hg.final(), hg.start())) {
+      PruneEpsilon pruneEpsilon(*this);
       pruneEpsilon.maybePruneEpsilon(static_cast<IMutableHypergraph<A>&>(hg));
       return false;
     } else
@@ -312,14 +309,14 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
 
   StateIdMapping* mapping(IHypergraph<A> const& hg, IMutableHypergraph<A>& outHg) {
     try {
-      SDL_DEBUG(PruneToBest, "creating mapping from " << opt);
-      ArcInBest<A> b(hg, opt);
+      SDL_DEBUG(PruneToBest, "creating mapping from " << *this);
+      ArcInBest<A> b(hg, *this);
       if (b.empty) return 0;
       this->keep = b;
     } catch (EmptySetException&) {
       return 0;
     }
-    if (opt.packStates) {
+    if (packStates) {
       return new StateAddMapping<A>(&outHg);
     } else {  // preserve stateids - means we need to define an edge filter
       return new IdentityIdMapping();
@@ -332,7 +329,7 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
 template <class Arc>
 void justBest(IMutableHypergraph<Arc>& hg, bool leaveSimplePathAlone = true) {
   PruneToBest<Arc> prune;
-  prune.opt.skipAlreadySingle = leaveSimplePathAlone;
+  prune.skipAlreadySingle = leaveSimplePathAlone;
   prune.inplace(hg);
 }
 
@@ -342,7 +339,7 @@ void justBest(unsigned nbest, IMutableHypergraph<Arc>& hg, Options const& pruneN
               bool leaveSimplePathAlone = true) {
   if (nbest) {
     PruneToBest<Arc> prune(nbest, pruneNonBestOrEpsilonOptions);
-    prune.opt.skipAlreadySingle = leaveSimplePathAlone;
+    prune.skipAlreadySingle = leaveSimplePathAlone;
     prune.inplace(hg);
   } else if (!leaveSimplePathAlone)
     pruneNonBestOrEpsilonOptions.maybePruneSimplePath(hg);
@@ -352,7 +349,7 @@ template <class Arc, class Options>
 void justBest(IMutableHypergraph<Arc>& hg, Options const& opt, bool leaveSimplePathAlone = true) {
   if (opt.pruning()) {
     PruneToBest<Arc> prune(opt.pruneToNbest, opt);
-    prune.opt.skipAlreadySingle = leaveSimplePathAlone;
+    prune.skipAlreadySingle = leaveSimplePathAlone;
     prune.inplace(hg);
   } else if (!leaveSimplePathAlone)
     opt.maybePruneSimplePath(hg);

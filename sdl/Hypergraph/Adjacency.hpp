@@ -21,49 +21,42 @@ namespace sdl {
 namespace Hypergraph {
 
 namespace detail {
-struct nIn
-{
+struct nIn {
+  // TODO: test
   StateId s;
   ArcId n;
   nIn(StateId s) : s(s), n() {}
   template <class A>
-  void operator()(A const* a)
-  {
-    if (a->head()==s)
-      ++n;
+  void operator()(A const* a) {
+    if (a->head() == s) ++n;
   }
 };
 
-struct nOut
-{
+struct nOut {
+  // TODO: test
   StateId s;
   ArcId n;
   nOut(StateId s) : s(s), n() {}
   template <class A>
-  void operator()(A const* a)
-  {
-    if (a->fsmSrc()==s)
-      ++n;
+  void operator()(A const* a) {
+    if (!a->tails_.empty() && a->tails_[0] == s) ++n;
   }
 };
-
 }
 
 template <class A>
-ArcId countInArcs(IHypergraph<A> const& h, StateId s)
-{
-  if (h.storesInArcs())
-    return h.numInArcs(s);
+ArcId countInArcs(IHypergraph<A> const& h, StateId s) {
+  if (h.storesInArcs()) return h.numInArcs(s);
+  // TODO: test
   detail::nIn v(s);
   h.forArcs(Util::visitorReference(v));
   return v.n;
 }
 
 template <class A>
-ArcId countOutArcs(IHypergraph<A> const& h, StateId s)
-{
-  if (h.storesOutArcs())
-    return h.numOutArcs(s);
+ArcId countOutArcs(IHypergraph<A> const& h, StateId s) {
+  if (h.storesOutArcs()) return h.numOutArcs(s);
+  // TODO: test
   detail::nOut v(s);
   h.forArcs(Util::visitorReference(v));
   return v.n;

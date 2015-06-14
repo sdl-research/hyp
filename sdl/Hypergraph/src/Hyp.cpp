@@ -27,6 +27,7 @@
 #include <sdl/Hypergraph/src/HypInside.cpp>
 #include <sdl/Hypergraph/src/HypEmpty.cpp>
 #include <sdl/Hypergraph/src/HypPruneToBest.cpp>
+#include <sdl/Hypergraph/src/HypPushWeights.cpp>
 #if !SDL_MINIMAL_HYP_MAIN
 #include <sdl/Hypergraph/src/HypReweightBest.cpp>
 #include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
@@ -68,7 +69,9 @@ sdl::Util::DefaultLocaleFastCout initCout;
   x(HypBest) \
   x(HypCompose) \
   x(HypInside) \
-  x(HypEmpty)
+  x(HypEmpty) \
+  x(HypPruneToBest) \
+  x(HypPushWeights)
 
 #if SDL_MINIMAL_HYP_MAIN
 #define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x)
@@ -87,7 +90,6 @@ sdl::Util::DefaultLocaleFastCout initCout;
   x(HypConcat) \
   x(HypReverse) \
   x(HypReweight) \
-  x(HypPruneToBest) \
   x(HypToMosesLattice) \
   x(HypConvertStrings) \
   x(HypDraw) \

@@ -56,6 +56,7 @@ void printDistances(IHypergraph<Arc> const& hg, bool allPairs, bool dag, StateId
                     StateId partBoundary) {
   typedef typename Arc::Weight Weight;
   if (allPairs) {
+    // TODO: test
     assert(partBoundary != kNoState);
     StateId n = hg.size();
     assert(partBoundary <= n);
@@ -116,9 +117,9 @@ void process(std::string const& file, unsigned ngramMax = 0, bool allPairs = fal
 
   typedef typename Arc::Weight Weight;
   if (ngramMax) {
+    // TODO: test
     typedef NgramWeightMapper<Arc> Mapper;
     typedef typename Mapper::TargetArc TargetArc;
-    ;
     MapHypergraph<Arc, TargetArc, Mapper> ngramhg(hg, Mapper(hg, ngramMax));
     printDistances(ngramhg, allPairs, dag, sort.stateRemap, sort.partBoundary);
   } else
@@ -178,6 +179,7 @@ struct HypInside {
       if (arcType == "log") {
         typedef ArcTpl<LogWeightTpl<float> > Arc;
         process<Arc>(file, ngramMax, allPairs, dag);
+        // TODO: test all but log
       } else if (arcType == "viterbi") {
         typedef ArcTpl<Viterbi> Arc;
         process<Arc>(file, ngramMax, allPairs, dag);

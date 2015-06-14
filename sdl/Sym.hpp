@@ -46,7 +46,7 @@ typedef SymInt SymIdInt;
 struct Sym;
 typedef Sym SymId;
 
-//TODO@JG: replace 'std::string[Ref] with just 'std::string [const&]' - will never change
+// TODO@JG: replace 'std::string[Ref] with just 'std::string [const&]' - will never change
 
 /* SymbolType specifies how the 32 bit Sym space is divided:
   bits 29-32 ([0...6] << 29):   SymbolType:
@@ -66,9 +66,9 @@ kSmallSizeMask
 
 enum {
   kMaxSmallSymIndex = (1u << 29) - 1,
-  kMaxLargeSymIndex = (1u << 30) - 2, // kNoSymbol takes up an index in the large space
+  kMaxLargeSymIndex = (1u << 30) - 2,  // kNoSymbol takes up an index in the large space
   kNoSymbol = 0xFFFFFFFFu
-}; // setting this to UINT_MAX might give an 8-byte enum for some compilers
+};  // setting this to UINT_MAX might give an 8-byte enum for some compilers
 
 // implementation note: be careful to cast these to (Sym) since enums may be 8 byte signed
 enum SymbolType {
@@ -88,15 +88,15 @@ enum SymbolType {
   kEndNonterminal = 5u << 29,
 
   kBeginTerminal = 5u << 29,
-  //TODO: make kTerminal start here (only hangup: vocab/grammar db backward
-  //compat). for now kPersistentTerminal and kPersistentNonterminal ranges are
-  //unusable in practice
+  // TODO: make kTerminal start here (only hangup: vocab/grammar db backward
+  // compat). for now kPersistentTerminal and kPersistentNonterminal ranges are
+  // unusable in practice
 
   // meaning persistent or not - not including special. might want to make all
   // the terminal types contiguous (then kNoSymbol wouldn't be end)
   kPersistentTerminal = 5u << 29,
   kTerminal = 6u << 29,
-  kLargeIdsStart = 6u << 29, // and 7 also - part of large range
+  kLargeIdsStart = 6u << 29,  // and 7 also - part of large range
 
   kEndTerminal = (SymInt)kNoSymbol,
   // of course you have to cast all these to SymInt anyway in case compiler
@@ -109,19 +109,13 @@ enum SymbolType {
   kBeginMaybePersistent = kBeginNonterminal,
   // above this, difference in kPersistentBit distinguishes persistent/not
   kPersistentBit = 1u << 29,
-  //TODO@SK: CM-275 changing persistent/nonpersistent changes whether that bit is 0 or 1
+  // TODO@SK: CM-275 changing persistent/nonpersistent changes whether that bit is 0 or 1
 
   kNoSymbolType = kNoSymbol,
-  /**
-     these aren't storage types and may not be used to initialize; they're for members detecting only *NON*-persistent type
-     (non)terminal (is(non)terminal is normally satisfied by either peristent or not).
-  */
-  kRegularNonterminal = 1, // this doesn't collide with any type
-  kLexicalTerminal = 2, // nor does this
-  kAllSymbols = 3, // nor this
+  kAllSymbols = kNoSymbol - 1,
 };
 
-inline std::ostream & operator<<(std::ostream &o, SymbolType t) {
+inline std::ostream& operator<<(std::ostream& o, SymbolType t) {
   return o << "SymbolType=" << ((unsigned)t >> 29);
 }
 
@@ -134,16 +128,16 @@ inline std::ostream & operator<<(std::ostream &o, SymbolType t) {
 struct Sym {
 
   enum {
-    kSmallTypeMask = (SymInt)(7u << 29), // 6 types that use 29 bits for offset and 3 for type id
-    kSmallSizeMask = (SymInt)0x1FFFFFFFu, // msbits 0001
-    kLargeTypeMask = (SymInt)(6u << 29), // the large space uses 30 bits for offset and 2 for type id
-    kLargeSizeMask = (SymInt)0x3FFFFFFFu, // msbits 0011
+    kSmallTypeMask = (SymInt)(7u << 29),  // 6 types that use 29 bits for offset and 3 for type id
+    kSmallSizeMask = (SymInt)0x1FFFFFFFu,  // msbits 0001
+    kLargeTypeMask = (SymInt)(6u << 29),  // the large space uses 30 bits for offset and 2 for type id
+    kLargeSizeMask = (SymInt)0x3FFFFFFFu,  // msbits 0011
     // k*TypeMask | k*SizeMask == -1
     // k*TypeMask & k*SizeMask == 0
   };
 
   static inline char const* getTypeName(SymbolType type) {
-    switch(type) {
+    switch (type) {
       case kSpecialTerminal:
         return "Special Terminal";
       case kVariable:
@@ -165,7 +159,7 @@ struct Sym {
   }
 
   static inline char const* getTypeNameShort(SymbolType type) {
-    switch(type) {
+    switch (type) {
       case kSpecialTerminal:
         return "Special:";
       case kVariable:
@@ -186,12 +180,8 @@ struct Sym {
     }
   }
 
-  char const* getTypeName() const {
-    return getTypeNameShort(type());
-  }
-  char const* getTypeNameShort() const {
-    return getTypeNameShort(type());
-  }
+  char const* getTypeName() const { return getTypeNameShort(type()); }
+  char const* getTypeNameShort() const { return getTypeNameShort(type()); }
 
   /*
       "constructor" (static factory method).
@@ -239,9 +229,7 @@ struct Sym {
     return id;
   }
 
-  static inline bool isSpecialType(SymbolType type) {
-    return type == (SymInt)kSpecialTerminal;
-  }
+  static inline bool isSpecialType(SymbolType type) { return type == (SymInt)kSpecialTerminal; }
 
   static inline bool isTerminalType(SymbolType type) {
     assert(type != (SymInt)kPersistentTerminal);
@@ -264,9 +252,7 @@ struct Sym {
     return type == (SymInt)kTerminal || type == (SymInt)kNonterminal;
   }
 
-  static inline bool isVariableType(SymbolType type) {
-    return type == (SymInt)kVariable;
-  }
+  static inline bool isVariableType(SymbolType type) { return type == (SymInt)kVariable; }
 
   static inline SymInt maxIndexForType(SymbolType typeId) {
     return (SymInt)(typeId == kLargeIdsStart ? kLargeSizeMask : kSmallSizeMask);
@@ -276,7 +262,7 @@ struct Sym {
 #ifdef __clang__
 #include <graehl/shared/warning_push.h>
 #pragma clang diagnostic ignored "-Wtautological-compare"
-  // because one of the boundaries will be 0 and unsigned can't be < 0
+// because one of the boundaries will be 0 and unsigned can't be < 0
 #endif
 
   /** \return is terminal, including special, persistent or not
@@ -284,7 +270,7 @@ struct Sym {
   bool isTerminal() const {
     assert(!isPersistent());
     return id_ >= (SymInt)kBeginTerminal && id_ < (SymInt)kEndTerminal
-        || id_ >= (SymInt)kSpecialTerminal && id_ < (SymInt)kEndSpecialTerminal;
+           || id_ >= (SymInt)kSpecialTerminal && id_ < (SymInt)kEndSpecialTerminal;
   }
 
   bool isSpecialTerminal() const {
@@ -317,17 +303,12 @@ struct Sym {
       The function will return true for all non-terminal symbol Id's, including
       non-persistent non-terminal, persistent non-terminal and special non-terminal symbols.
    */
-  bool isVariable() const {
-    return id_ >= (SymInt)kVariable && id_ < (SymInt)kEndVariable;
-  }
+  bool isVariable() const { return id_ >= (SymInt)kVariable && id_ < (SymInt)kEndVariable; }
 
-  bool isPersistent() const {
-    return isPersistentType(type());
-  }
+  bool isPersistent() const { return isPersistentType(type()); }
 
   void removePersistentBit() {
-    if (isPersistent())
-      id_ += (1u << 29);
+    if (isPersistent()) id_ += (1u << 29);
   }
 
   void setTerminal() {
@@ -336,9 +317,7 @@ struct Sym {
     id_ |= kTerminal;
   }
 
-  bool isSpecial() const {
-    return id_ >= (SymInt)kBeginSpecial && id_ < (SymInt)kEndSpecial;
-  }
+  bool isSpecial() const { return id_ >= (SymInt)kBeginSpecial && id_ < (SymInt)kEndSpecial; }
 
   SymInt maxIndex() const {
     return (SymInt)(id_ >= (SymInt)kLargeIdsStart ? kLargeSizeMask : kSmallSizeMask);
@@ -355,88 +334,53 @@ struct Sym {
       Sym::createSym(4, kVariable).index() will return 4.
       Sym::getVariableId(4).index() will return 4.
    */
-  SymInt index() const {
-    return id_ & maxIndex();
-  }
+  SymInt index() const { return id_ & maxIndex(); }
 
 
   /*
       set to NoSymbol
    */
-  void reset() {
-    id_ = (SymInt)kNoSymbol;
-  }
+  void reset() { id_ = (SymInt)kNoSymbol; }
 
 
   /** \return Checks if the Sym is not set to NoSymbol
 
       - simpler: just if(sym) or (bool)sym
   */
-  bool isValid() const {
-    return id_ != (SymInt)kNoSymbol;
-  }
+  bool isValid() const { return id_ != (SymInt)kNoSymbol; }
 
-  bool operator !() const {
-    return id_ == (SymInt)kNoSymbol;
-  }
+  bool operator!() const { return id_ == (SymInt)kNoSymbol; }
 
-  bool operator ==(Sym rhs) const {
-    return id_ == rhs.id_;
-  }
+  bool operator==(Sym rhs) const { return id_ == rhs.id_; }
 
-  bool operator ==(SymInt rhs) const {
-    return id_ == rhs;
-  }
+  bool operator==(SymInt rhs) const { return id_ == rhs; }
 
-  bool operator !=(Sym rhs) const {
-    return id_ != rhs.id_;
-  }
+  bool operator!=(Sym rhs) const { return id_ != rhs.id_; }
 
-  bool operator !=(SymInt rhs) const {
-    return id_ != rhs;
-  }
+  bool operator!=(SymInt rhs) const { return id_ != rhs; }
 
-  bool operator <(Sym rhs) const {
-    return id_ < rhs.id_;
-  }
+  bool operator<(Sym rhs) const { return id_ < rhs.id_; }
 
-  bool operator <(SymInt rhs) const {
-    return id_ < rhs;
-  }
+  bool operator<(SymInt rhs) const { return id_ < rhs; }
 
-  bool operator >(Sym rhs) const {
-    return id_ > rhs.id_;
-  }
+  bool operator>(Sym rhs) const { return id_ > rhs.id_; }
 
-  bool operator >(SymInt rhs) const {
-    return id_ > rhs;
-  }
+  bool operator>(SymInt rhs) const { return id_ > rhs; }
 
-  bool operator <=(Sym rhs) const {
-    return id_ <= rhs.id_;
-  }
+  bool operator<=(Sym rhs) const { return id_ <= rhs.id_; }
 
-  bool operator <=(SymInt rhs) const {
-    return id_ <= rhs;
-  }
+  bool operator<=(SymInt rhs) const { return id_ <= rhs; }
 
-  bool operator >=(Sym rhs) const {
-    return id_ >= rhs.id_;
-  }
+  bool operator>=(Sym rhs) const { return id_ >= rhs.id_; }
 
-  bool operator >=(SymInt rhs) const {
-    return id_ >= rhs;
-  }
+  bool operator>=(SymInt rhs) const { return id_ >= rhs; }
 
-  bool incrementable() const {
-    return ((id_ + 1) & kSmallSizeMask) || id_ == (SymInt)kLargeIncrementable;
-  }
+  bool incrementable() const { return ((id_ + 1) & kSmallSizeMask) || id_ == (SymInt)kLargeIncrementable; }
 
   /**
      preincrement - ++i
   */
-  Sym& operator++ ()
-  {
+  Sym& operator++() {
     assert(incrementable());
     ++id_;
     return *this;
@@ -445,8 +389,7 @@ struct Sym {
   /**
      postincrement - i++
   */
-  Sym operator++ (int)
-  {
+  Sym operator++(int) {
     assert(incrementable());
     Sym old(*this);
     ++id_;
@@ -456,17 +399,14 @@ struct Sym {
   typedef boost::range_detail::safe_bool<SymInt Sym::*> safe_bool_t;
   typedef safe_bool_t::unspecified_bool_type unspecified_bool_type;
 
-  operator unspecified_bool_type() const
-  {
-    return safe_bool_t::to_unspecified_bool(~id_, &Sym::id_);
-  }
+  operator unspecified_bool_type() const { return safe_bool_t::to_unspecified_bool(~id_, &Sym::id_); }
 
   /*
       used by KeyGeneratorUtil.hpp and in serializing {Phrase, Syntax}Rule
    */
   template <class Archive>
   void serialize(Archive& ar, const SymInt version) {
-    ar & id_;
+    ar& id_;
     assert(!isPersistent());
   }
 
@@ -477,9 +417,7 @@ struct Sym {
       return (SymbolType)(id_ & (SymInt)kSmallTypeMask);
   }
 
-  SymInt id() const {
-    return id_;
-  }
+  SymInt id() const { return id_; }
 
   SymInt id_;
   void operator+=(SymInt deltaIndex) {
@@ -507,7 +445,7 @@ enum { kNumPossibleTerminal = (SymInt)(kMaxTerminalIndex + 1) };
 
 /// we should be safe to use this during static init (because you'll have an
 /// initialized version in every compliation unit)
-static const Sym NoSymbol = { (SymInt)kNoSymbol };
+static const Sym NoSymbol = {(SymInt)kNoSymbol};
 
 inline Sym terminal(SymInt index) {
   Sym sym;
@@ -553,12 +491,12 @@ Sym operator-(Sym lhs, Rhs rhs) {
 
 */
 
-//TODO: 1 (regr may change slightly)
+// TODO: 1 (regr may change slightly)
 #define SDL_SYMID_FAST_HASH 0
 inline std::size_t hash_value(Sym const symId) {
 #if SDL_SYMID_FAST_HASH
   return (symId.id_ + (symId.id_ >> 27) + (symId.id_ << 4));
-  // fast and probably good enough - >> 26 is to mix the type bits into lower (29 would be more aggressive)
+// fast and probably good enough - >> 26 is to mix the type bits into lower (29 would be more aggressive)
 #else
   // slower but perhaps higher quality //TODO@JG: check regression difference; if none, use fast permanently
   boost::hash<SymInt> hasher;
@@ -575,22 +513,17 @@ inline std::istream& operator>>(std::istream& is, Sym& symId) {
   is >> symId.id_;
   return is;
 }
-
-
 }
 
 namespace std {
-template <> struct hash<sdl::Sym>
-{
-  size_t operator()(sdl::Sym x) const
-  {
-    return hash_value(x);
-  }
+template <>
+struct hash<sdl::Sym> {
+  size_t operator()(sdl::Sym x) const { return hash_value(x); }
 };
 }
 
 BOOST_CLASS_IMPLEMENTATION(sdl::Sym, object_serializable)
-//BOOST_CLASS_IMPLEMENTATION(sdl::Sym, primitive_type)
+// BOOST_CLASS_IMPLEMENTATION(sdl::Sym, primitive_type)
 BOOST_IS_BITWISE_SERIALIZABLE(sdl::Sym)
 
 #endif

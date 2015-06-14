@@ -43,11 +43,12 @@ template <class CharIter>
 inline CharIter chompEnd(CharIter begin, CharIter i) {
   if (i == begin)
     return i;
-  else if (*--i == '\n') {
+  if (*--i == '\n') {
+    //TODO: test
     if (i != begin && i[-1] == '\r') --i;
     return i;
-  } else
-    return ++i;
+  }
+  return ++i;
 }
 
 template <class String>

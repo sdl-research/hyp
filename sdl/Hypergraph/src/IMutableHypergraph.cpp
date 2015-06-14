@@ -26,6 +26,7 @@ void IMutableHypergraphBase::translateToVocabulary(IVocabularyPtr const& pNewVoc
       Sym const in = hgGetInputLabel(s);
       if (in) setInputLabel(s, newVocab.add(in, oldVocab));
     } else {
+      //TODO: test
       LabelPair inOut = hgGetLabelPair(s);
       assert(inOut.first);
       assert(inOut.second);

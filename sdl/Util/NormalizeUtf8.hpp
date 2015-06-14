@@ -42,6 +42,7 @@ struct NormalizeUtf8 : NfcOptions, FixUnicode {
   void normalize(std::string &str) const {
     FixedUtf8 fixed(str, *this);
     if (fixed.modified()) {
+      //TODO: test
       if (nfc) {
         // this branch could be handle every case, but we save some copies when
         // possible by avoiding it

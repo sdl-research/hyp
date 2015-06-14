@@ -158,6 +158,7 @@ struct IWordToPhrase : Evictable {
 
   /// for Hypergraph/TransformLabels
   bool operator()(std::string& utf8) const {
+    //TODO: test
     assert(!mayInsertOrDelete());
     Util::AcceptSingleCheck single(utf8);
     single.require();

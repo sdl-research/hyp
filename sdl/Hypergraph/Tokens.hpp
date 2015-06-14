@@ -118,18 +118,21 @@ struct GetTokenSpan {
 
   bool haveSpan() const { return !nullTokenSpan(span); }
 
+  //TODO: test
   template <class Arc>
   void operator()(Arc* arc) const {
     setNullTokenSpan(span);
     Hypergraph::visitFeatureRange(arc->weight(), *this, ids);
   }
 
+  //TODO: test
   template <class Arc>
   TokenSpan const& spanFor(Arc* arc) const {
     operator()(arc);
     return span;
   }
 
+  //TODO: test
   TokenSpan const& spanForFeature(FeatureId id) const {
     FeatureId const index = id - ids.begin;
     if (index >= spans->size())
@@ -139,6 +142,7 @@ struct GetTokenSpan {
     return (*spans)[index];
   }
 
+  //TODO: test
   void operator()(std::pair<FeatureId const, FeatureValue> const& idVal) const {
     FeatureId const id = idVal.first;
     if (haveSpan())

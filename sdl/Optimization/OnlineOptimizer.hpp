@@ -72,6 +72,7 @@ class ParameterUpdate : public IUpdate<FloatT> {
 
 template <class FloatT>
 struct AdagradParameterUpdate : public ParameterUpdate<FloatT> {
+  // TODO: test
   AdagradParameterUpdate(FloatT* params, FeatureId numParams, FloatT eta)
       : ParameterUpdate<FloatT>(params, numParams), eta_(eta), prevGrads_(numParams, (FloatT)0) {
     SDL_INFO(OnlineOptimizer, "Adagrad eta: " << eta_);
@@ -98,6 +99,7 @@ struct AdagradParameterUpdate : public ParameterUpdate<FloatT> {
  */
 template <class FloatT>
 struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
+  // TODO: test
   AdagradL1ParameterUpdate(FloatT* params, FeatureId numParams, FloatT eta, FloatT l1Strength)
       : ParameterUpdate<FloatT>(params, numParams)
       , eta_(eta)
@@ -183,6 +185,7 @@ class OnlineOptimizer {
 
     boost::scoped_ptr<ParameterUpdate<FloatT> > update;
     if (useAdagrad) {
+      // TODO: test
       if (useAdagradL1)
         update.reset(new AdagradL1ParameterUpdate<FloatT>(params, numParams,
                                                           opts_.learningRateOptions.adagradRate,

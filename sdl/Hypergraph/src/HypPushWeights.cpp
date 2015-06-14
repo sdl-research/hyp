@@ -10,21 +10,21 @@
 // limitations under the License.
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
-#include <sdl/Hypergraph/Determinize.hpp>
+#include <sdl/Hypergraph/PushWeights.hpp>
 
 namespace sdl {
 namespace Hypergraph {
 
-struct HypDeterminize : TransformMain<HypDeterminize> {
-  HypDeterminize()
-      : TransformMain<HypDeterminize>(DeterminizeOptions::name(), DeterminizeOptions::caption()) {}
-  DeterminizeOptions x;
+struct HypPushWeights : TransformMain<HypPushWeights> {  // CRTP
+  typedef TransformMain<HypPushWeights> Base;
+  HypPushWeights() : Base("PushWeights", PushWeights::caption()) {}
   void declare_configurable() { this->configurable(&x); }
 
+  PushWeights x;
+  enum { has_inplace_transform1 = true };
   template <class Arc>
-  bool transform1(IHypergraph<Arc> const& i, IMutableHypergraph<Arc>* o) {
-    Determinize t(x);
-    t.inout(i, o);
+  bool transform1InPlace(IMutableHypergraph<Arc>& h) {
+    x.inplace(h);
     return true;
   }
 };
@@ -32,4 +32,4 @@ struct HypDeterminize : TransformMain<HypDeterminize> {
 
 }}
 
-HYPERGRAPH_NAMED_MAIN(Determinize)
+HYPERGRAPH_NAMED_MAIN(PushWeights)

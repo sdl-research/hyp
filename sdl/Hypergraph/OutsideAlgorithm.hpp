@@ -48,16 +48,11 @@ namespace Hypergraph {
    ones (i.e. enable includingLeaves)
 */
 template <class Arc>
-void outsideFromInside(StateId stateId
-                       , IHypergraph<Arc> const& hg
-                       , boost::ptr_vector<typename Arc::Weight> const& insideScores
-                       , boost::ptr_vector<typename Arc::Weight> const& outsideScores
-                       , typename Arc::Weight &sum
-                       , StateId final
-                       , bool haveInsideForAxiom = true)
-{
-  SDL_TRACE(Hypergraph.OutsideAlgorithm,
-            "Computing outside score for " << stateId << ", sum=" << sum);
+void outsideFromInside(StateId stateId, IHypergraph<Arc> const& hg,
+                       boost::ptr_vector<typename Arc::Weight> const& insideScores,
+                       boost::ptr_vector<typename Arc::Weight> const& outsideScores,
+                       typename Arc::Weight& sum, StateId final, bool haveInsideForAxiom = true) {
+  SDL_TRACE(Hypergraph.OutsideAlgorithm, "Computing outside score for " << stateId << ", sum=" << sum);
   typedef typename Arc::Weight Weight;
   if (stateId == final)
     sum = Weight::one();
@@ -72,7 +67,7 @@ void outsideFromInside(StateId stateId
       // right-outside)
       StateIdContainer const& tails = arc.tails();
       unsigned nself = 0;
-      for(StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
+      for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
         StateId const tail = *i;
         if (tail == stateId && !nself)
           ++nself;
@@ -81,9 +76,8 @@ void outsideFromInside(StateId stateId
           timesBy(insideScores[tail], prod);
         }
       }
-      SDL_TRACE(Hypergraph.OutsideAlgorithm, " prod=" << prod << " (add #self="<<nself<<" times)");
-      while (nself--)
-        plusBy(prod, sum);
+      SDL_TRACE(Hypergraph.OutsideAlgorithm, " prod=" << prod << " (add #self=" << nself << " times)");
+      while (nself--) plusBy(prod, sum);
     }
   }
   SDL_TRACE(Hypergraph.OutsideAlgorithm, " sum now " << sum);
@@ -93,32 +87,29 @@ void outsideFromInside(StateId stateId
    A states visitor that computes the distance to each particular state
    that it's called with
 */
-template<class Arc>
+template <class Arc>
 struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
 
   typedef typename Arc::Weight Weight;
 
-  ComputeOutsideScoreStatesVisitor(IHypergraph<Arc> const& hg,
-                                   boost::ptr_vector<Weight> const& insideScores,
-                                   boost::ptr_vector<Weight>* outsideScores,
-                                  bool haveInsideForAxiom)
+  ComputeOutsideScoreStatesVisitor(IHypergraph<Arc> const& hg, boost::ptr_vector<Weight> const& insideScores,
+                                   boost::ptr_vector<Weight>* outsideScores, bool haveInsideForAxiom)
       : hg_(hg)
       , final(hg.final())
       , insideScores_(insideScores)
       , outsideScores_(outsideScores)
       , kZero(Weight::zero())
-      , haveInsideForAxiom_(haveInsideForAxiom)
-  {}
+      , haveInsideForAxiom_(haveInsideForAxiom) {}
 
   /**
      Computes the outside score of a particular state.
   */
   void visit(StateId stateId) {
     assert(outsideScores_);
-    Weight &outside = Util::atExpandPtr(*outsideScores_, stateId, kZero);
+    Weight& outside = Util::atExpandPtr(*outsideScores_, stateId, kZero);
     outsideFromInside(stateId, hg_, insideScores_, *outsideScores_, outside, final, haveInsideForAxiom_);
-    SDL_TRACE(Hypergraph.InsideAlgorithm,
-              "Stored outside distance: " << (*outsideScores_)[stateId] << " to state " << stateId);
+    SDL_TRACE(Hypergraph.InsideAlgorithm, "Stored outside distance: " << (*outsideScores_)[stateId]
+                                                                      << " to state " << stateId);
   }
 
   Weight const kZero;
@@ -137,15 +128,14 @@ struct ComputeOutsideScoreStatesVisitor : public IStatesVisitor {
    \param insideScores A vector of inside scores (unused if HG is an
    FSM)
 */
-template<class Arc>
-void outsideAlgorithm(IHypergraph<Arc> const& hg,
-                      boost::ptr_vector<typename Arc::Weight> const& insideScores,
+template <class Arc>
+void outsideAlgorithm(IHypergraph<Arc> const& hg, boost::ptr_vector<typename Arc::Weight> const& insideScores,
                       boost::ptr_vector<typename Arc::Weight>* outsideScores, bool haveInsideForAxiom = true) {
 
   // Traverse states in reverse topsorted order (i.e., starting from
   // FINAL root), and compute outsideScore for each state:
-  ComputeOutsideScoreStatesVisitor<Arc> outsideScoreComputer(
-      hg, insideScores, outsideScores, haveInsideForAxiom);
+  ComputeOutsideScoreStatesVisitor<Arc> outsideScoreComputer(hg, insideScores, outsideScores,
+                                                             haveInsideForAxiom);
   ReverseTopsortStatesTraversal<Arc>(hg, &outsideScoreComputer);
 }
 

@@ -33,6 +33,7 @@ namespace Util {
 
 unsigned const kICharsBufSize = 240;
 void alignedNormalize(IChars& in, IcuNormalizer2Ptr normalizer, ITakeAlignedChars& out) {
+  // TODO: test
   icu::UnicodeString u(kICharsBufSize, 0, 0);
   Unicode c;
   while (!IChars::done((c = in.next()))) u += (UChar32)c;
@@ -41,6 +42,7 @@ void alignedNormalize(IChars& in, IcuNormalizer2Ptr normalizer, ITakeAlignedChar
 
 void alignedNormalizeUnicodeString(icu::UnicodeString const& u, IcuNormalizer2Ptr normalizer,
                                    ITakeAlignedChars& out) {
+  // TODO: test
   Position start = 0;
   int32 len = u.length(), pos;
   UErrorCode err = U_ZERO_ERROR;
@@ -58,12 +60,13 @@ void alignedNormalizeUnicodeString(icu::UnicodeString const& u, IcuNormalizer2Pt
     ++span.first;
   }
   icu::UnicodeString remainder(u.tempSubString(nfcPrefixLen)), normalized;
-  CharsFromUnicodeStringImpl chars(remainder); //TODO: docs say normalizeSecondAndAppend
+  CharsFromUnicodeStringImpl chars(remainder);  // TODO: docs say normalizeSecondAndAppend
   IcuNormalizeByChunks<CharsFromUnicodeStringImpl> norm(chars, normalizer);
   norm.takeAllWithSpan(out);
 }
 
 void alignedNormalizeStringPiece(icu::StringPiece utf8, IcuNormalizer2Ptr normalizer, ITakeAlignedChars& out) {
+  // TODO: test
   Position start = 0;
   icu::UnicodeString u;
   if (toIcuReplacing(u, utf8)) SDL_THROW_LOG(AlignedChars, InvalidInputException, "invalid unicode");

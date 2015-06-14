@@ -18,7 +18,7 @@ namespace Hypergraph {
 
 template <class A>
 typename IHypergraph<A>::Weight IHypergraph<A>::final(StateId s) const {
-  // typedef typename A::Weight Weight;
+  // TODO: test
   StateId f = this->final();
   if (s == f) return Weight::one();
   if (isFsm()) {
@@ -79,6 +79,7 @@ struct CheckFsm {
 // note: an fsm missing either start or final state has no derivations (but is still an fsm)
 template <class A>
 bool IHypergraph<A>::isFsmCheck() const {
+  //TODO: test
   return visitArcsAtLeastOnce(*this, CheckFsm());
 }
 

@@ -171,6 +171,7 @@ class LbfgsOptimizer {
     lbfgsfloatval_t fx;
 
     if (lbfgsOptions_.orthantwise_c) {
+      //TODO: test
       lbfgsOptions_.orthantwise_start = 0;
       lbfgsOptions_.orthantwise_end = numParams - 1;
       lbfgsOptions_.linesearch = kBacktracking;  // required for L1

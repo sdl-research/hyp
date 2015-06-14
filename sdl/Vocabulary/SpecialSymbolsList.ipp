@@ -50,20 +50,18 @@
 #define SDL_SPECIAL_SYMBOL_TEXT "rho"
 #include SDL_SPECIAL_SYMBOL_INC
 
-// TODO: these can return to <s> and </s> for greater
-// inter-operability with third party software once
-// vocabulary bugs that prevent those tokens in data
-// from being treated normally are resolved
-// see http://jira:8080/jira/browse/CM-230
+
 #define SDL_SEGMENT_NONSTANDARD_START_END 1
-//TODO: remove this #define once CM-230 is properly resolved:
-// One way to fix CM-230 is to remove SEG_START and SEG_END entirely, since we
-//don't need them to query the LM. this would imply that you'd need separate
-//boolean options for whether to start at <s> vs empty context, and whether to
-//score </s> (see LmRescore where I did this already). the reason i want this
-//resolved is that we pay a performance price for every Sym or string -> LmId
-//lookup, which would go away if we either switched these back to <s> </s>, or
-//if we don't use those symbols at all
+/*
+  http://jira:8080/jira/browse/CM-230 may require these stay as <xmt-segment>
+  instead of the <s> we would like for greater LM API efficiency.
+
+   to summarize CM-230: when these were <s> </s> that was causing FeatureBot
+   problems on chinese training text / rules. therefore we need to be sure we
+   have such an input -> full training scenario as a regr test, then we can go
+   back to <s> </s> safely.
+ */
+
 #define SDL_SPECIAL_SYMBOL_NAME SEG_START
 #define SDL_SPECIAL_SYMBOL_TEXT "xmt-segment"
 #include SDL_SPECIAL_SYMBOL_INC

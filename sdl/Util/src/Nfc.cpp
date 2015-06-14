@@ -16,16 +16,20 @@ namespace sdl {
 namespace Util {
 
 void normalizeToNfc(std::string const& utf8, std::string& out, bool warnIfNotNfc, bool K) {
+  // TODO: test
   assert(out.empty());
   if (!maybeNormalizeToNfc(utf8, out, warnIfNotNfc, K)) out = utf8;
 }
 
 void normalizeToNfc(Slice utf8, std::string& out, bool warnIfNotNfc, bool K) {
+  // TODO: test
   assert(out.empty());
+  // TODO: test
   if (!maybeNormalizeToNfc(utf8, out, warnIfNotNfc, K)) assignSlice(out, utf8);
 }
 
 std::string normalizedToNfc(std::string const& s, bool K) {
+  // TODO: test
   return fromIcu(normalizedToNfc(toIcu(s), K));
 }
 
@@ -87,6 +91,7 @@ bool maybeNormalizeToNfc(Slice utf8, std::string& buf, bool warnIfNotNfc, bool w
     return false;  // already all valid utf8 (!replaced) and NFC.
   else {
     if (warnIfNotNfc) {
+      // TODO: test
       if (replaced)
         SDL_WARN(Icu.Nfc, "'" << utf8 << "' (utf8 with " << replaced
                               << " invalid codepoints) is not normal-form-composed (NFC)");
@@ -99,6 +104,7 @@ bool maybeNormalizeToNfc(Slice utf8, std::string& buf, bool warnIfNotNfc, bool w
       }
     }
     if (replaced == kIcuErrorInReplacing) {
+      // TODO: test
       SDL_WARN(Nfc,
                "Unexpected: Icu lib reported error in replacing bad utf8 characters. Retrying after cleaning "
                "utf8.");

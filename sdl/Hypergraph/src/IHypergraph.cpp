@@ -30,12 +30,6 @@ bool IHypergraphStates::hasSortedArcs() const {
   return p & kSortedOutArcs;
 }
 
-bool IHypergraphStates::hasBestFirstArcs() const {
-  Properties p = this->properties();
-  assert(storesOutArcs());
-  return p&kOutArcsSortedBestFirst;
-}
-
 bool IHypergraphStates::isMutable() const {
   return false;
 }
@@ -55,24 +49,15 @@ bool IHypergraphStates::prunedEmpty() const {
   return false;
 }
 
-LabelPair IHypergraphStates::labelPair(StateId s) const { // may be faster if overriden
+LabelPair IHypergraphStates::labelPair(StateId s) const {  // may be faster if overriden
   return LabelPair(inputLabel(s), outputLabel(s));
 }
 
 
-//TODO: allow setting of per-state axiom weights, or just enforce 0-tails arcs for axioms.
+// TODO: allow setting of per-state axiom weights, or just enforce 0-tails arcs for axioms.
 
 bool IHypergraphStates::isAxiom(StateId s) const {
-  return s==start() || hasTerminalLabel(s);
-}
-
-
-bool IHypergraphStates::hasStart() const {
-  return start() != Hypergraph::kNoState;
-}
-
-bool IHypergraphStates::hasFinal() const {
-  return final() != Hypergraph::kNoState;
+  return s == start() || hasTerminalLabel(s);
 }
 
 bool IHypergraphStates::storesArcs() const {
@@ -96,7 +81,8 @@ bool IHypergraphStates::storesFirstTailOutArcs() const {
 }
 
 bool IHypergraphStates::hasLabel(StateId id) const {
-  return inputLabel(id)!=NoSymbol;
+  return inputLabel(id) != NoSymbol;
 }
+
 
 }}

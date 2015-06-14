@@ -46,17 +46,19 @@ std::string findExistingFile(std::string const& filename, Dirs const& searchDirs
   }
 
   if (searchDirs.empty()) {
+    // TODO: test
     Dirs searchCwd(1, bfs::current_path().string());
     UTIL_DBG_MSG(1, "empty search dirs, using cwd: " << searchCwd[0]);
     if (doLogging) {
       SDL_INFO(FindFile, "No base directory specified - looking for "
-                         << filename << " relative to cwd: " << searchCwd[0]);
+                             << filename << " relative to cwd: " << searchCwd[0]);
     }
     return findExistingFile(filename, searchCwd, doLogging);
   }
 
   // Try each search dir.
   forall (std::string const& dirName, searchDirs) {
+    // TODO: test
     bfs::path tryPath(dirName);
     UTIL_DBG_MSG(1, "try in dir: " << tryPath << " for file: " << filePath);
     tryPath /= filePath;
@@ -71,11 +73,12 @@ std::string findExistingFile(std::string const& filename, Dirs const& searchDirs
 
   SDL_THROW_LOG(FindFile, ConfigException,
                 "Could not find file '"
-                << filename << "' " << Util::print(searchDirs, RangeSep(":", "(search directories: ", ")")));
+                    << filename << "' "
+                    << Util::print(searchDirs, RangeSep(":", "(search directories: ", ")")));
 }
 
 void splitFilePath(std::string const& resolvedPath, std::string* pStrDir, std::string* pStrFileName) {
-
+  // TODO: test
   bfs::path filePath(resolvedPath);
   if (pStrDir) *pStrDir = filePath.parent_path().string();
   if (pStrFileName) *pStrFileName = filePath.filename().string();
@@ -95,6 +98,7 @@ std::string basename(std::string const& pathName) {
 }
 
 void mkdirs(std::string const& path) {
+  // TODO: test
   boost::filesystem::create_directories(path);
 }
 
@@ -106,11 +110,13 @@ std::string mkdirParentPath(std::string const& pathName) {
 }
 
 std::string absParent(std::string const& pathName) {
+  // TODO: test
   bfs::path path(pathName);
   return system_complete(path).parent_path().string();
 }
 
 void SearchDirs::appendParent(std::string const& fileInParent) {
+  // TODO: test
   std::string const& parent = absParent(fileInParent);
   UTIL_DBG_MSG(1, "SearchDirs: appending dirname(" << fileInParent << ") = " << parent);
   append(parent);

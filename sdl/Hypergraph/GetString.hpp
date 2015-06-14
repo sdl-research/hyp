@@ -134,6 +134,7 @@ inline Util::StringBuilder& textFromSyms(Util::StringBuilder& out, Syms const& s
 }
 inline Util::StringBuilder& textFromSyms(Util::StringBuilder& out, SymSlice const& str, IVocabulary& voc,
                                          DerivationStringOptions const& opt) {
+  //TODO: test
   print(out, str, voc, opt.space.c_str(), opt.quote);
   return out;
 }
