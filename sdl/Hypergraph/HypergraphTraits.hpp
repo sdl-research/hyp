@@ -36,8 +36,7 @@ struct HypergraphTraversalTag : boost::vertex_list_graph_tag, boost::bidirection
 
 template <class A>
 StateId num_vertices(IHypergraph<A> const& h) {
-  //TODO: use h.sizeForHeads() instead
-  return h.size();
+  return h.sizeForHeads();
 }
 
 template <class A>
