@@ -17,17 +17,11 @@
 #define SDL_UTIL_MATH_HPP_
 #pragma once
 
-#ifndef SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING
-#ifdef _MSC_VER
-// because ms build has more warnings right now
-#define SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING 1
-#else
-#define SDL_WEIGHT_AVOID_FLOAT_CAST_WARNING 0
-#endif
-#endif
-
+#include <cstring>
+#include <cassert>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/graehl/shared/epsilon.hpp>
+#include <sdl/IntTypes.hpp>
 
 namespace sdl {
 namespace Util {
@@ -124,11 +118,48 @@ struct OtherFloat<double> {
   typedef float type;
 };
 
-/// TODO: this may be un-optimizable and could be specialized for several types (just check msb for intN and
-/// float and double)
-template <typename T>
-int sgn(T val) {
-  return (T(0) < val) - (val < T(0));
+template <class T>
+T signbit(T x) {
+  return x & (1 << (sizeof(T) * 8 - 1));
+}
+
+
+inline int8 signbit(int8 x) {
+  return x & (1 << 7);
+}
+
+inline int16 signbit(int16 x) {
+  return x & (1 << 15);
+}
+
+inline int32 signbit(int32 x) {
+  return x & (1 << 31);
+}
+
+inline int64 signbit(int64 x) {
+  return x & ((int64)1 << 63);
+}
+
+inline int32 signbit(float x) {
+  assert(sizeof(float) == sizeof(int32));
+  int32 y;
+  std::memcpy(&y, &x, sizeof(int32));
+  // because reinterpret_cast is not technically allowed by std. memcpy should
+  // be optimized away; if it weren't we'd want to just grab 1 byte (first or
+  // last depending on little/big endian)
+  return signbit(y);
+}
+
+inline int64 signbit(double x) {
+  assert(sizeof(double) == sizeof(int32));
+  int64 y;
+  std::memcpy(&y, &x, sizeof(int64));
+  return signbit(y);
+}
+
+template <class T>
+inline int sgn(T x) {
+  return signbit(x) ? -1 : 1;
 }
 
 

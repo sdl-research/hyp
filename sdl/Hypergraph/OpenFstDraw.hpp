@@ -81,7 +81,7 @@ struct DrawOptions {
     portrait = true;
     fontsize = 10;
     precision = 3;
-    pruneBeam = FloatLimits<double>::posInfinity;
+    pruneBeam = std::numeric_limits<double>::infinity();
     o = 0;  // don't draw, but maybe openFstPrintFile
   }
 
@@ -187,7 +187,7 @@ struct DrawOptions {
     typedef typename FstArc::Weight FW;
     typedef ToOpenFst<A, FstArc> T;
     T t(h, stateNames);
-    if (pruneBeam != FloatLimits<double>::posInfinity) { fst::Prune(&t.fst, FW(pruneBeam)); }
+    if (pruneBeam != std::numeric_limits<double>::infinity()) { fst::Prune(&t.fst, FW(pruneBeam)); }
     drawFst<FstArc>(t.getFst(), t.stateNames());
   }
   template <class A>

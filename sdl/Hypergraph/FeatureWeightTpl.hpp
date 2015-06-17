@@ -78,7 +78,7 @@ struct Expectation {
   */
   template <class FloatT>
   static FloatT getZeroFeatureValue() {
-    return FloatLimits<FloatT>::posInfinity;
+    return std::numeric_limits<FloatT>::infinity();
   }
 };
 
@@ -148,13 +148,13 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
 
   static inline Self one() { return Self(static_cast<FloatT>(0.0)); }
 
-  static inline Self zero() { return Self(FloatLimits<FloatT>::posInfinity); }
+  static inline Self zero() { return Self(std::numeric_limits<FloatT>::infinity()); }
 
   typedef void HasIsZero;
-  bool isZero() const { return this->value_ == FloatLimits<FloatT>::posInfinity; }
+  bool isZero() const { return this->value_ == std::numeric_limits<FloatT>::infinity(); }
 
   void setZero() {
-    this->value_ = FloatLimits<FloatT>::posInfinity;
+    this->value_ = std::numeric_limits<FloatT>::infinity();
     pMap_.reset();
   }
   friend inline void setZero(FeatureWeightTpl& x) { x.setZero(); }

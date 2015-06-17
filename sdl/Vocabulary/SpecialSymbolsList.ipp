@@ -51,23 +51,7 @@
 #include SDL_SPECIAL_SYMBOL_INC
 
 
-#define SDL_SEGMENT_NONSTANDARD_START_END 1
-/*
-  http://jira:8080/jira/browse/CM-230 may require these stay as <xmt-segment>
-  instead of the <s> we would like for greater LM API efficiency.
-
-   to summarize CM-230: when these were <s> </s> that was causing FeatureBot
-   problems on chinese training text / rules. therefore we need to be sure we
-   have such an input -> full training scenario as a regr test, then we can go
-   back to <s> </s> safely.
- */
-
-#define SDL_SPECIAL_SYMBOL_NAME SEG_START
-#define SDL_SPECIAL_SYMBOL_TEXT "xmt-segment"
-#include SDL_SPECIAL_SYMBOL_INC
-#define SDL_SPECIAL_SYMBOL_NAME SEG_END
-#define SDL_SPECIAL_SYMBOL_TEXT "/xmt-segment"
-#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SEGMENT_NONSTANDARD_START_END 0
 
 #define SDL_SPECIAL_SYMBOL_NAME UNK
 #define SDL_SPECIAL_SYMBOL_TEXT "unk"

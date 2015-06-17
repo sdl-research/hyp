@@ -229,7 +229,7 @@ class ViterbiWeightTpl : public FloatWeightTpl<T> {
 
   static inline ViterbiWeightTpl<T> one() { return ViterbiWeightTpl<T>(0.0f); }
 
-  static inline ViterbiWeightTpl<T> zero() { return ViterbiWeightTpl<T>(FloatLimits<T>::posInfinity); }
+  static inline ViterbiWeightTpl<T> zero() { return ViterbiWeightTpl<T>(std::numeric_limits<T>::infinity()); }
 
   void plusBy(Self const& b) {
     if (b.value_ < this->value_) this->value_ = b.value_;
@@ -308,7 +308,7 @@ class LogWeightTpl : public FloatWeightTpl<T> {
 
   static inline LogWeightTpl<T> one() { return LogWeightTpl<T>(0.0f); }
 
-  static inline LogWeightTpl<T> zero() { return LogWeightTpl<T>(FloatLimits<T>::posInfinity); }
+  static inline LogWeightTpl<T> zero() { return LogWeightTpl<T>(std::numeric_limits<T>::infinity()); }
 
   Self& operator=(Base const& other) {
     this->value_ = other.value_;

@@ -101,7 +101,7 @@ Syms& bestPathSymsAppend(Syms& syms, FeatureValue& cost, IHypergraph<Arc> const&
     cost = boost::get<1>(derivWeight).getValue();
     symsFromDerivAppend(syms, boost::get<0>(derivWeight), hg, opts);
   } else
-    cost = FloatLimits<FeatureValue>::posInfinity;
+    cost = std::numeric_limits<FeatureValue>::infinity();
   return syms;
 }
 
