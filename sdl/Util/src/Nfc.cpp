@@ -22,9 +22,7 @@ void normalizeToNfc(std::string const& utf8, std::string& out, bool warnIfNotNfc
 }
 
 void normalizeToNfc(Slice utf8, std::string& out, bool warnIfNotNfc, bool K) {
-  // TODO: test
   assert(out.empty());
-  // TODO: test
   if (!maybeNormalizeToNfc(utf8, out, warnIfNotNfc, K)) assignSlice(out, utf8);
 }
 

@@ -50,6 +50,8 @@ typedef std::size_t SegmentId;
 SegmentId const kNullSegmentId((SegmentId)-1);
 
 typedef char const* Pchar;
+
+//TODO: use boost::string_ref or std::experimental::string_view instead in C++11
 typedef std::pair<Pchar, Pchar> Slice;  // see Util/Fields for a richer interface
 
 inline std::size_t len(Slice const& slice) {

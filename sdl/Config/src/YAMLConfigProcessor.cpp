@@ -320,7 +320,16 @@ ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem:
   }
 }
 
-std::string const kPathSuffix("-path");
+std::string const kPathSuffix("path");
+unsigned const kLenPathSuffix = 4;
+
+inline bool hasPathSuffix(std::string const& key) {
+  if (Util::endsWith(key, kPathSuffix)) {
+    unsigned nkey = key.size();
+    return nkey == kLenPathSuffix || key[nkey - 5] == '-';
+  } else
+    return false;
+}
 
 ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in,
                                              boost::filesystem::path const& fsPrefix) const {
@@ -331,7 +340,7 @@ ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in,
     for (YAML::const_iterator itMap = in.begin(), end = in.end(); itMap != end; ++itMap) {
       std::string const& key = itMap->first.Scalar();
       ConfigNode const& val = itMap->second;
-      if (Util::endsWith(key, kPathSuffix)) {
+      if (hasPathSuffix(key)) {
         if (val.IsScalar()) {
           std::string const& origPath = val.Scalar();
           std::string const& newPath = addPrefixToPathString(origPath, fsPrefix);
@@ -354,7 +363,7 @@ ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in,
           addKeyVal(out, key, outSequence, *this);
         } else
           SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
-                        "Syntax error! Value for a key ending in '"
+                        "Syntax error! Value for a key 'path' or ending in '-"
                             << kPathSuffix << "' can only be a path or a list of paths." << '\n' << "path: [ "
                             << path() << " ]\n"
                             << "Key: " << key << '\n' << "File: " << getFilePath());

@@ -57,6 +57,13 @@
 #define SDL_SPECIAL_SYMBOL_TEXT "unk"
 #include SDL_SPECIAL_SYMBOL_INC
 
+#define SDL_SPECIAL_SYMBOL_NAME SENT_START
+#define SDL_SPECIAL_SYMBOL_TEXT "s"
+#include SDL_SPECIAL_SYMBOL_INC
+#define SDL_SPECIAL_SYMBOL_NAME SENT_END
+#define SDL_SPECIAL_SYMBOL_TEXT "/s"
+#include SDL_SPECIAL_SYMBOL_INC
+
 // Used by tokenizers to mark tokens.
 // Example: <tok> 't' 'e' 's' 't' </tok>
 // IMPORTANT: placing new symbols before TOK_START and TOK_END
@@ -94,13 +101,6 @@
 // Used by abortSegment to return the output of the canceled segment
 #define SDL_SPECIAL_SYMBOL_NAME ABORTSEGMENT
 #define SDL_SPECIAL_SYMBOL_TEXT "abort-segment"
-#include SDL_SPECIAL_SYMBOL_INC
-
-#define SDL_SPECIAL_SYMBOL_NAME SENT_START
-#define SDL_SPECIAL_SYMBOL_TEXT "s"
-#include SDL_SPECIAL_SYMBOL_INC
-#define SDL_SPECIAL_SYMBOL_NAME SENT_END
-#define SDL_SPECIAL_SYMBOL_TEXT "/s"
 #include SDL_SPECIAL_SYMBOL_INC
 #define SDL_SPECIAL_SYMBOL_NAME NULL_TAG
 #define SDL_SPECIAL_SYMBOL_TEXT "null"

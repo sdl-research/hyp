@@ -28,8 +28,6 @@
 #endif
 
 #define GRAEHL_CMDLINE_MAIN_USE_CONFIGURE HG_MAIN_USE_CONFIGURE
-#define TRANSFORM_TO_STR(x) #x
-#define TRANSFORM_NAME(x) TRANSFORM_TO_STR(x)
 
 #include <sdl/Util/ProgramOptions.hpp>
 #include <sdl/LexicalCast.hpp>
@@ -43,9 +41,6 @@
 #include <sdl/Util/Locale.hpp>
 #include <sdl/graehl/shared/named_main.hpp>
 #include <sdl/Util/Input.hpp>
-
-#define HYPERGRAPH_PREPEND_HYP(MAINCLASS) sdl::Hypergraph::Hyp##MAINCLASS
-#define HYPERGRAPH_NAMED_MAIN(MAINCLASS) GRAEHL_NAMED_MAIN(MAINCLASS, HYPERGRAPH_PREPEND_HYP(MAINCLASS))
 
 namespace sdl {
 namespace Hypergraph {
@@ -90,6 +85,10 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt, Util::Inputs {
     return pVoc;
   }
 
+  void init() {
+    graehl::main::init();
+  }
+
   HypergraphMainBase(std::string const& n, std::string const& usage, std::string const& ver = "v1",
                     bool multiple = true, HypergraphMainOpt const& opt = HypergraphMainOpt())
       : Util::Inputs(multiple)
@@ -108,7 +107,6 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt, Util::Inputs {
     inputEnabled = true;
     multifile = true;
   }
-
   void disableDefaultCmdlineOptions() {
     inputEnabled = false;
     verbose = 0;

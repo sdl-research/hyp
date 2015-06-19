@@ -41,7 +41,7 @@ void ResidentVocabulary::loadTerminals(std::string const& terminalPath) {
   SymbolType kType = sdl::kTerminal;
 
   Util::Input in(terminalPath);
-  while (Util::nfcline.getline(in, entry)) {
+  while (Util::nfcline(in, entry)) {
     Util::splitSpaces(strings, entry);
     (void)getVocab(kType).add(strings[1], kType);
   }
@@ -55,7 +55,7 @@ void ResidentVocabulary::loadNonterminals(std::string const& nonTerminalPath) {
   SymbolType kType = sdl::kNonterminal;
 
   Util::Input inSrcFile(nonTerminalPath);
-  while (Util::nfcline.getline(inSrcFile, entry)) {
+  while (Util::nfcline(inSrcFile, entry)) {
     Util::splitSpaces(strings, entry);
     (void)getVocab(kType).add(strings[1], kType);
   }

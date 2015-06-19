@@ -47,6 +47,12 @@
 #define HYP__HG_TRANSFORMMAIN_HPP
 #pragma once
 
+#define TRANSFORM_TO_STR(x) #x
+#define TRANSFORM_NAME(x) TRANSFORM_TO_STR(x)
+
+#define HYPERGRAPH_PREPEND_HYP(MAINCLASS) sdl::Hypergraph::Hyp##MAINCLASS
+#define HYPERGRAPH_NAMED_MAIN(MAINCLASS) GRAEHL_NAMED_MAIN(MAINCLASS, HYPERGRAPH_PREPEND_HYP(MAINCLASS))
+
 #include <sdl/Hypergraph/HypergraphMain.hpp>
 #include <sdl/LexicalCast.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>

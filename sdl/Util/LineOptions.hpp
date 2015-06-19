@@ -70,11 +70,11 @@ struct LineOptions : NormalizeUtf8 {
       return false;
   }
 
-  bool getline(Util::InputStream& in, std::string& line, char until = '\n') const {
+  bool getline(Util::InputStream const& in, std::string& line, char until = '\n') const {
     return getlineNormalized(*in, line, until);
   }
 
-  bool operator()(Util::InputStream& in, std::string& line, char until = '\n') const {
+  bool operator()(Util::InputStream const& in, std::string& line, char until = '\n') const {
     return getlineNormalized(*in, line, until);
   }
 

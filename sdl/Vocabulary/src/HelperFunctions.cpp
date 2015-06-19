@@ -26,22 +26,27 @@ IVocabularyPtr createDefaultVocab() {
   return IVocabularyPtr(new ResidentVocabulary());
 }
 
-void terminalTextToSignature(std::string const& text, Syms* syms, IVocabulary& vocab) {
+void splitToTerminals(std::string const& text, Syms& syms, IVocabulary& vocab) {
   Util::FieldGenerator words(text, ' ');
   for (; words; words.got()) {
     Slice word(words.get());
     if (empty(word)) continue;
-    syms->push_back(vocab.addTerminal(word));
+    syms.push_back(vocab.addTerminal(word));
   }
 }
 
-void terminalTextToSignature(std::string const& text, Syms* syms, IVocabularyPtr const& pVocabulary) {
-  terminalTextToSignature(text, syms, *pVocabulary);
+void splitIntegerSyms(std::string const& text, Syms& syms) {
+  Util::FieldGenerator words(text, ' ');
+  for (; words; words.got()) {
+    Util::Field word(words.get());
+    if (empty(word)) continue;
+    word.toNumber(&syms.push_back_uninitialized()->id_);
+  }
 }
 
-void terminalStringsToSignature(std::vector<std::string> const& strs, Syms* syms, IVocabulary& vocab) {
+void mapToTerminals(std::vector<std::string> const& strs, Syms& syms, IVocabulary& vocab) {
   for (std::vector<std::string>::const_iterator i = strs.begin(), e = strs.end(); i != e; ++i)
-    syms->push_back(vocab.addTerminal(*i));
+    syms.push_back(vocab.addTerminal(*i));
 }
 
 void removeBlockSymbols(Syms const& ngram, Syms& result) {

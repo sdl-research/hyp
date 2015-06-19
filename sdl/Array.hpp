@@ -25,6 +25,8 @@
 #pragma once
 
 #include <cstring>
+#include <string>
+#include <vector>
 
 #ifndef SDL_WIN32_SECURE_SCL_WORKAROUND
 #if _WIN32 && (!defined(_SECURE_SCL) || _SECURE_SCL)
@@ -35,7 +37,6 @@
 #endif
 
 namespace sdl {
-
 
 
 template <class It1, class It2>

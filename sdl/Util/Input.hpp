@@ -257,13 +257,17 @@ inline void swap(Input& a, Input& b) {
 }
 
 struct Inputs : InputsOptions {
+  typedef std::vector<Input> Ins;
+  Ins inputs;
+  char const* inName;
   std::size_t size() const { return inputs.size(); }
-  Inputs(InputsOptions const& conf = InputsOptions()) : InputsOptions(conf), configurableSingleInput(NullInputTag())  {
+  Input const& operator[](std::size_t i) const { return inputs[i]; }
+  Inputs(InputsOptions const& conf = InputsOptions(), char const* inName = "in")
+      : InputsOptions(conf), inName(inName), configurableSingleInput(NullInputTag()) {
+    inputEnabled = true;
     assert(configurableSingleInput.isNull());
     inputs.reserve(16);
   }
-  typedef std::vector<Input> Ins;
-  Ins inputs;
   /// return the first input
   Input const& input() const {
     assert(validated);
@@ -281,9 +285,9 @@ struct Inputs : InputsOptions {
     if (!inputEnabled) return;
     std::string const& help = input_help();
     if (multifile) {
-      config("in", &inputs)(help).eg("infileN.gz").positional(positional, max_inputs);
+      config(inName, &inputs)('i')(help).eg("infileN.gz").positional(positional, max_inputs);
     } else {
-      config("in", &configurableSingleInput)(help).eg("infileN.gz").positional(positional);
+      config(inName, &configurableSingleInput)('i')(help).eg("infileN.gz").positional(positional);
     }
   }
   friend inline void validate(Inputs& x) { x.validate(); }
