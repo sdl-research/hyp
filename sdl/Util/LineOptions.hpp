@@ -32,11 +32,10 @@ struct LineOptions : NormalizeUtf8 {
 
   bool chomp, trim;
 
-  LineOptions(bool forceNfc = kXmtDefaultNfc, bool fixUnicode = true) {
-    defaults();
+  LineOptions(bool forceNfc = kXmtDefaultNfc, bool fixUnicode = true, bool chomp = true, bool trim = false)
+      : chomp(chomp), trim(trim) {
     nfc = forceNfc;
-    if (!fixUnicode)
-      FixUnicode::disableAllFixes();
+    if (!fixUnicode) FixUnicode::disableAllFixes();
   }
 
   void defaults() {

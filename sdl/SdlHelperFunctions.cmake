@@ -146,7 +146,7 @@ macro(sdl_finish_cflags)
 endmacro()
 
 function(sdl_add_library LIBRARY_NAME SOURCE_DIR)
-  set(options SHARED)
+  set(options SHARED INTERFACE)
   set(oneValueArgs)
   set(multiValueArgs EXCLUDE INCLUDE INCLUDE_ONLY)
   cmake_parse_arguments(sdl_add_library "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -174,12 +174,17 @@ function(sdl_add_library LIBRARY_NAME SOURCE_DIR)
   endif()
 
   source_group("Template Definitions" FILES ${TEMPLATE_IMPLS})
+
   if(sdl_add_library_SHARED)
     add_library(${LIBRARY_NAME} SHARED ${ALL_SOURCE_FILES})
+    sdl_msvc_links(${LIBRARY_NAME})
+  elseif(sdl_add_library_INTERFACE)
+    add_library(${LIBRARY_NAME} INTERFACE)
   else()
     add_library(${LIBRARY_NAME} ${ALL_SOURCE_FILES})
+    sdl_msvc_links(${LIBRARY_NAME})
   endif()
-  sdl_msvc_links(${LIBRARY_NAME})
+
 endfunction(sdl_add_library)
 
 function(sdl_add_executable EXECUTABLE_NAME SOURCE_DIR)

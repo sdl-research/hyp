@@ -30,21 +30,32 @@ namespace Util {
 
 typedef boost::iterator_range<std::string::const_iterator> SplitRange;
 
+/**
+   if str was from std::getline then it already has the trailing '\n' removed
+   but in case of Windows + binary mode input we want to remove the '\r' in that
+   case anyway.
+
+   if str is the whole line incl '\n' then we remove the trailing "\n" or "\r\n"
+*/
 inline std::string& chomp(std::string& str) {
   if (!str.empty()) {
     std::string::iterator i = str.end();
-    if (*--i == '\n') str.erase((i > str.begin() && i[-1] == '\r') ? --i : i, str.end());
+    char last = *--i;
+    if (last == '\r')
+      str.pop_back();
+    else if (last == '\n') {
+      if (i > str.begin() && i[-1] == '\r') str.pop_back();
+      str.pop_back();
+    }
   }
   return str;
 }
 
-
 template <class CharIter>
 inline CharIter chompEnd(CharIter begin, CharIter i) {
-  if (i == begin)
-    return i;
+  if (i == begin) return i;
   if (*--i == '\n') {
-    //TODO: test
+    // TODO: test
     if (i != begin && i[-1] == '\r') --i;
     return i;
   }
@@ -122,15 +133,13 @@ inline boost::iterator_range<typename String::const_iterator> endTrimmedOf(Strin
 }
 
 template <class String>
-inline boost::iterator_range<typename String::const_iterator> endTrimmed(String const& str,
-                                                                         char space = ' ') {
+inline boost::iterator_range<typename String::const_iterator> endTrimmed(String const& str, char space = ' ') {
   typename String::const_iterator begin = str.begin();
   return trimEndOfChar(begin, chompEnd(begin, str.end()), space);
 }
 
 template <class String, class Space>
-inline boost::iterator_range<typename String::const_iterator> trimmedOf(String const& str,
-                                                                        Space const& space) {
+inline boost::iterator_range<typename String::const_iterator> trimmedOf(String const& str, Space const& space) {
   typename String::const_iterator begin = str.begin();
   return trimOf(begin, chompEnd(begin, str.end()), space);
 }

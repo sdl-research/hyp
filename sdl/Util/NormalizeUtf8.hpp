@@ -21,28 +21,27 @@
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/Chomp.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 /// FixUnicode deals in 1:1 Unicode subst and deletions; Nfc is many:many
 /// (they're logically related, but differ in implementation)
 struct NormalizeUtf8 : NfcOptions, FixUnicode {
 
   NormalizeUtf8() {}
-  NormalizeUtf8(bool makeNfc)
-      : NfcOptions(makeNfc)
-  {}
+  NormalizeUtf8(bool makeNfc) : NfcOptions(makeNfc) {}
 
   template <class Config>
-  void configure(Config &config) {
+  void configure(Config& config) {
     NfcOptions::configure(config);
     FixUnicode::configure(config);
     config.is("NormalizeUtf8");
   }
 
-  void normalize(std::string &str) const {
+  void normalize(std::string& str) const {
     FixedUtf8 fixed(str, *this);
     if (fixed.modified()) {
-      //TODO: test
+      // TODO: test
       if (nfc) {
         // this branch could be handle every case, but we save some copies when
         // possible by avoiding it
@@ -56,14 +55,14 @@ struct NormalizeUtf8 : NfcOptions, FixUnicode {
       NfcOptions::normalize(str);
     }
   }
-  void normalize(std::string const& str, std::string &out) const {
+  void normalize(std::string const& str, std::string& out) const {
     assert(out.empty());
     if (FixUnicode::maybeNormalize(str, out))
       NfcOptions::normalize(out);
     else
       NfcOptions::normalize(str, out);
   }
-  bool getlineNormalized(std::istream &in, std::string &utf8) const {
+  bool getlineNormalized(std::istream& in, std::string& utf8) const {
     if ((bool)std::getline(in, utf8)) {
       normalize(utf8);
       return true;
@@ -73,10 +72,8 @@ struct NormalizeUtf8 : NfcOptions, FixUnicode {
 };
 
 template <class StringConsumer>
-inline std::size_t visitChompedLines(std::istream &in,
-                                     StringConsumer const& consumer,
-                                     NormalizeUtf8 const& opt = NormalizeUtf8())
-{
+inline std::size_t visitChompedLines(std::istream& in, StringConsumer const& consumer,
+                                     NormalizeUtf8 const& opt = NormalizeUtf8()) {
   std::string line;
   std::size_t nlines = 0;
   while (opt.getlineNormalized(in, line)) {
@@ -90,11 +87,9 @@ inline std::size_t visitChompedLines(std::istream &in,
 
 /// consumer(line) for all lines from in until eof or separatorLine (which is consumed off in)
 template <class StringConsumer>
-inline std::size_t visitChompedLinesUntil(std::istream &in,
-                                          std::string const& separatorLine,
+inline std::size_t visitChompedLinesUntil(std::istream& in, std::string const& separatorLine,
                                           StringConsumer const& consumer,
-                                          NormalizeUtf8 const& opt = NormalizeUtf8())
-{
+                                          NormalizeUtf8 const& opt = NormalizeUtf8()) {
   std::string line;
   std::size_t nlines = 0;
   while (opt.getlineNormalized(in, line)) {
