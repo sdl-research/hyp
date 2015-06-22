@@ -760,6 +760,11 @@ if(CMAKE_COMPILER_IS_GNUXX)
   add_definitions(-Wno-unused-function)
 endif()
 
+if(UNIX)
+  find_package(GCC5)
+  MESSAGE(STATUS "GCC5 Libraries: ${GCC5_LIBRARIES}")
+endif()
+
 find_package(ICU)
 MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 if(WIN32)
