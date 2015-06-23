@@ -298,10 +298,11 @@ if(WIN32)
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
   set(Boost_COMPILER "-vc100")
   set(Boost_NO_SYSTEM_PATHS 1)
-  set(Boost_USE_STATIC_LIBS ON)
+#  set(Boost_USE_STATIC_LIBS ON) # Enable if statically linking to boost
 
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
   set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.5")
+  set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2-1.0.6")
 
 
   set(VS_MULTITHREADED_DEBUG_DLL_IGNORE_LIBRARY_FLAGS
@@ -760,11 +761,6 @@ if(CMAKE_COMPILER_IS_GNUXX)
   add_definitions(-Wno-unused-function)
 endif()
 
-if(UNIX)
-  find_package(GCC5)
-  MESSAGE(STATUS "GCC5 Libraries: ${GCC5_LIBRARIES}")
-endif()
-
 find_package(ICU)
 MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 if(WIN32)
@@ -805,7 +801,8 @@ if(NOT ANDROID)
 endif()
 
 if(WIN32)
-  list(APPEND boost_libs exception)
+#  list(APPEND boost_libs exception) # Enable if statically linking to boost
+  list(APPEND boost_libs zlib) # Disable if statically linking to boost
 endif()
 
 set(boost_libs_shared ${boost_libs})
@@ -849,6 +846,10 @@ elseif(UNIX)
   add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 
+if(WIN32)
+    add_definitions(-DBOOST_ALL_DYN_LINK) # Disable if statically linking to boost
+endif()
+
 MESSAGE(STATUS "Boost Include Directories: ${Boost_INCLUDE_DIRS}")
 MESSAGE(STATUS "Boost Library Directories: ${Boost_LIBRARY_DIRS}")
 
@@ -865,6 +866,11 @@ message(STATUS "yaml-cpp include directory: ${YAML_CPP_INCLUDE_DIR}")
 find_package(ZLIB)
 MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
 sdl_compiled_setting(HAVE_ZLIB 1)
+
+if(WIN32)
+  find_package(BZIP2 REQUIRED)
+  message(STATUS "BZIP2 Found: ${BZIP2_LIBRARIES}")
+endif()
 
 if(NOT ANDROID)
   find_package (Log4CXX)
