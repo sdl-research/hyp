@@ -294,7 +294,6 @@ if(WIN32)
   # Set Boost options
   set(SDL_BOOST_MINOR 57)
   set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
-  set(Boost_ADDITIONAL_VERSIONS "1.${SDL_BOOST_MINOR}" "1.${SDL_BOOST_MINOR}.0")
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
   set(Boost_COMPILER "-vc100")
   set(Boost_NO_SYSTEM_PATHS 1)
@@ -611,11 +610,15 @@ if(UNIX)
   endif()
 
   if(LINUX)
-    set(Boost_FIND_VERSION 1.57.0)
+    set(Boost_DEBUG 1)
+    set(Boost_DETAILED_FAILURE_MSG 1)
     set(Boost_NO_SYSTEM_PATHS 1)
-    set(SDL_BOOST_MINOR 57)
+#    set(SDL_BOOST_MINOR 57)
+#    set(Boost_COMPILER "-gcc44")
+    set(SDL_BOOST_MINOR 58)
+    set(Boost_COMPILER "")
+    set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
     set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
-    set(Boost_COMPILER "-gcc44")
     set(Boost_USE_STATIC_LIBS OFF)
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
     set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
@@ -666,7 +669,6 @@ if(UNIX)
     set(SDL_BOOST_MINOR 58)
     set(Boost_NO_SYSTEM_PATHS 1)
     set(BOOST_LIBRARYDIR "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0/lib")
-    set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
     set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
     set(Boost_INCLUDE_DIR "${BOOST_INCLUDEDIR}")
     set(Boost_LIBRARY_DIR "${BOOST_LIBRARYDIR}")
@@ -692,6 +694,10 @@ if(UNIX)
     endif()
 
   endif() # APPLE
+
+  if(NOT ANDROID)
+    set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
+  endif()
 
 endif() # UNIX
 
@@ -818,9 +824,11 @@ MESSAGE(STATUS "SDL_BOOST_MINOR ${SDL_BOOST_MINOR} Boost_LIBRARY_DIRS ${Boost_LI
 # Due to the Boost quirk described in https://svn.boost.org/trac/boost/ticket/5553, running boost unit-tests built in
 # Debug mode against a dynamic shared library built in Release mode, will cause segfaults to occur: in order to avoid
 # this, we simply avoid linking dynamic shared libs against the Boost unit-test framework.
+if(WIN32)
 set(SDL_UNIT_TEST_NO_SHARED 1)
 if(SDL_UNIT_TEST_NO_SHARED)
   LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
+endif()
 endif()
 
 if(SDL_UNIT_TEST_NO_SHARED)
