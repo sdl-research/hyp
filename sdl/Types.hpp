@@ -20,6 +20,11 @@
 #define SDL_TYPES_HPP
 #pragma once
 
+#if defined(__GNUC__) && defined(__LP64__)  /* only under 64 bit gcc */
+__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
+//http://www.win.tue.nl/~aeb/linux/misc/gcc-semibug.html
+#endif
+
 #include <string>
 #include <map>
 #include <vector>

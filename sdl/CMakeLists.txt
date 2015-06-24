@@ -604,26 +604,28 @@ if(UNIX)
 
   sdl_linker_flags(${SDL_UNSAFE_MATH})
 
+
   #CPU:
   if(NOT ANDROID)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mfpmath=sse")
   endif()
 
+  #set(Boost_DEBUG 1)
+  #set(Boost_DETAILED_FAILURE_MSG 1)
+
   if(LINUX)
-    set(Boost_DEBUG 1)
-    set(Boost_DETAILED_FAILURE_MSG 1)
     set(Boost_NO_SYSTEM_PATHS 1)
-#    set(SDL_BOOST_MINOR 57)
-#    set(Boost_COMPILER "-gcc44")
     set(SDL_BOOST_MINOR 58)
     set(Boost_COMPILER "")
+    #    set(SDL_BOOST_MINOR 57)
+    #    set(Boost_COMPILER "-gcc44")
     set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
     set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
     set(Boost_USE_STATIC_LIBS OFF)
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
     set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
-    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-5.4")
+    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
 
   endif()
 
