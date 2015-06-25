@@ -19,7 +19,7 @@
 
 #include <sdl/Hypergraph/LineToHypergraph.hpp>
 #include <sdl/Hypergraph/ArcParserFct.hpp>
-#include <sdl/graehl/shared/fileargs.hpp>
+#include <graehl/shared/fileargs.hpp>
 #include <sdl/Config/Init.hpp>
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/LineOptions.hpp>

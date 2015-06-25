@@ -68,7 +68,7 @@
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/Util/Override.hpp>
-#include <sdl/graehl/shared/os.hpp>
+#include <graehl/shared/os.hpp>
 #include <boost/noncopyable.hpp>
 
 namespace sdl {

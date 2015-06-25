@@ -16,8 +16,8 @@
 #include <string>
 
 
-#include <sdl/graehl/shared/split.hpp>
-#include <sdl/graehl/shared/from_strings.hpp>
+#include <graehl/shared/split.hpp>
+#include <graehl/shared/from_strings.hpp>
 #include <sdl/Config/Config.hpp>
 #include <sdl/Config/YAMLConfigProcessor.hpp>
 #include <sdl/Util/LogHelper.hpp>

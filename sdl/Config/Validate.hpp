@@ -17,7 +17,7 @@
     Usage: config("option", &val).validate(Config::boundedRange(0,10)) means only 0...9 are allowed.
 */
 
-#include <sdl/graehl/shared/validate.hpp>
+#include <graehl/shared/validate.hpp>
 
 namespace sdl {
 namespace Config {

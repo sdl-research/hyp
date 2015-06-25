@@ -17,7 +17,7 @@
 #define STRINGCONSUMER_JG2012719_HPP
 #pragma once
 
-#include <sdl/graehl/shared/warn.hpp>
+#include <graehl/shared/warn.hpp>
 
 namespace sdl {
 

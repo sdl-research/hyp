@@ -42,7 +42,7 @@
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/OutsideCosts.hpp>
 #include <sdl/Hypergraph/InsideCosts.hpp>
-#include <sdl/graehl/shared/nan.hpp>
+#include <graehl/shared/nan.hpp>
 
 namespace sdl {
 namespace Hypergraph {

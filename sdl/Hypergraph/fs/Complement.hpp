@@ -32,7 +32,7 @@
 #pragma once
 
 #include <sdl/Util/Forall.hpp>
-#include <sdl/graehl/shared/os.hpp>
+#include <graehl/shared/os.hpp>
 
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Determinize.hpp>

@@ -27,11 +27,11 @@
 #endif
 
 #include <sdl/Hypergraph/HypergraphDrawer.hpp>
-#include <sdl/graehl/shared/fileargs.hpp>
+#include <graehl/shared/fileargs.hpp>
 
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/graehl/shared/is_null.hpp>
+#include <graehl/shared/is_null.hpp>
 
 namespace sdl {
 namespace Hypergraph {

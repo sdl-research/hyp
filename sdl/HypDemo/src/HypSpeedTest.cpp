@@ -28,7 +28,7 @@ char const* usage = "measure performance of compose (excluding file input): HypS
 #include <sdl/Hypergraph/fs/Compose.hpp>
 #include <sdl/Hypergraph/SortArcs.hpp>
 #include <sdl/Hypergraph/BestPath.hpp>
-#include <sdl/graehl/shared/monotonic_time.hpp>
+#include <graehl/shared/monotonic_time.hpp>
 
 using namespace sdl;
 using namespace sdl::Hypergraph;

@@ -66,15 +66,15 @@
 #include <sdl/Hypergraph/InputHypergraphs.hpp>
 #include <sdl/Hypergraph/BestPath.hpp>
 
-#include <sdl/graehl/shared/hex_int.hpp>
-#include <sdl/graehl/shared/string_to.hpp>
+#include <graehl/shared/hex_int.hpp>
+#include <graehl/shared/string_to.hpp>
 
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Override.hpp>
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/Flag.hpp>
 #include <sdl/Util/StringBuilder.hpp>
-#include <sdl/graehl/shared/configure_named_bits.hpp>
+#include <graehl/shared/configure_named_bits.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -41,8 +41,8 @@
 #include <sdl/Util/Add.hpp>
 #include <sdl/Util/PointerWithFlag.hpp>
 
-#include <sdl/graehl/shared/nary_tree.hpp>
-#include <sdl/graehl/shared/word_spacer.hpp>
+#include <graehl/shared/nary_tree.hpp>
+#include <graehl/shared/word_spacer.hpp>
 
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/get_pointer.hpp>

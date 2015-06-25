@@ -26,7 +26,7 @@
 #endif
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <sdl/graehl/shared/leaf_configurable.hpp>
+#include <graehl/shared/leaf_configurable.hpp>
 
 namespace boost {
 namespace filesystem {

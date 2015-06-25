@@ -46,7 +46,7 @@
 #endif
 #include <sdl/Config/Config.hpp>
 #include <sdl/Util/Warn.hpp>
-#include <sdl/graehl/shared/configure.hpp>
+#include <graehl/shared/configure.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sdl/Util/Unordered.hpp>

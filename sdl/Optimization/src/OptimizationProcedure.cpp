@@ -37,7 +37,7 @@
 #include <sdl/Optimization/LoadFeatureWeights.hpp>
 #include <sdl/Optimization/IOriginalFeatureIds.hpp>
 
-#include <sdl/graehl/shared/percent.hpp>
+#include <graehl/shared/percent.hpp>
 #include <sdl/Util/Delete.hpp>
 
 namespace sdl {

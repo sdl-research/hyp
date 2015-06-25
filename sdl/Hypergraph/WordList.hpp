@@ -19,8 +19,8 @@
 
 #include <iostream>
 #include <string>
-#include <sdl/graehl/shared/normalize_range.hpp>
-#include <sdl/graehl/shared/split.hpp>
+#include <graehl/shared/normalize_range.hpp>
+#include <graehl/shared/split.hpp>
 #include <sdl/Util/Utf8.hpp>
 #include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/InvalidInputException.hpp>

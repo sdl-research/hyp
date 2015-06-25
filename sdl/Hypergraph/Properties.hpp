@@ -20,7 +20,7 @@
 #include <sdl/IntTypes.hpp>
 #include <boost/cstdint.hpp>
 #include <sdl/Util/PrintRange.hpp>
-#include <sdl/graehl/shared/configure_named_bits.hpp>
+#include <graehl/shared/configure_named_bits.hpp>
 
 namespace sdl {
 namespace Hypergraph {

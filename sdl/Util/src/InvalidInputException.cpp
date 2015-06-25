@@ -9,7 +9,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <sdl/Util/InvalidInputException.hpp>
-#include <sdl/graehl/shared/input_error.hpp>
+#include <graehl/shared/input_error.hpp>
 
 namespace sdl { namespace Util {
 

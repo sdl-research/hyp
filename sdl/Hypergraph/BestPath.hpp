@@ -66,12 +66,12 @@
 #include <sdl/Util/Output.hpp>
 #include <sdl/Util/Performance.hpp>
 
-#include <sdl/graehl/shared/tails_up_hypergraph.hpp>  // djikstra best-first bottom-up
-#include <sdl/graehl/shared/lazy_forest_kbest.hpp>  // binary forest top-down lazy nbest
+#include <graehl/shared/tails_up_hypergraph.hpp>  // djikstra best-first bottom-up
+#include <graehl/shared/lazy_forest_kbest.hpp>  // binary forest top-down lazy nbest
 // TODO: even better: don't generate lazy_forest nodes for parts of Hg that are high-cost
-#include <sdl/graehl/shared/os.hpp>
-#include <sdl/graehl/shared/pool_traits.hpp>
-#include <sdl/graehl/shared/teestream.hpp>
+#include <graehl/shared/os.hpp>
+#include <graehl/shared/pool_traits.hpp>
+#include <graehl/shared/teestream.hpp>
 #include <boost/pool/pool.hpp>
 #include <sdl/Hypergraph/AcyclicBest.hpp>
 #include <sdl/Config/Init.hpp>

@@ -19,7 +19,7 @@
 
 #include <utility>
 #include <vector>
-#include <sdl/graehl/shared/escape3.hpp>
+#include <graehl/shared/escape3.hpp>
 
 namespace sdl {
 

@@ -52,8 +52,8 @@
 #ifndef GRAEHL_IFDBG_ENABLE
 #define GRAEHL_IFDBG_ENABLE SDL_DEBUG_ENABLE
 #endif
-#include <sdl/graehl/shared/ifdbg.hpp>
-#include <sdl/graehl/shared/dbg_level.hpp>
+#include <graehl/shared/ifdbg.hpp>
+#include <graehl/shared/dbg_level.hpp>
 
 #include <iostream>
 #include <sstream>

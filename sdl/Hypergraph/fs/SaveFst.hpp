@@ -22,7 +22,7 @@
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Project.hpp>
 #include <sdl/Hypergraph/PruneToBest.hpp>
-#include <sdl/graehl/shared/hex_int.hpp>
+#include <graehl/shared/hex_int.hpp>
 
 namespace sdl {
 namespace Hypergraph {

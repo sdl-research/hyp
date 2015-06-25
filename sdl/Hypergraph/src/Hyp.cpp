@@ -14,7 +14,7 @@
 */
 
 #include <sdl/Util/Locale.hpp>
-#include <sdl/graehl/shared/named_main.hpp>
+#include <graehl/shared/named_main.hpp>
 
 #ifndef SDL_MINIMAL_HYP_MAIN
 #define SDL_MINIMAL_HYP_MAIN 0

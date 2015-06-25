@@ -22,9 +22,9 @@
 
 #include <vector>
 
-#include <sdl/graehl/shared/d_ary_heap.hpp>
-#include <sdl/graehl/shared/priority_queue.hpp>
-#include <sdl/graehl/shared/property.hpp>
+#include <graehl/shared/d_ary_heap.hpp>
+#include <graehl/shared/priority_queue.hpp>
+#include <graehl/shared/property.hpp>
 
 namespace sdl { namespace Util {
 

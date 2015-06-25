@@ -27,8 +27,8 @@
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <boost/optional.hpp>
-#include <sdl/graehl/shared/is_null.hpp>
-#include <sdl/graehl/shared/int_types.hpp>
+#include <graehl/shared/is_null.hpp>
+#include <graehl/shared/int_types.hpp>
 
 // TODO: feature-name->id dictionary and feature weights abstraction, set id via name
 

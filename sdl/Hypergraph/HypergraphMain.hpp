@@ -31,15 +31,15 @@
 
 #include <sdl/Util/ProgramOptions.hpp>
 #include <sdl/LexicalCast.hpp>
-#include <sdl/graehl/shared/random.hpp>
-#include <sdl/graehl/shared/cmdline_main.hpp>
-#include <sdl/graehl/shared/assign_traits.hpp>
+#include <graehl/shared/random.hpp>
+#include <graehl/shared/cmdline_main.hpp>
+#include <graehl/shared/assign_traits.hpp>
 #include <sdl/Util/InitLogger.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Util/FindFile.hpp>
 #include <sdl/Util/Locale.hpp>
-#include <sdl/graehl/shared/named_main.hpp>
+#include <graehl/shared/named_main.hpp>
 #include <sdl/Util/Input.hpp>
 
 namespace sdl {

@@ -20,7 +20,7 @@
 #pragma once
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/graehl/shared/priority_queue.hpp>
+#include <graehl/shared/priority_queue.hpp>
 #include <sdl/Util/MinMax.hpp>
 #include <sdl/Util/BitSet.hpp>
 

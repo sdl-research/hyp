@@ -20,7 +20,7 @@
 #include <cstring>
 #include <cassert>
 #include <sdl/Util/Constants.hpp>
-#include <sdl/graehl/shared/epsilon.hpp>
+#include <graehl/shared/epsilon.hpp>
 #include <sdl/IntTypes.hpp>
 
 namespace sdl {

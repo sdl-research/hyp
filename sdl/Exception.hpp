@@ -28,7 +28,7 @@
 #pragma once
 
 #include <exception>
-#include <sdl/graehl/shared/verbose_exception.hpp>
+#include <graehl/shared/verbose_exception.hpp>
 
 #define SDL_THROW0(n) VTHROW_A(n)
 #define SDL_THROW(n, why) VTHROW_A_1(n, why)

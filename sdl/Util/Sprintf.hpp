@@ -38,7 +38,7 @@
 # define GRAEHL_MUTABLE_STRING_DATA SDL_MUTABLE_STRING_DATA
 #endif
 
-#include <sdl/graehl/shared/snprintf.hpp>
+#include <graehl/shared/snprintf.hpp>
 
 namespace sdl { namespace Util {
 

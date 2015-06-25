@@ -30,7 +30,7 @@
 #define GRAEHL_SMALL_VECTOR_SERIALIZE_VERSION 0
 
 #include <sdl/Util/Valgrind.hpp>
-#include <sdl/graehl/shared/small_vector.hpp>
+#include <graehl/shared/small_vector.hpp>
 
 namespace sdl {
 

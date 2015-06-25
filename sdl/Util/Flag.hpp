@@ -21,7 +21,7 @@
 #pragma once
 
 
-#include <sdl/graehl/shared/flag.hpp>
+#include <graehl/shared/flag.hpp>
 
 namespace sdl {
 namespace Util {

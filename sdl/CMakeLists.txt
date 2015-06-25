@@ -100,7 +100,7 @@ if(SDL_DEBUG)
   sdl_compiled_setting(SDL_VALGRIND 1)
 else()
   # comment this out for very-slightly better performance (but spurious valgrind warnings)
-  sdl_compiled_setting(SDL_VALGRIND 1)
+  # sdl_compiled_setting(SDL_VALGRIND 1)
 endif()
 
 if(LINUX)
@@ -297,7 +297,6 @@ if(WIN32)
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
   set(Boost_COMPILER "-vc100")
   set(Boost_NO_SYSTEM_PATHS 1)
-#  set(Boost_USE_STATIC_LIBS ON) # Enable if statically linking to boost
 
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
   set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.5")
@@ -970,10 +969,25 @@ set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
 
 
 
+find_package(BZip2)
+
 set(INDIRECT_UTIL_LIB_DEPENDENCIES
   ${INDIRECT_Vocabulary_LIB_DEPENDENCIES}
   Vocabulary
+  ${BZIP2_LIBRARIES}
   )
+if(ZLIB_FOUND)
+  # kenlm was built with this
+  sdl_compiled_setting(HAVE_LIBZ 1)
+else()
+  message(FATAL_ERROR "not found: libz")
+endif()
+if(BZIP2_FOUND)
+  # kenlm was built with this
+  sdl_compiled_setting(HAVE_BZLIB 1)
+else()
+  message(WARNING "not found: BZip2")
+endif()
 
 # Util and prereqs - used by most projects (except a few that might
 # use Util header-only)
