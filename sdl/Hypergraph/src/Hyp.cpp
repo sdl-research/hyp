@@ -29,6 +29,9 @@
 #include <sdl/Hypergraph/src/HypPruneToBest.cpp>
 #include <sdl/Hypergraph/src/HypPushWeights.cpp>
 #if !SDL_MINIMAL_HYP_MAIN
+#if HAVE_OPENFST
+#include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
+#endif
 #include <sdl/Hypergraph/src/HypReweightBest.cpp>
 #include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
 #include <sdl/Hypergraph/src/HypComplement.cpp>
@@ -50,9 +53,7 @@
 #include <sdl/Hypergraph/src/HypGetString.cpp>
 #include <sdl/Hypergraph/src/HypTrie.cpp>
 #include <sdl/Hypergraph/src/HypProject.cpp>
-#if HAVE_OPENFST
-#include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
-#endif
+#include <sdl/Util/QuickExit.hpp>
 #endif
 
 #if SDL_FIX_LOCALE
@@ -102,5 +103,10 @@ sdl::Util::DefaultLocaleFastCout initCout;
 #endif
 
 int main(int argc, char* argv[]) {
-  return graehl::run_named_main(argc, argv);
+  int exitcode = graehl::run_named_main(argc, argv);
+#if 1
+  sdl::Util::quickExit(exitcode);
+#else
+  return exitcode;
+#endif
 }

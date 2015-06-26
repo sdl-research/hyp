@@ -92,7 +92,7 @@ template <class Arc>
 struct PruneToBest;
 
 struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
-  static char const* name() { return "PruneToBest"; }
+  static char const* type() { return "PruneToBest"; }
   PruneToBestOptions(unsigned defaultNbest = 1) : PruneToNbestOptions(defaultNbest) { init(); }
   template <class Opt>
   PruneToBestOptions(unsigned defaultNbest, Opt const& opt)

@@ -597,7 +597,7 @@ struct DeterminizeOptions {
     return "Determinize an unweighted FSA hypergraph -- input symbols only. TODO: support sigma, phi, "
            "weights, outputs.";
   }
-  static char const* name() { return "Determinize"; }
+  static char const* type() { return "Determinize"; }
   template <class Arc>
   struct TransformFor {
     typedef Determinize type;
@@ -605,7 +605,7 @@ struct DeterminizeOptions {
 
   template <class Config>
   void configure(Config const& c) {
-    c.is(name());
+    c.is(type());
     c(caption());
     c("epsilon-ordinary", &epsilonOrdinary).self_init()("treat <eps> as regular symbol for determinization");
     c("rho-ordinary", &rhoOrdinary).self_init()("treat <rho> as regular symbol for determinization");

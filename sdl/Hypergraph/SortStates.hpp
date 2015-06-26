@@ -246,7 +246,7 @@ struct TopNontermOrder : IStatesVisitor {
 // StateIdTranslation and offer both inout and inplace.
 template <class A>
 struct SortStates : public RestrictPrepare<SortStates<A>, A> {
-  static char const* name() { return "SortStates"; }
+  static char const* type() { return "SortStates"; }
   SortStatesOptions opt;
   SortStates(SortStatesOptions const& opt = SortStatesOptions()) : opt(opt) {
     opt.validate();

@@ -61,13 +61,13 @@ struct IsolateStartStateOptions : TransformOptionsBase {
 
   template <class Config>
   void configure(Config const& c) {
-    c.is(name());
+    c.is(type());
     c(caption());
   }
   static char const* caption() {
     return "prevents incoming arcs to start state by adding another state and cloning arcs if needed";
   }
-  static char const* name() { return "IsolateStart"; }
+  static char const* type() { return "IsolateStart"; }
 };
 
 /**

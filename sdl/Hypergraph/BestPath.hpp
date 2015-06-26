@@ -1659,7 +1659,7 @@ struct MaybeBestPathOutOptions : BestPathOutToOptions {
 
   static inline std::string usage() { return BestPathOptions::usage(); }
   static char const* caption() { return "nbest output and computation"; }
-  static char const* name() { return "Best"; }
+  static char const* type() { return "Best"; }
 
   void disableNbest() {
     enable = false;

@@ -660,9 +660,9 @@ struct ComposeFst : TimesFn {
           r.inArc.labelPair.second
               = NoSymbol;  // intentionally not EPSILON::ID; helps distinguish from real epsilon input arcs
 #if SDL_VALGRIND
-          //r.inArc.weight = Weight::one();
+          // weight set to one in ArcsGen so shouldn't need
+          r.inArc.weight = Weight::one();
 #endif
-          // weight is set to one in ArcsGen
           return r;
         }
         // else continue; no eligible

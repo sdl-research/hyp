@@ -40,7 +40,7 @@ struct PruneOptions : TransformOptionsBase {
   PruneOptions() { defaults(); }
   void defaults() { packStates = true; }
   static char const* caption() { return "Hypergraph pruning options"; }
-  static char const* name() { return "prune"; }
+  static char const* type() { return "Prune"; }
 
   template <class Conf>
   void configure(Conf& c) {

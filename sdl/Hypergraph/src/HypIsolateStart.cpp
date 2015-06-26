@@ -17,7 +17,7 @@ namespace Hypergraph {
 
 struct HypIsolateStart : TransformMain<HypIsolateStart> {
   HypIsolateStart()
-      : TransformMain<HypIsolateStart>(IsolateStartState::name(), IsolateStartState::caption()) {}
+      : TransformMain<HypIsolateStart>(IsolateStartState::type(), IsolateStartState::caption()) {}
   IsolateStartState iso;
   enum { has_inplace_transform1 = true };
   template <class Arc>

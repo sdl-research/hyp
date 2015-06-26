@@ -170,8 +170,8 @@ static const Properties maybeClearProps = 0;  // kAllProperties
 template <class Transform, class Arc>
 void checkInputs(IHypergraph<Arc> const& hg, Transform& t) {
   if (!t.checkInputs(hg))
-    THROW_LOG_NAMESTR("sdl." + t.name(), ConfigException,
-                      "input hypergraph " << t.checkInputsHelp() << " for transform " << t.name());
+    THROW_LOG_NAMESTR("sdl." + t.type(), ConfigException,
+                      "input hypergraph " << t.checkInputsHelp() << " for transform " << t.type());
 }
 
 
@@ -183,7 +183,7 @@ void inplace_always(IMutableHypergraph<A>& m, Transform& t) {
   if (t.Inplace) {
     bool needsc = t.needsCopy(m);
     if (needsc && !t.OptionalInplace)
-      SDL_THROW2(SelfModifyException, "unimplemented: needsCopy(hg) for inplace transform(hg)", t.name());
+      SDL_THROW2(SelfModifyException, "unimplemented: needsCopy(hg) for inplace transform(hg)", t.type());
     if (!needsc) {
       m.forceProperties(t.inAddProps());
       t.inplace(m);
@@ -329,7 +329,7 @@ template <class Transform, class A>
 void tryInplace(IHypergraph<A>& i, Transform& t) {
   if (!maybeInplace(i, t))
     SDL_THROW_LOG(Hypergraph.Transform, ImmutableHypergraphException,
-                  "input hypergraph is not mutable attempting in-place " << t.name() << " transform.");
+                  "input hypergraph is not mutable attempting in-place " << t.type() << " transform.");
 }
 
 template <class Transform, class A>
@@ -402,8 +402,6 @@ struct TransformBase {
     pVoc.maybeAssign(o.pVoc);
     applyFinalOutput = o.applyFinalOutput;
   }
-
-  // static char const* name() { return "TransformBase"; } // subclass should 'override' this
 
   template <class A>
   bool checkInputs(IHypergraph<A> const& h) const {
@@ -633,7 +631,7 @@ struct SimpleTransform : TransformBase<Inplace> {
   struct TransformFor {
     typedef CRTP type;
   };
-  char const* name() { return CRTP::name(); }
+  static char const* type() { return CRTP::type(); }
 };
 
 

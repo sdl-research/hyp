@@ -52,11 +52,10 @@ enum { kPushWeightsInsideAxiom = false };
 struct PushWeights;
 
 struct PushWeightsOptions : TransformOptionsBase {
-  static char const* name() { return "PushWeights"; }
+  static char const* type() { return "PushWeights"; }
   static char const* caption() {
     return "Modify Arc Weights (real-valued costs), optionally (in order 1-5):";
   }
-  static char const* type() { return "PushWeights"; }
   template <class Arc>
   struct TransformFor {
     typedef PushWeights type;

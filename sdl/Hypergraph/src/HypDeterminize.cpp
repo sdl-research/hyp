@@ -17,7 +17,7 @@ namespace Hypergraph {
 
 struct HypDeterminize : TransformMain<HypDeterminize> {
   HypDeterminize()
-      : TransformMain<HypDeterminize>(DeterminizeOptions::name(), DeterminizeOptions::caption()) {}
+      : TransformMain<HypDeterminize>(DeterminizeOptions::type(), DeterminizeOptions::caption()) {}
   DeterminizeOptions x;
   void declare_configurable() { this->configurable(&x); }
 

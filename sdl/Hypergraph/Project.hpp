@@ -54,7 +54,7 @@ struct Project : SimpleTransform<Project, Transform::Inplace>, TransformOptionsB
     c("make an fsa from fst by taking either the input or output labels");
     c("projection", &projection)("use input or output labels").init(kProject_Output);
   }
-  static char const* name() { return "Project"; }
+  static char const* type() { return "Project"; }
   template <class Arc>
   void inplace(IMutableHypergraph<Arc>& hg) const {
     project(&hg, projection);

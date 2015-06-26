@@ -182,7 +182,7 @@ struct FullSpliceOptions : SplicePrefixOptions, SpliceStateOptions {
 /// actual hg start and final state. actually copies ALL the source states.
 template <class A>
 struct Splice : TransformBase<Transform::Inplace, Transform::NoProperties> {
-  static char const* name() { return "Splice"; }
+  static char const* type() { return "Splice"; }
   // TODO: Reach pruning applied to the specified start->final states for fsm, and ->final for cfg.
   typedef A Arc;
   typedef typename A::Weight Weight;

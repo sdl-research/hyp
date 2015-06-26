@@ -913,14 +913,14 @@ void EarleyParser<Arc>::createResultArcs(Item* item, StateId head, ItemAndMatche
 
 struct ComposeOptions : fs::FstComposeOptions {
   explicit ComposeOptions() {}
-  static char const* name() { return "Compose"; }
+  static char const* type() { return "Compose"; }
   static char const* caption() {
     return "CFG*FST or FST*FST compose (for better speed, prune before composing)";
   }
   template <class Configure>
   void configure(Configure const& config) {
     fs::FstComposeOptions::configure(config);
-    config.is(name());
+    config.is(type());
     config(caption());
   }
 };

@@ -187,6 +187,10 @@ struct OutArcsT {};
 */
 struct IHypergraphStates : Resource {
 
+  static char const* staticType() { return "IHypergraph"; }
+  char const* dynamicType() const {
+    return typename_.c_str();
+  }
   std::string typename_;
 
   std::string const& typeStr() const { return typename_; }

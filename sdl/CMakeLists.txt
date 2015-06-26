@@ -26,16 +26,17 @@ else()
   set(SDL_DEVELOPMENT 0)
 endif()
 
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-
-if(SDL_CHECK_LICENSE)
-  message(STATUS "Enabling license/authentication check")
-  sdl_compiled_setting(SDL_CHECK_LICENSE 1)
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  set(SDL_RELEASE_BUILD 1)
+else()
+  set(SDL_RELEASE_BUILD 0)
 endif()
+
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 if(NOT DEFINED SDL_DEBUG_SYMBOLS)
   if (SDL_PRODUCTION)
-    if(CMAKE_BUILD_TYPE MATCHES "Release")
+    if(SDL_RELEASE_BUILD)
       set(SDL_DEBUG_SYMBOLS on)
     else()
       set(SDL_DEBUG_SYMBOLS on)
@@ -66,6 +67,10 @@ endif()
 
 option(OPEN_SOURCE_RELEASE "hyp open-source release" ON)
 
+
+if (SDL_RELEASE_BUILD)
+  add_definitions(-DEIGEN_NO_DEBUG)
+endif()
 
 # Use cmake -DSDL_FLOAT=32 or -DSDL_FLOAT=64
 if(NOT DEFINED SDL_FLOAT)
@@ -218,6 +223,7 @@ endif()
 set(UTF8_ROOT "${SDL_SHARED_EXTERNALS_PATH}/utf8")
 set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.3.0-newapi")
 if(UNIX)
+  set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2")
   set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.1")
 endif()
 if(ANDROID)
@@ -225,6 +231,7 @@ if(ANDROID)
 endif()
 
 if (WIN32)
+  set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2-1.0.6")
   # TODO: recompile 4.3.1
   set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.2.3")
   set(TBB_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/tbb-4.2.3")
@@ -300,7 +307,6 @@ if(WIN32)
 
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
   set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.5")
-  set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2-1.0.6")
 
 
   set(VS_MULTITHREADED_DEBUG_DLL_IGNORE_LIBRARY_FLAGS
@@ -331,6 +337,22 @@ if(WIN32)
   ##add_definitions("/wd4018")
   ## (people should really be forced to make explicit casts or fix their types)
 
+endif()
+
+if(WIN32 OR UNIX)
+  find_package(BZIP2)
+  message(STATUS "BZIP2 Found: ${BZIP2_LIBRARIES}")
+  if(NOT BZIP2_FOUND)
+    find_package(BZip2)
+  endif()
+  if(BZIP2_FOUND)
+    # kenlm was built with this
+    sdl_compiled_setting(HAVE_BZLIB 1)
+  else()
+    message(FATAL_ERROR "not found: BZIP2")
+  endif()
+else()
+  message(STATUS "no bzip2 (yet)")
 endif()
 
 set(SDL_NO_CLANG_OPTIMIZATIONS "-fcx-limited-range -fno-signaling-nans -fno-rounding-math")
@@ -829,11 +851,12 @@ MESSAGE(STATUS "SDL_BOOST_MINOR ${SDL_BOOST_MINOR} Boost_LIBRARY_DIRS ${Boost_LI
 # Due to the Boost quirk described in https://svn.boost.org/trac/boost/ticket/5553, running boost unit-tests built in
 # Debug mode against a dynamic shared library built in Release mode, will cause segfaults to occur: in order to avoid
 # this, we simply avoid linking dynamic shared libs against the Boost unit-test framework.
-if(WIN32)
+if(notevenWIN32)
 set(SDL_UNIT_TEST_NO_SHARED 1)
+endif()
+
 if(SDL_UNIT_TEST_NO_SHARED)
   LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
-endif()
 endif()
 
 if(SDL_UNIT_TEST_NO_SHARED)
@@ -855,7 +878,7 @@ if(SDL_UNIT_TEST_NO_SHARED)
 
     set_target_properties(boost_unit_test_framework PROPERTIES IMPORTED_LOCATION ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC})
   endif()
-elseif(UNIX)
+else() #if(UNIX)
   add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 
@@ -880,10 +903,6 @@ find_package(ZLIB)
 MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
 sdl_compiled_setting(HAVE_ZLIB 1)
 
-if(WIN32)
-  find_package(BZIP2 REQUIRED)
-  message(STATUS "BZIP2 Found: ${BZIP2_LIBRARIES}")
-endif()
 
 if(NOT ANDROID)
   find_package (Log4CXX)
@@ -973,8 +992,6 @@ set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
 
 
 
-find_package(BZip2)
-
 set(INDIRECT_UTIL_LIB_DEPENDENCIES
   ${INDIRECT_Vocabulary_LIB_DEPENDENCIES}
   Vocabulary
@@ -985,12 +1002,6 @@ if(ZLIB_FOUND)
   sdl_compiled_setting(HAVE_LIBZ 1)
 else()
   message(FATAL_ERROR "not found: libz")
-endif()
-if(BZIP2_FOUND)
-  # kenlm was built with this
-  sdl_compiled_setting(HAVE_BZLIB 1)
-else()
-  message(WARNING "not found: BZip2")
 endif()
 
 # Util and prereqs - used by most projects (except a few that might

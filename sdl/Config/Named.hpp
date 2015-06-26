@@ -11,11 +11,25 @@
 /** \file
 
    mixin for setName for KeywordConfig-able classes.
+   struct AB : INamed {
+   SDL_DYNAMIC_TYPE(AB)
+   }
 */
 
 #ifndef NAMED_JG_2013_12_05_HPP
 #define NAMED_JG_2013_12_05_HPP
 #pragma once
+
+
+#define SDL_DYNAMIC_TYPE_IS(s)                  \
+  static char const* staticType() { return s; } \
+  virtual char const* type() const { return staticType(); }
+
+#define SDL_STATIC_TYPE_IS(s)                  \
+  static char const* staticType() { return s; } \
+  static char const* type() { return staticType(); }
+
+#define SDL_DYNAMIC_TYPE(s) SDL_DYNAMIC_TYPE_IS(#s)
 
 #include <string>
 
@@ -24,14 +38,14 @@ namespace Config {
 
 struct UnspecifiedCategoryAndType {
   static char const* category() { return "?"; }
-  static char const* type() { return "?"; }
+  static char const* staticType() { return "?"; }
   static std::string usage() { return "?"; }
 };
 
 struct Nameless : UnspecifiedCategoryAndType {
   void setName(std::string const&) {}
   std::string name() const { return "?"; }
-  static char const* type() { return "nameless"; }
+  static char const* staticType() { return "nameless"; }
 };
 
 struct Named : UnspecifiedCategoryAndType {
@@ -39,7 +53,7 @@ struct Named : UnspecifiedCategoryAndType {
   void setName(std::string const& name) { name_ = name; }
   std::string name() const { return name_; }
   char const* nameC() const { return name_.c_str(); }
-  static char const* type() { return "named"; }
+  static char const* staticType() { return "named"; }
 };
 
 struct INamed {
@@ -50,7 +64,9 @@ struct INamed {
   virtual char const* nameC() const { return name_.c_str(); }
   virtual std::string usage() const { return "?"; }
   virtual char const* category() const { return "INamed"; }
-  static char const* type() { return "INamed"; }
+  /// TODO: make pure virtual and fill in every one
+  virtual char const* type() const { return staticType(); }
+  static char const* staticType() { return "INamed"; }
 
  protected:
   std::string name_;

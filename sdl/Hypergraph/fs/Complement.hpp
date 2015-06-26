@@ -144,7 +144,7 @@ void complement(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
 struct Complement : SimpleTransform<Complement, Transform::Inout>, TransformOptionsBase {
   Complement() {}
   explicit Complement(TransformOptionsBase const& base) {}
-  static char const* name() { return "Complement"; }
+  static char const* type() { return "Complement"; }
   std::string checkInputsHelp() { return "must be FSA"; }
   template <class A>
   bool checkInputs(IHypergraph<A> const& h) const {

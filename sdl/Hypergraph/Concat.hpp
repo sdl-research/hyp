@@ -57,7 +57,7 @@ struct ConcatOptions {
 // concat of yields of crossprod A x B - note: if either empty, so is result
 template <class A>
 struct Concat : TransformBase<Transform::Inplace, 0> {
-  static char const* name() { return "Concat"; }
+  static char const* type() { return "Concat"; }
   typedef A Arc;
   typedef IHypergraph<A> HG;
   typedef shared_ptr<HG const> PHG;
