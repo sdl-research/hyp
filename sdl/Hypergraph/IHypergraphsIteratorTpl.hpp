@@ -50,6 +50,9 @@ template <class A>
 struct IHypergraphsIteratorTpl {
   typedef A Arc;
 
+  /**
+     essential - we use a base-pointer-returning create factory for objs w/ different state
+  */
   virtual ~IHypergraphsIteratorTpl() {}
 
   /**

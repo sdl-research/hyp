@@ -16,23 +16,26 @@
     keyed on thread-id - each thread has its own slot
 */
 
-#ifndef THREADSPECIFICMAP_JG2012917_HPP
-#define THREADSPECIFICMAP_JG2012917_HPP
+#ifndef THREADSPECIFIC_JG2012917_HPP
+#define THREADSPECIFIC_JG2012917_HPP
 #pragma once
-
 
 #ifndef SDL_USE_PTHREAD_THREAD_SPECIFIC
 #if defined(_MSC_VER)
 #define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
-#else
-#if SDL_VALGRIND
+#elif SDL_VALGRIND
 #define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
 #else
-// this gives false-positive uninit conditional jump (because
-// pthread_getspecific fools valgrind). //TODO: check performance to see if
-// pthread or boost (which uses a threadlocal std::map<void *...> is faster
-#define SDL_USE_PTHREAD_THREAD_SPECIFIC 1
-#endif
+/**
+   uninit warning if 1:
+~ThreadSpecificInt (ThreadSpecific.hpp:100) - Util::ThreadSpecificBool originalAlreadyIncluded
+~IWordToPhrase (WordToPhrase.hpp:125)
+~IStringToString (StringToString.hpp:37)
+~Recase (Lowercase.hpp:26)
+~configure_info_for (configure_is.hpp:100)
+std::string configure::configure_usage<sdl::Lowercase::Recase>() (configure_is.hpp:123)
+*/
+#define SDL_USE_PTHREAD_THREAD_SPECIFIC 0
 #endif
 #endif
 
@@ -42,14 +45,13 @@
 #include <sdl/SharedPtr.hpp>
 #include <sdl/IntTypes.hpp>
 #include <sdl/Util/ThreadId.hpp>
-
-#if SDL_USE_PTHREAD_THREAD_SPECIFIC
-#include <pthread.h>
-#endif
 #include <stdint.h>
 #include <sdl/Util/Errno.hpp>
 #include <sdl/Util/Delete.hpp>
 // warning: std::uintptr_t is in C++11 only. most compilers' stdint.h will have uintptr_t, though
+#if SDL_USE_PTHREAD_THREAD_SPECIFIC
+#include <pthread.h>
+#endif
 
 namespace sdl {
 namespace Util {

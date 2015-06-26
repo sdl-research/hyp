@@ -47,8 +47,6 @@ class FlatStringHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
     opts.inputFeatures = feats;
   }
 
-  ~FlatStringHypergraphsIterator() {}
-
   StringToHypergraphOptions opts;
 
   // TODO: use full xmt/StringToHg options?
@@ -101,8 +99,6 @@ class FormattedHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
  public:
   FormattedHypergraphsIterator(std::istream& in, shared_ptr<IPerThreadVocabulary> const& perThreadVocab)
       : in_(in), perThreadVocab_(perThreadVocab), pHg_(), done_(), hgProp_(kStoreOutArcs) {}
-
-  ~FormattedHypergraphsIterator() {}
 
   virtual void next() {
 
