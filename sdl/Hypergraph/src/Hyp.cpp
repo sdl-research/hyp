@@ -28,6 +28,7 @@
 #include <sdl/Hypergraph/src/HypEmpty.cpp>
 #include <sdl/Hypergraph/src/HypPruneToBest.cpp>
 #include <sdl/Hypergraph/src/HypPushWeights.cpp>
+#include <sdl/Util/QuickExit.hpp>
 #if !SDL_MINIMAL_HYP_MAIN
 #if HAVE_OPENFST
 #include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
@@ -53,7 +54,6 @@
 #include <sdl/Hypergraph/src/HypGetString.cpp>
 #include <sdl/Hypergraph/src/HypTrie.cpp>
 #include <sdl/Hypergraph/src/HypProject.cpp>
-#include <sdl/Util/QuickExit.hpp>
 #endif
 
 #if SDL_FIX_LOCALE
