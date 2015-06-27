@@ -104,9 +104,6 @@ sdl::Util::DefaultLocaleFastCout initCout;
 
 int main(int argc, char* argv[]) {
   int exitcode = graehl::run_named_main(argc, argv);
-#if 1
   sdl::Util::quickExit(exitcode);
-#else
   return exitcode;
-#endif
 }
