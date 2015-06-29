@@ -289,6 +289,7 @@ struct ArcInBest {
 template <class A>
 struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
   typedef RestrictPrepare<PruneToBest<A>, A> Base;
+  enum { Inplace = true, OptionalInplace = false };
   using Base::inout;
   void inplace(IMutableHypergraph<A>& hg) {
     SDL_DEBUG(PruneToBest, "pruning " << hg);

@@ -244,7 +244,7 @@ void PushWeights::inplace(IMutableHypergraph<Arc>& hg) const {
   if (pushToFinal)
     PushWeightsToFinal<Arc>(hg, *this);
   else
-    pushWeightsToStart<Arc>(hg, *this);
+    PushCostsToStart<Arc> push(hg, *this);
 }
 
 

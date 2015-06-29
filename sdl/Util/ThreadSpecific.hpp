@@ -196,20 +196,24 @@ struct ThreadSpecific {
   }
   PVal pVal;
   operator Value&() { return get(); }
+
   Value& get() {
     if (alreadyThreadSpecific()) {
       if (local_) return *local_;
-      local_ = (Value*)std::malloc(sizeof(Value));
+      local_ = alloc();
       new (local_) Value();
       return *local_;
+    } else {
+      Value* v = pVal.get();
+      if (!v) {
+        v = alloc();
+        new (v) Value();
+        pVal.reset(v);
+      }
+      return *v;
     }
-    Value* v = pVal.get();
-    if (v) return *v;
-    v = (Value*)std::malloc(sizeof(Value));
-    new (v) Value();
-    pVal.reset(v);
-    return *v;
   }
+
   /// \return whether v needs to be constructed (will only be true once per
   /// thread) - sets v to point at thread specific value
   bool isUnconstructed(Value*& v) {
@@ -217,17 +221,21 @@ struct ThreadSpecific {
       if (local_) {
         v = local_;
         return false;
+      } else {
+        local_ = v = alloc();
+        return true;
       }
-      v = (Value*)std::malloc(sizeof(Value));
-      local_ = v;
-      return true;
+    } else {
+      v = pVal.get();
+      if (v)
+        return false;
+      else {
+        pVal.reset(v = alloc());
+        return true;
+      }
     }
-    v = pVal.get();
-    if (v) return false;
-    v = (Value*)std::malloc(sizeof(Value));
-    pVal.reset(v);
-    return true;
   }
+
   Value* getPtr() const { return alreadyThreadSpecific() ? local_ : pVal.get(); }
   Value const& get() const {
     Value* v = getPtr();
@@ -241,6 +249,7 @@ struct ThreadSpecific {
 
  private:
   ThreadSpecific(ThreadSpecific const& o);
+  static Value* alloc() { return (Value*)std::malloc(sizeof(Value)); }
 };
 
 

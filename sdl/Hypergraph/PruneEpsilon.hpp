@@ -140,8 +140,7 @@ struct PruneEpsilonOptions {
   };
 };
 
-struct PruneEpsilon : PruneEpsilonOptions {
-  enum { OptionalInplace = false };
+struct PruneEpsilon : PruneEpsilonOptions, TransformBase<Transform::Inplace> {
   PruneEpsilon(PruneEpsilonOptions const& opt = PruneEpsilonOptions())
       : PruneEpsilonOptions(opt)
   {}

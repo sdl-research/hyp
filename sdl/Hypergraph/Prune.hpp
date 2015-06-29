@@ -28,7 +28,13 @@
 namespace sdl {
 namespace Hypergraph {
 
-struct PruneOptions : TransformOptionsBase, SimpleTransform<PruneOptions> {
+struct PruneTransform;
+
+struct PruneOptions : TransformOptionsBase {
+  template <class Arc>
+  struct TransformFor {
+    typedef PruneTransform type;
+  };
   bool packStates;
   PruneOptions() { defaults(); }
   void defaults() { packStates = true; }
@@ -40,10 +46,6 @@ struct PruneOptions : TransformOptionsBase, SimpleTransform<PruneOptions> {
     c.is("Prune");
     c("pack-states", &packStates).self_init()("renumber remaining states to have contiguous ids");
   }
-  template <class Arc>
-  void inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const;
-  template <class Arc>
-  void inplace(IMutableHypergraph<Arc>& m) const;
 };
 
 template <class Arc>
@@ -67,12 +69,11 @@ struct ArcInStateSet {
    uses arc filter when you don't want to pack states
  */
 template <class Arc>
-struct PruneUnreachable : RestrictPrepare<PruneUnreachable<Arc>, Arc> {
+struct PruneUnreachable : RestrictPrepare<PruneUnreachable<Arc>, Arc>, PruneOptions {
   static char const* type() { return "Prune"; }
-  PruneOptions opt;
   typedef RestrictPrepare<PruneUnreachable<Arc>, Arc> Base;
   typedef PruneOptions Config;
-  PruneUnreachable(PruneOptions const& opt = PruneOptions()) : opt(opt) {}
+  PruneUnreachable(PruneOptions const& opt = PruneOptions()) : PruneOptions(opt) {}
   typedef shared_ptr<StateSet> PUseful;
   mutable PUseful pUseful;
   StateIdMapping* mapping(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>& m) const {
@@ -81,7 +82,7 @@ struct PruneUnreachable : RestrictPrepare<PruneUnreachable<Arc>, Arc> {
     pUseful = r.useful();
     ArcInStateSet<Arc> s(*pUseful);
     this->keep = s;
-    if (opt.packStates) {
+    if (packStates) {
       return new StateAddMapping<Arc>(&m);
     } else {  // preserve stateids
       return new IdentityIdMapping();
@@ -102,20 +103,23 @@ void pruneUnreachable(IMutableHypergraph<Arc>& hg, PruneOptions const& opt = Pru
 }
 
 template <class Arc>
-void pruneUnreachable(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* pHgResult, PruneOptions const& opt = PruneOptions()) {
+void pruneUnreachable(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* pHgResult,
+                      PruneOptions const& opt = PruneOptions()) {
   PruneUnreachable<Arc> p(opt);
   p.inout(hgInput, pHgResult);
 }
 
-template <class Arc>
-void PruneOptions::inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {
-  pruneUnreachable(h, o, *this);
-}
-
-template <class Arc>
-void PruneOptions::inplace(IMutableHypergraph<Arc>& m) const {
-  pruneUnreachable(m, *this);
-}
+struct PruneTransform : TransformBase<Transform::Inout> {
+  enum { OptionalInplace = true };
+  template <class Arc>
+  void inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {
+    pruneUnreachable(h, o, *this);
+  }
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& m) const {
+    pruneUnreachable(m, *this);
+  }
+};
 
 
 }}

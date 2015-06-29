@@ -112,7 +112,7 @@ void process(std::string const& file, unsigned ngramMax = 0, bool allPairs = fal
   sort.partBoundary = hg.size();
   if (allPairs && dag) {
     sort.clearRemap = false;
-    inplace(hg, sort);
+    sort.inplace(hg);
   }
 
   typedef typename Arc::Weight Weight;

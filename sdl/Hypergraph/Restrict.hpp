@@ -33,8 +33,9 @@ namespace Hypergraph {
 /// in per-thread objects or stack vars) is a sham here: everything is mutable
 /// (note: we're careful not to use a multithreaded shared Restrict transform,
 /// but it would be better to remove the Transform base entirely).
+//: TransformBase<Transform::Inplace>
 template <class A>
-struct Restrict : TransformBase<Transform::Inplace> {
+struct Restrict {
   enum { OptionalInplace = true };
   typedef IHypergraph<A> H;
   typedef A Arc;

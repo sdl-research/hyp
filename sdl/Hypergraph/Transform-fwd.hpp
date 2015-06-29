@@ -17,7 +17,14 @@
 
     if you define 'typedef void IsSimpleTransform;' then xmt modules won't do
     need locking/copying/etc before action (easiest to inherit from
-    SimpleTransform<...> in this case
+    SimpleTransform<...> in this case.
+
+    a 'Simple' transform does not get setDefaultVocabName(name) or
+    loadResources(mgr) calls (but does get:
+    transform.loadResourcesThread(mgr);
+    transform.prepareArcTypeThread(mgr, (Arc*)0);
+    )
+
 */
 
 
@@ -41,12 +48,14 @@ template <class TransformOptions, class Arc, class VoidIfSimpleTransform = void>
 struct TransformFor {
   typedef typename TransformOptions::template TransformFor<Arc>::type type;
   enum { Simple = false };
+  static type const* getSimple(TransformOptions const&) { return (type const*)0; }
 };
 
 template <class TransformOptions>
 struct TransformFor<TransformOptions, typename TransformOptions::IsSimpleTransform::type> {
   typedef TransformOptions type;
   enum { Simple = true };
+  static type const* getSimple(TransformOptions const& opt) { return &opt; }
 };
 
 /**

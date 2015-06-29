@@ -204,8 +204,7 @@ void reweight(IMutableHypergraph<Arc>& hg, ReweightOptions const& opt) {
   ReweightNormalize<Arc> rw(opt, hg);
 }
 
-struct Reweight : TransformBase<Transform::Inplace>, ReweightOptions {
-  typedef void IsSimpleTransform;
+struct Reweight : SimpleTransform<Reweight, Transform::Inplace, false>, ReweightOptions {
   Reweight(ReweightOptions const& opt = ReweightOptions()) : ReweightOptions(opt) {}
   template <class Arc>
   bool needs(IMutableHypergraph<Arc>& h) const {

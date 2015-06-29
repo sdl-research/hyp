@@ -421,7 +421,6 @@ template <bool Inplace_ = Transform::Inout, Properties InAddProps = Transform::N
 struct TransformBase : PrepareArcType {
   TransformBase() { defaultVocab = "input-vocab"; }
 
-
   template <class A>
   bool checkInputs(IHypergraph<A> const& h) const {
     return true;
@@ -515,13 +514,15 @@ struct TransformBase : PrepareArcType {
   /**
      if set before loadResources, pVoc will get vocab resource mgr[name].
   */
-  void setDefaultVocabName(std::string const& name) const { defaultVocab = name; }
+  void setDefaultVocabName(std::string const& name) { defaultVocab = name; }
 
   // so the word vocab configured by resource manager gets used in preference to the input hg's (warning:
   // don't assume ids are the same for same string, then - e.g. capitalize convert chars to tokens which
   // create new symbols
   IVocabularyPtr const& getVocab(IVocabularyPtr const& defaultVoc) const {
+    assert(defaultVoc.get());
     IVocabularyPtr& voc = pVoc.get();
+    assert(&voc);
     if (!voc) voc = defaultVoc;
     return voc;
   }
@@ -529,13 +530,12 @@ struct TransformBase : PrepareArcType {
   IVocabulary& vocab() const { return *getVocab(); }
 
  protected:
-  mutable std::string defaultVocab;  // comes from xmt/TransformAsModule config_.vocabulary
+  std::string defaultVocab;  // comes from xmt/TransformAsModule config_.vocabulary
   mutable IVocabularyPtrPerThread pVoc;  // TODO: once we have per-process vocabulary, remove ThreadSpecific
 
-  TransformBase(TransformBase const& o) {
-    defaultVocab = o.defaultVocab;
-    pVoc.maybeAssign(o.pVoc);
-  }
+ private:
+  void operator=(TransformBase const&);
+  TransformBase(TransformBase const& o);
 
 };
 
@@ -579,7 +579,7 @@ TransformHolder makeTransform(TransformOptions const& opt, IHypergraph<Arc> cons
 
 template <class Transform>
 Transform const& getTransform(TransformHolder const& transformHolder) {
-  return *(Transform const*)transformHolder.get();
+  return *static_cast<Transform *>(transformHolder.get());
 }
 
 template <class Arc, class TransformOptions>

@@ -1,0 +1,28 @@
+lbfgs: &LBFGS
+  # max-iterations: 100
+  max-iterations: 20
+  m: 5
+  epsilon: 1e-4
+  ftol: 1e-3
+
+optimize-lbfgs:
+  optimization-method: lbfgs
+  variance: 2.0
+  lbfgs: *LBFGS
+  test-mode-detailed-output: false
+  num-threads: 4
+
+search-space-train: &SEARCH_SPACE
+  conll-path: input/train-small.txt
+  meaningful-feature-names: true
+  fst-compose: true
+  labels-path: labels.txt.gz
+  labels-per-pos-path: labels-per-pos.txt.gz
+  transition-model: bigram
+  num-features: 10000 # for realistic applications, this should be larger, e.g., 1e6
+  num-threads: 4
+
+search-space-test:
+  basis: *SEARCH_SPACE
+  conll-path: input/test-small.txt
+  num-threads: 1 # must be 1 for test because output order is currently random if threads > 1
