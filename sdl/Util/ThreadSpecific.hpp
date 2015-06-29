@@ -173,23 +173,24 @@ typedef ThreadSpecificInt<unsigned> ThreadSpecificUnsigned;
 typedef ThreadSpecificInt<std::size_t> ThreadSpecificSize;
 
 /** new Value() per thread. */
-template <class Value, class Allocator = std::allocator<Value> >
-struct ThreadSpecific : Allocator {
+template <class Value>
+struct ThreadSpecific {
   Value* local_;
   enum { isThreadStack = false };
   bool alreadyThreadSpecific() const { return isSingleThreadProgram() || isThreadStack; }
+  typedef boost::thread_specific_ptr<Value> PVal;
   static void cleanFun(Value* p) {
     if (p) {
       p->~Value();
-      Allocator().deallocate(p, 1);
+      std::free(p);
     }
   }
-  typedef boost::thread_specific_ptr<Value> PVal;
-  ThreadSpecific(Allocator allocator = Allocator()) : Allocator(allocator), pVal(cleanFun), local_() {}
+  ThreadSpecific() : pVal(cleanFun), local_() {}
   ~ThreadSpecific() {
-    if (alreadyThreadSpecific())
-      delete local_;
-    else {
+    if (alreadyThreadSpecific()) {
+      local_->~Value();
+      std::free(local_);
+    } else {
       assert(!local_);
     }
   }
@@ -198,13 +199,13 @@ struct ThreadSpecific : Allocator {
   Value& get() {
     if (alreadyThreadSpecific()) {
       if (local_) return *local_;
-      local_ = (Value*)Allocator::allocate(1);
+      local_ = (Value*)std::malloc(sizeof(Value));
       new (local_) Value();
       return *local_;
     }
     Value* v = pVal.get();
     if (v) return *v;
-    v = (Value*)Allocator::allocate(1);
+    v = (Value*)std::malloc(sizeof(Value));
     new (v) Value();
     pVal.reset(v);
     return *v;
@@ -217,13 +218,13 @@ struct ThreadSpecific : Allocator {
         v = local_;
         return false;
       }
-      v = (Value*)Allocator::allocate(1);
+      v = (Value*)std::malloc(sizeof(Value));
       local_ = v;
       return true;
     }
     v = pVal.get();
     if (v) return false;
-    v = (Value*)Allocator::allocate(1);
+    v = (Value*)std::malloc(sizeof(Value));
     pVal.reset(v);
     return true;
   }

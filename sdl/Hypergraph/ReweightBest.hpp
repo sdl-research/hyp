@@ -34,28 +34,31 @@
 namespace sdl {
 namespace Hypergraph {
 
-struct ReweightBestOptions : ReweightOptions {
+struct ReweightBest : ReweightOptions, SimpleTransform<ReweightBest, Transform::Inplace, false> {
+  static char const* type() { return "ReweightBest"; }
   static inline std::string caption() {
     return std::string("(for best derivation arcs only) ") + ReweightOptions::caption();
   }
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& h) const;
 };
 
 // nbest visitor
-template <class A>
-struct ReweightDerivation : public Derivation<A>::VisitDfsBase {
-  ReweightBestOptions const& opt;
+template <class Arc>
+struct ReweightDerivation : public Derivation<Arc>::VisitDfsBase {
+  ReweightBest const& opt;
   typedef ReweightDerivation self_type;
-  IMutableHypergraph<A>& h;
-  ReweightDerivation(IMutableHypergraph<A>& h, ReweightBestOptions const& opt)
+  IMutableHypergraph<Arc>& h;
+  ReweightDerivation(IMutableHypergraph<Arc>& h, ReweightBest const& opt)
       : h(h), opt(opt), rng(opt.seed) {}
   mutable Util::Random01 rng;
-  typedef Derivation<A> Deriv;
+  typedef Derivation<Arc> Deriv;
   void close(Deriv const& d) const {
     if (d.axiom()) return;
-    A& a = d.arc();
+    Arc& a = d.arc();
     opt.reweight(a.weight(), rng);
   }
-  bool operator()(typename Deriv::DerivP const& dp, typename A::Weight const& w, NbestId n) const {
+  bool operator()(typename Deriv::DerivP const& dp, typename Arc::Weight const& w, NbestId n) const {
     SDL_DEBUG(Hypergraph.ReweightBest, "reweighting arcs in 1-best derivation " << print(*dp, h));
     dp->visitDfs(*this);
     return true;
@@ -63,14 +66,11 @@ struct ReweightDerivation : public Derivation<A>::VisitDfsBase {
 };
 
 
-struct ReweightBest : TransformBase<Transform::Inplace> {
-  ReweightBestOptions opt;
-  template <class A>
-  void inplace(IMutableHypergraph<A>& h) {
-    ReweightDerivation<A> v(h, opt);
-    visitNbest(v, 1, h);
-  }
-};
+template <class Arc>
+void ReweightBest::inplace(IMutableHypergraph<Arc>& h) const {
+  ReweightDerivation<Arc> v(h, *this);
+  visitNbest(v, 1, h);
+}
 
 
 }}

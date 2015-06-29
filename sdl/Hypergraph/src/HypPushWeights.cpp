@@ -22,7 +22,7 @@ struct HypPushWeights : TransformMain<HypPushWeights> {  // CRTP
   }
   void declare_configurable() { this->configurable(&x); }
 
-  Properties properties(int i) const { return this->properties_else(kFsmOutProperties) | kStoreInArcs; }
+  Properties properties(int i) const { return this->properties_else(x.inAddProps()); }
   PushWeights x;
   enum { has_inplace_transform1 = true };
   template <class Arc>

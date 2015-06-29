@@ -27,26 +27,32 @@
 namespace sdl {
 namespace Hypergraph {
 
+/// TODO: since a Restrict can only be used by one thread (it's more of a
+/// temporary object) perhaps we should make it not a transform - as you can
+/// see, the const-ness of Transform (intended to suggest putting mutable stuff
+/// in per-thread objects or stack vars) is a sham here: everything is mutable
+/// (note: we're careful not to use a multithreaded shared Restrict transform,
+/// but it would be better to remove the Transform base entirely).
 template <class A>
 struct Restrict : TransformBase<Transform::Inplace> {
+  enum { OptionalInplace = true };
   typedef IHypergraph<A> H;
   typedef A Arc;
   typedef typename A::ArcFilter Filter;
 
-  Filter keep;
-  bool clearRemap;
+  mutable Filter keep;
+  mutable bool clearRemap;
   Restrict() : clearRemap(true) {}
 
   explicit Restrict(Filter const& keep, bool clearRemap = true) : keep(keep), clearRemap(clearRemap) {}
 
   /// you must populate this if it's frozen, in which case it removes states not
   /// mapped. otherwise all states are mapped
-  StateIdTranslation stateRemap;
+  mutable StateIdTranslation stateRemap;
 
   bool trivial() const { return stateRemap.identity() && !keep; }
 
-  enum { Inplace = true, OptionalInplace = true };
-  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) {
+  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) const {
     assert(stateRemap);
     if (trivial())
       copyHypergraph(h, o);
@@ -54,13 +60,13 @@ struct Restrict : TransformBase<Transform::Inplace> {
       copyFilter(stateRemap, h, o, keep, kArcs, kStartFinal, kNoClear);
     }
   }
-  void inplace(IMutableHypergraph<A>& m) {
+  void inplace(IMutableHypergraph<A>& m) const {
     assert(stateRemap);
     if (!trivial()) {
       m.restrict(stateRemap, keep);
     }
   }
-  void complete() {
+  void complete() const {
     if (clearRemap) stateRemap.clear();
     keep = Filter();
   }
@@ -77,10 +83,10 @@ struct RestrictPrepare : Restrict<A> {
   static inline bool isInplace(IHypergraph<A> const& h, IMutableHypergraph<A>& m) { return &h == &m; }
 
   /// CRTP inheritance of Prepare from this
-  Prepare* impl() { return static_cast<Prepare*>(this); }
+  Prepare const* impl() const { return static_cast<Prepare const*>(this); }
 
-  bool prepare(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
-    Prepare* p = impl();
+  bool prepare(IHypergraph<A> const& h, IMutableHypergraph<A>& m) const {
+    Prepare const* p = impl();
     if (clearOut && !isInplace(h, m)) {
       if (samePropertiesOut)
         m.clear(h.properties());
@@ -95,26 +101,26 @@ struct RestrictPrepare : Restrict<A> {
     } else
       return false;
   }
-  void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {}
-  StateIdMapping* mapping(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
+  void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) const {}
+  StateIdMapping* mapping(IHypergraph<A> const& h, IMutableHypergraph<A>& m) const {
     assert(0);
     return 0;
   }
-  void complete() {
+  void complete() const {
     Restrict<A>::complete();
     ((Prepare*)this)->completeImpl();
   }
   void completeImpl() {}
   enum { enableInplace = true };
   enum { Inplace = enableInplace, OptionalInplace = enableInplace };
-  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) {
+  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) const {
     if (h.prunedEmpty()) return;
     prepare(h, *o);
     Restrict<A>::inout(h, o);
     complete();
   }
-  bool needsRestrict(IHypergraph<A>& h) { return true; }
-  void inplace(IMutableHypergraph<A>& m) {
+  bool needsRestrict(IHypergraph<A>& h) const { return true; }
+  void inplace(IMutableHypergraph<A>& m) const {
     if (m.prunedEmpty()) return;
     if (impl()->needsRestrict(m)) {
       if (prepare(m, m)) {

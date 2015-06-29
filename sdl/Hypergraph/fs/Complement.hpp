@@ -151,7 +151,7 @@ struct Complement : SimpleTransform<Complement, Transform::Inout>, TransformOpti
     return h.isFsm();
   }
   template <class Arc>
-  void inout(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* pResultHg) {
+  void inout(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* pResultHg) const {
     complement(hg, pResultHg);
   }
 };

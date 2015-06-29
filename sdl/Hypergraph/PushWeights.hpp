@@ -32,8 +32,8 @@
     now this is only for viterbi and log weight
 */
 
-#ifndef PUSHWEIGHTSTOSTART_JG2013220_HPP
-#define PUSHWEIGHTSTOSTART_JG2013220_HPP
+#ifndef PUSHWEIGHTS_JG2013220_HPP
+#define PUSHWEIGHTS_JG2013220_HPP
 #pragma once
 
 #include <sdl/Hypergraph/InsideAlgorithm.hpp>
@@ -49,19 +49,18 @@ namespace Hypergraph {
 
 enum { kPushWeightsInsideAxiom = false };
 
-struct PushWeights;
+struct PushWeights : SimpleTransform<PushWeights, false> {
+  void validate() {}
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& hg) const;
 
-struct PushWeightsOptions : TransformOptionsBase {
+  Properties inAddProps() const { return pushToFinal ? kStoreInArcs : kStoreFirstTailOutArcs; }
   static char const* type() { return "PushWeights"; }
   static char const* caption() {
     return "Modify Arc Weights (real-valued costs), optionally (in order 1-5):";
   }
-  template <class Arc>
-  struct TransformFor {
-    typedef PushWeights type;
-  };
 
-  PushWeightsOptions() : pushToFinal() {}
+  PushWeights() : pushToFinal() {}
   bool pushToFinal;
   template <class Config>
   void configure(Config& config) {
@@ -96,7 +95,7 @@ struct PushCostsToStart {
   StateId N, start, final;
   Util::AutoDeleteArray<SdlFloat> inside, outside;
   SdlFloat* outside0;
-  PushCostsToStart(HG& hg, PushWeightsOptions const& = PushWeightsOptions())
+  PushCostsToStart(HG& hg, PushWeights const& = PushWeights())
       : hg(hg)
       , mhg(hg.isMutable() ? static_cast<MHG*>(&hg) : 0)
       , N(hg.sizeForHeads())
@@ -146,7 +145,7 @@ struct PushCostsToStart {
    as with PushCostsToStart, but works on acyclic hg, moving inside costs up
    toward final (toward heads). commutative semirings (w/ division) only
 
-   usage: PushWeightsToFinal<Arc>(hg, PushWeightsOptions());
+   usage: PushWeightsToFinal<Arc>(hg, PushWeights());
 
 */
 template <class Arc>
@@ -160,7 +159,7 @@ struct PushWeightsToFinal {
   StateId N, final;
   Weight const kZero;
   PtrWeights inside;
-  PushWeightsToFinal(HG& hg, PushWeightsOptions const& = PushWeightsOptions())
+  PushWeightsToFinal(HG& hg, PushWeights const& = PushWeights())
       : hg(hg)
       , mhg(hg.isMutable() ? static_cast<MHG*>(&hg) : 0)
       , N(hg.sizeForHeads())
@@ -230,24 +229,18 @@ struct PushWeightsToFinal {
   }
 };
 
-
 template <class Arc>
-void pushWeightsToStart(IHypergraph<Arc>& hg, PushWeightsOptions const& config = PushWeightsOptions()) {
+void pushWeightsToStart(IHypergraph<Arc>& hg, PushWeights const& config = PushWeights()) {
   PushCostsToStart<Arc> push(hg, config);
 }
 
-struct PushWeights : TransformBase<Transform::Inplace, kStoreInArcs | kStoreOutArcs>, PushWeightsOptions {
-  explicit PushWeights(PushWeightsOptions const& opt) : PushWeightsOptions(opt) {}
-  PushWeights() {}
-
-  template <class Arc>
-  void inplace(IMutableHypergraph<Arc>& hg) const {
-    if (pushToFinal)
-      PushWeightsToFinal<Arc>(hg, *this);
-    else
-      PushCostsToStart<Arc>(hg, *this);
-  }
-};
+template <class Arc>
+void PushWeights::inplace(IMutableHypergraph<Arc>& hg) const {
+  if (pushToFinal)
+    PushWeightsToFinal<Arc>(hg, *this);
+  else
+    pushWeightsToStart<Arc>(hg, *this);
+}
 
 
 }}

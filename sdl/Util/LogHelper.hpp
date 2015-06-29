@@ -318,7 +318,7 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 #define SDL_FATAL(loggerNameSuffix, expression) \
   LOG_FATAL_NAMESTR(SDL_LOG_PREFIX(loggerNameSuffix), expression)
 
-#if ENABLE_TEST_SDL_DEBUG
+#if ENABLE_TEST_SDL_DEBUG_ALWAYS
 #define TEST_SDL_DEBUG(what, msg) SDL_DEBUG_ALWAYS(what, msg)
 #else
 #define TEST_SDL_DEBUG(what, msg) SDL_DEBUG(what, msg)

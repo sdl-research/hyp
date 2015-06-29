@@ -18,13 +18,14 @@
 #pragma once
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32)) && !defined(__CYGWIN__)
-# include <stdlib.h>
+#include <stdlib.h>
 #else
-# include <unistd.h>
+#include <unistd.h>
 #endif
 #include <iostream>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 /**
     exit without calling static or local destructors

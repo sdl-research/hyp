@@ -14,6 +14,10 @@
 
     TransformHolder: for Transform, hold arc-type-specific models (or other
     init. we don't want to happen for every single hg transformed).
+
+    if you define 'typedef void IsSimpleTransform;' then xmt modules won't do
+    need locking/copying/etc before action (easiest to inherit from
+    SimpleTransform<...> in this case
 */
 
 
@@ -32,15 +36,24 @@ const bool NoProperties=0;
 }
 
 /// template typedef trait TransformForHolder. you can also specialize this class
-template <class TransformOptions, class Arc>
+
+template <class TransformOptions, class Arc, class VoidIfSimpleTransform = void>
 struct TransformFor {
   typedef typename TransformOptions::template TransformFor<Arc>::type type;
+  enum { Simple = false };
 };
 
-typedef shared_ptr<void> TransformHolder; // for state specific to a weight
+template <class TransformOptions>
+struct TransformFor<TransformOptions, typename TransformOptions::IsSimpleTransform::type> {
+  typedef TransformOptions type;
+  enum { Simple = true };
+};
 
-/*
-TransformHolder example: (include full Transform.hpp)
+/**
+   TransformHolder is used to cache process-wide state for options in order to
+   transform a particular *arc* type (i.e. it holds a TransformFor<..., Arc>):
+
+example:
 
  ReweightOptions reweight;
  TransformHolder t = makeTransform<Arc>(reweight);
@@ -48,7 +61,14 @@ TransformHolder example: (include full Transform.hpp)
  Reweight<Arc>
  MutableHypergraph<Arc> hg1, hg2;
  inplace(hg1, useTransform(t, opt, reweight));
+
+  would be marked const so you don't accidentally put mutable state in what
+  could be a thread-shared object, except that shared_ptr<void const> doesn't
+  work.
  */
+typedef void AnyTransform;
+typedef shared_ptr<AnyTransform> TransformHolder;
+
 
 }}
 

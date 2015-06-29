@@ -252,9 +252,9 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
     opt.validate();
     this->clearOut = false;
   }
-  StateId partBoundary;
+  mutable StateId partBoundary;
 
-  bool needs(IHypergraph<A> const& hg) {
+  bool needs(IHypergraph<A> const& hg) const {
     if (opt.sortOrder == SortStatesOptions::kTopSort && hasProperties(hg.properties(), kSortedStates)) {
       partBoundary = hg.numNotTerminalStates();
       return false;
@@ -272,7 +272,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
     return true;
   }
 
-  void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
+  void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) const {
     bool inplace = this->isInplace(h, m);
     bool canonLex = !inplace && opt.canonicalLex;  // TODO: support for inplace also
     if (canonLex) m.forceCanonicalLex();
@@ -318,7 +318,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
     x.freeze();
   }
 
-  StateIdMapping* mapping(IHypergraph<A> const& h, IMutableHypergraph<A>& m) {
+  StateIdMapping* mapping(IHypergraph<A> const& h, IMutableHypergraph<A>& m) const {
     if (this->isInplace(h, m))
       return new ConsecutiveIdMapping();
     else {
@@ -338,7 +338,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
 template <class A>
 StateId sortStates(IMutableHypergraph<A>& h, SortStatesOptions const& opt = SortStatesOptions()) {
   SortStates<A> ss(opt);
-  inplace(h, ss);
+  ss.inplace(h);
   return ss.partBoundary;
 }
 

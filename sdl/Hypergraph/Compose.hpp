@@ -1067,12 +1067,17 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
 
   FstPtr& pFst() const { return ppFst.get(); }
 
-  Util::ThreadSpecificBool resourceNeedsCheck_;
+  mutable Util::ThreadSpecificBool resourceNeedsCheck_;
 
   template <class ResourceManager>
-  void loadResourcesThread(ResourceManager& mgr) {
-    if (!fst.empty()) {
+  void loadResources(ResourceManager&) {
+    if (!fst.empty())
       fstname = fst;
+  }
+
+  template <class ResourceManager>
+  void loadResourcesThread(ResourceManager& mgr) const {
+    if (!fst.empty()) {
       mgr.getResource(fst, pFst());
       resourceNeedsCheck_.set(true);
     }
@@ -1080,7 +1085,7 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
 
   bool haveFst() const { return pFst().get(); }
 
-  void loadFst(std::string const& filename, IVocabularyPtr const& vocab) {
+  void loadFst(std::string const& filename, IVocabularyPtr const& vocab) const {
     SDL_DEBUG(Compose, "loadFst into vocabulary @" << vocab.get());
     if (pFst())
       SDL_WARN(Hypergraph.Compose,
@@ -1096,14 +1101,13 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
     vocab->freeze();
     sortArcs(phg);
     pFst().reset(phg);
-    fstname = filename;
     checkFst();
   }
 
   /**
      not safe to sort an hg resource since there may be other users.
   */
-  void checkFst(bool resource = false) {
+  void checkFst(bool resource = false) const {
     FST* fst = pFst().get();
     if (!fst)
       SDL_THROW_LOG(Hypergraph.Compose, ConfigException,
@@ -1123,14 +1127,14 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
 
   std::string fstname;
 
-  void setFst(shared_ptr<FST> const& pFst_) {
+  void setFst(shared_ptr<FST> const& pFst_) const {
     pFst() = pFst_;
     checkFst();
   }
-  void setFst(FST& fst) { setFst(ptrNoDelete(fst)); }
-  shared_ptr<FST> getFst() { return pFst(); }
+  void setFst(FST& fst) const { setFst(ptrNoDelete(fst)); }
+  shared_ptr<FST> getFst() const { return pFst(); }
 
-  void inoutCfg(IHypergraph<FstArc>& hg, IMutableHypergraph<FstArc>* pResultHg) {
+  void inoutCfg(IHypergraph<FstArc>& hg, IMutableHypergraph<FstArc>* pResultHg) const {
     FST& fst = *pFst();
     if (resourceNeedsCheck_.get()) {
       fst.maybeInitProcessAndThread();
@@ -1141,7 +1145,7 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
     composeImpl(hg, fst, pResultHg, *this);
   }
 
-  IVocabularyPtr checkVocab(IHypergraph<FstArc> const& hg) {
+  IVocabularyPtr checkVocab(IHypergraph<FstArc> const& hg) const {
     IVocabularyPtr const& r = inputVocabMatches(hg);
     FST* fst = pFst().get();
     SDL_DEBUG(Compose, "transform input hg vocabulary @ " << r.get() << " should match fst vocabulary @"
@@ -1160,7 +1164,7 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
      *pResultHg = hg * fst.
    */
   template <class Arc>
-  void inout(IHypergraph<Arc> const& hgIn, IMutableHypergraph<Arc>* pResultHg) {
+  void inout(IHypergraph<Arc> const& hgIn, IMutableHypergraph<Arc>* pResultHg) const {
     FST* fst = pFst().get();
     if (!fst) SDL_THROW_LOG(Hypergraph.Compose, ConfigException, "no fst loaded to compose input with");
     pResultHg->setVocabulary(checkVocab(hgIn));

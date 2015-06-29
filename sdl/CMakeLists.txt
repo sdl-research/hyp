@@ -70,6 +70,8 @@ option(OPEN_SOURCE_RELEASE "hyp open-source release" ON)
 
 if (SDL_RELEASE_BUILD)
   add_definitions(-DEIGEN_NO_DEBUG)
+else()
+  add_definitions(-DEIGEN_NO_DEBUG)
 endif()
 
 # Use cmake -DSDL_FLOAT=32 or -DSDL_FLOAT=64
@@ -304,6 +306,8 @@ if(WIN32)
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
   set(Boost_COMPILER "-vc100")
   set(Boost_NO_SYSTEM_PATHS 1)
+#  set(Boost_USE_STATIC_LIBS ON) # Enable if statically linking to boost
+    add_definitions(-DBOOST_ALL_DYN_LINK) # Disable if statically linking to boost
 
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
   set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.5")
@@ -846,45 +850,58 @@ find_package(Boost ${Boost_FIND_VERSION} REQUIRED COMPONENTS ${boost_libs})
 
 MESSAGE(STATUS "SDL_BOOST_MINOR ${SDL_BOOST_MINOR} Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS}")
 
-# Create a list of Boost libraries that can be used to build shared libs; this list is essentially the same as the
-# normal list with the exception of the unit_test_framework.
-# Due to the Boost quirk described in https://svn.boost.org/trac/boost/ticket/5553, running boost unit-tests built in
-# Debug mode against a dynamic shared library built in Release mode, will cause segfaults to occur: in order to avoid
-# this, we simply avoid linking dynamic shared libs against the Boost unit-test framework.
-if(notevenWIN32)
-set(SDL_UNIT_TEST_NO_SHARED 1)
-endif()
+#if 1, attempt to use unit_test_framework dylib, but provide our own main()
+set(SDL_TRY_QUICK_EXIT_UNIT_TEST 1)
+set(SDL_BOOST_TEST_LIBRARIES "")
 
-if(SDL_UNIT_TEST_NO_SHARED)
-  LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
-endif()
-
-if(SDL_UNIT_TEST_NO_SHARED)
-  if(NOT WIN32)
-    add_library(boost_unit_test_framework STATIC IMPORTED)
-    list(APPEND Boost_LIBRARIES boost_unit_test_framework)
-    if(APPLE)
-      set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC "${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt.a")
-    else()
-      if(SDL_DEBUG)
-        set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC ${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt-d-1_${SDL_BOOST_MINOR}.a)
-      else()
-        set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC ${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt-1_${SDL_BOOST_MINOR}.a)
-      endif()
-    endif()
-    MESSAGE(STATUS "Boost unit test framework: ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC}")
-
-    #see http://www.boost.org/doc/libs/1_57_0/libs/test/doc/html/utf/compilation.html#utf.flag.alt-init-api
-
-    set_target_properties(boost_unit_test_framework PROPERTIES IMPORTED_LOCATION ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC})
-  endif()
-else() #if(UNIX)
-  add_definitions(-DBOOST_TEST_DYN_LINK)
-endif()
-
+# Create a list of Boost libraries that can be used to build shared libs; this
+# list is essentially the same as the normal list with the exception of the
+# unit_test_framework.  Due to the Boost quirk described in
+# https://svn.boost.org/trac/boost/ticket/5553, running boost unit-tests built
+# in Debug mode against a dynamic shared library built in Release mode, will
+# cause segfaults to occur (reported in windwos but feared in general)
+message(STATUS "${boost_libs_shared}")
 if(WIN32)
-    add_definitions(-DBOOST_ALL_DYN_LINK) # Disable if statically linking to boost
+  set(SDL_UNIT_TEST_MAIN 0)
+
+  LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
+  #see http://www.boost.org/doc/libs/1_57_0/libs/test/doc/html/utf/compilation.html#utf.flag.alt-init-api
+elseif(SDL_TRY_QUICK_EXIT_UNIT_TEST)
+  set(SDL_BOOST_TEST_LIBRARIES "${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt-1_${SDL_BOOST_MINOR}.so")
+  set(SDL_UNIT_TEST_MAIN 1)
+  # Shared lib version of Boost.Test does not include main for portability
+  # reasons, but if you -DBOOST_TEST_DYN_LINK it gets pulled in:
+  if (SDL_UNIT_TEST_MAIN)
+    add_definitions(-DBOOST_TEST_DYN_LINK)
+  else()
+    add_definitions(-DBOOST_TEST_DYN_LINK)
+    MESSAGE(STATUS "BOOST_TEST_DYN_LINK")
+  endif()
+else()
+  set(SDL_UNIT_TEST_MAIN 0)
+  LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
+  LIST(REMOVE_ITEM boost_libs_shared "unit_test_framework")
+
+  add_library(boost_unit_test_framework STATIC IMPORTED)
+  list(APPEND Boost_LIBRARIES boost_unit_test_framework)
+  if(APPLE)
+    set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC "${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt.a")
+  else()
+    if(SDL_DEBUG)
+      set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC ${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt-d-1_${SDL_BOOST_MINOR}.a)
+    else()
+      set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC ${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt-1_${SDL_BOOST_MINOR}.a)
+    endif()
+  endif()
+  MESSAGE(STATUS "Boost unit test framework: ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC}")
+
+  #see http://www.boost.org/doc/libs/1_57_0/libs/test/doc/html/utf/compilation.html#utf.flag.alt-init-api
+  set_target_properties(boost_unit_test_framework PROPERTIES IMPORTED_LOCATION ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC})
 endif()
+
+
+MESSAGE(STATUS "unit testing: SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN} ... SDL_TRY_UNIT_TEST_DYN_LINK ${SDL_TRY_UNIT_TEST_DYN_LINK}")
+sdl_compiled_setting(SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN})
 
 MESSAGE(STATUS "Boost Include Directories: ${Boost_INCLUDE_DIRS}")
 MESSAGE(STATUS "Boost Library Directories: ${Boost_LIBRARY_DIRS}")

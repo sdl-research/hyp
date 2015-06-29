@@ -88,9 +88,6 @@ struct PruneToNbestOptions : PruneEpsilonOptions {
   }
 };
 
-template <class Arc>
-struct PruneToBest;
-
 struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
   static char const* type() { return "PruneToBest"; }
   PruneToBestOptions(unsigned defaultNbest = 1) : PruneToNbestOptions(defaultNbest) { init(); }
@@ -101,7 +98,7 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
   }
   template <class Arc>
   struct TransformFor {
-    typedef PruneToBest<Arc> type;
+    typedef PruneToBestOptions type;
   };
   SdlFloat beam, beamEpsilon;
   StateId beamPlusStates;
@@ -161,6 +158,11 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
         << " pruning=" << pruning();
   }
 
+  template <class Arc>
+  void inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const;
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& m) const;
+
  private:
   void init() {
     single = true;
@@ -169,6 +171,7 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
     beamPlusStates = 0;
   }
 };
+
 
 /// lightweight copy, expensive constructor (computes best path)
 template <class A>
@@ -286,6 +289,7 @@ struct ArcInBest {
 template <class A>
 struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
   typedef RestrictPrepare<PruneToBest<A>, A> Base;
+  using Base::inout;
   void inplace(IMutableHypergraph<A>& hg) {
     SDL_DEBUG(PruneToBest, "pruning " << hg);
     if (pruning()) Base::inplace(hg);
@@ -300,7 +304,7 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
   PruneToBest(unsigned defaultNbest, Opt const& opt)
       : PruneToBestOptions(defaultNbest, opt) {}
 
-  bool needsRestrict(IHypergraph<A>& hg) {
+  bool needsRestrict(IHypergraph<A>& hg) const {
     if (skipAlreadySingle && hg.isMutable() && hasTrivialBestPath(hg, hg.final(), hg.start())) {
       PruneEpsilon pruneEpsilon(*this);
       pruneEpsilon.maybePruneEpsilon(static_cast<IMutableHypergraph<A>&>(hg));
@@ -309,7 +313,7 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
       return true;
   }
 
-  StateIdMapping* mapping(IHypergraph<A> const& hg, IMutableHypergraph<A>& outHg) {
+  StateIdMapping* mapping(IHypergraph<A> const& hg, IMutableHypergraph<A>& outHg) const {
     try {
       SDL_DEBUG(PruneToBest, "creating mapping from " << *this);
       ArcInBest<A> b(hg, *this);
@@ -324,8 +328,20 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
       return new IdentityIdMapping();
     }
   }
-  void completeImpl() {}
 };
+
+
+template <class Arc>
+void PruneToBestOptions::inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {
+  PruneToBest<Arc> p(*this);
+  p.inout(h, o);
+}
+
+template <class Arc>
+void PruneToBestOptions::inplace(IMutableHypergraph<Arc>& m) const {
+  PruneToBest<Arc> p(*this);
+  p.inplace(m);
+}
 
 /// if leaveSimplePathAlone, don't bother removing arcs as long as there's just 1 inarc from final
 template <class Arc>

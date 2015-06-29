@@ -42,7 +42,7 @@ void project(IMutableHypergraph<Arc>* hg, ProjectType projection) {
   }
 }
 
-struct Project : SimpleTransform<Project, Transform::Inplace>, TransformOptionsBase {
+struct Project : SimpleTransform<Project, Transform::Inplace, false>, TransformOptionsBase {
   Project() {}
   explicit Project(TransformOptionsBase const& base) {}
 

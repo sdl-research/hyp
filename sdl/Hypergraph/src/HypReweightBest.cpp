@@ -18,7 +18,7 @@ namespace Hypergraph {
 struct HypReweightBest : TransformMain<HypReweightBest> {  // CRTP
   typedef TransformMain<HypReweightBest> Base;
   HypReweightBest() : Base("ReweightBest", ReweightOptions::caption()) {}
-  void declare_configurable() { this->configurable(&rw.opt); }
+  void declare_configurable() { this->configurable(&rw); }
 
   ReweightBest rw;
   enum { has_inplace_transform1 = true };
@@ -27,7 +27,7 @@ struct HypReweightBest : TransformMain<HypReweightBest> {  // CRTP
     rw.inplace(h);
     return true;
   }
-  void validate_parameters_more() { rw.opt.validate(); }
+  void validate_parameters_more() { rw.validate(); }
 };
 
 

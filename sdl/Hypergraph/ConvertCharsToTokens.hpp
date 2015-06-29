@@ -60,7 +60,7 @@ struct ConvertCharsToTokens : SimpleTransform<ConvertCharsToTokens, Transform::I
   ConvertCharsToTokens() {}
   explicit ConvertCharsToTokens(TransformOptionsBase const& base) {}
   template <class Arc>
-  void inout(IHypergraph<Arc> const& inHg, IMutableHypergraph<Arc> *pOutHg) {
+  void inout(IHypergraph<Arc> const& inHg, IMutableHypergraph<Arc> *pOutHg) const {
     convertCharsToTokens(inHg, pOutHg);
   }
   static char const* type() {
