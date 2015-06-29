@@ -50,7 +50,6 @@ namespace Hypergraph {
 enum { kPushWeightsInsideAxiom = false };
 
 struct PushWeights : SimpleTransform<PushWeights, false> {
-  void validate() {}
   template <class Arc>
   void inplace(IMutableHypergraph<Arc>& hg) const;
 
@@ -59,6 +58,12 @@ struct PushWeights : SimpleTransform<PushWeights, false> {
   static char const* caption() {
     return "Modify Arc Weights (real-valued costs), optionally (in order 1-5):";
   }
+
+  Properties inputProperties() const {
+    return inAddProps();
+  }
+  void validate() {}
+  bool splitOnWhitespaceDefault() { return true; }
 
   PushWeights() : pushToFinal() {}
   bool pushToFinal;
