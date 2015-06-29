@@ -10,7 +10,6 @@ else()
 endif()
 string(REPLACE "\\" "/" SDL_EXTERNALS_PATH ${SDL_EXTERNALS_PATH})
 
-
 # or cmake -DCMAKE_BUILD_TYPE=Debug
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING

@@ -13,7 +13,7 @@
     split space-separated words from string into vector<string> or vector<SplitRange>.
 
     note that it's an error to split into an iterator range into a temporary
-    copy via splitSpaces - you must use NoTrim or InPlace
+    copy via splitSpaces - you must use NoTrim or Inplace
 
     the most reliable/desirable split in most cases is splitSpaces(words,
     string), because any \r\n \n issues are moot, and because we report no empty
@@ -84,7 +84,7 @@ void splitChars(Strings& words, String const& str) {
 
 /**
    split on ascii whitespace.
-   we can't copy then return iterator_range pointing into copy, so no trim (or InPlace)
+   we can't copy then return iterator_range pointing into copy, so no trim (or Inplace)
 */
 template <class Strings, class String>
 void splitSpaces(Strings& words, String const& str) {

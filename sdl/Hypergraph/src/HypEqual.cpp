@@ -25,7 +25,7 @@ struct HypEqual : TransformMain<HypEqual> {
   enum { has_transform1 = false, has_inplace_transform2 = true };
 
   template <class Arc>
-  bool transform2InPlace(IMutableHypergraph<Arc>& l, IHypergraph<Arc> const& r) {
+  bool transform2Inplace(IMutableHypergraph<Arc>& l, IHypergraph<Arc> const& r) {
     SDL_DEBUG(Hypergraph.HgEqual, "Equal input 1:\n" << l);
     SDL_DEBUG(Hypergraph.HgEqual, "Equal input 2:\n" << r);
     bool const eq = fs::equal(l, r);

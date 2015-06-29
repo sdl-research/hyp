@@ -30,7 +30,7 @@ struct HypProject : TransformMain<HypProject> {
   enum { has_inplace_transform1 = true };
 
   template <class Arc>
-  bool transform1InPlace(IMutableHypergraph<Arc>& hg) {
+  bool transform1Inplace(IMutableHypergraph<Arc>& hg) {
     project.inplace(hg);
     return true;
   }

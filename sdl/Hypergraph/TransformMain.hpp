@@ -294,9 +294,9 @@ struct TransformMain : TransformMainBase {
 
   // if has_*input_transform (can override directly):
   template <class Arc>
-  bool inputTransformInPlaceP(shared_ptr<IMutableHypergraph<Arc> >& h,
+  bool inputTransformInplaceP(shared_ptr<IMutableHypergraph<Arc> >& h,
                               unsigned n) {  // from n=1...#input files.
-    if (impl().has_inplace_input_transform) return impl().inputTransformInPlace(*h, n);
+    if (impl().has_inplace_input_transform) return impl().inputTransformInplace(*h, n);
     shared_ptr<IMutableHypergraph<Arc> > i = h;
     assert(n);
     MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(inputProperties(n - 1));
@@ -304,9 +304,9 @@ struct TransformMain : TransformMainBase {
     return impl().inputTransform((IHypergraph<Arc> const&)*i, m, n);
   }
   template <class Arc>
-  bool inputTransformInPlace(IMutableHypergraph<Arc>& i, unsigned n) {  // from n=1...#input files.
+  bool inputTransformInplace(IMutableHypergraph<Arc>& i, unsigned n) {  // from n=1...#input files.
     SDL_THROW_LOG(Hypergraph, UnimplementedException,
-                  "unimplemented: has_inplace_input_transform -> inputTransformInPlace for " << this->name());
+                  "unimplemented: has_inplace_input_transform -> inputTransformInplace for " << this->name());
     return true;
   }
   template <class Arc>
@@ -319,8 +319,8 @@ struct TransformMain : TransformMainBase {
 
   // if has_*transform1, override either this or one of below
   template <class Arc>
-  bool transform1InPlaceP(shared_ptr<IMutableHypergraph<Arc> >& h) {
-    if (impl().has_inplace_transform1) return impl().transform1InPlace(*h);
+  bool transform1InplaceP(shared_ptr<IMutableHypergraph<Arc> >& h) {
+    if (impl().has_inplace_transform1) return impl().transform1Inplace(*h);
     shared_ptr<IMutableHypergraph<Arc> > i = h;
     MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(outputProperties());
     h.reset(m);
@@ -328,8 +328,8 @@ struct TransformMain : TransformMainBase {
   }
   // if has_inplace_transform1
   template <class Arc>
-  bool transform1InPlace(IMutableHypergraph<Arc>& h) {
-    SDL_THROW_LOG(Hypergraph, UnimplementedException, "unimplemented transform1InPlace for " << this->name());
+  bool transform1Inplace(IMutableHypergraph<Arc>& h) {
+    SDL_THROW_LOG(Hypergraph, UnimplementedException, "unimplemented transform1Inplace for " << this->name());
   }
   // else just has_transform1
   // most unary transform will ONLY override this
@@ -343,8 +343,8 @@ struct TransformMain : TransformMainBase {
   // First ptr is taken as result for reduction/fold of N Hgs to
   // 1. please don't meaningfully modify i2.
   template <class Arc>
-  bool transform2InPlaceP(shared_ptr<IMutableHypergraph<Arc> >& io, shared_ptr<IMutableHypergraph<Arc> >& i2) {
-    if (impl().has_inplace_transform2) return impl().transform2InPlace(*io, *i2);
+  bool transform2InplaceP(shared_ptr<IMutableHypergraph<Arc> >& io, shared_ptr<IMutableHypergraph<Arc> >& i2) {
+    if (impl().has_inplace_transform2) return impl().transform2Inplace(*io, *i2);
     shared_ptr<IMutableHypergraph<Arc> > i = io;
     io.reset(new MutableHypergraph<Arc>(outputProperties()));
     io->setVocabulary(this->vocab());
@@ -353,14 +353,14 @@ struct TransformMain : TransformMainBase {
 
   // if has_inplace_transform2
   template <class Arc>
-  bool transform2InPlace(IMutableHypergraph<Arc>& io, IMutableHypergraph<Arc>& i2) {
-    return impl().transform2InPlacec(io, i2);
+  bool transform2Inplace(IMutableHypergraph<Arc>& io, IMutableHypergraph<Arc>& i2) {
+    return impl().transform2Inplacec(io, i2);
   }
 
   template <class Arc>
-  bool transform2InPlacec(IMutableHypergraph<Arc>& io, IHypergraph<Arc> const& i2) {
+  bool transform2Inplacec(IMutableHypergraph<Arc>& io, IHypergraph<Arc> const& i2) {
     SDL_THROW_LOG(Hypergraph, UnimplementedException,
-                  "unimplemented: has_inplace_input_transform2 -> transform2InPlace for " << this->name());
+                  "unimplemented: has_inplace_input_transform2 -> transform2Inplace for " << this->name());
     return true;
   }
 
@@ -456,7 +456,7 @@ struct TransformMain : TransformMainBase {
           parseText(*in, in.name, h.get());
           if (impl().hasInputTransform()) {
             SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", pre-transform");
-            bool inputOk = impl().inputTransformInPlaceP(h, input);
+            bool inputOk = impl().inputTransformInplaceP(h, input);
             if (!inputOk) return false;
             SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", post-transform");
           }
@@ -468,7 +468,7 @@ struct TransformMain : TransformMainBase {
                                   << "=:\n" << *h,
                           aname, in.name);
           o_name << oname_sep << in.name;
-          bool ok = impl().transform2InPlaceP(olast, h);
+          bool ok = impl().transform2InplaceP(olast, h);
           olast_name = o_name.str();
           HTRANSFORM2_MSG(6, "result=" << olast_name << " (success=" << ok << "):\n" << *olast, aname, in.name);
           if (!ok) return false;
@@ -477,7 +477,7 @@ struct TransformMain : TransformMainBase {
         if (free) h.reset();
       }
       if (impl().has1()) {
-        bool finalok = impl().transform1InPlaceP(olast);
+        bool finalok = impl().transform1InplaceP(olast);
         if (!finalok) return false;
       }
       if (impl().printFinal()) {
@@ -520,7 +520,7 @@ struct TransformMain : TransformMainBase {
       if (impl().hasInputTransform()) {
         unsigned input = 0;
         SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", pre-transform");
-        bool inputOk = impl().inputTransformInPlaceP(h, input);
+        bool inputOk = impl().inputTransformInplaceP(h, input);
         if (!inputOk) return false;
         SDL_TRACE(Hypergraph.TransformMain, "input: " << input << ", post-transform");
       }

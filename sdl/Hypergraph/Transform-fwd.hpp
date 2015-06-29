@@ -34,29 +34,15 @@
 
 #include <sdl/SharedPtr.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 namespace Transform {
-const bool Inplace=true;
-const bool Inout=false;
-const bool NoProperties=0;
+const bool Inplace = true;
+const bool Inout = false;
+const bool NoProperties = 0;
 }
 
-/// template typedef trait TransformForHolder. you can also specialize this class
-
-template <class TransformOptions, class Arc, class VoidIfSimpleTransform = void>
-struct TransformFor {
-  typedef typename TransformOptions::template TransformFor<Arc>::type type;
-  enum { Simple = false };
-  static type const* getSimple(TransformOptions const&) { return (type const*)0; }
-};
-
-template <class TransformOptions>
-struct TransformFor<TransformOptions, typename TransformOptions::IsSimpleTransform::type> {
-  typedef TransformOptions type;
-  enum { Simple = true };
-  static type const* getSimple(TransformOptions const& opt) { return &opt; }
-};
 
 /**
    TransformHolder is used to cache process-wide state for options in order to
@@ -65,11 +51,11 @@ struct TransformFor<TransformOptions, typename TransformOptions::IsSimpleTransfo
 example:
 
  ReweightOptions reweight;
- TransformHolder t = makeTransform<Arc>(reweight);
+ TransformHolder t = transformFor<Arc>(reweight);
 
  Reweight<Arc>
  MutableHypergraph<Arc> hg1, hg2;
- inplace(hg1, useTransform(t, opt, reweight));
+ inplace(hg1, useTransform<Arc, ReweightOptions>(t, opt, reweight));
 
   would be marked const so you don't accidentally put mutable state in what
   could be a thread-shared object, except that shared_ptr<void const> doesn't
@@ -77,6 +63,24 @@ example:
  */
 typedef void AnyTransform;
 typedef shared_ptr<AnyTransform> TransformHolder;
+
+/// template typedef trait TransformForHolder. you can also specialize this class
+
+template <class TransformOptions, class Arc, class VoidIfSimpleTransform = void>
+struct TransformFor {
+  typedef typename TransformOptions::template TransformFor<Arc>::type type;
+  enum { Simple = false };
+  static type const* getSimple(TransformOptions const&) { return (type const*)0; }
+  static TransformHolder getComplex(TransformOptions const& opt) { return TransformHolder(new type(opt)); }
+};
+
+template <class TransformOptions, class Arc>
+struct TransformFor<TransformOptions, Arc, typename TransformOptions::IsSimpleTransform> {
+  typedef TransformOptions type;
+  enum { Simple = true };
+  static type const* getSimple(TransformOptions const& opt) { return &opt; }
+  static TransformHolder getComplex(TransformOptions const& opt) { return TransformHolder(); }
+};
 
 
 }}

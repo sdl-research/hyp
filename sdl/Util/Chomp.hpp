@@ -30,6 +30,14 @@ namespace Util {
 
 typedef boost::iterator_range<std::string::const_iterator> SplitRange;
 
+inline void eraseLastChar(std::string& str) {
+#if __cplusplus >= 201103L
+  str.pop_back();
+#else
+  str.erase(str.size() - 1);
+#endif
+}
+
 /**
    if str was from std::getline then it already has the trailing '\n' removed
    but in case of Windows + binary mode input we want to remove the '\r' in that
@@ -42,10 +50,10 @@ inline std::string& chomp(std::string& str) {
     std::string::iterator i = str.end();
     char last = *--i;
     if (last == '\r')
-      str.pop_back();
+      eraseLastChar(str);
     else if (last == '\n') {
-      if (i > str.begin() && i[-1] == '\r') str.pop_back();
-      str.pop_back();
+      if (i > str.begin() && i[-1] == '\r') eraseLastChar(str);
+      eraseLastChar(str);
     }
   }
   return str;

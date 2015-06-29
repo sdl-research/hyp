@@ -29,6 +29,7 @@
 #include <sdl/Hypergraph/Prune.hpp>
 #include <sdl/Util/PointerWithFlag.hpp>
 #include <sdl/Hypergraph/PruneEpsilon.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Util/Delete.hpp>
 #include <sdl/Hypergraph/OutsideCosts.hpp>
 #include <sdl/Util/TopK.hpp>
@@ -89,6 +90,11 @@ struct PruneToNbestOptions : PruneEpsilonOptions {
 };
 
 struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
+  typedef OptionalInplaceTransform<PruneToBestOptions> PruneToBestTransform;
+  template <class Arc>
+  struct TransformFor {
+    typedef PruneToBestTransform type;
+  };
   static char const* type() { return "PruneToBest"; }
   PruneToBestOptions(unsigned defaultNbest = 1) : PruneToNbestOptions(defaultNbest) { init(); }
   template <class Opt>
@@ -96,10 +102,12 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
       : PruneToNbestOptions(defaultNbest, opt) {
     init();
   }
-  template <class Arc>
-  struct TransformFor {
-    typedef PruneToBestOptions type;
-  };
+  template <class Opt>
+  PruneToBestOptions(Opt const& opt, bool, bool)
+      : PruneToNbestOptions(opt) {
+    init();
+  }
+
   SdlFloat beam, beamEpsilon;
   StateId beamPlusStates;
   bool single;
@@ -172,6 +180,7 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
   }
 };
 
+typedef PruneToBestOptions::PruneToBestTransform PruneToBestTransform;
 
 /// lightweight copy, expensive constructor (computes best path)
 template <class A>
@@ -287,27 +296,29 @@ struct ArcInBest {
 };
 
 template <class A>
-struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
+struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
+  PruneToBestOptions const& opt;
   typedef RestrictPrepare<PruneToBest<A>, A> Base;
   enum { Inplace = true, OptionalInplace = false };
   using Base::inout;
   void inplace(IMutableHypergraph<A>& hg) {
     SDL_DEBUG(PruneToBest, "pruning " << hg);
-    if (pruning()) Base::inplace(hg);
-    PruneEpsilon pruneEpsilon(*this);
+    if (opt.pruning()) Base::inplace(hg);
+    PruneEpsilon pruneEpsilon(opt);
     pruneEpsilon.inplace(hg);
   }
   PruneToBest() {}
   template <class Opt>
   PruneToBest(Opt const& opt)
-      : PruneToBestOptions(opt) {}
-  template <class Opt>
-  PruneToBest(unsigned defaultNbest, Opt const& opt)
-      : PruneToBestOptions(defaultNbest, opt) {}
+      : opt(opt) {}
+
+  bool needs(IHypergraph<A>& hg) const {
+    return needsRestrict(hg);
+  }
 
   bool needsRestrict(IHypergraph<A>& hg) const {
-    if (skipAlreadySingle && hg.isMutable() && hasTrivialBestPath(hg, hg.final(), hg.start())) {
-      PruneEpsilon pruneEpsilon(*this);
+    if (opt.skipAlreadySingle && hg.isMutable() && hasTrivialBestPath(hg, hg.final(), hg.start())) {
+      PruneEpsilon pruneEpsilon(opt);
       pruneEpsilon.maybePruneEpsilon(static_cast<IMutableHypergraph<A>&>(hg));
       return false;
     } else
@@ -316,14 +327,14 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A>, PruneToBestOptions {
 
   StateIdMapping* mapping(IHypergraph<A> const& hg, IMutableHypergraph<A>& outHg) const {
     try {
-      SDL_DEBUG(PruneToBest, "creating mapping from " << *this);
-      ArcInBest<A> b(hg, *this);
+      SDL_DEBUG(PruneToBest, "creating mapping from " << opt);
+      ArcInBest<A> b(hg, opt);
       if (b.empty) return 0;
       this->keep = b;
     } catch (EmptySetException&) {
       return 0;
     }
-    if (packStates) {
+    if (opt.packStates) {
       return new StateAddMapping<A>(&outHg);
     } else {  // preserve stateids - means we need to define an edge filter
       return new IdentityIdMapping();
@@ -347,9 +358,9 @@ void PruneToBestOptions::inplace(IMutableHypergraph<Arc>& m) const {
 /// if leaveSimplePathAlone, don't bother removing arcs as long as there's just 1 inarc from final
 template <class Arc>
 void justBest(IMutableHypergraph<Arc>& hg, bool leaveSimplePathAlone = true) {
-  PruneToBest<Arc> prune;
-  prune.skipAlreadySingle = leaveSimplePathAlone;
-  prune.inplace(hg);
+  PruneToBestOptions opt;
+  opt.skipAlreadySingle = leaveSimplePathAlone;
+  inplace(hg, PruneToBestTransform(opt));
 }
 
 /// Options is either PruneToBestOptions or PruneEpsilonOptions
@@ -357,9 +368,10 @@ template <class Arc, class Options>
 void justBest(unsigned nbest, IMutableHypergraph<Arc>& hg, Options const& pruneNonBestOrEpsilonOptions,
               bool leaveSimplePathAlone = true) {
   if (nbest) {
-    PruneToBest<Arc> prune(nbest, pruneNonBestOrEpsilonOptions);
+    PruneToBestOptions opt(nbest, pruneNonBestOrEpsilonOptions);
+    PruneToBest<Arc> prune(opt);
     prune.skipAlreadySingle = leaveSimplePathAlone;
-    prune.inplace(hg);
+    inplace(hg, PruneToBestTransform(prune));
   } else if (!leaveSimplePathAlone)
     pruneNonBestOrEpsilonOptions.maybePruneSimplePath(hg);
 }
@@ -367,9 +379,9 @@ void justBest(unsigned nbest, IMutableHypergraph<Arc>& hg, Options const& pruneN
 template <class Arc, class Options>
 void justBest(IMutableHypergraph<Arc>& hg, Options const& opt, bool leaveSimplePathAlone = true) {
   if (opt.pruning()) {
-    PruneToBest<Arc> prune(opt.pruneToNbest, opt);
-    prune.skipAlreadySingle = leaveSimplePathAlone;
-    prune.inplace(hg);
+    PruneToBestOptions o(opt, false, false);
+    o.skipAlreadySingle = leaveSimplePathAlone;
+    inplace(hg, PruneToBestTransform(o));
   } else if (!leaveSimplePathAlone)
     opt.maybePruneSimplePath(hg);
 }

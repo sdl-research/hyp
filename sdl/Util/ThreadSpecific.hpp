@@ -41,6 +41,7 @@ std::string configure::configure_usage<sdl::Lowercase::Recase>() (configure_is.h
 
 #include <string>
 #include <memory>
+#include <boost/noncopyable.hpp>
 #include <boost/thread/tss.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <sdl/IntTypes.hpp>
@@ -87,7 +88,7 @@ inline bool isThreadStackAddress(void const* p) {
 }
 
 template <class Int>
-struct ThreadSpecificInt {
+struct ThreadSpecificInt : boost::noncopyable {
   typedef uintptr PtrInt;
   union KeyOrInt {
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
@@ -144,12 +145,14 @@ struct ThreadSpecificInt {
 #endif
   }
   typedef ThreadSpecificInt<Int> Self;
+#if 0
   // swaps values for this thread only
   friend inline void swap(Self& a, Self& b) {
     Int tmp = a;
     a = b;
     b = tmp;
   }
+#endif
 
  private:
   void init(Int i) {
@@ -174,7 +177,7 @@ typedef ThreadSpecificInt<std::size_t> ThreadSpecificSize;
 
 /** new Value() per thread. */
 template <class Value>
-struct ThreadSpecific {
+struct ThreadSpecific : boost::noncopyable {
   Value* local_;
   enum { isThreadStack = false };
   bool alreadyThreadSpecific() const { return isSingleThreadProgram() || isThreadStack; }
@@ -187,7 +190,7 @@ struct ThreadSpecific {
   }
   ThreadSpecific() : pVal(cleanFun), local_() {}
   ~ThreadSpecific() {
-    if (alreadyThreadSpecific()) {
+    if (alreadyThreadSpecific() && local_) {
       local_->~Value();
       std::free(local_);
     } else {
@@ -199,9 +202,10 @@ struct ThreadSpecific {
 
   Value& get() {
     if (alreadyThreadSpecific()) {
-      if (local_) return *local_;
-      local_ = alloc();
-      new (local_) Value();
+      if (!local_) {
+        local_ = alloc();
+        new (local_) Value();
+      }
       return *local_;
     } else {
       Value* v = pVal.get();

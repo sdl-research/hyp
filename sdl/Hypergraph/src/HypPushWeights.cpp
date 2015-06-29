@@ -26,7 +26,7 @@ struct HypPushWeights : TransformMain<HypPushWeights> {  // CRTP
   PushWeights x;
   enum { has_inplace_transform1 = true };
   template <class Arc>
-  bool transform1InPlace(IMutableHypergraph<Arc>& h) {
+  bool transform1Inplace(IMutableHypergraph<Arc>& h) {
     x.inplace(h);
     return true;
   }

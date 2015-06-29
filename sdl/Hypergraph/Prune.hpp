@@ -109,7 +109,9 @@ void pruneUnreachable(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* 
   p.inout(hgInput, pHgResult);
 }
 
-struct PruneTransform : TransformBase<Transform::Inout> {
+struct PruneTransform : TransformBase<Transform::Inout>, PruneOptions {
+  PruneTransform(PruneOptions const& o  = PruneOptions())
+      : PruneOptions(o) {}
   enum { OptionalInplace = true };
   template <class Arc>
   void inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {

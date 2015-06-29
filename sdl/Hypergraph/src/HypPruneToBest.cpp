@@ -18,10 +18,10 @@ namespace Hypergraph {
 
 struct HypPruneToBest : TransformMain<HypPruneToBest> {
   typedef TransformMain<HypPruneToBest> Base;
-  HypPruneToBest() : Base("PruneToBest", USAGE_HypPruneToBest), opt() {}
-  void declare_configurable() { this->configurable(&opt); }
+  HypPruneToBest() : Base("PruneToBest", USAGE_HypPruneToBest) {}
+  void declare_configurable() { this->configurable(&prune); }
 
-  PruneToBestOptions opt;
+  PruneToBestOptions prune;
 
   Properties properties(int i) const { return kDefaultProperties | kStoreInArcs; }
 
@@ -32,9 +32,9 @@ struct HypPruneToBest : TransformMain<HypPruneToBest> {
   static bool nbestHypergraphDefault() { return false; }
 
   template <class Arc>
-  bool inputTransformInPlace(IMutableHypergraph<Arc>& hg, int n) const {
-    PruneToBest<Arc> prune(opt);
-    prune.inplace(hg);
+  bool inputTransformInplace(IMutableHypergraph<Arc>& hg, int) const {
+    PruneToBestTransform x(prune);
+    inplace_always(hg, x);
     return true;
   }
 };

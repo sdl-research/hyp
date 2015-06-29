@@ -86,7 +86,7 @@ struct NfcStringRef {
 
    this is a fast no-op when a quick check (NFC_QC property) can show s is definitely already NFC.
 */
-inline void normalizeToNfcInPlace(std::string& s, bool warnIfNotNfc = kSilentlyNfc, bool nfkc = false) {
+inline void normalizeToNfcInplace(std::string& s, bool warnIfNotNfc = kSilentlyNfc, bool nfkc = false) {
   NfcStringRef nfcRef(s, warnIfNotNfc, nfkc);
   std::string const& nfc = nfcRef;
   if (&nfc != &s) s = nfc;
@@ -95,7 +95,7 @@ inline void normalizeToNfcInPlace(std::string& s, bool warnIfNotNfc = kSilentlyN
 inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = kSilentlyNfc,
                        bool nfkc = false) {
   if ((bool)std::getline(in, utf8)) {
-    normalizeToNfcInPlace(utf8, warnIfNotNfc, nfkc);
+    normalizeToNfcInplace(utf8, warnIfNotNfc, nfkc);
     return true;
   } else
     return false;
@@ -104,7 +104,7 @@ inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = 
 inline bool getlineNfcUntil(std::istream& in, std::string& utf8, char until, bool warnIfNotNfc = kSilentlyNfc,
                             bool nfkc = false) {
   if ((bool)std::getline(in, utf8, until)) {
-    normalizeToNfcInPlace(utf8, warnIfNotNfc, nfkc);
+    normalizeToNfcInplace(utf8, warnIfNotNfc, nfkc);
     return true;
   } else
     return false;
@@ -150,7 +150,7 @@ struct NfcOptions {
 
   void normalize(std::string& in) const {
     if (nfc)
-      Util::normalizeToNfcInPlace(in, warnIfNotNfc, nfkc);
+      Util::normalizeToNfcInplace(in, warnIfNotNfc, nfkc);
     else
       maybeWarn(in);
   }

@@ -22,7 +22,7 @@ struct HypDraw : TransformMain<HypDraw> {
   Properties properties(int i) const { return kStoreInArcs; }
   enum { has_transform1 = false, has_transform2 = false, has_inplace_input_transform = true };
   template <class Arc>
-  bool inputTransformInPlace(IHypergraph<Arc> const& i, int) {
+  bool inputTransformInplace(IHypergraph<Arc> const& i, int) {
     drawHypergraph(out(), i) << '\n';
     return true;
   }

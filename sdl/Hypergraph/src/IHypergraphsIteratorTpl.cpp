@@ -56,7 +56,7 @@ class FlatStringHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
     pHg_->setVocabulary(*perThreadVocab_);
     using namespace std;
     getline(in_, line);
-    Util::normalizeToNfcInPlace(line, Util::kWarnUnlessNfc);
+    Util::normalizeToNfcInplace(line, Util::kWarnUnlessNfc);
     vector<string> tokens;
     Util::splitSpaces(tokens, line);
 

@@ -33,7 +33,7 @@ struct HypFsmDraw : TransformMain<HypFsmDraw> {
   bool printFinal() const { return false; }
   enum { has_transform1 = false, has_transform2 = false, has_inplace_input_transform = true };
   template <class Arc>
-  bool inputTransformInPlace(IHypergraph<Arc> const& i, unsigned) {
+  bool inputTransformInplace(IHypergraph<Arc> const& i, unsigned) {
     dopt.o = out_file.is_none() ? 0 : out_file.get();
     dopt.draw(i);
     if (out_file) out_file.stream() << '\n';

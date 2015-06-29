@@ -37,7 +37,7 @@ struct HypConcat : TransformMain<HypConcat> {
   enum { has_transform1 = false, has_inplace_transform2 = true };
 
   template <class Arc>
-  bool transform2InPlace(IMutableHypergraph<Arc>& l, IHypergraph<Arc> const& r) {
+  bool transform2Inplace(IMutableHypergraph<Arc>& l, IHypergraph<Arc> const& r) {
     SDL_DEBUG(Hypergraph.HgConcat, "Concat input 1:\n" << l);
     SDL_DEBUG(Hypergraph.HgConcat, "Concat input 2:\n" << r);
     hgConcat(&l, r, opt);

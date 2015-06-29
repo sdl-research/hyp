@@ -30,17 +30,18 @@
 namespace sdl {
 namespace Hypergraph {
 
+enum SortOrder {
+  // TODO: kNone for optional sorting?
+  kTerminalFirst = 1,
+  kTerminalLast,
+  kTopSort,  // final state goes at end, after antecedents (tails) are fully processed. start state will be
+  // at state 0 iff every state is reachable from start
+  kSortOrderEnd,
+  kSortOrderBegin = kTerminalFirst
+};
+
 // TODO: provide topo sort of reverse for Fsm - then we don't need in arcs
 struct SortStatesOptions {
-  enum SortOrder {
-    // TODO: kNone for optional sorting?
-    kTerminalFirst = 1,
-    kTerminalLast,
-    kTopSort,  // final state goes at end, after antecedents (tails) are fully processed. start state will be
-    // at state 0 iff every state is reachable from start
-    kSortOrderEnd,
-    kSortOrderBegin = kTerminalFirst
-  };
   bool topological() const { return sortOrder == kTopSort; }
   SortOrder sortOrder;
   bool canonicalLex;
@@ -172,12 +173,12 @@ bool isTopoSort(IHypergraph<Arc> const& hg, bool requireHeadAfterTails = true, S
     return visitArcsAtLeastOnce(hg, CheckTopo<false>(nontermEnds));
 }
 
+
 /**
    \return kNoState if states aren't split to nonterm first then lex, else return id such that [0, id) are
    nonterm and [id, size) are lex.
 */
-template <class Arc>
-StateId findBoundaryBetweenNotAndIsTerminal(IHypergraph<Arc> const& hg) {
+inline StateId findBoundaryBetweenNotAndIsTerminal(IHypergraphStates const& hg) {
   StateId N = hg.size();
   IVocabularyPtr voc = hg.getVocabulary();
   for (StateId s = 0; s < N; ++s) {
@@ -191,6 +192,33 @@ StateId findBoundaryBetweenNotAndIsTerminal(IHypergraph<Arc> const& hg) {
     }
   }
   return N;  // none were lexical
+}
+
+/**
+   \return whether states aren't yet sorted per sortOrder. quick check for
+   kTopSort, else only check if stable == true.
+
+   \param[out] partBoundary - if states are already sorted then this is the
+   boundary between the two types of states.
+*/
+template <class Arc>
+inline bool unsortedStates(IHypergraph<Arc> const& hg, SortOrder sortOrder, StateId& partBoundary,
+                           bool stable = false) {
+  if (sortOrder == kTopSort && hasProperties(hg.properties(), kSortedStates)) {
+    partBoundary = hg.numNotTerminalStates();
+    return false;
+  }
+  if (stable)  // checking for already sorted is not worth the time, unless stable sorting was requested
+    switch (sortOrder) {
+      case kTerminalFirst:
+        return (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
+      case kTopSort:
+        return !isTopoSort(hg) || (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
+      default:
+        partBoundary = kNoState;
+    }
+  // stable sort is only supported for topo sort and lexical-first
+  return true;
 }
 
 
@@ -248,29 +276,12 @@ template <class A>
 struct SortStates : public RestrictPrepare<SortStates<A>, A> {
   static char const* type() { return "SortStates"; }
   SortStatesOptions opt;
-  SortStates(SortStatesOptions const& opt = SortStatesOptions()) : opt(opt) {
+  SortStates(SortStatesOptions const& opt = SortStatesOptions(), StateId partBoundaryFromNeeds = kNoState)
+      : opt(opt), partBoundary(partBoundaryFromNeeds) {
     opt.validate();
     this->clearOut = false;
   }
   mutable StateId partBoundary;
-
-  bool needs(IHypergraph<A> const& hg) const {
-    if (opt.sortOrder == SortStatesOptions::kTopSort && hasProperties(hg.properties(), kSortedStates)) {
-      partBoundary = hg.numNotTerminalStates();
-      return false;
-    }
-    if (opt.stable)  // checking for already sorted is not worth the time, unless stable sorting was requested
-      switch (opt.sortOrder) {
-        case SortStatesOptions::kTerminalFirst:
-          return (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
-        case SortStatesOptions::kTopSort:
-          return !isTopoSort(hg) || (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
-        default:
-          ;
-      }
-    // stable sort is only supported for topo sort and lexical-first
-    return true;
-  }
 
   void preparePost(IHypergraph<A> const& h, IMutableHypergraph<A>& m) const {
     bool inplace = this->isInplace(h, m);
@@ -285,7 +296,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
     } else {
       StateId N = h.size();
       if (canonLex) {  // todo: support for inplace also
-        if (opt.sortOrder == SortStatesOptions::kTerminalFirst) {
+        if (opt.sortOrder == kTerminalFirst) {
           std::vector<StateId> lexs(N);
           StateId nlex = 0;
           for (StateId s = 0; s != N; ++s)
@@ -299,7 +310,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
             StateId s = lexs[i];
             x.addState(s, h.labelPair(s));
           }
-        } else if (opt.sortOrder == SortStatesOptions::kTerminalLast) {
+        } else if (opt.sortOrder == kTerminalLast) {
           for (StateId s = 0; s != N; ++s)
             if (h.hasTerminalLabel(s)) x.addState(s, h.labelPair(s));
           partBoundary = m.size();
@@ -308,8 +319,8 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
       } else {
         for (StateId s = 0; s != N; ++s)
           if (h.hasTerminalLabel(s)) {
-            if (opt.sortOrder == SortStatesOptions::kTerminalFirst) x.stateFor(s);
-          } else if (opt.sortOrder == SortStatesOptions::kTerminalLast)
+            if (opt.sortOrder == kTerminalFirst) x.stateFor(s);
+          } else if (opt.sortOrder == kTerminalLast)
             x.stateFor(s);
         partBoundary = (StateId)x.size();
         for (StateId s = 0; s != N; ++s) x.stateFor(s);
@@ -337,9 +348,14 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
    */
 template <class A>
 StateId sortStates(IMutableHypergraph<A>& h, SortStatesOptions const& opt = SortStatesOptions()) {
-  SortStates<A> ss(opt);
-  ss.inplace(h);
-  return ss.partBoundary;
+  StateId boundary;
+  bool needs = unsortedStates(h, opt.sortOrder, boundary, opt.stable);
+  if (needs) {
+    SortStates<A> ss(opt, needs);
+    ss.inplace(h);
+    return ss.partBoundary;
+  } else
+    return boundary;
 }
 
 /**
@@ -352,10 +368,35 @@ StateId sortStates(IMutableHypergraph<A>& h, SortStatesOptions const& opt = Sort
 template <class A>
 StateId sortStates(IHypergraph<A> const& h, IMutableHypergraph<A>* out,
                    SortStatesOptions const& opt = SortStatesOptions()) {
-  SortStates<A> ss(opt);
-  inout(h, out, ss);
+  SortStates<A> ss(opt, kNoState);
+  ss.inout(h, out);
   return ss.partBoundary;
 }
+
+struct SortStatesTransform : SortStatesOptions, TransformBase<Transform::Inplace> {
+  static char const* type() { return "SortStates"; }
+
+  enum { OptionalInplace = true };
+
+  bool needs(IHypergraphStates const& hg) const {
+    return !(sortOrder == kTopSort && hasProperties(hg.properties(), kSortedStates));
+  }
+  template <class Arc>
+  bool needs(IHypergraph<Arc> const& hg) const {
+    return needs((IHypergraphStates const&)hg);
+  }
+
+  SortStatesTransform(SortStatesOptions const& opt = SortStatesOptions()) : SortStatesOptions(opt) {}
+  template <class Arc>
+  void inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {
+    sortStates(h, o, *this);
+  }
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& m) const {
+    sortStates(m, *this);
+  }
+};
+
 
 /**
    \return whether this is an acyclic fsm
@@ -369,7 +410,7 @@ bool isAcyclicBySortStates(IHypergraph<Arc> const& hg) {
   else {
     MutableHypergraph<Arc> sorted((kStoreInArcs));
     SortStates<Arc> sorter;
-    inout(hg, &sorted, sorter);
+    sorter.inout(hg, &sorted);
     return isTopoSort(sorted, true, sorter.partBoundary);
   }
 }

@@ -401,7 +401,7 @@ struct FixUnicode {
     out.resize(o - begin);
   }
 
-  void normalizeValidUtf8InPlace(std::string& out) const {
+  void normalizeValidUtf8Inplace(std::string& out) const {
     std::string::iterator begin = out.begin(), o = begin;
     Encoder toutf8(o);
     fixedUtf8To(begin, out.end(), toutf8);

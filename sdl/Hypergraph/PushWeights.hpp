@@ -49,11 +49,11 @@ namespace Hypergraph {
 
 enum { kPushWeightsInsideAxiom = false };
 
-struct PushWeights : SimpleTransform<PushWeights, false> {
+struct PushWeights : SimpleTransform<PushWeights, Transform::Inplace, false> {
   template <class Arc>
   void inplace(IMutableHypergraph<Arc>& hg) const;
 
-  Properties inAddProps() const { return pushToFinal ? kStoreInArcs : kStoreFirstTailOutArcs; }
+  Properties inAddProps() const { return kStoreInArcs | (pushToFinal ? 0 : kStoreFirstTailOutArcs); }
   static char const* type() { return "PushWeights"; }
   static char const* caption() {
     return "Modify Arc Weights (real-valued costs), optionally (in order 1-5):";

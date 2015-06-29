@@ -33,7 +33,7 @@ struct HypSubUnion : TransformMain<HypSubUnion> {
     out_every = false
   };  // means multiple input files
   template <class Arc>
-  bool inputTransformInPlace(IMutableHypergraph<Arc>& hg, int n) {
+  bool inputTransformInplace(IMutableHypergraph<Arc>& hg, int n) {
     return true;
   }
 

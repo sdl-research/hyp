@@ -66,7 +66,7 @@ struct HypEmpty : TransformMain<HypEmpty> { // note base class CRTP (google it)
   }
 
   template <class Arc>
-  bool inputTransformInPlace(IHypergraph<Arc> const& hg, int) {
+  bool inputTransformInplace(IHypergraph<Arc> const& hg, int) {
     if (empty.empty)
       outProperty("EMPTY", Hypergraph::empty(hg));
     if (empty.fsm)

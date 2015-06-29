@@ -22,10 +22,10 @@ namespace Hypergraph {
 struct HypPrune : TransformMain<HypPrune> {
   typedef TransformMain<HypPrune> Base;
   HypPrune() : Base("Prune", USAGE_HypPrune) {}
-  void declare_configurable() { this->configurable(&popt); }
 
-  PruneOptions popt;
+  PruneOptions pruneOptions;
   Properties properties(int i) const { return kStoreOutArcs; }
+  void declare_configurable() { this->configurable(&pruneOptions); }
 
   enum { has_inplace_input_transform = true, has_transform1 = false };
 
@@ -34,9 +34,8 @@ struct HypPrune : TransformMain<HypPrune> {
   static bool nbestHypergraphDefault() { return false; }
 
   template <class Arc>
-  bool inputTransformInPlace(IMutableHypergraph<Arc>& i, int n) const {
-    PruneUnreachable<Arc> p(popt);
-    inplace_always(i, p);
+  bool inputTransformInplace(IMutableHypergraph<Arc>& hg, int) const {
+    pruneUnreachable(hg, pruneOptions);
     return true;
   }
 };

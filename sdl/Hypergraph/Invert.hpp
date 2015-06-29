@@ -17,6 +17,8 @@
 #define HYP__HG_INVERT_HPP
 #pragma once
 
+#include <sdl/Hypergraph/IHypergraph.hpp>
+
 namespace sdl {
 namespace Hypergraph {
 
@@ -29,11 +31,10 @@ void invertForceLabelPair(IMutableHypergraphBase &);
 /// both are equivalent until you later chang einput label)
 void invert(IMutableHypergraphBase &);
 
-template <class Arc>
-bool needsInvert(IHypergraph<Arc> const& h) {
+template <class Hg>
+bool needsInvert(Hg const& h) {
   return h.hasOutputLabels();
 }
-
 
 }}
 

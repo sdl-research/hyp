@@ -55,9 +55,9 @@ struct ArcReverser {
 };
 
 template <class Arc>
-struct ArcReverserFsInPlace {
+struct ArcReverserFsInplace {
   IMutableHypergraph<Arc>* hg_;
-  ArcReverserFsInPlace(IMutableHypergraph<Arc>* hg) : hg_(hg) {}
+  ArcReverserFsInplace(IMutableHypergraph<Arc>* hg) : hg_(hg) {}
   void operator()(Arc& arc) const {
     typename Arc::StateIdContainer& tails = arc.tails();
     StateId h = arc.head();  // swap head, tail
@@ -93,9 +93,9 @@ void reverseFsm(IMutableHypergraph<Arc>& h) {
 }
 
 template <class Arc>
-struct ArcReverserCfgInPlace {
+struct ArcReverserCfgInplace {
   IMutableHypergraph<Arc>* hg_;
-  ArcReverserCfgInPlace(IMutableHypergraph<Arc>* hg) : hg_(hg) {}
+  ArcReverserCfgInplace(IMutableHypergraph<Arc>* hg) : hg_(hg) {}
   void operator()(Arc& arc) const {
     typename Arc::StateIdContainer& tails = arc.tails();
     std::reverse(tails.begin(), tails.end());
@@ -109,7 +109,7 @@ void reverseCfg(IMutableHypergraph<Arc>& h) {
   if (h.isFsm()) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseCfg called on FSM (reverseFsm instead)");
   }
-  ArcReverserCfgInPlace<Arc> rev(&h);
+  ArcReverserCfgInplace<Arc> rev(&h);
   h.forArcs(rev);
 }
 

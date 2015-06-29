@@ -21,7 +21,7 @@ struct HypIsolateStart : TransformMain<HypIsolateStart> {
   IsolateStartState iso;
   enum { has_inplace_transform1 = true };
   template <class Arc>
-  bool transform1InPlace(IMutableHypergraph<Arc>& h) {
+  bool transform1Inplace(IMutableHypergraph<Arc>& h) {
     inplace(h, iso);
     return true;
   }

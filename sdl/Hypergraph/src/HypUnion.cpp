@@ -32,7 +32,7 @@ struct HypUnion : TransformMain<HypUnion> {
   char const* transform2sep() const { return " + "; }
 
   template <class Arc>
-  bool transform2InPlace(IMutableHypergraph<Arc>& hg2, IHypergraph<Arc> const& hg1) {
+  bool transform2Inplace(IMutableHypergraph<Arc>& hg2, IHypergraph<Arc> const& hg1) {
     SDL_DEBUG(Hypergraph.HgUnion, "Union input 1:\n" << hg1);
     SDL_DEBUG(Hypergraph.HgUnion, "Union input 2:\n" << hg2);
     hgUnion(hg1, &hg2);

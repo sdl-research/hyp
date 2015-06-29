@@ -10,9 +10,14 @@
 // limitations under the License.
 /** \file
 
-    note: OptionalInplace should be true only if Inplace is true, i.e. it means
-    prefer inout except when input->output is a mutable hg. OptionalInplace is
-    irrelevant if !Inplace (Transform::Inout)
+    boilerplate for 'maybe hypergraph needs to be copied then in-place
+    transformed, maybe the hypergraph needs these properties to be in-place
+    transformed, or maybe the hypergraph already satisfies the postcondition of
+    the transform'
+
+    if you call transform.inplace(h) or .inout(h, &out) directly the
+    work-avoiding logic (needs() etc) is skipped, but calling free fns as in the
+    following example will intelligently avoid some work:
 
     usage:
 
@@ -29,28 +34,34 @@
     rescored2 = clone(inhg);
     inplace(rescored2, addlm);
     inout(inhg, &outhg, addlm);
-    inplace(inhg, addlm); // only this modifies inhg. has to make a copy first, so not more efficient than an
-   explicit clone
+    inplace(inhg, addlm); // will silently create a temporary copy of the input hg
+    // (out of necessity; LmRescore doesn't support in-place hg tranformation)
 
     a Transform e.g. LmRescore:
 
     1. may define properties that must be on or off in the input hg and the output hg.
 
     2. may define a check on the input which may skip the transform (e.g. the desired result is already the
-   case in the input). no matter what, the required output properties are present/absent in the output.
-   further, the output gets the vocab of the input, even if the transform wasn't needed
+    case in the input). no matter what, the required output properties are present/absent in the output.
+    further, the output gets the vocab of the input, even if the transform wasn't needed
 
     3. may implement either an in-place modification of input, or output to a new hg, or both (with a
-   preference for one or the other). the transform elects its preferred/possible methods by setting Inplace or
-   OptionalInplace bool members
+    preference for one or the other). the transform elects its preferred/possible methods by setting Inplace
+   or
+    OptionalInplace bool members
 
     4. may be used via inplace(hg, transform) or inout(inhg, &outhg, transform), no matter what. for inplace,
-   hg may be a ref to mutable hg or a ref to shared_ptr to hg. the shared_ptr is inspected to see whether hg
-   itself is mutable, for a possible actual in-place update.
+    hg may be a ref to mutable hg or a ref to shared_ptr to hg. the shared_ptr is inspected to see whether hg
+    itself is mutable, for a possible actual in-place update.
 
-   if you define 'typedef void IsSimpleTransform;' then xmt modules won't do
-   need locking/copying/etc before action (easiest to inherit from
-   SimpleTransform<...> in this case
+    5. if you define 'typedef void IsSimpleTransform;' then xmt modules won't do
+    need locking/copying/etc before action (easiest to inherit from
+    SimpleTransform<...> in this case
+
+    note: OptionalInplace should be true only if Inplace is true, i.e. it means
+    prefer inout except when input->output is a mutable hg. OptionalInplace is
+    irrelevant if !Inplace (Transform::Inout)
+
 */
 
 // FIXME: kFsm is getting cleared e.g. HgConcat fsm*fsm*fsm - thinks (fsm*fsm) -> cfg. not sure why. not
@@ -124,7 +135,7 @@ namespace Hypergraph {
 
 struct PrepareArcType {
   /**
-     (for xmt/TransformAsModule.hpp)
+     (for xmt/CopyingHypergraphTransform.hpp)
 
      override this if you have input-arc type initialization in xmt pipeline
      context (via TransformAsModule) that needs to precede any actual input
@@ -224,17 +235,20 @@ void inplace_always(IMutableHypergraph<A>& m, Transform const& t) {
 
 /// see inplace_always. properties are forced whether or not the transform was needed.
 template <class Transform, class A>
-void inplace(IMutableHypergraph<A>& m, Transform const& t) {
-  if (t.needs(m))
+bool inplace(IMutableHypergraph<A>& m, Transform const& t) {
+  if (t.needs(m)) {
     inplace_always(m, t);
-  else
+    return true;
+  } else {
     m.forcePropertiesOnOff(t.outAddProps(), t.outSubProps());
+    return false;
+  }
 }
 
 template <class Transform, class A>
-void inplace(IMutableHypergraph<A>& m) {
+bool inplace(IMutableHypergraph<A>& m) {
   Transform t;
-  inplace(m, t);
+  return inplace(m, t);
 }
 
 namespace {
@@ -300,12 +314,12 @@ bool copyIfSame(shared_ptr<IHypergraph<A> >& pl, IHypergraph<A> const& r) {
 
 /// shared_ptr to hg is updated with result t(hg) - this is a copy if needed, but if
 template <class Transform, class A>
-void inplace(shared_ptr<IHypergraph<A> const>& cpi, Transform const& t) {
+bool inplace(shared_ptr<IHypergraph<A> const>& cpi, Transform const& t) {
   shared_ptr<IHypergraph<A> const> holdi = cpi;
   IHypergraph<A> const& i = *holdi;
   if (!t.needs(i)) {
     cpi = ensureProperties(i, t.outAddProps(), 0, t.outSubProps());
-    return;
+    return false;
   }
   MutableHypergraph<A>* o = new MutableHypergraph<A>(t.newOutAddProps());
   cpi.reset(o);
@@ -318,25 +332,31 @@ void inplace(shared_ptr<IHypergraph<A> const>& cpi, Transform const& t) {
     shared_ptr<IHypergraph<A> const> i2 = ensureProperties(i, t.inAddProps(), maybeClearProps);
     inout_impl(*i2, o, t);
   }
+  return true;
 }
 
 // note: non-const pointer may still not actually be mutable - will check isMutable()
 template <class Transform, class A>
-void inplace(shared_ptr<IMutableHypergraph<A> >& pi, Transform const& t) {
+bool inplace(shared_ptr<IMutableHypergraph<A> >& pi, Transform const& t) {
   return inplace(*pi, t);
 }
 
-// return true if mutated, false if copy
+// return false iff !t.needs(*pi), modify pi
 template <class Transform, class A>
 bool inplace(shared_ptr<IHypergraph<A> >& pi, Transform const& t) {
-  IHypergraph<A>& i = *pi;
-  if (i.isMutable()) {
-    inplace(boost::static_pointer_cast<IMutableHypergraph<A> >(pi));
-    return true;
+  typedef IHypergraph<A> Hg;
+  if (pi->isMutable()) {
+    typedef IMutableHypergraph<A> MHg;
+    shared_ptr<MHg> pm(boost::static_pointer_cast<MHg>(pi));
+    if (inplace(pm, t)) {
+      pi = boost::static_pointer_cast<Hg>(pm);
+      return true;
+    } else
+      return false;
   }
-  shared_ptr<IHypergraph<A> const> cpi = pi;
+  shared_ptr<Hg const> cpi = pi;
   inplace(cpi, t);
-  pi = boost::const_pointer_cast<shared_ptr<IHypergraph<A> > >(cpi);
+  pi = boost::const_pointer_cast<Hg>(cpi);
   return false;
 }
 
@@ -407,17 +427,18 @@ shared_ptr<IHypergraph<A> > transformedMaybeInplace(IHypergraph<A>& hg, Transfor
                                                     IVocabularyPtr pVoc = IVocabularyPtr()) {
   if (!t.needs(hg)) return ptrNoDelete(hg);
   if (t.Inplace && hg.isMutable()) {
-    inplace(static_cast<IMutableHypergraph<A>&>(hg), t);
+    t.inplace(static_cast<IMutableHypergraph<A>&>(hg));
     return ptrNoDelete(hg);
   }
   return shared_ptr<IHypergraph<A> >(transformedNewNeeds(hg, t, pVoc));
 }
 
+Properties const NewOutAddProps = kStoreInArcs;
+Properties const OutSubProps = Transform::NoProperties;
+Properties const OutAddProps = Transform::NoProperties;
 
 // since we use templates, you don't actually need to inherit from this. but provide these members.
-template <bool Inplace_ = Transform::Inout, Properties InAddProps = Transform::NoProperties,
-          Properties NewOutAddProps = kStoreInArcs, Properties OutSubProps = Transform::NoProperties,
-          Properties OutAddProps = Transform::NoProperties>
+template <bool Inplace_ = Transform::Inout, Properties InAddProps = Transform::NoProperties>
 struct TransformBase : PrepareArcType {
   TransformBase() { defaultVocab = "input-vocab"; }
 
@@ -497,13 +518,14 @@ struct TransformBase : PrepareArcType {
 
   template <class HG>
   IVocabularyPtr inputVocabMatches(HG const& hg) const {
-    IVocabularyPtr hgVoc = hg.getVocabulary();
+    IVocabularyPtr const& hgVoc = hg.getVocabulary();
+    IVocabularyPtr const& trVoc = pVoc.get();
     SDL_DEBUG(Transform, "transform input hg vocabulary @ " << hgVoc.get() << " should match vocabulary @"
-                                                            << pVoc.get().get());
-    if (pVoc.get() && pVoc.get() != hgVoc)
-      SDL_THROW_LOG(Hypergraph.Transform, ConfigException,
-                    "vocabulary resource '" << defaultVocab
-                                            << "' didn't match input hypergraph's vocabulary");
+                                                            << trVoc.get());
+    if (trVoc && trVoc != hgVoc)
+      SDL_THROW_LOG(Hypergraph.Transform, ConfigException, "vocabulary resource '"
+                                                           << defaultVocab
+                                                           << "' didn't match input hypergraph's vocabulary");
     return hgVoc;
   }
 
@@ -520,10 +542,8 @@ struct TransformBase : PrepareArcType {
   // don't assume ids are the same for same string, then - e.g. capitalize convert chars to tokens which
   // create new symbols
   IVocabularyPtr const& getVocab(IVocabularyPtr const& defaultVoc) const {
-    assert(defaultVoc.get());
     IVocabularyPtr& voc = pVoc.get();
-    assert(&voc);
-    if (!voc) voc = defaultVoc;
+    if (!voc) voc = defaultVoc;    assert(voc);
     return voc;
   }
 
@@ -536,7 +556,6 @@ struct TransformBase : PrepareArcType {
  private:
   void operator=(TransformBase const&);
   TransformBase(TransformBase const& o);
-
 };
 
 // optional base class.
@@ -565,39 +584,18 @@ struct TransformOptionsBase : ForceArcs {
   void validate() {}
 };
 
-
 template <class Arc, class TransformOptions>
-TransformHolder makeTransform(TransformOptions const& opt) {
-  typedef typename TransformFor<TransformOptions, Arc>::type Transform;
-  return TransformHolder(new Transform(opt));
-}
-
-template <class TransformOptions, class Arc>
-TransformHolder makeTransform(TransformOptions const& opt, IHypergraph<Arc> const&) {
-  return makeTransform<Arc, TransformOptions>(opt);
-}
-
-template <class Transform>
-Transform const& getTransform(TransformHolder const& transformHolder) {
-  return *static_cast<Transform *>(transformHolder.get());
+TransformHolder transformFor(TransformOptions const& opt) {
+  typedef TransformFor<TransformOptions, Arc> TFor;
+  if (TFor::Simple)
+    return TransformHolder((void*)TFor::getSimple(opt), DoNothing());
+  else
+    return TFor::getComplex(opt);
 }
 
 template <class Arc, class TransformOptions>
 typename TransformFor<TransformOptions, Arc>::type const& useTransform(TransformHolder const& transformHolder) {
-  return getTransform<typename TransformFor<TransformOptions, Arc>::type>(transformHolder);
-}
-
-template <class Arc, class TransformOptions>
-typename TransformFor<TransformOptions, Arc>::type const& useTransform(TransformHolder const& transformHolder,
-                                                                 TransformOptions const&) {
-  return useTransform<Arc, TransformOptions>(transformHolder);
-}
-
-template <class Arc, class TransformOptions>
-typename TransformFor<TransformOptions, Arc>::type const& useTransform(TransformHolder const& transformHolder,
-                                                                 TransformOptions const&,
-                                                                 IHypergraph<Arc> const&) {
-  return useTransform<Arc, TransformOptions>(transformHolder);
+  return *static_cast<typename TransformFor<TransformOptions, Arc>::type*>(transformHolder.get());
 }
 
 template <class Arc, class TransformOptions>
@@ -608,20 +606,19 @@ void inplaceFromOptions(TransformOptions const& opt, IMutableHypergraph<Arc>& hg
 }
 
 template <class Options>
-struct InPlaceForOptions {
+struct InplaceForOptions {
   template <class Arc>
   void inplace(Options const& opt, IMutableHypergraph<Arc>& hg) const {
     opt.inplace(hg);
   }
 };
 
-
 template <class Arc, class Options>
 void inplaceTransform(Options const& opt, IHypergraph<Arc>& hg) {
   if (!hg.isMutable())
     SDL_THROW_LOG(Hypergraph, ProgrammerMistakeException,
                   "don't call in-place modules on non-mutable hypergraphs");
-  InPlaceForOptions<Options>().inplace(opt, static_cast<IMutableHypergraph<Arc>&>(hg));
+  InplaceForOptions<Options>().inplace(opt, static_cast<IMutableHypergraph<Arc>&>(hg));
 }
 
 
@@ -635,7 +632,7 @@ void inoutFromOptions(TransformOptions const& opt, IHypergraph<Arc> const& i, IM
 /**
    convenience: declare a config-less transform suitable for xmt/TransformAsModule.
 */
-template <class CRTP, bool InplaceOrInout = Transform::Inout, bool HasOptionalInplace = true>
+template <class CRTP, bool InplaceOrInout, bool HasOptionalInplace = true>
 struct SimpleTransform : TransformBase<InplaceOrInout> {
   enum { OptionalInplace = HasOptionalInplace };
   template <class Arc>
@@ -644,6 +641,33 @@ struct SimpleTransform : TransformBase<InplaceOrInout> {
   };
   static char const* type() { return CRTP::type(); }
   typedef void IsSimpleTransform;
+};
+
+template <class Options>
+struct InplaceTransform : TransformBase<Transform::Inplace> {
+  static char const* type() { return Options::type(); }
+  InplaceTransform(Options const& opt) : opt(opt) {}
+  Options const& opt;
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& m) const {
+    opt.inplace(m);
+  }
+};
+
+template <class Options>
+struct OptionalInplaceTransform : TransformBase<Transform::Inplace> {
+  enum { OptionalInplace = true };
+  static char const* type() { return Options::type(); }
+  OptionalInplaceTransform(Options const& opt) : opt(opt) {}
+  Options const& opt;
+  template <class Arc>
+  void inplace(IMutableHypergraph<Arc>& m) const {
+    opt.inplace(m);
+  }
+  template <class A>
+  void inout(IHypergraph<A> const& h, IMutableHypergraph<A>* o) const {
+    opt.inout(h, o);
+  }
 };
 
 

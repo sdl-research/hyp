@@ -33,7 +33,7 @@ void printHgAsMosesLattice(IHypergraph<Arc> const& hg){
   if(!hg.isFsm()){
     SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error, "Input Hypergraph should be FSM");
   }
-  SortStatesOptions opt(SortStatesOptions::kTopSort);
+  SortStatesOptions opt(kTopSort);
   MutableHypergraph<Arc>* hg_sort = dynamic_cast<MutableHypergraph<Arc>* >(hg.clone());
   if(hg_sort == NULL){
     SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error, "Input Hypergraph should be mutable");

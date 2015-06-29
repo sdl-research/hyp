@@ -24,7 +24,7 @@ struct HypReweight : TransformMain<HypReweight> {
   static RandomSeed randomSeed() { return kRandomSeed; }
   enum { has_inplace_transform1 = true };
   template <class Arc>
-  bool transform1InPlace(IMutableHypergraph<Arc>& h) {
+  bool transform1Inplace(IMutableHypergraph<Arc>& h) {
     rw.inplace(h);
     return true;
   }
