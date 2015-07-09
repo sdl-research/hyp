@@ -87,8 +87,10 @@ typedef void* ArcHandle;  // opaque identifer for an arc - TODO: that's bad for 
 
 #if SDL_64BIT_STATE_ID
 typedef uint64 StateId;
+typedef int64 StateIdDifference;
 #else
 typedef uint32 StateId;
+typedef int32 StateIdDifference;
 #endif
 
 typedef Util::small_vector<StateId, 2, TailId> StateIdContainer;

@@ -204,7 +204,6 @@ class CompositeWeight {
   typedef typename Weight1::FloatT FloatT;
   FloatT getValue() const { return w1_.getValue(); }  // for best-path purposes
 
- private:
   Weight1 w1_;
   Weight2 w2_;
   Weight3 w3_;
@@ -272,7 +271,6 @@ class CompositeWeight<W1, NoWeight, NoWeight, NoWeight, NoWeight> {
 
   typedef typename Weight1::FloatT FloatT;
   FloatT getValue() const { return w1_.getValue(); }  // for best-path purposes
- private:
   Weight1 w1_;
 };
 
@@ -340,7 +338,6 @@ class CompositeWeight<W1, W2, NoWeight, NoWeight, NoWeight> {
 
   typedef typename Weight1::FloatT FloatT;
   FloatT getValue() const { return w1_.getValue(); }  // for best-path purposes
- private:
   Weight1 w1_;
   Weight2 w2_;
 };
@@ -416,7 +413,6 @@ class CompositeWeight<W1, W2, W3, NoWeight, NoWeight> {
 
   typedef typename Weight1::FloatT FloatT;
   FloatT getValue() const { return w1_.getValue(); }  // for best-path purposes
- private:
   Weight1 w1_;
   Weight2 w2_;
   Weight3 w3_;
@@ -497,7 +493,6 @@ class CompositeWeight<W1, W2, W3, W4, NoWeight> {
 
   typedef typename Weight1::FloatT FloatT;
   FloatT getValue() const { return w1_.getValue(); }  // for best-path purposes
- private:
   Weight1 w1_;
   Weight2 w2_;
   Weight3 w3_;

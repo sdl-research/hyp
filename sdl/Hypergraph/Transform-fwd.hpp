@@ -15,16 +15,9 @@
     TransformHolder: for Transform, hold arc-type-specific models (or other
     init. we don't want to happen for every single hg transformed).
 
-    if you define 'typedef void IsSimpleTransform;' then xmt modules won't do
-    need locking/copying/etc before action (easiest to inherit from
+    If Options == Transform class (no per-thread mutable state), you may
+    optionally 'typedef void IsSimpleTransform;' (easiest to inherit from
     SimpleTransform<...> in this case.
-
-    a 'Simple' transform does not get setDefaultVocabName(name) or
-    loadResources(mgr) calls (but does get:
-    transform.loadResourcesThread(mgr);
-    transform.prepareArcTypeThread(mgr, (Arc*)0);
-    )
-
 */
 
 
