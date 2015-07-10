@@ -30,6 +30,8 @@
    std::vector<typename Derivation<Arc>::DerivP> derivs;
    // (it's better if you can use the visitor interface instead of storing a vector, though)
    visit_nbest(holdNbestDerivations(derivs, n, hg);
+
+   NbestId is kFirstNbestId == 0 for the 1-best
 */
 
 #ifndef HYP__HG_BESTPATH_HPP
@@ -108,7 +110,7 @@ struct NbestPlusTies {
   }
   void print(std::ostream& out) const {
     out << nbest;
-    if (numTies) out << "(+ " << numTies << " ties";
+    if (numTies) out << "(+ " << numTies << " ties)";
   }
 };
 
@@ -121,10 +123,11 @@ struct VisitPlusTies {
   template <class DerivP, class Weight>
   bool operator()(DerivP const& deriv, Weight const& wtotal, NbestId n) const {
     SdlFloat thisCost = wtotal.getValue();
-    if (n > 1 && n >= nbest && thisCost > lastCost)
+    if (n >= nbest && thisCost > lastCost)
       return false;
     else {
-      lastCost = thisCost;
+      if (n < nbest || thisCost < lastCost)
+        lastCost = thisCost;
       return visitor(deriv, wtotal, n);
     }
   }
