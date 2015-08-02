@@ -102,11 +102,10 @@ else()
 endif()
 
 if(SDL_DEBUG)
-  # comment this out for very-slightly better performance (but spurious valgrind warnings)
   sdl_compiled_setting(SDL_VALGRIND 1)
 else()
-  # comment this out for very-slightly better performance (but spurious valgrind warnings)
-  # sdl_compiled_setting(SDL_VALGRIND 1)
+  # 0: *very*-slightly better performance (but spurious valgrind warnings)
+  sdl_compiled_setting(SDL_VALGRIND 0)
 endif()
 
 if(LINUX)
@@ -293,7 +292,7 @@ if(WIN32)
 
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG")
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /LTCG")
-  sdl_compiled_setting(_WINSOCKAPI_ 1) # but then db.h needs help - see BDBConfig.cpp
+  sdl_quiet_compiled_setting(_WINSOCKAPI_ 1) # but then db.h needs help - see BDBConfig.cpp
   #sdl_compiled_setting(_SECURE_SCL 0) # Causes end-iterator-dereference errors for debug Windows builds
 
   add_definitions(-DWIN32 -D_SCL_SECURE_NO_WARNINGS -D__TBB_NO_IMPLICIT_LINKAGE)
@@ -352,7 +351,7 @@ if(WIN32 OR UNIX)
     # kenlm was built with this
     sdl_compiled_setting(HAVE_BZLIB 1)
   else()
-    message(FATAL_ERROR "not found: BZIP2")
+    message(WARNING "not found: BZIP2")
   endif()
 else()
   message(STATUS "no bzip2 (yet)")
@@ -378,9 +377,9 @@ if(USING_GCC)
       set(SDL_HAVE_GCC_4_8 1)
 
       if(LINUX)
-        sdl_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 0)
+        sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 0)
       else()
-        sdl_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 1)
+        sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 1)
       endif()
       #add_definitions(-Wextra) # enable only temporarily, since it's too much - see http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
       add_definitions(-fmax-errors=3) # quit after this many
@@ -548,7 +547,17 @@ if(WIN32)
   set(SRILM_ROOT "${SDL_EXTERNALS_PATH}/libraries/srilm-1.7.0")
 endif()
 
+sdl_quiet_compiled_setting(HAVE_BUILTIN_POPCNT 1)
+# -mpopcnt gives 'population count' i.e. number of set bits - might require corei7 - check cluster machines!
+
+# CA-9649 Use older boost, icu, kenlm from xmt-externals master
+if(NOT DEFINED SDL_ETS_BUILD)
+  set(SDL_ETS_BUILD 0)
+endif()
+sdl_compiled_setting(SDL_ETS_BUILD ${SDL_ETS_BUILD})
+
 if(UNIX)
+  sdl_quiet_compiled_setting(HAVE_BUILTIN_CLZ 1)
   if (NOT CMAKE_COMPILER_IS_CLANGXX)
     if (NOT APPLE)
       sdl_linker_flags(-Wl,--no-undefined)
@@ -643,69 +652,25 @@ if(UNIX)
 
   if(LINUX)
     set(Boost_NO_SYSTEM_PATHS 1)
-    set(SDL_BOOST_MINOR 58)
-    set(Boost_COMPILER "")
-    #    set(SDL_BOOST_MINOR 57)
-    #    set(Boost_COMPILER "-gcc44")
+    if(SDL_ETS_BUILD)
+      set(SDL_BOOST_MINOR 57)
+      set(Boost_COMPILER "-gcc44")
+    else()
+      set(SDL_BOOST_MINOR 58)
+      set(Boost_COMPILER "")
+    endif()
     set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
     set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
     set(Boost_USE_STATIC_LIBS OFF)
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
     set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
-    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
-
-  endif()
-
-  if(ANDROID)
-    sdl_exe_linker_flags(-static)
-    set(Boost_FIND_VERSION 1.49)
-    set(Boost_ADDITIONAL_VERSIONS "1.49" "1.49.0")
-    set(Boost_NO_SYSTEM_PATHS 1)
-    set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost-1.49.0")
-    set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_COMPILER "-gcc")
-
-    set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
-    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
-    set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/lib) # always use release for Android
-    set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.3")
-    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-49.1.2")
-    set(DB_ROOT_PATH "${SDL_EXTERNALS_PATH}/libraries/db-5.3.21")
-
-    # Android uses different yaml and tbb versions:
-    set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.1/")
-  endif()
-
-
-  if(APPLE)
-    set(APPLE_USE_LOCAL_ICU 1)
-    if(APPLE_USE_LOCAL_ICU)
-      set(ICU_ROOT "/usr/local/Cellar/icu4c/55.1")
-    else()
+    if(SDL_ETS_BUILD)
       set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-5.4")
+    else()
+      set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
     endif()
 
-    find_path(FOUND_LOG4CXX_ROOT include/log4cxx/logger.h PATHS ${LOG4CXX_ROOT})
-    if(NOT FOUND_LOG4CXX_ROOT)
-      message(ERROR "Could not find log4cxx installation. Please install it system-wide or specify location with -DLOG4CXX_ROOT")
-    endif()
-    set(LOG4CXX_ROOT ${FOUND_LOG4CXX_ROOT})
-
-    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-    set(Boost_USE_MULTITHREADED 1)
-    set(SDL_BOOST_MINOR 58)
-    set(Boost_NO_SYSTEM_PATHS 1)
-    set(BOOST_LIBRARYDIR "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0/lib")
-    set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
-    set(Boost_INCLUDE_DIR "${BOOST_INCLUDEDIR}")
-    set(Boost_LIBRARY_DIR "${BOOST_LIBRARYDIR}")
-    set(Boost_COMPILER "")
-    if(OPEN_SOURCE_RELEASE)
-      set(Boost_USE_STATIC_LIBS ON)
-    endif()
 
     if(CMAKE_COMPILER_IS_GNUCXX)
       #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
@@ -802,7 +767,7 @@ MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 if(WIN32)
   set(LINK_DEPENDENCIES ${LINK_DEPENDENCIES} ${ICU_LIBRARIES})
 endif()
-sdl_compiled_setting(HAVE_ICU 1)
+sdl_quiet_compiled_setting(HAVE_ICU 1)
 
 find_package(TBB)
 MESSAGE(STATUS "TBB Library: ${TBB_LIBRARY}")
@@ -900,7 +865,7 @@ endif()
 
 
 MESSAGE(STATUS "unit testing: SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN} ... SDL_TRY_UNIT_TEST_DYN_LINK ${SDL_TRY_UNIT_TEST_DYN_LINK}")
-sdl_compiled_setting(SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN})
+sdl_quiet_compiled_setting(SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN})
 
 MESSAGE(STATUS "Boost Include Directories: ${Boost_INCLUDE_DIRS}")
 MESSAGE(STATUS "Boost Library Directories: ${Boost_LIBRARY_DIRS}")
@@ -917,7 +882,7 @@ message(STATUS "yaml-cpp include directory: ${YAML_CPP_INCLUDE_DIR}")
 
 find_package(ZLIB)
 MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
-sdl_compiled_setting(HAVE_ZLIB 1)
+sdl_quiet_compiled_setting(HAVE_ZLIB 1)
 
 
 if(NOT ANDROID)
@@ -1015,7 +980,7 @@ set(INDIRECT_UTIL_LIB_DEPENDENCIES
   )
 if(ZLIB_FOUND)
   # kenlm was built with this
-  sdl_compiled_setting(HAVE_LIBZ 1)
+  sdl_quiet_compiled_setting(HAVE_LIBZ 1)
 else()
   message(FATAL_ERROR "not found: libz")
 endif()
@@ -1064,8 +1029,8 @@ if(OPEN_SOURCE_RELEASE)
   sdl_compiled_setting(SDL_ENCRYPT 0) #necessary?
 
   if(APPLE)
-    sdl_compiled_setting(SDL_FIX_LOCALE 0) # optional except on my mac
-    sdl_compiled_setting(SDL_BOOST_LOCALE 0) # optional
+    sdl_quiet_compiled_setting(SDL_FIX_LOCALE 0) # optional except on my mac
+    sdl_quiet_compiled_setting(SDL_BOOST_LOCALE 0) # optional
   endif()
   #  sdl_compiled_setting(SDL_FAST_COUT 0) # optional
   #  sdl_compiled_setting(GRAEHL_FILEARGS_DEFAULT_LARGE_BUF 0) #optional
@@ -1074,7 +1039,7 @@ else()
   if(SDL_DEVELOPMENT)
     MESSAGE(STATUS "!OPEN_SOURCE_RELEASE AND SDL_DEVELOPMENT: SDL_ASSERT_THREAD_SPECIFIC")
     # if not set, then enabled for debug only:
-    sdl_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
+    sdl_quiet_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
   endif()
   if(SDL_DEBUG)
     if(SDL_PRODUCTION)

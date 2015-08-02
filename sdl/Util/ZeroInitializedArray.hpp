@@ -25,6 +25,11 @@
 
 namespace sdl { namespace Util {
 
+template <class Array>
+void bzeroArray(Array const& a) {
+  std::memset(&a[0], 0, sizeof(a[0])*a.size());
+}
+
 
 /**
    like boost::array but for memcmp-able pod that you want set to zero bytes (boost::array

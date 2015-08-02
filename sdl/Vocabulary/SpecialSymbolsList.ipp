@@ -106,6 +106,10 @@
 #define SDL_SPECIAL_SYMBOL_TEXT "null"
 #include SDL_SPECIAL_SYMBOL_INC
 
+#define SDL_SPECIAL_SYMBOL_NAME JUMP_WALL
+#define SDL_SPECIAL_SYMBOL_TEXT "jump-wall"
+#include SDL_SPECIAL_SYMBOL_INC
+
 //////////////////////////////
 // SDL_BLOCK symbols
 //////////////////////////////

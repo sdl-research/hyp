@@ -1192,7 +1192,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
         }
         bool const tryAcyclic
             = canAcyclic && (opt.acyclic || isAcyclic);  // might be acyclic even though not marked as such
-        bool const gotAcyclic = !tryAcyclic ? false : simpleGraph ? acyclicBest<true>() : acyclicBest<false>();
+        bool const gotAcyclic = tryAcyclic && (simpleGraph ? acyclicBest<true>() : acyclicBest<false>());
         if (!gotAcyclic) {
           typedef graehl::TailsUpHypergraph<HG> Tails;
           Tails tails(hg, vf, ef);

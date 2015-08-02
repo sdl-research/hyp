@@ -64,7 +64,7 @@ struct WhichFstComposeSpecials {
   bool defined() const { return ids_ < (1 << knFstComposeSpecials); }
   static WhichFstComposeSpecials undefined() {
     WhichFstComposeSpecials r;
-    r.ids_ = 1<<knFstComposeSpecials;
+    r.ids_ = 1 << knFstComposeSpecials;
     return r;
   }
   bool test(SymId sym) const { return test(sym.id()); }
@@ -80,21 +80,20 @@ struct WhichFstComposeSpecials {
   void check(SymId sym) {
     if (isFstComposeSpecial(sym)) set(sym);
   }
-  friend inline std::ostream& operator<<(std::ostream &out, WhichFstComposeSpecials const& self) {
+  friend inline std::ostream& operator<<(std::ostream& out, WhichFstComposeSpecials const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream &out) const {
+  void print(std::ostream& out) const {
     out << "fst-compose-specials:";
     for (SymIdInt id = 0; id < knFstComposeSpecials; ++id)
-      if (test(id))
-        out << ' ' << specialSymbols().str(specialTerminal(id));
+      if (test(id)) out << ' ' << specialSymbols().str(specialTerminal(id));
   }
 };
 
 inline bool specialTerminalIsAnnotation(Sym specialTerminal) {
   assert(specialTerminal.type() == kSpecialTerminal);
-  return specialTerminal >= BLOCK_END::ID;
+  return specialTerminal >= JUMP_WALL::ID;
 }
 
 inline bool isAnnotation(Sym sym) {
@@ -160,6 +159,14 @@ inline bool isBlockSymbol(Sym sym) {
   return sym >= BLOCK_END::ID && sym < BLOCK_START::ID + SDL_NUM_BLOCKS;
 }
 
+inline bool isBlockSymbolOrJumpWall(Sym sym) {
+  return sym >= JUMP_WALL::ID && sym < BLOCK_START::ID + SDL_NUM_BLOCKS;
+}
+
+inline bool isJumpWallOrBlockOrSubstituteSymbol(Sym sym) {
+  return sym >= JUMP_WALL::ID && sym < BLOCK_START::ID + 2 * SDL_NUM_BLOCKS;
+}
+
 inline bool isBlockOrSubstituteSymbol(Sym sym) {
   return sym >= BLOCK_END::ID && sym < BLOCK_START::ID + 2 * SDL_NUM_BLOCKS;
 }
@@ -180,8 +187,10 @@ struct IsBlockStartSymbol {
   bool operator()(Sym sym) const { return isBlockStartSymbol(sym); }
 };
 
-struct IsNotBlockSymbol {
-  bool operator()(Sym sym) const { return !isBlockSymbol(sym); }
+/// probably we can just check IsConstraintSubstitute instead (since no other
+/// special symbol should contribute to rule-source-sides)
+struct IsNotBlockSymbolOrJumpWall {
+  bool operator()(Sym sym) const { return !isBlockSymbolOrJumpWall(sym); }
 };
 
 struct IsLexical {
@@ -224,8 +233,8 @@ inline void checkBlockId(BlockId id) {
   if (!(id <= SDL_NUM_BLOCKS && id > 0))
     SDL_THROW_LOG(Vocabulary.BLOCK_OPEN, ConfigException,
                   "<xmt-block"
-                  << id << "> exceeded max # of blocks " << SDL_NUM_BLOCKS
-                  << " - recompile with a larger limit or decode with fewer constraints per segment");
+                      << id << "> exceeded max # of blocks " << SDL_NUM_BLOCKS
+                      << " - recompile with a larger limit or decode with fewer constraints per segment");
 }
 
 // TODO: because of the way SpecialSymbolsList works, ID is not a compile-time
@@ -241,8 +250,8 @@ inline Sym blockOpenForIndex(BlockId index) {
   if (index >= SDL_NUM_BLOCKS)
     SDL_THROW_LOG(Constraints, ConfigException,
                   "Fixed limit SDL_NUM_BLOCKS="
-                  << SDL_NUM_BLOCKS << " exceeded with block-open index" << index
-                  << " - recompile with larger or prune your input, or use fewer constraints");
+                      << SDL_NUM_BLOCKS << " exceeded with block-open index" << index
+                      << " - recompile with larger or prune your input, or use fewer constraints");
 
   return BLOCK_START::ID + index;
 }

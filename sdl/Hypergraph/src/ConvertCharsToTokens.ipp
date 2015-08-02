@@ -68,7 +68,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
 
 
   bool keep(Sym sym) const {
-    assert(!Vocabulary::isBlockSymbol(sym));
+    assert(!Vocabulary::isBlockSymbolOrJumpWall(sym));
     return !sym.isSpecial() || sym == GLUE::ID;
   }
 
@@ -154,36 +154,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
   bool isTokenImpossibleToComplete(Token const& tok) const {
     return isBadStartToken(tok) || isBadFinalToken(tok);
   }
-  /* //TODO: handle block syms on inarcs instead of in TokenWeight?
-  void visit(StateId stateid) {
-    SDL_TRACE(Hypergraph.ConvertCharsToTokens, "Visiting state " << stateid);
-    assert(inarcs_);
-    if (stateid >= (*inarcs_).size()) return;
-    ArcsContainer const& arcs = (*inarcs_)[stateid];
-    if (adj.empty()) return;
 
-    StateId outmid = kNoState;
-    for(typename Arcs::const_iterator ai = arcs.begin(), ae = arcs.end(); ai != ae; ++ai) {
-      Arc *a = *ai;
-      Weight const& inweight = a->weight();
-      StateIdContainer const& intails = a->tails();
-      for(StateIdContainer::const_iterator ti = intails.begin(), te = intails.end(); ti != te; ++ti) {
-        StateId tail = *ti;
-        SymId tailsym = inhg_.inputLabel(tail);
-        if (Vocabulary::isBlockSymbol(tailsym)) {
-          if (outmid == kNoState) {
-          }
-
-        }
-
-        TokenWeight const& tailTokenWt = incomingTokenWeights_[tail];
-
-      }
-
-    }
-
-  }
-  */
   void visit(StateId stateid) {
     SDL_TRACE(Hypergraph.ConvertCharsToTokens, "Visiting state " << stateid);
     if (stateid >= (*inarcs_).size() || (*inarcs_)[stateid].empty()) return;
@@ -217,7 +188,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
             StateIdContainer& tails = arc->tails();
             for (; i != e; ++i) {
               Sym const s = *i;
-              if (Vocabulary::isBlockSymbol(s)) {
+              if (Vocabulary::isBlockSymbolOrJumpWall(s)) {
                 if (!buf.empty()) break;
                 tails.push_back(outhg_->addState(s));
               } else if (keep(s)) {
@@ -323,7 +294,7 @@ struct AssignTokenWeight : public StateToWeight<TW> {
       } else if (sym == EPSILON::ID) {
         // <eps> is extendable, but doesn't *have* to extend
         tokenProps = Token::kExtendableLeft | Token::kExtendableRight;
-      } else if (Vocabulary::isBlockSymbol(sym))
+      } else if (Vocabulary::isBlockSymbolOrJumpWall(sym))
         tokenProps = Token::kBlockSymbolTokenProperties;
       TokenWeight tw(Token(sym, tokenProps), Weight::one());
       SDL_TRACE(Hypergraph.AssignTokenWeight, "State " << stateId << ": Assigning token weight " << tw);

@@ -32,8 +32,8 @@ struct QueueDistance {};
 template <class Arc, class InsideCost>
 void outsideCosts(IHypergraph<Arc> const& hg, SdlFloat* outside, InsideCost const& inside,
                   StateId N = kNoState, SdlFloat onlyCostsBelow = HUGE_VAL, bool insideHasAxioms = true) {
-  if (!hg.storesInArcs())
-    SDL_THROW_LOG(OutsideCosts, ConfigException, "can't get outsideCosts without in-arcs");
+  forceInArcs(const_cast<IHypergraph<Arc>&>(hg), "outsideCosts");
+
   if (N == kNoState) N = hg.sizeForHeads();
   SDL_TRACE(OutsideCosts, "N=" << N << " onlyCostsBelow=" << onlyCostsBelow
                                << " insideHasAxioms=" << insideHasAxioms);

@@ -882,13 +882,13 @@ StateId ensureFinal(IMutableHypergraph<Arc>& hg) {
 }
 
 template <class Arc>
-inline void forceInArcs(IHypergraph<Arc>& hg) {
+inline void forceInArcs(IHypergraph<Arc>& hg, char const* prefix = "input") {
   if (!hg.storesInArcs()) {
     IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
     if (mhg)
       mhg->forceInArcs();
     else
-      SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, "input hg doesn't have inarcs");
+      SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, prefix << " hg doesn't have inarcs");
   }
 }
 

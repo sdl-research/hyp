@@ -333,14 +333,16 @@ inline NgramWeightTpl<W> times(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> co
   typedef typename Ngw::const_iterator Iter;
   forall (NgramPtrAndWeight const& p1, w1) {
     Ngram const& ngram1 = *p1.first;
-    std::size_t len1 = std::count_if(ngram1.begin(), ngram1.end(), Vocabulary::IsNotBlockSymbol());
+    /// probably we can just check IsConstraintSubstitute instead (since no other
+    /// special symbol should contribute to rule-source-sides)
+    std::size_t len1 = std::count_if(ngram1.begin(), ngram1.end(), Vocabulary::IsNotBlockSymbolOrJumpWall());
     assert(len1 <= w1.getMaxLen());
     assert(len1 <= maxlen);
     std::size_t maxlen2 = maxlen - len1;
     for (Iter i2 = w2.begin(), e2 = w2.end(); i2 != e2; ++i2) {
       NgramPtrAndWeight const& p2 = *i2;
       Ngram const& ngram2 = *p2.first;
-      std::size_t len2 = std::count_if(ngram2.begin(), ngram2.end(), Vocabulary::IsNotBlockSymbol());
+      std::size_t len2 = std::count_if(ngram2.begin(), ngram2.end(), Vocabulary::IsNotBlockSymbolOrJumpWall());
       assert(len2 <= w2.getMaxLen());
       if (len2 > maxlen2) continue;
       W const& wtConcat = times(p1.second, p2.second);

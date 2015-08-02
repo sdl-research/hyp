@@ -184,16 +184,19 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn {  // empty base clas
   KeepFn const& keep() const { return *this; }
   ArcWtFn const& arcWeight() const { return *this; }
 
+  std::vector<StateId>* maxEnd;
+
   AllPairsSortedDag(InputHypergraph const& hg, Distances& distances, KeepFn keepFn = KeepFn(),
                     ArcWtFn arcWtFn = ArcWtFn(), Weight const& oneWeight = Weight::one(),
-                    Weight const& zeroWeight = Weight::zero())
+                    Weight const& zeroWeight = Weight::zero(), std::vector<StateId>* maxEnd = 0)
       : ArcWtFn(arcWtFn)
       , KeepFn(keepFn)
       , hg(hg)
       , distances(distances)
       , nStates((StateId)distances.getNumRows())
       , oneWeight(oneWeight)
-      , zeroWeight(zeroWeight) {
+      , zeroWeight(zeroWeight)
+      , maxEnd(maxEnd) {
     //    if (!hg.isFsm() || !hg.storesOutArcs())
     // SDL_THROW_LOG(Hypergraph, ConfigException,
     // "Current AllPairsSortedDag implementation needs " SDL_ALL_PAIRS_REQUIRES_SORTED_DAG);
@@ -220,19 +223,25 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn {  // empty base clas
   }
 
   void compute() {
+    StateId *maxEnds = 0;
+    if (maxEnd) {
+      maxEnd->clear();
+      maxEnd->resize(nStates);
+      maxEnds = &maxEnd->front();
+    }
     for (StateId from = 0; from < nStates; ++from) {  // ultimate source
       Weight* distancesFrom = distances.row(from);
       distancesFrom[from] = oneWeight;
+      StateId maxEndFrom = 0;
       for (StateId via = from; via < nStates; ++via) {
         Weight& viaWt = distancesFrom[via];
         if (viaWt == zeroWeight) continue;
         // TODO: slight speedup: maintain reachability set (log n or bit vector, instead of n)
-
         if (!keep()(viaWt)) {
           if (kZeroDropped) viaWt = zeroWeight;
           continue;  // we already don't care for from->via. definitely don't continue it.
         }
-
+        maxEndFrom = via;
         // for outarcs of via:
         ArcId nArcs = hg.numOutArcs(via);
         for (ArcId a = 0; a < nArcs; ++a) {
@@ -244,6 +253,7 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn {  // empty base clas
           // don't reject head yet (semiring may accumulate sums).
         }
       }
+      if (maxEnds) maxEnds[from] = maxEndFrom;
     }
   }
 };
@@ -252,14 +262,15 @@ template <class InputHypergraph, class KeepFn, class ArcWtFn>
 void allPairsSortedDag(InputHypergraph const& hg, Util::Matrix<typename ArcWtFn::Weight>& distances,
                        KeepFn const& keepFn, ArcWtFn const& arcWtFn, bool zeroDroppedPaths = true,
                        typename ArcWtFn::Weight const& oneWeight = ArcWtFn::Weight::one(),
-                       typename ArcWtFn::Weight const& zeroWeight = ArcWtFn::Weight::zero()) {
+                       typename ArcWtFn::Weight const& zeroWeight = ArcWtFn::Weight::zero(),
+                       std::vector<StateId>* maxEnd = 0) {
   distances.fill(zeroWeight);
   if (zeroDroppedPaths)
     AllPairsSortedDag<InputHypergraph, KeepFn, ArcWtFn, true> compute(hg, distances, keepFn, arcWtFn,
-                                                                      oneWeight, zeroWeight);
+                                                                      oneWeight, zeroWeight, maxEnd);
   else
     AllPairsSortedDag<InputHypergraph, KeepFn, ArcWtFn, false> compute(hg, distances, keepFn, arcWtFn,
-                                                                       oneWeight, zeroWeight);
+                                                                       oneWeight, zeroWeight, maxEnd);
 }
 
 

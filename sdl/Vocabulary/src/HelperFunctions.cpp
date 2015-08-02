@@ -51,7 +51,7 @@ void mapToTerminals(std::vector<std::string> const& strs, Syms& syms, IVocabular
 
 void removeBlockSymbols(Syms const& ngram, Syms& result) {
   for (Syms::const_iterator i = ngram.begin(), e = ngram.end(); i != e; ++i)
-    if (!Vocabulary::isBlockSymbol(*i)) result.push_back(*i);
+    if (!Vocabulary::isBlockSymbolOrJumpWall(*i)) result.push_back(*i);
 }
 
 

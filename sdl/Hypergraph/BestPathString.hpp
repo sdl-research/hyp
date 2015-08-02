@@ -322,7 +322,7 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
   void operator()(Hypergraph::IHypergraph<Arc> const& hg) const {
     using namespace Hypergraph;
     voc = hg.getVocabulary().get();
-    skipOriginalSym = skipOriginalWord ? voc->sym(*skipOriginalWord, kTerminal) : NoSymbol;
+    skipOriginalSym = skipOriginalWord ? voc->addTerminal(*skipOriginalWord) : NoSymbol;
     hgBase = &hg;
     SDL_DEBUG(Hypergraph.BestPathString, "RunPipeline visitor for Translitate etc. computing "
                                              << options.nbest << "-best for hg:\n " << hg);
@@ -341,25 +341,28 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
                         options.hgString);
     if (symsRewrite) symsRewrite(tokens, voc);
     if (!options.detok) {
-      if (skipOriginalSym && tokens.size() == 1 && tokens.front() != skipOriginalSym)
+      if (!skipOriginalSym || !(tokens.size() == 1 && tokens[0] == skipOriginalSym))
         accept.phrase(tokens, *voc);
     } else {
       Util::StringBuilder wordBuf;  // we may have to concatenate several tokens into one
       std::string const& spaceToken = options.spaceToken;
       if (spaceToken.empty()) {
         textFromSyms(wordBuf, tokens, *voc, options.hgString);
-        if (skipOriginalWord && wordBuf == *skipOriginalWord) return true;  // continue visiting nbests
+        if (skipOriginalWord) {
+          SDL_DEBUG(xmt.RunPipeline.runPipelineToStrings, "'"<<wordBuf<<"' vs original '"<<*skipOriginalWord<< " equal="<<(wordBuf == *skipOriginalWord));
+          if (wordBuf == *skipOriginalWord) return true;  // continue nbests
+        }
         accept(wordBuf);  // single token result
       } else {
         // split into several tokens
         Sym const spaceSym = voc->add(spaceToken, kTerminal);
         Psym begin = tokens.begin(), end = tokens.end();
         Psym word0 = begin;
-        unsigned nwords = 0;
+        unsigned nSpaceSep = 0;
         for (Psym i = begin; i < end; ++i) {
           if (*i == spaceSym)
             if (word0 < i) {  // nonempty token-slice
-              ++nwords;
+              ++nSpaceSep;
               wordBuf.clear();
               textFromSyms(wordBuf, SymSlice(word0, i), *voc, options.hgString);
               accept(wordBuf);
@@ -369,8 +372,10 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
         if (word0 < end) {
           wordBuf.clear();
           textFromSyms(wordBuf, SymSlice(word0, end), *voc, options.hgString);
-          if (!nwords && skipOriginalWord && wordBuf == *skipOriginalWord)
-            return true;  // continue visiting nbests
+          if (!nSpaceSep && skipOriginalWord) {
+            SDL_DEBUG(xmt.RunPipeline.runPipelineToStrings, "single word '"<<wordBuf<<"' vs original '"<<*skipOriginalWord<<" equal="<<(wordBuf == *skipOriginalWord));
+            if (wordBuf == *skipOriginalWord) return true;  // continue nbests
+          }
           accept(wordBuf);
         }
       }
