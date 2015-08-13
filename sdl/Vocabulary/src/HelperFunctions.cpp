@@ -54,5 +54,12 @@ void removeBlockSymbols(Syms const& ngram, Syms& result) {
     if (!Vocabulary::isBlockSymbolOrJumpWall(*i)) result.push_back(*i);
 }
 
+SymsIndex countBlockSymbols(Syms const& ngram) {
+  SymsIndex r = 0;
+  for (Syms::const_iterator i = ngram.begin(), e = ngram.end(); i != e; ++i)
+    r += Vocabulary::isBlockSymbolOrJumpWall(*i);
+  return r;
+}
+
 
 }}

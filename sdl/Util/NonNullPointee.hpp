@@ -48,7 +48,6 @@ struct NonNullPointeeEqualExpensive {
 /**
    Hash pointer-likes by their pointed-to contents.
 */
-
 template <class T>
 struct NonNullPointeeHash : boost::hash<T> {
   typedef std::size_t result_type;
@@ -62,6 +61,19 @@ struct NonNullPointeeHash : boost::hash<T> {
   template <class Ptr>
   result_type operator()(Ptr const& p) const {
     return boost::hash<T>()(*p);
+  }
+};
+
+struct NonNullPointeeHashValue {
+  typedef std::size_t result_type;
+
+  template <class T>
+  result_type operator()(T *p) const {
+    return hash_value(*p);
+  }
+  template <class T>
+  result_type operator()(T const* p) const {
+    return hash_value(*p);
   }
 };
 

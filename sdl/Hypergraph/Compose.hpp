@@ -62,6 +62,8 @@
 #include <sdl/Util/NonNullPointee.hpp>
 #include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/Util/PrintRange.hpp>
+#include <sdl/Hypergraph/Assert.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 
 #ifndef SDL_HASH_COMPOSE_ITEM
 #define SDL_HASH_COMPOSE_ITEM 0
@@ -72,7 +74,6 @@
 
 #if SDL_HASH_COMPOSE_ITEM
 #include <sdl/Util/Index.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
 #endif
 
 namespace sdl {

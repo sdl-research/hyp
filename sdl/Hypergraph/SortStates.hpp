@@ -398,24 +398,6 @@ struct SortStatesTransform : SortStatesOptions, TransformBase<Transform::Inplace
 };
 
 
-/**
-   \return whether this is an acyclic fsm
-
-   TODO: much more efficient algorithm is possible.
-*/
-template <class Arc>
-bool isAcyclicBySortStates(IHypergraph<Arc> const& hg) {
-  if (hasProperties(hg.properties(), kSortedStates))
-    return isTopoSort(hg);
-  else {
-    MutableHypergraph<Arc> sorted((kStoreInArcs));
-    SortStates<Arc> sorter;
-    sorter.inout(hg, &sorted);
-    return isTopoSort(sorted, true, sorter.partBoundary);
-  }
-}
-
-
 }}
 
 #endif

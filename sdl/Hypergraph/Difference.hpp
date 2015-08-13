@@ -21,6 +21,7 @@
 #include <sdl/Hypergraph/Compose.hpp>
 #include <sdl/Hypergraph/fs/Complement.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/Assert.hpp>
 
 namespace sdl {
 namespace Hypergraph {

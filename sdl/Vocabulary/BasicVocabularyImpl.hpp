@@ -147,13 +147,13 @@ class BasicVocabularyImpl {
     return symForIndex(i);
   }
 
-  SymIdInt indexAdding(std::string const& symbol) {
+  SymInt indexAdding(std::string const& symbol) {
     SymInt i = symbols_.index(symbol);
     assert(i < maxLstSize_);
     return i;
   }
 
-  SymIdInt indexAdding(Slice s) { return indexAdding(std::string(s.first, s.second)); }
+  SymInt indexAdding(Slice s) { return indexAdding(std::string(s.first, s.second)); }
 
   Sym addSymbolMustBeNew(Slice s) { return addSymbolMustBeNew(std::string(s.first, s.second)); }
 

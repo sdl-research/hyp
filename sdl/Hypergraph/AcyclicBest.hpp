@@ -151,16 +151,19 @@ struct AcyclicBest {
     // kAcyclic to spare the effort)
 
     if (useOutArcs) {
-      // essentially two different-order algorithms for viterbi. one iterates
-      // over in arcs the other out. both are correct for acyclic. this is all
-      // to avoid requiring storing in *and* out arcs - either is fine
-      FirstTailOutArcs<Arc> adj(hg);
+// essentially two different-order algorithms for viterbi. one iterates
+// over in arcs the other out. both are correct for acyclic. this is all
+// to avoid requiring storing in *and* out arcs - either is fine
 
       std::vector<StateId> orderReverse;
+#if 0
+      FirstTailOutArcs<Arc> adj(hg);
       StateId N = hg.size();
       orderReverse.reserve(N);
       back_edges_ = adj.orderTailsLast(orderReverse, maxBackEdges, IsGraph);
-
+#else
+      back_edges_ = orderTailsLast(hg, orderReverse, maxBackEdges, IsGraph);
+#endif
       if (orderReverse.empty()) return;
       typedef StateId const* I;
       for (I i = &orderReverse.back(), last = &orderReverse.front();;) {

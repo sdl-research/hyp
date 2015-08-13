@@ -32,6 +32,7 @@
 #include <sdl/Util/Map.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Unordered.hpp>
+#include <sdl/Hypergraph/Assert.hpp>
 
 namespace sdl {
 namespace Hypergraph {

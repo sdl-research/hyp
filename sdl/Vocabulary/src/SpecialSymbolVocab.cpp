@@ -72,7 +72,7 @@ Sym SpecialSymbolVocab::add(std::string const& symbol) {
     return vocab->add(symbol);
 }
 
-Sym SpecialSymbolVocab::addAssertId(std::string const& symbol, SymIdInt id) {
+Sym SpecialSymbolVocab::addAssertId(std::string const& symbol, SymInt id) {
   if (symbol == kXmtBlockStr || symbol == kXmtEntityStr)
     return addSdlNumBlocks(*vocab, symbol);
   else {

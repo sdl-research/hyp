@@ -179,6 +179,11 @@ void removeEmpty(Vec &vec) {
   removeShrink(vec, Empty());
 }
 
+template <class VecVec>
+void reserveEach(VecVec &v, std::size_t reserve) {
+  for(typename VecVec::const_iterator i = v.begin(), e = v.end(); i != e; ++i)
+    i->reserve(reserve);
+}
 
 }}
 

@@ -41,10 +41,8 @@ VERBOSE_EXCEPTION_DECLARE(InvalidSymType)
 
 typedef unsigned SymInt;
 typedef SymInt BlockId;
-typedef SymInt SymIdInt;
 
 struct Sym;
-typedef Sym SymId;
 
 // TODO@JG: replace 'std::string[Ref] with just 'std::string [const&]' - will never change
 

@@ -411,7 +411,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       }
       // TODO: maybe only optimize epsilon
       assert(input == SIGMA::ID);
-      SymId sym;
+      Sym sym;
       for (;; ++i) {
         if (i == e) return OutArcsGenerator();
         if ((sym = this->inputLabel((*i)->fsmSymbolState())) > EPSILON::ID) {
@@ -889,6 +889,17 @@ inline void forceInArcs(IHypergraph<Arc>& hg, char const* prefix = "input") {
       mhg->forceInArcs();
     else
       SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, prefix << " hg doesn't have inarcs");
+  }
+}
+
+template <class Arc>
+inline void forceFirstTailOutArcs(IHypergraph<Arc>& hg, char const* prefix = "input") {
+  if (!hg.storesOutArcs()) {
+    IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
+    if (mhg)
+      mhg->forceFirstTailOutArcs();
+    else
+      SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, prefix << " hg doesn't have (graph) out arcs");
   }
 }
 

@@ -387,6 +387,11 @@ PrintRange<Iter> makePrintable(Iter begin, Iter end, bool printIndex = false) {
   return PrintRange<Iter>(begin, end, printIndex);
 }
 
+template <class Range>
+PrintRange<typename Range::const_iterator> rangePrintable(Range const& range, bool printIndex = false) {
+  return PrintRange<typename Range::const_iterator>(range.begin(), range.end(), printIndex);
+}
+
 template <class Iter>
 PrintRange<Iter> arrayPrintable(Iter begin, unsigned n, bool printIndex = false) {
   return PrintRange<Iter>(begin, begin + n, printIndex);

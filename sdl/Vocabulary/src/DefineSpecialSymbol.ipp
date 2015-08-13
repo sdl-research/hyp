@@ -13,7 +13,7 @@ namespace Vocabulary {
 namespace Symbols {
 struct BOOST_PP_CAT(Symbol_, SDL_SPECIAL_SYMBOL_NAME) : SpecialSymbolTemplate<BOOST_PP_CAT(Symbol_, SDL_SPECIAL_SYMBOL_NAME)> {
   static char const* str() { return "<" SDL_SPECIAL_SYMBOL_TEXT ">"; }
-  static const SymIdInt id = BOOST_PP_SLOT(1);
+  static const SymInt id = BOOST_PP_SLOT(1);
 };
 }
 }

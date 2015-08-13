@@ -42,7 +42,7 @@ class SpecialSymbolVocab {
   virtual ~SpecialSymbolVocab();
 
   Sym add(std::string const& symbol);
-  Sym addAssertId(std::string const& symbol, SymIdInt id);
+  Sym addAssertId(std::string const& symbol, SymInt id);
 
   std::string const& str(Sym id) const;
 

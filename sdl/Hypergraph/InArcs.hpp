@@ -511,6 +511,14 @@ struct FirstTailOutArcs : AdjacentArcsBase<Arc, mustStoreNatively> {
   ArcsContainer tmpOutArcs, emptyOutArcs;
 };
 
+/// reverse topological order on tail->head. \return #back edges
+template <class Arc>
+std::size_t orderTailsLast(IHypergraph<Arc> const& hg, std::vector<StateId> &order, std::size_t maxBackEdges = 0, bool isGraph = true) {
+  order.reserve(hg.size());
+  FirstTailOutArcs<Arc> adj(hg);
+  return adj.orderTailsLast(order, maxBackEdges, isGraph);
+}
+
 
 }}
 

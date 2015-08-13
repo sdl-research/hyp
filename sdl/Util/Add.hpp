@@ -418,6 +418,11 @@ void increaseSize(Vector& v, Index sz) {
   if (sz > v.size()) v.resize(sz);
 }
 
+template <class Vector, class Index>
+void increaseSizeForIndex(Vector& v, Index i) {
+  increaseSize(v, i + 1);
+}
+
 /**
    v.resize(sz, zero) if not already at least that large
 */

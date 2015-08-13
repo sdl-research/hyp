@@ -38,6 +38,7 @@
 #include <sdl/Hypergraph/Determinize.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/Assert.hpp>
 
 #include <algorithm>
 

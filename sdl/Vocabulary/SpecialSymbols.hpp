@@ -67,17 +67,17 @@ struct WhichFstComposeSpecials {
     r.ids_ = 1 << knFstComposeSpecials;
     return r;
   }
-  bool test(SymId sym) const { return test(sym.id()); }
-  void set(SymId sym) { return set(sym.id()); }
-  bool test(SymIdInt id) const {
+  bool test(Sym sym) const { return test(sym.id()); }
+  void set(Sym sym) { return set(sym.id()); }
+  bool test(SymInt id) const {
     assert(id <= knFstComposeSpecials);
     return ids_ & (1 << id);
   }
-  void set(SymIdInt id) {
+  void set(SymInt id) {
     assert(id <= knFstComposeSpecials);
     ids_ |= (1 << id);
   }
-  void check(SymId sym) {
+  void check(Sym sym) {
     if (isFstComposeSpecial(sym)) set(sym);
   }
   friend inline std::ostream& operator<<(std::ostream& out, WhichFstComposeSpecials const& self) {
@@ -86,7 +86,7 @@ struct WhichFstComposeSpecials {
   }
   void print(std::ostream& out) const {
     out << "fst-compose-specials:";
-    for (SymIdInt id = 0; id < knFstComposeSpecials; ++id)
+    for (SymInt id = 0; id < knFstComposeSpecials; ++id)
       if (test(id)) out << ' ' << specialSymbols().str(specialTerminal(id));
   }
 };
@@ -225,7 +225,7 @@ inline BlockId getBlockOp(Sym sym) {
   return sym.id() - BLOCK_END::ID.id();
 }
 
-inline bool isBlockOp(SymIdInt blockOp) {
+inline bool isBlockOp(SymInt blockOp) {
   return blockOp <= SDL_NUM_BLOCKS;
 }
 

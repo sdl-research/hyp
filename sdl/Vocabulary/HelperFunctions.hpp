@@ -24,6 +24,7 @@
 #include <sdl/Util/ThreadId.hpp>
 #include <sdl/Vocabulary/PrintSyms.hpp>
 #include <sdl/Vocabulary/ToTerminals.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
 
 namespace sdl {
 namespace Vocabulary {
@@ -58,9 +59,23 @@ struct VocabularyLeakCheck : Util::LeakCheckBase {
 IVocabularyPtr createDefaultVocab();
 
 /**
-   Removes block symbols from ngram
+   Removes block (or JUMP_WALL) symbols from ngram
  */
 void removeBlockSymbols(Syms const& ngram, Syms& result);
+
+SymsIndex countBlockSymbols(Syms const& ngram);
+
+//TODO: can rule out variables/NT if we think that will ever happen
+inline bool isRuleSrcSymbol(Sym sym) {
+  return sym && sym.id_ && !Vocabulary::isBlockSymbolOrJumpWall(sym);
+}
+
+inline SymsIndex countRuleSrcSymbols(Syms const& ngram) {
+  SymsIndex r = 0;
+  for (Syms::const_iterator i = ngram.begin(), e = ngram.end(); i != e; ++i)
+    r += Vocabulary::isRuleSrcSymbol(*i);
+  return r;
+}
 
 
 }}

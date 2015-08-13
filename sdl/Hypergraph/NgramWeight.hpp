@@ -43,6 +43,7 @@
 #include <sdl/Util/Forall.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
 
 namespace sdl {
 
@@ -78,21 +79,20 @@ namespace Hypergraph {
 
    Note that the times operation is not commutative.
 
-   Note the intended behavior is to not contain longer ngrams, so if
+   Note the intended behavior is to not collect longer ngrams, so if
    you call times(["a","b","c"], ["d"]) the result will be *empty* for
    n=3 (trigrams).
-
 
    the setting of maxlen to 0 means that you allow either an empty set of ngrams
    or a single empty-string ngram. this is the case for one() and zero()
    both. one() doesn't explicitly store an empty-string ngram, but behaves as
    though it has one for the purposes of plus and times.
 
-   the result of times where each ngram has a different maxlen has the greater of
-   the two maxlen. similarly for plus. effectively, maxlen is like a contagious global
-   setting.
+   the result of times where each ngram has a different maxlen has the greater
+   of the two maxlen. similarly for plus. effectively, maxlen is a contagious
+   global setting.
 
-   block symbols don't count for the purpose of the ngram length limit
+   block symbols aren't included in ngrams
 
 */
 template <class W>
@@ -333,16 +333,18 @@ inline NgramWeightTpl<W> times(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> co
   typedef typename Ngw::const_iterator Iter;
   forall (NgramPtrAndWeight const& p1, w1) {
     Ngram const& ngram1 = *p1.first;
-    /// probably we can just check IsConstraintSubstitute instead (since no other
-    /// special symbol should contribute to rule-source-sides)
-    std::size_t len1 = std::count_if(ngram1.begin(), ngram1.end(), Vocabulary::IsNotBlockSymbolOrJumpWall());
+    std::size_t const len1 = ngram1.size();
+    assert(!Vocabulary::countBlockSymbols(ngram1));
+    assert(len1 == Vocabulary::countRuleSrcSymbols(ngram1));
     assert(len1 <= w1.getMaxLen());
     assert(len1 <= maxlen);
     std::size_t maxlen2 = maxlen - len1;
     for (Iter i2 = w2.begin(), e2 = w2.end(); i2 != e2; ++i2) {
       NgramPtrAndWeight const& p2 = *i2;
       Ngram const& ngram2 = *p2.first;
-      std::size_t len2 = std::count_if(ngram2.begin(), ngram2.end(), Vocabulary::IsNotBlockSymbolOrJumpWall());
+      std::size_t const len2 =ngram2.size();
+      assert(!Vocabulary::countBlockSymbols(ngram2));
+      assert(len2 == Vocabulary::countRuleSrcSymbols(ngram2));
       assert(len2 <= w2.getMaxLen());
       if (len2 > maxlen2) continue;
       W const& wtConcat = times(p1.second, p2.second);
