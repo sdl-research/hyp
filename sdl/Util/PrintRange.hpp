@@ -392,6 +392,11 @@ PrintRange<typename Range::const_iterator> rangePrintable(Range const& range, bo
   return PrintRange<typename Range::const_iterator>(range.begin(), range.end(), printIndex);
 }
 
+template <class Range>
+PrintRange<typename Range::const_iterator> multilinePrintable(Range const& range, RangeSep const& sep = multiLineNoBrace()) {
+  return PrintRange<typename Range::const_iterator>(range.begin(), range.end(), sep);
+}
+
 template <class Iter>
 PrintRange<Iter> arrayPrintable(Iter begin, unsigned n, bool printIndex = false) {
   return PrintRange<Iter>(begin, begin + n, printIndex);

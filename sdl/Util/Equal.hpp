@@ -105,12 +105,12 @@ inline bool StreamLinesUnorderedEqual(std::istream& stream1, std::istream& strea
 
   if (!ok) {
     SDL_WARN(Util, "NOT (unordered) EQUAL:\n "
-                   << first_name << ": {[(\n" << print(stream1_lines, multiLineNoBrace()) << "\n)]} "
-                   << second_name << ": {(" << print(stream2_lines, multiLine()) << ")}\n\n difference "
-                   << first_name << " - " << second_name << ": {"
-                   << print(difference(stream1_lines, stream2_lines), multiLine()) << "} difference "
-                   << second_name << " - " << first_name << ": {"
-                   << print(difference(stream2_lines, stream1_lines), multiLine()));
+                       << first_name << ": {[(\n" << print(stream1_lines, multiLineNoBrace()) << "\n)]} "
+                       << second_name << ": {(" << print(stream2_lines, multiLine()) << ")}\n\n difference "
+                       << first_name << " - " << second_name << ": {"
+                       << print(difference(stream1_lines, stream2_lines), multiLine()) << "} difference "
+                       << second_name << " - " << first_name << ": {"
+                       << print(difference(stream2_lines, stream1_lines), multiLine()));
   }
 
   return ok;
@@ -197,7 +197,7 @@ inline bool LinesUnorderedEqualIgnoringDigits(std::string str1, std::string str2
     SDL_WARN(Util.Equal, " OK - Equal after digit replacement.");
   else
     SDL_WARN(Util.Equal, "not exactly equal even after digit replacement and ignoring line order: [(test)"
-                         << str1 << "  !=  " << str2 << " (reference)]\n");
+                             << str1 << "  !=  " << str2 << " (reference)]\n");
   return ok;
 }
 
@@ -213,7 +213,7 @@ inline bool LinesUnorderedEqualIgnoringIntegers(std::string str1, std::string st
   bool ok = LinesUnorderedEqual(str1, str2, first_name, second_name);
   if (!ok)
     SDL_WARN(Util.Equal, "not exactly equal even after integer replacement and ignoring line order: [(test)"
-                         << str1 << "  !=  " << str2 << " (reference)]\n");
+                             << str1 << "  !=  " << str2 << " (reference)]\n");
   else
     SDL_WARN(Util.Equal, " OK - Equal after integer replacement.");
   return ok;
@@ -255,8 +255,8 @@ bool PrintedLinesUnorderedEqualIgnoringIntegers(Obj const& obj, Obj2 const& obj2
    string.
 */
 template <class T>
-bool isStrEqual(T const& obj, std::string const& str, char const* nameObj = "actual",
-                char const* nameStr = "expected") {
+bool isStrEqual(T const& obj, std::string const& str, char const* nameObj = "GOT",
+                char const* nameStr = "REF") {
   std::stringstream ss;
   ss << obj;
   bool ok = str == ss.str();
@@ -283,10 +283,7 @@ inline bool StreamLinesEqual(std::istream& stream1, std::istream& stream2, char 
   std::vector<std::string> stream1_lines, stream2_lines;
   std::copy(linesNoTrailingSpacesBegin(stream1), linesNoTrailingSpacesEnd(), std::back_inserter(stream1_lines));
   std::copy(linesNoTrailingSpacesBegin(stream2), linesNoTrailingSpacesEnd(), std::back_inserter(stream2_lines));
-
-  bool ok = stream1_lines == stream2_lines;
-
-  return ok;
+  return stream1_lines == stream2_lines;
 }
 
 template <class Val1, class Val2>

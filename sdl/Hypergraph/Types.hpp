@@ -83,7 +83,9 @@ std::string featureIdRangeDescription(FeatureId begin, FeatureId end);
 typedef std::size_t NbestId;
 typedef uint32 TailId;
 
-typedef void* ArcHandle;  // opaque identifer for an arc - TODO: that's bad for lazy fsm.
+struct ArcBase;
+
+typedef ArcBase* ArcHandle;
 
 #if SDL_64BIT_STATE_ID
 typedef uint64 StateId;

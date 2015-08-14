@@ -127,7 +127,7 @@ Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId sid, StateIdToSp
   forall (ArcId aid, hg.inArcIds(sid)) {
     Arc* arc = hg.inArc(sid, aid);
     SDL_DEBUG(Hypergraph.SubUnion, "Processing arc " << *arc);
-    typename Arc::StateIdContainer tailIds = arc->tails();
+    StateIdContainer tailIds = arc->tails();
     std::vector<Span> tailSpans;
     Span coverSpan((kNullSpan));
     for (TailId i = 0, end = tailIds.size(); i < end; ++i) {
@@ -164,7 +164,7 @@ void getSourceSpansBubbleDown(IHypergraph<Arc> const& hg, StateId sid, Span sidS
   SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleDown(sid=" << sid << ")");
   forall (ArcId aid, hg.inArcIds(sid)) {
     Arc* arc = hg.inArc(sid, aid);
-    typename Arc::StateIdContainer tailIds = arc->tails();
+    StateIdContainer tailIds = arc->tails();
     for (TailId i = 0, end = tailIds.size(); i < end; ++i) {
       StateIdToSpan::iterator found = stateIdToSpan->find(tailIds[i]);
       if (found == stateIdToSpan->end())
@@ -192,7 +192,7 @@ struct InvalidArcSpansRemover {
   InvalidArcSpansRemover(IHypergraph<Arc> const& hg_, StateIdToSpan* _) : hg(hg_), m(_) {}
 
   void operator()(Arc& arc) const {
-    typename Arc::StateIdContainer const& tails = arc.tails();
+    StateIdContainer const& tails = arc.tails();
     StateIdToSpan::iterator foundHeadSpan = m->find(arc.head());
     if (foundHeadSpan == m->end()) {
       return;

@@ -1000,7 +1000,7 @@ struct IHypergraph : IHypergraphStates, private boost::noncopyable {
   void forArcsOutFirstTail(StateId state, V const& v) const {
     for (ArcId a = 0, f = numOutArcs(state); a < f; ++a) {
       Arc* pa = outArc(state, a);
-      typename Arc::StateIdContainer const& tails = pa->tails_;
+      StateIdContainer const& tails = pa->tails_;
       assert(!tails.empty());
       StateId t0 = *tails.begin();
       if (t0 == state) v(pa);

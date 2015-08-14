@@ -59,7 +59,7 @@ struct ArcReverserFsInplace {
   IMutableHypergraph<Arc>* hg_;
   ArcReverserFsInplace(IMutableHypergraph<Arc>* hg) : hg_(hg) {}
   void operator()(Arc& arc) const {
-    typename Arc::StateIdContainer& tails = arc.tails();
+    StateIdContainer& tails = arc.tails();
     StateId h = arc.head();  // swap head, tail
     arc.setHead(tails[0]);
     tails[0] = h;
@@ -97,7 +97,7 @@ struct ArcReverserCfgInplace {
   IMutableHypergraph<Arc>* hg_;
   ArcReverserCfgInplace(IMutableHypergraph<Arc>* hg) : hg_(hg) {}
   void operator()(Arc& arc) const {
-    typename Arc::StateIdContainer& tails = arc.tails();
+    StateIdContainer& tails = arc.tails();
     std::reverse(tails.begin(), tails.end());
   }
   void operator()(Arc* arc) const { (*this)(*arc); }
