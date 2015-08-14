@@ -152,12 +152,7 @@ struct HypToReplaceFst {
 
         std::cerr << "Optimizing ... ";
         fst::Project((IFst*)&nonlazy, fst::PROJECT_OUTPUT);
-#if 0
-        fst::RmEpsilon((IFst*)&nonlazy);
-        fst::DeterminizeFst<FArc>((IFst&)nonlazy, &minimized);
-#else
         fst::Determinize(fst::RmEpsilonFst<FArc>(nonlazy), &minimized);
-#endif
       }
       // TODO: can we result.release() now?
       fst::Minimize((IFst*)&minimized);
