@@ -18,28 +18,38 @@
 #pragma once
 
 #include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/Label.hpp>
+#include <sdl/Hypergraph/FwdDecls.hpp>
 #include <sdl/Util/ObjectCount.hpp>
 #include <boost/functional/hash.hpp>
+#include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <algorithm>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
+
+template <class Weight>
+struct ArcTpl;
+
+/// ArcBase constructor tag
 struct PresizeTails {};
 
-//SDL_OBJECT_TRACK_BASE(ArcBase)
-struct ArcBase {
+struct ArcBase SDL_OBJECT_TRACK_BASE(ArcBase) {
   StateId head_;
+  // TODO (disturbing - compiler bug?): if you change the order of head_ and
+  // tails_, for some reason ExpectationWeight fails. is this just a
+  // full-rebuild/ccache issue or a bug?
   StateIdContainer tails_;
   ArcBase() {}
   /**
      for making a copy with a tail id substitution. this could be a free fn but
      this is more efficient (no extra copying).
   */
-  ArcBase(StateIdContainer const& tails, StateId fromTail, StateId replacementTail) : tails_(tails.size())
-  {
+  ArcBase(StateIdContainer const& tails, StateId fromTail, StateId replacementTail) : tails_(tails.size()) {
     std::replace_copy(tails.begin(), tails.end(), tails_.begin(), fromTail, replacementTail);
   }
   explicit ArcBase(StateId srcState) : tails_(1, srcState) {}
@@ -56,17 +66,98 @@ struct ArcBase {
   ArcBase(ArcBase const& o) = default;
   ArcBase& operator=(ArcBase const& o) = default;
 #endif
-  friend inline std::ostream& operator<<(std::ostream &out, ArcBase const& self) {
+  friend inline std::ostream& operator<<(std::ostream & out, ArcBase const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream &out) const {
+  void print(std::ostream & out) const {
     out << head_ << " <-";
-    for(StateIdContainer::const_iterator i = tails_.begin(), e = tails_.end(); i != e; ++i)
-      out << ' ' << *i;
+    for (StateIdContainer::const_iterator i = tails_.begin(), e = tails_.end(); i != e; ++i) out << ' ' << *i;
   }
+
+
+  void setHead(StateId s) { head_ = s; }
+
+  StateId head() const { return head_; }
+
+  StateId& head() { return head_; }
+
+  bool isFsmArc() const { return tails_.size() == 2; }
+
+  bool isFsmFrom(StateId tail0) const {
+    return !tails_.empty() && tails_[0] == tail0;
+  }
+
+  StateId fsmSrc() const {
+    assert(isFsmArc());
+    return tails_[0];
+  }
+  StateId graphSrc() const {
+    assert(!tails_.empty());
+    return tails_[0];
+  }
+
+  StateId fsmSymbolState() const {
+    assert(isFsmArc());
+    return tails_[1];
+  }
+
+  StateIdContainer& tails() { return tails_; }
+
+  StateIdContainer const& tails() const { return tails_; }
+
+  TailIdRange tailIds() const {
+    return TailIdRange(TailIdIterator(0), TailIdIterator((TailId)tails_.size()));
+  }
+
+  void addTail(StateId s) { tails_.push_back(s); }
+
+  StateId getTail(TailId i) const { return tails_[i]; }
+
+  TailId getNumTails() const { return (TailId)tails_.size(); }
+
+  template <class Arc>
+  typename Arc::Weight& arcweight() {
+    return static_cast<Arc*>(this)->weight_;
+  }
+
+  template <class Arc>
+  typename Arc::Weight const& arcweight() const {
+    return static_cast<Arc const*>(this)->weight_;
+  }
+
+  template <class Weight>
+  Weight& weight() {
+    return static_cast<ArcTpl<Weight>*>(this)->weight_;
+  }
+
+  template <class Weight>
+  Weight const& weight() const {
+    return static_cast<ArcTpl<Weight> const*>(this)->weight_;
+  }
+
+  // (unsafe?) weight_.value_ assuming Cost value_ is first member of weight
+  Cost cost() const;
+
+  /// would prefer *not* to have this but it's asking a lot to ask coders to
+  /// never delete an ArcBase. (and ArcTpl/ArcWithData anyway already have
+  /// vtables)
+  virtual ~ArcBase() {}
+
+  /*
+  typedef boost::function<bool(ArcBase*)> ArcFilter;
+  typedef boost::function<void(ArcBase*)> ArcVisitor;
+  */
 };
 
+// (unsafe?) weight_.value_ assuming float is first member of weight
+struct ArcWithCostFirstWeight : ArcBase {
+  Cost value_;
+};
+
+inline Cost ArcBase::cost() const {
+  return reinterpret_cast<ArcWithCostFirstWeight const*>(this)->value_;
+}
 
 // reference to arc's tails valid only as long as arc isn't modified. equal/hash of an Arc ignoring weight
 struct ArcConnections {
@@ -107,10 +198,27 @@ struct ArcConnections {
 
   ArcConnections() {}
 
-  explicit ArcConnections(ArcBase const* a) {
-    set(*a);
-  }
+  explicit ArcConnections(ArcBase const* a) { set(*a); }
 };
+
+template <class ArcsContainer>
+struct AppendArcs {
+  ArcsContainer& arcs;
+  AppendArcs(ArcsContainer& arcs) : arcs(arcs) {}
+  void operator()(ArcBase* arc) const { arcs.push_back(static_cast<typename ArcsContainer::value_type>(arc)); }
+  void operator=(ArcBase* arc) const {
+    operator()(arc);
+  }
+  AppendArcs const& operator*() const { return *this; }
+  AppendArcs const& operator++() const { return *this; }
+  AppendArcs const& operator++(int) const { return *this; }
+};
+
+template <class ArcsContainer>
+AppendArcs<ArcsContainer> appendArcs(ArcsContainer& arcs) {
+  return AppendArcs<ArcsContainer>(arcs);
+}
+
 
 }}
 

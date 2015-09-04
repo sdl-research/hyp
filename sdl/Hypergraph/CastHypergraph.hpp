@@ -43,35 +43,37 @@ class CastHypergraph SDL_FINAL : public IHypergraph<ToA> {
 
   CastHypergraph(IHypergraph<FromA> const& hg) : hg_(hg) { this->setStartFinalFrom(hg); }
 
-  virtual CastHypergraph<FromArc, ToArc>* clone() const OVERRIDE {
+  Properties uncomputedProperties() const OVERRIDE { return hg_.uncomputedProperties(); }
+
+  CastHypergraph<FromArc, ToArc>* clone() const OVERRIDE {
     return new CastHypergraph<FromArc, ToArc>(hg_);
   }
 
   /**
      Casts the arc using reinterpret_cast and returns it.
   */
-  virtual ToArc* inArc(StateId sid, ArcId aid) const OVERRIDE {
-    return reinterpret_cast<ToArc*>(hg_.inArc(sid, aid));
+  ToArc* inArc(StateId s, ArcId arcid) const OVERRIDE {
+    return reinterpret_cast<ToArc*>(hg_.inArc(s, arcid));
   }
 
   /**
      Casts the arc using reinterpret_cast and returns it.
   */
-  virtual ToArc* outArc(StateId sid, ArcId aid) const OVERRIDE {
-    return reinterpret_cast<ToArc*>(hg_.outArc(sid, aid));
+  ToArc* outArc(StateId s, ArcId arcid) const OVERRIDE {
+    return reinterpret_cast<ToArc*>(hg_.outArc(s, arcid));
   }
 
   // Simple delegation:
-  ArcId numInArcs(StateId sid) const OVERRIDE { return hg_.numInArcs(sid); }
-  ArcId numOutArcs(StateId sid) const OVERRIDE { return hg_.numOutArcs(sid); }
-  virtual StateId size() const OVERRIDE { return hg_.size(); }
-  virtual Sym inputLabel(StateId sid) const OVERRIDE { return hg_.inputLabel(sid); }
-  virtual Sym outputLabel(StateId sid) const OVERRIDE { return hg_.outputLabel(sid); }
-  virtual Properties properties() const OVERRIDE { return hg_.properties(); }
-  virtual IVocabularyPtr getVocabulary() const OVERRIDE { return hg_.getVocabulary(); }
+  ArcId numInArcs(StateId s) const OVERRIDE { return hg_.numInArcs(s); }
+  ArcId numOutArcs(StateId s) const OVERRIDE { return hg_.numOutArcs(s); }
+  StateId size() const OVERRIDE { return hg_.size(); }
+  Sym inputLabel(StateId s) const OVERRIDE { return hg_.inputLabel(s); }
+  Sym outputLabel(StateId s) const OVERRIDE { return hg_.outputLabel(s); }
+  Properties properties() const OVERRIDE { return hg_.properties(); }
+  IVocabularyPtr getVocabulary() const OVERRIDE { return hg_.getVocabulary(); }
 
   /** since arc mapping doesn't affect state labels, defer. */
-  bool outputLabelFollowsInput(StateId sid) const OVERRIDE { return hg_.outputLabelFollowsInput(sid); }
+  bool outputLabelFollowsInput(StateId s) const OVERRIDE { return hg_.outputLabelFollowsInput(s); }
 
   bool outputLabelFollowsInput() const OVERRIDE { return hg_.outputLabelFollowsInput(); }
 

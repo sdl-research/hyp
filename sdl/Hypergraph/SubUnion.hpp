@@ -107,25 +107,25 @@ typename std::map<Key, Value>::const_iterator getMaxValueIter(std::map<Key, Valu
    bottom to top
 */
 template <class Arc>
-Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId sid, StateIdToSpan* stateIdToSpan) {
+Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId s, StateIdToSpan* stateIdToSpan) {
   // Already done?
-  StateIdToSpan::const_iterator found = stateIdToSpan->find(sid);
+  StateIdToSpan::const_iterator found = stateIdToSpan->find(s);
   if (found != stateIdToSpan->end()) {
     return found->second;
   }
-  if (hg.hasLexicalLabel(sid)) {
+  if (hg.hasLexicalLabel(s)) {
     // TODO@MD: why was below commented out?
-    // Span resultingSpan(inferSpanFromLabel(hg, hg.outputLabel(sid)));
-    return (*stateIdToSpan)[sid] = kNullSpan;
+    // Span resultingSpan(inferSpanFromLabel(hg, hg.outputLabel(s)));
+    return (*stateIdToSpan)[s] = kNullSpan;
   }
-  SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleUp(sid=" << sid << ")");
+  SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleUp(s=" << s << ")");
 
   using boost::get;  // tuple fct
   std::map<StateId, StateId> votesForLeft, votesForRight;
 
   // Look at the spans of children
-  forall (ArcId aid, hg.inArcIds(sid)) {
-    Arc* arc = hg.inArc(sid, aid);
+  forall (ArcId arcid, hg.inArcIds(s)) {
+    Arc* arc = hg.inArc(s, arcid);
     SDL_DEBUG(Hypergraph.SubUnion, "Processing arc " << *arc);
     StateIdContainer tailIds = arc->tails();
     std::vector<Span> tailSpans;
@@ -143,15 +143,15 @@ Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId sid, StateIdToSp
 
   // Look at own span annotation if children are unreliable
   if (votesForLeft.size() != 1 || votesForRight.size() != 1) {
-    Span sidSpan = inferSpanFromLabel(hg, hg.inputLabel(sid));
-    ++votesForLeft[sidSpan.left];
-    ++votesForRight[sidSpan.right];
+    Span sSpan = inferSpanFromLabel(hg, hg.inputLabel(s));
+    ++votesForLeft[sSpan.left];
+    ++votesForRight[sSpan.right];
   }
 
   Span resultingSpan(getMaxValueIter(votesForLeft)->first, getMaxValueIter(votesForRight)->first);
 
-  (*stateIdToSpan)[sid] = resultingSpan;
-  SDL_DEBUG(Hypergraph.SubUnion, "sid: " << sid << " has " << resultingSpan);
+  (*stateIdToSpan)[s] = resultingSpan;
+  SDL_DEBUG(Hypergraph.SubUnion, "s: " << s << " has " << resultingSpan);
   return resultingSpan;
 }
 
@@ -159,11 +159,11 @@ Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId sid, StateIdToSp
    Propagates span info down
 */
 template <class Arc>
-void getSourceSpansBubbleDown(IHypergraph<Arc> const& hg, StateId sid, Span sidSpan,
+void getSourceSpansBubbleDown(IHypergraph<Arc> const& hg, StateId s, Span sSpan,
                               StateIdToSpan* stateIdToSpan) {
-  SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleDown(sid=" << sid << ")");
-  forall (ArcId aid, hg.inArcIds(sid)) {
-    Arc* arc = hg.inArc(sid, aid);
+  SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleDown(s=" << s << ")");
+  forall (ArcId arcid, hg.inArcIds(s)) {
+    Arc* arc = hg.inArc(s, arcid);
     StateIdContainer tailIds = arc->tails();
     for (TailId i = 0, end = tailIds.size(); i < end; ++i) {
       StateIdToSpan::iterator found = stateIdToSpan->find(tailIds[i]);
@@ -171,9 +171,9 @@ void getSourceSpansBubbleDown(IHypergraph<Arc> const& hg, StateId sid, Span sidS
         SDL_THROW_LOG(Hypergraph.SubUnion, ProgrammerMistakeException,
                       tailIds[i] << " should have had a span stored");
 
-      if (i == 0) Util::setUnlessDefined(found->second.left, sidSpan.left);
+      if (i == 0) Util::setUnlessDefined(found->second.left, sSpan.left);
 
-      if (i == end - 1) Util::setUnlessDefined(found->second.right, sidSpan.right);
+      if (i == end - 1) Util::setUnlessDefined(found->second.right, sSpan.right);
 
       SDL_DEBUG(Hypergraph.SubUnion, "Assigned to " << tailIds[i] << ": " << found->second);
 
@@ -189,9 +189,11 @@ void getSourceSpansBubbleDown(IHypergraph<Arc> const& hg, StateId sid, Span sidS
 template <class Arc>
 struct InvalidArcSpansRemover {
 
-  InvalidArcSpansRemover(IHypergraph<Arc> const& hg_, StateIdToSpan* _) : hg(hg_), m(_) {}
+  InvalidArcSpansRemover(IHypergraph<Arc> const& hg_, StateIdToSpan* _) : hg(hg_), m(_) {
+    assert(!hg.storesAllOutArcs());
+  }
 
-  void operator()(Arc& arc) const {
+  void operator()(ArcBase &arc) const {
     StateIdContainer const& tails = arc.tails();
     StateIdToSpan::iterator foundHeadSpan = m->find(arc.head());
     if (foundHeadSpan == m->end()) {
@@ -205,7 +207,7 @@ struct InvalidArcSpansRemover {
       }
     }
   }
-  void operator()(Arc* arc) const { (*this)(*arc); }
+  void operator()(ArcBase* arc) const { (*this)(*arc); }
 
   IHypergraph<Arc> const& hg;
   StateIdToSpan* m;
@@ -220,8 +222,8 @@ void removeInvalidSpans(IHypergraph<Arc> const& hg, StateIdToSpan* stateIdToSpan
   InvalidArcSpansRemover<Arc> fct(hg, stateIdToSpan);
   hg.forArcs(fct);
 
-  for (StateId sid = 0, e = hg.size(); sid != e; ++sid) {
-    StateIdToSpan::iterator found = stateIdToSpan->find(sid);
+  for (StateId s = 0, e = hg.size(); s != e; ++s) {
+    StateIdToSpan::iterator found = stateIdToSpan->find(s);
     if (found != stateIdToSpan->end())
       if (isNull(found->second)) stateIdToSpan->erase(found);
   }
@@ -265,10 +267,10 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
   if (didFindHeadSpan && !headSpan.smaller(parentSpan) && !hasLexicalLabel) headSpan = kNullSpan;
 
   std::vector<std::vector<StateIdContainer> > newStatesForTailsPerArc;
-  forall (ArcId aid, hg.inArcIds(head)) {
+  forall (ArcId arcid, hg.inArcIds(head)) {
     std::vector<StateIdContainer> newStatesForTails;
     bool allTailsAreUnion = true;
-    Arc* arc = hg.inArc(head, aid);
+    Arc* arc = hg.inArc(head, arcid);
     forall (StateId tailId, arc->tails()) {
       NewStateInfo* p = addStatesRecurse(hg, tailId, headSpan, hgStateIdToSpan, result, resultSpanToStateIds,
                                          resultArcs, newStateInfos, opts);
@@ -330,7 +332,7 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
         StateIdContainer arcStates(cartProd[i]);
         arcStates.push_back(newHead);
         if (resultArcs->find(arcStates) == resultArcs->end()) {
-          Arc* arc = new Arc(Head(newHead), Tails(cartProd[i].begin(), cartProd[i].end()));
+          Arc* arc = new Arc(newHead, cartProd[i]);
           SDL_DEBUG(Hypergraph.SubUnion, "Adding arc " << *arc);
           result->addArc(arc);
           resultArcs->insert(arcStates);
@@ -353,9 +355,9 @@ void addStates(IHypergraph<Arc> const& hg, StateIdToSpan const& hgStateIdToSpan,
                IMutableHypergraph<Arc>* result, SpanToStateIds const& resultSpanToStateIds,
                SubUnionOptions& opts) {
   std::set<StateIdContainer> resultArcs;
-  forall (StateId sid, hg.getStateIds()) {
-    forall (ArcId aid, hg.inArcIds(sid)) {
-      Arc* arc = hg.inArc(sid, aid);
+  forall (StateId s, hg.getStateIds()) {
+    forall (ArcId arcid, hg.inArcIds(s)) {
+      Arc* arc = hg.inArc(s, arcid);
       StateIdContainer v(arc->tails());
       v.push_back(arc->head());
       resultArcs.insert(v);

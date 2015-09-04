@@ -178,9 +178,9 @@ struct HypergraphFst {
   typedef typename HgArcs::iterator HgArcIterator;
   typedef Util::TransformedIteratorGenerator<FstArcFn, HgArcIterator> Arcs;
 
-  Arcs outArcs(StateId sid) const {
-    assert(sid != kNoState);
-    return Arcs(static_cast<MutableHg const&>(*pHg).outArcs(sid), arcFn);
+  Arcs outArcs(StateId s) const {
+    assert(s != kNoState);
+    return Arcs(static_cast<MutableHg const&>(*pHg).outArcs(s), arcFn);
   }
 
   IVocabularyPtr getVocabulary() const { return hg().getVocabulary(); }
@@ -226,9 +226,9 @@ struct ConstHypergraphFst : HypergraphFst<HgArcT> {
 
   typedef typename Hg::ConstOutArcsGenerator HgArcs;
   typedef Util::TransformedGenerator<HgArcs, typename Hg::FstArcFor, FstArc<Weight> > Arcs;
-  Arcs outArcs(StateId sid) const {
+  Arcs outArcs(StateId s) const {
     // TODO: test
-    return Arcs(this->pHg->outArcsConst(sid), this->arcFn);
+    return Arcs(this->pHg->outArcsConst(s), this->arcFn);
   }
 };
 

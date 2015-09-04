@@ -213,7 +213,7 @@ struct ArcInBest {
     empty = !N;
     if (empty) return;
     ComputeBest best(opt, hg);
-    if (beaming) empty = !best.best();
+    if (beaming) empty = !best.best(false, single);
     if (empty) return;
     inarcs = hg.storesInArcs();
     StateId final = hg.final();

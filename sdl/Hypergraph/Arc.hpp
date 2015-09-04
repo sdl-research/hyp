@@ -30,6 +30,12 @@
 */
 
 #include <sdl/Hypergraph/ArcBase.hpp>
+#include <sdl/Util/Forall.hpp>
+#include <sdl/Util/SmallVector.hpp>
+#include <sdl/Util/ZeroInitializedArray.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/Hash.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 
 #include <cstring>
 #include <vector>
@@ -38,14 +44,6 @@
 #include <algorithm>
 #include <boost/function.hpp>
 
-#include <sdl/Util/Forall.hpp>
-#include <sdl/Hypergraph/Label.hpp>
-#include <sdl/Hypergraph/FwdDecls.hpp>
-#include <sdl/Util/SmallVector.hpp>
-#include <sdl/Util/ZeroInitializedArray.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Util/Hash.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -73,60 +71,72 @@ struct WeightCount {
   }
 };
 
+template <class Arc>
 struct ArcPrinter {
   std::ostream& o;
   ArcPrinter(std::ostream& o = std::cout) : o(o) {}
   ArcPrinter(ArcPrinter const& o) : o(o.o) {}
-  template <class Arc>
-  void operator()(Arc* a) const {
-    o << *a << '\n';
+  void operator()(ArcBase const* a) const {
+    operator()(*(Arc const*)a);
   }
-  template <class Arc>
   void operator()(Arc const& a) const {
     o << a << '\n';
   }
 };
 
-// TODO: remove
-struct Head {
-  StateId state_;
-  explicit Head(StateId s) : state_(s) {}
-  operator StateId() const { return state_; }
-};
+/// syntactic sugar, used for new Arc(Head(s), Tails(t, u), Weight::one())
+inline StateId Head(StateId s) {
+  return s;
+}
 
-// TODO: remove
-struct Tails : public StateIdContainer {
-  explicit Tails(StateId t1) { this->push_back(t1); }
-  explicit Tails(StateId t1, StateId t2) {
-    this->push_back(t1);
-    this->push_back(t2);
+inline StateIdContainer Tails(StateId t1) {
+  StateIdContainer r;
+  r.push_back(t1);
+  return r;
+}
+inline StateIdContainer Tails(StateId t1, StateId t2) {
+  StateIdContainer r;
+  r.push_back(t1);
+  r.push_back(t2);
+  return r;
+}
+inline StateIdContainer Tails(StateId t1, StateId t2, StateId t3) {
+  StateIdContainer r;
+  r.push_back(t1);
+  r.push_back(t2);
+  r.push_back(t3);
+  return r;
+}
+inline StateIdContainer Tails(StateId t1, StateId t2, StateId t3, StateId t4) {
+  StateIdContainer r;
+  r.push_back(t1);
+  r.push_back(t2);
+  r.push_back(t3);
+  r.push_back(t4);
+  return r;
+}
+inline StateIdContainer Tails(StateId t1, StateId t2, StateId t3, StateId t4, StateId t5) {
+  StateIdContainer r;
+  r.push_back(t1);
+  r.push_back(t2);
+  r.push_back(t3);
+  r.push_back(t4);
+  r.push_back(t5);
+  return r;
+}
+template <class Iter>
+inline StateIdContainer Tails(Iter begin, Iter end) {
+  StateIdContainer r;
+  for (; begin != end; ++begin) {
+    r.push_back(*begin);
   }
-  explicit Tails(StateId t1, StateId t2, StateId t3) {
-    this->push_back(t1);
-    this->push_back(t2);
-    this->push_back(t3);
-  }
-  explicit Tails(StateId t1, StateId t2, StateId t3, StateId t4) {
-    this->push_back(t1);
-    this->push_back(t2);
-    this->push_back(t3);
-    this->push_back(t4);
-  }
-  explicit Tails(StateId t1, StateId t2, StateId t3, StateId t4, StateId t5) {
-    this->push_back(t1);
-    this->push_back(t2);
-    this->push_back(t3);
-    this->push_back(t4);
-    this->push_back(t5);
-  }
-  template <class Iter>
-  explicit Tails(Iter begin, Iter end) {
-    for (; begin != end; ++begin) {
-      this->push_back(*begin);
-    }
-  }
-};
+  return r;
+}
 
+
+/// tags to distinguish ArcTpl(...) constructors
+struct HeadAndWeight {};
+struct HeadAndTail {};
 
 /**
    Hypergraph arc (i.e., hyperedge).
@@ -174,14 +184,22 @@ struct ArcTpl : ArcBase {
 
   ArcTpl(Weight const& weight, StateId srcState) : ArcBase(srcState), weight_(weight) {}
 
-  // for ConvertCharsToTokens
-  ArcTpl(Head head, Weight const& weight) : weight_(weight) { head_ = head; }
-  /// does NOT set weight to 1 or head
-  explicit ArcTpl(StateId tail) : ArcBase(tail) {}
-  ArcTpl(Head head, StateId tail) : ArcBase(tail) {
+  ArcTpl(HeadAndWeight, StateId head, Weight const& weight) : weight_(weight) { head_ = head; }
+
+  ArcTpl(HeadAndTail, StateId head, StateId tail) : ArcBase(tail) {
     head_ = head;
     setOne(weight_);
   }
+  ArcTpl(HeadAndTail, StateId head, StateId tail0, StateId tail1) : ArcBase(tail0, tail1) {
+    head_ = head;
+  }
+  ArcTpl(HeadAndTail, StateId head, StateId tail0, StateId tail1, Weight const& weight)
+      : ArcBase(tail0, tail1), weight_(weight) {
+    head_ = head;
+  }
+
+  /// sets only a single tail; you must set head and weight
+  explicit ArcTpl(StateId tail) : ArcBase(tail) {}
 
   /**
      for binarization - head set later
@@ -212,8 +230,7 @@ struct ArcTpl : ArcBase {
      for Derivation: more efficiently copy weight while remapping states
      (starting with newHead; tails to be updated later).
   */
-  ArcTpl(ArcTpl const& arc, StateId head)
-      : ArcBase(PresizeTails(), arc.tails_.size()), weight_(arc.weight_) {
+  ArcTpl(ArcTpl const& arc, StateId head) : ArcBase(PresizeTails(), arc.tails_.size()), weight_(arc.weight_) {
     head_ = head;
   }
 
@@ -223,6 +240,11 @@ struct ArcTpl : ArcBase {
     assert(!tails_.empty());
     head_ = head;
     tails_[0] = newTail;
+  }
+
+  explicit ArcTpl(ArcBase const& base)
+      : ArcBase(base) {
+    setOne(weight_);
   }
 
   /**
@@ -251,42 +273,6 @@ struct ArcTpl : ArcBase {
   // default copy/move/etc c'tor
 
   virtual ~ArcTpl() {}
-
-  void setHead(StateId s) { head_ = s; }
-
-  StateId head() const { return head_; }
-
-  StateId& head() { return head_; }
-
-  bool isFsmArc() const { return tails_.size() == 2; }
-
-  StateId fsmSrc() const {
-    assert(isFsmArc());
-    return tails_[0];
-  }
-  StateId graphSrc() const {
-    assert(!tails_.empty());
-    return tails_[0];
-  }
-
-  StateId fsmSymbolState() const {
-    assert(isFsmArc());
-    return tails_[1];
-  }
-
-  StateIdContainer& tails() { return tails_; }
-
-  StateIdContainer const& tails() const { return tails_; }
-
-  TailIdRange tailIds() const {
-    return TailIdRange(TailIdIterator(0), TailIdIterator((TailId)tails_.size()));
-  }
-
-  void addTail(StateId s) { tails_.push_back(s); }
-
-  StateId getTail(TailId i) const { return tails_[i]; }
-
-  TailId getNumTails() const { return (TailId)tails_.size(); }
 
   void setWeight(Weight const& weight) { weight_ = weight; }
 
@@ -338,52 +324,6 @@ std::ostream& operator<<(std::ostream& o, const ArcTpl<W>* selfp) {
   o << "ArcTpl@0x" << (void*)selfp << ": ";
   if (selfp) o << *selfp;
   return o;
-}
-
-template <class Arc>
-Sym getFsmInputLabel(IHypergraph<Arc> const& hg, ArcBase const& arc) {
-  assert(arc.tails_.size() == 2);
-  return hg.inputLabel(arc.tails_[1]);
-}
-
-/**
-   \return the single lexical symbol if there is one, else NoSymbol. throw if more than one lexical symbol
-*/
-template <class Arc>
-Sym getSingleLexicalLabel(IHypergraph<Arc> const& hg, Arc const& arc, LabelType labelType = kInput) {
-  StateIdContainer const& tails = arc.tails();
-  for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
-    Sym const tailSym = hg.label(*i, labelType);
-    if (tailSym.isLexical()) return tailSym;
-  }
-  return NoSymbol;
-}
-
-template <class Arc>
-TailId nLexicalLabels(IHypergraph<Arc> const& hg, ArcBase const& arc, LabelType labelType = kInput) {
-  StateIdContainer const& tails = arc.tails_;
-  TailId nLexical = 0;
-  for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i)
-    nLexical += (bool)hg.label(*i, labelType).isLexical();
-  return nLexical;
-}
-
-template <class Arc>
-Sym getFsmOutputLabel(IHypergraph<Arc> const& hg, ArcBase const& arc) {
-  assert(arc.tails_.size() == 2);
-  return hg.outputLabel(arc.tails_[1]);
-}
-
-template <class Arc>
-void setFsmInputLabel(IMutableHypergraph<Arc>* pHg, ArcBase const& arc, Sym symid) {
-  assert(arc.tails_.size() == 2);
-  pHg->setInputLabel(arc.tails_[1], symid);
-}
-
-template <class Arc>
-void setFsmOutputLabel(IMutableHypergraph<Arc>* pHg, ArcBase const& arc, Sym symid) {
-  assert(arc.tails_.size() == 2);
-  return pHg->setOutputLabel(arc.tails_[1], symid);
 }
 
 struct ArcWithDataDeleter {

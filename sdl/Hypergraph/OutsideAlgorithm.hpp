@@ -40,7 +40,7 @@ namespace sdl {
 namespace Hypergraph {
 
 /**
-   sets sum the outside score (with final as the root) for sid, assuming the
+   sets sum the outside score (with final as the root) for s, assuming the
    outside scores of all the heads of outarcs of sid are already known (and all
    the inside scores, of course). assumes commutative Weight
 

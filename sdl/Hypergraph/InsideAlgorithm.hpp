@@ -75,19 +75,19 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
   /**
      Computes the distance to a particular state.
   */
-  void visit(StateId sid) {
+  void visit(StateId s) {
     // topo visit calls for tails first. so all the distances_[tail] are already computed.
-    std::size_t const cntInArcs = hg_.numInArcs(sid);
-    bool axiom = hg_.isAxiom(sid);
-    Weight& sum = Util::atExpandPtr(distances_, sid, kZero);
+    std::size_t const cntInArcs = hg_.numInArcs(s);
+    bool axiom = hg_.isAxiom(s);
+    Weight& sum = Util::atExpandPtr(distances_, s, kZero);
     // keeping this reference is ok because there's no recursion in loops below:
     if (axiom) {
       setOne(sum);
       return;
     }
-    if (!IncludingAxioms && sid > maxNonAxiom_) maxNonAxiom_ = sid;
-    for (ArcId aid = 0; aid < cntInArcs; ++aid) {
-      Arc const& arc = *hg_.inArc(sid, aid);
+    if (!IncludingAxioms && s > maxNonAxiom_) maxNonAxiom_ = s;
+    for (ArcId arcid = 0; arcid < cntInArcs; ++arcid) {
+      Arc const& arc = *hg_.inArc(s, arcid);
       Weight prod(Weight::one());
       // we start from one here, and add arcw at the very end because we use
       // some noncommutative semirings (block, ngram, token weight)
@@ -96,25 +96,25 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
         StateId const tail = *i;
         if (hg_.isAxiom(tail)) {
           StateWtFn::timesByState(tail, prod);
-          SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << sid << " from " << tail << " prod = " << prod
+          SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << s << " from " << tail << " prod = " << prod
                                                         << " = old * " << StateWtFn::operator()(tail));
         } else if (tail >= distances_.size()) {
           SDL_THROW_LOG(Hypergraph.InsideAlgorithm, CycleException,
-                        "back edge tail=" << tail << " => head=" << sid
+                        "back edge tail=" << tail << " => head=" << s
                                           << " - input was cyclic or wasn't topo-sorted");
         } else {
           Hypergraph::timesBy(distances_[tail], prod);
-          SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << sid << " from " << tail << " prod = " << prod
+          SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << s << " from " << tail << " prod = " << prod
                                                         << " = old * " << distances_[tail]);
         }
       }
       ArcWtFn::timesBy(&arc, prod);
       // arcw has to come after the states for non-commutative e.g. SingleBlockWeight
-      SDL_TRACE(FinalOutput.InsideAlgorithm, "after arc wt for " << Util::print(arc, hg_) << " for " << sid
+      SDL_TRACE(FinalOutput.InsideAlgorithm, "after arc wt for " << Util::print(arc, hg_) << " for " << s
                                                                  << " prod = " << prod);
 
       Hypergraph::plusBy(prod, sum);
-      SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << sid << " sum " << sum << " = old + " << prod);
+      SDL_TRACE(FinalOutput.InsideAlgorithm, "for " << s << " sum " << sum << " = old + " << prod);
     }
   }
 

@@ -125,7 +125,7 @@ const PropertiesInt kConstraintStarts = 0x2000ULL;
 /// fixed state endBlock(id) is the graph source
 const PropertiesInt kConstraintEnds = 0x4000ULL;
 
-/// stateids for all but first tail are Sym.id_ (see GraphInlineInputLabels)
+/// stateids for all but first tail are Sym.id_ (directly using GraphInlineInputLabels.hpp is the only way to achieve this property, and after setting it, the normal hg 'label' interface is unavailable (but that's fine; you have the labels). kGraphInlineInputLabels means only in-arcs and first-tail-out-arcs are allowed (not full out-arcs)
 const PropertiesInt kGraphInlineInputLabels = 0x8000ULL;
 
 const PropertiesInt kPropertyEnd = kConstraintEnds << 1;
@@ -143,8 +143,8 @@ const PropertiesInt kFullInOutArcs = kStoreInArcs | kStoreOutArcs;
 const PropertiesInt kDefaultStoreArcsPerState = kFullInOutArcs;
 // TODO: change all algorithms to be ok with kStoreFirstTailOutArcs
 
-const PropertiesInt kStoresAnyOutArcs = kStoreOutArcs | kStoreFirstTailOutArcs;
-const PropertiesInt kStoresAnyArcs = kStoreInArcs | kStoresAnyOutArcs;
+const PropertiesInt kStoreAnyOutArcs = kStoreOutArcs | kStoreFirstTailOutArcs;
+const PropertiesInt kStoreAnyArcs = kStoreInArcs | kStoreAnyOutArcs;
 
 inline PropertiesInt unknownPropertyBits(PropertiesInt p) {
   return p & ~kAllProperties;
@@ -193,7 +193,7 @@ inline bool hasProperties(Properties p, Properties requiredOnOrOff, bool on) {
 }
 
 inline Properties withArcs(Properties p, Properties arcTypeIfNoArcs = kStoreInArcs) {
-  return (p & kStoresAnyArcs) ? p : (p | arcTypeIfNoArcs);
+  return (p & kStoreAnyArcs) ? p : (p | arcTypeIfNoArcs);
 }
 
 

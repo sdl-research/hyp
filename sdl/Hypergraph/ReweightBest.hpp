@@ -52,13 +52,12 @@ struct ReweightDerivation : public Derivation<Arc>::VisitDfsBase {
   ReweightDerivation(IMutableHypergraph<Arc>& h, ReweightBest const& opt)
       : h(h), opt(opt), rng(opt.seed) {}
   mutable Util::Random01 rng;
-  typedef Derivation<Arc> Deriv;
-  void close(Deriv const& d) const {
+  void close(Derivation const& d) const {
     if (d.axiom()) return;
     Arc& a = d.arc();
     opt.reweight(a.weight(), rng);
   }
-  bool operator()(typename Deriv::DerivP const& dp, typename Arc::Weight const& w, NbestId n) const {
+  bool operator()(DerivationPtr const& dp, typename Arc::Weight const& w, NbestId n) const {
     SDL_DEBUG(Hypergraph.ReweightBest, "reweighting arcs in 1-best derivation " << print(*dp, h));
     dp->visitDfs(*this);
     return true;

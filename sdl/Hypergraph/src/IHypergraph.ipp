@@ -10,11 +10,13 @@
 // limitations under the License.
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/Visit.hpp>
+#include <sdl/Hypergraph/ContainsEmptyString.hpp>
 
 // templated IHypergraph functions
 
 namespace sdl {
 namespace Hypergraph {
+
 
 template <class A>
 typename IHypergraph<A>::Weight IHypergraph<A>::final(StateId s) const {
@@ -64,11 +66,6 @@ bool IHypergraph<A>::checkValid() const {
   return true;
 }
 
-template <class A>
-LabelPair IHypergraph<A>::fsmLabelPair(Arc const& a) const {
-  return labelPair(a.fsmSymbolState());
-}
-
 struct CheckFsm {
   template <class Arc>
   bool operator()(IHypergraph<Arc> const& hg, Arc* arc) const {
@@ -76,10 +73,8 @@ struct CheckFsm {
   }
 };
 
-// note: an fsm missing either start or final state has no derivations (but is still an fsm)
 template <class A>
 bool IHypergraph<A>::isFsmCheck() const {
-  //TODO: test
   return visitArcsAtLeastOnce(*this, CheckFsm());
 }
 
@@ -88,14 +83,14 @@ struct CheckGraph {
   mutable bool fsm;
   mutable bool oneLexical;
   template <class Arc>
-  bool operator()(IHypergraph<Arc> const& hg, Arc* arc) const {
+  bool operator()(IHypergraph<Arc> const& hg, ArcBase const* arc) const {
     return hg.isGraphArc(*arc, fsm, oneLexical);
   }
 };
 
 // note: a graph missing either start or final state has no derivations (but is still a graph)
-template <class A>
-bool IHypergraph<A>::isGraphCheck(bool& fsm, bool& oneLexical) const {
+template <class Arc>
+bool IHypergraph<Arc>::isGraphCheck(bool& fsm, bool& oneLexical) const {
   bool const mustBeCfg = start() == kNoState && final() != kNoState;
   // above check: because we require that kStart == kNoState iff the cfg is
   // empty, whenever kFsm or kGraph are set. but some CFG may accidentally be

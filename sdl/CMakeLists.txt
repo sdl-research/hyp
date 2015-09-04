@@ -36,7 +36,7 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 if(NOT DEFINED SDL_DEBUG_SYMBOLS)
   if (SDL_PRODUCTION)
     if(SDL_RELEASE_BUILD)
-      set(SDL_DEBUG_SYMBOLS on)
+      set(SDL_DEBUG_SYMBOLS off)
     else()
       set(SDL_DEBUG_SYMBOLS on)
     endif()
@@ -547,7 +547,11 @@ if(WIN32)
   set(SRILM_ROOT "${SDL_EXTERNALS_PATH}/libraries/srilm-1.7.0")
 endif()
 
-sdl_quiet_compiled_setting(HAVE_BUILTIN_POPCNT 1)
+# Use cmake -DSDL_HAVE_BUILTIN_POPCNT=0 for older CPUs or -DSDL_HAVE_BUILTIN_POPCNT=1 newer CPUs
+if(NOT DEFINED SDL_HAVE_BUILTIN_POPCNT)
+  set(SDL_HAVE_BUILTIN_POPCNT 0) # Default this setting to off for now to match minimum CT & ETS CPU requirements
+endif()
+sdl_compiled_setting(HAVE_BUILTIN_POPCNT ${SDL_HAVE_BUILTIN_POPCNT})
 # -mpopcnt gives 'population count' i.e. number of set bits - might require corei7 - check cluster machines!
 
 # CA-9649 Use older boost, icu, kenlm from xmt-externals master
@@ -621,7 +625,7 @@ if(UNIX)
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     set(SDL_RELEASE_OPTIMIZATIONS "-fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
   else()
-    set(SDL_RELEASE_OPTIMIZATIONS "-fno-keep-static-consts -fmerge-all-constants -DNDEBUG -falign-functions=${SDL_ALIGN_LOOPS_ETC_TO} -falign-loops=${SDL_ALIGN_LOOPS_ETC_TO} -falign-jumps=${SDL_ALIGN_LOOPS_ETC_TO} -falign-labels=1 -fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
+    set(SDL_RELEASE_OPTIMIZATIONS "-fno-keep-static-consts -fmerge-all-constants -DNDEBUG -DEIGEN_NO_DEBUG -falign-functions=${SDL_ALIGN_LOOPS_ETC_TO} -falign-loops=${SDL_ALIGN_LOOPS_ETC_TO} -falign-jumps=${SDL_ALIGN_LOOPS_ETC_TO} -falign-labels=1 -fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
   endif()
   #align-labels=1 is good because you need to avoid noop cost.
   if (NOT SDL_DEBUG_SYMBOLS)
@@ -969,6 +973,7 @@ set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
   ${ICU_LIBRARY}
   ${ZLIB_LIBRARIES}
   ${Boost_LIBRARIES}
+  ${GCC5_LIBRARIES}
   )
 
 

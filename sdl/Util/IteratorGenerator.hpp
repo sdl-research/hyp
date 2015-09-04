@@ -53,7 +53,7 @@ struct IteratorGenerator
   IteratorGenerator(iterator iBegin, iterator iEnd) : iBegin(iBegin), iEnd(iEnd) {}
   IteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd) : iBegin(pairBeginEnd.first), iEnd(pairBeginEnd.second) {}
   //TODO: test
-  Result peek() const { return *iBegin; }
+  Result peek() const { return (Result)*iBegin; }
   //TODO: test
   void pop() { ++iBegin; }
   //TODO: test
@@ -82,8 +82,8 @@ struct TransformedIteratorGenerator
       : Trans(t), iBegin(iBegin), iEnd(iEnd) {}
   explicit TransformedIteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd, Trans const& t = Trans())
       : Trans(t), iBegin(pairBeginEnd.first), iEnd(pairBeginEnd.second) {}
-  Result operator()() { return Trans::operator()(*iBegin++); }
-  Result peek() const { return Trans::operator()(*iBegin); }
+  Result operator()() { return (Result)Trans::operator()(*iBegin++); }
+  Result peek() const { return (Result)Trans::operator()(*iBegin); }
   void pop() { ++iBegin; }
   operator bool() const { return iBegin!=iEnd; }
 };

@@ -382,8 +382,8 @@ struct HypergraphMatchFst : HypergraphFst<ArcT> {
      arcs matching input. must call explicitly for epsilon, rho, etc.
   */
   typedef typename Base::Arcs Matches;
-  Matches arcsMatchingInput(StateId sid, Sym in) const {
-    return Matches(hg().outArcsMatchingInput(sid, in), this->arcFn);
+  Matches arcsMatchingInput(StateId s, Sym in) const {
+    return Matches(hg().outArcsMatchingInput(s, in), this->arcFn);
   }
 
   WhichFstComposeSpecials whichSpecials;

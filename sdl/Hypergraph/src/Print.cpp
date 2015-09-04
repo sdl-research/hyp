@@ -24,40 +24,5 @@ void dumpFHG(IHypergraph<ArcTpl<FeatureWeight> > const& hg) {
   std::cout << hg;
 }
 
-void printState(std::ostream& out, StateId s, IHypergraphStates const& hg, bool inlineLabel) {
-  out << s;
-  IVocabulary const* voc = hg.vocab();
-  StateId nstates = hg.size();
-  if (inlineLabel || s > nstates) {
-    Sym sym;
-    sym.id_ = s;
-    out << '(';
-    writeLabel(out, sym, voc);
-    out << ')';
-  } else {
-    LabelPair io(hg.labelPair(s));
-    if (io.first || io.second) {
-      out << '(';
-      if (io.first) {
-        writeLabel(out, io.first, voc);
-        if (io.second && io.second != io.first) writeLabel(out << ' ', io.second, voc);
-      } else
-        writeLabel(out << ' ', io.second, voc);
-      // "( out-label)" for no in-label vs "(in-label)"
-      out << ')';
-    }
-  }
-}
-
-void printArcTails(std::ostream& out, StateIdContainer const& tails, IHypergraphStates const* hg,
-                  bool inlineGraphLabels) {
-  bool again = false;
-  for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
-    if (again) out << ' ';
-    printState(out, *i, *hg, inlineGraphLabels && again);
-    again = true;
-  }
-}
-
 
 }}

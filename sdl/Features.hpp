@@ -24,10 +24,12 @@
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/ZeroInitializedArray.hpp>
 #include <sdl/Util/Fields.hpp>
+#include <sdl/IntTypes.hpp>
+#include <sdl/Util/Log10Ln.hpp>
 
 namespace sdl {
 
-typedef unsigned FeatureId;
+typedef uint32 FeatureId;
 // formerly in FeatureBot/IFeature - could move to Features.hpp instead
 typedef std::string FeatureName;
 typedef SdlFloat FeatureValue;
@@ -42,12 +44,12 @@ typedef Features NamedFeatureWeights;
 typedef NamedFeatureWeights NamedFeatureValues;
 
 /// rule feature encodings (for boost serialization grammar db format)
-typedef FeatureId RuleFeatureId;
+typedef uint32 RuleFeatureId;
 FeatureId const kNullFeatureId = (FeatureId)-1;
 
-// in case we switch to wider feature id, remember that in old dbs we use this type (but probably we never
-// will)
+// don't change to 64-bit featureid; serialized grammar rules depend on 32-bit.
 typedef std::map<RuleFeatureId, FeatureValue> SparseFeatures;
+typedef SparseFeatures::value_type SparseFeatureEntry;
 
 template <class Map, class Key>
 inline FeatureValue featureValue(Map const& map, Key const& key) {
@@ -92,8 +94,11 @@ typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
 typedef Util::ZeroInitializedHeapArray<FeatureValue> DenseFeatures;
 #endif
 
-FeatureValue const kLnToFeatureValue
-    = (FeatureValue)(-1. / std::log(10.));  // multiply ln(prob) by this for neglog10 cost (e^x)
+#if __cplusplus >= 201103L
+FeatureValue constexpr kLnToFeatureValue = (SdlFloat)-M_LOG10E; // multiply ln(prob) by this for neglog10 cost (e^x)
+#else
+FeatureValue const kLnToFeatureValue = (SdlFloat)-M_LOG10E;
+#endif
 
 /// if str has e.g. "myfeat=4.3 ...", sets to["myfeat"]=4.3 (to may be filled
 /// with features already; only the ones named in str are overwritten)

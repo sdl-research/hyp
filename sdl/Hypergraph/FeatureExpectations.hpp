@@ -39,14 +39,13 @@ namespace sdl {
 namespace Hypergraph {
 
 namespace {
-template<class Map>
+template <class Map>
 inline void printMapInfo(Map const& map, int n = 10) {
-  SDL_DEBUG(Hypergraph.FeatureExpectations,
-            "Map with " << map.size() << " feature expectations. First "<< n << " values:");
+  SDL_DEBUG(Hypergraph.FeatureExpectations, "Map with " << map.size() << " feature expectations. First " << n
+                                                        << " values:");
   typedef typename Map::const_iterator Iter;
   for (Iter it = map.begin(); it != map.end() && n; ++it, --n) {
-    SDL_DEBUG(Hypergraph.FeatureExpectations,
-              "  expectation[" << it->first << "]=" << it->second);
+    SDL_DEBUG(Hypergraph.FeatureExpectations, "  expectation[" << it->first << "]=" << it->second);
   }
 }
 }
@@ -57,31 +56,28 @@ inline void printMapInfo(Map const& map, int n = 10) {
    them. Works correctly for both types of feature arcs (viterbi and
    expectation).
 */
-template<class FloatT, class MapT>
+template <class FloatT, class MapT>
 struct AccumulateExpectedValuesFct {
 
   typedef LogWeightTpl<FloatT> LogW;
   typedef MapT Map;
 
-  IHypergraphStates const& hg_;
+  HypergraphBase const& hg_;
 
-  AccumulateExpectedValuesFct(IHypergraphStates const& hg, boost::ptr_vector<LogW> const& insideWeights,
-                              boost::ptr_vector<LogW> const& outsideWeights,
-                              Map* pResultMap)
-      : hg_(hg), insideWeights_(insideWeights),
-        outsideWeights_(outsideWeights),
-        pResultMap_(pResultMap) {}
+  AccumulateExpectedValuesFct(HypergraphBase const& hg, boost::ptr_vector<LogW> const& insideWeights,
+                              boost::ptr_vector<LogW> const& outsideWeights, Map* pResultMap)
+      : hg_(hg), insideWeights_(insideWeights), outsideWeights_(outsideWeights), pResultMap_(pResultMap) {}
 
   /**
      Accumulates feature expectations found on a feature
      weight arc. (Gets called with *expectation* feature weights.)
   */
   void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, Expectation> > const* arc) {
-    FloatT posteriorArcWeight = computeInsideTimesOutside(arc).getValue();
+    FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_;
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
-    forall (MapValueType const& idValue, arc->weight())
-        updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight + idValue.second); // times prob
+    forall (MapValueType const& idValue, arc->weight_)
+      updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight + idValue.second);  // times prob
   }
 
   /**
@@ -89,29 +85,27 @@ struct AccumulateExpectedValuesFct {
      weight arc. (Gets called with *viterbi* feature weights.)
   */
   void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, TakeMin> > const* arc) {
-    FloatT posteriorArcWeight =
-        computeInsideTimesOutside(arc).getValue() + arc->weight().getValue(); // unlike Expectation, which already includes this factor in the feature values
-    SDL_DEBUG(Hypergraph.FeatureExpectations,
-              "Accumulate feature expectations for " << *arc
-              << " with posterior weight " << posteriorArcWeight);
+    FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_ + arc->weight_.value_;
+    // unlike Expectation, which already includes this factor in the feature values
+    SDL_DEBUG(Hypergraph.FeatureExpectations, "Accumulate feature expectations for "
+                                                  << *arc << " with posterior weight " << posteriorArcWeight);
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
-    forall (MapValueType const& idValue, arc->weight())
-        updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight - log(idValue.second)); // times prob (which was in linear space, not -log, because of TakeMin aka FeatureWeight)
-    if (Util::isDebugBuild())
-      printMapInfo(*pResultMap_);
+    forall (MapValueType const& idValue, arc->weight_)
+      updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight - log(idValue.second));
+    // times prob (which was in linear space, not -log,  because of TakeMin aka FeatureWeight)
+    if (Util::isDebugBuild()) printMapInfo(*pResultMap_);
   }
 
  private:
-  template<class Arc>
+  template <class Arc>
   LogWeightTpl<FloatT> computeInsideTimesOutside(Arc const& arc) {
     assert(outsideWeights_.size() > arc->head());
     LogW result(outsideWeights_[arc->head()]);
     StateIdContainer const& tails = arc->tails();
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
       StateId const tailId = *i;
-      if (!hg_.isAxiom(tailId))
-        Hypergraph::timesBy(insideWeights_[tailId], result);
+      if (!hg_.isAxiom(tailId)) Hypergraph::timesBy(insideWeights_[tailId], result);
     }
     return result;
   }
@@ -130,10 +124,9 @@ struct AccumulateExpectedValuesFct {
 
    \return Sum of all path weights (used for normalization)
 */
-template<class Arc>
-typename Arc::Weight::FloatT
-computeFeatureExpectations(IHypergraph<Arc> const& hg,
-                           typename Arc::Weight::Map* pResultMap) {
+template <class Arc>
+typename Arc::Weight::FloatT computeFeatureExpectations(IHypergraph<Arc> const& hg,
+                                                        typename Arc::Weight::Map* pResultMap) {
   SDL_TRACE(Hypergraph, "computeFeatureExpectations");
   typedef typename Arc::Weight Weight;
   typedef typename Weight::Map Map;
@@ -161,13 +154,10 @@ computeFeatureExpectations(IHypergraph<Arc> const& hg,
 
   // Normalize and remove neglog of feature expectations:
   typedef typename Arc::Weight::Map::value_type ValT;
-  forall (ValT& val, *pResultMap) {
-    val.second = exp(-val.second + pathsSum.getValue());
-  }
-  if (Util::isDebugBuild())
-    printMapInfo(*pResultMap);
+  forall (ValT& val, *pResultMap) { val.second = exp(-val.second + pathsSum.value_); }
+  if (Util::isDebugBuild()) printMapInfo(*pResultMap);
 
-  return pathsSum.getValue();
+  return pathsSum.value_;
 }
 
 

@@ -43,12 +43,11 @@ void printHgAsMosesLattice(IHypergraph<Arc> const& hg){
   SDL_DEBUG(Hypergraph.PrintHgAsLattice, *hg_sort);
   IVocabularyPtr pVoc = hg_sort->getVocabulary();
   std::cout << '(';
-  for(StateId sid = hg_sort->start(), endid = hg_sort->maxNotTerminalState(); sid != endid; ++ sid) {
+  for(StateId s = hg_sort->start(), endid = hg_sort->maxNotTerminalState(); s != endid; ++ s) {
     std::cout << '(' ;
-    forall (ArcId aid, hg_sort->outArcIds(sid)){
-      Arc* arc = hg_sort->outArc(sid, aid);
-      StateId next_sid = arc->head();
-      int step = next_sid - sid;
+    forall (ArcId aid, hg_sort->outArcIds(s)){
+      Arc* arc = hg_sort->outArc(s, aid);
+      int step = (int)arc->head_ - (int)s;
       if(step < 0){
         SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error, "Illegal lattice input that cant be ordered");
       }

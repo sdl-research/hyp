@@ -27,39 +27,34 @@ namespace Hypergraph {
 /**
    Draws an arc (Graphviz dot format).
 */
+template <class Arc>
 struct DrawArcFct {
 
-  DrawArcFct(std::ostream& out_, std::size_t firstNodeId_)
-      : out(out_), nodeId(firstNodeId_) {}
+  DrawArcFct(std::ostream& out_, std::size_t firstNodeId_) : out(out_), nodeId(firstNodeId_) {}
 
-  template<class Arc>
   void operator()(Arc* arc) const {
     typedef typename Arc::Weight Weight;
-    if (arc->getNumTails() == 1) { // just one tail: no aux node needed
+    if (arc->getNumTails() == 1) {  // just one tail: no aux node needed
       out << arc->getTail(0) << " -> " << arc->head() << " [label=\"";
-      if (arc->weight() != Weight::one())
-        out << arc->weight();
+      if (arc->weight() != Weight::one()) out << arc->weight();
       out << "\" fontsize = 12]\n";
       return;
     }
 
     // Draw auxiliary node for the hyperarc
-    out << nodeId << " [label = \"\", shape = circle, style=solid, width = 0]"
-        << '\n';
+    out << nodeId << " [label = \"\", shape = circle, style=solid, width = 0]" << '\n';
 
     // Draw tails into aux arc
     std::size_t cnt = 1;
-    forall (StateId sid, arc->tails()) {
-      out << sid << " -> " << nodeId << " [label = \""<< cnt
-          <<"\", arrowhead = none, fontcolor = gray55, fontsize = 10]"
-          << '\n';
+    forall (StateId s, arc->tails()) {
+      out << s << " -> " << nodeId << " [label = \"" << cnt
+          << "\", arrowhead = none, fontcolor = gray55, fontsize = 10]" << '\n';
       ++cnt;
     }
 
     // Draw aux arc to head
     out << nodeId << " -> " << arc->head() << " [label=\"";
-    if (arc->weight() != Weight::one())
-      out << arc->weight();
+    if (arc->weight() != Weight::one()) out << arc->weight();
     out << "\" fontsize=12]\n";
 
     ++nodeId;
@@ -73,42 +68,30 @@ struct DrawArcFct {
    For dot tool, write Greek symbols as HTML entities
  */
 std::string dotify(std::string const& sym) {
-  if (sym.length() < 3 || !(*sym.begin() == '<' && *sym.rbegin() == '>'))
-    return sym;
-  if (sym == "<eps>")
-    return "&epsilon;";
-  if (sym == "<phi>")
-    return "&phi;";
-  if (sym == "<rho>")
-    return "&rho;";
-  if (sym == "<sigma>")
-    return "&sigma;";
+  if (sym.length() < 3 || !(*sym.begin() == '<' && *sym.rbegin() == '>')) return sym;
+  if (sym == "<eps>") return "&epsilon;";
+  if (sym == "<phi>") return "&phi;";
+  if (sym == "<rho>") return "&rho;";
+  if (sym == "<sigma>") return "&sigma;";
   return sym;
 }
 
-bool writeStateLabel(std::ostream& out,
-                     Hypergraph::StateId stateId,
-                     Sym symId,
-                     IVocabularyPtr pVoc) {
+bool writeStateLabel(std::ostream& out, Hypergraph::StateId stateId, Sym symId, IVocabularyPtr pVoc) {
   if (!pVoc || symId == NoSymbol) {
     out << stateId;
-  }
-  else {
+  } else {
     std::string const& sym = pVoc->str(symId);
     if (symId.isTerminal() && !symId.isSpecial()) {
       out << "\\\"" << sym << "\\\"";
-    }
-    else {
+    } else {
       out << dotify(sym);
     }
   }
   return true;
 }
 
-template<class A>
-std::ostream& drawHypergraph(std::ostream& out,
-                             IHypergraph<A> const& hg)
-{
+template <class Arc>
+std::ostream& drawHypergraph(std::ostream& out, IHypergraph<Arc> const& hg) {
   // Begin
   out << "digraph HG {\n"
       << "  rankdir = LR;\n"
@@ -122,35 +105,32 @@ std::ostream& drawHypergraph(std::ostream& out,
 
   // States
   IVocabularyPtr pVoc = hg.getVocabulary();
-  std::size_t maxSid = 0;
-  forall (StateId sid, hg.getStateIds()) {
-    Sym inId = hg.inputLabel(sid);
-    Sym outId = hg.outputLabel(sid);
-    out << sid << " [";
+  std::size_t maxS = 0;
+  forall (StateId s, hg.getStateIds()) {
+    Sym inId = hg.inputLabel(s);
+    Sym outId = hg.outputLabel(s);
+    out << s << " [";
     if (inId.isTerminal()) {
       out << "fontcolor=blue,";
     }
     out << "label = \"";
-    writeStateLabel(out, sid, inId, pVoc);
+    writeStateLabel(out, s, inId, pVoc);
     if (inId != outId) {
       out << " ";
-      writeStateLabel(out, sid, outId, pVoc);
+      writeStateLabel(out, s, outId, pVoc);
     }
-    out << "\", shape = "
-        << (hg.final() == sid ? "doublecircle" : "circle")
-        << ", width = .5, fontsize = 12";
-    if (hg.numInArcs(sid) == 0)       // no in arcs = no need to derive = 'observed'
-      out << ", style=filled, fillcolor=\"#E6E6E6\""; // => filled grey like in graphical models
+    out << "\", shape = " << (hg.final() == s ? "doublecircle" : "circle") << ", width = .5, fontsize = 12";
+    if (hg.numInArcs(s) == 0)  // no in arcs = no need to derive = 'observed'
+      out << ", style=filled, fillcolor=\"#E6E6E6\"";  // => filled grey like in graphical models
     else
       out << ", style=solid";
-    if (sid == hg.start())
-      out << ", penwidth=2";
+    if (s == hg.start()) out << ", penwidth=2";
     out << "]\n";
-    maxSid = sid;
+    maxS = s;
   }
 
   // Arcs
-  hg.forArcs(DrawArcFct(out, maxSid + 1));
+  hg.forArcs(DrawArcFct<Arc>(out, maxS + 1));
 
   // End
   out << "}\n";

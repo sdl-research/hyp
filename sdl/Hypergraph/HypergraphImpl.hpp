@@ -19,20 +19,23 @@
 #pragma once
 
 #include <sdl/Hypergraph/Arc.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 
 namespace sdl {
 namespace Hypergraph {
 namespace impl {
 
-struct deleter {
-  template <class X> void operator()(X *x) const {
-    delete x;
+template <class Arc>
+struct ArcDeleter {
+  void operator()(ArcBase *x) const {
+    delete (Arc*)x;
   }
 };
 
-struct set_weight1 {
-  template <class A> void operator()(A *a) const {
-    a->setWeight(A::Weight::one());
+template <class Arc>
+struct ArcWeightSetOne {
+  void operator()(ArcBase *x) const {
+    setOne(static_cast<Arc*>(x)->weight_);
   }
 };
 

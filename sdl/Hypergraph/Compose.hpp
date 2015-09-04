@@ -88,31 +88,23 @@ static const ArcId fakeArcId = (ArcId)-1;
 template <class A>
 struct CmpInputLabelWithSearchLabel {
 
-  CmpInputLabelWithSearchLabel(IHypergraph<A> const& fst, StateId sid, Sym searchLabel = NoSymbol)
-      : fst_(fst), sid_(sid), searchLabel_(searchLabel) {}
+  CmpInputLabelWithSearchLabel(IHypergraph<A> const& fst, StateId s, Sym searchLabel = NoSymbol)
+      : fst_(fst), tail_(s), searchLabel_(searchLabel) {}
 
   bool operator()(ArcId a, ArcId b) const {
     if (a == fakeArcId) {
-      A* otherArc = fst_.outArc(sid_, b);
+      A* otherArc = fst_.outArc(tail_, b);
       return searchLabel_ < fst_.inputLabel((otherArc->getTail(1)));
     } else {
-      A* otherArc = fst_.outArc(sid_, a);
+      A* otherArc = fst_.outArc(tail_, a);
       return searchLabel_ > fst_.inputLabel((otherArc->getTail(1)));
     }
   }
 
   IHypergraph<A> const& fst_;
-  StateId sid_;
+  StateId tail_;
   Sym searchLabel_;
 };
-
-// used only in a test
-template <class A>
-ArcIdIterator searchLabel(IHypergraph<A> const& hg, StateId sid, Sym label) {
-  ArcIdRange arcIdsRange = hg.outArcIds(sid);
-  // binary search:
-  return boost::lower_bound(arcIdsRange, fakeArcId, CmpInputLabelWithSearchLabel<A>(hg, sid, label));
-}
 
 // TODO: try Index.hpp registry, which uses hashing.
 template <class T>
@@ -339,23 +331,23 @@ class EarleyParser {
   }
 
   void init() {
-    StateId sid = cfg_.final();
+    StateId s = cfg_.final();
     StateId from = fst_.start();
-    forall (ArcId aid, cfg_.inArcIds(sid)) {
-      Arc* arc = cfg_.inArc(sid, aid);
+    forall (ArcId arcid, cfg_.inArcIds(s)) {
+      Arc* arc = cfg_.inArc(s, arcid);
       // Item* item = createItem(from, from, arc, 0, arc->weight());
       Item* item = createItem(from, from, arc, 0);
       pushAgendaItem(item, arc->weight());
     }
     alreadyPredicted_.resize(from + 1);
-    alreadyPredicted_[from].insert(sid);
+    alreadyPredicted_[from].insert(s);
   }
 
   void predict(Item* item) {
     SDL_TRACE(Hypergraph.Compose, "predict from " << dbgItem(item, *this));
-    StateId sid = item->arc->getTail(item->dotPos);
+    StateId s = item->arc->getTail(item->dotPos);
 
-    if (sid == cfg_.start()) {
+    if (s == cfg_.start()) {
       // automatically derive start state
       Item* newItem = createItem(item->from, item->to, item->arc, item->dotPos + 1);
       pushAgendaItem(newItem, item->chartWeight);
@@ -371,11 +363,11 @@ class EarleyParser {
     }
 
     StateId from = item->to;
-    if (alreadyPredicted_.size() > from && alreadyPredicted_[from].find(sid) != alreadyPredicted_[from].end()) {
+    if (alreadyPredicted_.size() > from && alreadyPredicted_[from].find(s) != alreadyPredicted_[from].end()) {
       return;
     }
-    forall (ArcId aid, cfg_.inArcIds(sid)) {
-      Arc* arc = cfg_.inArc(sid, aid);
+    forall (ArcId arcid, cfg_.inArcIds(s)) {
+      Arc* arc = cfg_.inArc(s, arcid);
       StateId to = item->to;
       Item* newItem = createItem(from, to, arc, 0);
       pushAgendaItem(newItem, arc->weight());
@@ -383,7 +375,7 @@ class EarleyParser {
     if (alreadyPredicted_.size() <= from) {
       alreadyPredicted_.resize(from + 1);
     }
-    alreadyPredicted_[from].insert(sid);
+    alreadyPredicted_[from].insert(s);
   }
 
   /**
@@ -403,16 +395,16 @@ class EarleyParser {
       return;
     }
     // Don't attach eps right before a non-lexical nontermial (will
-    // instead attach inside that nonterminal)
+    // instead attach inse that nonterminal)
     if (!item->isComplete()) {
       StateId next = item->arc->getTail(item->dotPos);
       if (!cfg_.outputLabel(next).isTerminal()) {
         return;
       }
     }
-    StateId sid = item->to;
-    forall (ArcId aid, fst_.outArcIds(sid)) {
-      Arc* fstArc = fst_.outArc(sid, aid);
+    StateId s = item->to;
+    forall (ArcId arcid, fst_.outArcIds(s)) {
+      Arc* fstArc = fst_.outArc(s, arcid);
       Sym label = fst_.inputLabel(fstArc->getTail(1));
       if (label == EPSILON::ID) {
         Weight w = times(item->chartWeight, fstArc->weight());
@@ -444,7 +436,7 @@ class EarleyParser {
                     "Currently, special symbols <phi>, <rho>, <sigma> can only be used in "
                     "the 2nd argument to compose.");
     }
-    StateId sid = item->to;
+    StateId s = item->to;
 
     std::size_t numMatches = 0;
 
@@ -454,8 +446,8 @@ class EarleyParser {
 
     // Iterate through first arcs to see if we have unconditional
     // matches (i.e., eps or sigma)
-    forall (ArcId aid, fst_.outArcIds(sid)) {
-      Arc* fstArc = fst_.outArc(sid, aid);
+    forall (ArcId arcid, fst_.outArcIds(s)) {
+      Arc* fstArc = fst_.outArc(s, arcid);
       Sym foundLabel = fst_.inputLabel(fstArc->getTail(1));
       if (foundLabel == EPSILON::ID) {
         continue;  // scanEps is a separate function
@@ -467,19 +459,19 @@ class EarleyParser {
         backPointers_[newItem].insert(BackPointer(item, bpItem));
         if (options_.sigmaPreventsPhiRhoMatch) ++numMatches;
       } else {
-        firstConditionalArcId = aid;
+        firstConditionalArcId = arcid;
         break;
       }
     }
 
     // Search for search label using binary search
-    ArcIdRange arcIdsRange = fst_.outArcIds(sid);
+    ArcIdRange arcIdsRange = fst_.outArcIds(s);
     // binary search:
     ArcIdIterator arcEnd = boost::end(arcIdsRange);
     ArcIdIterator matchingArcIdsIter
-        = boost::lower_bound(arcIdsRange, fakeArcId, CmpInputLabelWithSearchLabel<A>(fst_, sid, searchLabel));
+        = boost::lower_bound(arcIdsRange, fakeArcId, CmpInputLabelWithSearchLabel<A>(fst_, s, searchLabel));
     for (; matchingArcIdsIter != arcEnd; ++matchingArcIdsIter, ++numMatches) {
-      Arc* matchingArc = fst_.outArc(sid, *matchingArcIdsIter);
+      Arc* matchingArc = fst_.outArc(s, *matchingArcIdsIter);
       if (fst_.inputLabel(matchingArc->getTail(1)) != searchLabel) {
         break;
       }
@@ -491,10 +483,10 @@ class EarleyParser {
 
     // Look for phi or rho
     if (numMatches == 0 && firstConditionalArcId != kNoArc && (options_.enablePhiRhoMatch)) {
-      ArcIdRange arcIdsRange = fst_.outArcIds(sid);
+      ArcIdRange arcIdsRange = fst_.outArcIds(s);
       for (ArcIdIterator aiter = ArcIdIterator(firstConditionalArcId), arcEnd = boost::end(arcIdsRange);
            aiter != arcEnd; ++aiter) {
-        Arc* arc = fst_.outArc(sid, *aiter);
+        Arc* arc = fst_.outArc(s, *aiter);
         Item* fstArcItem = createItem(kNoState, kNoState, arc, 1);
         if (fst_.inputLabel(arc->getTail(1)) == PHI::ID) {
           // non-consuming
@@ -602,13 +594,13 @@ class EarleyParser {
     backtrace2(item, 0);
   }
 
-  StateId getResultCfgState(StateId inputCfgSid, std::size_t from, std::size_t to) {
+  StateId getResultCfgState(StateId inputCfgState, std::size_t from, std::size_t to) {
     TripleToResultStateMap::const_iterator found
-        = tripleToResultState_.find(boost::make_tuple(inputCfgSid, from, to));
+        = tripleToResultState_.find(boost::make_tuple(inputCfgState, from, to));
     StateId resultId = kNoState;
     if (found == tripleToResultState_.end()) {
-      resultId = result_->addState(cfg_.outputLabel(inputCfgSid), cfg_.outputLabel(inputCfgSid));
-      tripleToResultState_[boost::make_tuple(inputCfgSid, from, to)] = resultId;
+      resultId = result_->addState(cfg_.outputLabel(inputCfgState), cfg_.outputLabel(inputCfgState));
+      tripleToResultState_[boost::make_tuple(inputCfgState, from, to)] = resultId;
     } else {
       resultId = found->second;
     }
@@ -798,9 +790,9 @@ template <class A>
 StateId EarleyParser<A>::addLexicalState(Sym ilabel, Sym olabel) {
   LabelPairToStateId::const_iterator found = resultLabelPairToStateId_.find(std::make_pair(ilabel, olabel));
   if (found == resultLabelPairToStateId_.end()) {
-    StateId sid = result_->addState(ilabel, olabel);
-    resultLabelPairToStateId_.insert(std::make_pair(std::make_pair(ilabel, olabel), sid));
-    return sid;
+    StateId s = result_->addState(ilabel, olabel);
+    resultLabelPairToStateId_.insert(std::make_pair(std::make_pair(ilabel, olabel), s));
+    return s;
   }
   return found->second;
 }
@@ -820,13 +812,13 @@ StateId EarleyParser<A>::createTerminalState(BackPointer bp) {
     return addLexicalState(cfgOutputLabel, cfgOutputLabel);
   }
 
-  StateId sid;
+  StateId s;
   StateId fstLabelState = bp.second->arc->getTail(1);
   Sym fstInputLabel = fst_.inputLabel(fstLabelState);
   const bool isNonconsuming = fstInputLabel == EPSILON::ID || fstInputLabel == PHI::ID;
   if (isNonconsuming) {
     Sym fstOutputLabel = fst_.outputLabel(fstLabelState);
-    sid = addLexicalState(EPSILON::ID, fstOutputLabel);
+    s = addLexicalState(EPSILON::ID, fstOutputLabel);
   } else {
     StateId cfgLabelState = bp.first->arc->getTail(bp.first->dotPos);
     // Sym cfgOutputLabel =
@@ -838,12 +830,12 @@ StateId EarleyParser<A>::createTerminalState(BackPointer bp) {
     // rewrite rho/sigma input to the actual matched CFG label
     if ((fstInputLabel == RHO::ID && fstOutputLabel == RHO::ID)
         || (fstInputLabel == SIGMA::ID && fstOutputLabel == SIGMA::ID)) {
-      sid = addLexicalState(cfgInputLabel, cfgInputLabel);
+      s = addLexicalState(cfgInputLabel, cfgInputLabel);
     } else {
-      sid = addLexicalState(cfgInputLabel, fstOutputLabel);
+      s = addLexicalState(cfgInputLabel, fstOutputLabel);
     }
   }
-  return sid;
+  return s;
 }
 
 template <class Arc>
@@ -899,7 +891,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
       if (tails.empty())
         result_->setStart(head);
       else
-        result_->addArc(new Arc(Head(head), Tails(tails.rbegin(), tails.rend()), times(w, item->arc->weight())));
+        result_->addArc(new Arc(head, StateIdContainer(tails.rbegin(), tails.rend()), times(w, item->arc->weight())));
     }
   }
 }

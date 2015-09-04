@@ -180,7 +180,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
           StateId to = oldStateToNewState_.stateFor(tokenEndState);
           StateId const tokstart = tok.start();
           Arc* arc = tokstart == kNoState
-                         ? new Arc(Head(to), tokWeightPair.second)
+                         ? new Arc(HeadAndWeight(), to, tokWeightPair.second)
                          : new Arc(to, tokWeightPair.second, oldStateToNewState_.stateFor(tokstart));
           // axiom else start from (output copy of) tokstart
           Util::StringBuilder buf;
@@ -208,7 +208,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
             arc->setHead(mid);
             SDL_TRACE(Hypergraph.ConvertCharsToTokens, "Adding arc: " << *arc);
             outhg_->addArc(arc);
-            arc = new Arc(Head(to), mid);
+            arc = new Arc(HeadAndTail(), to, mid);
             buf.clear();
           }
         }

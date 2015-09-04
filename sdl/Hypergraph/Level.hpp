@@ -141,9 +141,8 @@ struct Levelization : Levels {
   struct CountFstInArcs {
     RemainingInArcs& remainIn;
     explicit CountFstInArcs(RemainingInArcs& remainIn) : remainIn(remainIn) {}
-    template <class Arc>
-    void operator()(Arc* arc) const {
-      ++Util::atExpand(remainIn, arc->head());
+    void operator()(ArcBase* arc) const {
+      ++Util::atExpand(remainIn, arc->head_);
     }
   };
 

@@ -62,7 +62,7 @@ void insideCosts(IHypergraph<Arc> const& hg, SdlFloat* inside, StateId N) {
   std::memset(color, 0, N);
   reverseTopologicalOutArcsGraph(hg, hg.start(), e, color, N);
   std::fill(inside, inside + N, (float)HUGE_VAL);
-  typedef typename IMutableHypergraph<Arc>::ArcsContainer ArcsContainer;
+  typedef HypergraphBase::ArcsContainer ArcsContainer;
   if (hg.isMutable()) {
     IMutableHypergraph<Arc> const& mhg = static_cast<IMutableHypergraph<Arc> const&>(hg);
     for (;;) {
@@ -71,8 +71,8 @@ void insideCosts(IHypergraph<Arc> const& hg, SdlFloat* inside, StateId N) {
       SdlFloat c = hg.isAxiom(s) ? 0 : inside[s];
       ArcsContainer const* arcs = mhg.maybeOutArcs(s);
       if (!arcs) continue;
-      for (typename ArcsContainer::const_iterator i = arcs->begin(), e = arcs->end(); i != e; ++i) {
-        Arc* a = *i;
+      for (ArcsContainer::const_iterator i = arcs->begin(), e = arcs->end(); i != e; ++i) {
+        Arc* a = (Arc*)*i;
         assert(a->head_ < N);
         Util::minEq(inside[a->head_], a->weight_.value_ + c);
       }
@@ -84,8 +84,8 @@ void insideCosts(IHypergraph<Arc> const& hg, SdlFloat* inside, StateId N) {
       SdlFloat c = hg.isAxiom(s) ? 0 : inside[s];
       ArcsContainer arcs;
       hg.outArcs(s, arcs);
-      for (typename ArcsContainer::const_iterator i = arcs.begin(), e = arcs.end(); i != e; ++i) {
-        Arc* a = *i;
+      for (ArcsContainer::const_iterator i = arcs.begin(), e = arcs.end(); i != e; ++i) {
+        Arc* a = (Arc*)*i;
         assert(a->head_ < N);
         Util::minEq(inside[a->head_], a->weight_.value_ + c);
       }

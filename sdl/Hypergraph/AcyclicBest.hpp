@@ -13,6 +13,10 @@
     1-best for a lattice (acyclic graph) - works fine w/ negative costs.
 
     a similar acyclic-hypergraph version based on Level.hpp would be pretty simple
+
+    TODO: so far path_traits seems potentially useful only for
+    InsideAlgorithm-like LogWeight sum-all-paths vs the usual viterbi min. we
+    could remove it (except as needed by generic lazy_forest_kbest code)
 */
 
 #ifndef HYPERGRAPH__ACYCLIC_BEST_JG_2013_06_10_HPP
@@ -87,16 +91,30 @@ struct AcyclicBest {
                                              << bestCost);
     if (path_traits::better(w, bestCost)) {
       bestCost = w;
-      if (pi) put(pi, head, (ArcHandle)arc);
+      if (pi) put(pi, head, arc);
       SDL_TRACE(Hypergraph.AcyclicBest, "improved head " << head << ": new mu=" << get(mu, head) << " new pi="
                                                          << get(pi, head) << " arc: " << (Arc*)get(pi, head));
     }
   }
 
-  // for top-down (in-arcs)
-  void acceptIn(Arc* arc, StateId head) { improve(arc, head); }
+  void improveTopDown(Arc* arc, StateId head) {
+    assert(IsGraph);
+    StateIdContainer const& tails = arc->tails();
+    if (tails.empty()) return;
+    Cost fromCost = mu[head];
+    path_traits::extendBy(arc->weight_.value_, fromCost);
+    StateId tail = tails[0];
+    Cost& bestCost = mu[tail];
+    if (path_traits::better(fromCost, bestCost)) {
+      bestCost = fromCost;
+      if (pi) put(pi, tail, arc);
+    }
+  }
 
-  void acceptOut(Arc* arc, StateId) { improve(arc, arc->head()); }
+  // for top-down (in-arcs)
+  void acceptIn(ArcBase* arc, StateId head) { improveTopDown((Arc*)arc, head); }
+
+  void acceptOut(ArcBase* arc, StateId) { improve((Arc*)arc, arc->head_); }
 
   /// number of tails needing init (for graph, we only need up to start state and max non-terminal)
   StateId muStates_;
@@ -116,12 +134,20 @@ struct AcyclicBest {
     muStates_ = hg.size();
     piStates_ = muStates_;
 
-    bool const outArcs = hg.storesOutArcs();
-    bool const useOutArcs = IsGraph && outArcs;
+    StateId final = hg.final();
+    if (final == kNoState)
+      SDL_THROW_LOG(Hypergraph.AcyclicBest, EmptySetException,
+                    "your hypergraph had no final state (and so no paths)");
 
-    if (!useOutArcs && !hg.storesInArcs())
+    Properties hgprop = hg.uncomputedProperties();
+    bool const inArcs = hgprop & kStoreInArcs;
+    bool const outArcs = hgprop & kStoreAnyOutArcs;
+    bool const useOutArcs = IsGraph && outArcs;  // we require outarcs for graph+nbest
+
+    if (!useOutArcs && !inArcs)
       SDL_THROW_LOG(Hypergraph.AcyclicBest, ConfigException,
                     "must store inarcs unless your hypergraph is a simple graph");
+    assert(inArcs || outArcs);
 
     /*
       TODO: allow !IsGraph; use reached-tails approach of e.g. Hypergraph/Level.hpp or
@@ -130,35 +156,36 @@ struct AcyclicBest {
     */
     assert(IsGraph);
 
+    StateId start = hg.start();
     if (IsGraph) {
-      StateId start = hg.start();
       if (start == kNoState)
         SDL_THROW_LOG(Hypergraph.AcyclicBest, EmptySetException,
                       "your simple graph had no start state (and so no paths)");
     }
 
-    initMu();
-
     if (hg.isMutable()) hgAsMutable = static_cast<IMutableHypergraph<Arc> const*>(&hg);
 
     typedef typename InArcs<Arc>::ArcsContainer ArcsContainer;
 
-    // topo sort (top-down) without stack-killing recursion.
     back_edges_ = 0;
     self_loops_ = 0;
     // we wouldn't need to track this except we choose to set the kAcyclic
     // property and self-loops technically violate it (perhaps we could redefine
     // kAcyclic to spare the effort)
 
+    std::vector<StateId> orderReverse;
+    orderReverse.reserve(hg.sizeForHeads());
+    typedef StateId const* I;
+    assert(!get(pi, start));
+    assert(!get(pi, final));
     if (useOutArcs) {
-// essentially two different-order algorithms for viterbi. one iterates
-// over in arcs the other out. both are correct for acyclic. this is all
-// to avoid requiring storing in *and* out arcs - either is fine
-
-      std::vector<StateId> orderReverse;
+      // essentially two different-order algorithms for viterbi. one iterates
+      // over in arcs the other out. both are correct for acyclic. this is all
+      // to avoid requiring storing in *and* out arcs - either is fine
       back_edges_ = orderTailsLast(hg, orderReverse, maxBackEdges, IsGraph);
       if (orderReverse.empty()) return;
-      typedef StateId const* I;
+      for (StateId i = 0, N = muStates_; i < N; ++i)
+        put(mu, i, hg.isAxiom(i) ? path_traits::start() : path_traits::unreachable());
       for (I i = &orderReverse.back(), last = &orderReverse.front();;) {
         StateId tail = *i;
         visitOutArcs(*this, tail, hg, hgAsMutable);
@@ -166,21 +193,38 @@ struct AcyclicBest {
         --i;
       }
     } else {
-      InArcs<Arc> adj(hg);
-      if (IsGraph)
-        back_edges_ = adj.orderHeadsLast(*this, maxBackEdges, IsGraph);
-      else
-        SDL_THROW_LOG(AcyclicBest, ProgrammerMistakeException, "hg acyclic best: //TODO@JG");
+      if (!IsGraph) SDL_THROW_LOG(AcyclicBest, ProgrammerMistakeException, "hg acyclic best: //TODO@JG");
+      mu[final] = 0;
+      std::vector<StateId> orderReverse;
+      back_edges_ = orderHeadsLast(hg, orderReverse, maxBackEdges, IsGraph);
+      if (orderReverse.empty()) return;
+      for (StateId i = 0, N = muStates_; i < N; ++i)
+        put(mu, i, path_traits::unreachable());
+      put(mu, final, path_traits::start());
+      for (I i = &orderReverse.back(), last = &orderReverse.front();;) {
+        StateId tail = *i;
+        visitInArcs(*this, tail, hg, hgAsMutable);
+        if (i == last) break;
+        --i;
+      }
+      ArcBase* lastarc = 0;
+      Cost mucost = 0;
+      Cost pathcost = mu[start];
+      for (StateId s = start; s != final;) {
+        ArcBase* nextarc = get(pi, s);
+        if (!nextarc)
+          SDL_THROW_LOG(Hypergraph.AcyclicBest, EmptySetException,
+                        "path from start->final not recovered from top-down AcyclicBest");
+        put(pi, s, lastarc);
+        mu[s] = mucost;
+        path_traits::extendBy(nextarc->arcweight<Arc>().value_, mucost);
+        s = (lastarc = nextarc)->head_;
+      }
+      put(pi, final, lastarc);
+      mu[final] = mucost;
+      assert(std::fabs(mucost - pathcost) < 0.1);
     }
     if (acyclic() && hgAsMutable) const_cast<IMutableHypergraph<Arc>*>(hgAsMutable)->addProperties(kAcyclic);
-  }
-
-  void initMu() {
-    for (StateId i = 0, N = muStates_; i < N; ++i) {
-      put(mu, i, hg.isAxiom(i) ? path_traits::start() : path_traits::unreachable());
-      // initial best-cost[state] is axiom(state)? 0 : infinity
-      assert(pi[i] == 0);
-    }
   }
 
   void reserve(std::size_t nState) {}

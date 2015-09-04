@@ -148,7 +148,6 @@ struct TokenSplitPolicy {
   bool spaceBetween_;
 };
 
-
 /*
   visitor class that is intended be used with topological traversal.
 
@@ -193,7 +192,8 @@ struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
     visitOutArcs(*this, s, hg_, hgAsMutable_);
   }
 
-  void acceptOut(Arc* arc, StateId sid) {
+  void acceptOut(ArcBase* a, StateId s) {
+    Arc* arc = (Arc*)a;
     Sym const arcSym = hg_.firstLexicalOutput(arc);
     bool const extendStart = isStart_ && !arcSym;
     StateType const headType = extendStart ? kStart : this->headType(arcSym);
@@ -224,10 +224,10 @@ struct SplitStateVisitor : IStatesVisitor, TokenSplitPolicy<Arc> {
           final_ = headSplit;
         }
       }
-      StateSplits const& sidSplits = stateSplitsFor_[sid];
+      StateSplits const& sSplits = stateSplitsFor_[s];
       for (std::size_t i = 0; i < StateSplits::static_size; ++i)
-        if (sidSplits[i] != kUnsplitState)
-          this->connect(arc, arcSym, (StateType)i, sidSplits[i], headType, headSplit, outHg_);
+        if (sSplits[i] != kUnsplitState)
+          this->connect(arc, arcSym, (StateType)i, sSplits[i], headType, headSplit, outHg_);
     }
   }
 

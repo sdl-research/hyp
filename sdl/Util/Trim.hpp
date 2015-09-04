@@ -53,7 +53,6 @@ inline std::string::const_iterator leftTrimBegin(std::string const& s) {
    \return maximum iter on [begin, end) with pred(*iter)==true, else return end. this is like find_if
    (c.rbegin(), c.rend(), pred)+1).base() except you get end rather than begin if not found.
 */
-
 template <class Iter, class Pred>
 inline Iter findLast(Iter begin, Iter const& end, Pred pred) {
   Iter i = end;

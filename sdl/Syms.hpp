@@ -35,6 +35,7 @@ typedef SymInt SymsIndex;
 typedef std::pair<SymInt, SymInt> SymSpan;
 typedef Sym const* Psym;
 typedef std::pair<Psym, Psym> SymSlice;
+typedef graehl::pod_array_ref<Sym> SymPodArrayRef; //TODO: use this instead of SymSlice. faster <=> Syms.
 
 enum { kInlineSyms = 3 };
 // 16 bytes (more if >3 elements). note: small_vector<SymInt, 1> and <SymInt, 2> have the same size due to alignment.

@@ -55,7 +55,7 @@ class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
   }
 
   /** since arc mapping doesn't affect state labels, defer. */
-  bool outputLabelFollowsInput(StateId sid) const OVERRIDE { return hg_.outputLabelFollowsInput(sid); }
+  bool outputLabelFollowsInput(StateId s) const OVERRIDE { return hg_.outputLabelFollowsInput(s); }
 
   bool outputLabelFollowsInput() const OVERRIDE { return hg_.outputLabelFollowsInput(); }
 
@@ -67,31 +67,33 @@ class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
 
   StateIdRange getStateIds() const { return hg_.getStateIds(); }
 
-  ArcIdRange inArcIds(StateId sid) const { return hg_.inArcIds(sid); }
+  ArcIdRange inArcIds(StateId s) const { return hg_.inArcIds(s); }
 
-  ArcIdRange outArcIds(StateId sid) const { return hg_.outArcIds(sid); }
+  ArcIdRange outArcIds(StateId s) const { return hg_.outArcIds(s); }
 
-  ArcId numInArcs(StateId sid) const OVERRIDE { return hg_.numInArcs(sid); }
+  ArcId numInArcs(StateId s) const OVERRIDE { return hg_.numInArcs(s); }
 
-  ArcId numOutArcs(StateId sid) const OVERRIDE { return hg_.numOutArcs(sid); }
+  ArcId numOutArcs(StateId s) const OVERRIDE { return hg_.numOutArcs(s); }
 
-  ToArc* inArc(StateId sid, ArcId aid) const OVERRIDE {
-    FromArc* fromArc = hg_.inArc(sid, aid);
+  ToArc* inArc(StateId s, ArcId arcid) const OVERRIDE {
+    FromArc* fromArc = hg_.inArc(s, arcid);
     return mappedArc(fromArc);
   }
 
-  ToArc* outArc(StateId sid, ArcId aid) const OVERRIDE {
-    FromArc* fromArc = hg_.outArc(sid, aid);
+  ToArc* outArc(StateId s, ArcId arcid) const OVERRIDE {
+    FromArc* fromArc = hg_.outArc(s, arcid);
     return mappedArc(fromArc);
   }
 
-  Sym inputLabel(StateId sid) const OVERRIDE { return hg_.inputLabel(sid); }
+  Sym inputLabel(StateId s) const OVERRIDE { return hg_.inputLabel(s); }
 
-  Sym outputLabel(StateId sid) const OVERRIDE { return hg_.outputLabel(sid); }
+  Sym outputLabel(StateId s) const OVERRIDE { return hg_.outputLabel(s); }
 
   Properties properties() const OVERRIDE { return hg_.properties(); }
 
   IVocabularyPtr getVocabulary() const OVERRIDE { return hg_.getVocabulary(); }
+  IVocabulary* vocab() const OVERRIDE { return hg_.vocab(); }
+  Properties uncomputedProperties() const OVERRIDE { return hg_.uncomputedProperties(); }
 
  private:
   ToArc* mappedArc(FromArc* fromArc) const {
@@ -137,7 +139,7 @@ struct SetWeightMapper {
   SetWeightMapper(ToWeight w) : weight_(w) {}
 
   ToArc* operator()(FromArc* arc) const {
-    ToArc* result = new ToArc(Head(arc->head()), Tails(arc->tails().begin(), arc->tails().end()), weight_);
+    ToArc* result = new ToArc(arc->head_, arc->tails_, weight_);
     return result;
   }
 
@@ -160,7 +162,7 @@ struct LengthMapper {
     Sym symid = getFsmInputLabel(hg_, *arc);
     const bool isTerminal = symid.isTerminal();
     const ToWeight weight = isTerminal ? ToWeight(1.0) : ToWeight(0.0);
-    ToArc* result = new ToArc(Head(arc->head()), Tails(arc->tails().begin(), arc->tails().end()), weight);
+    ToArc* result = new ToArc(arc->head_, arc->tails_, weight);
     return result;
   }
 

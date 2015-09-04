@@ -46,11 +46,11 @@ unsigned const kReserveForBestPathString = 500;
 
 
 template <class Arc>
-void appendBestPathStringForDeriv(Util::StringBuilder& out, typename Derivation<Arc>::child_type const& deriv,
+void appendBestPathStringForDeriv(Util::StringBuilder& out, DerivationPtr const& deriv,
                                   IHypergraph<Arc> const& hg,
                                   DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
                                   bool printWeight = false) {
-  if (printWeight) out(deriv->weight())(' ');
+  if (printWeight) out(deriv->weightForArc<Arc>())(' ');
   textFromDeriv(out, deriv, hg, opts);
 }
 
@@ -60,7 +60,7 @@ Util::StringBuilder& bestPathString(Util::StringBuilder& out, IHypergraph<Arc> c
                                     DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
                                     bool printWeight = false,
                                     char const* fallbackIfNoDerivation = "[no derivation exists]") {
-  typename Derivation<Arc>::child_type deriv = bestPath(hg, bestPathOpts);
+  DerivationPtr deriv = bestPath(hg, bestPathOpts);
   if (!deriv)
     return out(fallbackIfNoDerivation);
   else {
@@ -75,7 +75,7 @@ std::string bestPathString(IHypergraph<Arc> const& hg, BestPathOptions const& be
                            DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
                            bool printWeight = false,
                            char const* fallbackIfNoDerivation = "[no derivation exists]") {
-  typename Derivation<Arc>::child_type deriv = bestPath(hg, bestPathOpts);
+  DerivationPtr deriv = bestPath(hg, bestPathOpts);
   if (!deriv)
     return fallbackIfNoDerivation;
   else {
@@ -96,10 +96,10 @@ template <class Arc>
 Syms& bestPathSymsAppend(Syms& syms, FeatureValue& cost, IHypergraph<Arc> const& hg,
                          BestPathOptions const& bestPathOpts = BestPathOptions(),
                          WhichSymbolOptions const& opts = WhichSymbolOptions()) {
-  typename Derivation<Arc>::DerivAndWeight derivWeight = bestDerivWeight(hg, bestPathOpts);
-  if (boost::get<0>(derivWeight)) {
-    cost = boost::get<1>(derivWeight).getValue();
-    symsFromDerivAppend(syms, boost::get<0>(derivWeight), hg, opts);
+  Derivation::DerivAndWeight<Arc> derivWeight(bestDerivWeight(hg, bestPathOpts));
+  if (derivWeight.deriv) {
+    cost = derivWeight.weight.value_;
+    symsFromDerivAppend(syms, derivWeight.deriv, hg, opts);
   } else
     cost = std::numeric_limits<FeatureValue>::infinity();
   return syms;
@@ -332,8 +332,7 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
   /// for visit_nbest for runPipeline hg output. to help compiler, we needed to template on Weight instead of
   /// Arc
   template <class Weight>
-  bool operator()(typename Derivation<ArcTpl<Weight> >::DerivP const& deriv, Weight const& weight,
-                  NbestId n) const {
+  bool operator()(Hypergraph::DerivationPtr const& deriv, Weight const& weight, NbestId n) const {
     assert(voc);
     assert(deriv);
     Syms tokens;  // TODO: unnecessary copy - visit
@@ -349,7 +348,8 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
       if (spaceToken.empty()) {
         textFromSyms(wordBuf, tokens, *voc, options.hgString);
         if (skipOriginalWord) {
-          SDL_DEBUG(xmt.RunPipeline.runPipelineToStrings, "'"<<wordBuf<<"' vs original '"<<*skipOriginalWord<< " equal="<<(wordBuf == *skipOriginalWord));
+          SDL_DEBUG(xmt.RunPipeline.runPipelineToStrings, "'" << wordBuf << "' vs original '" << *skipOriginalWord
+                                                              << " equal=" << (wordBuf == *skipOriginalWord));
           if (wordBuf == *skipOriginalWord) return true;  // continue nbests
         }
         accept(wordBuf);  // single token result
@@ -373,16 +373,16 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
           wordBuf.clear();
           textFromSyms(wordBuf, SymSlice(word0, end), *voc, options.hgString);
           if (!nSpaceSep && skipOriginalWord) {
-            SDL_DEBUG(xmt.RunPipeline.runPipelineToStrings, "single word '"<<wordBuf<<"' vs original '"<<*skipOriginalWord<<" equal="<<(wordBuf == *skipOriginalWord));
+            SDL_DEBUG(xmt.RunPipeline.runPipelineToStrings,
+                      "single word '" << wordBuf << "' vs original '" << *skipOriginalWord
+                                      << " equal=" << (wordBuf == *skipOriginalWord));
             if (wordBuf == *skipOriginalWord) return true;  // continue nbests
           }
           accept(wordBuf);
         }
       }
     }
-    FeatureValue const cost = deriv->weight().getValue();
-    assert(
-        Util::floatEqualWarn<FeatureValue>(cost, weight.getValue(), .001, "deriv.weight()", "BestPath cost"));
+    FeatureValue const cost = deriv->weight<Weight>().value_;
     countAccepted();
     return accept.finishPhrase(options.costMaybeNbest(n + 1, cost));  // 1-best has index 0
 
@@ -392,7 +392,7 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
 
  private:
   mutable IVocabulary* voc;
-  mutable IHypergraphStates const* hgBase;
+  mutable HypergraphBase const* hgBase;
 };
 
 

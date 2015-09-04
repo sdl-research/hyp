@@ -34,200 +34,23 @@ template <class Arc>
 struct SortStates;
 
 /**
-   The part of IMutableHypergraph<Arc> that doesn't depend on Arc.
-
-   Because there's no cheap (nonvirtual) diamond inheritance, we have to call
-   IHypergraphBase in a slightly verbose manner.
-*/
-struct IMutableHypergraphBase {
-
-  virtual void removeDeletedArcs(Util::PointerSet const& deletedArcPointers) = 0;
-
-  /// remove kCanonicalLex property
-  virtual void clearCanonicalLex() = 0;
-
-  /// leave kCanonicalLex alone (may still be set) but clear cache so currently existing states won't be
-  /// reused
-  virtual void clearCanonicalLexCache() = 0;
-
-  /// return true if no duplicate states with same labelpair, setting kCanonicalLex and rebuilding cache
-  virtual bool forceCanonicalLex() = 0;
-
-  /// return true if no duplicate states with same labelpair. invalidate existing cache
-  virtual bool ensureCanonicalLex() = 0;
-
-  /**
-     \return existing StateId with given label pair, if any. may only call if canonicalLex()
-  */
-  virtual StateId canonicalExistingStateForLabelPair(LabelPair io) = 0;
-  /**
-     reserve at least this many states (optional; for efficiency - not required to call with an upper bound,
-     or at all).
-  */
-  virtual void reserve(StateId) {}
-
-  /** an output symbol of NoSymbol means the output changes when you
-      setInputLabel later; an explicit same-symbol will fix the output label
-      against that eventuality.
-  */
-  virtual void setLabelPair(StateId state, LabelPair io) = 0;
-
-  void setLabelPair(StateId state, Sym in, Sym out = NoSymbol) { setLabelPair(state, LabelPair(in, out)); }
-
-  virtual StateId addState() { return addStateId(nextStateId()); }
-
-  // optional to call this - might clear out some garbage. won't set
-  // kCanonicalLex if it isn't set already (use forceCanonicalLex for
-  // that). \return whether labels are in fact canonical
-  virtual bool rebuildCanonicalLex() = 0;
-
-  /// respects kCanonicalLex property
-  virtual StateId addState(Sym inputLabel) = 0;
-
-  /**
-     addStateId(nextStateId(), ...) is the same as addState(, ...) always.
-  */
-  virtual StateId nextStateId() const = 0;
-
-  /**
-     remove last addState provided no arcs using it have been added
-  */
-  virtual void removeLastState() = 0;
-
-  /// note: if state was already added, it keeps existing arcs/labels. returns state always - cannot fail
-  virtual StateId addStateId(StateId state) = 0;
-
-  virtual void addStateId(StateId state, LabelPair l) {
-    addStateId(state);
-    setLabelPair(state, l);
-  }
-
-  virtual StateId addStateId(StateId stateId, Sym inputLabel, Sym outputLabel) = 0;
-
-  virtual StateId addState(Sym inputLabel, Sym outputLabel) = 0;
-
-  StateId addState(LabelPair io) { return addState(input(io), output(io)); }
-
-  virtual void setInputLabel(StateId state, Sym label) = 0;
-
-  // Remember, setting to NoSymbol (or never setting) means output is
-  // same as input.
-  virtual void setOutputLabel(StateId state, Sym label) = 0;
-
-  virtual void setVocabulary(IVocabularyPtr const&) = 0;
-  void setVocabulary(IPerThreadVocabulary& perThreadVocab) {
-    setVocabulary(perThreadVocab.getPerThreadVocabulary());
-  }
-
-  /**
-     Add existing labels to new vocab, and setVocabulary(vocab).
-  */
-  void translateToVocabulary(IVocabularyPtr const& newVocab);
-
-  /// make our hg have the same vocab as another
-  template <class A>
-  void takeVocabulary(IHypergraph<A> const& h) {
-    this->setVocabulary(h.getVocabulary());
-  }
-
-  // workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual bool hgOutputLabelFollowsInput(StateId state) const = 0;
-
-  virtual bool hgOutputLabelFollowsInput() const = 0;
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual StateId hgGetNumStates() const = 0;
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual LabelPair hgGetLabelPair(StateId state) const = 0;
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual Sym hgGetInputLabel(StateId state) const = 0;
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual IVocabularyPtr hgGetVocabulary() const = 0;
-
-  /// workaround avoiding virtual inheritance for purposes of Invert
-  virtual Properties hgProperties() const = 0;
-};
-
-/// lets you grab fresh states and return unwanted states back to a free pool
-struct AddStateId {
-  std::vector<StateId> pool;
-  IMutableHypergraphBase& hg;
-
-  AddStateId(IMutableHypergraphBase& hg) : hg(hg) {}
-
-  void addStateId(StateId s) {
-    for (StateId from = hg.hgGetNumStates(); from < s; ++from) pool.push_back(from);
-    hg.addStateId(s);
-  }
-
-  StateId addState() {
-    if (pool.empty()) {
-      return hg.addState();
-    } else {
-      StateId r = pool.back();
-      pool.pop_back();
-      return r;
-    }
-  }
-
-  void setSameTerminals(IHypergraphStates const& hgIn) {
-    for (StateId s = 0, n = hgIn.size(); s < n; ++s) {
-      if (hgIn.hasTerminalLabel(s)) {
-        addStateId(s);
-        hg.setLabelPair(s, hgIn.labelPair(s));
-      }
-    }
-  }
-};
-
-/**
    An IHypergraph you can modify. In practice this is always a
    MutableHypergraph, which uses arrays to store things.
 */
 template <class A>
-struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
+struct IMutableHypergraph : IHypergraph<A> {
+  static char const* staticType() { return "IHypergraph"; }
 
   void setHaveConstraints(bool haveConstraintStarts, bool haveConstraintEnds) {
     if (haveConstraintEnds && !haveConstraintStarts)
       SDL_THROW_LOG(Hypergraph.Constraints, ConfigException,
                     "we always have constraint start-states if we have constraints, and sometimes have "
                     "constraint end-states - so haveConstraintEnds && !haveConstraintStarts is an error");
-    setPropertyBit(kConstraintStarts, haveConstraintStarts);
-    setPropertyBit(kConstraintEnds, haveConstraintEnds);
+    this->setPropertyBit(kConstraintStarts, haveConstraintStarts);
+    this->setPropertyBit(kConstraintEnds, haveConstraintEnds);
   }
-
-  void setStart(StateId s) { this->start_ = s; }
-
-  void setFinal(StateId s) { this->final_ = s; }
 
  protected:
-  // we hope all these are implemented extremely efficiently (by cloning part of
-  // vtable). but (see MutableHypergraph.hpp) we can also directly implement in
-  // terms of non-virtual shared subclass impl just in case
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual bool hgOutputLabelFollowsInput(StateId state) const OVERRIDE {
-    return this->outputLabelFollowsInput(state);
-  }
-
-  virtual bool hgOutputLabelFollowsInput() const OVERRIDE { return this->outputLabelFollowsInput(); }
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual StateId hgGetNumStates() const OVERRIDE { return this->size(); }
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual LabelPair hgGetLabelPair(StateId state) const OVERRIDE { return this->labelPair(state); }
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual Sym hgGetInputLabel(StateId state) const OVERRIDE { return this->inputLabel(state); }
-
-  virtual Properties hgProperties() const OVERRIDE { return this->properties(); }
-
-  /// workaround avoiding virtual inheritance for purposes of translateToVocabulary
-  virtual IVocabularyPtr hgGetVocabulary() const OVERRIDE { return this->getVocabulary(); }
 
   friend struct SortStates<A>;
   StateId sortedStatesNumNotTerminal_;  // this is set only if properties() & kSortedStates
@@ -239,8 +62,8 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   typedef shared_ptr<Self> Ptr;
   typedef A Arc;
   typedef typename A::Weight Weight;
-  typedef typename Base::ArcsContainer ArcsContainer;
-  typedef typename ArcsContainer::const_iterator OutArcsIter;
+  typedef HypergraphBase::ArcsContainer ArcsContainer;
+  typedef ArcsContainer::const_iterator OutArcsIter;
   // we could change this to AnyGenerator (at significantly increased cost) if we want to allow alternate
   // IMutableHypergraph impls
   typedef Util::IteratorGenerator<OutArcsIter, Arc*> OutArcsGenerator;
@@ -312,7 +135,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     this->addProperties(kOutArcsSortedBestFirst);
     for (StateId state = 0, n = this->size(); state < n; ++state) {
       ArcsContainer* arcs = this->maybeOutArcs(state);
-      if (arcs) std::sort(arcs->begin(), arcs->end(), CmpByWeight());
+      if (arcs) std::sort(arcs->begin(), arcs->end(), CmpByWeight<Arc>());
     }
   }
 
@@ -333,18 +156,6 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
 
   StateId sizeForHeads() const OVERRIDE {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ : this->size();
-  }
-
-
-  /**
-     if on, set bit, else clear it. does not do anything except change the
-     property bit value so should be used by library writers only.
-
-     TODO: make protected?
-  */
-  virtual void setPropertyBit(Properties bit, bool on = true) {
-    Properties p = this->hgUncomputedProperties();
-    setProperties(on ? (bit | p) : (~bit & p));
   }
 
  private:
@@ -443,12 +254,12 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     SDL_TRACE(Hypergraph, "clearImpl set p=" << PrintProperties(p));
     p &= ~kHasOutputLabels;
     p |= kFsmProperties;
-    if (p & kStoresAnyOutArcs) p |= kSortedOutArcs;
+    if (p & kStoreAnyOutArcs) p |= kSortedOutArcs;
     this->setProperties(p);
     SDL_TRACE(Hypergraph, "clear postlude prop=" << printProperties(*this));
   }
 
-  void clear() { clear(this->hgUncomputedProperties()); }
+  void clear() { this->clear(this->uncomputedProperties()); }
 
   void setEmptyIfNoArcs(bool addstart = true, bool addfinal = false) {
     if (this->prunedEmpty()) setEmpty(addstart, addfinal);
@@ -456,82 +267,76 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
 
   void setEmpty(bool addstart = false, bool addfinal = false) {
     clear();
-    if (addstart) setStart(addState());
-    if (addfinal) setFinal(addState());
+    if (addstart) this->setStart(this->addState());
+    if (addfinal) this->setFinal(this->addState());
   }
 
   /// order of args: fromState -> toState with (labelState, weight) tails are (toState, labelState)
   Arc* addArcFsm(StateId fromState, StateId toState, StateId labelState, Weight weight = Weight::one()) {
     Arc* a = new Arc(fromState, labelState, weight, toState);
-    addArc(a);
+    this->addArc(a);
     return a;
   }
 
   Arc* addArcGraph(StateId fromState, StateId toState, Weight weight = Weight::one()) {
     Arc* a = new Arc(toState, weight, fromState);
-    addArc(a);
+    this->addArc(a);
     return a;
   }
 
   Arc* addArcFsa(StateId from, StateId to, Sym label = EPSILON::ID, Weight w = Weight::one()) {
-    Arc* a = new Arc(from, addState(label), w, to);
-    addArc(a);
+    Arc* a = new Arc(from, this->addState(label), w, to);
+    this->addArc(a);
     return a;
   }
 
   Arc* addArcEpsilon(StateId from, StateId to, Weight w = Weight::one()) {
-    Arc* a = new Arc(from, addState(EPSILON::ID), w, to);
-    addArc(a);
+    Arc* a = new Arc(from, this->addState(EPSILON::ID), w, to);
+    this->addArc(a);
     return a;
   }
 
   Arc* addArcGraphEpsilon(StateId from, StateId to, Weight w = Weight::one()) {
     Arc* a = new Arc(from, w, to);
-    addArc(a);
+    this->addArc(a);
     return a;
   }
 
   Arc* addArcFst(StateId from, StateId to, Sym label, Sym labelout, Weight w = Weight::one()) {
-    Arc* a = new Arc(from, addState(LabelPair(label, labelout)), w, to);
-    addArc(a);
+    Arc* a = new Arc(from, this->addState(LabelPair(label, labelout)), w, to);
+    this->addArc(a);
     return a;
   }
 
   Arc* addArcFst(StateId from, StateId to, LabelPair inout, Weight w = Weight::one()) {
-    Arc* a = new Arc(from, addState(inout), w, to);
-    addArc(a);
+    Arc* a = new Arc(from, this->addState(inout), w, to);
+    this->addArc(a);
     return a;
   }
 
   /// call after modifying an already added arc to add a tail
   virtual void addedTail(Arc* a, StateId tail) = 0;
 
-  IMutableHypergraph() : IHypergraph<A>("sdl::IMutableHypergraph"), sortedStatesNumNotTerminal_() {}
+  IMutableHypergraph() : IHypergraph<A>("IMutableHypergraph"), sortedStatesNumNotTerminal_() {}
 
   // function overwrite with covariant return type:
   virtual IMutableHypergraph<A>* clone() const OVERRIDE = 0;
 
-  /**
-     should set kArcsAdded property so we can detect acyclic, fsm, etc.
-  */
-  virtual void addArc(Arc*) = 0;
+  /// addArc after calling addStateId on head, tails.
+  virtual void addArcCreatingStates(Arc*) = 0;
+
+  void forceNotAllOutArcs() OVERRIDE {
+    Properties p = this->uncomputedProperties();
+    if ((p & kStoreOutArcs) && !(p & kStoreFirstTailOutArcs)) {
+      this->forceFirstTailOutArcs();
+    }
+  }
+
 
   void forceHasArcs(bool outPreferred = false) { forceStoreArcs(outPreferred); }
 
   void forceStoreArcs(bool outPreferred = true) {
     if (!this->storesArcs()) forceProperties(outPreferred ? kStoreFirstTailOutArcs : kStoreInArcs);
-  }
-
-  void forceFirstTailOutArcsOnly() {
-    this->forceFirstTailOutArcs();
-    removeInArcs();
-  }
-
-  void forceNotAllOutArcs() OVERRIDE {
-    Properties p = this->hgUncomputedProperties();
-    if ((p & kStoreOutArcs) && !(p & kStoreFirstTailOutArcs)) {
-      this->forceFirstTailOutArcs();
-    }
   }
 
   void forceOnlyProperties(Properties properties) {
@@ -574,12 +379,12 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       // TODO: we could automatically call SortStates, but it would be hard to make it compile due to
       // dependencies, i think. for now i've friended so SortStates can call setProperties
       if (add & kSortedStates) this->setProperties(p |= kSortedStates);
-      if (add & kStoreInArcs) forceInArcs();
+      if (add & kStoreInArcs) this->forceInArcs();
       if (add & kStoreOutArcs) {
         if (add & kStoreFirstTailOutArcs)
           SDL_THROW_LOG(IMutableHypergraph.forceProperties, ProgrammerMistakeException,
                         "Can't have both first-tail-only and all-tails out-arcs");
-        forceOutArcs();
+        this->forceOutArcs();
       }
       add = on & ~p;
       /* I think we want kStoreFirstTailOutArcs to be satisfied by kStoreArcsPerState. that's easiest achieved
@@ -598,7 +403,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
         this->clearProperties(kSortedOutArcs);
         this->forceBestFirstArcs();
       }
-      if ((add & kCanonicalLex) && !ensureCanonicalLex()) {
+      if ((add & kCanonicalLex) && !this->ensureCanonicalLex()) {
         SDL_DEBUG(Hypergraph, "in setting kCanonicalLex, found duplicate states with same labelpair");
       }
       p = this->properties();
@@ -630,21 +435,13 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     assert(this->storesArcs());
   }
 
-  virtual void forceInArcs() = 0;
-
-  virtual void forceOutArcs() = 0;
-
-  virtual void removeInArcs() = 0;
-
-  virtual void removeOutArcs() = 0;
-
   void forceModifiableLabelStates() {
     if (this->storesAllOutArcs()) {
       if (this->isGraph())
         this->forceFirstTailOutArcs();
       else {
-        forceInArcs();
-        removeOutArcs();
+        this->forceInArcs();
+        this->removeOutArcs();
       }
     }
   }
@@ -653,14 +450,14 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     Properties p = this->properties();
     if (p & kStoreOutArcs) {
       if (p & kStoreInArcs)
-        removeOutArcs();
+        this->removeOutArcs();
       else
         this->forceFirstTailOutArcs();
     }
   }
 
   void projectInput() {
-    removeOutputLabels();
+    this->removeOutputLabels();
     this->clearProperties(kHasOutputLabels);
   }
 
@@ -720,7 +517,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     for (StateId s = 0, N = this->size(); s < N; ++s) {
       ArcsContainer const* p = maybeArcsConst(s, inarcs);
       if (!p) continue;
-      for (typename ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v(*i);
+      for (ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v((Arc*)*i);
     }
   }
 
@@ -731,7 +528,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     for (StateId s = 0, N = this->size(); s < N; ++s) {
       ArcsContainer const* p = maybeArcsConst(s, inarcs);
       if (!p) continue;
-      for (typename ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v(*i);
+      for (ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v((Arc*)*i);
     }
   }
 
@@ -756,15 +553,6 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
   void clearProperties(Properties p) { setProperties(this->properties() & ~p); }
 
   /**
-     instead of checkGraph, trust the caller.
-  */
-  virtual void setFsmGraphOneLexical(bool fsm, bool graph, bool one) {
-    setPropertiesAt(kGraph, graph);
-    setPropertiesAt(kFsm, fsm);
-    setPropertiesAt(kOneLexical, one);
-  }
-
-  /**
      compute whether hg is a graph, updating properties used to update cached
      kGraph properties. since we can update kFsm at the same time for free (kFsm
      => kGraph), we do that too
@@ -773,9 +561,7 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
     bool fsm;
     bool one;
     bool graph = this->isGraphCheck(fsm, one);
-    setPropertiesAt(kGraph, graph);
-    setPropertiesAt(kFsm, fsm);
-    setPropertiesAt(kOneLexical, one);
+    this->setFsmGraphOneLexical(fsm, graph, one);
     return graph;
   }
 
@@ -786,9 +572,9 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
       clearProperties(bits);
   }
 
-  void setAllStrings(Sym sigma
-                     = RHO::ID) {  // whether you use RHO or SIGMA doesn't matter since there will be only 1
-    // arc. HOWEVER determinize only supports rho now, not sigma
+  void setAllStrings(Sym sigma = RHO::ID) {
+    // whether you use RHO or SIGMA doesn't matter since there will be only 1
+    // arc, except that you should prefer rho since determinize lacks support for sigma.
     clear();
     StateId state = this->addState();
     this->setStart(state);
@@ -810,14 +596,15 @@ struct IMutableHypergraph : IHypergraph<A>, IMutableHypergraphBase {
 
   virtual StateId ensureStart() {
     StateId s = this->start();
-    if (s == kNoState) setStart(s = addState());
+    if (s == kNoState) this->setStart(s = this->addState());
     return s;
   }
 
  protected:
   virtual void removeOutputLabels() = 0;
-  ArcsContainer emptyArcs_;  // for start=final=kNoState, fs/Compose/Context etc may still ask for outarcs of
-  // start state
+
+  /// for prunedEmpty() - i.e., start=final=kNoState, algs may still ask for outarcs of start()
+  ArcsContainer emptyArcs_;
 
  private:
   struct SetInLabelToOut {
@@ -871,8 +658,8 @@ inline void forcePropertiesIfMutable(IHypergraph<Arc>& hg, Properties properties
 /**
    return final state (existing final state, else create new one)
 */
-template <class Arc>
-StateId ensureFinal(IMutableHypergraph<Arc>& hg) {
+inline StateId ensureFinal(HypergraphBase& hg) {
+  assert(hg.isMutable());
   StateId s = hg.final();
   if (s == kNoState) {
     s = hg.addState();
@@ -881,35 +668,29 @@ StateId ensureFinal(IMutableHypergraph<Arc>& hg) {
   return s;
 }
 
-template <class Arc>
-inline void forceInArcs(IHypergraph<Arc>& hg, char const* prefix = "input") {
+inline void forceInArcs(HypergraphBase& hg, char const* prefix = "input") {
   if (!hg.storesInArcs()) {
-    IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
-    if (mhg)
-      mhg->forceInArcs();
+    if (hg.isMutable())
+      hg.forceInArcs();
     else
       SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, prefix << " hg doesn't have inarcs");
   }
 }
 
-template <class Arc>
-inline void forceFirstTailOutArcs(IHypergraph<Arc>& hg, char const* prefix = "input") {
+inline void forceFirstTailOutArcs(HypergraphBase& hg, char const* prefix = "input") {
   if (!hg.storesOutArcs()) {
-    IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
-    if (mhg)
-      mhg->forceFirstTailOutArcs();
+    if (hg.isMutable())
+      hg.forceFirstTailOutArcs();
     else
       SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, prefix << " hg doesn't have (graph) out arcs");
   }
 }
 
-template <class Arc>
-inline void forceInArcsOnly(IHypergraph<Arc>& hg) {
+inline void forceInArcsOnly(HypergraphBase& hg) {
   if (!hg.storesInArcs()) {
-    IMutableHypergraph<Arc>* mhg = dynamic_cast<IMutableHypergraph<Arc>*>(&hg);
-    if (mhg) {
-      mhg->forceInArcs();
-      mhg->removeOutArcs();
+    if (hg.isMutable()) {
+      hg.forceInArcs();
+      hg.removeOutArcs();
     } else
       SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, "input hg doesn't have inarcs");
   }

@@ -107,13 +107,13 @@ void complement(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
   assert(pVoc != 0);
   bool reachedNewFinal = false;
   StateIdRange states = result->getStateIds();
-  forall (StateId sid, states) {
-    const bool isLexicalState = result->inputLabel(sid).isTerminal();
-    // if ((!isLexicalState && result->numOutArcs(sid)) || sid == newFinal) {
+  forall (StateId s, states) {
+    const bool isLexicalState = result->inputLabel(s).isTerminal();
+    // if ((!isLexicalState && result->numOutArcs(s)) || s == newFinal) {
     typedef typename Arc::Weight Weight;
-    if (!isLexicalState && sid != newFinal && !hg.hasAllOut(sid)) {
+    if (!isLexicalState && s != newFinal && !hg.hasAllOut(s)) {
       // ONLY IF there isn't already a sigma or rho, and state wasn't final (epsilon to oldFinal)
-      result->addArcFsm(sid, newFinal, rhoLabelState);
+      result->addArcFsm(s, newFinal, rhoLabelState);
       reachedNewFinal = true;
     }
   }

@@ -15,6 +15,7 @@
     TODO: test that we throw CycleException in all cases rather than infinitely
     looping (in case the best derivation is divergent due to negative cost, and
     so has self-loops)
+
 */
 
 #ifndef HYP__HG_DERIVATION_HPP
@@ -96,23 +97,28 @@ inline StateString statesFrom(DerivationYield const& dy) {
 // TODO: exclude axioms from derivation tree? i.e. derivation child i is the ith non-axiom tail in arc()? can
 // make some code (printing, visiting, etc) behave the same for either decision
 
-template <class A>
-struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCount> {
-  typedef graehl::shared_nary_tree<Derivation<A>, Util::RefCount> Tree;
-  typedef A Arc;
-  typedef typename Arc::Weight Weight;
-  typedef typename Tree::child_type child_type;  // intrusive shared pointer to Derivation
-  typedef typename Tree::children_type children_type;  // vector
-  typedef typename Tree::user_allocator Alloc;
+struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> {
+  typedef graehl::shared_nary_tree<Derivation, Util::RefCount> Tree;
+  typedef ArcBase Arc;
+  typedef Tree::child_type child_type;  // intrusive shared pointer to Derivation
+  typedef Tree::children_type children_type;  // vector
+  typedef Tree::user_allocator Alloc;
   typedef TailId child_index;
-  typedef IHypergraph<Arc> Hg;
+  typedef HypergraphBase Hg;
   typedef Derivation self_type;
-  typedef self_type Deriv;
-  typedef child_type DerivP;
-  typedef boost::tuple<DerivP, Weight> DerivAndWeight;
-  friend inline Deriv& deriv(DerivAndWeight const& dw) { return *boost::get<0>(dw); }
-  friend inline DerivP const& derivP(DerivAndWeight const& dw) { return boost::get<0>(dw); }
-  friend inline Weight const& weight(DerivAndWeight const& dw) { return boost::get<1>(dw); }
+  typedef child_type pointer_type;
+  typedef pointer_type DerivationPtr;
+  template <class Arc>
+  struct DerivAndWeight {
+    typedef typename Arc::Weight Weight;
+    DerivationPtr deriv;
+    Weight weight;
+    DerivAndWeight() {}
+    DerivAndWeight(DerivationPtr const& deriv, Weight const& weight) : deriv(deriv), weight(weight) {}
+    friend inline Derivation& deriv(DerivAndWeight const& dw) { return *dw.deriv; }
+    friend inline DerivationPtr const& derivP(DerivAndWeight const& dw) { return dw.deriv; }
+    friend inline Weight const& weight(DerivAndWeight const& dw) { return dw.weight; }
+  };
 
   Derivation(Arc* a) : a(a), color() {}
   Derivation(Arc* a, TailId nchild) : Tree(nchild), a(a), color() {}
@@ -123,7 +129,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     this->children[0] = firstchild;
   }
 
-  DerivP pointer() { return DerivP(this); }
+  DerivationPtr pointer() { return DerivationPtr(this); }
 
   static child_type kAxiom;  // no need to use this as opposed to construct(), but feel free
   static inline Derivation* malloc() { return (Derivation*)Alloc::malloc(sizeof(Derivation)); }
@@ -150,6 +156,12 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
   bool axiom() const { return !a; }
   Arc& arc() const { return *a; }
 
+  template <class Weight>
+  Weight& arcwt() const {
+    return static_cast<ArcTpl<Weight>*>(a)->weight_;
+  }
+
+  // TODO: use Util/DfsColor instead (2 bits per instead of 8)
   mutable int color;
   enum {
     opened = -1,
@@ -185,38 +197,40 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     typedef C result_type;
     /// open node, (if return value was true) child, childClose ..., close node
     /// note: !d.axiom()
-    bool open(result_type&, Deriv const&) const { return true; }
+    bool open(result_type&, Derivation const&) const { return true; }
     /// visitors/computers get called with axiom() to determine the initial value
     C axiom(StateId state) const { return C(); }
-    void child(result_type& r, Deriv const& p, Deriv const& c, TailId i) const {}
+    void child(result_type& r, Derivation const& p, Derivation const& c, TailId i) const {}
     // (void)r;(void)p;(void)c;(void)i; } // for -Wunused
-    void childClose(result_type& r, result_type const& cr, Deriv const& p, Deriv const& c, TailId i) const {}
-    void close(result_type& r, Deriv const& d) const {}
+    void childClose(result_type& r, result_type const& cr, Derivation const& p, Derivation const& c,
+                    TailId i) const {}
+    void close(result_type& r, Derivation const& d) const {}
     /// since we use a vector to hold the result_type for a state, you need to use non-default values if you
     /// don't want to revisit the same subtree repeatedly. return true always if you don't mind
     bool finished(result_type& r) const { return true; }
   };
 
   // works only for non alternative same-head deriv, e.g. 1best
+  template <class Weight>
   struct ComputeWeight : public ComputeOnceBase<Weight> {
-    bool open(Weight& r, Deriv const& d) {
-      r = d.arc().weight();
+    bool open(Weight& r, Derivation const& d) {
+      r = d.arcwt<Weight>();
       return true;
     }
     Weight axiom(StateId) { return Weight::one(); }
-    void childClose(Weight& r, Weight const& cr, Deriv const& p, Deriv const& c, TailId i) const {
+    void childClose(Weight& r, Weight const& cr, Derivation const& p, Derivation const& c, TailId i) const {
       timesBy(cr, r);
     }
     bool finished(Weight& w) const { return !(w == Weight::zero()); }
   };
 
-  struct ComputeCost : public ComputeOnceBase<FeatureValue> {
-    bool open(FeatureValue& r, Deriv const& d) {
-      r = d.arc().weight().getValue();
+  struct ComputeCost : public ComputeOnceBase<Cost> {
+    bool open(Cost& r, Derivation const& d) {
+      r = d.a->cost();
       return true;
     }
-    Weight axiom(StateId) { return (FeatureValue)0; }
-    void childClose(FeatureValue& r, FeatureValue const& cr, Deriv const& p, Deriv const& c, TailId i) const {
+    Cost axiom(StateId) { return (Cost)0; }
+    void childClose(Cost& r, Cost const& cr, Derivation const& p, Derivation const& c, TailId i) const {
       r += cr;
     }
   };
@@ -230,9 +244,9 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
   typename V::result_type computeOnceDfsOneBest(std::vector<typename V::result_type> once, V& v, StateId state) {
     typedef typename V::result_type R;
     if (axiom()) return v.axiom(state);
-    R& r = Util::atExpand(once, arc().head());
+    R& r = Util::atExpand(once, a->head());
     if (!v.finished(r) && v.open(r, *this)) {
-      StateIdContainer const& tails = arc().tails();
+      StateIdContainer const& tails = a->tails();
       for (TailId i = 0, e = (TailId) this->children.size(); i != e; ++i) {
         child_type const& c = this->children[i];
         if (c) {
@@ -255,40 +269,61 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     return computeOnceDfsOneBest(once, v, state);
   }
 
+  template <class Weight>
   Weight weight() const {
-    ComputeWeight w;
+    ComputeWeight<Weight> w;
     return computeOnceDfs(w, kNoState);
   }
 
-  Weight cost() const {
+  template <class Arc>
+  typename Arc::Weight weightForArc() const {
+    return weight<typename Arc::Weight>();
+  }
+
+  Cost cost() const {
     ComputeCost w;
     return computeOnceDfs(w, kNoState);
   }
 
-  friend inline Weight weight(Derivation const& deriv) { return deriv.weight(); }
-  friend inline Weight weight(DerivP const& deriv) { return deriv->weight(); }
+  template <class Weight>
+  friend inline Weight weight(Derivation const& deriv) {
+    return deriv.weight<Weight>();
+  }
+  template <class Weight>
+  friend inline Weight weight(DerivationPtr const& deriv) {
+    return deriv->weight<Weight>();
+  }
 
-  friend inline FeatureValue cost(Derivation const& deriv) { return deriv.cost(); }
-  friend inline FeatureValue cost(DerivP const& deriv) { return deriv->cost(); }
+  template <class Arc>
+  friend inline typename Arc::Weight weightForArc(Derivation const& deriv) {
+    return deriv.arcwt<typename Arc::Weight>();
+  }
+  template <class Arc>
+  friend inline typename Arc::Weight weightForArc(DerivationPtr const& deriv) {
+    return deriv->arcwt<typename Arc::Weight>();
+  }
+
+  friend inline Cost cost(Derivation const& deriv) { return deriv.cost(); }
+  friend inline Cost cost(DerivationPtr const& deriv) { return deriv->cost(); }
 
   struct VisitTreeBase {
     // return true to expand children
-    bool open(StateId head, Deriv const& d) const { return true; }
-    void child(Deriv const& p, Deriv const& c, TailId i) const {}
-    void close(StateId head, Deriv const& d) const {}
+    bool open(StateId head, Derivation const& d) const { return true; }
+    void child(Derivation const& p, Derivation const& c, TailId i) const {}
+    void close(StateId head, Derivation const& d) const {}
   };
 
   struct VisitDfsBase {
     // return true to expand children
-    bool open(Deriv const& d) const { return true; }
-    void child(Deriv const& p, Deriv const& c, TailId i) const {}
-    void close(Deriv const& d) const {}
+    bool open(Derivation const& d) const { return true; }
+    void child(Derivation const& p, Derivation const& c, TailId i) const {}
+    void close(Derivation const& d) const {}
   };
 
   struct SetColorSafe : public VisitDfsBase {
     int c;
     explicit SetColorSafe(int c) : c(c) {}
-    void close(Deriv const& d) const { d.color = c; }
+    void close(Derivation const& d) const { d.color = c; }
   };
 
   // postfix sequence of pair <StateId, Arc *>. axioms get <StateId, NULL>. output iter O gets Arc *
@@ -305,7 +340,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
         ++o;
       }
     }
-    void close(StateId head, Deriv const& d) { out(head, d.a); }
+    void close(StateId head, Derivation const& d) { out(head, d.a); }
   };
 
   template <class Out>
@@ -328,7 +363,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
       *o = a;
       ++o;
     }
-    void close(StateId, Deriv const& d) const { out(d.a); }
+    void close(StateId, Derivation const& d) const { out(d.a); }
   };
 
   template <class Out>
@@ -337,11 +372,12 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
   }
 
   template <class Container>
-  static VisitArcsOut<Util::Adder<Container> > visitArcsAdd(Container& o) {
-    return visitArcsOut(Util::adder(o));
+  static VisitArcsOut<AppendArcs<Container> > visitArcsAdd(Container& o) {
+    return visitArcsOut(AppendArcs<Container>(o));
   }
 
   /// all the arcs (including duplicate) used in this derivation
+  template <class Arc>
   void appendArcs(std::vector<Arc*>& ret, bool cycleDetect = true) {
     visitTree(visitArcsAdd(ret), kNoState, cycleDetect);
   }
@@ -349,6 +385,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
   /**
      left->right postorder vector of arcs in derivation.
   */
+  template <class Arc>
   std::vector<Arc*> getArcs() {
     std::vector<Arc*> ret;
     appendArcs(ret);
@@ -518,8 +555,8 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     DfsVisit<V const&> visit(v, this);
   }
 
-  typedef Derivation const*
-      DP;  // pun: LSB 1 means it's a "close" instruction. safe because sizeof(Derivation)>1.
+  typedef Derivation const* DP;
+  // pun: LSB 1 means it's a "close" instruction. safe because sizeof(Derivation)>1.
   // this halves the size of the stack.
   typedef std::stack<DP> Agenda;
 
@@ -628,11 +665,11 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     Hg const& hg;
     unsigned levels;
     VisitPrint(Out& o, Hg const& hg, unsigned levels = (unsigned)-1) : o(o), hg(hg), levels(levels) {}
-    bool open(Deriv const& d) { return d.openPrint(o, hg, levels); }
-    void child(Deriv const& p, Deriv const& c, TailId i) const {
+    bool open(Derivation const& d) { return d.openPrint(o, hg, levels); }
+    void child(Derivation const& p, Derivation const& c, TailId i) const {
       if (i) o << ' ';
     }
-    void close(Deriv const& d) {
+    void close(Derivation const& d) {
       ++levels;
       o << '}';
     }
@@ -661,22 +698,15 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     c->print(o, h);
     return o;
   }
-  friend inline std::ostream& print(std::ostream& o, self_type const& self, unsigned levels) {
-    self.print(o, levels);
-    return o;
-  }
-  friend inline std::ostream& print(std::ostream& o, child_type const& c, unsigned levels) {
-    c->print(o, levels);
-    return o;
-  }
 
+  template <class Arc>
   struct ToHypergraphOnce : public VisitDfsBase {
     StateIdTranslation& sx;
-    IMutableHypergraph<A>& o;
-    ToHypergraphOnce(StateIdTranslation& sx, IMutableHypergraph<A>& o) : sx(sx), o(o) {}
-    bool open(Deriv const& d) const {
+    IMutableHypergraph<Arc>& o;
+    ToHypergraphOnce(StateIdTranslation& sx, IMutableHypergraph<Arc>& o) : sx(sx), o(o) {}
+    bool open(Derivation const& d) const {
       if (d.axiom()) return false;
-      A* a = sx.copyArc(d.arc());
+      Arc* a = sx.copyArc(static_cast<Arc&>(d.arc()));
       o.addArc(a);
       return true;
     }
@@ -684,7 +714,8 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
 
   // note: for 2-best and worse, you don't have the same derivation for each instance of a vertex,
   // necessarily. so this might not make sense
-  void translateToHypergraph(IHypergraph<A> const& i, IMutableHypergraph<A>& o,
+  template <class Arc>
+  void translateToHypergraph(IHypergraph<Arc> const& i, IMutableHypergraph<Arc>& o,
                              StateIdMappingPtr const& idmap, bool best = kIsNonBest) {
     o.clear(kCanonicalLex | kDefaultProperties);
     o.forceHasArcs();
@@ -696,33 +727,39 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
 
 
   // best means that this is a 1-best derivation, so no need to split in case of subtree sharing
-  IMutableHypergraph<A>* translateToHypergraphNew(IHypergraph<A> const& i, bool keepStateIds = kRenumberStates,
-                                                  bool best = kIsNonBest) {
-    IMutableHypergraph<A>* pOut = new MutableHypergraph<A>();
+  template <class Arc>
+  IMutableHypergraph<Arc>* translateToHypergraphNew(IHypergraph<Arc> const& i,
+                                                    bool keepStateIds = kRenumberStates,
+                                                    bool best = kIsNonBest) {
+    IMutableHypergraph<Arc>* pOut = new MutableHypergraph<Arc>();
     translateToHypergraph(i, *pOut, keepStateIds, best);
     return pOut;
   }
-  shared_ptr<IMutableHypergraph<A> > translateToHypergraph(IHypergraph<A> const& i,
-                                                           bool keepStateIds = kRenumberStates,
-                                                           bool best = kIsNonBest) {
-    return shared_ptr<IMutableHypergraph<A> >(translateToHypergraphNew(i, keepStateIds, best));
+
+  template <class Arc>
+  shared_ptr<IMutableHypergraph<Arc> > translateToHypergraph(IHypergraph<Arc> const& i,
+                                                             bool keepStateIds = kRenumberStates,
+                                                             bool best = kIsNonBest) {
+    return shared_ptr<IMutableHypergraph<Arc> >(translateToHypergraphNew(i, keepStateIds, best));
   }
 
   // TODO: specify output vocab != input vocab?
-  void translateToHypergraph(IHypergraph<A> const& i, IMutableHypergraph<A>& o,
+  template <class Arc>
+  void translateToHypergraph(IHypergraph<Arc> const& i, IMutableHypergraph<Arc>& o,
                              bool keepStateIds = kRenumberStates, bool best = kIsNonBest) {
     if (!best)
       translateToSingleDerivationHypergraph(i, o);
     else {
-      StateIdMappingPtr idmap(keepStateIds ? static_cast<StateIdMapping*>(new StateAddIdentityMapping<A>(&o))
-                                           : static_cast<StateIdMapping*>(new StateAddMapping<A>(&o)));
+      StateIdMappingPtr idmap(keepStateIds ? static_cast<StateIdMapping*>(new StateAddIdentityMapping<Arc>(&o))
+                                           : static_cast<StateIdMapping*>(new StateAddMapping<Arc>(&o)));
       translateToHypergraph(i, o, idmap, best);
     }
   }
 
-  void translateToHypergraph(StateIdTranslation& sx, IMutableHypergraph<A>& o, bool best = kIsNonBest,
+  template <class Arc>
+  void translateToHypergraph(StateIdTranslation& sx, IMutableHypergraph<Arc>& o, bool best = kIsNonBest,
                              bool resetColor = true) {
-    ToHypergraphOnce v(sx, o);
+    ToHypergraphOnce<Arc> v(sx, o);
     visitDfs(v);
   }
 
@@ -745,7 +782,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     if (Util::update(once, this, pr)) {  // for non-axioms, one result per
       R& r = *pr;
       if (v.open(r, *this)) {
-        StateIdContainer const& tails = arc().tails();
+        StateIdContainer const& tails = a->tails();
         for (TailId i = 0, e = (TailId) this->children.size(); i != e; ++i) {
           child_type const& c = this->children[i];
           v.child(r, *this, *c, i);
@@ -771,9 +808,10 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
 
 
   /// .second is the output arc in progress for the .first head state.
-  typedef std::pair<StateId, Arc*> NewStateAndInArc;
+  typedef std::pair<StateId, ArcBase*> NewStateAndInArc;
 
   /// for translateToSingleDerivationHypergraph
+  template <class Arc>
   struct ToSingleDerivationHypergraph : ComputeOnceBase<NewStateAndInArc> {
     std::vector<StateId> forAxiom;
 
@@ -790,19 +828,20 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     ToSingleDerivationHypergraph(IHypergraph<Arc> const& ihg, IMutableHypergraph<Arc>& o)
         : ihg(ihg), o(o), forAxiom(ihg.size(), kNoState) {}
 
-    bool open(NewStateAndInArc& r, Deriv const& d) {
-      Arc const& arc = d.arc();
+    bool open(NewStateAndInArc& r, Derivation const& d) {
+      Arc const& arc = static_cast<Arc const&>(d.arc());
       r.second
           = new Arc(arc, r.first = o.addState());  // sets new head; tails to be overwritten in childClose
-      o.setLabelPair(r.first, ihg.labelPair(arc.head()));
+      o.setLabelPair(r.first, ihg.labelPair(arc.head_));
       return true;
     }
 
-    void childClose(NewStateAndInArc& rSt, NewStateAndInArc const& cSt, Deriv const&, Deriv const&, TailId i) {
+    void childClose(NewStateAndInArc& rSt, NewStateAndInArc const& cSt, Derivation const&, Derivation const&,
+                    TailId i) {
       rSt.second->tails()[i] = cSt.first;
     }
 
-    void close(NewStateAndInArc& r, Deriv const&) {
+    void close(NewStateAndInArc& r, Derivation const&) {
       o.addArc(r.second);  // couldn't add until we have finalized state ids for tails (children)
     }
   };
@@ -819,9 +858,10 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
      \param oProperties - set o's properties to this. if 0, use i's properties.
 
   */
-  void translateToSingleDerivationHypergraph(IHypergraph<A> const& i, IMutableHypergraph<A>& o,
+  template <class Arc>
+  void translateToSingleDerivationHypergraph(IHypergraph<Arc> const& i, IMutableHypergraph<Arc>& o,
                                              Properties oProperties = 0) {
-    StateId iRoot = axiom() ? i.final() : arc().head();
+    StateId iRoot = axiom() ? i.final() : a->head();
     if (iRoot == kNoState)
       SDL_THROW_LOG(Hypergraph.Derivation, EmptySetException,
                     "can't build derivation hg for singleton derivation and input hg with no final state");
@@ -829,7 +869,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     o.clear(oProperties ? oProperties : i.properties());
     o.takeVocabulary(i);
 
-    ToSingleDerivationHypergraph toDerivationHg(i, o);
+    ToSingleDerivationHypergraph<Arc> toDerivationHg(i, o);
 
     // TODO: option for fsm only to produce topo-sorted states (nonlex last, start first, final last). can
     // also do topo sort for hg, but may not want axioms last? for now we just have state 0 final to not break
@@ -840,31 +880,23 @@ struct Derivation : public graehl::shared_nary_tree<Derivation<A>, Util::RefCoun
     o.setStart(istart == kNoState ? kNoState : toDerivationHg.axiom(istart).first);
   }
 
-  typedef child_type pointer_type;
 };
 
-// watch out: entire derivation = kAxiom implies a start=final=axiom toHypergraph i.e. containing empty string
-// only w/ wt 1. in this case the state id is irrelevant - make it up
-template <class A>
-typename Derivation<A>::DerivP Derivation<A>::kAxiom
-    = Derivation<A>::construct(0);  // 0 arc pointer - to get state you need to look at tails of parent.
+typedef Derivation::pointer_type DerivationPtr;
+typedef Derivation::children_type DerivationChildren;
 
-// documentation only
-template <class A>
-struct DerivationPointer {
-  typedef Derivation<A> value_type;
-  typedef typename value_type::child_type pointer_type;
+struct DerivAndCost {
+  DerivationPtr deriv;
+  Cost cost;
+  DerivAndCost() {}
+  DerivAndCost(DerivationPtr const& deriv, Cost cost) : deriv(deriv), cost(cost) {}
 };
-
 
 // top-down recursion. assumes 1 in arc per state else throws exception
 template <class Arc>
-typename Derivation<Arc>::DerivP singleDerivation(IHypergraph<Arc> const& hg, StateSet& seen, StateId from) {
+DerivationPtr singleDerivation(IHypergraph<Arc> const& hg, StateSet& seen, StateId from) {
   assert(from != kNoState);
-  typedef Derivation<Arc> Deriv;
-  typedef typename Deriv::child_type Child;
-  typedef typename Deriv::children_type Children;
-  if (hg.isAxiom(from)) return Deriv::kAxiom;
+  if (hg.isAxiom(from)) return Derivation::kAxiom;
   if (!Util::latch(seen, from))
     SDL_THROW2(CycleException, "Cycle observed - state appeared twice in stack:", from);
   ArcIdRange r = hg.inArcIds(from);
@@ -879,24 +911,20 @@ typename Derivation<Arc>::DerivP singleDerivation(IHypergraph<Arc> const& hg, St
   Arc* arc = hg.inArc(from, aid);
   StateIdContainer const& tails = arc->tails();
   TailId n = (TailId)tails.size();
-  Child ret = Deriv::construct(arc, n);
-  Children& ch = ret->children;
+  DerivationPtr ret = Derivation::construct(arc, n);
+  DerivationChildren& ch = ret->children;
   for (TailId i = 0; i < n; ++i) ch[i] = singleDerivation(hg, seen, tails[i]);
   Util::erase(seen, from);
   return ret;
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivP singleDerivationGraphOut(IHypergraph<Arc> const& hg, StateSet& seen,
-                                                          typename Derivation<Arc>::DerivP const& bottomUpPart,
-                                                          StateId from, StateId final) {
+DerivationPtr singleDerivationGraphOut(IHypergraph<Arc> const& hg, StateSet& seen,
+                                       DerivationPtr const& bottomUpPart, StateId from, StateId final) {
   assert(hg.isGraph());
   assert(from != kNoState);
   assert(final != kNoState);
   if (from == final) return bottomUpPart;
-  typedef Derivation<Arc> Deriv;
-  typedef typename Deriv::DerivP Child;
-  typedef typename Deriv::children_type Children;
   if (!Util::latch(seen, from))
     SDL_THROW2(CycleException, "Cycle observed - state appeared twice in stack:", from);
   ArcId nr = hg.numOutArcs(from);
@@ -907,20 +935,19 @@ typename Derivation<Arc>::DerivP singleDerivationGraphOut(IHypergraph<Arc> const
       SDL_THROW2(EmptySetException, "No outgoing arcs for state", from);
   }
   Arc* arc = hg.outArc(from, 0);
-  return singleDerivationGraphOut(hg, seen, Deriv::construct(arc, bottomUpPart), arc->head(), final);
+  return singleDerivationGraphOut(hg, seen, Derivation::construct(arc, bottomUpPart), arc->head(), final);
 }
 
 // returns null pointer if empty hg
 template <class Arc>
-typename Derivation<Arc>::DerivP singleDerivation(IHypergraph<Arc> const& hg) {
+DerivationPtr singleDerivation(IHypergraph<Arc> const& hg) {
   try {
-    typedef Derivation<Arc> Deriv;
     if (hg.prunedEmpty()) return 0;
     StateSet seen(hg.size());
     if (hg.storesOutArcs() && hg.isGraph()) {
       StateId s = hg.start();
       if (s == kNoState) return 0;  // SDL_THROW(FsmNoStartException, "singleDerivation");
-      return singleDerivationGraphOut(hg, seen, Deriv::kAxiom, s, hg.final());
+      return singleDerivationGraphOut(hg, seen, Derivation::kAxiom, s, hg.final());
     } else if (hg.storesInArcs()) {
       return singleDerivation(hg, seen, hg.final());
     } else
@@ -931,26 +958,27 @@ typename Derivation<Arc>::DerivP singleDerivation(IHypergraph<Arc> const& hg) {
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivAndWeight withWeight(typename Derivation<Arc>::DerivP const& p) {
-  return typename Derivation<Arc>::DerivAndWeight(p, p ? p->weight() : Arc::Weight::zero());
+Derivation::DerivAndWeight<Arc> withWeight(DerivationPtr const& p) {
+  Derivation::DerivAndWeight<Arc> r;
+  r.deriv = p;
+  if (p)
+    r.weight = p->weightForArc<Arc>();
+  else
+    setZero(r.weight);
+  return r;
 }
 
 /**
    for deriv.visitTree(visitor) where visitor(Arc *)
 */
-template <class ArcVisitor>
+template <class ArcVisitor, class Arc = typename ArcVisitor::Arc>
 struct TreeVisitArcs {
   ArcVisitor const& visitor;
   explicit TreeVisitArcs(ArcVisitor const& visitor) : visitor(visitor) {}
-  template <class Arc>
-  bool open(StateId, Derivation<Arc> const&) const {
-    return true;
-  }
-  template <class Arc>
-  void child(Derivation<Arc> const&, Derivation<Arc> const&, TailId) const {}
-  template <class Arc>
-  void close(StateId, Derivation<Arc> const& d) const {
-    if (d.a) visitor(d.a);
+  bool open(StateId, Derivation const&) const { return true; }
+  void child(Derivation const&, Derivation const&, TailId) const {}
+  void close(StateId, Derivation const& d) const {
+    if (d.a) visitor(static_cast<Arc*>(d.a));
   }
 };
 

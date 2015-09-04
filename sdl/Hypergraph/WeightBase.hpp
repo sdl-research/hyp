@@ -13,6 +13,7 @@
     Common base class for all weights for clarity of casts. intentionally
     empty/non-virtual dtor
 
+    TODO: move float member here? few weights don't have one
 */
 
 #ifndef HYP__HYPERGRAPH_WEIGHTBASE_HPP

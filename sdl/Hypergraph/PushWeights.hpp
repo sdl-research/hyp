@@ -209,8 +209,8 @@ struct PushWeightsToFinal {
 
      that is, for any arc, the new weight is inside[head] / prod(inside[tails]))
   */
-  void operator()(Arc* pArc) const {
-    Arc& arc = *pArc;
+  void operator()(ArcBase* pArc) const {
+    Arc& arc = *(Arc*)pArc;
     StateId head = arc.head_;
     Weight& weight = arc.weight();
     StateId ninside = inside.size();

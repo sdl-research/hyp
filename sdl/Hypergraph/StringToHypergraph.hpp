@@ -114,7 +114,7 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
   for (std::size_t i = 0, numNonlexicalStates = inputTokens.size() + 1; i < numNonlexicalStates; ++i)
     pHgResult->addState();
   pHgResult->setStart(0);
-  StateId prevSid = 0;
+  StateId prevState = 0;
 
   typedef typename Arc::Weight Weight;
   typedef FeatureInsertFct<Weight> FI;
@@ -122,20 +122,20 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
   for (Position i = 0, n = inputTokens.size(); i != n; ++i) {
     std::string const& token = inputTokens[i];
     SDL_TRACE(Hypergraph.StringToHypergraph, i << ": " << token);
-    const Sym symId = opts.terminalMaybeUnk(pVoc.get(), token);
-    const StateId nextSid = prevSid + 1;
-    Arc* pArc = new Arc(Head(nextSid), Tails(prevSid, pHgResult->addState(symId)));
+    const Sym sym = opts.terminalMaybeUnk(pVoc.get(), token);
+    const StateId nextState = prevState + 1;
+    Arc* pArc = new Arc(nextState, Tails(prevState, pHgResult->addState(sym)));
     Weight& weight = pArc->weight();
     assert(opts.inputFeatures != NULL);
     forall (FeatureId featureId, opts.inputFeatures->getFeaturesForInputPosition(i)) {
       FI::insertNew(&weight, featureId, 1);
-      if (opts.tokens) opts.tokens->insert(symId, featureId);
+      if (opts.tokens) opts.tokens->insert(sym, featureId);
     }
     inputWeights.reweight(i, weight);
     pHgResult->addArc(pArc);
-    prevSid = nextSid;
+    prevState = nextState;
   }
-  pHgResult->setFinal(prevSid);
+  pHgResult->setFinal(prevState);
 }
 
 /**
@@ -173,8 +173,8 @@ void stringPairToFst(Strings const& inputTokens, std::vector<std::string> const&
   const StateId finalId = pHgResult->final();
   while (stateId != finalId) {
     Arc* arc = pHgResult->outArc(stateId, 0);
-    const Sym symId = opts.terminalMaybeUnk(pVoc.get(), *it);
-    setFsmOutputLabel(pHgResult, *arc, symId);
+    const Sym sym = opts.terminalMaybeUnk(pVoc.get(), *it);
+    setFsmOutputLabel(pHgResult, *arc, sym);
     ++it;
     stateId = arc->head();
   }

@@ -29,10 +29,10 @@
 namespace sdl {
 namespace Hypergraph {
 
+template <class Arc>
 struct CmpByWeight {
-  template <class X>
-  bool operator()(X const* a, X const* b) const {
-    return a->weight() < b->weight();  // TODO: use Hypergraph::less
+  bool operator()(ArcBase const* a, ArcBase const* b) const {
+    return a->arcweight<Arc>() < b->arcweight<Arc>();
   }
 };
 
@@ -51,10 +51,10 @@ struct CmpFsmArcInput {
   /**
      sort together arcs w/ same input label. among those, the lowest cost (highest prob) come first.
   */
-  bool operator()(Arc const* a, Arc const* b) const {
+  bool operator()(ArcBase const* a, ArcBase const* b) const {
     Sym labelA = fst.inputLabel(a->fsmSymbolState());
     Sym labelB = fst.inputLabel(b->fsmSymbolState());
-    return labelA < labelB || (labelA == labelB && a->weight() < b->weight());
+    return labelA < labelB || (labelA == labelB && a->arcweight<Arc>() < b->arcweight<Arc>());
   }
 };
 
@@ -63,22 +63,22 @@ struct CmpFsmArcInput {
 */
 template <class Arc>
 struct CmpFsmArcInputBestFirst {
-  IHypergraph<Arc> const& fst;
-  CmpFsmArcInputBestFirst(IHypergraph<Arc> const& fst) : fst(fst) {}
+  HypergraphBase const& fst;
+  CmpFsmArcInputBestFirst(HypergraphBase const& fst) : fst(fst) {}
 
   /**
      sort together arcs w/ same input label. among those, the lowest cost (highest prob) come first.
   */
-  bool operator()(Arc const* a, Arc const* b) const {
+  bool operator()(ArcBase const* a, ArcBase const* b) const {
     Sym labelA = fst.inputLabel(a->fsmSymbolState());
     Sym labelB = fst.inputLabel(b->fsmSymbolState());
-    return labelA < labelB || (labelA == labelB && a->weight() < b->weight());
+    return labelA < labelB || (labelA == labelB && a->arcweight<Arc>() < b->arcweight<Arc>());
   }
 };
 
 template <class Arc>
 struct CmpFsmArcHead {
-  bool operator()(Arc const* a, Arc const* b) const { return a->head() < b->head(); }
+  bool operator()(ArcBase const* a, ArcBase const* b) const { return a->head() < b->head(); }
 };
 
 template <class Arc>
@@ -90,7 +90,7 @@ void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "sortArcs is for Fsm with out-arcs index.");
   if (hg->hasSortedArcs()) return;
   for (StateId sid = 0, N = hg->size(); sid < N; ++sid) {
-    typedef typename IMutableHypergraph<Arc>::ArcsContainer ArcsContainer;
+    typedef HypergraphBase::ArcsContainer ArcsContainer;
     ArcsContainer* a = hg->maybeOutArcs(sid);
     if (a) std::sort(a->begin(), a->end(), cmp);
   }
@@ -117,41 +117,40 @@ template <class Arc>
 struct FirstLexicalAscending {
   IMutableHypergraph<Arc> const& hg;
   explicit FirstLexicalAscending(IMutableHypergraph<Arc> const& hg) : hg(hg) {}
-  bool operator()(Arc const* a, Arc const* b) const {
+  bool operator()(ArcBase const* a, ArcBase const* b) const {
     return hg.firstLexicalInput(a) < hg.firstLexicalInput(b);
   }
   bool operator()(Sym a, Arc const* b) const { return a < hg.firstLexicalInput(b); }
-  bool operator()(Arc const* a, Sym b) const { return hg.firstLexicalInput(a) < b; }
-  Sym operator()(Arc const* a) const {
-    return hg.firstLexicalInput(a);
-  }
+  bool operator()(ArcBase const* a, Sym b) const { return hg.firstLexicalInput(a) < b; }
+  Sym operator()(ArcBase const* a) const { return hg.firstLexicalInput(a); }
 };
 
 template <class Arc, class Less>
-void sortInArcs(IMutableHypergraph<Arc> & hg, Less const& less) {
+void sortInArcs(IMutableHypergraph<Arc>& hg, Less const& less) {
   hg.forceProperties(kStoreInArcs);
   for (StateId i = 0, N = hg.size(); i < N; ++i) {
-    typename IMutableHypergraph<Arc>::ArcsContainer* a = hg.maybeInArcs(i);
+    HypergraphBase::ArcsContainer* a = hg.maybeInArcs(i);
     if (a) std::sort(a->begin(), a->end(), less);
   }
 }
 template <class Arc>
-void sortInArcsFirstLexical(IMutableHypergraph<Arc> & hg) {
+void sortInArcsFirstLexical(IMutableHypergraph<Arc>& hg) {
   sortInArcs(hg, FirstLexicalAscending<Arc>(hg));
 }
 
 template <class Arc>
-std::pair<Arc const**, Arc const**> findLexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head,
-                                                      Sym firstLexical) {
-  typename IMutableHypergraph<Arc>::ArcsContainer* a = hg.maybeInArcs(head);
+std::pair<Arc const* const*, Arc const* const*> findLexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head,
+                                                        Sym firstLexical) {
+  HypergraphBase::ArcsContainer* a = hg.maybeInArcs(head);
   assert(a);
   return std::equal_range(a->begin(), a->end(), firstLexical, FirstLexicalAscending<Arc>(hg));
 }
 
-template <class Hg, class ArcsContainer>
-typename ArcsContainer::const_iterator findNonlexSortedInArcsBegin(Hg const& hg, ArcsContainer const& a) {
+inline ArcBase const* const* findNonlexSortedInArcsBegin(HypergraphBase const& hg, HypergraphBase::ArcsContainer const& a) {
   // FirstLexicalAscending puts @NoSymbol position (-1) so at end
-  typename ArcsContainer::const_iterator b = a.begin(), e = a.end();
+  typedef ArcBase const* R;
+  typedef R const* Iter;
+  Iter b = arrayBegin(a), e = arrayEnd(a);
   if (b != e) {
     while (--e >= b)
       if (hg.firstLexicalInput(*e)) break;
@@ -161,11 +160,11 @@ typename ArcsContainer::const_iterator findNonlexSortedInArcsBegin(Hg const& hg,
 }
 
 template <class Arc>
-std::pair<Arc const**, Arc const**> findNonlexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head) {
+std::pair<Arc const* const*, Arc const* const*> findNonlexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head) {
   // FirstLexicalAscending puts @NoSymbol position (-1) so at end
-  typename IMutableHypergraph<Arc>::ArcsContainer* a = hg.maybeInArcs(head);
+  HypergraphBase::ArcsContainer* a = hg.maybeInArcs(head);
   assert(a);
-  return std::pair<Arc const**, Arc const**>(findNonlexSortedInArcsBegin(hg, *a), a->end());
+  return std::pair<Arc const* const*, Arc const* const*>((Arc const* const*)findNonlexSortedInArcsBegin(hg, *a), a->end());
 }
 
 

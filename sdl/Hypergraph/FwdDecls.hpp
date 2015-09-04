@@ -17,7 +17,7 @@
 namespace sdl {
 namespace Hypergraph {
 
-struct IHypergraphStates;
+struct HypergraphBase;
 template<class Arc> struct IHypergraph;
 template<class Arc> struct IMutableHypergraph;
 template<class Arc> struct MutableHypergraph;

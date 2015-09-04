@@ -38,7 +38,7 @@ void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWe
   StateSet usefulState(N);
   StateId const sorig = hg.start();
   assert(sorig != kNoState);
-  typedef typename IHypergraph<Arc>::ArcsContainer ArcsContainer;
+  typedef HypergraphBase::ArcsContainer ArcsContainer;
   typedef typename Arc::Weight Weight;
   Weight initwt;
   Weight* prevwt = 0;
@@ -56,7 +56,7 @@ void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWe
                                                                     << " out arcs instead of 0 or 1\n");
       return;  // not a path
     }
-    Arc* a = outarcs->front();
+    Arc* a = (Arc*)outarcs->front();
     snext = a->head();
     if (snext == s) {
       SDL_WARN(Hypergraph.PruneEpsilon, "No path (because of arc " << *a << " self-loop leaving state " << s);
@@ -108,8 +108,8 @@ void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWe
         ArcsContainer* outarcs = hg.maybeOutArcs(s);
         if (outarcs && outarcs->size()) {
           SDL_DEBUG(Hypergraph.PruneEpsilon, "removing useless state with outarcs: " << s);
-          for (typename ArcsContainer::const_iterator i = outarcs->begin(), e = outarcs->end(); i != e; ++i)
-            delete *i;
+          for (ArcsContainer::const_iterator i = outarcs->begin(), e = outarcs->end(); i != e; ++i)
+            delete (Arc*)*i;
           outarcs->clear();
         }
       }

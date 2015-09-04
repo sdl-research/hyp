@@ -127,6 +127,7 @@ inline std::string getSdlFloatName() {
 #endif
 
 typedef SdlFloat LmCostVal;
+typedef SdlFloat Cost;
 
 /**
    Cast any float type to SdlFloat. Just a convenience

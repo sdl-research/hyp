@@ -14,22 +14,20 @@
 namespace sdl {
 namespace Hypergraph {
 
-inline bool needsInvert(IMutableHypergraphBase const& h) {
-  return !h.hgOutputLabelFollowsInput();
-}
-
 inline LabelPair invert(LabelPair x) {
   return LabelPair(x.second, x.first);
 }
 
-void invertForceLabelPair(IMutableHypergraphBase &h) {
-  for (StateId s = 0, e = h.hgGetNumStates(); s < e; ++s)
-    h.setLabelPair(s, invert(h.hgGetLabelPair(s)));
+bool needsInvert(HypergraphBase const& hg) {
+  return !hg.outputLabelFollowsInput();
 }
 
-void invert(IMutableHypergraphBase &h) {
-  if (needsInvert(h))
-    invertForceLabelPair(h);
+void invertForceLabelPair(HypergraphBase& hg) {
+  for (StateId s = 0, N = hg.size(); s < N; ++s) hg.setLabelPair(s, invert(hg.labelPair(s)));
+}
+
+void invert(HypergraphBase& hg) {
+  if (needsInvert(hg)) invertForceLabelPair(hg);
 }
 
 

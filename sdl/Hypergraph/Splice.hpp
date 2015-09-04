@@ -136,12 +136,12 @@ struct SpliceStateOptions {
     }
   }
 
-  static StateId getStartFinal(IHypergraphStates const& hg, int sf = kStart) {
+  static StateId getStartFinal(HypergraphBase const& hg, int sf = kStart) {
     return sf == kFinal ? hg.final() : hg.start();
   }
 
-  void setSourceTarget(IHypergraphStates const& source, IHypergraphStates const& target) {
-    IHypergraphStates const* pst[2];
+  void setSourceTarget(HypergraphBase const& source, HypergraphBase const& target) {
+    HypergraphBase const* pst[2];
     pst[0] = &source;
     pst[1] = &target;
     for (int i = 0; i < 2; ++i)

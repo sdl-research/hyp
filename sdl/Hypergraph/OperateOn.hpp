@@ -64,9 +64,9 @@ bool outputNeeded(OperateOn operateOn, Hypergraph const& h)
 }
 
 template <class Hypergraph>
-bool outputNeeded(OperateOn operateOn, Hypergraph const& h, StateId sid)
+bool outputNeeded(OperateOn operateOn, Hypergraph const& h, StateId s)
 {
-  return operateOn==kOperateOnOutput || operateOn==kOperateOnInputOutput && !h.outputLabelFollowsInput(sid);
+  return operateOn==kOperateOnOutput || operateOn==kOperateOnInputOutput && !h.outputLabelFollowsInput(s);
 }
 
 inline bool outputOnly(OperateOn operateOn)

@@ -76,6 +76,8 @@
 namespace sdl {
 namespace Hypergraph {
 
+struct HypergraphBase;
+
 using sdl::FeatureId;
 
 std::string featureIdRangeDescription(FeatureId begin, FeatureId end);
@@ -85,7 +87,8 @@ typedef uint32 TailId;
 
 struct ArcBase;
 
-typedef ArcBase* ArcHandle;
+typedef ArcBase *ArcHandle;
+typedef std::vector<ArcHandle> ArcHandles;
 
 #if SDL_64BIT_STATE_ID
 typedef uint64 StateId;
@@ -142,10 +145,12 @@ inline StateId maxState(StateId a, StateId b) {
   return a > b ? a : b;
 }
 
-typedef std::map<FeatureId, FeatureValue> Features;
+typedef SparseFeatures Features;
+using sdl::SparseFeatureEntry;
 
 typedef unordered_map<StateId, StateId> StateIdMap;
 
+typedef SdlFloat Distance;
 
 }}
 

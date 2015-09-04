@@ -17,24 +17,19 @@
 #define HYP__HG_INVERT_HPP
 #pragma once
 
-#include <sdl/Hypergraph/IHypergraph.hpp>
-
 namespace sdl {
 namespace Hypergraph {
 
-struct IMutableHypergraphBase;
+struct HypergraphBase;
 
 /// result has explicit (input,input) for (input)-only labels
-void invertForceLabelPair(IMutableHypergraphBase &);
+void invertForceLabelPair(HypergraphBase &);
 
 /// do nothing if labels are all (input)-only, else invertForceLabelPair (semantically
 /// both are equivalent until you later chang einput label)
-void invert(IMutableHypergraphBase &);
+void invert(HypergraphBase &);
 
-template <class Hg>
-bool needsInvert(Hg const& h) {
-  return h.hasOutputLabels();
-}
+bool needsInvert(HypergraphBase const& hg);
 
 }}
 

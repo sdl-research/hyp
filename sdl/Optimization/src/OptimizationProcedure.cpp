@@ -176,9 +176,9 @@ void OptimizationProcedure::test() {
     else
       SDL_TRACE(Optimize.unclamped, "Unclamped hg:\n" << *unclamped);
     if (opts_.testModeDetailed) {
-      Hypergraph::Derivation<Arc>::child_type deriv
+      Hypergraph::DerivationPtr deriv
           = Hypergraph::bestPath(*unclamped, Hypergraph::BestPathOptions());
-      std::cout << deriv->weight() << "\t";
+      std::cout << deriv->weightForArc<Arc>() << "\t";
       std::cout << Hypergraph::textFromDeriv(deriv, *unclamped, Hypergraph::DerivationStringOptions())
                 << "\n";
     } else if (opts_.testModeOutputHypergraph) {

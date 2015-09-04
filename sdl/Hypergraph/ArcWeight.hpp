@@ -63,9 +63,9 @@ template<class Wt>
 struct StateToWeight {
   typedef Wt Weight;
   virtual ~StateToWeight() {}
-  virtual Weight operator()(StateId sid) const = 0;
-  void timesByState(StateId sid, Weight &w) const {
-    Hypergraph::timesBy((*this)(sid), w);
+  virtual Weight operator()(StateId s) const = 0;
+  void timesByState(StateId s, Weight &w) const {
+    Hypergraph::timesBy((*this)(s), w);
   }
 };
 
@@ -74,11 +74,11 @@ template <class Wt, class Pimpl = StateToWeight<Wt> *>
 struct CallStateToWeight {
   typedef Wt Weight;
   Pimpl p;
-  Weight operator()(StateId sid) const {
-    return (*p)(sid);
+  Weight operator()(StateId s) const {
+    return (*p)(s);
   }
-  void timesByState(StateId sid, Weight &w) const {
-    p->timesByState(sid, w);
+  void timesByState(StateId s, Weight &w) const {
+    p->timesByState(s, w);
   }
 
   CallStateToWeight() : p() {}
@@ -226,9 +226,9 @@ struct StateWeightsCached : StateWtFn {
     return weights[i];
   }
   Wt operator()(StateId s) { return isAxiom(s) ? axiomWt(s) : Wt::one(); }
-  void timesByState(StateId sid, Weight &w) {
+  void timesByState(StateId s, Weight &w) {
     if (isAxiom())
-      timesBy(axiomWt(sid), w);
+      timesBy(axiomWt(s), w);
   }
   StateWeightsCached() : axiomsStart() {}
   StateWeightsCached(StateId axiomsStart, StateId axiomsEnd)

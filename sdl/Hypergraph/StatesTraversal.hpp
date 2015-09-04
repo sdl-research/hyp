@@ -35,7 +35,7 @@ namespace sdl {
 namespace Hypergraph {
 
 struct IStatesVisitor {
-  virtual void visit(StateId sid) = 0;
+  virtual void visit(StateId s) = 0;
   virtual ~IStatesVisitor() {}
 };
 
@@ -51,8 +51,8 @@ struct PrintStatesVisitor : public IStatesVisitor {
                      std::string const& separator = "\n")
       : out_(out), separator_(separator) {}
 
-  void visit(StateId sid) {
-    out_ << sid << separator_;
+  void visit(StateId s) {
+    out_ << s << separator_;
   }
 
   std::ostream& out_;
@@ -186,9 +186,9 @@ class ReverseTopsortStatesTraversal : private IStatesVisitor {
   typedef std::vector<StateId> States;
   States order_;
  public:
-  void visit(StateId sid)
+  void visit(StateId s)
   {
-    order_.push_back(sid);
+    order_.push_back(s);
   }
   ReverseTopsortStatesTraversal(IHypergraph<Arc> const& hg, IStatesVisitor* visitor)
   {

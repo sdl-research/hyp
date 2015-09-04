@@ -39,7 +39,7 @@ namespace Hypergraph {
 
 
 template <class Arc>
-void addGraphEpsilon(IMutableHypergraph<Arc> &hg, StateId epsLabelState, bool graphOutput, StateId from,
+void addGraphEpsilon(IMutableHypergraph<Arc>& hg, StateId epsLabelState, bool graphOutput, StateId from,
                      StateId to) {
   if (graphOutput)
     hg.addArcGraphEpsilon(from, to);
@@ -60,29 +60,27 @@ struct ArcCopyFct {
   ArcCopyFct(IHypergraph<Arc> const& source, IMutableHypergraph<Arc>* pTarget)
       : source_(source), pTarget_(pTarget) {}
 
-  void operator()(Arc* pArc) const {
-    Arc* newArc = new Arc();
-    newArc->setHead(stateId(pArc->head()));
-    for (TailId i = 0, e = (TailId)pArc->getNumTails(); i < e; ++i) {
-      newArc->addTail(stateId(pArc->getTail(i)));
-    }
-    newArc->setWeight(pArc->weight());
-    pTarget_->addArc(newArc);
+  void operator()(ArcBase* pArc) const {
+    Arc const& from = *(Arc*)pArc;
+    Arc* copied = new Arc(from, stateId(from.head_));
+    for (unsigned i = 0, N = from.tails_.size(); i < N; ++i) copied->tails_[i] = stateId(from.tails_[i]);
+    pTarget_->addArc(copied);
   }
 
-  StateId stateId(StateId oldSid) const {
+  StateId stateId(StateId oldState) const {
     StateId* pNewState;
-    if (Util::update(old2new_, oldSid, pNewState))
-      return (*pNewState = pTarget_->addState(source_.labelPair(oldSid)));
+    if (Util::update(old2new_, oldState, pNewState))
+      return (*pNewState = pTarget_->addState(source_.labelPair(oldState)));
     return *pNewState;
   }
+
+  StateId existingStateId(StateId s) const { return s == kNoState ? s : old2new_[s]; }
 
   /**
      call only after visiting all arcs.
   */
-  StateId start() { return old2new_[source_.start()]; }
-
-  StateId final() { return old2new_[source_.final()]; }
+  StateId start() { return existingStateId(source_.start()); }
+  StateId final() { return existingStateId(source_.final()); }
 
   IHypergraph<Arc> const& source_;
   IMutableHypergraph<Arc>* pTarget_;
@@ -102,8 +100,8 @@ void fstUnion(IHypergraph<Arc> const& sourceFst, IMutableHypergraph<Arc>* pTarge
     return;
   }
 
-  StateId origStartSid = pTargetFst->start();
-  StateId origFinalSid = pTargetFst->final();
+  StateId origStartState = pTargetFst->start();
+  StateId origFinalState = pTargetFst->final();
 
   // Write sourceFst into pTargetFst
   UnionHelper::ArcCopyFct<Arc> fct(sourceFst, pTargetFst);
@@ -112,16 +110,16 @@ void fstUnion(IHypergraph<Arc> const& sourceFst, IMutableHypergraph<Arc>* pTarge
   StateId epsLabelState = pTargetFst->addState(EPSILON::ID);
 
   // Add common new start state
-  StateId unionStartSid = pTargetFst->addState();
-  pTargetFst->addArc(new Arc(Head(origStartSid), Tails(unionStartSid, epsLabelState)));
-  pTargetFst->addArc(new Arc(Head(fct.start()), Tails(unionStartSid, epsLabelState)));
-  pTargetFst->setStart(unionStartSid);
+  StateId unionStartState = pTargetFst->addState();
+  pTargetFst->addArc(new Arc(HeadAndTail(), origStartState, unionStartState, epsLabelState));
+  pTargetFst->addArc(new Arc(HeadAndTail(), fct.start(), unionStartState, epsLabelState));
+  pTargetFst->setStart(unionStartState);
 
   // Add common new final state
-  StateId unionFinalSid = pTargetFst->addState();
-  pTargetFst->addArc(new Arc(Head(unionFinalSid), Tails(origFinalSid, epsLabelState)));
-  pTargetFst->addArc(new Arc(Head(unionFinalSid), Tails(fct.final(), epsLabelState)));
-  pTargetFst->setFinal(unionFinalSid);
+  StateId unionFinalState = pTargetFst->addState();
+  pTargetFst->addArc(new Arc(HeadAndTail(), unionFinalState, origFinalState, epsLabelState));
+  pTargetFst->addArc(new Arc(HeadAndTail(), unionFinalState, fct.final(), epsLabelState));
+  pTargetFst->setFinal(unionFinalState);
   ASSERT_VALID_HG(*pTargetFst);
 }
 
@@ -134,12 +132,12 @@ void hgUnion(IHypergraph<Arc> const& sourceHg, IMutableHypergraph<Arc>* pTargetH
     UnionHelper::ArcCopyFct<Arc> copier(sourceHg, pTargetHg);
     sourceHg.forArcs(copier);
 
-    StateId epsLabelStateId = pTargetHg->addState(EPSILON::ID);
+    StateId epsLabelState = pTargetHg->addState(EPSILON::ID);
 
     // Add common new final state
     StateId superfinal = pTargetHg->addState();
-    pTargetHg->addArc(new Arc(Head(superfinal), Tails(pTargetHg->final(), epsLabelStateId)));
-    pTargetHg->addArc(new Arc(Head(superfinal), Tails(copier.final(), epsLabelStateId)));
+    pTargetHg->addArc(new Arc(HeadAndTail(), superfinal, pTargetHg->final(), epsLabelState));
+    pTargetHg->addArc(new Arc(HeadAndTail(), superfinal, copier.final(), epsLabelState));
     pTargetHg->setFinal(superfinal);
   }
 }

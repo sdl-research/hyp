@@ -42,6 +42,10 @@ using boost::math::log1p;
 // using Concurrency::precise_math::log1p; // TODO: when we have MSVC2012
 #else
 #include <math.h>
+namespace boost {
+namespace math {
+}
+}
 // have log1p from <math.h>
 #endif
 

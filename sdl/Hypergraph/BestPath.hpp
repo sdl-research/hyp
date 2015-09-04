@@ -27,7 +27,7 @@
    IHypergraph<Arc> hg;
    unsigned n=10;
 
-   std::vector<typename Derivation<Arc>::DerivP> derivs;
+   std::vector<DerivationPtr> derivs;
    // (it's better if you can use the visitor interface instead of storing a vector, though)
    visit_nbest(holdNbestDerivations(derivs, n, hg);
 
@@ -120,14 +120,13 @@ struct VisitPlusTies {
   NbestId nbest;
   mutable SdlFloat lastCost;
   VisitPlusTies(Visitor const& visitor, NbestId nbest) : visitor(visitor), nbest(nbest), lastCost() {}
-  template <class DerivP, class Weight>
-  bool operator()(DerivP const& deriv, Weight const& wtotal, NbestId n) const {
+  template <class Weight>
+  bool operator()(DerivationPtr const& deriv, Weight const& wtotal, NbestId n) const {
     SdlFloat thisCost = wtotal.getValue();
     if (n >= nbest && thisCost > lastCost)
       return false;
     else {
-      if (n < nbest || thisCost < lastCost)
-        lastCost = thisCost;
+      if (n < nbest || thisCost < lastCost) lastCost = thisCost;
       return visitor(deriv, wtotal, n);
     }
   }
@@ -155,34 +154,30 @@ inline void maybeThrowEmptySetException(bool throwEmptySetException) {
 
 VERBOSE_EXCEPTION_DECLARE(BestPathException)
 
-/// example nbest visitor that fills your vector of DerivP with the (up to) nbest. you may prefer to iterate
+/// example nbest visitor that fills your vector of DerivationPtr with the (up to) nbest. you may prefer to iterate
 /// over a vector to writing your own visitor.
 template <class Arc>
 struct HoldNbestDerivAndWeights {
-  typedef Derivation<Arc> Deriv;
-  typedef typename Deriv::DerivP DerivP;
   typedef typename Arc::Weight Weight;
-  typedef typename Deriv::DerivAndWeight DerivAndWeight;
+  typedef Derivation::DerivAndWeight<Arc> DerivAndWeight;
   typedef std::vector<DerivAndWeight> Derivs;
   Derivs& derivs;
   HoldNbestDerivAndWeights(HoldNbestDerivAndWeights const& o) : derivs(o.derivs) {}
   HoldNbestDerivAndWeights(Derivs& derivs) : derivs(derivs) {}
-  bool operator()(DerivP const& deriv, Weight const& w, NbestId) const {
-    derivs.push_back(DerivAndWeight(deriv, w));
+  bool operator()(DerivationPtr const& deriv, Weight const& w, NbestId) const {
+    derivs.push_back(Derivation::DerivAndWeight<Arc>(deriv, w));
     return true;
   }
 };
 
 template <class Arc>
 struct HoldNbestDerivs {
-  typedef Derivation<Arc> Deriv;
-  typedef typename Deriv::DerivP DerivP;
-  typedef typename Arc::Weight Weight;
-  typedef std::vector<DerivP> Derivs;
+  typedef std::vector<DerivationPtr> Derivs;
   Derivs& derivs;
+  typedef typename Arc::Weight Weight;
   HoldNbestDerivs(HoldNbestDerivs const& o) : derivs(o.derivs) {}
   HoldNbestDerivs(Derivs& derivs) : derivs(derivs) {}
-  bool operator()(DerivP const& deriv, Weight const&, NbestId) const {
+  bool operator()(DerivationPtr const& deriv, Weight const&, NbestId) const {
     derivs.push_back(deriv);
     return true;
   }
@@ -269,7 +264,7 @@ struct PathOutOptions : DerivationStringOptions {
     /**
        important: return false if you want nbest visiting to stop before n.
     */
-    bool operator()(typename Derivation<Arc>::DerivP const& dp, typename Arc::Weight const&, NbestId n) const {
+    bool operator()(DerivationPtr const& dp, typename Arc::Weight const&, NbestId n) const {
       po.maybe_print_deriv(out, dp, i, n);
       return true;
     }
@@ -282,10 +277,9 @@ struct PathOutOptions : DerivationStringOptions {
 
   // newlines after each part
   template <class Out, class Arc>
-  void maybe_print_deriv(Out& out, typename Derivation<Arc>::DerivP const& d, IHypergraph<Arc> const& hg,
-                         NbestId n = 0) const {
+  void maybe_print_deriv(Out& out, DerivationPtr const& d, IHypergraph<Arc> const& hg, NbestId n = 0) const {
     if (outderiv) {
-      print_header(out, d, n);
+      print_header<Arc>(out, d, n);
       out << Util::print(d, hg) << '\n';
     }
     maybe_print_paths(out, hg, d, n);
@@ -297,25 +291,24 @@ struct PathOutOptions : DerivationStringOptions {
   }
 
   template <class Out, class Arc>
-  void maybe_print_paths(Out& out, IHypergraph<Arc> const& hg, typename Derivation<Arc>::DerivP const& d,
-                         NbestId n) const {
+  void maybe_print_paths(Out& out, IHypergraph<Arc> const& hg, DerivationPtr const& d, NbestId n) const {
     if (inyield) maybe_print_path(out, hg, d, kInput, n);
     if (outyield) maybe_print_path(out, hg, d, kOutput, n);
     if (!inyield && !outyield && (weight || nbestIndex)) out << '\n';
   }
 
   template <class Out, class Arc>
-  void maybe_print_path(Out& out, IHypergraph<Arc> const& hg, typename Derivation<Arc>::DerivP const& d,
-                        LabelType labelType, NbestId n) const {
+  void maybe_print_path(Out& out, IHypergraph<Arc> const& hg, DerivationPtr const& d, LabelType labelType,
+                        NbestId n) const {
     print_path(out, hg, d, labelType, n);
   }
 
   // prints a line no matter what (even if d is null)
   template <class Out, class Arc>
-  void print_path(Out& out, IHypergraph<Arc> const& hg, typename Derivation<Arc>::DerivP const& d,
-                  LabelType labelType, NbestId n) const {
+  void print_path(Out& out, IHypergraph<Arc> const& hg, DerivationPtr const& d, LabelType labelType,
+                  NbestId n) const {
     if (d) {
-      print_header(out, d, n);
+      print_header<Arc>(out, d, n);
       DerivationStringOptions dopt((*this));
       dopt.labelType = labelType;
       out << textFromDeriv(d, hg, dopt);
@@ -323,9 +316,9 @@ struct PathOutOptions : DerivationStringOptions {
     out << '\n';
   }
 
-  template <class Out, class DerivP>
-  void print_header(Out& o, DerivP const& d, NbestId n) const {
-    print_header_weight(o, d->weight(), n);
+  template <class Arc, class Out>
+  void print_header(Out& o, DerivationPtr const& d, NbestId n) const {
+    print_header_weight(o, d->weightForArc<Arc>(), n);
   }
 
   template <class Out, class W>
@@ -507,11 +500,9 @@ struct BestPath : TransformBase<Transform::Inplace> {
       if (storeBackPointers) pi = pib.set(new PiB(hg, (ArcHandle)0))->pmap;
     }
 
-    typedef Derivation<Arc> Deriv;
-    typedef typename Deriv::DerivP DerivP;
-    typedef typename Deriv::DerivAndWeight DerivAndWeight;
-    typedef typename Deriv::Alloc DerivAlloc;
-    typedef typename Deriv::children_type DerivChildren;
+    typedef Derivation::DerivAndWeight<Arc> DerivAndWeight;
+    typedef Derivation::Alloc DerivAlloc;
+    typedef DerivationChildren DerivChildren;
 
     struct BinaryDerivation;
     typedef BinaryDerivation D;
@@ -659,7 +650,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
         return path_traits::better(a.w, b.w);
       }
       friend inline bool derivation_better_than(Dp a, Dp b) { return derivation_better_than(*a, *b); }
-      typedef Derivation<Arc> FD;
+      typedef Derivation FD;
 
       void yield(NbestKeyAccum& accum) {
         if (this == &none) return;
@@ -678,26 +669,26 @@ struct BestPath : TransformBase<Transform::Inplace> {
         }
       }
 
-      DerivP derivation() const {
+      DerivationPtr derivation() const {
         if (this == &none) return 0;
-        if (leaf()) return Deriv::kAxiom;
+        if (leaf()) return Derivation::kAxiom;
         assert(a);
         StateIdContainer& t = tails();
-        DerivP p = FD::construct((Arc*)a, (TailId)t.size());
+        DerivationPtr p = FD::construct((Arc*)a, (TailId)t.size());
         unsigned i = 0;
         derivation(p->children, i);
         assert(i == p->children.size());
         return p;
       }
-      void rderivation(std::vector<DerivP>& ch, unsigned& i) const {
+      void rderivation(std::vector<DerivationPtr>& ch, unsigned& i) const {
         if (leaf())
-          ch[i++] = Deriv::kAxiom;
+          ch[i++] = Derivation::kAxiom;
         else if (a)
           ch[i++] = derivation();
         else
           derivation(ch, i);
       }
-      void derivation(std::vector<DerivP>& ch, unsigned& i) const {
+      void derivation(std::vector<DerivationPtr>& ch, unsigned& i) const {
         if (children[0]) {
           children[0]->rderivation(ch, i);
           if (children[1]) children[1]->rderivation(ch, i);
@@ -1071,16 +1062,16 @@ struct BestPath : TransformBase<Transform::Inplace> {
       HG const& hg;
       BinaryVisitor(DerivVisitor const& v, HG const& hg) : v(v), hg(hg) {}
       bool operator()(Dp b, NbestId n) const {
-        DerivP d = b->derivation();
+        DerivationPtr d = b->derivation();
         SdlFloat cost = b->w;
-        Weight w = d->weight();
-        SdlFloat deriv_cost = w.getValue();
+        Weight const& w = d->weight<Weight>();
+        SdlFloat deriv_cost = w.value_;
         if (!graehl::cost_path_traits<SdlFloat>::close_enough(cost, deriv_cost)) {
           SDL_WARN(Hypergraph.BestPath, (n + 1) << "-best cost=" << cost
                                                 << " != derivation cost=" << deriv_cost);
           SDL_DEBUG(Hypergraph.BestPath, (n + 1) << "-best cost=" << cost
                                                  << " does not match derivation.weight() cost=" << deriv_cost
-                                                 << " deriv=" << Util::print(d, hg) << " weight=" << w);
+                                                 << " deriv=" << Util::print(d, hg));
         }
         return v(d, w, n);
       }
@@ -1088,16 +1079,17 @@ struct BestPath : TransformBase<Transform::Inplace> {
 
     struct IgnoreVisitor {
       template <class Weight>
-      bool operator()(DerivP const&, Weight const&, NbestId) const {
+      bool operator()(DerivationPtr const&, Weight const&, NbestId) const {
         return true;
       }
     };
 
-   private:
     /**
        return true if hg was acyclic and could be handled (non-fsa + non-in-arcs = can't).
 
        post: mu/pi reset to normal so can use regular best-first bottom-up hypergraph best tree
+
+       TODO: allow kbest w/ inarcs only
     */
     template <bool IsGraph>
     bool acyclicBest() {
@@ -1124,7 +1116,6 @@ struct BestPath : TransformBase<Transform::Inplace> {
       }
     }
 
-   public:
     template <class Pmap>
     void logHeadDebug(char const* name, Pmap const& pmap, StateId N, StateId headN) {
       SDL_DEBUG(Hypergraph.BestPath, name << ": " << Util::printPrefix(&pmap[0], N, headN) << " ... (head "
@@ -1132,7 +1123,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
     }
 
     /**
-       calls visitor(typename Derivation<Arc>::DerivP, Cost, n), where n = 0 for the best, n = 1 for 2nd best
+       calls visitor(DerivationPtr, Cost, n), where n = 0 for the best, n = 1 for 2nd best
        ... skips duplicates (internal to lazy nbest algorithm) according to filter. returns 1best (or throws
        EmptySetException if no derivations).
 
@@ -1141,10 +1132,11 @@ struct BestPath : TransformBase<Transform::Inplace> {
        if nVisited, set *nVisited to number of best paths actually visited (for pad-nbest)
     */
     template <class Filter, class DerivVisitor>
-    DerivP visit_nbestFilter(NbestId nbest, DerivVisitor const& visitor, Filter const& filter = Filter(),
-                             bool throwEmptySetException = false, NbestId* nVisited = 0) {
+    DerivationPtr visit_nbestFilter(NbestId nbest, DerivVisitor const& visitor, Filter const& filter = Filter(),
+                             bool throwEmptySetException = false, NbestId* nVisited = 0,
+                             bool onlyBestPathIf1best = false) {
       BinaryVisitor<DerivVisitor> binvisitor(visitor, hg);
-      DerivP r = 0;
+      DerivationPtr r = 0;
       if (nbest == 0) {
         SDL_INFO(Hypergraph.BestPath, "requested 0-best only - not doing anything.");
         return r;
@@ -1164,7 +1156,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
       // enabled if there's a start state
       if (final == Hypergraph::kNoState) {  // pruned empty
         maybeThrowEmptySetException(throwEmptySetException);
-        return DerivP();
+        return DerivationPtr();
         // find 1best
 
       } else {
@@ -1174,7 +1166,8 @@ struct BestPath : TransformBase<Transform::Inplace> {
         typedef ReadEdgeCostMap<Arc> Ecost;
         Ecost ec;
 
-        bool const canAcyclic = simpleGraph;  // || hg.storesInArcs()
+        bool const canAcyclic = simpleGraph
+                                && (onlyBestPathIf1best && nbest == 1 || hg.tryForceFirstTailOutArcs());
         // TODO@JG: implement finite CFG case in AcyclicBest
         // TODO@JG: implement non-mutable case in AcyclicBest (data stack for copy of arc adjacencies during
         // dfs)
@@ -1224,7 +1217,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
           if (throwEmptySetException)
             SDL_THROW_LOG(Hypergraph.BestPath, EmptySetException, "no paths to final state " << final);
           if (nVisited) *nVisited = 0;
-          return DerivP();
+          return DerivationPtr();
         }
 
         r = derivation(final);
@@ -1232,7 +1225,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
         SDL_DEBUG(Hypergraph.BestPath, "found 1-best; visiting " << (nbest > 1 ? "(up-to) " : "") << nbest
                                                                  << "-best.");
         if (nbest == 1) {
-          visitor(r, r->weight(), (NbestId)0);  // we don't use saved best cost, because that may be a summary
+          visitor(r, r->weight<Weight>(), (NbestId)0);  // we don't use saved best cost, because that may be a summary
           // of e.g. FeatureWeightTpl feature vector
           if (nVisited) *nVisited = 1;
           return r;
@@ -1249,7 +1242,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
     }
 
     template <class DerivVisitor>
-    DerivP visit_nbest(NbestPlusTies nbest, DerivVisitor const& visitor, bool throwEmptySetException = false,
+    DerivationPtr visit_nbest(NbestPlusTies nbest, DerivVisitor const& visitor, bool throwEmptySetException = false,
                        NbestId* nVisited = 0) {
       NbestId maxn = nbest.maxnbest();
       if (opt.noFilterNeeded(nbest.nbest))
@@ -1263,9 +1256,9 @@ struct BestPath : TransformBase<Transform::Inplace> {
     /**
        return 1best or null derivation pointer if there is none.
     */
-    DerivP best(bool throwEmptySetException = false) {
+    DerivationPtr best(bool throwEmptySetException = false, bool onlyBestPathIf1best = false) {
       IgnoreVisitor v;
-      return visit_nbestFilter(1, v, noFilter(), throwEmptySetException);
+      return visit_nbestFilter(1, v, noFilter(), throwEmptySetException, 0, onlyBestPathIf1best);
     }
 
     // if there's a best path, return preecessor property map (best ArcHandle - untyped Arc *) per head
@@ -1275,13 +1268,13 @@ struct BestPath : TransformBase<Transform::Inplace> {
       SaveLastVisitor(SaveLastVisitor const& o) : last(o.last) {}
       SaveLastVisitor(DerivAndWeight& last) : last(last) {}
       DerivAndWeight& last;
-      bool operator()(DerivP const& d, Weight const& w, NbestId) const {
+      bool operator()(DerivationPtr const& d, Weight const& w, NbestId) const {
         last = DerivAndWeight(d, w);
         return true;
       }
     };
 
-    /// mostly for testing - tuple<DerivP, Weight>
+    /// mostly for testing - tuple<DerivationPtr, Weight>
     DerivAndWeight bestWeighted(bool throwEmptySetException = false) {
       DerivAndWeight ret;
       SaveLastVisitor v(ret);
@@ -1289,7 +1282,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
       return ret;
     }
 
-    DerivP derivation(StateId head) const {
+    DerivationPtr derivation(StateId head) const {
       BuildDerivation d(hg, pi);
       return d.derivation(head);
     }
@@ -1298,17 +1291,17 @@ struct BestPath : TransformBase<Transform::Inplace> {
     struct BuildDerivation {
       HG const& hg_;
       Pi pi_;  // Pi = best-predecessor property map (Arc *) - lightweight copy
-      std::vector<DerivP> deriv_;  // memoize to prevent infinite loop in computing a loopy best-derivation,
+      std::vector<DerivationPtr> deriv_;  // memoize to prevent infinite loop in computing a loopy best-derivation,
       // and create a linear, rather than exponential, size derivation for pathological CFGs like:
       // S->T T; T->U U ; .... ; Z -> z
       BuildDerivation(HG const& hg, Pi pi) : hg_(hg), pi_(pi), deriv_(hg.sizeForHeads()) {}
-      typedef std::pair<StateId, DerivP*> StateResult;
+      typedef std::pair<StateId, DerivationPtr*> StateResult;
       std::stack<StateResult> agenda;
-      DerivP derivation(StateId head) {
+      DerivationPtr derivation(StateId head) {
         if (hg_.isAxiom(head))
-          return Deriv::kAxiom;
+          return Derivation::kAxiom;
         else {
-          DerivP& d = deriv_[head];
+          DerivationPtr& d = deriv_[head];
           agenda.push(StateResult(head, &d));
           while (!agenda.empty()) buildOneNode();
           return d;
@@ -1321,22 +1314,22 @@ struct BestPath : TransformBase<Transform::Inplace> {
         agenda.pop();
         StateId head = r.first;
         assert(!hg_.isAxiom(head));
-        DerivP& d = deriv_[head];
+        DerivationPtr& d = deriv_[head];
         if (!d) {
           Arc* headBestArc = (Arc*)get(pi_, head);
           if (!headBestArc)
-            d = Deriv::kAxiom;
+            d = Derivation::kAxiom;
           else {
             StateIdContainer const& tails = headBestArc->tails();
             unsigned t = 0, nTails = (unsigned)tails.size();
-            d = Deriv::construct(headBestArc, nTails);
+            d = Derivation::construct(headBestArc, nTails);
             DerivChildren& derivch = d->children;
             t = nTails;
             while (t) {  // any order is fine
               --t;
               StateId tail = tails[t];
               if (hg_.isAxiom(tail))
-                derivch[t] = Deriv::kAxiom;
+                derivch[t] = Derivation::kAxiom;
               else
                 agenda.push(StateResult(tails[t], &derivch[t]));
             }
@@ -1350,10 +1343,8 @@ struct BestPath : TransformBase<Transform::Inplace> {
 
 
   template <class Visitor, class Arc>
-  typename Derivation<Arc>::DerivP visit_nbest_get_1best(Visitor const& visitor, NbestPlusTies nbest,
-                                                         IHypergraph<Arc> const& hg,
-                                                         bool throwEmptySetException,
-                                                         NbestId* nVisited = 0) const {
+  DerivationPtr visit_nbest_get_1best(Visitor const& visitor, NbestPlusTies nbest, IHypergraph<Arc> const& hg,
+                                      bool throwEmptySetException, NbestId* nVisited = 0) const {
     Compute<Arc> cb(opt, hg);
     return cb.visit_nbest(nbest, visitor, throwEmptySetException, nVisited);
   }
@@ -1369,11 +1360,11 @@ struct BestPath : TransformBase<Transform::Inplace> {
 
   // returns 1best deriv
   template <class Out, class Arc>
-  typename Derivation<Arc>::DerivP out_nbest(Out& out, NbestPlusTies nbest, PathOutOptions const& popt,
-                                             IHypergraph<Arc> const& hg, bool throwEmptySetException) const {
+  DerivationPtr out_nbest(Out& out, NbestPlusTies nbest, PathOutOptions const& popt,
+                          IHypergraph<Arc> const& hg, bool throwEmptySetException) const {
     Compute<Arc> cb(opt, hg);
     NbestId nVisited = 0;
-    typename Derivation<Arc>::DerivP r
+    DerivationPtr r
         = cb.visit_nbest(nbest, popt.pathOutNbestVisitor(out, hg), throwEmptySetException, &nVisited);
     popt.pad(out, nVisited, nbest.maxnbest());
     return r;
@@ -1385,8 +1376,8 @@ struct VisitBoth {
   Visitor1 const& visitor1;
   Visitor2 const& visitor2;
   VisitBoth(Visitor1 const& visitor1, Visitor2 const& visitor2) : visitor1(visitor1), visitor2(visitor2) {}
-  template <class DerivP, class Weight>
-  bool operator()(DerivP const& deriv, Weight const& wtotal, NbestId nbest) const {
+  template <class Weight>
+  bool operator()(DerivationPtr const& deriv, Weight const& wtotal, NbestId nbest) const {
     return visitor1(deriv, wtotal, nbest) && visitor2(deriv, wtotal, nbest);
   }
 };
@@ -1446,8 +1437,6 @@ struct NbestHypergraphOptions : NbestPathOptions {
 
   template <class Arc>
   struct AcceptToNbestHg {
-    typedef Derivation<Arc> Deriv;
-    typedef typename Deriv::DerivP DerivP;
     typedef typename Arc::Weight Weight;
 
     AcceptToNbestHg(IHypergraph<Arc> const& in, IMutableHypergraph<Arc>& out,
@@ -1467,7 +1456,7 @@ struct NbestHypergraphOptions : NbestPathOptions {
     }
 
     /// for visit_nbest
-    bool operator()(DerivP const& d, Weight const& wtotal, NbestId nbest) const {
+    bool operator()(DerivationPtr const& d, Weight const& wtotal, NbestId nbest) const {
       typename Weight::FloatT thisCost = wtotal.getValue();
       valueTotal = wtotal.getValue();
       if (d->axiom()) {  // empty output string
@@ -1492,7 +1481,7 @@ struct NbestHypergraphOptions : NbestPathOptions {
     }
 
     /// for Derivation::visitTree: return true to expand children
-    bool open(StateId head, Deriv const& d) const {
+    bool open(StateId head, Derivation const& d) const {
       if (!graph)
         takeWeight(d.a);
       else if (d.a) {
@@ -1500,10 +1489,10 @@ struct NbestHypergraphOptions : NbestPathOptions {
       }
       return true;
     }
-    void child(Deriv const& p, Deriv const& c, TailId i) const {
+    void child(Derivation const& p, Derivation const& c, TailId i) const {
       if (graph && i == 1) takeWeight(p.a);
     }
-    void close(StateId s, Deriv const& d) const {
+    void close(StateId s, Derivation const& d) const {
       LabelPair const labelPair = in.labelPair(s);
       if (labelPair.first.isTerminal()) {
         if (added) {
@@ -1530,8 +1519,8 @@ struct NbestHypergraphOptions : NbestPathOptions {
     mutable Weight weightSince;
     mutable typename Weight::FloatT valueTotal;
     mutable Arc* added;
-    void takeWeight(Arc* arc) const {
-      if (arc) timesBy(arc->weight(), weightSince);
+    void takeWeight(ArcBase* arc) const {
+      if (arc) timesBy(arc->weight<Weight>(), weightSince);
     }
   };
 
@@ -1554,7 +1543,7 @@ struct BestPathOutOptions : PathOutOptions, NbestPathOptions {
     c("passes an input hypergraph unchanged, printing its best path(s)");
   }
   template <class Arc>
-  typename Derivation<Arc>::DerivP out_nbest(std::ostream& out, IHypergraph<Arc> const& hg) const {
+  DerivationPtr out_nbest(std::ostream& out, IHypergraph<Arc> const& hg) const {
     return BestPath(static_cast<BestPathOptions const&>(*this))
         .out_nbest(out, *this, static_cast<PathOutOptions const&>(*this), hg, !print_empty);
   }
@@ -1576,7 +1565,7 @@ struct BestPathOutToOptions : NbestHypergraphOptions, PathOutOptions {
 
   BestPathOutToOptions(bool nbestHypergraphDefault = true) : NbestHypergraphOptions(nbestHypergraphDefault) {}
   template <class Arc>
-  typename Derivation<Arc>::DerivP out_nbest(std::ostream& out, IHypergraph<Arc> const& hg) const {
+  DerivationPtr out_nbest(std::ostream& out, IHypergraph<Arc> const& hg) const {
     return BestPath(static_cast<BestPathOptions const&>(*this))
         .out_nbest(out, *this, static_cast<PathOutOptions const&>(*this), hg, !print_empty);
   }
@@ -1760,16 +1749,15 @@ bool hasTrivialBestPath(IHypergraph<Arc> const& hg, StateId final, StateId start
    doesn't protect against infinite loops from a cycle (except the trivial self-loop)
 */
 template <class Arc>
-typename Derivation<Arc>::DerivP computeTrivialBestPath(IHypergraph<Arc> const& hg, StateId final,
-                                                        typename Arc::Weight* w, StateId start) {
+DerivationPtr computeTrivialBestPath(IHypergraph<Arc> const& hg, StateId final, typename Arc::Weight* w,
+                                     StateId start) {
   // SDL_TRACE(BestPath.computeTrivialBestPath, "checking for trivial best path in " << hg);
-  typedef typename Derivation<Arc>::DerivP DerivP;
   if (!hg.storesInArcs()) {
     if (!hg.isGraph() || start == kNoState)
       SDL_THROW_LOG(Hypergraph.BestPath, ConfigException,
                     "can't compute trivial best path of non-graph without in-arcs: " << withProperties(hg));
 
-    DerivP r(Derivation<Arc>::kAxiom);
+    DerivationPtr r(Derivation::kAxiom);
     for (;;) {
       if (start == final) {
         SDL_TRACE(Hypergraph.BestPath.computeTrivialBestPath, "found graph-out-arc trivial best-path to "
@@ -1779,10 +1767,10 @@ typename Derivation<Arc>::DerivP computeTrivialBestPath(IHypergraph<Arc> const& 
       if (hg.numOutArcs(start) == 1) {
         Arc* arc = hg.outArc(start, 0);
         if (w) timesBy(arc->weight(), *w);
-        r = Derivation<Arc>::construct(arc, r);
+        r = Derivation::construct(arc, r);
         start = arc->head_;
         SDL_TRACE(Hypergraph.BestPath.computeTrivialBestPath, "taking unambiguous graph-out-arc step "
-                                                                  << printArc(arc, hg));
+                                                                  << arcPrint(arc, hg));
       } else
         break;
     }
@@ -1796,9 +1784,9 @@ typename Derivation<Arc>::DerivP computeTrivialBestPath(IHypergraph<Arc> const& 
         if (tails.size() == 1 && tails[0] == start && hg.hasLexicalLabel(final))
           // hack for syntax-based labels-on-preterminals - once CM-450 is fixed we can simply favor axiom
           // case
-          return Derivation<Arc>::kAxiom;
-        DerivP r(new Derivation<Arc>(arc, tails.size()));
-        typename Derivation<Arc>::children_type& children = r->children;
+          return Derivation::kAxiom;
+        DerivationPtr r(new Derivation(arc, tails.size()));
+        DerivationChildren& children = r->children;
         for (TailId i = 0, n = tails.size(); i < n; ++i) {
           StateId const src = tails[i];
           if (src == final) {
@@ -1812,30 +1800,28 @@ typename Derivation<Arc>::DerivP computeTrivialBestPath(IHypergraph<Arc> const& 
       } else if (atStart || hg.hasLexicalLabel(final))
         // this is else rather than first check to work around Preorderer (CM-450)
         // placing terminals in non-leaf position
-        return Derivation<Arc>::kAxiom;
+        return Derivation::kAxiom;
     }
   none:
     SDL_TRACE(Hypergraph.BestPath.computeTrivialBestPath, "no single-in-arc derivation for state "
                                                               << final << " in hg: " << hg);
   }
   if (w) setZero(*w);
-  return DerivP();
+  return DerivationPtr();
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivP
-computeTrivialGraphBestPathOutArcs(typename Derivation<Arc>::DerivP const& prefix, IHypergraph<Arc> const& hg,
-                                   StateId final, typename Arc::Weight* w, StateId start) {
-  typedef typename Derivation<Arc>::DerivP DerivP;
+DerivationPtr computeTrivialGraphBestPathOutArcs(DerivationPtr const& prefix, IHypergraph<Arc> const& hg,
+                                                 StateId final, typename Arc::Weight* w, StateId start) {
   if (start != kNoState) {
     if (hg.numOutArcs(start) == 1) {
       Arc* arc = hg.outArc(start, 0);
       if (w) timesBy(arc->weight(), *w);
       TailId const ntails = arc->tails().size();
-      DerivP succ(new Derivation<Arc>(arc, ntails));
-      typename Derivation<Arc>::children_type& children = succ->children;
+      DerivationPtr succ(new Derivation(arc, ntails));
+      DerivationChildren& children = succ->children;
       children[0] = prefix;
-      std::fill(children.begin() + 1, children.end(), Derivation<Arc>::kAxiom);
+      std::fill(children.begin() + 1, children.end(), Derivation::kAxiom);
       StateId const next = arc->head();
       if (next == final)
         return succ;
@@ -1843,21 +1829,20 @@ computeTrivialGraphBestPathOutArcs(typename Derivation<Arc>::DerivP const& prefi
         return computeTrivialGraphBestPathOutArcs(succ, hg, final, w, next);
     }
   }
-  return DerivP();
+  return DerivationPtr();
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivAndWeight computeBestDerivWeight(IHypergraph<Arc> const& hg,
-                                                                BestPathOptions const& opt = BestPathOptions(),
-                                                                bool throwEmptySetException = false) {
+Derivation::DerivAndWeight<Arc> computeBestDerivWeight(IHypergraph<Arc> const& hg,
+                                                       BestPathOptions const& opt = BestPathOptions(),
+                                                       bool throwEmptySetException = false) {
   BestPath::Compute<Arc> cb(opt, hg);
   return cb.bestWeighted(throwEmptySetException);
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivP computeBestPath(IHypergraph<Arc> const& hg,
-                                                 BestPathOptions const& opt = BestPathOptions(),
-                                                 bool throwEmptySetException = false) {
+DerivationPtr computeBestPath(IHypergraph<Arc> const& hg, BestPathOptions const& opt = BestPathOptions(),
+                              bool throwEmptySetException = false) {
   BestPath::Compute<Arc> cb(opt, hg);
   return cb.best(throwEmptySetException);
 }
@@ -1865,10 +1850,8 @@ typename Derivation<Arc>::DerivP computeBestPath(IHypergraph<Arc> const& hg,
 /// when hg is already a single derivation hg (final state and all reachable
 /// states have 0 or 1 inarcs), return that derivation. else return 0
 template <class Arc>
-typename Derivation<Arc>::DerivP trivialBestPath(IHypergraph<Arc> const& hg,
-                                                 bool throwEmptySetException = false,
-                                                 typename Arc::Weight* w = 0) {
-  typedef typename Derivation<Arc>::DerivP DerivP;
+DerivationPtr trivialBestPath(IHypergraph<Arc> const& hg, bool throwEmptySetException = false,
+                              typename Arc::Weight* w = 0) {
   StateId final = hg.final();
   if (final == kNoState) {
     maybeThrowEmptySetException(throwEmptySetException);
@@ -1876,29 +1859,26 @@ typename Derivation<Arc>::DerivP trivialBestPath(IHypergraph<Arc> const& hg,
   } else if (hg.storesInArcs()) {
     SDL_TRACE(verbose.Hypergraph.BestPath.trivialBestPath,
               "checking for single-in-arc derivation to FINAL:" << final << " in hg: " << hg);
-    typename Derivation<Arc>::DerivP const& r = computeTrivialBestPath(hg, final, w, hg.start());
+    DerivationPtr const& r = computeTrivialBestPath(hg, final, w, hg.start());
     if (r) return r;
   } else if (hg.isGraph() && hg.storesOutArcs()) {
-    typename Derivation<Arc>::DerivP r(Derivation<Arc>::kAxiom);
+    DerivationPtr r(Derivation::kAxiom);
     r = computeTrivialGraphBestPathOutArcs(r, hg, final, w, hg.start());
     if (r) return r;
   }
 
-  return DerivP();
+  return DerivationPtr();
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivP bestPath(IHypergraph<Arc> const& hg,
-                                          BestPathOptions const& opt = BestPathOptions(),
-                                          bool throwEmptySetException = false, typename Arc::Weight* w = 0) {
-  typedef typename Derivation<Arc>::DerivP DerivP;
+DerivationPtr bestPath(IHypergraph<Arc> const& hg, BestPathOptions const& opt = BestPathOptions(),
+                       bool throwEmptySetException = false, typename Arc::Weight* w = 0) {
   if (w) setOne(*w);
-  DerivP const& r = trivialBestPath(hg, throwEmptySetException, w);
+  DerivationPtr const& r = trivialBestPath(hg, throwEmptySetException, w);
   if (r)
     return r;
   else if (w) {
-    typename Derivation<Arc>::DerivAndWeight const& dw
-        = computeBestDerivWeight(hg, opt, throwEmptySetException);
+    Derivation::DerivAndWeight<Arc> const& dw = computeBestDerivWeight(hg, opt, throwEmptySetException);
     *w = weight(dw);
     return derivP(dw);
   } else
@@ -1906,22 +1886,21 @@ typename Derivation<Arc>::DerivP bestPath(IHypergraph<Arc> const& hg,
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivAndWeight bestDerivWeight(IHypergraph<Arc> const& hg,
-                                                         BestPathOptions const& opt = BestPathOptions(),
-                                                         bool throwEmptySetException = false) {
-  typename Derivation<Arc>::DerivAndWeight r;
-  get<0>(r) = bestPath(hg, opt, throwEmptySetException, &get<1>(r));
+Derivation::DerivAndWeight<Arc> bestDerivWeight(IHypergraph<Arc> const& hg,
+                                                BestPathOptions const& opt = BestPathOptions(),
+                                                bool throwEmptySetException = false) {
+  Derivation::DerivAndWeight<Arc> r;
+  r.deriv = bestPath(hg, opt, throwEmptySetException, &r.weight);
   return r;
 }
 
 template <class V, class Arc>
-typename Derivation<Arc>::DerivP visitNbest(V const& v, NbestPlusTies n, IHypergraph<Arc> const& hg,
-                                            BestPathOptions const& opt = BestPathOptions(),
-                                            bool throwEmptySetException = false, NbestId* nVisited = 0) {
-  typedef typename Derivation<Arc>::DerivP DerivP;
+DerivationPtr visitNbest(V const& v, NbestPlusTies n, IHypergraph<Arc> const& hg,
+                         BestPathOptions const& opt = BestPathOptions(), bool throwEmptySetException = false,
+                         NbestId* nVisited = 0) {
   if (n.nbest == 1) {
     typename Arc::Weight w;
-    DerivP const& r = bestPath(hg, opt, throwEmptySetException, &w);  // no sequence point for fn params
+    DerivationPtr const& r = bestPath(hg, opt, throwEmptySetException, &w);  // no sequence point for fn params
     if (r) v(r, w, kFirstNbestId);
     if (nVisited) *nVisited = (bool)r;
     return r;
@@ -1931,26 +1910,26 @@ typename Derivation<Arc>::DerivP visitNbest(V const& v, NbestPlusTies n, IHyperg
 }
 
 template <class Arc>
-std::vector<typename Derivation<Arc>::DerivAndWeight> getNbest(NbestId n, IHypergraph<Arc> const& hg,
-                                                               BestPathOptions const& opt = BestPathOptions(),
-                                                               bool throwEmptySetException = false) {
-  std::vector<typename Derivation<Arc>::DerivAndWeight> derivs;
+std::vector<Derivation::DerivAndWeight<Arc> > getNbest(NbestId n, IHypergraph<Arc> const& hg,
+                                                       BestPathOptions const& opt = BestPathOptions(),
+                                                       bool throwEmptySetException = false) {
+  std::vector<Derivation::DerivAndWeight<Arc> > derivs;
   derivs.reserve(n);
   visitNbest(HoldNbestDerivAndWeights<Arc>(derivs), n, hg, opt, throwEmptySetException);
   return derivs;
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivAndWeight get1best(IHypergraph<Arc> const& hg,
-                                                  BestPathOptions const& opt = BestPathOptions(),
-                                                  bool throwEmptySetException = false) {
-  std::vector<typename Derivation<Arc>::DerivAndWeight> derivs;
+Derivation::DerivAndWeight<Arc> get1best(IHypergraph<Arc> const& hg,
+                                         BestPathOptions const& opt = BestPathOptions(),
+                                         bool throwEmptySetException = false) {
+  std::vector<Derivation::DerivAndWeight<Arc> > derivs;
   visitNbest(HoldNbestDerivAndWeights<Arc>(derivs), 1, hg, opt, throwEmptySetException);
   return derivs.front();
 }
 
 template <class Arc>
-typename Derivation<Arc>::DerivP bestPath(IHypergraph<Arc> const& hg, bool throwEmptySetException) {
+DerivationPtr bestPath(IHypergraph<Arc> const& hg, bool throwEmptySetException) {
   return bestPath(hg, BestPathOptions(), throwEmptySetException);
 }
 

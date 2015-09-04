@@ -23,7 +23,7 @@ struct HypPruneToBest : TransformMain<HypPruneToBest> {
 
   PruneToBestOptions prune;
 
-  Properties properties(int i) const { return kDefaultProperties | kStoreInArcs; }
+  Properties properties(int i) const { return kDefaultProperties | kStoreFirstTailOutArcs; }
 
   enum { has_inplace_input_transform = true, has_transform1 = false };
 

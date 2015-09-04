@@ -114,15 +114,14 @@ namespace Hypergraph {
 
 typedef Util::DupCount<sdl::unordered_set<Sym> > DupSymbols;
 
-template <class Arc>
 struct IsDetState {  // unlike DupSymbols, allow epsilon to final only!
-  IHypergraph<Arc> const& hg;
+  HypergraphBase const& hg;
   StateId final;
   typedef unordered_set<Sym> S;
   S s;
   bool r;
   bool anyeps;
-  explicit IsDetState(IHypergraph<Arc> const& hg) : hg(hg), final(hg.final()) {
+  explicit IsDetState(HypergraphBase const& hg) : hg(hg), final(hg.final()) {
     r = true;
     anyeps = false;
   }
@@ -134,32 +133,30 @@ struct IsDetState {  // unlike DupSymbols, allow epsilon to final only!
   }
 };
 
-template <class A>
-bool isDeterminized(StateId s, IHypergraph<A> const& i, bool allow_epsilon = false) {
+inline bool isDeterminized(StateId s, HypergraphBase const& i, bool allow_epsilon = false) {
   if (i.prunedEmpty()) return true;
-  IsDetState<A> det(i);
+  IsDetState det(i);
   i.forArcsOutFirstTail(s, Util::visitorReference(det));
   return det.r && (allow_epsilon || !det.anyeps);
 }
 
-template <class A>
-bool isDeterminized(IHypergraph<A> const& i, bool allow_epsilon = false) {
+inline bool isDeterminized(HypergraphBase const& i, bool allow_epsilon = false) {
   if (i.prunedEmpty()) return true;
   StateId ns = i.size();
   for (StateId s = 0; s < ns; ++s)
-    if (i.isFsmState(s) && !isDeterminized(s, i, allow_epsilon)) {
+    if (i.isGraphState(s) && !isDeterminized(s, i, allow_epsilon)) {
       return false;
     }
   return true;
 }
 
-template <class A>
-bool containsEmptyStringDet(IHypergraph<A> const& i) {
+inline bool containsEmptyStringDet(HypergraphBase const& i) {
+  assert(i.storesOutArcs());
   assert(isDeterminized(i));
   StateId st = i.start(), f = i.final();
   if (st == f) return true;
   for (ArcId a = 0, e = i.numOutArcs(st); a != e; ++a) {
-    A* pa = i.outArc(st, a);
+    ArcBase* pa = i.outArc(st, a);
     if (pa->head() == f && i.inputLabel(pa->fsmSymbolState()) == EPSILON::ID) return true;
   }
   return false;
@@ -377,7 +374,7 @@ struct DeterminizeFsa {
       destroy(&qs);
       return *id;
     }
-    QSet *pcqs = &qs, *newpcqs = 0;
+    QSet* pcqs = &qs, * newpcqs = 0;
     bool anyadded = false;
     if (specialEps) {
       newpcqs = qsp.construct(qs);

@@ -154,7 +154,7 @@ struct GetTokenSpan {
   struct SpansForStates {
     GetTokenSpan const& getTokenSpan_;
     TokenSpans& spans_;
-    IHypergraphStates const& hg_;
+    HypergraphBase const& hg_;
     template <class Arc>
     SpansForStates(GetTokenSpan const& getTokenSpan, TokenSpans& spans, IHypergraph<Arc> const& hg)
         : getTokenSpan_(getTokenSpan), spans_(spans), hg_(hg) {

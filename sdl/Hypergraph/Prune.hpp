@@ -48,13 +48,12 @@ struct PruneOptions : TransformOptionsBase {
   }
 };
 
-template <class Arc>
 struct ArcInStateSet {
   StateSet const& ss;
 
   explicit ArcInStateSet(StateSet const& s) : ss(s) {}
 
-  bool operator()(Arc* a) const {
+  bool operator()(ArcBase* a) const {
     if (!Util::test(ss, a->head())) return false;
     StateIdContainer const& tails = a->tails();
     for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i)
@@ -78,9 +77,9 @@ struct PruneUnreachable : RestrictPrepare<PruneUnreachable<Arc>, Arc>, PruneOpti
   mutable PUseful pUseful;
   StateIdMapping* mapping(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>& m) const {
     // TODO: make Reach return shared_ptr to subset only
-    Reach<Arc> r(h, true);
+    Reach r(h, true);
     pUseful = r.useful();
-    ArcInStateSet<Arc> s(*pUseful);
+    ArcInStateSet s(*pUseful);
     this->keep = s;
     if (packStates) {
       return new StateAddMapping<Arc>(&m);

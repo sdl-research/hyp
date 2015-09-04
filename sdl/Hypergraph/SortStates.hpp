@@ -178,7 +178,7 @@ bool isTopoSort(IHypergraph<Arc> const& hg, bool requireHeadAfterTails = true, S
    \return kNoState if states aren't split to nonterm first then lex, else return id such that [0, id) are
    nonterm and [id, size) are lex.
 */
-inline StateId findBoundaryBetweenNotAndIsTerminal(IHypergraphStates const& hg) {
+inline StateId findBoundaryBetweenNotAndIsTerminal(HypergraphBase const& hg) {
   StateId N = hg.size();
   IVocabularyPtr voc = hg.getVocabulary();
   for (StateId s = 0; s < N; ++s) {
@@ -260,12 +260,12 @@ struct TopNontermOrder : IStatesVisitor {
     }
     return firstLexSt;
   }
-  virtual void visit(StateId sid) OVERRIDE {
-    if (ph->hasTerminalLabel(sid))
-      unmappedLexStates.push_back(sid);
+  virtual void visit(StateId s) OVERRIDE {
+    if (ph->hasTerminalLabel(s))
+      unmappedLexStates.push_back(s);
     else {
       ++firstLexSt;
-      pDestState->stateFor(sid);
+      pDestState->stateFor(s);
     }
   }
 };
@@ -378,12 +378,12 @@ struct SortStatesTransform : SortStatesOptions, TransformBase<Transform::Inplace
 
   enum { OptionalInplace = true };
 
-  bool needs(IHypergraphStates const& hg) const {
+  bool needs(HypergraphBase const& hg) const {
     return !(sortOrder == kTopSort && hasProperties(hg.properties(), kSortedStates));
   }
   template <class Arc>
   bool needs(IHypergraph<Arc> const& hg) const {
-    return needs((IHypergraphStates const&)hg);
+    return needs((HypergraphBase const&)hg);
   }
 
   SortStatesTransform(SortStatesOptions const& opt = SortStatesOptions()) : SortStatesOptions(opt) {}

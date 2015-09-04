@@ -38,61 +38,21 @@
 namespace sdl {
 namespace Hypergraph {
 
-// TODO: names are bad: shouldn't it be vice versa? getStringWt just adds the weight
-template <class Arc>
-std::string getString(IHypergraph<Arc> const& hg,
-                      DerivationStringOptions const& opt = DerivationStringOptions(kUnquoted)) {
-  return getStringWt(hg, opt).first;
-}
+Syms& symsFromStatesAppend(Syms& result, StateString const& ss, HypergraphBase const& hg,
+                                  WhichSymbolOptions const& opt = WhichSymbolOptions());
 
-
+Syms& symsFromDerivAppend(Syms& syms, DerivationPtr const& pDerivation, HypergraphBase const& hg,
+                                 WhichSymbolOptions const& opt = WhichSymbolOptions());
 /// Syms: vector<Sym>
-template <class Arc>
-Syms& symsFromStatesAppend(Syms& result, StateString const& ss, IHypergraph<Arc> const& hg,
-                           WhichSymbolOptions const& opt = WhichSymbolOptions()) {
-  for (StateString::const_iterator i = ss.begin(), e = ss.end(); i != e; ++i) {
-    Sym sym = hg.label(*i, opt.labelType);
-    if (sym && opt.shows(sym)) result.push_back(sym);
-  }
-  return result;
-}
-
-template <class Arc>
-struct AppendSymsFromStates {
-  Syms& result;
-  IHypergraph<Arc> const& hg;
-  WhichSymbolOptions const& opt;
-  AppendSymsFromStates(Syms& result, IHypergraph<Arc> const& hg,
-                       WhichSymbolOptions const& opt)
-      : result(result), hg(hg), opt(opt) {}
-  void push_back(StateId s) {
-    Sym sym(hg.label(s, opt.labelType));
-    if (sym && opt.shows(sym)) result.push_back(sym);
-  }
-};
-
-template <class Arc>
-Syms& symsFromDerivAppend(Syms& syms, typename Derivation<Arc>::child_type const& pDerivation,
-                          IHypergraph<Arc> const& hg, WhichSymbolOptions const& opt = WhichSymbolOptions()) {
-  if (pDerivation) {
-    AppendSymsFromStates<Arc> append(syms, hg, opt);
-    pDerivation->appendStates(append, hg.final(), opt.leafOnly);
-  }
-  return syms;
-}
-
-/// Syms: vector<Sym>
-template <class Arc>
-Syms symsFromStates(StateString const& ss, IHypergraph<Arc> const& hg,
-                    DerivationStringOptions const& opt = DerivationStringOptions()) {
+inline Syms symsFromStates(StateString const& ss, HypergraphBase const& hg,
+                           DerivationStringOptions const& opt = DerivationStringOptions()) {
   Syms result;
   symsFromStatesAppend(result, ss, hg, opt);
   return result;
 }
 
-template <class Arc>
-Syms symsFromDeriv(typename Derivation<Arc>::child_type const& pDerivation, IHypergraph<Arc> const& hg,
-                   DerivationStringOptions const& opt = DerivationStringOptions()) {
+inline Syms symsFromDeriv(DerivationPtr const& pDerivation, HypergraphBase const& hg,
+                          DerivationStringOptions const& opt = DerivationStringOptions()) {
   Syms result;
   symsFromDerivAppend(result, pDerivation, hg, opt);
   return result;
@@ -134,37 +94,42 @@ inline Util::StringBuilder& textFromSyms(Util::StringBuilder& out, Syms const& s
 }
 inline Util::StringBuilder& textFromSyms(Util::StringBuilder& out, SymSlice const& str, IVocabulary& voc,
                                          DerivationStringOptions const& opt) {
-  //TODO: test
+  // TODO: test
   print(out, str, voc, opt.space.c_str(), opt.quote);
   return out;
 }
 
 
-template <class Arc>
-std::string textFromDeriv(typename Derivation<Arc>::child_type const& pDerivation, IHypergraph<Arc> const& hg,
-                          DerivationStringOptions const& opt = DerivationStringOptions()) {
+inline std::string textFromDeriv(DerivationPtr const& pDerivation, HypergraphBase const& hg,
+                                 DerivationStringOptions const& opt = DerivationStringOptions()) {
   return textFromSyms(symsFromDeriv(pDerivation, hg, opt), *hg.getVocabulary(), opt);
 }
-template <class Arc>
-Util::StringBuilder& textFromDeriv(Util::StringBuilder& out,
-                                   typename Derivation<Arc>::child_type const& pDerivation,
-                                   IHypergraph<Arc> const& hg,
-                                   DerivationStringOptions const& opt = DerivationStringOptions()) {
+inline Util::StringBuilder& textFromDeriv(Util::StringBuilder& out, DerivationPtr const& pDerivation,
+                                          HypergraphBase const& hg,
+                                          DerivationStringOptions const& opt = DerivationStringOptions()) {
   return textFromSyms(out, symsFromDeriv(pDerivation, hg, opt), *hg.getVocabulary(), opt);
 }
 
 
-template <class Arc>
-std::string textFromStates(StateString const& ss, IHypergraph<Arc> const& hg,
-                           DerivationStringOptions const& opt = DerivationStringOptions()) {
+inline std::string textFromStates(StateString const& ss, HypergraphBase const& hg,
+                                  DerivationStringOptions const& opt = DerivationStringOptions()) {
   return textFromSyms(symsFromStates(ss, hg, opt), *hg.getVocabulary(), opt);
 }
-template <class Arc>
-Util::StringBuilder& textFromStates(Util::StringBuilder& out, StateString const& ss, IHypergraph<Arc> const& hg,
-                                    DerivationStringOptions const& opt = DerivationStringOptions()) {
+inline Util::StringBuilder& textFromStates(Util::StringBuilder& out, StateString const& ss,
+                                           HypergraphBase const& hg,
+                                           DerivationStringOptions const& opt = DerivationStringOptions()) {
   return textFromSyms(out, symsFromStates(ss, hg, opt), *hg.getVocabulary(), opt);
 }
 
+
+template <class Arc>
+inline std::string getString(IHypergraph<Arc> const& hg,
+                             DerivationStringOptions const& opt = DerivationStringOptions(kUnquoted),
+                             char const* fallbackIfNoDerivation = "[no derivation exists]") {
+  DerivationPtr deriv = singleDerivation(hg);
+  return deriv ? textFromSyms(symsFromDeriv(deriv, hg, opt), hg.getVocabulary(), opt.space.c_str(), opt.quote)
+               : fallbackIfNoDerivation;
+}
 
 template <class Arc>
 std::pair<std::string, typename Arc::Weight>
@@ -172,10 +137,10 @@ getStringWt(IHypergraph<Arc> const& hg, DerivationStringOptions const& opt = Der
             char const* fallbackIfNoDerivation = "[no derivation exists]") {
   typedef typename Arc::Weight Weight;
   typedef std::pair<std::string, Weight> Ret;
-  typename Derivation<Arc>::child_type deriv = singleDerivation(hg);
+  DerivationPtr deriv = singleDerivation(hg);
   if (!deriv) return Ret(fallbackIfNoDerivation, Weight::zero());
   return Ret(textFromSyms(symsFromDeriv(deriv, hg, opt), hg.getVocabulary(), opt.space.c_str(), opt.quote),
-             deriv->weight());
+             deriv->weight<Weight>());
 }
 
 struct PrintSyms {
@@ -186,8 +151,7 @@ struct PrintSyms {
       : voc(voc), syms(syms), quote(quote) {}
   PrintSyms(Syms const& syms, IVocabularyPtr const& voc, SymbolQuotation quote = kQuoted)
       : voc(*voc), syms(syms), quote(quote) {}
-  template <class Arc>
-  PrintSyms(Syms const& syms, IHypergraph<Arc> const& voc, SymbolQuotation quote = kQuoted)
+  PrintSyms(Syms const& syms, HypergraphBase const& voc, SymbolQuotation quote = kQuoted)
       : voc(*voc.getVocabulary()), syms(syms), quote(quote) {}
   friend inline std::ostream& operator<<(std::ostream& out, PrintSyms const& self) {
     self.print(out);
