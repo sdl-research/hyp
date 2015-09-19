@@ -251,7 +251,7 @@ void printArcTails(std::ostream& out, StateIdContainer const& tails, HypergraphB
   bool again = false;
   for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
     if (again) out << ' ';
-    printState(out, *i, *hg, inlineGraphLabels && again);
+    printState(out, *i, hg, inlineGraphLabels && again);
     again = true;
   }
 }

@@ -73,6 +73,7 @@ struct ZeroInitializedArray
   operator T const*() const { return space; }
 
   void zero() {
+    assert(sizeof(space) == NT * sizeof(T));
     std::memset(space, 0, sizeof(space));
   }
 

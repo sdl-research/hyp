@@ -97,7 +97,7 @@ inline StateString statesFrom(DerivationYield const& dy) {
 // TODO: exclude axioms from derivation tree? i.e. derivation child i is the ith non-axiom tail in arc()? can
 // make some code (printing, visiting, etc) behave the same for either decision
 
-struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> {
+struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
   typedef graehl::shared_nary_tree<Derivation, Util::RefCount> Tree;
   typedef ArcBase Arc;
   typedef Tree::child_type child_type;  // intrusive shared pointer to Derivation
@@ -212,7 +212,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
 
   // works only for non alternative same-head deriv, e.g. 1best
   template <class Weight>
-  struct ComputeWeight : public ComputeOnceBase<Weight> {
+  struct ComputeWeight : ComputeOnceBase<Weight> {
     bool open(Weight& r, Derivation const& d) {
       r = d.arcwt<Weight>();
       return true;
@@ -224,7 +224,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
     bool finished(Weight& w) const { return !(w == Weight::zero()); }
   };
 
-  struct ComputeCost : public ComputeOnceBase<Cost> {
+  struct ComputeCost : ComputeOnceBase<Cost> {
     bool open(Cost& r, Derivation const& d) {
       r = d.a->cost();
       return true;
@@ -320,7 +320,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
     void close(Derivation const& d) const {}
   };
 
-  struct SetColorSafe : public VisitDfsBase {
+  struct SetColorSafe : VisitDfsBase {
     int c;
     explicit SetColorSafe(int c) : c(c) {}
     void close(Derivation const& d) const { d.color = c; }
@@ -328,7 +328,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
 
   // postfix sequence of pair <StateId, Arc *>. axioms get <StateId, NULL>. output iter O gets Arc *
   template <class Out>
-  struct VisitOut : public VisitTreeBase {
+  struct VisitOut : VisitTreeBase {
     Out o;
     WhichDerivationStates whichStates;  // actually, stateids
     VisitOut(Out o, WhichDerivationStates whichStates = kWholeTree) : o(o), whichStates(whichStates) {}
@@ -355,7 +355,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
   }
 
   template <class Out>
-  struct VisitArcsOut : public VisitTreeBase {
+  struct VisitArcsOut : VisitTreeBase {
     Out o;
     VisitArcsOut(Out o) : o(o) {}
     void out(Arc* a = 0) const {
@@ -660,7 +660,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
   }
 
   template <class Out>
-  struct VisitPrint : public VisitDfsBase {
+  struct VisitPrint : VisitDfsBase {
     Out& o;
     Hg const& hg;
     unsigned levels;
@@ -700,7 +700,7 @@ struct Derivation : public graehl::shared_nary_tree<Derivation, Util::RefCount> 
   }
 
   template <class Arc>
-  struct ToHypergraphOnce : public VisitDfsBase {
+  struct ToHypergraphOnce : VisitDfsBase {
     StateIdTranslation& sx;
     IMutableHypergraph<Arc>& o;
     ToHypergraphOnce(StateIdTranslation& sx, IMutableHypergraph<Arc>& o) : sx(sx), o(o) {}

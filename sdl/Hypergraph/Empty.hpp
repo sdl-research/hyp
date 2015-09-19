@@ -85,7 +85,6 @@ struct Reach {
       , stopAtFinal(stopAtFinal)
       , final(hg.final()) {
     if (hg.isGraph()) {
-      typedef shared_ptr<IHypergraph<Arc> const> HP;
       StateId const start = hg.start();
       if (start != kNoState) {
         holdh = ensureFirstTailOutArcs(hg);

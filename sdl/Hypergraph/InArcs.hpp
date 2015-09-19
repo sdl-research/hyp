@@ -387,7 +387,7 @@ struct FirstTailOutArcs : AdjacentArcsBase<kMustStoreNatively> {
 
   TailId numOutArcs(StateId st) const {
     if (hasNative()) return hg.numOutArcs(st);
-    return st < adj.size() ? (ArcHandle)adj[st].size() : 0;
+    return st < adj.size() ? (TailId)adj[st].size() : 0;
   }
   ArcHandle outArc(StateId st, TailId tail) const {
     if (hasNative()) return hg.outArc(st, tail);

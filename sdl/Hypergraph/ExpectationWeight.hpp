@@ -113,7 +113,6 @@ namespace Hypergraph {
 /// sum of values rather than the min:
 typedef FeatureWeightTpl<FeatureValue, Features, Expectation> ExpectationWeight;
 
-
 /**
    Adds another weight to this weight (using semiring
    plus). This is the version for Expectation policy.

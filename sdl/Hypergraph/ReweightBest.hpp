@@ -45,19 +45,21 @@ struct ReweightBest : ReweightOptions, SimpleTransform<ReweightBest, Transform::
 
 // nbest visitor
 template <class Arc>
-struct ReweightDerivation : public Derivation<Arc>::VisitDfsBase {
+struct ReweightDerivation {
+  typedef typename Arc::Weight Weight;
+  bool open(Derivation const& d) const { return true; }
+  void child(Derivation const& p, Derivation const& c, TailId i) const {}
+  void close(Derivation const& d) const {
+    if (d.axiom()) return;
+    opt.reweight(d.arcwt<Weight>(), rng);
+  }
+
   ReweightBest const& opt;
   typedef ReweightDerivation self_type;
   IMutableHypergraph<Arc>& h;
-  ReweightDerivation(IMutableHypergraph<Arc>& h, ReweightBest const& opt)
-      : h(h), opt(opt), rng(opt.seed) {}
+  ReweightDerivation(IMutableHypergraph<Arc>& h, ReweightBest const& opt) : h(h), opt(opt), rng(opt.seed) {}
   mutable Util::Random01 rng;
-  void close(Derivation const& d) const {
-    if (d.axiom()) return;
-    Arc& a = d.arc();
-    opt.reweight(a.weight(), rng);
-  }
-  bool operator()(DerivationPtr const& dp, typename Arc::Weight const& w, NbestId n) const {
+  bool operator()(DerivationPtr const& dp, Weight const& w, NbestId n) const {
     SDL_DEBUG(Hypergraph.ReweightBest, "reweighting arcs in 1-best derivation " << print(*dp, h));
     dp->visitDfs(*this);
     return true;

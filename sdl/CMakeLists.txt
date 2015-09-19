@@ -45,6 +45,7 @@ if(NOT DEFINED SDL_DEBUG_SYMBOLS)
   endif()
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Shared")
 if(WIN32)
   list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Windows")
 elseif(APPLE)
@@ -54,7 +55,6 @@ elseif(ANDROID)
 elseif(UNIX)
   list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/FC12")
 endif()
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Shared")
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 
 if(DEFINED SDL_EXTERNALS_PATH)
@@ -418,7 +418,7 @@ if(USING_GCC)
         sdl_enable_cpp11()
       endif()
       #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs
-      sdl_quiet_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
+      sdl_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
       if(OPEN_SOURCE_RELEASE)
         sdl_exe_linker_flags("-static-libgcc")
       else()
@@ -556,9 +556,10 @@ sdl_compiled_setting(HAVE_BUILTIN_POPCNT ${SDL_HAVE_BUILTIN_POPCNT})
 
 # CA-9649 Use older boost, icu, kenlm from xmt-externals master
 if(NOT DEFINED SDL_ETS_BUILD)
-  set(SDL_ETS_BUILD 0)
+set(SDL_ETS_BUILD 0)
 endif()
 sdl_compiled_setting(SDL_ETS_BUILD ${SDL_ETS_BUILD})
+message(INFO "SDL_ETS_BUILD ${SDL_ETS_BUILD}")
 
 if(UNIX)
   sdl_quiet_compiled_setting(HAVE_BUILTIN_CLZ 1)
@@ -960,7 +961,19 @@ list(APPEND subDirectories
 #CTest and CDash
 if(NOT ANDROID)
   INCLUDE(CTest)
+
+  # for clang static analyzer
+  set(CTEST_CUSTOM_WARNING_EXCEPTION
+".*warning: 'type' overrides a member function but is not marked 'override' [-Winconsistent-missing-override].*"
+".*small_vector.hpp.*warning: Call to 'malloc' has an allocation size of 0 bytes.*"
+".*stl_uninitialized.h:.*warning: Forming reference to null pointer.*"
+".*stl_vector.h:.* warning: Returning null reference.*"
+"warning: Value stored to 'yymsg' is never read"
+"warning: Value stored to 'yytoken' is never read"
+)
+
 endif()
+
 
 set(UTIL_LIBRARY_NAME sdl_util)
 
@@ -977,6 +990,9 @@ set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
   )
 
 
+if (LINUX)
+  list(APPEND INDIRECT_Vocabulary_LIB_DEPENDENCIES rt)
+endif()
 
 set(INDIRECT_UTIL_LIB_DEPENDENCIES
   ${INDIRECT_Vocabulary_LIB_DEPENDENCIES}

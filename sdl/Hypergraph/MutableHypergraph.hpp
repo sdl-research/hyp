@@ -1189,7 +1189,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   /// addArc after calling addStateId on head, tails.
-  virtual void addArcCreatingStates(Arc* arc) {
+  virtual void addArcCreatingStates(Arc* arc) OVERRIDE {
     StateId maxState = arc->head_;
     for (StateIdContainer::const_iterator i = arc->tails_.begin(), e = arc->tails_.end(); i != e; ++i)
       Util::maxEq(maxState, *i);

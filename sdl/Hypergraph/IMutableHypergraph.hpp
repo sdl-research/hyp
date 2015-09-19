@@ -469,38 +469,13 @@ struct IMutableHypergraph : IHypergraph<A> {
   virtual void prepareAddArcsSize(StateId size) = 0;
   virtual void prepareAddArcs() { prepareAddArcsSize(this->sizeForHeads()); }
 
-  /**
-     these may return NULL instead of empty. (the const versions will return a
-     pointer to empty instead)
-
-     you should assume that these pointers are invalidated whenever calling
-     addArcs with bigger stateids than before, in the relevant position (head
-     for in, first tail for first-tail-out-arcs, all tails for out-arcs))
-
-  */
-  virtual ArcsContainer* maybeInArcs(StateId state) = 0;
-
-  virtual ArcsContainer const* maybeInArcs(StateId state) const = 0;
-
-  virtual ArcsContainer* maybeOutArcs(StateId state) = 0;
-
   void outAdjStates(StateId st, StateIdContainer& adjStates) const OVERRIDE {
-    ArcsContainer const* a = maybeOutArcs(st);
+    ArcsContainer const* a = this->maybeOutArcs(st);
     if (a) {
       ArcId N = a->size();
       adjStates.resize(N);
       for (unsigned i = 0; i < N; ++i) adjStates[i] = (*a)[i]->head_;
     }
-  }
-
-  virtual ArcsContainer const* maybeOutArcs(StateId state) const = 0;
-
-  ArcsContainer const* maybeInArcsConst(StateId state) const { return maybeInArcs(state); }
-
-  ArcsContainer const* maybeOutArcsConst(StateId state) const { return maybeOutArcs(state); }
-
-  ArcsContainer const* maybeArcsConst(StateId state, bool inarcs) const {
-    return inarcs ? maybeInArcs(state) : maybeOutArcs(state);
   }
 
   /// if any arcs were modified structurally (or states labels changed), you
@@ -515,7 +490,7 @@ struct IMutableHypergraph : IHypergraph<A> {
     if (!inarcs)
       if (!(p & kStoreFirstTailOutArcs)) return IHypergraph<Arc>::forArcs(v);
     for (StateId s = 0, N = this->size(); s < N; ++s) {
-      ArcsContainer const* p = maybeArcsConst(s, inarcs);
+      ArcsContainer const* p = this->maybeArcsConst(s, inarcs);
       if (!p) continue;
       for (ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v((Arc*)*i);
     }
@@ -526,7 +501,7 @@ struct IMutableHypergraph : IHypergraph<A> {
     Properties p = this->properties();
     bool inarcs = p & kStoreInArcs;
     for (StateId s = 0, N = this->size(); s < N; ++s) {
-      ArcsContainer const* p = maybeArcsConst(s, inarcs);
+      ArcsContainer const* p = this->maybeArcsConst(s, inarcs);
       if (!p) continue;
       for (ArcsContainer::const_iterator i = p->begin(), e = p->end(); i != e; ++i) v((Arc*)*i);
     }

@@ -328,7 +328,6 @@ inline NgramWeightTpl<W> times(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> co
   Ngw product(maxlen);
   assert(!product.isZero());
   typedef typename Ngw::Ngram Ngram;
-  typedef typename Ngw::NgramPtr NgramPtr;
   typedef typename Ngw::value_type NgramPtrAndWeight;
   typedef typename Ngw::const_iterator Iter;
   forall (NgramPtrAndWeight const& p1, w1) {
@@ -391,7 +390,6 @@ std::ostream& operator<<(std::ostream& out, NgramWeightTpl<W> const& w) {
   }
   typedef typename NgramW::Ngram Ngram;
   typedef typename NgramW::NgramPtr NgramPtr;
-  typedef typename NgramW::Ngram Ngram;
   typedef std::pair<NgramPtr, W> NgramPtrAndWeight;
   bool first1 = true;
   out << "(";

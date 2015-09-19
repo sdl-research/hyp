@@ -437,9 +437,7 @@ FeatureWeightTpl<FloatT, MapT, TakeMin> times(FeatureWeightTpl<FloatT, MapT, Tak
 template <class FloatT, class MapT>
 inline FeatureWeightTpl<FloatT, MapT, TakeMin> divide(FeatureWeightTpl<FloatT, MapT, TakeMin> const& w1,
                                                       FeatureWeightTpl<FloatT, MapT, TakeMin> const& w2) {
-  typedef FeatureWeightTpl<FloatT, MapT, TakeMin> FeatW;
-  typedef typename MapT::mapped_type FeatValueT;
-  FeatW result(w1);
+  FeatureWeightTpl<FloatT, MapT, TakeMin> result(w1);
   result.divideBy(w2);
   return result;
 }

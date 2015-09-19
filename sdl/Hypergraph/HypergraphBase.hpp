@@ -782,7 +782,6 @@ struct HypergraphBase : Resource {
     return inarcs ? maybeInArcs(state) : maybeOutArcs(state);
   }
 
-
   virtual ArcBase* inArc(StateId state, ArcId aid) const = 0;
 
   virtual ArcBase* outArc(StateId state, ArcId aid) const = 0;

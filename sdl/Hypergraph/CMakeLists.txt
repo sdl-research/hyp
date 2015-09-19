@@ -15,10 +15,10 @@ include_directories(${ICU_INCLUDE_DIR})
 
 file(GLOB LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HYP_SOURCES ${PROJECT_SOURCE_DIR}/src/Hyp*.cpp)
+list(REMOVE_ITEM HYP_SOURCES ${PROJECT_SOURCE_DIR}/src/HypergraphBase.cpp)
 foreach(item ${HYP_SOURCES})
   list(REMOVE_ITEM LIB_SOURCES ${item})
 endforeach()
-
 message(STATUS "Hypergraph lib sources: ${LIB_SOURCES}")
 
 list(APPEND LINK_DEPENDENCIES ${LOG4CXX_LIBRARIES} ${UTIL_LIBRARIES})

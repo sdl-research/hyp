@@ -261,7 +261,7 @@ struct TransformMain : TransformMainBase {
 
   int run_exit() OVERRIDE {
     bool r;
-    switch (arcType) {
+    switch ((unsigned)arcType) {
       case kViterbiSemiring:
         r = runWeight<ViterbiWeightTpl<SdlFloat> >();
         break;

@@ -396,7 +396,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
 
   IHypergraph(std::string const& typeStr = "sdl::IHypergraph") : HypergraphBase(typeStr) {}
 
-  virtual IHypergraph<A>* clone() const = 0;
+  virtual IHypergraph<A>* clone() const OVERRIDE = 0;
 
   virtual ~IHypergraph() {}
 
@@ -410,9 +410,9 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
      Not directly returning the Arc pointers here because that would
      expose the internal container.
   */
-  virtual Arc* inArc(StateId state, ArcId aid) const = 0;
+  virtual Arc* inArc(StateId state, ArcId aid) const OVERRIDE = 0;
 
-  virtual Arc* outArc(StateId state, ArcId aid) const = 0;
+  virtual Arc* outArc(StateId state, ArcId aid) const OVERRIDE = 0;
 
   virtual void outAdjStates(StateId st, StateIdContainer& adjStates) const {
     ArcId i = 0, N = this->numOutArcs(st);
