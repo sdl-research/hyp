@@ -41,7 +41,10 @@ class CastHypergraph SDL_FINAL : public IHypergraph<ToA> {
   typedef FromA FromArc;
   typedef ToA ToArc;
 
-  CastHypergraph(IHypergraph<FromA> const& hg) : hg_(hg) { this->setStartFinalFrom(hg); }
+  CastHypergraph(IHypergraph<FromA> const& hg) : hg_(hg) {
+    this->setStart(hg.start());
+    this->setFinal(hg.final());
+  }
 
   Properties uncomputedProperties() const OVERRIDE { return hg_.uncomputedProperties(); }
 

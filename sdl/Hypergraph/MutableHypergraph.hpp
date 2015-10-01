@@ -303,7 +303,6 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     if (state >= inArcsPerState_.size()) return;
     ArcsContainer& arcs = inArcsPerState_[state];
     if (storesOutArcsImpl()) {
-      SDL_TRACE(Hypergraph.deleteInArcs, "before deleteInArcs(" << state << "): " << *this);
       if (this->properties_ & kStoreFirstTailOutArcs) {
         Util::PointerSet deleted;
         interested_.reserve(numStates_);
@@ -338,7 +337,6 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     } else
       for (ArcIter i = arcs.begin(), e = arcs.end(); i != e; ++i) delete (Arc*)*i;
     arcs.clear();
-    SDL_TRACE(Hypergraph.deleteInArcs, "after deleteInArcs(" << state << "): " << *this);
   }
 
   void deleteOutArcsExceptImpl(StateId state, Arc* keepArc) OVERRIDE {
@@ -354,8 +352,6 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     if (state >= outArcsPerState_.size()) return;
     ArcsContainer& arcs = outArcsPerState_[state];
     if (storesInArcs()) {
-      SDL_TRACE(Hypergraph.deleteInArcs, "before deleteOutArcs(" << state << "): " << *this);
-      // TODO: code deduplication from deleteInArcsImpl w/ GraphInarcs vs GraphOutArcs abstraction.
       Util::PointerSet deleted;
       interested_.reserve(numStates_);
       for (ArcIter i = arcs.begin(), e = arcs.end(); i != e; ++i) {
@@ -377,7 +373,6 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     } else
       for (ArcIter i = arcs.begin(), e = arcs.end(); i != e; ++i) delete (Arc*)*i;
     arcs.clear();
-    SDL_TRACE(Hypergraph.deleteOutArcs, "after deleteOutArcs(" << state << "): " << *this);
   }
 
   // for each Arc *arc, if keep(arc), then remap arc through x and place it in the in/out arcs index. similar

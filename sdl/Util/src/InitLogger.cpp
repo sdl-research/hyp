@@ -23,7 +23,7 @@
 #endif
 #include <sdl/Util/InitLogger.hpp>
 #include <sdl/Util/FindFile.hpp>
-#include <sdl/Util/LogHelper.hpp>  //LOG_INFO() sdl::logLevel(int) etc
+#include <sdl/Util/LogHelper.hpp>
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

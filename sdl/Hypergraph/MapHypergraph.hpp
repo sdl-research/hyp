@@ -42,7 +42,8 @@ class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
   typedef boost::unordered_map<FromArc*, ToArc*> ArcsMap;
 
   MapHypergraph(IHypergraph<FromA> const& hg, Mapper mapper = Mapper()) : hg_(hg), mapper_(mapper) {
-    this->setStartFinalFrom(hg);
+    this->setStart(hg.start());
+    this->setFinal(hg.final());
   }
   ~MapHypergraph() {
     // TODO: memory leak if memoization is turned off

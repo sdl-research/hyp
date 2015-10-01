@@ -49,8 +49,6 @@ struct HypergraphBase : Resource {
   // for uncomputedProperties() - properties() forces update of
   // fsm/graph/etc. mutable because properties() is const.
   mutable Properties properties_;
-  StateId start_;
-  StateId final_;
   void initProcessPhase(InitProcessPhase phase) OVERRIDE {}
 
   StateId maxNotTerminalStateImpl() const {
@@ -61,21 +59,18 @@ struct HypergraphBase : Resource {
       if (!hasTerminalLabel(s)) return s;
     }
   }
-
-  void setStartFinalFrom(HypergraphBase const& o) {
-    start_ = o.start_;
-    final_ = o.final_;
-  }
+  StateId start_;
+  StateId final_;
 
  public:
   void setStart(StateId s) {
     assert(isMutable());
-    this->start_ = s;
+    start_ = s;
   }
 
   void setFinal(StateId s) {
     assert(isMutable());
-    this->final_ = s;
+    final_ = s;
   }
 
   std::string const& typeStr() const { return typename_; }

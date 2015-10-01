@@ -497,7 +497,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
     mutable Nstats nstat;
     Compute(BestPathOptions opt, HG const& hg, bool storeBackPointers = true)
         : opt(opt), hg(hg), vf(hg), ef(hg), mub(hg, path_traits::unreachable()), mu(mub.pmap) {
-      if (storeBackPointers) pi = pib.set(new PiB(hg, (ArcHandle)0))->pmap;
+      if (storeBackPointers) pi = pib.set(new PiB(hg, 0))->pmap;
     }
 
     typedef Derivation::DerivAndWeight<Arc> DerivAndWeight;

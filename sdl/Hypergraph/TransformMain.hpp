@@ -108,7 +108,7 @@ struct TransformMainBase : HypergraphMainBase {
  protected:
   void init() {
     firstInputFileHasMultipleHgs = false;
-    logname = "LW.TransformMain";
+    logname = "sdl.Hypergraph.TransformMain";
   }
 
  public:

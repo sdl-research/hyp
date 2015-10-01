@@ -25,18 +25,6 @@ void FeatureIdRange::requireSize(double needed, char const* prefix) {
   end = begin + (FeatureId)(needed + epsilon);
 }
 
-std::ostream& operator<<(std::ostream &out,
-                         FeatureIdRange const& x) {
-  if (!x.enabled())
-    out << "none";
-  else {
-    out << x.begin;
-    if (x.end != (FeatureId) - 1)
-      out << '-' << (x.end - 1);
-  }
-  return out;
-}
-
 double FeatureIdRange::tupleRequiresDouble(unsigned order) {
   double n = (double)size();
   double sum = 0;
