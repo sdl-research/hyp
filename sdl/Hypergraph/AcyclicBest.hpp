@@ -183,7 +183,19 @@ struct AcyclicBest {
       // over in arcs the other out. both are correct for acyclic. this is all
       // to avoid requiring storing in *and* out arcs - either is fine
       back_edges_ = orderTailsLast(hg, orderReverse, maxBackEdges, IsGraph);
-      if (orderReverse.empty()) return;
+    } else {
+      if (!IsGraph) SDL_THROW_LOG(AcyclicBest, ProgrammerMistakeException, "hg acyclic best: //TODO@JG");
+      back_edges_ = orderHeadsLast(hg, orderReverse, maxBackEdges, IsGraph);
+    }
+
+    SDL_DEBUG(Hypergraph.AcyclicBest, "acyclic best: " << back_edges_ << " back edges  - max allowed is "
+                                                       << maxBackEdges);
+    SDL_TRACE(Hypergraph.AcyclicBest,
+              "reverse acyclic order: " << Util::print(orderReverse, Util::singleline()) << " for hg:\n" << hg);
+    if (maxBackEdges && back_edges_ >= maxBackEdges) return;
+    if (orderReverse.empty()) return;
+
+    if (useOutArcs) {
       for (StateId i = 0, N = muStates_; i < N; ++i)
         put(mu, i, hg.isAxiom(i) ? path_traits::start() : path_traits::unreachable());
       for (I i = &orderReverse.back(), last = &orderReverse.front();;) {
@@ -193,13 +205,7 @@ struct AcyclicBest {
         --i;
       }
     } else {
-      if (!IsGraph) SDL_THROW_LOG(AcyclicBest, ProgrammerMistakeException, "hg acyclic best: //TODO@JG");
-      mu[final] = 0;
-      std::vector<StateId> orderReverse;
-      back_edges_ = orderHeadsLast(hg, orderReverse, maxBackEdges, IsGraph);
-      if (orderReverse.empty()) return;
-      for (StateId i = 0, N = muStates_; i < N; ++i)
-        put(mu, i, path_traits::unreachable());
+      for (StateId i = 0, N = muStates_; i < N; ++i) put(mu, i, path_traits::unreachable());
       put(mu, final, path_traits::start());
       for (I i = &orderReverse.back(), last = &orderReverse.front();;) {
         StateId tail = *i;
@@ -232,10 +238,6 @@ struct AcyclicBest {
   void resetPi() {
     for (StateId i = 0, N = piStates_; i < N; ++i) pi[i] = 0;
   }
-
-
-  typedef std::vector<StateId> Order;
-  Order order_;  // TODO: can leave this empty if we already have sorted states
 
   bool acyclic() const { return !back_edges_ && !self_loops_; }
 

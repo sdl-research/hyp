@@ -783,6 +783,9 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDe
   MESSAGE(STATUS "Disabling TBB malloc: TBB_LIBRARY=${TBB_LIBRARY} TBBMALLOC_LIBRARY=${TBBMALLOC_LIBRARY}")
 endif()
 
+find_package(Nadeau) # header only
+MESSAGE(STATUS "Nadeau include directory: ${NADEAU_INCLUDE_DIR}")
+
 
 # Boost
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -999,6 +1002,11 @@ set(INDIRECT_UTIL_LIB_DEPENDENCIES
   Vocabulary
   ${BZIP2_LIBRARIES}
   )
+
+if (WIN32)
+  list(APPEND INDIRECT_UTIL_LIB_DEPENDENCIES psapi.lib)
+endif()
+
 if(ZLIB_FOUND)
   # kenlm was built with this
   sdl_quiet_compiled_setting(HAVE_LIBZ 1)

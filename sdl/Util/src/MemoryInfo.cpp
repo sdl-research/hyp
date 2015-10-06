@@ -26,6 +26,7 @@
 #include <sdl/Util/ThreadSpecific.hpp>
 #include <sdl/Util/LogHelper.hpp>
 
+
 #ifdef _WIN32
 #include <process.h>
 #define getpid _getpid

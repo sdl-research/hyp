@@ -48,6 +48,7 @@ class MemoryInfo {
   double getSizeInMB();
   double getSizeInGB();
 
+
  private:
   enum { buflen = 64 };
 

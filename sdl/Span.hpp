@@ -185,6 +185,14 @@ inline bool encloses(TokenSpan const& container, TokenSpan const& x) {
   return container.first <= x.first && container.second >= x.second;
 }
 
+inline bool emptyIntersection(TokenSpan const& x, TokenSpan const& y) {
+  return y.second <= x.first || x.second <= y.first;
+}
+
+inline bool collides(TokenSpan const& x, TokenSpan const& y) {
+  return y.second > x.first && x.second > y.first;
+}
+
 inline bool contains(TokenSpan const& container, Position p) {
   return p >= container.first && p < container.second;
 }

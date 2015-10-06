@@ -988,6 +988,11 @@ struct HypergraphBase : Resource {
     assert(isMutable());
     addUncomputedProperties(kAcyclic);
   }
+
+  void unknownAcyclic() const {
+    clearUncomputedProperties(kAcyclic|kSortedStates);
+  }
+
 };
 
 inline std::ostream& operator<<(std::ostream& out, HypergraphBase const& self) {

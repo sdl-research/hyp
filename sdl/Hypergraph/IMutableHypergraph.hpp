@@ -159,7 +159,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
  private:
-  /// accept value naively. post: getProperties() returns p
+  /// accept value naively. post: properties() returns p
   virtual void setProperties(Properties p) = 0;
 
 

@@ -55,6 +55,7 @@
 */
 
 #include <stack>
+#include <sdl/Hypergraph/SortStates.hpp>
 #include <sdl/Hypergraph/PrintOptions.hpp>
 #include <sdl/Hypergraph/Derivation.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
@@ -154,7 +155,8 @@ inline void maybeThrowEmptySetException(bool throwEmptySetException) {
 
 VERBOSE_EXCEPTION_DECLARE(BestPathException)
 
-/// example nbest visitor that fills your vector of DerivationPtr with the (up to) nbest. you may prefer to iterate
+/// example nbest visitor that fills your vector of DerivationPtr with the (up to) nbest. you may prefer to
+/// iterate
 /// over a vector to writing your own visitor.
 template <class Arc>
 struct HoldNbestDerivAndWeights {
@@ -1105,7 +1107,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
                                                                               << " tail=head self-loops)");
         return true;
       } else {  // reset mu for non-acyclic version
-        SDL_WARN(Hypergraph.BestPath.acyclic,
+        SDL_INFO(Hypergraph.BestPath.acyclic,
                  "You asked for acyclic best-path, but there were cycles due to "
                      << acyclic.back_edges_ << " cycle-causing arcs during topological sort. "
                                                "For greater speed in this case, set acyclic: false or else "
@@ -1132,9 +1134,9 @@ struct BestPath : TransformBase<Transform::Inplace> {
        if nVisited, set *nVisited to number of best paths actually visited (for pad-nbest)
     */
     template <class Filter, class DerivVisitor>
-    DerivationPtr visit_nbestFilter(NbestId nbest, DerivVisitor const& visitor, Filter const& filter = Filter(),
-                             bool throwEmptySetException = false, NbestId* nVisited = 0,
-                             bool onlyBestPathIf1best = false) {
+    DerivationPtr visit_nbestFilter(NbestId nbest, DerivVisitor const& visitor,
+                                    Filter const& filter = Filter(), bool throwEmptySetException = false,
+                                    NbestId* nVisited = 0, bool onlyBestPathIf1best = false, bool modifyIfUnsortedAcyclic = true) {
       BinaryVisitor<DerivVisitor> binvisitor(visitor, hg);
       DerivationPtr r = 0;
       if (nbest == 0) {
@@ -1166,13 +1168,14 @@ struct BestPath : TransformBase<Transform::Inplace> {
         typedef ReadEdgeCostMap<Arc> Ecost;
         Ecost ec;
 
-        bool const canAcyclic = simpleGraph
+        bool const canAcyclic = simpleGraph // && trySortStates(hg, modifyIfUnsortedAcyclic)
                                 && (onlyBestPathIf1best && nbest == 1 || hg.tryForceFirstTailOutArcs());
         // TODO@JG: implement finite CFG case in AcyclicBest
         // TODO@JG: implement non-mutable case in AcyclicBest (data stack for copy of arc adjacencies during
         // dfs)
-        bool const isAcyclic
-            = hasProperties(hg.properties(), kAcyclic);  // TODO@JG: actually, we can do acyclic 1-best even
+        Properties props = hg.properties();
+        bool const isAcyclic = props & kAcyclic;
+        // TODO@JG: actually, we can do acyclic 1-best even
         // when there are self-loops. but that's ok because
         // of the acyclic option trying even when we don't
         // have it marked acyclic
@@ -1225,7 +1228,8 @@ struct BestPath : TransformBase<Transform::Inplace> {
         SDL_DEBUG(Hypergraph.BestPath, "found 1-best; visiting " << (nbest > 1 ? "(up-to) " : "") << nbest
                                                                  << "-best.");
         if (nbest == 1) {
-          visitor(r, r->weight<Weight>(), (NbestId)0);  // we don't use saved best cost, because that may be a summary
+          visitor(r, r->weight<Weight>(),
+                  (NbestId)0);  // we don't use saved best cost, because that may be a summary
           // of e.g. FeatureWeightTpl feature vector
           if (nVisited) *nVisited = 1;
           return r;
@@ -1242,8 +1246,8 @@ struct BestPath : TransformBase<Transform::Inplace> {
     }
 
     template <class DerivVisitor>
-    DerivationPtr visit_nbest(NbestPlusTies nbest, DerivVisitor const& visitor, bool throwEmptySetException = false,
-                       NbestId* nVisited = 0) {
+    DerivationPtr visit_nbest(NbestPlusTies nbest, DerivVisitor const& visitor,
+                              bool throwEmptySetException = false, NbestId* nVisited = 0) {
       NbestId maxn = nbest.maxnbest();
       if (opt.noFilterNeeded(nbest.nbest))
         return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), noFilter(),
@@ -1291,7 +1295,8 @@ struct BestPath : TransformBase<Transform::Inplace> {
     struct BuildDerivation {
       HG const& hg_;
       Pi pi_;  // Pi = best-predecessor property map (Arc *) - lightweight copy
-      std::vector<DerivationPtr> deriv_;  // memoize to prevent infinite loop in computing a loopy best-derivation,
+      std::vector<DerivationPtr>
+          deriv_;  // memoize to prevent infinite loop in computing a loopy best-derivation,
       // and create a linear, rather than exponential, size derivation for pathological CFGs like:
       // S->T T; T->U U ; .... ; Z -> z
       BuildDerivation(HG const& hg, Pi pi) : hg_(hg), pi_(pi), deriv_(hg.sizeForHeads()) {}
@@ -1900,7 +1905,8 @@ DerivationPtr visitNbest(V const& v, NbestPlusTies n, IHypergraph<Arc> const& hg
                          NbestId* nVisited = 0) {
   if (n.nbest == 1) {
     typename Arc::Weight w;
-    DerivationPtr const& r = bestPath(hg, opt, throwEmptySetException, &w);  // no sequence point for fn params
+    DerivationPtr const& r
+        = bestPath(hg, opt, throwEmptySetException, &w);  // no sequence point for fn params
     if (r) v(r, w, kFirstNbestId);
     if (nVisited) *nVisited = (bool)r;
     return r;

@@ -13,6 +13,9 @@
     rearrange the states of a hypergraph into two parts, (terminal labeled, and
     not - nonterm meaning not terminal labeled, not meaning having a nonterminal
     label, or in topological (bottom up or top down) order
+
+    TODO: write the in-place part w/ HypergraphBase only (no weight) and/or add
+    to HypergraphBase a clone-arc member for copies to MutableHypergraph?
 */
 
 
@@ -371,6 +374,18 @@ StateId sortStates(IHypergraph<A> const& h, IMutableHypergraph<A>* out,
   SortStates<A> ss(opt, kNoState);
   ss.inout(h, out);
   return ss.partBoundary;
+}
+
+template <class A>
+bool trySortStates(IHypergraph<A> const& hg, bool modifyIfPossible = true) {
+  if (hg.properties() & kSortedStates)
+    return true;
+  else if (modifyIfPossible && hg.isMutable()) {
+    SortStates<A> ss;
+    ss.inplace(static_cast<IMutableHypergraph<A> &>(const_cast<IHypergraph<A> &>(hg)));
+    return true;
+  } else
+    return false;
 }
 
 struct SortStatesTransform : SortStatesOptions, TransformBase<Transform::Inplace> {
