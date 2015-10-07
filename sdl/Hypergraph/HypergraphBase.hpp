@@ -1068,6 +1068,14 @@ void printState(std::ostream& out, StateId s, HypergraphBase const& hg, bool inl
 void printArcTails(std::ostream& out, StateIdContainer const& tails, HypergraphBase const* hg,
                    bool inlineGraphLabels = false);
 
+inline void print(std::ostream& out, StateIdContainer const& tails, HypergraphBase const* hg) {
+  printArcTails(out, tails, hg);
+}
+
+inline void print(std::ostream& out, Syms const& syms, HypergraphBase const* hg) {
+  print(out, syms, hg ? hg->vocab() : 0);
+}
+
 void printArc(std::ostream& out, ArcBase const* arc, HypergraphBase const* hg, bool inlineGraphLabels);
 
 void printArc(std::ostream& out, ArcBase const* arc, HypergraphBase const* hg);
@@ -1131,6 +1139,10 @@ inline void print(std::ostream& o, std::size_t s, HypergraphBase const& hg) {
 }
 #endif
 #endif
+
+inline void print(std::ostream &out, StateIdContainer const& x, IVocabulary const* voc) {
+  out << Util::makePrintable(x);
+}
 
 
 }}

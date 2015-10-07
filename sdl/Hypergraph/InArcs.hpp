@@ -64,14 +64,18 @@ void visitOutArcs(Visitor& visit, StateId tail, HypergraphBase const& hg, bool i
 }
 
 struct ToTail0 {
+  StateId from(ArcBase const* arc) const { return arc->head_; }
   StateId to(ArcBase const* arc) const {
-    StateIdContainer const& tails = arc->tails();
-    assert(!tails.empty());
-    return tails[0];
+    assert(!arc->tails_.empty());
+    return arc->tails_.front();
   }
 };
 
 struct ToHead {
+  StateId from(ArcBase const* arc) const {
+    assert(!arc->tails_.empty());
+    return arc->tails_.front();
+  }
   StateId to(ArcBase const* arc) const { return arc->head_; }
 };
 
@@ -85,7 +89,9 @@ struct PeekableArcGeneratorBase {
 
 template <class Arc>
 struct InArcsGenerator : PeekableArcGeneratorBase<Arc> {
-  InArcsGenerator(HypergraphBase const& hg, StateId s) : i_(), end_(hg.numInArcs(s)), s_(s), hg_(&hg) {}
+  InArcsGenerator(HypergraphBase const& hg, StateId s) : i_(), end_(hg.numInArcs(s)), s_(s), hg_(&hg) {
+    SDL_TRACE(Hypergraph.InArcs, "InArcsGenerator(" << s << ")");
+  }
 
  protected:
   ArcId i_, end_;
@@ -93,7 +99,7 @@ struct InArcsGenerator : PeekableArcGeneratorBase<Arc> {
   HypergraphBase const* hg_;
 
  public:
-  StateId state() const { return s_; }
+  // StateId state() const { return s_; }
 
   Arc* peek() const { return (Arc*)hg_->inArc(s_, i_); }
   operator bool() const { return i_ != end_; }
@@ -109,7 +115,9 @@ struct InArcsGenerator : PeekableArcGeneratorBase<Arc> {
 
 template <class Arc>
 struct OutArcsGenerator : PeekableArcGeneratorBase<Arc> {
-  OutArcsGenerator(HypergraphBase const& hg, StateId s) : i_(), end_(hg.numOutArcs(s)), s_(s), hg_(&hg) {}
+  OutArcsGenerator(HypergraphBase const& hg, StateId s) : i_(), end_(hg.numOutArcs(s)), s_(s), hg_(&hg) {
+    SDL_TRACE(Hypergraph.InArcs, "OutArcsGenerator(" << s << ")");
+  }
 
  protected:
   ArcId i_, end_;
@@ -117,7 +125,7 @@ struct OutArcsGenerator : PeekableArcGeneratorBase<Arc> {
   HypergraphBase const* hg_;
 
  public:
-  StateId state() const { return s_; }
+  // StateId state() const { return s_; }
 
   Arc* peek() const { return (Arc*)hg_->outArc(s_, i_); }
   operator bool() const { return i_ != end_; }
@@ -149,15 +157,21 @@ struct ContainerArcsGenerator : PeekableArcGeneratorBase<Arc> {
     } else
       i = end = 0;
   }
-  ContainerArcsGenerator() {}
-  ContainerArcsGenerator(HypergraphBase::ArcsContainer const* arcs) { init(arcs); }
+  // ContainerArcsGenerator() {}
+  // ContainerArcsGenerator(HypergraphBase::ArcsContainer const* arcs) { init(arcs); }
   ContainerArcsGenerator(HypergraphBase const& hg, StateId s, OutArcsT) {
     assert(hg.isMutable());
     init(hg.maybeOutArcs(s));
+    SDL_TRACE(Hypergraph.InArcs,
+              "ContainerArcsGenerator("
+                  << s << ", OutArcsT()): " << Util::printablePointerRange(i, end, Util::commas()));
   }
   ContainerArcsGenerator(HypergraphBase const& hg, StateId s, InArcsT) {
     assert(hg.isMutable());
     init(hg.maybeInArcs(s));
+    SDL_TRACE(Hypergraph.InArcs,
+              "ContainerArcsGenerator("
+                  << s << ", InArcsT()): " << Util::printablePointerRange(i, end, Util::commas()));
   }
   typedef ArcHandle const* ArcHandleI;
   ArcHandleI i, end;
@@ -190,6 +204,7 @@ struct AdjacentArcsBase {
 
  public:
   AdjacentArcsBase(HypergraphBase const& hg, bool hgHasNative) : hg(hg), hgHasNative(hgHasNative) {
+    SDL_TRACE(Hypergraph.InArcs, "AdjacentArcsBase(" << hgHasNative << ")");
     isMutable = hg.isMutable();
     if (hasNative())
       if (!hgHasNative)
@@ -208,44 +223,57 @@ struct ComputeStateOrder {
   HypergraphBase const& hg;
   StateOrder& order;
   Util::DfsColorArray color;
-  StateId nBackEdges, maxBackEdges;
+  StateId nBackEdges, maxBackEdges, nStates;
   ComputeStateOrder(StateOrder& order, HypergraphBase const& hg, StateId nStates,
                     StateId maxBackEdges = kNoState)
-      : hg(hg), order(order), color(nStates), maxBackEdges(maxBackEdges), nBackEdges() {
+      : hg(hg), order(order), color(nStates), maxBackEdges(maxBackEdges), nBackEdges(), nStates(nStates) {
     assert(hg.isGraph());
   }
   template <class Context>
   void start(StateId from) {
-    color.set(from, Util::kQueuedOrClosed);
+    assert(from < nStates);
+    color.set(from, Util::kOpened);
     open<Context>(from);
   }
   // TODO (maybe) explicit DFS stack instead of using real stack locals
   template <class Context>
   void open(StateId from) {
-    assert(color[from] == Util::kQueuedOrClosed);
-    color.set(from, Util::kOpened);
+    assert(from < nStates);
+    assert(color[from] == Util::kOpened);
     Context context(hg, from);
     while (context) {  // next (new) child
       ArcBase const* arc = context.get();
+      assert(context.from(arc) == from);
       context.got();
       StateId const to = context.to(arc);
-      Util::DfsColor const prevColor = color.test_set(to, Util::kQueuedOrClosed);
-      if (prevColor == Util::kFresh) {
+      Util::DfsColor const prevColor = color.test_set_if_false(to, Util::kOpened);
+      assert((prevColor == Util::kFresh) == !prevColor);
+      SDL_TRACE(Hypergraph.InArcs, "queueing? dfs color for " << to << " was " << prevColor << " now is "
+                                                              << color[to]);
+      if (!prevColor) {
+        assert(color[to] == Util::kOpened);
+        SDL_TRACE(Hypergraph.InArcs, "visiting fresh edge " << from << " => " << to << " via " << *arc);
         open<Context>(to);
-        SDL_TRACE(Hypergraph.InArcs, "queued fresh edge => " << to << " via " << *arc);
       } else if (prevColor == Util::kOpened) {  // back edge
-        SDL_TRACE(Hypergraph.InArcs, "back edge => " << to << " via " << *arc);
-        if (kSelfLoopIsBackEdge || to != from) SDL_TRACE(Hypergraph.InArcs, hg);
-        if (++nBackEdges > maxBackEdges) {
-          SDL_INFO(Hypergraph.BestPath, "aborting acyclic best after "
-                                            << nBackEdges << " back edges; this most recent one is " << *arc);
-          throw CycleException();
+        if (kSelfLoopIsBackEdge || to != from) {
+          SDL_TRACE(Hypergraph.InArcs, "back edge => " << to << " (already dfs-opened) from " << from
+                                                       << " via " << *arc);
+          SDL_TRACE(Hypergraph.InArcs, hg);
+          if (++nBackEdges > maxBackEdges) {
+            SDL_INFO(Hypergraph.BestPath, "aborting acyclic best after "
+                                              << nBackEdges << " back edges; this most recent one is " << *arc);
+            throw CycleException();
+          }
         }
-      } else  // else already queued or closed
+      } else {  // else already queued or closed
+        assert(color[to] == Util::kQueuedOrClosed);
         SDL_TRACE(Hypergraph.InArcs, "already queued " << to);
+      }
     }
     order.push_back(from);
+    SDL_TRACE(Hypergraph.InArcs, "dfs finished " << from);
     color.set(from, Util::kQueuedOrClosed);
+    assert(color[from] == Util::kQueuedOrClosed);
   }
 };
 
@@ -308,6 +336,7 @@ struct InArcs : AdjacentArcsBase<kMustStoreNatively> {
      non-inarc IHypergraph, because of single tmpInArcs
   */
   ArcsContainer const* inArcs(StateId st) {
+    assert(emptyInArcs.empty());
     if (hasNative()) {
       if (isMutable) return hg.maybeInArcs(st);
       hg.inArcs(st, tmpInArcs);
@@ -322,9 +351,12 @@ struct InArcs : AdjacentArcsBase<kMustStoreNatively> {
      for mutable hg only.
   */
   struct Context : ToTail0, ContainerArcsGenerator<Arc> {
-    StateId state_;
-    Context(HypergraphBase const& hg, StateId s) : ContainerArcsGenerator<Arc>(hg, s, InArcsT()), state_(s) {}
-    StateId state() const { return state_; }
+    // StateId state_;
+    Context(HypergraphBase const& hg, StateId s)
+        : ContainerArcsGenerator<Arc>(hg, s, InArcsT())
+    //    , state_(s)
+    {}
+    // StateId state() const { return state_; }
   };
 
   /**
@@ -394,7 +426,6 @@ struct FirstTailOutArcs : AdjacentArcsBase<kMustStoreNatively> {
     return (ArcHandle)adj[st][tail];
   }
 
-
   /**
      will call visit.acceptOut(arc, tail) for all arcs with (first, depending on indexed type) tail = tail.
   */
@@ -411,6 +442,7 @@ struct FirstTailOutArcs : AdjacentArcsBase<kMustStoreNatively> {
      non-inarc IHypergraph, because of single tmpInArcs
   */
   ArcsContainer const* outArcs(StateId st) {
+    assert(emptyInArcs.empty());
     if (hasNative()) {
       if (isMutable) return hg.outArcs(st);
       hg.outArcs(st, tmpOutArcs);
@@ -435,10 +467,12 @@ struct FirstTailOutArcs : AdjacentArcsBase<kMustStoreNatively> {
      for mutable hg only.
   */
   struct Context : ToHead, ContainerArcsGenerator<Arc> {
-    StateId state_;
+    // StateId state_;
     Context(HypergraphBase const& hg, StateId s)
-        : ContainerArcsGenerator<Arc>(hg, s, OutArcsT()), state_(s) {}
-    StateId state() const { return state_; }
+        : ContainerArcsGenerator<Arc>(hg, s, OutArcsT())
+    //    , state_(s)
+    {}
+    // StateId state() const { return state_; }
   };
 
   /**
@@ -465,7 +499,7 @@ struct FirstTailOutArcs : AdjacentArcsBase<kMustStoreNatively> {
     assert(isGraph);  // TODO: we can extend this to non-graph but not trivially - would have to use similar
     // approach as Hypergraph/Level
     StateId start = hg.start();
-    SDL_DEBUG(Hypergraph.InArcs, "single axiom for graph w/ inarcs: " << start);
+    SDL_DEBUG(Hypergraph.InArcs, "graph w/ out-arcs: start=" << start);
     if (start == kNoState) return 0;
     StateId nStatesForOrder = hg.sizeForHeads();
     return isMutable ? orderTailsLast<Context>(order, start, nStatesForOrder, maxBackEdges)

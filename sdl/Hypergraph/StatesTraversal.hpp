@@ -220,7 +220,7 @@ void visitGraphOutArcsTopsort(IHypergraph<Arc> const& hg, Visitor &visitor, std:
   std::size_t nBackEdges = adj.orderTailsLast(orderReverse, maxBackEdges, true);
   if (nBackEdges > maxBackEdges)
     SDL_THROW_LOG(StatesTraversal.visitGraphOutArcsTopsort, CycleException,
-                  nBackEdges<<" cycle-causing edges; can't topologically sort");
+                  nBackEdges<<" cycle-causing back edges; can't topologically sort");
   if (orderReverse.empty()) return;
   typedef StateId const* I;
   for (I i = &orderReverse.back(), last = &orderReverse.front(); ; ) {

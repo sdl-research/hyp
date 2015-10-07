@@ -193,9 +193,7 @@ struct IWordToPhrase : Evictable {
   }
 
   virtual bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const {
-    std::string const& word(voc.str(sym));  // may need a copy because ...
-    return stringToPhrase(word,
-                          phrase);  // ... this may add symbols to our vocab while possibly referring to word
+    return stringToPhrase(voc.str(sym), phrase);
   }
 
   virtual bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const {
@@ -256,16 +254,7 @@ struct IStringToPhrase : IWordToPhrase {
     return operator()(std::string(word.first, word.second), phrase);
   }
 
-  /** (you implement this)
-
-      caution: if `word` comes from vocab and AcceptString adds to same vocab,
-      caller must pass a copy of `word` or else your stringToPhrase must make
-      one word before calling AcceptString(...), if `word` will be used after
-      that - see xmt-code-gotchas.md - caller is the only one who can be
-      informed about this in all cases. we don't copy always because of the cost
-      and the lack of need in most use cases. if user-friendly bug avoidance is
-      desired, it's IVocabulary that should be fixed.
-  */
+  /** (you implement this) */
   bool stringToPhrase(std::string const& word, AcceptString const& phrase) const OVERRIDE {
     SDL_THROW_LOG(WordToPhrase.stringToPhrase, ProgrammerMistakeException, "unimplemented stringToPhrase");
     return false;

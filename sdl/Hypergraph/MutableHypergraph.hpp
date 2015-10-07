@@ -596,7 +596,6 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     return this->properties_ & kGraph;
   }
 
-
   void computeFsmGraphProperty() const {
     if (fsmChecked) return;
     this->properties_ &= ~(kFsmProperties);  // need to do this up front because isFsmCheck itself may check
@@ -612,6 +611,8 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   void notifyArcsModified() OVERRIDE {
     notifyArcImpl();
     this->properties_ &= ~kSortedOutArcs;
+    this->properties_ &= ~kAcyclic;
+    assert(checkValid());
   }
 
   void finishDeleted(std::size_t ndel) {
@@ -763,26 +764,42 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     clearStates();
   }
 
-  ArcId numInArcs(StateId state) const OVERRIDE {
+  ArcId numInArcs(StateId from) const OVERRIDE {
     assert(storesInArcs());
-    return state < inArcsPerState_.size() ? inArcsPerState_[state].size() : 0;
+    return from < inArcsPerState_.size() ? inArcsPerState_[from].size() : 0;
   }
-  ArcId numOutArcs(StateId state) const OVERRIDE {
+  ArcId numOutArcs(StateId from) const OVERRIDE {
     assert(storesOutArcsImpl());
-    return state < outArcsPerState_.size() ? outArcsPerState_[state].size() : 0;
+    return from < outArcsPerState_.size() ? outArcsPerState_[from].size() : 0;
   }
 
-  Arc* inArc(StateId state, ArcId aid) const OVERRIDE {
+  Arc* inArc(StateId from, ArcId aid) const OVERRIDE {
     assert(storesInArcs());
-    assert(state < inArcsPerState_.size());
-    return (Arc*)inArcsPerState_[state][aid];
+    assert(from < inArcsPerState_.size());
+    assert(from == inArcsPerState_[from][aid]->head_);
+    return (Arc*)inArcsPerState_[from][aid];
   }
 
-  Arc* outArc(StateId state, ArcId aid) const OVERRIDE {
+  Arc* outArc(StateId from, ArcId aid) const OVERRIDE {
     assert(storesOutArcsImpl());
-    assert(state < outArcsPerState_.size());
-    return (Arc*)outArcsPerState_[state][aid];
+    assert(from < outArcsPerState_.size());
+    assert(!(this->properties_ & kStoreFirstTailOutArcs) || from == outArcsPerState_[from][aid]->tails_[0]);
+    return (Arc*)outArcsPerState_[from][aid];
   }
+
+#if __cplusplus >= 201103L
+  void replaceFirstTailOutArcsMove(StateId from, ArcsContainer && with) OVERRIDE {
+    assert(this->properties_ & kStoreFirstTailOutArcs);
+    assert(from < outArcsPerState_.size());
+    outArcsPerState_[from] = with;
+  }
+#else
+  void replaceFirstTailOutArcsMove(StateId from, ArcsContainer & with) OVERRIDE {
+    assert(this->properties_ & kStoreFirstTailOutArcs);
+    assert(from < outArcsPerState_.size());
+    outArcsPerState_[from].swap(with);
+  }
+#endif
 
   bool storesInArcs() const { return this->properties_ & kStoreInArcs; }
   bool storesOutArcs() const { return storesOutArcsImpl(); }
@@ -1285,6 +1302,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   ArcsContainer const* maybeOutArcs(StateId state) const OVERRIDE {
+    assert(this->emptyArcs_.empty());
     assert(storesOutArcsImpl());
     return state < outArcsPerState_.size() ? &outArcsPerState_[state] : &this->emptyArcs_;
   }
@@ -1295,6 +1313,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   ArcsContainer const* maybeInArcs(StateId state) const OVERRIDE {
+    assert(this->emptyArcs_.empty());
     assert(storesInArcs());
     return state < inArcsPerState_.size() ? &inArcsPerState_[state] : &this->emptyArcs_;
   }

@@ -217,7 +217,7 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn {  // empty base clas
 
   void checkTopoSort(StateId from, StateId to) {
     if (to <= from)
-      SDL_THROW_LOG(Hypergraph, CycleException, "AllPairsSortedDag found cycle-causing arc "
+      SDL_THROW_LOG(Hypergraph, CycleException, "AllPairsSortedDag found cycle-causing back edge "
                                                     << from << "->" << to
                                                     << " (requires " SDL_ALL_PAIRS_REQUIRES_SORTED_DAG ")");
   }

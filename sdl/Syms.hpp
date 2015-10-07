@@ -139,41 +139,41 @@ inline Sym const* lexicalInteriorLength(Syms const& syms, SymsIndex &lenInterior
 
 //TODO: it would be nice to put print in a .cpp somewhere since performance
 //isn't critical. but we have no lib for the toplevel xmt/ headers.
-inline void print(std::ostream &out, Sym sym, IVocabulary const* vocab
+inline void print(std::ostream &out, Sym sym, IVocabulary const* voc
                   , char const* variablePrefix="X") {
   //TODO: consider always escaping for syntax rule formats (anything with
   //delimiters other than space, which we never allow inside tokens, etc)
   if (variablePrefix && sym.isVariable())
     out << "X" << sym.index();
-  // some unit tests use vocabularies that don't set a variables vocab. if
+  // some unit tests use vocabularies that don't set a variables voc. if
   // that's fixed, we can remove the variablePrefix arg
-  else if (vocab)
-    out << vocab->str(sym); // if you want quotes + escaping, use Hypergraph/SymbolPrint.hpp
+  else if (voc)
+    out << voc->str(sym); // if you want quotes + escaping, use Hypergraph/SymbolPrint.hpp
   else
     out << sym.getTypeNameShort() << sym.index();
 }
 
-inline void print(std::ostream &out, Sym sym, IVocabularyPtr const& vocab
+inline void print(std::ostream &out, Sym sym, IVocabularyPtr const& voc
                   , char const* variablePrefix="X") {
-  print(out, sym, vocab.get(), variablePrefix);
+  print(out, sym, voc.get(), variablePrefix);
 }
 
 /**
-   to be found by ADL for out << Util::print(phrase, vocab).
+   to be found by ADL for out << Util::print(phrase, voc).
 */
-inline void print(std::ostream &out, Syms const& phrase, IVocabulary const* vocab) {
-  Util::printRangeState(out, vocab, phrase);
+inline void print(std::ostream &out, Syms const& phrase, IVocabulary const* voc) {
+  Util::printRangeState(out, voc, phrase);
 }
 
 /**
-   to be found by ADL for out << Util::print(phrase, vocab).
+   to be found by ADL for out << Util::print(phrase, voc).
 */
-inline void print(std::ostream &out, Syms const& phrase, IVocabulary const& vocab) {
-  Util::printRangeState(out, &vocab, phrase);
+inline void print(std::ostream &out, Syms const& phrase, IVocabulary const& voc) {
+  Util::printRangeState(out, &voc, phrase);
 }
 
-inline void print(std::ostream &out, Syms const& phrase, IVocabularyPtr const& vocab) {
-  Util::printRangeState(out, vocab.get(), phrase);
+inline void print(std::ostream &out, Syms const& phrase, IVocabularyPtr const& voc) {
+  Util::printRangeState(out, voc.get(), phrase);
 }
 
 

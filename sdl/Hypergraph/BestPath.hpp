@@ -393,11 +393,11 @@ struct BestPathOptions : graehl::BestTreeOptions {
         .init(true)(
             "attempt acyclic viterbi best-path even if input is not marked as acyclic, falling back to "
             "best-first bottom-up if it turns out to have cycles - enabling this is slower if you know your "
-            "hypergraph has cycles. See WARN messages sdl.Hypergraph.BestPath.acyclic to see whether this "
+            "hypergraph has cycles. See INFO messages sdl.Hypergraph.BestPath.acyclic to see whether this "
             "is happening.");
     c("acyclic-max-back-edges", &acyclicMaxBackEdges)
         .init(0)(
-            "accept acyclic best-path result if there are this many or fewer cycle-causing edges - the "
+            "accept acyclic best-path result if there are this many or fewer cycle-causing back edges - the "
             "(n-)best paths are potentially wrong if this is > 0 - see INFO messages "
             "sdl.Hypergraph.BestPath.acyclic for reports that this might be happening.");
     c("allow-rereach", &allow_rereach)
@@ -1109,7 +1109,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
       } else {  // reset mu for non-acyclic version
         SDL_INFO(Hypergraph.BestPath.acyclic,
                  "You asked for acyclic best-path, but there were cycles due to "
-                     << acyclic.back_edges_ << " cycle-causing arcs during topological sort. "
+                     << acyclic.back_edges_ << " cycle-causing back edges during topological sort. "
                                                "For greater speed in this case, set acyclic: false or else "
                                                "(risking 1-best inaccuracy) increase the configured "
                                                "acyclic-max-back-edges: " << opt.acyclicMaxBackEdges);
@@ -1134,9 +1134,9 @@ struct BestPath : TransformBase<Transform::Inplace> {
        if nVisited, set *nVisited to number of best paths actually visited (for pad-nbest)
     */
     template <class Filter, class DerivVisitor>
-    DerivationPtr visit_nbestFilter(NbestId nbest, DerivVisitor const& visitor,
-                                    Filter const& filter = Filter(), bool throwEmptySetException = false,
-                                    NbestId* nVisited = 0, bool onlyBestPathIf1best = false, bool modifyIfUnsortedAcyclic = true) {
+    DerivationPtr visit_nbestFilter(NbestId nbest, DerivVisitor const& visitor, Filter const& filter = Filter(),
+                                    bool throwEmptySetException = false, NbestId* nVisited = 0,
+                                    bool onlyBestPathIf1best = false, bool modifyIfUnsortedAcyclic = true) {
       BinaryVisitor<DerivVisitor> binvisitor(visitor, hg);
       DerivationPtr r = 0;
       if (nbest == 0) {
@@ -1168,7 +1168,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
         typedef ReadEdgeCostMap<Arc> Ecost;
         Ecost ec;
 
-        bool const canAcyclic = simpleGraph // && trySortStates(hg, modifyIfUnsortedAcyclic)
+        bool const canAcyclic = simpleGraph  // && trySortStates(hg, modifyIfUnsortedAcyclic)
                                 && (onlyBestPathIf1best && nbest == 1 || hg.tryForceFirstTailOutArcs());
         // TODO@JG: implement finite CFG case in AcyclicBest
         // TODO@JG: implement non-mutable case in AcyclicBest (data stack for copy of arc adjacencies during

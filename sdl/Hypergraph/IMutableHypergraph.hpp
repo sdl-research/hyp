@@ -127,6 +127,15 @@ struct IMutableHypergraph : IHypergraph<A> {
 
   virtual bool isMutable() const OVERRIDE { return true; }
 
+#if __cplusplus >= 201103L
+  virtual void replaceFirstTailOutArcsMove(StateId from, ArcsContainer && with) = 0;
+  void replaceFirstTailOutArcsMove(StateId from, ArcsContainer & with) {
+    replaceFirstTailOutArcsMove(from, (ArcsContainer&&)with);
+  }
+#else
+  virtual void replaceFirstTailOutArcsMove(StateId from, ArcsContainer & with) = 0;
+#endif
+
   // if you know you've added arcs out of order (or in order), inform us by setting the property
   void setBestFirstArcs(bool on = true) { setPropertiesAt(kOutArcsSortedBestFirst, on); }
 
@@ -240,6 +249,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
   OutArcsGenerator outArcs(StateId outFromState) const {
+    assert(emptyArcs_.empty());
     ArcsContainer const& arcs = outFromState == kNoState ? emptyArcs_ : *this->maybeOutArcs(outFromState);
     return OutArcsGenerator(arcs.begin(), arcs.end());
   }
