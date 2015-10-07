@@ -68,9 +68,7 @@ struct FeaturesVisitor<Weight, typename Weight::IsFeatureWeight> {
     typedef typename Weight::value_type value_type;
     forall (value_type aPair, weight) { visitor(aPair.first, aPair.second); }
   }
-#if __cplusplus >= 201103L
   static inline void setFeatures(Weight& w, sdl::shared_ptr<Features>& f) { w.setFeatures(std::move(f)); }
-#endif
   static inline void setFeatures(Weight& w, sdl::shared_ptr<Features> const& f) { w.setFeatures(f); }
   static inline Features* featuresWrite(Weight& w) { return &w.featuresWrite(); }
   static inline Features const* maybeFeatures(Weight const& w) { return w.maybeFeatures(); }

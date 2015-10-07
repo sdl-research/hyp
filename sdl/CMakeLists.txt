@@ -107,7 +107,12 @@ else()
   # 0: *very*-slightly better performance (but spurious valgrind warnings)
   sdl_compiled_setting(SDL_VALGRIND 0)
 endif()
-
+if(OPEN_SOURCE_RELEASE)
+  message(STATUS "OPEN_SOURCE_RELEASE")
+  if (NOT APPLE)
+    set(LINUX 1) #TODO: why isn't cmake setting this for us?
+  endif()
+endif()
 if(LINUX)
   message(STATUS "The target system is LINUX.")
 endif()
@@ -221,10 +226,10 @@ endif()
 
 
 set(UTF8_ROOT "${SDL_SHARED_EXTERNALS_PATH}/utf8")
-set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.3.0-newapi")
+set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.1")
+set(YAML_CPP_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/yaml-cpp-0.5.1")
 if(UNIX)
   set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2")
-  set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.1")
 endif()
 if(ANDROID)
   set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.0")
@@ -232,13 +237,10 @@ endif()
 
 if (WIN32)
   set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2-1.0.6")
-  # TODO: recompile 4.3.1
-  set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.2.3")
-  set(TBB_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/tbb-4.2.3")
-elseif(UNIX AND NOT APPLE)
-  set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.3.1")
-  set(TBB_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/tbb-4.3.1")
 endif()
+
+set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.4.0")
+set(TBB_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/tbb-4.4.0")
 
 if(UNIX AND NOT APPLE)
   # Apache Portable Runtime (used by Log4cxx)
@@ -299,16 +301,17 @@ if(WIN32)
   # -DCRT_NO_DEPRECATE # could be used to get builtin vsnprintf if we want to try that
 
   # Set Boost options
-  set(SDL_BOOST_MINOR 57)
+  set(SDL_BOOST_MINOR 59)
   set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
+  set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
-  set(Boost_COMPILER "-vc100")
+  set(Boost_COMPILER "-vc140")
   set(Boost_NO_SYSTEM_PATHS 1)
 #  set(Boost_USE_STATIC_LIBS ON) # Enable if statically linking to boost
     add_definitions(-DBOOST_ALL_DYN_LINK) # Disable if statically linking to boost
 
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
-  set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.5")
+  set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.8")
 
 
   set(VS_MULTITHREADED_DEBUG_DLL_IGNORE_LIBRARY_FLAGS
@@ -341,21 +344,6 @@ if(WIN32)
 
 endif()
 
-if(WIN32 OR UNIX)
-  find_package(BZIP2)
-  message(STATUS "BZIP2 Found: ${BZIP2_LIBRARIES}")
-  if(NOT BZIP2_FOUND)
-    find_package(BZip2)
-  endif()
-  if(BZIP2_FOUND)
-    # kenlm was built with this
-    sdl_compiled_setting(HAVE_BZLIB 1)
-  else()
-    message(WARNING "not found: BZIP2")
-  endif()
-else()
-  message(STATUS "no bzip2 (yet)")
-endif()
 
 set(SDL_NO_CLANG_OPTIMIZATIONS "-fcx-limited-range -fno-signaling-nans -fno-rounding-math")
 
@@ -367,8 +355,8 @@ if(USING_GCC)
   add_definitions("-Wno-deprecated") # FC12/libraries/svmtool++/include/svmtool/tagger.h
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
   message(STATUS "found gcc version ${GCC_VERSION}")
-  if(GCC_VERSION VERSION_LESS 4.7)
-    message(WARNING "${PROJECT_NAME} will eventually require g++ 4.7 or greater (you have '${CMAKE_CXX_COMPILER}', version=${GCC_VERSION}.")
+  if(GCC_VERSION VERSION_LESS 5.0)
+    message(FATAL_ERROR "${PROJECT_NAME} requires g++ 5 or greater (you have '${CMAKE_CXX_COMPILER}', version=${GCC_VERSION}.")
   else ()
     set(SDL_HAVE_GCC_4_7 1)
     message(STATUS "have gcc 4.7 or higher")
@@ -437,8 +425,6 @@ elseif(USING_CLANG)
     # sdl_enable_cpp11()
   endif()
   # sdl_enable_cpp11()
-else ()
-  message(WARNING "Your C++ compiler does not support C++11.")
 endif()
 
 
@@ -554,13 +540,6 @@ endif()
 sdl_compiled_setting(HAVE_BUILTIN_POPCNT ${SDL_HAVE_BUILTIN_POPCNT})
 # -mpopcnt gives 'population count' i.e. number of set bits - might require corei7 - check cluster machines!
 
-# CA-9649 Use older boost, icu, kenlm from xmt-externals master
-if(NOT DEFINED SDL_ETS_BUILD)
-set(SDL_ETS_BUILD 0)
-endif()
-sdl_compiled_setting(SDL_ETS_BUILD ${SDL_ETS_BUILD})
-message(INFO "SDL_ETS_BUILD ${SDL_ETS_BUILD}")
-
 if(UNIX)
   sdl_quiet_compiled_setting(HAVE_BUILTIN_CLZ 1)
   if (NOT CMAKE_COMPILER_IS_CLANGXX)
@@ -657,24 +636,16 @@ if(UNIX)
 
   if(LINUX)
     set(Boost_NO_SYSTEM_PATHS 1)
-    if(SDL_ETS_BUILD)
-      set(SDL_BOOST_MINOR 57)
-      set(Boost_COMPILER "-gcc44")
-    else()
-      set(SDL_BOOST_MINOR 58)
-      set(Boost_COMPILER "")
-    endif()
+    set(SDL_BOOST_MINOR 59)
+    set(Boost_COMPILER "-gcc51")
     set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
     set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
+    set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
     set(Boost_USE_STATIC_LIBS OFF)
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
     set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
-    if(SDL_ETS_BUILD)
-      set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-5.4")
-    else()
-      set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
-    endif()
+    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
 
 
     if(CMAKE_COMPILER_IS_GNUCXX)
@@ -783,8 +754,6 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDe
   MESSAGE(STATUS "Disabling TBB malloc: TBB_LIBRARY=${TBB_LIBRARY} TBBMALLOC_LIBRARY=${TBBMALLOC_LIBRARY}")
 endif()
 
-find_package(Nadeau) # header only
-MESSAGE(STATUS "Nadeau include directory: ${NADEAU_INCLUDE_DIR}")
 
 
 # Boost
@@ -817,7 +786,7 @@ endif()
 set(boost_libs_shared ${boost_libs})
 
 # Proceed to generate the normal all-inclusive Boost libraries
-message(STATUS "looking for Boost version ${Boost_FIND_VERSION}")
+message(STATUS "looking for Boost version ${Boost_FIND_VERSION} compiler ${Boost_COMPILER}")
 find_package(Boost ${Boost_FIND_VERSION} REQUIRED COMPONENTS ${boost_libs})
 
 MESSAGE(STATUS "SDL_BOOST_MINOR ${SDL_BOOST_MINOR} Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS}")

@@ -64,32 +64,12 @@ struct MemcpyMovable<std::vector<T>, typename VoidIf<typename MemcpyMovable<T>::
   enum { value = true };
 };
 
-#if __cplusplus >= 201103L
 template <class T>
 struct MoveConstruct {
   static inline void moveConstruct(T *to, T &from) {
     new(to) T(std::move(from));
   }
 };
-
-#else
-
-template <class T, class Unless=void>
-struct MoveConstruct {
-  static inline void moveConstruct(T *to, T &from) {
-    new(to) T;
-    adlSwap(*to, from);
-  }
-};
-
-template <class T>
-struct MoveConstruct<T, VoidIf<typename T::memcpy_movable> > {
-  static inline void moveConstruct(T *to, T &from) {
-    std::memcpy(to, &from, sizeof(T));
-    new (&from) T;
-  }
-};
-#endif
 
 /**
    pre: to is uninit storage of sizeof(T) bytes.
@@ -105,25 +85,13 @@ static inline T* moveConstruct(void *to, T &from) {
 
 template <class T>
 void moveAssign(T &to, T &from) {
-#if __cplusplus >= 201103L
   to = std::move(from);
-#else
-  to.~T();
-  moveConstruct(&to, from);
-#endif
 }
 
-#if __cplusplus >= 201103L
 template <class T>
 T && moved(T &from) {
   return static_cast<T&&>(from);
 }
-#else
-template <class T>
-T const& moved(T &from) {
-  return from;
-}
-#endif
 
 }}
 

@@ -248,17 +248,16 @@ struct ComputeStateOrder {
       StateId const to = context.to(arc);
       Util::DfsColor const prevColor = color.test_set_if_false(to, Util::kOpened);
       assert((prevColor == Util::kFresh) == !prevColor);
-      SDL_TRACE(Hypergraph.InArcs, "queueing? dfs color for " << to << " was " << prevColor << " now is "
-                                                              << color[to]);
+      //SDL_TRACE(Hypergraph.InArcs, "dfs color for " << to << " was " << prevColor << " now is " << color[to]);
       if (!prevColor) {
         assert(color[to] == Util::kOpened);
         SDL_TRACE(Hypergraph.InArcs, "visiting fresh edge " << from << " => " << to << " via " << *arc);
         open<Context>(to);
       } else if (prevColor == Util::kOpened) {  // back edge
         if (kSelfLoopIsBackEdge || to != from) {
-          SDL_TRACE(Hypergraph.InArcs, "back edge => " << to << " (already dfs-opened) from " << from
+          SDL_DEBUG(Hypergraph.InArcs, "back edge => " << to << " (already dfs-opened) from " << from
                                                        << " via " << *arc);
-          SDL_TRACE(Hypergraph.InArcs, hg);
+          SDL_DEBUG(Hypergraph.InArcs, "hg with back edge:\n" << hg);
           if (++nBackEdges > maxBackEdges) {
             SDL_INFO(Hypergraph.BestPath, "aborting acyclic best after "
                                               << nBackEdges << " back edges; this most recent one is " << *arc);

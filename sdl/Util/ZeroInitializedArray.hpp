@@ -118,12 +118,10 @@ struct ZeroInitializedArray
 
   ZeroInitializedArray() { zero(); }
   explicit ZeroInitializedArray(bool) { setMinusOne(); }
-#if __cplusplus >= 201103L
   ZeroInitializedArray(ZeroInitializedArray &&)=default;
   ZeroInitializedArray& operator=(ZeroInitializedArray &&)=default;
   ZeroInitializedArray(ZeroInitializedArray const&)=default;
   ZeroInitializedArray& operator=(ZeroInitializedArray const&)=default;
-#endif
   friend inline void swap(ZeroInitializedArray & x1, ZeroInitializedArray & x2) {
     x1.swap(x2);
   }
@@ -203,7 +201,6 @@ struct ZeroInitializedHeapArray
     memcpy_from(other.space);
   }
 
-#if __cplusplus >= 201103L
   ZeroInitializedHeapArray(ZeroInitializedHeapArray &&o) {
     space = o.space;
     N = o.N;
@@ -217,7 +214,6 @@ struct ZeroInitializedHeapArray
     o.space = 0;
     return *this;
   }
-#endif
 
   ~ZeroInitializedHeapArray() {
     free();
@@ -358,7 +354,6 @@ struct UnsizedArray
     x1.swapSameSize(x2);
   }
 
-#if __cplusplus >= 201103L
   UnsizedArray(UnsizedArray &&o) {
     space = o.space;
     o.space = 0;
@@ -372,20 +367,12 @@ struct UnsizedArray
   }
   UnsizedArray(UnsizedArray const&o) = delete;
   UnsizedArray& operator=(UnsizedArray const&o) = delete;
-#endif
- private:
+
+private:
   void free()
   {
     UserAllocator::free((char*)space);
   }
-#if !(__cplusplus >= 201103L)
-  void operator=(UnsizedArray const& other) {
-    std::abort();
-  }
-  UnsizedArray(UnsizedArray const& other) {
-    std::abort();
-  }
-#endif
 };
 
 

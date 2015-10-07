@@ -126,11 +126,8 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
 
  public:
   void set(std::string const&);
-#if __cplusplus >= 201103L
+
   FeatureWeightTpl() = default;
-#else
-  FeatureWeightTpl() {}
-#endif
 
   /** copy ctor that immediately makes a unique writable pointer */
   FeatureWeightTpl(FeatureWeightTpl const& cpfrom, bool)
@@ -299,9 +296,7 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   DEFINE_OPENFST_COMPAT_FUNCTIONS(Feature)
 
   void setFeatures(shared_ptr<Map> const& pMap) { pMap_ = pMap; }
-#if __cplusplus >= 201103L
   void setFeatures(shared_ptr<Map>&& pMap) { pMap_ = std::move(pMap); }
-#endif
 
   shared_ptr<Map> const& featuresPtr() const { return pMap_; }
 

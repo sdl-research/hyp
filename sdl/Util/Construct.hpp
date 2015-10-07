@@ -23,7 +23,6 @@
 /// SDL_*DEFAULT won't actually define the members (you'd have to do that
 /// yourself if you already e.g. defined something else blocking it)
 
-#if __cplusplus >= 201103L
 #define SDL_DEFAULT_CTOR(TYPE) TYPE() = default;
 #define SDL_NONCOPYABLE(TYPE)   \
   TYPE(TYPE const& o) = delete; \
@@ -34,17 +33,6 @@
 #define SDL_COPY_DEFAULT(TYPE)   \
   TYPE(TYPE const& o) = default; \
   TYPE& operator=(TYPE const& o) = default;
-#else
-#define SDL_DEFAULT_CTOR(TYPE) \
-  TYPE() {}
-#define SDL_NONCOPYABLE(TYPE)                     \
- private:                                         \
-  TYPE(TYPE const& o) { std::abort(); }           \
-  void operator=(TYPE const& o) { std::abort(); } \
- public:
-#define SDL_MOVE_DEFAULT(TYPE)
-#define SDL_COPY_DEFAULT(TYPE)
-#endif
 
 /// opt for default move ctor/assign if C++11, disable entirely copy (you may still wish to define swap
 /// yourself but the default C++11 should be smart enough to use 3 moves to swap (after checking for

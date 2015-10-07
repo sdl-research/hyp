@@ -35,12 +35,7 @@ UErrorCode nfcErr = U_ZERO_ERROR;
 
 char const* const kIcuNfc("nfc");
 char const* const kIcuNfkc("nfkc");
-#ifdef _WIN32
-IcuNormalizer2Ptr gNfc = icu_54::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_COMPOSE, nfcErr);
-IcuNormalizer2Ptr gNfkc = icu_54::Normalizer2::getInstance(NULL, kIcuNfkc, UNORM2_COMPOSE, nfcErr);
-IcuNormalizer2Ptr gNfd = icu_54::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_DECOMPOSE, nfcErr);
-IcuNormalizer2Ptr gNfkd = icu_54::Normalizer2::getInstance(NULL, kIcuNfkc, UNORM2_DECOMPOSE, nfcErr);
-#else
+
 typedef icu::Normalizer2 IcuNormalizer;
 #if U_ICU_VERSION_MAJOR_NUM < 49
 icu::Normalizer2 const* gNfc = icu::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_COMPOSE, nfcErr);
@@ -52,7 +47,6 @@ icu::Normalizer2 const* gNfc = icu::Normalizer2::getNFCInstance(nfcErr);
 icu::Normalizer2 const* gNfkc = icu::Normalizer2::getNFKCInstance(nfcErr);
 icu::Normalizer2 const* gNfd = icu::Normalizer2::getNFDInstance(nfcErr);
 icu::Normalizer2 const* gNfkd = icu::Normalizer2::getNFKDInstance(nfcErr);
-#endif
 #endif
 
 

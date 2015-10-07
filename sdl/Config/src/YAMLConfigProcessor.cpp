@@ -65,12 +65,7 @@ struct MapIndex : MapIndexBase {
 
 template <class Key, class Val>
 inline void addKeyVal(ConfigNode& node, Key const& key, Val const& val, YAMLConfigProcessor const& proc) {
-#if SDL_HAVE_AT_LEAST_YAML_CPP_0_5
   node.force_insert(key, val);
-#else
-  // O(n) - awful
-  node[key] = val;
-#endif
 }
 
 /**
@@ -203,11 +198,7 @@ ConfigNode copyToTree(ConfigNode const& in) {
 
 /// deep copy
 ConfigNode clone(ConfigNode const& in) {
-#if SDL_HAVE_AT_LEAST_YAML_CPP_0_5
   return Clone(in);
-#else
-  return copyToTree(in);
-#endif
 }
 
 // static linkage:

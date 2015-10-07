@@ -209,14 +209,13 @@ struct ArcTpl : ArcBase {
   /// for GraphInlineInputLabels expandInputLabels - otherwise will crash (these aren't real stateids)
   void appendInline(Sym s) { tails_.push_back((StateId)s.id_); }
 
-#if __cplusplus >= 201103L
   /// move
   // virtual dtor might have prevented automatic use of these
   ArcTpl(ArcTpl&& o) = default;
   ArcTpl& operator=(ArcTpl&& o) = default;
   ArcTpl(ArcTpl const& o) = default;
   ArcTpl& operator=(ArcTpl const& o) = default;
-#endif
+
   /**
      for making a copy with a tail id substitution. this could be a free fn but
      this is more efficient (no extra copying).
@@ -450,7 +449,6 @@ class ArcWithDataTpl : public ArcTpl<W> {
 
   bool isDataEmpty() const { return data_ == NULL; }
 
-#if __cplusplus >= 201103L
   /// move
   ArcWithDataTpl(ArcWithDataTpl&& o) noexcept : Base(static_cast<Base&&>(o)),
                                                 data_(o.data_),
@@ -463,7 +461,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
     deleter_ = o.deleter_;
     o.deleter_ = 0;
   }
-#endif
+
   /**
      alternative to making copy private: don't copy data. we could copy data but
      not deleter but then lifetime of source (may have been temporary) isn't

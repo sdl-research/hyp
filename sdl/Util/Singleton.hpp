@@ -42,11 +42,7 @@
 #pragma once
 
 #ifndef SDL_STATIC_LOCAL_INIT_ATOMIC
-# if defined(__GNUC__) && __GNUC__ >=4 || __cplusplus >= 201103L
-# define SDL_STATIC_LOCAL_INIT_ATOMIC 1
-# else
-# define SDL_STATIC_LOCAL_INIT_ATOMIC 0
-# endif
+#define SDL_STATIC_LOCAL_INIT_ATOMIC 1
 #endif
 
 #if !SDL_STATIC_LOCAL_INIT_ATOMIC

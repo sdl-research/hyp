@@ -59,13 +59,13 @@ struct ArcBase SDL_OBJECT_TRACK_BASE(ArcBase) {
     tails_[0] = srcState;
     tails_[1] = lexState;
   }
-#if __cplusplus >= 201103L
+
   /// move, copy. in case object tracking interferes w/ defaults
   ArcBase(ArcBase && o) = default;
   ArcBase& operator=(ArcBase && o) = default;
   ArcBase(ArcBase const& o) = default;
   ArcBase& operator=(ArcBase const& o) = default;
-#endif
+
   friend inline std::ostream& operator<<(std::ostream & out, ArcBase const& self) {
     self.print(out);
     return out;

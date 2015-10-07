@@ -24,13 +24,8 @@
 
 namespace sdl { namespace Util {
 
-#if __cplusplus >= 201103L
 SdlFloat constexpr ln10 = (SdlFloat)M_LN10;
 SdlFloat constexpr ln10inv = (SdlFloat)M_LOG10E;
-#else
-SdlFloat const ln10 = (SdlFloat)M_LN10;
-SdlFloat const ln10inv = (SdlFloat)M_LOG10E;
-#endif
 
 inline SdlFloat logProbForCost(SdlFloat costVal) {
   return costVal * (SdlFloat)M_LN10;

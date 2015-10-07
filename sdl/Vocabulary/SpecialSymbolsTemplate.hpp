@@ -30,18 +30,18 @@ template <typename Symbol>
 struct SpecialSymbolTemplate {
   static std::string const TOKEN;
   static Sym const ID_LINKED;
-#if __cplusplus >= 201103L
-  static constexpr Sym ID = {Symbol::id};
-#else
+#ifdef WIN32 // Still needed on MSVC2015
   static Sym const ID;  // = { Symbol::id };
+#else
+  static constexpr Sym ID = { Symbol::id };
 #endif
 };
-#if __cplusplus >= 201103L
+#ifdef WIN32
 template <typename Symbol>
-Sym constexpr SpecialSymbolTemplate<Symbol>::ID;
+Sym const SpecialSymbolTemplate<Symbol>::ID = { Symbol::id };
 #else
 template <typename Symbol>
-Sym const SpecialSymbolTemplate<Symbol>::ID = {Symbol::id};
+Sym constexpr SpecialSymbolTemplate<Symbol>::ID;
 #endif
 
 /**

@@ -39,13 +39,7 @@ inline void quickExit(int rc = 0) {
   std::cout.flush();
   std::cerr.flush();
   using namespace std;
-#if __cplusplus >= 201103L
   std::quick_exit(rc);
-#else
-  /// for msvc: _exit Performs quick C library termination procedures,
-  /// terminates the process, and exits with the supplied status code.
-  _exit(rc);
-#endif
 }
 
 

@@ -45,7 +45,7 @@ sdl_find_library(
   PATHS ${TBB_ROOT}/lib
   DOC "Libraries to link against for TBB")
 
-set(TBB_LIBRARY optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_DEBUG})
+set(TBB_LIBRARY optimized ${TBB_LIBRARY_RELEASE} debug ${TBB_LIBRARY_RELEASE})
 
 # look for the Scalable Memory Allocator library
 unset(TBBMALLOC_LIBRARY_RELEASE CACHE)
@@ -62,7 +62,7 @@ sdl_find_library(
   PATHS ${TBB_ROOT}/lib
   DOC "Libraries to link against for TBBMALLOC")
 
-set(TBBMALLOC_LIBRARY optimized ${TBBMALLOC_LIBRARY_RELEASE} debug ${TBBMALLOC_LIBRARY_DEBUG})
+set(TBBMALLOC_LIBRARY optimized ${TBBMALLOC_LIBRARY_RELEASE} debug ${TBBMALLOC_LIBRARY_RELEASE})
 
 unset(TBBMALLOC_PROXY_LIBRARY_RELEASE CACHE)
 sdl_find_library(
@@ -78,7 +78,7 @@ sdl_find_library(
   PATHS ${TBB_ROOT}/lib
   DOC "Libraries to link against for TBBMALLOC_PROXY")
 
-set(TBBMALLOC_PROXY_LIBRARY optimized ${TBBMALLOC_PROXY_LIBRARY_RELEASE} debug ${TBBMALLOC_PROXY_LIBRARY_DEBUG})
+set(TBBMALLOC_PROXY_LIBRARY optimized ${TBBMALLOC_PROXY_LIBRARY_RELEASE} debug ${TBBMALLOC_PROXY_LIBRARY_RELEASE})
 
 if(TBB_INCLUDE_DIR AND TBB_LIBRARY)
   sdl_libpath(${TBB_LIBRARY_RELEASE})

@@ -61,7 +61,6 @@
 #define SDL_FINAL final
 #else
 #if __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 7
-#if __cplusplus >= 201103L
 #if !defined(HAVE_CPP11_NOEXCEPT)
 #define HAVE_CPP11_NOEXCEPT 1
 #endif
@@ -70,7 +69,6 @@
 #endif
 #if !defined(HAVE_CPP11_OVERRIDE)
 #define HAVE_CPP11_OVERRIDE 1
-#endif
 #endif
 #endif
 #if HAVE_CPP11_OVERRIDE

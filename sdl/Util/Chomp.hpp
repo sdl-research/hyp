@@ -31,11 +31,7 @@ namespace Util {
 typedef boost::iterator_range<std::string::const_iterator> SplitRange;
 
 inline void eraseLastChar(std::string& str) {
-#if __cplusplus >= 201103L
   str.pop_back();
-#else
-  str.erase(str.size() - 1);
-#endif
 }
 
 /**

@@ -105,12 +105,7 @@ class FloatWeightTpl : public WeightBase {
 
   /// uninitialized - we want users to explicitly init to zero or one as
   /// appropriate e.g. vector<ViterbiWeight>(N, ViterbiWeight::zero())
-#if __cplusplus >= 201103L
   FloatWeightTpl() = default;  // uninitialized but an explicit weight() init would then 0-init?
-#else
-  FloatWeightTpl() {}
-#endif
-
   FloatWeightTpl(T v) : value_(v) {}
   FloatWeightTpl(DoubleT v) : value_((T)v) {}
   FloatWeightTpl(int v) : value_((T)v) {}

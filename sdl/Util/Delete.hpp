@@ -154,7 +154,7 @@ struct AutoDelete {
   AutoDelete(T const* toDelete) : toDelete((T*)toDelete) {}
   ~AutoDelete() { delete toDelete; }
   void clone(T const& r) { reset(new T(r)); }
-#if __cplusplus >= 201103L
+
   AutoDelete(AutoDelete&& o) {
     toDelete = o.toDelete;
     o.toDelete = 0;
@@ -167,11 +167,6 @@ struct AutoDelete {
   }
   AutoDelete(AutoDelete const& o) = delete;
   AutoDelete& operator=(AutoDelete const& o) = delete;
-#else
- private:
-  AutoDelete(AutoDelete const&) { std::abort(); }
-  void operator=(AutoDelete const& o) { std::abort(); }
-#endif
 };
 
 /// use a default-constructed T unless an existing T* was provided

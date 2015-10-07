@@ -232,11 +232,11 @@ endfunction(sdl_add_test_executable)
 
 # macro so we can grab sdl_UTEST_DIR var later ? seems to work as function.
 function(sdl_add_unit_test PROJECT_NAME TEST_EXE SUB_UNIT_TEST_NAME)
-  add_test(${PROJECT_NAME}-${SUB_UNIT_TEST_NAME} ${TEST_EXE} --catch_system_errors --detect_fp_exceptions --detect_memory_leaks --log_level=test_suite --run_test=${SUB_UNIT_TEST_NAME} --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
+  add_test(${PROJECT_NAME}-${SUB_UNIT_TEST_NAME} ${TEST_EXE} --catch_system_errors --detect_memory_leaks --log_level=test_suite --run_test=${SUB_UNIT_TEST_NAME} --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
 endfunction(sdl_add_unit_test)
 
 function(sdl_add_unit_tests PROJECT_NAME TEST_EXE)
-  add_test(${PROJECT_NAME} ${TEST_EXE} --catch_system_errors --detect_fp_exceptions --detect_memory_leaks --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
+  add_test(${PROJECT_NAME} ${TEST_EXE} --catch_system_errors --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
 endfunction(sdl_add_unit_tests)
 
 function(sdl_unit_tests_executable EXECUTABLE_NAME SOURCE_DIR)
@@ -334,7 +334,7 @@ macro(sdl_tests)
     add_executable(${texe} ${tsrc} ${TEST_INCS} ${PROJECT_SOURCE_DIR})
     target_link_libraries(${texe} ${SDL_BOOST_TEST_LIBRARIES} ${LINK_DEPENDENCIES} ${UTIL_LIBRARIES} ${ARGN})
     #TODO: use sdl_add_unit_test macro?
-    add_test(${PROJECT_NAME}-${tname} ${texe} "--catch_system_errors --detect_fp_exceptions --detect_memory_leaks --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-${tname}.xml")
+    add_test(${PROJECT_NAME}-${tname} ${texe} "--catch_system_errors --detect_memory_leaks --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-${tname}.xml")
     # sdl_msvc_links(${PROJECT_NAME}-${tname})
   endforeach(tsrc)
   #sdl_msvc_links(${PROJECT_TEST_NAME})
