@@ -332,7 +332,7 @@ struct ArcWithDataDeleter {
 
 template <class T>
 struct ArcWithDataDeleterTpl : public ArcWithDataDeleter {
-  void dispose(void* ptr) const OVERRIDE { delete (T*)ptr; }
+  void dispose(void* ptr) const override { delete (T*)ptr; }
 };
 
 template <class T>

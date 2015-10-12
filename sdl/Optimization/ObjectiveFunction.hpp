@@ -42,7 +42,7 @@
 #include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/Util/Delete.hpp>
 #include <sdl/Optimization/IOriginalFeatureIds.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Optimization/Types.hpp>
 #include <sdl/Util/Sleep.hpp>
 
@@ -84,7 +84,7 @@ class L2RegularizeFct : public IRegularizeFct<FloatT> {
  public:
   explicit L2RegularizeFct(FloatT v) : inverseVariance_(1 / (double)v) {}
 
-  FloatT operator()(FloatT const* params, FloatT* gradients, FeatureId numParams) const OVERRIDE {
+  FloatT operator()(FloatT const* params, FloatT* gradients, FeatureId numParams) const override {
     FloatT norm(0.0);
     for (FeatureId i = 0; i < numParams; ++i) {
       FloatT const x = params[i];
@@ -181,7 +181,7 @@ template <class FloatT, class Queue>
 struct GradientUpdate_Queue : public IUpdate<FloatT> {
   GradientUpdate_Queue(Queue& queue) : queue_(queue) {}
 
-  void update(FeatureId index, FloatT value) OVERRIDE {
+  void update(FeatureId index, FloatT value) override {
     while (!queue_.bounded_push(makePodPair(index, value)))
       ;
   }
@@ -193,7 +193,7 @@ template <class FloatT>
 struct GradientUpdate : public IUpdate<FloatT> {
   GradientUpdate(FloatT* gradients) : gradients_(gradients) {}
 
-  void update(FeatureId index, FloatT value) OVERRIDE { gradients_[index] += value; }
+  void update(FeatureId index, FloatT value) override { gradients_[index] += value; }
 
   FloatT* gradients_;
 };
@@ -212,7 +212,7 @@ struct ScaledGradientUpdate : public IUpdate<FloatT> {
   ScaledGradientUpdate(FloatT* gradients, FloatT scale = (FloatT)1.0)
       : gradients_(gradients), scaleTimes_(1 / scale) {}
 
-  void update(FeatureId index, FloatT value) OVERRIDE { gradients_[index] += value * scaleTimes_; }
+  void update(FeatureId index, FloatT value) override { gradients_[index] += value * scaleTimes_; }
 
   FloatT* gradients_;
   FloatT scaleTimes_;

@@ -114,7 +114,7 @@ typedef PrependForInputStateFn<StateId> PrependForInputStateIdFn;
 
 struct PrependForInputStateCached : PrependForInputStateIdFn {
   PrependForInputState cached_;
-  virtual void append(StateId const& state, Syms& appendTo) OVERRIDE {
+  virtual void append(StateId const& state, Syms& appendTo) override {
     if (state < cached_.size()) appendTo.append(cached_[state]);
   }
 };

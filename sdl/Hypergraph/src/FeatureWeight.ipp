@@ -26,7 +26,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>  // crucial
-#include <sdl/Util/Move.hpp>
+#include <utility>
 
 namespace sdl {
 namespace Hypergraph {
@@ -44,8 +44,10 @@ void FeatureWeightTpl<FloatT, MapT, SumT>::set(std::string const& str) {
   if (!ok)
     SDL_THROW_LOG(Hypergraph.FeatureWeightTpl, InvalidInputException, "Could not parse '" << str << "'");
   this->value_ = weightProxy.first;
-  if (weightProxy.second.is_initialized())
-    Util::moveAssign(this->featuresWrite(), *weightProxy.second);
+  if (weightProxy.second.is_initialized()) {
+    assert(&this->featuresWrite() != &*weightProxy.second);
+    this->featuresWrite() = std::move(*weightProxy.second);
+  }
 }
 
 

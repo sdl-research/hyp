@@ -20,7 +20,7 @@
 
 #include <sdl/SharedPtr.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/IVocabulary.hpp>
 
@@ -35,7 +35,7 @@ namespace Hypergraph {
    from ViterbiArc to LogArc).
 */
 template <class FromA, class ToA>
-class CastHypergraph SDL_FINAL : public IHypergraph<ToA> {
+class CastHypergraph final : public IHypergraph<ToA> {
 
  public:
   typedef FromA FromArc;
@@ -46,39 +46,39 @@ class CastHypergraph SDL_FINAL : public IHypergraph<ToA> {
     this->final_ = hg.final();
   }
 
-  Properties uncomputedProperties() const OVERRIDE { return hg_.uncomputedProperties(); }
+  Properties uncomputedProperties() const override { return hg_.uncomputedProperties(); }
 
-  CastHypergraph<FromArc, ToArc>* clone() const OVERRIDE {
+  CastHypergraph<FromArc, ToArc>* clone() const override {
     return new CastHypergraph<FromArc, ToArc>(hg_);
   }
 
   /**
      Casts the arc using reinterpret_cast and returns it.
   */
-  ToArc* inArc(StateId s, ArcId arcid) const OVERRIDE {
+  ToArc* inArc(StateId s, ArcId arcid) const override {
     return reinterpret_cast<ToArc*>(hg_.inArc(s, arcid));
   }
 
   /**
      Casts the arc using reinterpret_cast and returns it.
   */
-  ToArc* outArc(StateId s, ArcId arcid) const OVERRIDE {
+  ToArc* outArc(StateId s, ArcId arcid) const override {
     return reinterpret_cast<ToArc*>(hg_.outArc(s, arcid));
   }
 
   // Simple delegation:
-  ArcId numInArcs(StateId s) const OVERRIDE { return hg_.numInArcs(s); }
-  ArcId numOutArcs(StateId s) const OVERRIDE { return hg_.numOutArcs(s); }
-  StateId size() const OVERRIDE { return hg_.size(); }
-  Sym inputLabel(StateId s) const OVERRIDE { return hg_.inputLabel(s); }
-  Sym outputLabel(StateId s) const OVERRIDE { return hg_.outputLabel(s); }
-  Properties properties() const OVERRIDE { return hg_.properties(); }
-  IVocabularyPtr getVocabulary() const OVERRIDE { return hg_.getVocabulary(); }
+  ArcId numInArcs(StateId s) const override { return hg_.numInArcs(s); }
+  ArcId numOutArcs(StateId s) const override { return hg_.numOutArcs(s); }
+  StateId size() const override { return hg_.size(); }
+  Sym inputLabel(StateId s) const override { return hg_.inputLabel(s); }
+  Sym outputLabel(StateId s) const override { return hg_.outputLabel(s); }
+  Properties properties() const override { return hg_.properties(); }
+  IVocabularyPtr getVocabulary() const override { return hg_.getVocabulary(); }
 
   /** since arc mapping doesn't affect state labels, defer. */
-  bool outputLabelFollowsInput(StateId s) const OVERRIDE { return hg_.outputLabelFollowsInput(s); }
+  bool outputLabelFollowsInput(StateId s) const override { return hg_.outputLabelFollowsInput(s); }
 
-  bool outputLabelFollowsInput() const OVERRIDE { return hg_.outputLabelFollowsInput(); }
+  bool outputLabelFollowsInput() const override { return hg_.outputLabelFollowsInput(); }
 
   IHypergraph<FromArc> const& hg_;
 };

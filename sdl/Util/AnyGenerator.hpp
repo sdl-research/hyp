@@ -74,12 +74,12 @@ struct IGeneratorBase : intrusive_refcount<IGeneratorBase<V>, RefCount> {
 
 template <class V, class T>
 struct IGenerator : IGeneratorBase<V>, GeneratorBase<IGenerator<V, T>, V, NonPeekableT> {
-  virtual bool peekable() const OVERRIDE { return false; }
+  virtual bool peekable() const override { return false; }
 };
 
 template <class V>
 struct IGenerator<V, PeekableT> : IGeneratorBase<V>, GeneratorBase<IGenerator<V, PeekableT>, V, PeekableT> {
-  virtual bool peekable() const OVERRIDE { return true; }  // means you can cast parent to this type
+  virtual bool peekable() const override { return true; }  // means you can cast parent to this type
   virtual void pop() = 0;
   virtual V peek() const = 0;
 };
@@ -87,24 +87,24 @@ struct IGenerator<V, PeekableT> : IGeneratorBase<V>, GeneratorBase<IGenerator<V,
 // G is the concrete Generator implementation type, or, if T=PeekableT, G may be an iterator (adapted to
 template <class GenImpl, class V, class T>
 struct AnyGeneratorImplBase : IGenerator<V, T>, GeneratorBase<AnyGeneratorImplBase<GenImpl, V, T>, V, T> {
-  virtual std::size_t visit(AnyVisitor<V> const& v) OVERRIDE {
+  virtual std::size_t visit(AnyVisitor<V> const& v) override {
     UTIL_DBG_MSG(12, "Any:visit");
     return Util::visitGenerate(g, v);
   }
-  virtual std::size_t visit(AnyVisitor<V> const& v, std::size_t max) OVERRIDE {
+  virtual std::size_t visit(AnyVisitor<V> const& v, std::size_t max) override {
     UTIL_DBG_MSG(12, "Any:visit(max)");
     return Util::visitGenerate(g, v, max);
   }
-  virtual std::size_t append(std::vector<V>& v) OVERRIDE {
+  virtual std::size_t append(std::vector<V>& v) override {
     UTIL_DBG_MSG(12, "Any:append");
     return Util::appendGenerate(g, v);
   }
-  virtual std::size_t append(std::vector<V>& v, std::size_t max) OVERRIDE {
+  virtual std::size_t append(std::vector<V>& v, std::size_t max) override {
     UTIL_DBG_MSG(12, "Any:append(max)");
     return Util::appendGenerate(g, v, max);
   }
-  virtual bool more() const OVERRIDE { return bool(g); }
-  virtual V next() OVERRIDE { return g(); }
+  virtual bool more() const override { return bool(g); }
+  virtual V next() override { return g(); }
   AnyGeneratorImplBase(GenImpl const& g) : g(g) {}
   AnyGeneratorImplBase() : g() {}
   template <class C1, class C2>

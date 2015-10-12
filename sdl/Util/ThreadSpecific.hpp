@@ -145,14 +145,6 @@ struct ThreadSpecificInt : boost::noncopyable {
 #endif
   }
   typedef ThreadSpecificInt<Int> Self;
-#if 0
-  // swaps values for this thread only
-  friend inline void swap(Self& a, Self& b) {
-    Int tmp = a;
-    a = b;
-    b = tmp;
-  }
-#endif
 
  private:
   void init(Int i) {

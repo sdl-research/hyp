@@ -48,12 +48,12 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
 
   HypergraphCrfObjFct(shared_ptr<Pairs> const& pHgPairs) : Base(), pHgTrainingPairs_(pHgPairs) {}
 
-  std::size_t getNumExamples() OVERRIDE { return pHgTrainingPairs_->size(); }
+  std::size_t getNumExamples() override { return pHgTrainingPairs_->size(); }
 
   /**
       Inserts feature weights into all training examples
    */
-  void setFeatureWeights(FloatT const* params, FeatureId numParams) OVERRIDE {
+  void setFeatureWeights(FloatT const* params, FeatureId numParams) override {
     pHgTrainingPairs_->setFeatureWeights(params, numParams);
   }
 
@@ -62,13 +62,13 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
       end).
    */
   void setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end, FloatT const* params,
-                         FeatureId numParams) OVERRIDE {
+                         FeatureId numParams) override {
     pHgTrainingPairs_->setFeatureWeights(begin, end, params, numParams);
   }
 
-  void accept(IObjectiveFunctionVisitor<FloatT>* visitor) OVERRIDE { visitor->visit(this); }
+  void accept(IObjectiveFunctionVisitor<FloatT>* visitor) override { visitor->visit(this); }
 
-  FloatT getUpdates(TrainingDataIndex begin, TrainingDataIndex end, IUpdate<FloatT>& updates) OVERRIDE {
+  FloatT getUpdates(TrainingDataIndex begin, TrainingDataIndex end, IUpdate<FloatT>& updates) override {
     using namespace Hypergraph;
 
     // The amount that the specified examples contribute to the

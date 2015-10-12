@@ -86,19 +86,10 @@ inline bool disjointUnion(Features& to, Features const& from) {
   return to.size() == expect;
 }
 
-#if SDL_EXTERNAL_FEATURES_SWAP_ONLY || __cplusplus >= 201103L
 // move but not copy
 typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
-#else
-// can copy
-typedef Util::ZeroInitializedHeapArray<FeatureValue> DenseFeatures;
-#endif
 
-#if __cplusplus >= 201103L
 FeatureValue constexpr kLnToFeatureValue = (SdlFloat)-M_LOG10E; // multiply ln(prob) by this for neglog10 cost (e^x)
-#else
-FeatureValue const kLnToFeatureValue = (SdlFloat)-M_LOG10E;
-#endif
 
 /// if str has e.g. "myfeat=4.3 ...", sets to["myfeat"]=4.3 (to may be filled
 /// with features already; only the ones named in str are overwritten)

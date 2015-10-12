@@ -139,7 +139,7 @@
 #include <boost/type_traits/add_reference.hpp>
 #include <boost/mpl/bool.hpp>
 #include <sdl/Util/RefCount.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/AnyVisitor.hpp>
 #include <sdl/Util/Debug.hpp>
 

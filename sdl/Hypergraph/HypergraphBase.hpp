@@ -49,7 +49,7 @@ struct HypergraphBase : Resource {
   // for uncomputedProperties() - properties() forces update of
   // fsm/graph/etc. mutable because properties() is const.
   mutable Properties properties_;
-  void initProcessPhase(InitProcessPhase phase) OVERRIDE {}
+  void initProcessPhase(InitProcessPhase phase) override {}
 
   StateId maxNotTerminalStateImpl() const {
     StateId const numStates = size();
@@ -122,7 +122,7 @@ struct HypergraphBase : Resource {
   /// first-tail) aren't already stored. else you'll have at least first-tail
   /// out-arcs
   virtual void forceFirstTailOutArcs() {
-    if (!storesOutArcs())
+    if (!(properties() & kStoreFirstTailOutArcs))
       SDL_THROW_LOG(Hypergraph.forceFirstTailOutArcs, ConfigException,
                     "hypergraph doesn't have at least first-tail-out-arcs");
   }
@@ -138,7 +138,6 @@ struct HypergraphBase : Resource {
     this->forceFirstTailOutArcs();
     this->removeInArcs();
   }
-
 
   /**
      fsm and graph require start state; for cfg it's optional. terminal labeled
@@ -522,7 +521,7 @@ struct HypergraphBase : Resource {
   */
   bool storesAllOutArcs() const;
 
-  std::string name() const OVERRIDE { return typename_; }
+  std::string name() const override { return typename_; }
 
   /**
      helper for prettier iteration syntax: forall (ArcId arci,
@@ -617,7 +616,6 @@ struct HypergraphBase : Resource {
   // does s have an outgoing transition matching every possible input symbol
   virtual bool hasAllOut(StateId s) const = 0;
 
-  virtual bool checkValid() const = 0;
   /**
      an fsm arc has two tails: second has the terminal (special or
      lexical)label, first does not.
@@ -939,6 +937,8 @@ struct HypergraphBase : Resource {
   */
   virtual void addArc(ArcBase*) { unimplementedMutableOnly("addArc"); }
 
+  virtual bool checkValid() const;
+
   // if we want we can move even more of IHypergraph / IMutableHypergraph inline
   // helper methods here.
 
@@ -993,6 +993,12 @@ struct HypergraphBase : Resource {
     clearUncomputedProperties(kAcyclic|kSortedStates);
   }
 
+  void unknownSortedStates() const {
+    clearUncomputedProperties(kSortedStates);
+  }
+
+  /// attempt to print adjacencies even if they're wrong (i.e. no sanity checking). for debugging.
+  virtual void printUnchecked(std::ostream &out) const;
 };
 
 inline std::ostream& operator<<(std::ostream& out, HypergraphBase const& self) {
@@ -1144,6 +1150,21 @@ inline void print(std::ostream &out, StateIdContainer const& x, IVocabulary cons
   out << Util::makePrintable(x);
 }
 
+void printStartAndFinal(std::ostream &out, HypergraphBase const& hg);
+
+struct PrintUnchecked {
+  HypergraphBase const& hg;
+  PrintUnchecked(HypergraphBase const& hg)
+      : hg(hg) {}
+  friend inline std::ostream& operator<<(std::ostream &out, PrintUnchecked const& self) {
+    self.print(out);
+    return out;
+  }
+  void print(std::ostream &out) const {
+    hg.printUnchecked(out);
+  }
+
+};
 
 }}
 

@@ -17,6 +17,7 @@
 #define SDL_UTIL__ADD_HPP
 #pragma once
 
+#include <utility>
 #include <vector>
 #include <deque>
 #include <list>
@@ -502,6 +503,17 @@ void pop(Collection& c) {
 template <class Collection>
 void popSwap(Collection& c, typename Collection::value_type& saveTop) {
   saveTop.swap(top(c));
+  pop(c);
+}
+
+/**
+   in case you have an expensive copy constructor, you can retrieve top via swap
+   rather than copy ctor or assignment. you'd use this since pop invalidates the
+   top value
+*/
+template <class Collection>
+void popMove(Collection& c, typename Collection::value_type& saveTop) {
+  saveTop = std::move(top(c));
   pop(c);
 }
 

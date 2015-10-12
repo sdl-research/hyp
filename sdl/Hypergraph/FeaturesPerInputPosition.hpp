@@ -49,7 +49,7 @@ struct NoFeatures : public IFeaturesPerInputPosition {
   /**
      Returns all features for a given input position.
   */
-  FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) OVERRIDE {
+  FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) override {
     return feats_; // empty
   }
 
@@ -66,7 +66,7 @@ struct TakeFeaturesFromVector : public IFeaturesPerInputPosition {
       : from_(vec), feats_(1)
   {}
 
-  FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) OVERRIDE {
+  FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) override {
     assert(position < from_.size());
     feats_[0] = from_[position];
     return feats_;
@@ -84,7 +84,7 @@ struct MultipleFeaturesPerInputPosition : public IFeaturesPerInputPosition {
   MultipleFeaturesPerInputPosition(std::vector<FeatureIdVec > const& feats)
       : feats_(feats) {}
 
-  FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) OVERRIDE {
+  FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) override {
     return position < feats_.size() ? feats_[position] : empty_;
   }
 

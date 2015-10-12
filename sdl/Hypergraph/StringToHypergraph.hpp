@@ -40,7 +40,7 @@
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 
 #include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {

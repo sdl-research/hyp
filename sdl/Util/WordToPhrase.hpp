@@ -26,7 +26,7 @@
 
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/AcceptString.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/Fields.hpp>
 #include <sdl/Syms.hpp>
 #include <sdl/Types.hpp>
@@ -250,99 +250,99 @@ struct IWordToPhrase : Evictable {
 };
 
 struct IStringToPhrase : IWordToPhrase {
-  bool fieldToPhrase(Field word, AcceptString const& phrase) const OVERRIDE {
+  bool fieldToPhrase(Field word, AcceptString const& phrase) const override {
     return operator()(std::string(word.first, word.second), phrase);
   }
 
   /** (you implement this) */
-  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const OVERRIDE {
+  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const override {
     SDL_THROW_LOG(WordToPhrase.stringToPhrase, ProgrammerMistakeException, "unimplemented stringToPhrase");
     return false;
   }
 };
 
 struct IUnicodesToPhrase : IWordToPhrase {
-  bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const OVERRIDE {
+  bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const override {
     SDL_THROW_LOG(WordToPhrase.unicodesToPhrase, ProgrammerMistakeException,
                   "unimplemented unicodesToPhrase");
     return false;
   }
 
-  virtual bool wstringToPhrase(std::wstring const& word, AcceptString const& phrase) const OVERRIDE {
+  virtual bool wstringToPhrase(std::wstring const& word, AcceptString const& phrase) const override {
     return unicodesToPhrase(ToUnicodes(word), phrase);
   }
 
-  bool fieldToPhrase(Field word, AcceptString const& phrase) const OVERRIDE {
+  bool fieldToPhrase(Field word, AcceptString const& phrase) const override {
     return unicodesToPhrase(ToUnicodes(word), phrase);
   }
 
-  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const OVERRIDE {
+  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const override {
     return unicodesToPhrase(ToUnicodes(word), phrase);
   }
 
-  bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const OVERRIDE {
+  bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const override {
     return unicodesToPhrase(ToUnicodes(voc.str(sym)),
                             phrase);  // we already copy to Unicodes, so no additional copy needed
   }
 
-  virtual bool string32ToPhrase(Util::String32 const& word, AcceptString const& phrase) const OVERRIDE {
+  virtual bool string32ToPhrase(Util::String32 const& word, AcceptString const& phrase) const override {
     return unicodesToPhrase(ToUnicodes(word), phrase);
   }
 };
 
 struct IString32ToPhrase : IWordToPhrase {
-  virtual bool string32ToPhrase(Util::String32 const& word, AcceptString const& phrase) const OVERRIDE {
+  virtual bool string32ToPhrase(Util::String32 const& word, AcceptString const& phrase) const override {
     SDL_THROW_LOG(WordToPhrase.string32ToPhrase, ProgrammerMistakeException,
                   "unimplemented string32ToPhrase");
     return false;
   }
 
-  bool wstringToPhrase(std::wstring const& word, AcceptString const& phrase) const OVERRIDE {
+  bool wstringToPhrase(std::wstring const& word, AcceptString const& phrase) const override {
     return string32ToPhrase(ToString32(word), phrase);
   }
 
-  bool fieldToPhrase(Field word, AcceptString const& phrase) const OVERRIDE {
+  bool fieldToPhrase(Field word, AcceptString const& phrase) const override {
     return string32ToPhrase(ToString32(word), phrase);
   }
 
-  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const OVERRIDE {
+  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const override {
     return string32ToPhrase(ToString32(word), phrase);
   }
 
-  bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const OVERRIDE {
+  bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const override {
     return string32ToPhrase(ToString32(voc.str(sym)),
                             phrase);  // we already copy to Unicodes, so no additional copy needed
   }
 
-  bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const OVERRIDE {
+  bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const override {
     return string32ToPhrase(ToString32(word), phrase);
   }
 };
 
 struct IWideStringToPhrase : IWordToPhrase {
-  bool wstringToPhrase(std::wstring const& word, AcceptString const& phrase) const OVERRIDE {
+  bool wstringToPhrase(std::wstring const& word, AcceptString const& phrase) const override {
     SDL_THROW_LOG(WordToPhrase.wstringToPhrase, ProgrammerMistakeException, "unimplemented wstringToPhrase");
     return false;
   }
 
-  bool string32ToPhrase(Util::String32 const& word, AcceptString const& phrase) const OVERRIDE {
+  bool string32ToPhrase(Util::String32 const& word, AcceptString const& phrase) const override {
     return wstringToPhrase(ToWideString(word), phrase);
   }
 
-  bool fieldToPhrase(Field word, AcceptString const& phrase) const OVERRIDE {
+  bool fieldToPhrase(Field word, AcceptString const& phrase) const override {
     return wstringToPhrase(ToWideString(word), phrase);
   }
 
-  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const OVERRIDE {
+  bool stringToPhrase(std::string const& word, AcceptString const& phrase) const override {
     return wstringToPhrase(ToWideString(word), phrase);
   }
 
-  bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const OVERRIDE {
+  bool symToPhrase(Sym sym, IVocabulary& voc, AcceptString const& phrase) const override {
     return wstringToPhrase(ToWideString(voc.str(sym)),
                            phrase);  // we already copy to Unicodes, so no additional copy needed
   }
 
-  bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const OVERRIDE {
+  bool unicodesToPhrase(Unicodes const& word, AcceptString const& phrase) const override {
     return wstringToPhrase(ToWideString(word), phrase);
   }
 };

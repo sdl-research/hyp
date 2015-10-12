@@ -23,6 +23,8 @@
 #include <sdl/Hypergraph/SymbolPrint.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/ContainsEmptyString.hpp>
+#include <sdl/Util/Once.hpp>
+#include <sdl/Util/PointerSet.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -108,7 +110,52 @@ struct CallPrintArc {
 };
 
 void HypergraphBase::printStderr() const {
-  print(std::cerr);
+  printUnchecked(std::cerr);
+}
+
+
+struct MoreThanOnceException : public std::exception {
+  char const* what() const throw() override { return "pointer visited more than once"; }
+  void const* duplicate;
+  MoreThanOnceException(void const* duplicate) : duplicate(duplicate) {}
+};
+
+struct CheckOnce {
+  CheckOnce(Util::PointerSet& p) : p(&p) {}
+  Util::PointerSet* p;
+  // mutating via pointer p - const helps compiler out?
+  bool first(void const* v) const {
+    return p->insert((intptr_t)v).second;
+  }
+  void operator()(void const* v) const {
+    if (!first(v)) throw MoreThanOnceException(v);
+  }
+};
+
+void HypergraphBase::printUnchecked(std::ostream &out) const {
+  out << *this;
+}
+
+bool HypergraphBase::checkValid() const {
+  StateId N = size();
+  StateId maxhead = maxHead(*this);
+  assert(maxhead == kNoState || maxhead < N);
+  StateId maxtail = maxTail(*this);
+  assert(maxtail == kNoState || maxtail < N);
+  StateId s = start(), f = final();
+  assert(s == kNoState || s < N);
+  assert(f == kNoState || f < N);
+  Util::PointerSet once;
+  if (storesInArcs() || storesFirstTailOutArcs()) try {
+      forArcs(CheckOnce(once));
+    } catch (MoreThanOnceException& e) {
+      SDL_ERROR(Hypergraph.CheckValid,
+                "arc stored more than once: " << e.duplicate << " = "
+                                              << Util::print(*(ArcBase const*)e.duplicate, *this));
+      SDL_DEBUG(Hypergraph.CheckValid, PrintUnchecked(*this));
+      return false;
+    }
+  return true;
 }
 
 inline void printStartOrFinal(char const* prefix, std::ostream& out, HypergraphBase const& hg, StateId s) {
@@ -117,6 +164,11 @@ inline void printStartOrFinal(char const* prefix, std::ostream& out, HypergraphB
     printState(out, s, hg);
     out << '\n';
   }
+}
+
+void printStartAndFinal(std::ostream &out, HypergraphBase const& hg) {
+  printStartOrFinal("START", out, hg, hg.start());
+  printStartOrFinal("FINAL", out, hg, hg.final());
 }
 
 void HypergraphBase::print(std::ostream& out) const {
@@ -345,5 +397,6 @@ void HypergraphBase::addStateId(StateId state, LabelPair l) {
 bool HypergraphBase::containsEmptyString() const {
   return Hypergraph::containsEmptyString(*this);
 }
+
 
 }}

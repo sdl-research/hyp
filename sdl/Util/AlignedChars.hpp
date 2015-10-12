@@ -34,7 +34,7 @@
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/Utf8.hpp>
 #include <sdl/Util/Delete.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
@@ -231,8 +231,8 @@ struct CharsFromUtf8Impl : FixUnicode {
 typedef IcuNormalizeByChunks<CharsFromUtf8Impl> IcuNormalizeUtf8ByChunks;
 struct CharsFromUtf8 : CharsFromUtf8Impl, IAlignedChars {
   typedef CharsFromUtf8Impl Impl;
-  Unicode next() OVERRIDE { return Impl::next(); }
-  Unicode nextWithSpan(TokenSpan& span) OVERRIDE { return Impl::nextWithSpan(span); }
+  Unicode next() override { return Impl::next(); }
+  Unicode nextWithSpan(TokenSpan& span) override { return Impl::nextWithSpan(span); }
   CharsFromUtf8() {}
   template <class T>
   explicit CharsFromUtf8(T const& t)
@@ -262,8 +262,8 @@ struct CharsFromUnicodesImpl {
 
 struct CharsFromUnicodes : CharsFromUnicodesImpl, IAlignedChars {
   typedef CharsFromUnicodesImpl Impl;
-  Unicode next() OVERRIDE { return Impl::next(); }
-  Unicode nextWithSpan(TokenSpan& span) OVERRIDE { return Impl::nextWithSpan(span); }
+  Unicode next() override { return Impl::next(); }
+  Unicode nextWithSpan(TokenSpan& span) override { return Impl::nextWithSpan(span); }
   CharsFromUnicodes() {}
   explicit CharsFromUnicodes(Unicodes const& u) : Impl(u) {}
 };
@@ -289,8 +289,8 @@ struct CharsFromUnicodeStringImpl {
 
 struct CharsFromUnicodeString : CharsFromUnicodeStringImpl, IAlignedChars {
   typedef CharsFromUnicodeStringImpl Impl;
-  Unicode next() OVERRIDE { return Impl::next(); }
-  Unicode nextWithSpan(TokenSpan& span) OVERRIDE { return Impl::nextWithSpan(span); }
+  Unicode next() override { return Impl::next(); }
+  Unicode nextWithSpan(TokenSpan& span) override { return Impl::nextWithSpan(span); }
   explicit CharsFromUnicodeString(icu::UnicodeString& u) : Impl(u) {}
 };
 
@@ -329,7 +329,7 @@ struct TakeUnicodes : ITakeAlignedChars {
   Unicodes* unicodes;
   TokenSpans* spans;
   TakeUnicodes() : spans() {}
-  void take(Unicode c) OVERRIDE {
+  void take(Unicode c) override {
     if (spans) {
       Position i = spans->empty() ? 0 : spans->back().second;
       spans->push_back(TokenSpan(i, i + 1));
@@ -337,7 +337,7 @@ struct TakeUnicodes : ITakeAlignedChars {
     assert(unicodes);
     unicodes->push_back(c);
   }
-  void takeWithSpan(Unicode c, TokenSpan span) OVERRIDE {
+  void takeWithSpan(Unicode c, TokenSpan span) override {
     if (spans) spans->push_back(span);
     assert(unicodes);
     unicodes->push_back(c);

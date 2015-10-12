@@ -277,6 +277,11 @@ if(WIN32)
   # This option is similar to building with -DSDL_VALIDATION_BUILD, but with a few extra settings added.
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /Od /Ob0 /RTC1")
 
+  #/MD: Causes the application to use the multithread-specific and DLL-specific version of the run-time library
+  #/Zi: PDB
+  #/Od: no optimization
+  #/Z7: inline debug syms
+
   # Enable TRACE statements for RelWIthDebInfo mode -- On Windows, this is the typical mode a developer will use when
   # writing code and debugging
   if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
@@ -284,7 +289,8 @@ if(WIN32)
   endif()
 
   if(SDL_VALIDATION_BUILD)
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Od") # disable optimization for faster compile
+    sdl_linker_flags(/DEBUG)
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Z7 /Od") # disable optimization for faster compile
     message(STATUS "SDL_VALIDATION_BUILD - faster (no optimization) build for Windows")
   else()
     sdl_linker_flags(/LTCG)

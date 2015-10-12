@@ -53,19 +53,6 @@ bool IHypergraph<A>::hasAllOut(StateId s) const {
   return false;
 }
 
-template <class A>
-bool IHypergraph<A>::checkValid() const {
-  StateId N = size();
-  StateId maxhead = maxHead(*this);
-  assert(maxhead == kNoState || maxhead < N);
-  StateId maxtail = maxTail(*this);
-  assert(maxtail == kNoState || maxtail < N);
-  StateId s = start(), f = final();
-  assert(s == kNoState || s < N);
-  assert(f == kNoState || f < N);
-  return true;
-}
-
 struct CheckFsm {
   template <class Arc>
   bool operator()(IHypergraph<Arc> const& hg, Arc* arc) const {

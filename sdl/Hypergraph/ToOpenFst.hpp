@@ -27,7 +27,7 @@
 #include <fst/vector-fst.h>
 #include <fst/script/fst-class.h>
 
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Exception.hpp>
 #include <sdl/Util/FnReference.hpp>
 
@@ -50,54 +50,54 @@ struct IVocabularySymbolTable : public fst::SymbolTable {  // unfortunate: this 
   IVocabularySymbolTable(self_type const& o) : Base("IVocabularySymbolTable"), pVoc(o.pVoc) {}
   typedef std::string string;
   typedef ::int64 int64;  // fst/types.h
-  virtual fst::SymbolTable* Copy() const OVERRIDE { return new IVocabularySymbolTable(*this); }
-  virtual string Find(int64 key) const OVERRIDE {
+  virtual fst::SymbolTable* Copy() const override { return new IVocabularySymbolTable(*this); }
+  virtual string Find(int64 key) const override {
     Sym id = {(unsigned)key};
     return pVoc->str(id);
   }
 
-  virtual int64 AddSymbol(string const&) OVERRIDE {
+  virtual int64 AddSymbol(string const&) override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  virtual int64 AddSymbol(string const&, int64) OVERRIDE {
+  virtual int64 AddSymbol(string const&, int64) override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  void AddTable(SymbolTable const& table) OVERRIDE { SDL_THROW0(UnimplementedException); }
-  virtual string CheckSum() const OVERRIDE {
+  void AddTable(SymbolTable const& table) override { SDL_THROW0(UnimplementedException); }
+  virtual string CheckSum() const override {
     SDL_THROW0(UnimplementedException);
     return string();
   }
-  virtual string LabeledCheckSum() const OVERRIDE {
+  virtual string LabeledCheckSum() const override {
     SDL_THROW0(UnimplementedException);
     return string();
   }
-  virtual bool Write(std::ostream& strm) const OVERRIDE {
+  virtual bool Write(std::ostream& strm) const override {
     SDL_THROW0(UnimplementedException);
     return false;
   }
-  virtual bool WriteText(std::ostream& strm) const OVERRIDE {
+  virtual bool WriteText(std::ostream& strm) const override {
     SDL_THROW0(UnimplementedException);
     return false;
   }
-  virtual int64 Find(string const& symbol) const OVERRIDE {
+  virtual int64 Find(string const& symbol) const override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  virtual int64 Find(const char* symbol) const OVERRIDE {
+  virtual int64 Find(const char* symbol) const override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  virtual int64 AvailableKey(void) const OVERRIDE {
+  virtual int64 AvailableKey(void) const override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  virtual ::size_t NumSymbols(void) const OVERRIDE {
+  virtual ::size_t NumSymbols(void) const override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  virtual int64 GetNthKey(ssize_t pos) const OVERRIDE {
+  virtual int64 GetNthKey(ssize_t pos) const override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
@@ -116,7 +116,7 @@ struct StateNamesSymbolTable : public IVocabularySymbolTable {
     }
   }
 
-  virtual string Find(int64 key) const OVERRIDE {
+  virtual string Find(int64 key) const override {
     Sym l = ssym[key];
     if (l == NoSymbol) return sdl::lexical_cast<std::string>(key);
     return pVoc->str(l);

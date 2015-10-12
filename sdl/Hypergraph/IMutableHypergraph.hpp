@@ -79,7 +79,7 @@ struct IMutableHypergraph : IHypergraph<A> {
     this->offerVocabulary(h.getVocabulary());
   }
 
-  virtual ConstOutArcsGenerator outArcsConst(StateId state) const OVERRIDE {
+  virtual ConstOutArcsGenerator outArcsConst(StateId state) const override {
     return ConstOutArcsGenerator(outArcs(state));
   }
 
@@ -107,6 +107,13 @@ struct IMutableHypergraph : IHypergraph<A> {
 
   void deleteOutArcsExcept(StateId s, Arc* keepArc) { deleteOutArcsExceptImpl(s, keepArc); }
 
+  /// up to you to deleteOutArcs(state) first if that makes sense (i.e. you
+  /// weren't just editing from maybeOutArcs in-place)
+  virtual void setOutArcs(StateId state, ArcsContainer &&arcs) = 0;
+  void setOutArcs(StateId state, ArcsContainer const& arcs) {
+    setOutArcs(state, ArcsContainer(arcs));
+  }
+
   virtual void deleteInArcsImpl(StateId) = 0;
   virtual void deleteOutArcsImpl(StateId) = 0;
   virtual void deleteOutArcsExceptImpl(StateId, Arc*) = 0;
@@ -125,16 +132,10 @@ struct IMutableHypergraph : IHypergraph<A> {
   */
   virtual std::size_t restrict(ArcFilter const& keep) = 0;
 
-  virtual bool isMutable() const OVERRIDE { return true; }
+  virtual bool isMutable() const override { return true; }
 
-#if __cplusplus >= 201103L
+  /// does *not* delete old outarcs first (call deleteOutArcs(from) if you want that
   virtual void replaceFirstTailOutArcsMove(StateId from, ArcsContainer && with) = 0;
-  void replaceFirstTailOutArcsMove(StateId from, ArcsContainer & with) {
-    replaceFirstTailOutArcsMove(from, (ArcsContainer&&)with);
-  }
-#else
-  virtual void replaceFirstTailOutArcsMove(StateId from, ArcsContainer & with) = 0;
-#endif
 
   // if you know you've added arcs out of order (or in order), inform us by setting the property
   void setBestFirstArcs(bool on = true) { setPropertiesAt(kOutArcsSortedBestFirst, on); }
@@ -148,24 +149,27 @@ struct IMutableHypergraph : IHypergraph<A> {
     }
   }
 
-  StateId numNotTerminalStates() const OVERRIDE {
+  StateId numNotTerminalStates() const override {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_
                                                 : this->countNumNotTerminalStates();
   }
 
-  StateId maxNotTerminalState() const OVERRIDE {
+  StateId maxNotTerminalState() const override {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ - 1
                                                 : this->maxNotTerminalStateImpl();
   }
 
-  StateId exactSizeForHeads() const OVERRIDE {
+  StateId exactSizeForHeads() const override {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_
                                                 : this->maxNotTerminalStateImpl() + 1;
   }
 
-  StateId sizeForHeads() const OVERRIDE {
+  StateId sizeForHeads() const override {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ : this->size();
   }
+
+  /// remap graph states permutation[i] -> i. inversePermutation[permutation[j]] -> j. pre: isGraph(). post: kStoreFirstTailOutArcs()
+  virtual void orderGraphStates(StateIds const& permutation, StateIds const& inversePermutation) = 0;
 
  private:
   /// accept value naively. post: properties() returns p
@@ -330,12 +334,12 @@ struct IMutableHypergraph : IHypergraph<A> {
   IMutableHypergraph() : IHypergraph<A>("IMutableHypergraph"), sortedStatesNumNotTerminal_() {}
 
   // function overwrite with covariant return type:
-  virtual IMutableHypergraph<A>* clone() const OVERRIDE = 0;
+  virtual IMutableHypergraph<A>* clone() const override = 0;
 
   /// addArc after calling addStateId on head, tails.
   virtual void addArcCreatingStates(Arc*) = 0;
 
-  void forceNotAllOutArcs() OVERRIDE {
+  void forceNotAllOutArcs() override {
     Properties p = this->uncomputedProperties();
     if ((p & kStoreOutArcs) && !(p & kStoreFirstTailOutArcs)) {
       this->forceFirstTailOutArcs();
@@ -475,11 +479,11 @@ struct IMutableHypergraph : IHypergraph<A> {
   using IHypergraph<Arc>::outArcs;
 
   /// you may call this before getting ArcsContainer * and be sure that adding
-  /// arcs touching states < size won't invalidate. if size is kNoState then
+  /// arcs touching states < size won't invalidate.
   virtual void prepareAddArcsSize(StateId size) = 0;
   virtual void prepareAddArcs() { prepareAddArcsSize(this->sizeForHeads()); }
 
-  void outAdjStates(StateId st, StateIdContainer& adjStates) const OVERRIDE {
+  void outAdjStates(StateId st, StateIdContainer& adjStates) const override {
     ArcsContainer const* a = this->maybeOutArcs(st);
     if (a) {
       ArcId N = a->size();
@@ -536,6 +540,9 @@ struct IMutableHypergraph : IHypergraph<A> {
   // an effort
   void addProperties(Properties p) { setProperties(this->properties() | p); }
   void clearProperties(Properties p) { setProperties(this->properties() & ~p); }
+
+  /// clear arcs without deleting any
+  virtual void releaseArcs() = 0;
 
   /**
      compute whether hg is a graph, updating properties used to update cached

@@ -125,7 +125,7 @@ class InMemoryFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
    */
   InMemoryFeatureHypergraphPairs(VectorPtr const& pPairs) : pPairs_(pPairs), numParams_(0) {}
 
-  value_type operator[](TrainingDataIndex index)OVERRIDE {
+  value_type operator[](TrainingDataIndex index)override {
     SDL_ASSERT_MSG(pPairs_->size() >= index, "index out of bounds");
     return (*pPairs_)[index];
   }
@@ -136,7 +136,7 @@ class InMemoryFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
       TODO: This could be made more efficient by having a map from
       feature IDs to arcs that use them.
    */
-  void setFeatureWeights(FloatT const* featWeights, FeatureId numParams) OVERRIDE {
+  void setFeatureWeights(FloatT const* featWeights, FeatureId numParams) override {
     SDL_DEBUG(Optimization.HypergraphCrfObjFct, "Setting feature weights");
     setFeatureWeights(0, size(), featWeights, numParams);
   }
@@ -147,7 +147,7 @@ class InMemoryFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
       \param end Last hypergraph pair index plus one
    */
   void setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end, FloatT const* featWeights,
-                         FeatureId numParams) OVERRIDE {
+                         FeatureId numParams) override {
     SDL_DEBUG(Optimization.HypergraphCrfObjFct, "Setting feature weights for HGs (" << begin << ", " << end
                                                                                     << "]");
     for (TrainingDataIndex i = begin; i < end; ++i) {
@@ -160,13 +160,13 @@ class InMemoryFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
     }
   }
 
-  //TODO: test
-  void push_back(value_type const& val) OVERRIDE { pPairs_->push_back(val); }
+  // TODO: test
+  void push_back(value_type const& val) override { pPairs_->push_back(val); }
 
-  TrainingDataIndex size() const OVERRIDE { return pPairs_->size(); }
+  TrainingDataIndex size() const override { return pPairs_->size(); }
 
-  FeatureId getNumFeatures() OVERRIDE { return numParams_; }
-  void setNumFeatures(FeatureId n) OVERRIDE { numParams_ = n; }
+  FeatureId getNumFeatures() override { return numParams_; }
+  void setNumFeatures(FeatureId n) override { numParams_ = n; }
 
  private:
   VectorPtr pPairs_;
@@ -192,7 +192,7 @@ class WriteFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
     SDL_INFO(Optimization.WriteFeatureHypergraphPairs, "Writing training archive to '" << fname << "'");
   }
 
-  void push_back(value_type const& val) OVERRIDE {
+  void push_back(value_type const& val) override {
     int numThousands = size_ / 1000;
     bfs::path dir(dir_ / bfs::path("hg") / bfs::path(sdl::lexical_cast<std::string>(numThousands)));
     bfs::create_directories(dir);
@@ -209,23 +209,23 @@ class WriteFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
     ++size_;
   }
 
-  value_type operator[](TrainingDataIndex index)OVERRIDE { return value_type(); }
+  value_type operator[](TrainingDataIndex index)override { return value_type(); }
 
-  void finish() OVERRIDE {
+  void finish() override {
     bfs::path p(dir_ / bfs::path("size.txt"));
     std::ofstream out(p.string().c_str());
     out << size_;
   }
 
-  void setFeatureWeights(FloatT const* featWeights, FeatureId numParams) OVERRIDE {}
+  void setFeatureWeights(FloatT const* featWeights, FeatureId numParams) override {}
 
   void setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end, FloatT const* featWeights,
-                         FeatureId numParams) OVERRIDE {}
+                         FeatureId numParams) override {}
 
-  std::size_t size() const OVERRIDE { return 0; }
-  FeatureId getNumFeatures() OVERRIDE { return 0; }
+  std::size_t size() const override { return 0; }
+  FeatureId getNumFeatures() override { return 0; }
 
-  void setNumFeatures(FeatureId numParams) OVERRIDE {
+  void setNumFeatures(FeatureId numParams) override {
     bfs::path p(dir_ / bfs::path("num-feats.txt"));
     std::ofstream out(p.string().c_str());
     out << numParams;

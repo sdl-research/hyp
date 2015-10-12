@@ -296,7 +296,10 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   DEFINE_OPENFST_COMPAT_FUNCTIONS(Feature)
 
   void setFeatures(shared_ptr<Map> const& pMap) { pMap_ = pMap; }
-  void setFeatures(shared_ptr<Map>&& pMap) { pMap_ = std::move(pMap); }
+  void setFeatures(shared_ptr<Map>&& pMap) {
+    assert(&pMap_ != &pMap);
+    pMap_ = std::move(pMap);
+  }
 
   shared_ptr<Map> const& featuresPtr() const { return pMap_; }
 

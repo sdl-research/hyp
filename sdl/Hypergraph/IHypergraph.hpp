@@ -341,7 +341,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
      note: in extreme cases (negative costs possible for arcs, as may happen in tuning) this should be less
      than 0
   */
-  Distance heuristic(StateId st) const OVERRIDE { return 0; }
+  Distance heuristic(StateId st) const override { return 0; }
 
   /**
      may improve the estimates returned by heuristic. may be as expensive as inside-outside.
@@ -355,7 +355,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
      this is a const method (it should be harmless to call at any time), so any
      state kept by an implementation should probably be marked mutable
   */
-  void computeHeuristic() const OVERRIDE {}
+  void computeHeuristic() const override {}
 
   /** \return number of edges. may be linear time. */
   std::size_t getNumEdges() const;
@@ -363,9 +363,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
   // does s have an outgoing transition for every symbol (aside from
   // epsilon to final, which should be //TODO: multiple final states,
   // so we don't have to distinguish between real and fake epsilons)
-  bool hasAllOut(StateId s) const OVERRIDE;
-
-  bool checkValid() const OVERRIDE;
+  bool hasAllOut(StateId s) const override;
 
   /// forArcs(v) -  call v(a) for all Arc *a, exactly once for each a
 
@@ -396,7 +394,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
 
   IHypergraph(std::string const& typeStr = "sdl::IHypergraph") : HypergraphBase(typeStr) {}
 
-  virtual IHypergraph<A>* clone() const OVERRIDE = 0;
+  virtual IHypergraph<A>* clone() const override = 0;
 
   virtual ~IHypergraph() {}
 
@@ -410,9 +408,9 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
      Not directly returning the Arc pointers here because that would
      expose the internal container.
   */
-  virtual Arc* inArc(StateId state, ArcId aid) const OVERRIDE = 0;
+  virtual Arc* inArc(StateId state, ArcId aid) const override = 0;
 
-  virtual Arc* outArc(StateId state, ArcId aid) const OVERRIDE = 0;
+  virtual Arc* outArc(StateId state, ArcId aid) const override = 0;
 
   virtual void outAdjStates(StateId st, StateIdContainer& adjStates) const {
     ArcId i = 0, N = this->numOutArcs(st);
@@ -446,10 +444,10 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
      before destroying a hypergraph, in other words */
   virtual void deleteArcs() { forArcsSafe(impl::ArcDeleter<Arc>()); }
 
-  bool isFsmCheck() const OVERRIDE;
-  bool isGraphCheck(bool& isFsm, bool& oneLexical) const OVERRIDE;
+  bool isFsmCheck() const override;
+  bool isGraphCheck(bool& isFsm, bool& oneLexical) const override;
 
-  void printArc(std::ostream& out, ArcBase const* arc, bool inlineLabel) const OVERRIDE {
+  void printArc(std::ostream& out, ArcBase const* arc, bool inlineLabel) const override {
     Hypergraph::printArc<Arc>(out, (Arc*)arc, (HypergraphBase const*)this, inlineLabel);
   }
 

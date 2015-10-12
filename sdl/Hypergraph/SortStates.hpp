@@ -100,7 +100,7 @@ struct SortStatesMapping : public StateIdMapping {
       nextRest = 0;
     }
   }
-  virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
+  virtual StateId remap(StateId s) override { return remapImpl(s); }
   StateId remapImpl(StateId s) {
     assert(s < lexical.size());
     return Util::contains(lexical, s) ? nextLex++ : nextRest++;
@@ -263,7 +263,7 @@ struct TopNontermOrder : IStatesVisitor {
     }
     return firstLexSt;
   }
-  virtual void visit(StateId s) OVERRIDE {
+  virtual void visit(StateId s) override {
     if (ph->hasTerminalLabel(s))
       unmappedLexStates.push_back(s);
     else {

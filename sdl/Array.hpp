@@ -122,7 +122,6 @@ inline char* arrayEnd(std::string& c) {
 #endif
 }
 
-#if __cplusplus >= 201103L
 template <class T, class A>
 T const* arrayBegin(std::vector<T, A> const& c) {
   return c.data();
@@ -143,8 +142,6 @@ template <class T, class A>
 T* arrayEnd(std::vector<T, A>& c) {
   return c.data() + c.size();
 }
-#endif
-
 #endif
 
 

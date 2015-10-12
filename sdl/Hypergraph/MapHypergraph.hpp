@@ -21,7 +21,7 @@
 #include <sdl/Hypergraph/ConvertWeight.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Forall.hpp>
-#include <sdl/Util/Override.hpp>
+
 
 #include <utility>  // make_pair
 #include <boost/unordered_map.hpp>
@@ -33,7 +33,7 @@ namespace Hypergraph {
    Maps each arc on demand.
 */
 template <class FromA, class ToA, class MapFct>
-class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
+class MapHypergraph final : public IHypergraph<ToA> {
 
  public:
   typedef FromA FromArc;
@@ -56,15 +56,15 @@ class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
   }
 
   /** since arc mapping doesn't affect state labels, defer. */
-  bool outputLabelFollowsInput(StateId s) const OVERRIDE { return hg_.outputLabelFollowsInput(s); }
+  bool outputLabelFollowsInput(StateId s) const override { return hg_.outputLabelFollowsInput(s); }
 
-  bool outputLabelFollowsInput() const OVERRIDE { return hg_.outputLabelFollowsInput(); }
+  bool outputLabelFollowsInput() const override { return hg_.outputLabelFollowsInput(); }
 
-  virtual MapHypergraph<FromArc, ToArc, Mapper>* clone() const OVERRIDE {
+  virtual MapHypergraph<FromArc, ToArc, Mapper>* clone() const override {
     return new MapHypergraph<FromArc, ToArc, Mapper>(hg_, mapper_);
   }
 
-  StateId size() const OVERRIDE { return hg_.size(); }
+  StateId size() const override { return hg_.size(); }
 
   StateIdRange getStateIds() const { return hg_.getStateIds(); }
 
@@ -72,29 +72,29 @@ class MapHypergraph SDL_FINAL : public IHypergraph<ToA> {
 
   ArcIdRange outArcIds(StateId s) const { return hg_.outArcIds(s); }
 
-  ArcId numInArcs(StateId s) const OVERRIDE { return hg_.numInArcs(s); }
+  ArcId numInArcs(StateId s) const override { return hg_.numInArcs(s); }
 
-  ArcId numOutArcs(StateId s) const OVERRIDE { return hg_.numOutArcs(s); }
+  ArcId numOutArcs(StateId s) const override { return hg_.numOutArcs(s); }
 
-  ToArc* inArc(StateId s, ArcId arcid) const OVERRIDE {
+  ToArc* inArc(StateId s, ArcId arcid) const override {
     FromArc* fromArc = hg_.inArc(s, arcid);
     return mappedArc(fromArc);
   }
 
-  ToArc* outArc(StateId s, ArcId arcid) const OVERRIDE {
+  ToArc* outArc(StateId s, ArcId arcid) const override {
     FromArc* fromArc = hg_.outArc(s, arcid);
     return mappedArc(fromArc);
   }
 
-  Sym inputLabel(StateId s) const OVERRIDE { return hg_.inputLabel(s); }
+  Sym inputLabel(StateId s) const override { return hg_.inputLabel(s); }
 
-  Sym outputLabel(StateId s) const OVERRIDE { return hg_.outputLabel(s); }
+  Sym outputLabel(StateId s) const override { return hg_.outputLabel(s); }
 
-  Properties properties() const OVERRIDE { return hg_.properties(); }
+  Properties properties() const override { return hg_.properties(); }
 
-  IVocabularyPtr getVocabulary() const OVERRIDE { return hg_.getVocabulary(); }
-  IVocabulary* vocab() const OVERRIDE { return hg_.vocab(); }
-  Properties uncomputedProperties() const OVERRIDE { return hg_.uncomputedProperties(); }
+  IVocabularyPtr getVocabulary() const override { return hg_.getVocabulary(); }
+  IVocabulary* vocab() const override { return hg_.vocab(); }
+  Properties uncomputedProperties() const override { return hg_.uncomputedProperties(); }
 
  private:
   ToArc* mappedArc(FromArc* fromArc) const {

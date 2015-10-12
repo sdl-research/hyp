@@ -102,6 +102,8 @@ typedef Util::small_vector<StateId, 2, TailId> StateIdContainer;
 // only 2 tails inline: StateId is std::size_t=8 bytes. therefore
 // sizeof(StateIdContainer) is 24 bytes. 2 tails is perfect for fsm, though
 
+typedef std::vector<StateId> StateIds;
+
 #if SDL_64BIT_ARC_ID
 typedef uint64 ArcId;
 #else

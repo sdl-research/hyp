@@ -53,7 +53,7 @@
 #include <sdl/Util/FormattedOstream.hpp>
 #include <sdl/Util/Forall.hpp>
 #include <sdl/LexicalCast.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/Print.hpp>
 #include <sdl/Util/Nfc.hpp>
 
@@ -750,22 +750,22 @@ struct YamlConfigure : Base {
   StringConsumer log() const { return Base::log(); }
 
  public:
-  virtual void help(std::ostream& out, int verbosity) const OVERRIDE {
+  virtual void help(std::ostream& out, int verbosity) const override {
     Config::ConfigureYaml cy(log(), verbosity);
     Config::configure_action(cy, Config::help_config(out), pimpl(), log());
   }
-  virtual void showExample(std::ostream& out, int verbosity) const OVERRIDE {
+  virtual void showExample(std::ostream& out, int verbosity) const override {
     Config::ConfigureYaml cy(log(), verbosity);
     Config::configure_action(cy, Config::show_example_config(out), pimpl(), log());
   }
-  virtual void showEffective(std::ostream& out, int verbosity) const OVERRIDE {
+  virtual void showEffective(std::ostream& out, int verbosity) const override {
     Config::ConfigureYaml cy(log(), verbosity);
     Config::configure_action(cy, Config::show_effective_config(out), pimpl(), log());
   }
 
-  virtual void init() OVERRIDE { configure::configure_init(pimpl(), log()); }
-  virtual void validateStored() OVERRIDE { Config::validate_stored(pimpl(), log()); }
-  virtual void store(ConfigNode const& configNode) OVERRIDE {
+  virtual void init() override { configure::configure_init(pimpl(), log()); }
+  virtual void validateStored() override { Config::validate_stored(pimpl(), log()); }
+  virtual void store(ConfigNode const& configNode) override {
     Config::ConfigureYaml cy(configNode, log());
     Config::configure_action(cy, Config::store_config(), pimpl(), log());
   }

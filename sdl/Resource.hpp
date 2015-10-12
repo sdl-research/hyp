@@ -25,7 +25,7 @@
 #include <sdl/Util/AssertThreadSpecific.hpp>
 #endif
 #include <sdl/Util/LeakCheck.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/IsDebugBuild.hpp>
 
 namespace sdl {
@@ -64,14 +64,14 @@ struct Resource : Evictable, Util::IAddLeakChecks {
 #endif
   }
 
-  virtual char const* category() const OVERRIDE { return "resource"; }
-  virtual void initProcessPhase(InitProcessPhase phase) OVERRIDE {
+  virtual char const* category() const override { return "resource"; }
+  virtual void initProcessPhase(InitProcessPhase phase) override {
     if (phase == kPhase0) initProcess();
   }
 
  protected:
   /// no need to override if you override initProcessPhase
-  virtual void initProcess() OVERRIDE {
+  virtual void initProcess() override {
     SDL_THROW_LOG(Resource, ProgrammerMistakeException, "no initProcess defined for resource "
                                                         << name()
                                                         << " - see docs/xmt-initialization-and-eviction.md");
@@ -87,28 +87,28 @@ struct AcceptResource {
 struct AcceptAddLeakChecks : AcceptResource {
   Util::ILeakChecks& ref;
   AcceptAddLeakChecks(Util::ILeakChecks& ref) : ref(ref) {}
-  char const* type() OVERRIDE { return "AddLeakCheck"; }
-  void operator()(Resource& adder) OVERRIDE { adder.addLeakChecks(ref); }
+  char const* type() override { return "AddLeakCheck"; }
+  void operator()(Resource& adder) override { adder.addLeakChecks(ref); }
 };
 
 struct AcceptMaybeInitThread : AcceptResource {
-  char const* type() OVERRIDE { return "MaybeInitThread"; }
-  void operator()(Resource& resource) OVERRIDE { resource.maybeInitThread(); }
+  char const* type() override { return "MaybeInitThread"; }
+  void operator()(Resource& resource) override { resource.maybeInitThread(); }
 };
 
 struct AcceptMaybeInitProcess : AcceptResource {
   InitProcessPhase phase;
   AcceptMaybeInitProcess(InitProcessPhase phase) : phase(phase) {}
-  char const* type() OVERRIDE { return "MaybeInitProcess"; }
-  void operator()(Resource& resource) OVERRIDE { resource.maybeInitProcess(phase); }
+  char const* type() override { return "MaybeInitProcess"; }
+  void operator()(Resource& resource) override { resource.maybeInitProcess(phase); }
 };
 
 struct AcceptEvictThread : AcceptResource {
   bool any;
   Occupancy occupancy;
   AcceptEvictThread(Occupancy const& occupancy) : any(), occupancy(occupancy) {}
-  char const* type() OVERRIDE { return "EvictThread"; }
-  void operator()(Resource& resource) OVERRIDE {
+  char const* type() override { return "EvictThread"; }
+  void operator()(Resource& resource) override {
     if (resource.maybeEvictThread(occupancy)) any = true;
   }
 };

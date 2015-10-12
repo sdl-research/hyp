@@ -20,7 +20,7 @@
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Sym.hpp>
 #include <sdl/Vocabulary/BasicVocabularyImpl.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/LeakCheck.hpp>
 
 namespace sdl {
@@ -30,7 +30,7 @@ template <class ReadOnlyVocab>
 struct ExtendedVocabulary;
 
 struct ResidentVocabulary : IVocabulary {
-  void addLeakChecks(Util::ILeakChecks& leaks) OVERRIDE;
+  void addLeakChecks(Util::ILeakChecks& leaks) override;
 
   /**
      if you have ExtendedVocabulary and this is the second part, you should pass
@@ -49,38 +49,38 @@ struct ResidentVocabulary : IVocabulary {
   friend struct ExtendedVocabulary;
   friend class MultiVocabulary;
 
-  void loadTerminals(std::string const& terminalPath) OVERRIDE;  //, std::string const& sourcePath);
-  void loadNonterminals(std::string const& nonTerminalPath) OVERRIDE;  //, std::string const& sourcePath);
+  void loadTerminals(std::string const& terminalPath) override;  //, std::string const& sourcePath);
+  void loadNonterminals(std::string const& nonTerminalPath) override;  //, std::string const& sourcePath);
 
-  void clearSinceFreeze() OVERRIDE {
+  void clearSinceFreeze() override {
     SDL_DEBUG(Leak.ResidentVocabulary.clearSinceFreeze, *this);
     vocabTerminal.clearSinceFreeze();
     vocabNonterminal.clearSinceFreeze();
     SDL_DEBUG(Leak.ResidentVocabulary.clearSinceFreeze, "after: " << *this);
   }
 
-  WordCount countSinceFreeze() const OVERRIDE {
+  WordCount countSinceFreeze() const override {
     return vocabNonterminal.countSinceFreeze() + vocabTerminal.countSinceFreeze();
   }
 
-  void freeze() OVERRIDE {
+  void freeze() override {
     vocabTerminal.freeze();
     vocabNonterminal.freeze();
   }
 
-  virtual void addSymbolCounts(SymbolType type, SymbolCounts& symbols) const OVERRIDE {
+  virtual void addSymbolCounts(SymbolType type, SymbolCounts& symbols) const override {
     // TODO: test
     symbols.thread += _GetNumSymbols(type);
     symbols.symbolType = type;
   }
 
-  void enterThreadLocal() OVERRIDE {
+  void enterThreadLocal() override {
     // TODO: test
     _enterThreadLocal();
   }
 
-  virtual Sym addTerminal(std::string const& word) OVERRIDE;
-  virtual Sym getTerminal(std::string const& word) const OVERRIDE;
+  virtual Sym addTerminal(std::string const& word) override;
+  virtual Sym getTerminal(std::string const& word) const override;
 
  protected:
   Sym _addTerminal(std::string const& word) { return vocabTerminal.add(word); }
@@ -93,44 +93,44 @@ struct ResidentVocabulary : IVocabulary {
   */
   void _enterThreadLocal() {}
 
-  virtual Sym addImpl(std::string const& str, SymbolType symType) OVERRIDE { return _Add(str, symType); }
+  virtual Sym addImpl(std::string const& str, SymbolType symType) override { return _Add(str, symType); }
 
-  virtual Sym doAddField(Slice const& word, SymbolType symType) OVERRIDE {
+  virtual Sym doAddField(Slice const& word, SymbolType symType) override {
     return _Add(std::string(word.first, word.second), symType);
     // TODO: add Slice hash lookup to readonly/resident vocabs
   }
 
-  virtual std::string const& strImpl(Sym sym) const OVERRIDE { return _Str(sym); }
+  virtual std::string const& strImpl(Sym sym) const override { return _Str(sym); }
 
-  virtual Sym symImpl(std::string const& str, SymbolType symType) const OVERRIDE {
+  virtual Sym symImpl(std::string const& str, SymbolType symType) const override {
     return _Sym(str, symType);
   }
 
-  virtual bool containsSymImpl(Sym sym) const OVERRIDE { return _containsSym(sym); }
+  virtual bool containsSymImpl(Sym sym) const override { return _containsSym(sym); }
 
-  virtual bool containsImpl(std::string const& str, SymbolType symType) const OVERRIDE {
+  virtual bool containsImpl(std::string const& str, SymbolType symType) const override {
     return _contains(str, symType);
   }
 
-  virtual unsigned doGetNumSymbols(SymbolType symType) const OVERRIDE { return _GetNumSymbols(symType); }
+  virtual unsigned doGetNumSymbols(SymbolType symType) const override { return _GetNumSymbols(symType); }
 
-  virtual std::size_t doGetSize() const OVERRIDE { return _GetSize(); }
+  virtual std::size_t doGetSize() const override { return _GetSize(); }
 
-  virtual void accept(IVocabularyVisitor& visitor) OVERRIDE {
+  virtual void accept(IVocabularyVisitor& visitor) override {
     // TODO: test
     return _Accept(visitor);
   }
 
-  virtual void acceptType(IVocabularyVisitor& visitor, SymbolType symType) OVERRIDE {
+  virtual void acceptType(IVocabularyVisitor& visitor, SymbolType symType) override {
     return _AcceptType(visitor, symType);
   }
 
-  virtual Sym doAddSymbolMustBeNew(std::string const& str, SymbolType symType) OVERRIDE {
+  virtual Sym doAddSymbolMustBeNew(std::string const& str, SymbolType symType) override {
     // TODO: test
     return _AddSymbolMustBeNew(str, symType);
   }
 
-  SymInt pastFrozenTerminalIndex() const OVERRIDE { return vocabTerminal.pastFrozenIndex(); }
+  SymInt pastFrozenTerminalIndex() const override { return vocabTerminal.pastFrozenIndex(); }
 
   // faster calls for ExtendedVocabulary - no need for virtual dispatch
   Sym _Add(std::string const&, SymbolType symType);

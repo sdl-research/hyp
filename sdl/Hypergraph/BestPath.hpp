@@ -1453,7 +1453,8 @@ struct NbestHypergraphOptions : NbestPathOptions {
         , graph(in.isGraph()) {
       out.setEmpty();
       out.setVocabulary(in.getVocabulary());
-      out.forceProperties(kStoreFirstTailOutArcs | kCanonicalLex);
+      out.forceProperties(kCanonicalLex);
+      out.forceFirstTailOutArcsOnly();
       start = out.addState();
       final = out.addState();
       out.setStart(start);
@@ -1501,15 +1502,14 @@ struct NbestHypergraphOptions : NbestPathOptions {
       LabelPair const labelPair = in.labelPair(s);
       if (labelPair.first.isTerminal()) {
         if (added) {
-          added->setHead(
-              (lastHead
-               = out.addState()));  // setHead after add is ok because we have kStoreFirstTailOutArcs only
+          added->setHead((lastHead = out.addState()));
+          // setHead after add is ok because we have kStoreFirstTailOutArcs only
           if (outOpt.pushWeightValueToStart)
             setOneValue(weightSince);  // because we already put the total value on the first w
         } else if (outOpt.pushWeightValueToStart)
           weightSince.value_ = valueTotal;
-        added = out.addArcFst(lastHead, final, labelPair,
-                              weightSince);  // we'll change 'final' later if this wasn't the last one
+        added = out.addArcFst(lastHead, final, labelPair, weightSince);
+        // we'll change 'final' later if this wasn't the last one
         setOne(weightSince);
       }
     }

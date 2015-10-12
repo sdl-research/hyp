@@ -65,7 +65,7 @@ struct IVocabulary : Resource {
      want to purge those unknown words. This implies that people might want to
      be notified when a vocab is reset. Alternatively, we provide
      addSymbol that are immune to this purging. */
-  bool evictThread(Occupancy const&) OVERRIDE;
+  bool evictThread(Occupancy const&) override;
 
   IVocabulary() : threadlocal_() {
     setThreadSpecific();  // TODO:CM-377
@@ -239,14 +239,14 @@ struct IVocabulary : Resource {
 
   void print(std::ostream& out) const;
 
-  char const* category() const OVERRIDE { return "vocabulary"; }
-  std::string name() const OVERRIDE { return getName(); }
+  char const* category() const override { return "vocabulary"; }
+  std::string name() const override { return getName(); }
 
-  void initProcessPhase(InitProcessPhase phase) OVERRIDE {
+  void initProcessPhase(InitProcessPhase phase) override {
     if (phase == kPhase1) setThreadLocal(true);
   }
 
-  void initThread() OVERRIDE { SDL_DEBUG(evict.init.Vocabulary, "vocabulary initThread " << getName()); }
+  void initThread() override { SDL_DEBUG(evict.init.Vocabulary, "vocabulary initThread " << getName()); }
 
  protected:
   bool threadlocal_;

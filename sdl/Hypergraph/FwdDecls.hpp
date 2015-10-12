@@ -12,7 +12,7 @@
 #define HYP__HYPERGRAPH_FWDDECLS_HPP
 #pragma once
 
-#include <sdl/Util/Override.hpp>
+
 
 namespace sdl {
 namespace Hypergraph {

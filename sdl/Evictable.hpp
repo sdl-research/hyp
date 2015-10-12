@@ -22,7 +22,7 @@
 #include <vector>
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/thread/locks.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/ThreadSpecific.hpp>
 #include <sdl/Util/Flag.hpp>
 #include <sdl/Util/LogHelper.hpp>

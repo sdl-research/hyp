@@ -22,7 +22,7 @@
 
 #include <sdl/Types.hpp>
 #include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/Override.hpp>
+
 
 namespace sdl {
 namespace Util {
@@ -80,19 +80,19 @@ struct IWordFilter {
 };
 
 struct AllWords : IWordFilter {
-  virtual bool alwaysAllow() const OVERRIDE { return true; }
-  bool allowString(std::string const&) const OVERRIDE { return true; }
-  bool allowUnicodes(Unicodes const&) const OVERRIDE { return true; }
+  virtual bool alwaysAllow() const override { return true; }
+  bool allowString(std::string const&) const override { return true; }
+  bool allowUnicodes(Unicodes const&) const override { return true; }
 };
 
 struct AsciiWords : IWordFilter {
   enum { kAsciiMax = 127 };
-  bool allowString(std::string const& word) const OVERRIDE {
+  bool allowString(std::string const& word) const override {
     for (std::string::const_iterator i = word.begin(), e = word.end(); i != e; ++i)
       if ((unsigned char)*i > kAsciiMax) return false;
     return true;
   }
-  bool allowUnicodes(Unicodes const& word) const OVERRIDE {
+  bool allowUnicodes(Unicodes const& word) const override {
     for (Unicodes::const_iterator i = word.begin(), e = word.end(); i != e; ++i)
       if (*i > kAsciiMax) return false;
     return true;
@@ -105,13 +105,13 @@ struct WordFilter : Impl, IWordFilter {
   Impl& impl() { return *this; }
   Impl const& impl() const { return *this; }
 
-  void initProcess() OVERRIDE { impl().initProcess(); }
-  void setAlwaysAllow() OVERRIDE { impl().setAlwaysAllow(); }
-  void setNeverAllow() OVERRIDE { impl().setNeverAllow(); }
-  bool alwaysAllow() const OVERRIDE { return impl().alwaysAllow(); }
-  bool neverAllow() const OVERRIDE { return impl().neverAllow(); }
-  bool allowString(std::string const& word) const OVERRIDE { return impl().allowString(word); }
-  virtual bool allowUnicodes(Unicodes const& word) const OVERRIDE {
+  void initProcess() override { impl().initProcess(); }
+  void setAlwaysAllow() override { impl().setAlwaysAllow(); }
+  void setNeverAllow() override { impl().setNeverAllow(); }
+  bool alwaysAllow() const override { return impl().alwaysAllow(); }
+  bool neverAllow() const override { return impl().neverAllow(); }
+  bool allowString(std::string const& word) const override { return impl().allowString(word); }
+  virtual bool allowUnicodes(Unicodes const& word) const override {
     return impl().allowString(FromUnicodes(word));
   }
 };
@@ -121,15 +121,15 @@ struct WordFilterUnicodes : Impl, IWordFilter {
   Impl& impl() { return *this; }
   Impl const& impl() const { return *this; }
 
-  void initProcess() OVERRIDE { impl().initProcess(); }
-  void setAlwaysAllow() OVERRIDE { impl().setAlwaysAllow(); }
-  void setNeverAllow() OVERRIDE { impl().setNeverAllow(); }
-  bool alwaysAllow() const OVERRIDE { return impl().alwaysAllow(); }
-  bool neverAllow() const OVERRIDE { return impl().neverAllow(); }
-  bool allowString(std::string const& word) const OVERRIDE {
+  void initProcess() override { impl().initProcess(); }
+  void setAlwaysAllow() override { impl().setAlwaysAllow(); }
+  void setNeverAllow() override { impl().setNeverAllow(); }
+  bool alwaysAllow() const override { return impl().alwaysAllow(); }
+  bool neverAllow() const override { return impl().neverAllow(); }
+  bool allowString(std::string const& word) const override {
     return impl().allowUnicodes(Util::ToUnicodes(word));
   }
-  virtual bool allowUnicodes(Unicodes const& word) const OVERRIDE { return impl().allowUnicodes(word); }
+  virtual bool allowUnicodes(Unicodes const& word) const override { return impl().allowUnicodes(word); }
 };
 
 template <class Impl>
@@ -137,13 +137,13 @@ struct WordFilterStringUnicodes : Impl, IWordFilter {
   Impl& impl() { return *this; }
   Impl const& impl() const { return *this; }
 
-  void initProcess() OVERRIDE { impl().initProcess(); }
-  void setAlwaysAllow() OVERRIDE { impl().setAlwaysAllow(); }
-  void setNeverAllow() OVERRIDE { impl().setNeverAllow(); }
-  bool alwaysAllow() const OVERRIDE { return impl().alwaysAllow(); }
-  bool neverAllow() const OVERRIDE { return impl().neverAllow(); }
-  bool allowString(std::string const& word) const OVERRIDE { return impl().allowString(word); }
-  virtual bool allowUnicodes(Unicodes const& word) const OVERRIDE { return impl().allowUnicodes(word); }
+  void initProcess() override { impl().initProcess(); }
+  void setAlwaysAllow() override { impl().setAlwaysAllow(); }
+  void setNeverAllow() override { impl().setNeverAllow(); }
+  bool alwaysAllow() const override { return impl().alwaysAllow(); }
+  bool neverAllow() const override { return impl().neverAllow(); }
+  bool allowString(std::string const& word) const override { return impl().allowString(word); }
+  virtual bool allowUnicodes(Unicodes const& word) const override { return impl().allowUnicodes(word); }
 };
 
 

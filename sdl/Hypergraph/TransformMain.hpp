@@ -70,7 +70,7 @@
 #include <graehl/shared/string_to.hpp>
 
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/Flag.hpp>
 #include <sdl/Util/StringBuilder.hpp>
@@ -184,7 +184,7 @@ struct TransformMainBase : HypergraphMainBase {
   bool firstInputFileHasMultipleHgs;  // multiple inputs[0] lines or hgs
   bool reloadOnMultiple;  // for inputs 2...n, free then re-parse for each input (saves memory if n is large)
 
-  void finish_configure_more() OVERRIDE {
+  void finish_configure_more() override {
     this->configurable(this);
     if (bestOutputs) {
       this->configurable(&optBestOutputs);
@@ -196,7 +196,7 @@ struct TransformMainBase : HypergraphMainBase {
     return hg_properties ? withArcs(*hg_properties) : p;
   }
 
-  virtual void validate_parameters_more() OVERRIDE {
+  virtual void validate_parameters_more() override {
     if (!(arcType.i & allowedSemirings.i))
       SDL_THROW_LOG(Hypergraph, InvalidInputException,
                     "semiring type " << arcType << " not allowed - use one of " << semiringsUsage());
@@ -253,13 +253,13 @@ struct TransformMain : TransformMainBase {
     configuredInputs = true;
   }
 
-  void before_finish_configure() OVERRIDE { configureInputs(); }
+  void before_finish_configure() override { configureInputs(); }
 
   OD inputOptDesc;
   CRTP& impl() { return *static_cast<CRTP*>(this); }
   CRTP const& impl() const { return *static_cast<CRTP const*>(this); }
 
-  int run_exit() OVERRIDE {
+  int run_exit() override {
     bool r;
     switch ((unsigned)arcType) {
       case kViterbiSemiring:

@@ -67,7 +67,7 @@
 #include <sdl/Hypergraph/FwdDecls.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/Override.hpp>
+
 #include <graehl/shared/os.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -110,26 +110,26 @@ struct StateIdMapping {
 typedef shared_ptr<StateIdMapping> StateIdMappingPtr;
 
 struct IdentityIdMapping : public StateIdMapping {
-  virtual char const* name() const OVERRIDE { return "IdentityIdMapping"; }
-  virtual bool identity() const OVERRIDE { return true; }
+  virtual char const* name() const override { return "IdentityIdMapping"; }
+  virtual bool identity() const override { return true; }
 
-  virtual StateId remap(StateId s) OVERRIDE { return s; }
+  virtual StateId remap(StateId s) override { return s; }
   //  static IdentityIdMapping canonical;
 };
 
 struct OffsetIdMapping : public StateIdMapping {
-  virtual char const* name() const OVERRIDE { return "OffsetIdMapping"; }
-  virtual bool identity() const OVERRIDE { return !offset; }
+  virtual char const* name() const override { return "OffsetIdMapping"; }
+  virtual bool identity() const override { return !offset; }
 
-  virtual StateId remap(StateId s) OVERRIDE { return s + offset; }
+  virtual StateId remap(StateId s) override { return s + offset; }
   StateId offset;
   OffsetIdMapping(StateId offset) : offset(offset) {}
 };
 
 struct ConsecutiveIdMapping : public StateIdMapping {
-  virtual char const* name() const OVERRIDE { return "ConsecutiveIdMapping"; }
+  virtual char const* name() const override { return "ConsecutiveIdMapping"; }
 
-  virtual StateId remap(StateId s) OVERRIDE { return next++; }
+  virtual StateId remap(StateId s) override { return next++; }
   StateId next;
   ConsecutiveIdMapping(StateId next = 0) : next(next) {}
 };
@@ -138,30 +138,30 @@ struct ConsecutiveIdMapping : public StateIdMapping {
 // NOTE: these add using the usual interface, so when used in-place we have to copy arcs/labels then clear.
 template <class A>
 struct StateAddMapping : public StateIdMapping {
-  virtual char const* name() const OVERRIDE { return "StateAddMapping"; }
-  virtual bool stateAdding() const OVERRIDE { return true; }
+  virtual char const* name() const override { return "StateAddMapping"; }
+  virtual bool stateAdding() const override { return true; }
 
   IMutableHypergraph<A>* outHg;
   StateAddMapping(IMutableHypergraph<A>* outHg) : outHg(outHg) {}
-  virtual StateId remap(StateId s) OVERRIDE {
+  virtual StateId remap(StateId s) override {
     StateId r = outHg->addState();
     SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s
                                                                             << " -> r=" << r
                                                                             << " numStates=" << outHg->size());
     return r;
   }
-  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE { return outHg->addState(io); }
+  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) override { return outHg->addState(io); }
 };
 
 template <class A>
 struct StateAddIdentityMapping : public StateIdMapping {
-  virtual char const* name() const OVERRIDE { return "StateAddMapping"; }
-  virtual bool stateAdding() const OVERRIDE { return true; }
+  virtual char const* name() const override { return "StateAddMapping"; }
+  virtual bool stateAdding() const override { return true; }
 
   IMutableHypergraph<A>* outHg;
   StateAddIdentityMapping(IMutableHypergraph<A>* outHg) : outHg(outHg) {}
   // we don't declare this as identity because we want to make sure remap is actually called
-  virtual StateId remap(StateId s) OVERRIDE {
+  virtual StateId remap(StateId s) override {
     StateId r = outHg->addStateId(s);
     SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s
                                                                             << " -> r=" << r
@@ -169,33 +169,33 @@ struct StateAddIdentityMapping : public StateIdMapping {
     assert(r == s);
     return s;
   }
-  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE { return outHg->addState(io); }
+  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) override { return outHg->addState(io); }
 };
 
 template <class A>
 struct SubsetStateAddMapping : public StateAddMapping<A> {
-  virtual char const* name() const OVERRIDE { return "SubsetStateAddMapping"; }
+  virtual char const* name() const override { return "SubsetStateAddMapping"; }
 
-  virtual bool partial() const OVERRIDE { return true; }
+  virtual bool partial() const override { return true; }
 
   StateSet const& subset;
   SubsetStateAddMapping(IMutableHypergraph<A>* outHg, StateSet const& subset)
       : StateAddMapping<A>(outHg), subset(subset) {}
-  virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
+  virtual StateId remap(StateId s) override { return remapImpl(s); }
   StateId remapImpl(StateId s) { return Util::contains(subset, s) ? this->outHg->addState() : kNoState; }
-  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) OVERRIDE {
+  virtual StateId remapForLabelPair(StateId s, LabelPair const& io) override {
     return Util::contains(subset, s) ? this->outHg->addState(io) : kNoState;
   }
 };
 
 struct SubsetIdentityMapping : public StateIdMapping {
-  virtual char const* name() const OVERRIDE { return "SubsetIdentityMapping"; }
+  virtual char const* name() const override { return "SubsetIdentityMapping"; }
 
-  virtual bool partial() const OVERRIDE { return true; }
+  virtual bool partial() const override { return true; }
 
   StateSet const& subset;
   SubsetIdentityMapping(StateSet const& subset) : subset(subset) {}
-  virtual StateId remap(StateId s) OVERRIDE { return remapImpl(s); }
+  virtual StateId remap(StateId s) override { return remapImpl(s); }
   StateId remapImpl(StateId s) { return Util::contains(subset, s) ? s : kNoState; }
 };
 

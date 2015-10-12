@@ -55,7 +55,7 @@ class ParameterUpdate : public IUpdate<FloatT> {
   {
   }
 
-  void update(FeatureId index, FloatT value) OVERRIDE {
+  void update(FeatureId index, FloatT value) override {
     SDL_DEBUG_BUILD(assert(index < numParams_));
     params_[index] -= rate_ * value;
   }
@@ -79,9 +79,9 @@ struct AdagradParameterUpdate : public ParameterUpdate<FloatT> {
   }
 
   /// No-op since Adagrad sets its own feature-specific learning rates
-  void setRate(FloatT rate) OVERRIDE {}
+  void setRate(FloatT rate) override {}
 
-  void update(FeatureId index, FloatT value) OVERRIDE {
+  void update(FeatureId index, FloatT value) override {
     if (!value) return;
     assert(index < this->numParams_);
     prevGrads_[index] += value * value;
@@ -111,11 +111,11 @@ struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
   }
 
   /// No-op since Adagrad sets its own feature-specific learning rates
-  void setRate(FloatT rate) OVERRIDE {}
+  void setRate(FloatT rate) override {}
 
-  void incTimeStep() OVERRIDE { ++timeStep_; }
+  void incTimeStep() override { ++timeStep_; }
 
-  void update(FeatureId index, FloatT value) OVERRIDE {
+  void update(FeatureId index, FloatT value) override {
     if (!value) return;
     prevGrads_[index] += value;
     prevGradsSquared_[index] += value * value;
