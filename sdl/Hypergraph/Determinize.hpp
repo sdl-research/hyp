@@ -336,7 +336,7 @@ struct DeterminizeFsa {
         f = qfinals[0];
       else {
         f = o->addState();
-        forall (StateId q, qfinals) { o->addArcFsa(q, f); }
+        for (StateId q : qfinals) { o->addArcFsa(q, f); }
       }
       o->setFinal(f);
     }
@@ -379,7 +379,7 @@ struct DeterminizeFsa {
     if (specialEps) {
       newpcqs = qsp.construct(qs);
       FORCE_SET(qs);
-      forall (StateId s, qs) {  // avoid iterating over in-place set result because of possible invalidation
+      for (StateId s : qs) {  // avoid iterating over in-place set result because of possible invalidation
         // if using BitSet, use |= op
         addqs(*newpcqs, eps.outs[s], anyadded);
         // could also memoize every intermediate result, but why bother? bad space/time tradeoff maybe, if we
@@ -443,13 +443,13 @@ struct DeterminizeFsa {
     std::vector<StateId> qrho;
     QSet& qallrho = *qsp.construct();
     bool addrhodummy;
-    forall (StateId s, qs) {
+    for (StateId s : qs) {
       Outi const& p = rhos[s];
       if (!p.qrhos.empty()) {
         qrho.push_back(s);  // process later once full alphabet for qs is known
         addqs(qallrho, p.qrhos, addrhodummy);
       }
-      forall (Arc const& a, p.arcs) {
+      for (Arc const& a : p.arcs) {
         Util::add(delta(d, a.first), a.second);  // SDL_DETERMINIZE_SORT: will uniq later
       }
     }
@@ -457,10 +457,10 @@ struct DeterminizeFsa {
       destroy(&qallrho);
     else
       addArc(q, qallrho, RHO::ID);  // handles all symbols not mentioned in any outgoing arc of qs.
-    forall (Delta::value_type& v, d) {
+    for (Delta::value_type& v : d) {
       Sym i = v.first;
       QSet& dqs = DEREF_DELTA v.second;
-      forall (StateId q, qrho) {  // now handle symbols not mentioned in state q but mentioned elsehwere in qs
+      for (StateId q : qrho) {  // now handle symbols not mentioned in state q but mentioned elsehwere in qs
         Outi const& p = rhos[q];
         if (!Util::contains(p.normals, i))  // because the normal letters from q-> don't include i, rhos from
           // q->x should be added to d[i]=dqs
@@ -473,7 +473,7 @@ struct DeterminizeFsa {
 #endif
     }
 #if SDL_DETERMINIZE_SORT
-    forall (Delta::value_type& v, d) { addArc(q, uniq(v.second), v.first); }
+    for (Delta::value_type& v : d) { addArc(q, uniq(v.second), v.first); }
 #endif
   }
 

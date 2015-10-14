@@ -524,7 +524,7 @@ struct HypergraphBase : Resource {
   std::string name() const override { return typename_; }
 
   /**
-     helper for prettier iteration syntax: forall (ArcId arci,
+     helper for prettier iteration syntax: forall (ArcId arci :
      hg.inArcIds(headState)) { Arc *arc = inArc(headState, arci); }.
   */
 
@@ -759,17 +759,35 @@ struct HypergraphBase : Resource {
      for in, first tail for first-tail-out-arcs, all tails for out-arcs))
 
   */
-  virtual ArcsContainer* maybeInArcs(StateId state) { unimplementedMutableOnly("maybeInArcs"); return 0; }
+  virtual ArcsContainer* maybeInArcs(StateId state) {
+    unimplementedMutableOnly("maybeInArcs");
+    return 0;
+  }
 
-  virtual ArcsContainer const* maybeInArcs(StateId state) const { unimplementedMutableOnly("maybeInArcs"); return 0; }
+  virtual ArcsContainer const* maybeInArcs(StateId state) const {
+    unimplementedMutableOnly("maybeInArcs");
+    return 0;
+  }
 
-  virtual ArcsContainer* maybeOutArcs(StateId state) { unimplementedMutableOnly("maybeOutArcs"); return 0; }
+  virtual ArcsContainer* maybeOutArcs(StateId state) {
+    unimplementedMutableOnly("maybeOutArcs");
+    return 0;
+  }
 
-  virtual ArcsContainer const* maybeOutArcs(StateId state) const { unimplementedMutableOnly("maybeOutArcs"); return 0; }
+  virtual ArcsContainer const* maybeOutArcs(StateId state) const {
+    unimplementedMutableOnly("maybeOutArcs");
+    return 0;
+  }
 
-  ArcsContainer const* maybeInArcsConst(StateId state) const { return maybeInArcs(state); return 0; }
+  ArcsContainer const* maybeInArcsConst(StateId state) const {
+    return maybeInArcs(state);
+    return 0;
+  }
 
-  ArcsContainer const* maybeOutArcsConst(StateId state) const { return maybeOutArcs(state); return 0; }
+  ArcsContainer const* maybeOutArcsConst(StateId state) const {
+    return maybeOutArcs(state);
+    return 0;
+  }
 
   ArcsContainer const* maybeArcsConst(StateId state, bool inarcs) const {
     return inarcs ? maybeInArcs(state) : maybeOutArcs(state);
@@ -798,9 +816,7 @@ struct HypergraphBase : Resource {
   /// labels (by casting away const) could invalidate label-dependent
   /// (e.g. kOneLexical) properties, after which you should
   /// clearUncomputedProperties(...)
-  virtual MaybeLabels maybeLabels() const {
-    return MaybeLabels((Labels const*)0, (Labels const*)0);
-  }
+  virtual MaybeLabels maybeLabels() const { return MaybeLabels((Labels const*)0, (Labels const*)0); }
 
   virtual void printArc(std::ostream& out, ArcBase const* a, bool inlineLabel) const;
 
@@ -842,10 +858,16 @@ struct HypergraphBase : Resource {
   virtual void clearCanonicalLexCache() { unimplementedMutableOnly("clearCanonicalLexCache"); }
 
   /// return true if no duplicate states with same labelpair, setting kCanonicalLex and rebuilding cache
-  virtual bool forceCanonicalLex() { unimplementedMutableOnly("forceCanonicalLex"); return 0; }
+  virtual bool forceCanonicalLex() {
+    unimplementedMutableOnly("forceCanonicalLex");
+    return 0;
+  }
 
   /// return true if no duplicate states with same labelpair. invalidate existing cache
-  virtual bool ensureCanonicalLex() { unimplementedMutableOnly("ensureCanonicalLex"); return 0; }
+  virtual bool ensureCanonicalLex() {
+    unimplementedMutableOnly("ensureCanonicalLex");
+    return 0;
+  }
 
   /**
      \return existing StateId with given label pair, if any. may only call if canonicalLex()
@@ -873,15 +895,24 @@ struct HypergraphBase : Resource {
   // optional to call this - might clear out some garbage. won't set
   // kCanonicalLex if it isn't set already (use forceCanonicalLex for
   // that). \return whether labels are in fact canonical
-  virtual bool rebuildCanonicalLex() { unimplementedMutableOnly("rebuildCanonicalLex"); return 0; }
+  virtual bool rebuildCanonicalLex() {
+    unimplementedMutableOnly("rebuildCanonicalLex");
+    return 0;
+  }
 
   /// respects kCanonicalLex property
-  virtual StateId addState(Sym inputLabel) { unimplementedMutableOnly("addState"); return 0; }
+  virtual StateId addState(Sym inputLabel) {
+    unimplementedMutableOnly("addState");
+    return 0;
+  }
 
   /**
      addStateId(nextStateId(), ...) is the same as addState(, ...) always.
   */
-  virtual StateId nextStateId() const { unimplementedMutableOnly("nextStateId"); return 0; }
+  virtual StateId nextStateId() const {
+    unimplementedMutableOnly("nextStateId");
+    return 0;
+  }
 
   /**
      remove last addState provided no arcs using it have been added
@@ -889,7 +920,10 @@ struct HypergraphBase : Resource {
   virtual void removeLastState() { unimplementedMutableOnly("removeLastState"); }
 
   /// note: if state was already added, it keeps existing arcs/labels. returns state always - cannot fail
-  virtual StateId addStateId(StateId state) { unimplementedMutableOnly("addStateId"); return 0; }
+  virtual StateId addStateId(StateId state) {
+    unimplementedMutableOnly("addStateId");
+    return 0;
+  }
 
   virtual void addStateId(StateId state, LabelPair l);
 
@@ -898,7 +932,10 @@ struct HypergraphBase : Resource {
     return 0;
   }
 
-  virtual StateId addState(Sym inputLabel, Sym outputLabel) { unimplementedMutableOnly("addState"); return 0; }
+  virtual StateId addState(Sym inputLabel, Sym outputLabel) {
+    unimplementedMutableOnly("addState");
+    return 0;
+  }
 
   StateId addState(LabelPair io) { return addState(input(io), output(io)); }
 
@@ -924,13 +961,21 @@ struct HypergraphBase : Resource {
     this->setVocabulary(h.getVocabulary());
   }
 
-  virtual void forceInArcs() { unimplementedMutableOnly("forceInArcs"); }
+  virtual void forceInArcs() {
+    if (!storesInArcs()) unimplementedMutableOnly("forceInArcs");
+  }
 
-  virtual void forceOutArcs() { unimplementedMutableOnly("forceOutArcs"); }
+  virtual void forceOutArcs() {
+    if (!storesOutArcs()) unimplementedMutableOnly("forceOutArcs");
+  }
 
-  virtual void removeInArcs() { unimplementedMutableOnly("removeInArcs"); }
+  virtual void removeInArcs() {
+    if (storesInArcs()) unimplementedMutableOnly("removeInArcs");
+  }
 
-  virtual void removeOutArcs() { unimplementedMutableOnly("removeOutArcs"); }
+  virtual void removeOutArcs() {
+    if (storesOutArcs()) unimplementedMutableOnly("removeOutArcs");
+  }
 
   /**
      should set kArcsAdded property so we can detect acyclic, fsm, etc.
@@ -989,16 +1034,12 @@ struct HypergraphBase : Resource {
     addUncomputedProperties(kAcyclic);
   }
 
-  void unknownAcyclic() const {
-    clearUncomputedProperties(kAcyclic|kSortedStates);
-  }
+  void unknownAcyclic() const { clearUncomputedProperties(kAcyclic | kSortedStates); }
 
-  void unknownSortedStates() const {
-    clearUncomputedProperties(kSortedStates);
-  }
+  void unknownSortedStates() const { clearUncomputedProperties(kSortedStates); }
 
   /// attempt to print adjacencies even if they're wrong (i.e. no sanity checking). for debugging.
-  virtual void printUnchecked(std::ostream &out) const;
+  virtual void printUnchecked(std::ostream& out) const;
 };
 
 inline std::ostream& operator<<(std::ostream& out, HypergraphBase const& self) {
@@ -1103,30 +1144,30 @@ void printArc(std::ostream& out, Arc const* arc, HypergraphBase const& hg) {
 }
 
 template <class Arc>
-void print(std::ostream &out, Arc const* arc, HypergraphBase const* hg) {
+void print(std::ostream& out, Arc const* arc, HypergraphBase const* hg) {
   printArc(out, arc, hg);
 }
 
 
-inline void print(std::ostream &out, ArcBase const* arc, HypergraphBase const* hg) {
+inline void print(std::ostream& out, ArcBase const* arc, HypergraphBase const* hg) {
   if (hg)
     hg->printArc(out, arc);
   else
     out << *arc;
 }
 
-inline void print(std::ostream &out, ArcBase const& arc, HypergraphBase const* hg) {
+inline void print(std::ostream& out, ArcBase const& arc, HypergraphBase const* hg) {
   if (hg)
     hg->printArc(out, &arc);
   else
     out << arc;
 }
 
-inline void print(std::ostream &out, ArcBase const* arc, HypergraphBase const& hg) {
+inline void print(std::ostream& out, ArcBase const* arc, HypergraphBase const& hg) {
   hg.printArc(out, arc);
 }
 
-inline void print(std::ostream &out, ArcBase const& arc, HypergraphBase const& hg) {
+inline void print(std::ostream& out, ArcBase const& arc, HypergraphBase const& hg) {
   hg.printArc(out, &arc);
 }
 
@@ -1146,25 +1187,22 @@ inline void print(std::ostream& o, std::size_t s, HypergraphBase const& hg) {
 #endif
 #endif
 
-inline void print(std::ostream &out, StateIdContainer const& x, IVocabulary const* voc) {
+inline void print(std::ostream& out, StateIdContainer const& x, IVocabulary const* voc) {
   out << Util::makePrintable(x);
 }
 
-void printStartAndFinal(std::ostream &out, HypergraphBase const& hg);
+void printStartAndFinal(std::ostream& out, HypergraphBase const& hg);
 
 struct PrintUnchecked {
   HypergraphBase const& hg;
-  PrintUnchecked(HypergraphBase const& hg)
-      : hg(hg) {}
-  friend inline std::ostream& operator<<(std::ostream &out, PrintUnchecked const& self) {
+  PrintUnchecked(HypergraphBase const& hg) : hg(hg) {}
+  friend inline std::ostream& operator<<(std::ostream& out, PrintUnchecked const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream &out) const {
-    hg.printUnchecked(out);
-  }
-
+  void print(std::ostream& out) const { hg.printUnchecked(out); }
 };
+
 
 }}
 

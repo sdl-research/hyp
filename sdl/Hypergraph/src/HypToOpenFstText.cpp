@@ -26,7 +26,7 @@
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 
 #include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/Locale.hpp>
 
 #include <sdl/Util/ProgramOptions.hpp>

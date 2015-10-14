@@ -20,7 +20,7 @@
 #define HYP__HYPERGRAPH_CONVERT_CHARS_TO_TOKENS_HPP
 #pragma once
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/HypergraphCopyBasic.hpp>

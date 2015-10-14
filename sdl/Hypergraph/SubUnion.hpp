@@ -24,7 +24,7 @@
 #include <sdl/Hypergraph/Union.hpp>
 
 #include <sdl/Util/Constants.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/CartesianProduct.hpp>
 
@@ -124,7 +124,7 @@ Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId s, StateIdToSpan
   std::map<StateId, StateId> votesForLeft, votesForRight;
 
   // Look at the spans of children
-  forall (ArcId arcid, hg.inArcIds(s)) {
+  for (ArcId arcid : hg.inArcIds(s)) {
     Arc* arc = hg.inArc(s, arcid);
     SDL_DEBUG(Hypergraph.SubUnion, "Processing arc " << *arc);
     StateIdContainer tailIds = arc->tails();
@@ -162,7 +162,7 @@ template <class Arc>
 void getSourceSpansBubbleDown(IHypergraph<Arc> const& hg, StateId s, Span sSpan,
                               StateIdToSpan* stateIdToSpan) {
   SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleDown(s=" << s << ")");
-  forall (ArcId arcid, hg.inArcIds(s)) {
+  for (ArcId arcid : hg.inArcIds(s)) {
     Arc* arc = hg.inArc(s, arcid);
     StateIdContainer tailIds = arc->tails();
     for (TailId i = 0, end = tailIds.size(); i < end; ++i) {
@@ -267,11 +267,11 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
   if (didFindHeadSpan && !headSpan.smaller(parentSpan) && !hasLexicalLabel) headSpan = kNullSpan;
 
   std::vector<std::vector<StateIdContainer> > newStatesForTailsPerArc;
-  forall (ArcId arcid, hg.inArcIds(head)) {
+  for (ArcId arcid : hg.inArcIds(head)) {
     std::vector<StateIdContainer> newStatesForTails;
     bool allTailsAreUnion = true;
     Arc* arc = hg.inArc(head, arcid);
-    forall (StateId tailId, arc->tails()) {
+    for (StateId tailId : arc->tails()) {
       NewStateInfo* p = addStatesRecurse(hg, tailId, headSpan, hgStateIdToSpan, result, resultSpanToStateIds,
                                          resultArcs, newStateInfos, opts);
       bool isUnion = p->first;
@@ -288,7 +288,7 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
     SpanToStateIds::const_iterator foundStates = resultSpanToStateIds.find(foundSpan->second);
     if (foundStates != resultSpanToStateIds.end()) {
       StateIdContainer const& statesVec = foundStates->second;
-      forall (StateId s, statesVec) {
+      for (StateId s : statesVec) {
         if (result->hasLexicalLabel(s)) {
           if (result->inputLabel(s) == hg.inputLabel(head)) {
             isUnion = true;
@@ -317,7 +317,7 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
   }
 
   // Add all resulting arcs to the result machine
-  forall (StateId newHead, newStates) {
+  for (StateId newHead : newStates) {
     for (std::size_t a = 0; a < newStatesForTailsPerArc.size(); ++a) {
       std::vector<StateIdContainer> newStatesForTails = newStatesForTailsPerArc[a];
       for (std::size_t i = 0, end = newStatesForTails.size(); i < end; ++i) {
@@ -342,7 +342,7 @@ NewStateInfo* addStatesRecurse(IHypergraph<Arc> const& hg, StateId head, Span pa
   }
 
   SDL_DEBUG(Hypergraph.SubUnion, "Result " << head << ": " << (isUnion ? "UNION" : "NO"));
-  forall (StateId s, newStates) { SDL_DEBUG(Hypergraph.SubUnion, " new state " << s); }
+  for (StateId s : newStates) { SDL_DEBUG(Hypergraph.SubUnion, " new state " << s); }
 
   // return std::make_pair(isUnion, newStates);
   NewStateInfo* info = new NewStateInfo(isUnion, newStates);
@@ -355,8 +355,8 @@ void addStates(IHypergraph<Arc> const& hg, StateIdToSpan const& hgStateIdToSpan,
                IMutableHypergraph<Arc>* result, SpanToStateIds const& resultSpanToStateIds,
                SubUnionOptions& opts) {
   std::set<StateIdContainer> resultArcs;
-  forall (StateId s, hg.getStateIds()) {
-    forall (ArcId arcid, hg.inArcIds(s)) {
+  for (StateId s : hg.getStateIds()) {
+    for (ArcId arcid : hg.inArcIds(s)) {
       Arc* arc = hg.inArc(s, arcid);
       StateIdContainer v(arc->tails());
       v.push_back(arc->head());

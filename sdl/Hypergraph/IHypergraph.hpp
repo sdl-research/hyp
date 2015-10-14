@@ -132,7 +132,7 @@
 #include <sdl/Util/Once.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/AnyGenerator.hpp>
-#include <sdl/Util/Forall.hpp>
+
 
 #include <sdl/SharedPtr.hpp>
 #include <boost/range/size.hpp>
@@ -463,12 +463,12 @@ struct ArcPointers : public std::vector<Arc*> {
   }
   template <class V>
   void visit(V const& v) const {
-    forall (Arc* arc, *this)
+    for (Arc* arc : *this)
       v(arc);
   }
   template <class V>
   void visit(V& v) const {
-    forall (Arc* arc, *this)
+    for (Arc* arc : *this)
       v(arc);
   }
 };

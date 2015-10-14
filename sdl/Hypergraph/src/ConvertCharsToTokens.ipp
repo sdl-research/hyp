@@ -25,7 +25,7 @@
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
@@ -167,7 +167,7 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
 
     if (!tokenWeight.isZero()) {
       SDL_TRACE(Hypergraph.ConvertCharsToTokens, "w[" << stateid << "]: " << tokenWeight);
-      forall (typename TokenWeight::value_type const& tokWeightPair, tokenWeight) {
+      for (typename TokenWeight::value_type const& tokWeightPair : tokenWeight) {
         Hypergraph::Token const& tok = tokWeightPair.first;
         Syms const& toksyms = tok.syms();
         if (tok.isComplete() || isTokenImpossibleToComplete(tok)) {
@@ -229,11 +229,11 @@ struct ConstructResultArcForeachIncomingToken : public IStatesVisitor {
   */
   void finishVisit() {
     SDL_TRACE(Hypergraph.ConvertCharsToTokens, "finishVisit");
-    forall (StateId stateid, inhg_.getStateIds()) {
-      forall (ArcId aid, inhg_.inArcIds(stateid)) {
+    for (StateId stateid : inhg_.getStateIds()) {
+      for (ArcId aid : inhg_.inArcIds(stateid)) {
         Arc* arc = inhg_.inArc(stateid, aid);
         bool allTailsOk = true;
-        forall (StateId tailId, arc->tails()) {
+        for (StateId tailId : arc->tails()) {
           if (!hasIncomingTokens(tailId)) {
             allTailsOk = false;
             break;

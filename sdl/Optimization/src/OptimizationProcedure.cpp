@@ -21,7 +21,7 @@
 
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Equal.hpp>
-#include <sdl/Util/Forall.hpp>
+
 
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 

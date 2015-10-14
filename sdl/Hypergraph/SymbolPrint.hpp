@@ -27,7 +27,7 @@
 #include <sdl/Hypergraph/LabelPair.hpp>
 #include <sdl/Util/Print.hpp>
 #include <sdl/Util/PrintRange.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/Enum.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Hypergraph/PrintOptions.hpp>
@@ -139,7 +139,7 @@ inline void print(Util::StringBuilder& o, Hypergraph::LabelPair const& l, IVocab
 inline void print(std::ostream& o, Syms const& s, IVocabulary& voc, char const* space,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   Util::Sep sp(space);
-  forall (Sym w, s) {
+  for (Sym w : s) {
     if (w) {
       o << sp;
       print(o, w, voc, quote);
@@ -149,7 +149,7 @@ inline void print(std::ostream& o, Syms const& s, IVocabulary& voc, char const* 
 inline void print(Util::StringBuilder& o, Syms const& s, IVocabulary& voc, char const* space,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   Util::Sep sp(space);
-  forall (Sym w, s) {
+  for (Sym w : s) {
     if (w) {
       o << sp;
       print(o, w, voc, quote);

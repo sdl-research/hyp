@@ -46,11 +46,11 @@ void parsedArcsToHg(ParsedArcs const& arcs
   // this will have the effect of putting state-id-free lexical axioms after the rest of the states
   StateId highestStateId = 0; // should be -1 but that is kNoState, so added workaround using hasStateIds
   bool hasStateIds = false;
-  forall (ParsedArc* arc, arcs) {
+  for (ParsedArc* arc : arcs) {
     arc->head.increaseMaxId(highestStateId);
     if (arc->head.hasId())
       hasStateIds = true;
-    forall (ParserUtil::State s, arc->tails) {
+    for (ParserUtil::State s : arc->tails) {
         s.increaseMaxId(highestStateId);
         if (s.hasId())
           hasStateIds = true;
@@ -64,10 +64,10 @@ void parsedArcsToHg(ParsedArcs const& arcs
 
   std::size_t linenum = 1;
   SymsToState symsToState;
-  forall (ParsedArc* wrappedArc, arcs) {
+  for (ParsedArc* wrappedArc : arcs) {
 
     // Add states
-    forall (ParserUtil::State& t, wrappedArc->tails) {
+    for (ParserUtil::State& t : wrappedArc->tails) {
       addState(t, &symsToState, highestStateId, *pVoc, result,
                inFilename, linenum, &numBlockStartSymsSeen);
     }
@@ -89,7 +89,7 @@ void parsedArcsToHg(ParsedArcs const& arcs
     else {
       Arc* arc = new Arc();
       arc->setHead(wrappedArc->head.id);
-      forall (ParserUtil::State t, wrappedArc->tails) {
+      for (ParserUtil::State t : wrappedArc->tails) {
         arc->addTail(t.id);
       }
       std::string const& wtstr = wrappedArc->weightStr;

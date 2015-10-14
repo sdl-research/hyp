@@ -24,7 +24,7 @@
 #define PRUNENONBEST_LW2012517_HPP
 #pragma once
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Hypergraph/BestPath.hpp>
 #include <sdl/Hypergraph/Prune.hpp>
 #include <sdl/Util/PointerWithFlag.hpp>
@@ -283,9 +283,9 @@ struct ArcInBest {
       if (Util::lsb(ah)) return;  // already marked subtree
       put(pi, s, Util::withLsb(ah));
       A* a = (A*)ah;
-      forall (StateId tail, a->tails()) { markFromGoal(tail); }
+      for (StateId tail : a->tails()) { markFromGoal(tail); }
     } else if (inarcs && phg->hasLexicalLabel(s)) {
-      forall (ArcId aid, phg->inArcIds(s)) {
+      for (ArcId aid : phg->inArcIds(s)) {
         A* arc = phg->inArc(s, aid);
         assert(!arc->tails().empty());
         if (arc->getTail(0) == start) put(pi, s, Util::withLsb((ArcHandle)arc));

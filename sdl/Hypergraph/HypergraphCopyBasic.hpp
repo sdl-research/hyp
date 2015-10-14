@@ -63,7 +63,7 @@ void copyExceptArcs(IHypergraph<A> const& from, IMutableHypergraph<B>* to,
                     ClearAndSameProperties clearAndSameProperties = kClearAndSameProperties) {
   if (clearAndSameProperties == kClearAndSameProperties) to->clear(from.properties());
   to->setVocabulary(from.getVocabulary());
-  forall (StateId s, from.getStateIds()) {
+  for (StateId s : from.getStateIds()) {
     to->addStateId(s, from.labelPairOptionalOutput(s));
   }
   to->setStart(from.start());

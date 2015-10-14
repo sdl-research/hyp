@@ -28,7 +28,7 @@
 #include <vector>
 #include <cassert>
 #include <sdl/Util/Add.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
@@ -57,7 +57,7 @@ void outsideFromInside(StateId stateId, IHypergraph<Arc> const& hg,
   if (stateId == final)
     sum = Weight::one();
   else {
-    forall (ArcId aid, hg.outArcIds(stateId)) {
+    for (ArcId aid : hg.outArcIds(stateId)) {
       Arc const& arc = *hg.outArc(stateId, aid);
       SDL_TRACE(Hypergraph.OutsideAlgorithm, " Found out arc: " << arc);
       Weight prod(times(arc.weight(), outsideScores[arc.head()]));

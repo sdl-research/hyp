@@ -38,7 +38,7 @@
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Util/RefCount.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/Add.hpp>
 #include <sdl/Util/PointerWithFlag.hpp>
 
@@ -185,7 +185,7 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
   // you!)
   void setColor(int newcolor = usermin) const {
     if (color == opened) return;
-    forall (child_type const& c, this->children) { c->setColor(newcolor); }
+    for (child_type const& c : this->children) { c->setColor(newcolor); }
     color = newcolor;
     // we don't bother avoiding redundant retraversal of children - so you could have an exponential
     // full-binary-tree. to avoid that, would need to make list of things to set then set them later
@@ -683,7 +683,7 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
     color = opened;
     if (!openPrint(o, h, levels)) return;
     graehl::word_spacer sp;
-    forall (child_type const& c, this->children) {
+    for (child_type const& c : this->children) {
       o << sp;
       c->rprint(o, h, levels);
     }

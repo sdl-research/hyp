@@ -31,7 +31,7 @@
 #include <sdl/IVocabulary-fwd.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/ProgramOptions.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sdl/SharedPtr.hpp>
@@ -89,7 +89,7 @@ void printDistances(IHypergraph<Arc> const& hg, bool allPairs, bool dag, StateId
     boost::ptr_vector<Weight> weights;
     insideAlgorithm(hg, &weights);
     std::size_t i = 0;
-    forall (Weight w, weights) { std::cout << i++ << '\t' << w << '\n'; }
+    for (Weight w : weights) { std::cout << i++ << '\t' << w << '\n'; }
   }
 }
 

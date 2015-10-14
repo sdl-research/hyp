@@ -353,7 +353,7 @@ struct StateIdTranslation : boost::noncopyable {
 
   template <class A>
   void transferLabelsPartial(IHypergraph<A> const& ihg, IMutableHypergraph<A>& ohg) {
-    forall (StateIdMap::value_type const& io, cache)
+    for (StateIdMap::value_type const& io : cache)
       ohg.setLabelPair(io.second, ihg.labelPair(io.first));
   }
 

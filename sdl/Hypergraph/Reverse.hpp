@@ -30,11 +30,11 @@
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Hypergraph/Transform.hpp>
 
 #include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Forall.hpp>
+
 
 namespace sdl {
 namespace Hypergraph {
@@ -60,7 +60,7 @@ template <class Arc>
 void reverseFsm(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
   if (!inhg.isFsm())
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseFsm called on CFG");
-  forall (StateId s, inhg.getStateIds()) {
+  for (StateId s : inhg.getStateIds()) {
     result->addStateId(s, inhg.labelPair(s));
   }
   result->setVocabulary(inhg.getVocabulary());

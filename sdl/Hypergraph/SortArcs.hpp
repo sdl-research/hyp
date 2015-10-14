@@ -24,7 +24,7 @@
 #include <algorithm>
 
 #include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Forall.hpp>
+
 
 namespace sdl {
 namespace Hypergraph {

@@ -20,7 +20,7 @@
 #include <sdl/Hypergraph/WeightUtil.hpp>
 
 #include <cmath>
-#include <sdl/Util/Forall.hpp>
+
 
 #include <sdl/Util/Matrix.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
@@ -52,7 +52,7 @@ void floydWarshallInit(IHypergraph<Arc> const& hg, Util::Matrix<typename ArcWtFn
   dist.setDiagonal(Weight::one(), Weight::zero());
   for (StateId tail = 0, numStates = (StateId)dist.getNumRows(); tail < numStates; ++tail) {
     Weight* rowTail = dist.row(tail);
-    forall (ArcId aid, hg.outArcIds(tail)) {
+    for (ArcId aid : hg.outArcIds(tail)) {
       Arc* arc = hg.outArc(tail, aid);
       StateId head = arc->head();
       Hypergraph::plusBy(arcWtFn(arc), rowTail[head]);

@@ -34,7 +34,7 @@
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 
 #include <utility>
@@ -88,7 +88,7 @@ fst::ReplaceFst<FstArc>* toReplaceFst(IHypergraph<HgArc> const& hg, fst::SymbolT
     fst->SetStart(startState);
 
     // Each HG arc has tails, which are converted into a sequence in an FST
-    forall (ArcId arcid, hg.inArcIds(s)) {
+    for (ArcId arcid : hg.inArcIds(s)) {
       HgArc* arc = hg.inArc(s, arcid);
       FStateId prevState = startState;
       StateIdContainer const& tails = arc->tails_;

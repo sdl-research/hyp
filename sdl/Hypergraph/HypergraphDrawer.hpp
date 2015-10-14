@@ -19,7 +19,7 @@
 #pragma once
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Util/Forall.hpp>
+
 
 namespace sdl {
 namespace Hypergraph {
@@ -46,7 +46,7 @@ struct DrawArcFct {
 
     // Draw tails into aux arc
     std::size_t cnt = 1;
-    forall (StateId s, arc->tails()) {
+    for (StateId s : arc->tails()) {
       out << s << " -> " << nodeId << " [label = \"" << cnt
           << "\", arrowhead = none, fontcolor = gray55, fontsize = 10]" << '\n';
       ++cnt;
@@ -106,7 +106,7 @@ std::ostream& drawHypergraph(std::ostream& out, IHypergraph<Arc> const& hg) {
   // States
   IVocabularyPtr pVoc = hg.getVocabulary();
   std::size_t maxS = 0;
-  forall (StateId s, hg.getStateIds()) {
+  for (StateId s : hg.getStateIds()) {
     Sym inId = hg.inputLabel(s);
     Sym outId = hg.outputLabel(s);
     out << s << " [";

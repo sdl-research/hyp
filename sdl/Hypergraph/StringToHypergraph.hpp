@@ -127,7 +127,7 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
     Arc* pArc = new Arc(nextState, Tails(prevState, pHgResult->addState(sym)));
     Weight& weight = pArc->weight();
     assert(opts.inputFeatures != NULL);
-    forall (FeatureId featureId, opts.inputFeatures->getFeaturesForInputPosition(i)) {
+    for (FeatureId featureId : opts.inputFeatures->getFeaturesForInputPosition(i)) {
       FI::insertNew(&weight, featureId, 1);
       if (opts.tokens) opts.tokens->insert(sym, featureId);
     }

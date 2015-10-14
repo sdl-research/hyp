@@ -116,6 +116,28 @@ struct AutoFree {
   ~AutoFree() { std::free(toFree); }
 };
 
+struct AutoFreeAll : std::vector<void*> {
+  typedef std::vector<void*> Base;
+  void hold(void* p) { Base::push_back(p); }
+  void* releaseOne() {
+    void* r = Base::back();
+    Base::pop_back();
+    return r;
+  }
+  void deleteAndClear() {
+    for (Base::const_iterator i = Base::begin(), e = Base::end(); i != e; ++i) std::free(*i);
+    releaseAll();
+  }
+  void releaseAll() { Base::clear(); }
+  AutoFreeAll() {}
+  AutoFreeAll(void* toFree) : Base(1, toFree) {}
+  AutoFreeAll(std::size_t n) : Base(n) {}
+  ~AutoFreeAll() {
+    for (Base::const_iterator i = Base::begin(), e = Base::end(); i != e; ++i) std::free(*i);
+  }
+  AutoFreeAll(AutoFreeAll const&) = delete;
+};
+
 template <class T>
 struct AutoDestroy {
   AutoDestroy(T* p) : p_(p) {}
@@ -203,9 +225,7 @@ struct AutoDeleteAll : std::vector<T*> {
   ~AutoDeleteAll() {
     for (typename Base::const_iterator i = Base::begin(), e = Base::end(); i != e; ++i) delete *i;
   }
-
- private:
-  AutoDeleteAll(AutoDeleteAll const&) {}
+  AutoDeleteAll(AutoDeleteAll const&) = delete;
 };
 
 template <class T>
@@ -223,8 +243,7 @@ struct AutoDeleteArray {
   AutoDeleteArray(std::size_t n, T const& x) { init(n, x); }
   ~AutoDeleteArray() { delete[] toDelete; }
 
- private:
-  AutoDeleteArray(AutoDeleteArray const&) {}
+  AutoDeleteArray(AutoDeleteArray const&) = delete;
 };
 
 /**

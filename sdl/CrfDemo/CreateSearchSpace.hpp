@@ -20,7 +20,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <sdl/Util/Input.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Config/ConfigureYaml.hpp>
 #include <sdl/IVocabulary.hpp>
@@ -101,7 +101,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   void writeLabelsFile(std::string const& fname) {
     SDL_INFO(CrfDemo, "Writing labels file '" << fname << "'");
     Util::Output output(fname);
-    forall (Sym labelId, allLabels_) { *output << pVoc_->str(labelId) << '\n'; }
+    for (Sym labelId : allLabels_) { *output << pVoc_->str(labelId) << '\n'; }
   }
 
   void readLabelsPerPosFile(std::string const& fname) {
@@ -124,7 +124,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     Util::Output output(fname);
     for (LabelsPerPosMap::const_iterator it = labelsPerPos_.begin(); it != labelsPerPos_.end(); ++it) {
       *output << pVoc_->str(it->first);
-      forall (Sym labelId, it->second) { *output << "\t" << pVoc_->str(labelId); }
+      for (Sym labelId : it->second) { *output << "\t" << pVoc_->str(labelId); }
       *output << '\n';
     }
   }
@@ -229,7 +229,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     model->addState();
     model->setStart(0);
     model->setFinal(0);
-    forall (Sym sym, allLabels_) {
+    for (Sym sym : allLabels_) {
       model->addArc(new Arc(Head(0), Tails(0, model->addState(sym)), Weight::one()));
     }
     sortArcs(model);
@@ -244,7 +244,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     std::vector<Sym> historyNames;  // just for more meaningful feature names
     historyNames.reserve(allLabels_.size() + 1);
     historyNames.push_back(EPSILON::ID);
-    forall (Sym label, allLabels_) { historyNames.push_back(label); }
+    for (Sym label : allLabels_) { historyNames.push_back(label); }
 
     std::size_t numStates = allLabels_.size() + 2;
     for (std::size_t i = 0; i < numStates; ++i) {
@@ -288,7 +288,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     // model->setStart(model->addState());
 
     std::set<Sym> nonterminals;  // NP, VP, ...
-    forall (Sym label, allLabels_) {
+    for (Sym label : allLabels_) {
       std::string const& str = pVoc_->str(label);
       if (str.length() > 2 && (str[0] == 'I' || str[0] == 'B') && str[1] == '-') {
         nonterminals.insert(sym(str.substr(2)));
@@ -301,7 +301,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     // (NP) <- (B-NP) (NP0)
     // (NP0) <- (I-NP)
     // (NP0) <- (I-NP) (NP0)
-    forall (Sym nt, nonterminals) {
+    for (Sym nt : nonterminals) {
       std::string const& ntStr = pVoc_->str(nt);
       stateId[nt] = model->addState(nt);
 
@@ -337,9 +337,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     stateId[O] = model->addState(O);
 
     // add (nt1+nt2) states
-    forall (Sym nt1, nonterminals) {
+    for (Sym nt1 : nonterminals) {
       std::string const& nt1Str = pVoc_->str(nt1);
-      forall (Sym nt2, nonterminals) {
+      for (Sym nt2 : nonterminals) {
         std::string const& nt2Str = pVoc_->str(nt2);
         Sym nt12 = sym(nt1Str + "+" + nt2Str);
         stateId[nt12] = model->addState(nt12);
@@ -349,12 +349,12 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     // Trigram model over nonterminals:
     // (NP+VP) <- (ADJ+NP) (VP)
     // ...
-    forall (Sym nt1, nonterminals) {
+    for (Sym nt1 : nonterminals) {
       std::string const& nt1Str = pVoc_->str(nt1);
-      forall (Sym nt2, nonterminals) {
+      for (Sym nt2 : nonterminals) {
         std::string const& nt2Str = pVoc_->str(nt2);
         Sym nt12 = sym(nt1Str + "+" + nt2Str);
-        forall (Sym nt3, nonterminals) {
+        for (Sym nt3 : nonterminals) {
           std::string const& nt3Str = pVoc_->str(nt3);
           Sym nt23 = sym(nt2Str + "+" + nt3Str);
           Weight weight(0.0f);
@@ -367,13 +367,13 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     }
 
     // (NP+VP) <- (eps+NP) (VP)
-    forall (Sym nt1, nonterminals) {
+    for (Sym nt1 : nonterminals) {
       std::string const& nt1Str = pVoc_->str(nt1);
 
       Sym epsNt1 = sym("eps+" + nt1Str);
       stateId[epsNt1] = model->addState(epsNt1);
 
-      forall (Sym nt2, nonterminals) {
+      for (Sym nt2 : nonterminals) {
         std::string const& nt2Str = pVoc_->str(nt2);
         Sym nt12 = sym(nt1Str + "+" + nt2Str);
         Weight weight(0.0f);
@@ -387,7 +387,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     // (eps+NP) <- START (NP)
     // (eps+VP) <- START (VP)
     // ...
-    forall (Sym nt, nonterminals) {
+    for (Sym nt : nonterminals) {
       std::string const& ntStr = pVoc_->str(nt);
       Sym epsNt = sym("eps+" + ntStr);
       Weight weight(0.0f);
@@ -400,9 +400,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     stateId[final0] = model->addState(final0);
 
     // (FINAL0) <- (NP+VP)
-    forall (Sym nt1, nonterminals) {
+    for (Sym nt1 : nonterminals) {
       std::string const& nt1Str = pVoc_->str(nt1);
-      forall (Sym nt2, nonterminals) {
+      for (Sym nt2 : nonterminals) {
         std::string const& nt2Str = pVoc_->str(nt2);
         Sym nt12 = sym(nt1Str + "+" + nt2Str);
         Weight weight(0.0f);
@@ -414,7 +414,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     }
 
     // (FINAL0) <- (eps+NP)
-    forall (Sym nt1, nonterminals) {
+    for (Sym nt1 : nonterminals) {
       std::string const& nt1Str = pVoc_->str(nt1);
       Sym epsNt1 = sym("eps+" + nt1Str);
       Weight weight(0.0f);
@@ -472,13 +472,13 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       if (hgType == kClamped) {  // add the observed (gold) label (clamped, nominator)
         addLabelArc(result, sent.words[i], sent.poss[i], sent.labels[i], i, i + 1);
       } else {
-        // forall (Sym label, allLabels_) { // add all possible labels (unclamped, denominator)
+        // for (Sym label : allLabels_) { // add all possible labels (unclamped, denominator)
         std::set<Sym> const* labels = &allLabels_;
         LabelsPerPosMap::const_iterator iter = labelsPerPos_.find(sent.poss[i]);
         if (iter != labelsPerPos_.end()) {
           labels = &(iter->second);
         }
-        forall (Sym label, *labels) { addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1); }
+        for (Sym label : *labels) { addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1); }
       }
     }
 
@@ -583,7 +583,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     SDL_INFO(CrfDemo, "Found " << allLabels_.size() << " labels");
 
     // For pruning
-    forall (Sentence const& sent, sents) {
+    for (Sentence const& sent : sents) {
       for (std::size_t i = 0; i < sent.poss.size(); ++i) {
         labelsPerPos_[sent.poss[i]].insert(sent.labels[i]);
       }
@@ -599,7 +599,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     if (opts_.numThreads < 2) {
       std::size_t cnt = 0;
-      forall (Sentence const& sent, sents) { processTrainingSentence(sent, *transitionModel, *pairs_); }
+      for (Sentence const& sent : sents) { processTrainingSentence(sent, *transitionModel, *pairs_); }
     } else {  // multi-threaded:
       std::size_t numProducers = opts_.numThreads;
       boost::thread_group producer_threads;

@@ -23,7 +23,7 @@
 #include <vector>
 
 #include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>

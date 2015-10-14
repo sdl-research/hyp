@@ -85,21 +85,6 @@ struct LazyBestOptions {
 #endif
   }
 
-  PrependForInputStatePtr prependForStateId;
-  Syms const* prependFor(StateId s) {
-    return s != kNoState && s < prependForStateId->size() ? &(*prependForStateId)[s] : NULL;
-  }
-
-  template <class State>
-  Syms const* prependFor(State const& s) {
-#if 1
-    return NULL;
-#else
-    if (!prependForStateId) return NULL;
-    StateId s = stateId(s);
-    return s != kNoState && s < prependForStateId->size() ? &(*prependForStateId)[s] : NULL;
-#endif
-  }
 };
 
 
@@ -119,7 +104,7 @@ struct LazyBestOptions {
    FstPath path;
    LazyBest<Fst>(hg, path);
    path.computeWeight();
-   forall (PathArc const& arc, path) {}
+   for (PathArc const& arc : path) {}
 
 */
 
@@ -135,8 +120,6 @@ struct LazyBest : DistanceFn {
   typedef Path<FstArc> FstPath;
   typedef Path<FstArcNoState<Weight> > FstPathNoState;
 
-  /// set from outside for constraints in TrainableCapitalizerModule
-  shared_ptr<PrependForInputStateFn<State> > prependForInputState;
 
   typedef std::size_t QueueIndex;
 

@@ -10,7 +10,7 @@
 // limitations under the License.
 #include <sdl/LexicalCast.hpp>
 #include <sdl/Util/InitLoggerFromConfig.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/Input.hpp>
 #include <sdl/Util/Locale.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>

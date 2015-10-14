@@ -52,7 +52,7 @@
 
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Compare.hpp>
 
@@ -357,7 +357,7 @@ inline std::ostream& operator<<(std::ostream& out, TokenWeightTpl<W> const& tokW
   Util::Sep sep(", ");
   out << "(";
   typedef typename TokenWeightTpl<W>::value_type value_type;
-  forall (value_type tokWeightPair, tokWeight) {
+  for (value_type tokWeightPair : tokWeight) {
     out << sep << "[";
     tokWeightPair.first.print(out, tokWeight.getVocabulary());
     out << ",w:" << tokWeightPair.second << "]";
@@ -374,7 +374,7 @@ inline TokenWeightTpl<W> plus(TokenWeightTpl<W> const& w1, TokenWeightTpl<W> con
   if (isZero(w2)) return w1;
   TokWt sum(w1);
   typedef typename TokWt::value_type value_type;
-  forall (value_type const& tokWeightPair, w2) {
+  for (value_type const& tokWeightPair : w2) {
     typedef typename TokWt::TokenMap TokenMap;
     std::pair<typename TokenMap::iterator, bool> result = sum.insert(tokWeightPair);
     if (!result.second) Hypergraph::plusBy(tokWeightPair.second, result.first->second);
@@ -401,7 +401,7 @@ inline TokenWeightTpl<W> times(TokenWeightTpl<W> const& tokWeight1, TokenWeightT
 
   // Build cross-product of the contained tokens in tokWeight1 and tokWeight2
   TokWt product;  //=1
-  forall (value_type const& tw1, tokWeight1) {
+  for (value_type const& tw1 : tokWeight1) {
     Token const& tok1 = tw1.first;
     for (typename TokWt::TokenMap::const_iterator i = tokWeight2.begin(), e = tokWeight2.end(); i != e; ++i) {
       value_type const& tw2 = *i;

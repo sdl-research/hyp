@@ -40,7 +40,7 @@
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/Compare.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
@@ -330,7 +330,7 @@ inline NgramWeightTpl<W> times(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> co
   typedef typename Ngw::Ngram Ngram;
   typedef typename Ngw::value_type NgramPtrAndWeight;
   typedef typename Ngw::const_iterator Iter;
-  forall (NgramPtrAndWeight const& p1, w1) {
+  for (NgramPtrAndWeight const& p1 : w1) {
     Ngram const& ngram1 = *p1.first;
     std::size_t const len1 = ngram1.size();
     assert(!Vocabulary::countBlockSymbols(ngram1));
@@ -393,12 +393,12 @@ std::ostream& operator<<(std::ostream& out, NgramWeightTpl<W> const& w) {
   typedef std::pair<NgramPtr, W> NgramPtrAndWeight;
   bool first1 = true;
   out << "(";
-  forall (NgramPtrAndWeight ngramPtrAndWeight, w) {
+  for (NgramPtrAndWeight ngramPtrAndWeight : w) {
     bool first = true;
     out << (first1 ? "" : ", ") << "[";
     NgramPtr pNgram = ngramPtrAndWeight.first;
     W const& weight = ngramPtrAndWeight.second;
-    forall (Sym const& label, *pNgram) {
+    for (Sym const& label : *pNgram) {
       out << (first ? "" : " ") << label;
       first = false;
     }

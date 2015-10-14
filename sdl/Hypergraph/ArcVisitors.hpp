@@ -22,7 +22,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Exception.hpp>
 #include <sdl/Hypergraph/FeatureIdRange.hpp>

@@ -20,7 +20,7 @@
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/ConvertWeight.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Forall.hpp>
+
 
 
 #include <utility>  // make_pair
@@ -47,7 +47,7 @@ class MapHypergraph final : public IHypergraph<ToA> {
   }
   ~MapHypergraph() {
     // TODO: memory leak if memoization is turned off
-    forall (typename ArcsMap::value_type pairOldNewArcs, oldArcsToNewArcs_) {
+    for (typename ArcsMap::value_type pairOldNewArcs : oldArcsToNewArcs_) {
       ToArc* newArc = pairOldNewArcs.second;
       delete newArc;
       // We're not deleting old arc (pairOldNewArcs.first) because it

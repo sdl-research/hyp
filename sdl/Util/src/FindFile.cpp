@@ -20,7 +20,7 @@
 #include <sdl/Util/Debug.hpp>
 #include <sdl/Util/FindFile.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/DefaultPrintRange.hpp>
 
 namespace sdl {
@@ -57,7 +57,7 @@ std::string findExistingFile(std::string const& filename, Dirs const& searchDirs
   }
 
   // Try each search dir.
-  forall (std::string const& dirName, searchDirs) {
+  for (std::string const& dirName : searchDirs) {
     // TODO: test
     bfs::path tryPath(dirName);
     UTIL_DBG_MSG(1, "try in dir: " << tryPath << " for file: " << filePath);

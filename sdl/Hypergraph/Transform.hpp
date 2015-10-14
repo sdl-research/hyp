@@ -639,7 +639,6 @@ struct SimpleTransform : TransformBase<InplaceOrInout> {
   struct TransformFor {
     typedef CRTP type;
   };
-  static char const* type() { return CRTP::type(); }
   typedef void IsSimpleTransform;
 };
 

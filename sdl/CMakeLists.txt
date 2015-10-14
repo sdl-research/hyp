@@ -256,6 +256,7 @@ endif()
 # Windows specific settings.
 #
 if(WIN32)
+  sdl_linker_flags(/LTCG) # else warning about libcrypt needing to restart linker anyway
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /EHsc /MP") #/MP and /Gm are mutually exclusive
   # By default, a project build enables the /Gm compiler option (incremental
@@ -269,33 +270,25 @@ if(WIN32)
   # processors)
 
   sdl_linker_flags(/machine:x64)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od /Ob0")
 
   # For debugging on Windows, we recommend building a RelWithDebInfo build with all optimizations disabled. This is
   # effectively the same as building xmt in Debug mode; however, the advantage is that it allows you to link against
   # release mode 3rd party libs. Use a Debug build if you really want to link against the slower debug 3rdParty libs.
-  # This option is similar to building with -DSDL_VALIDATION_BUILD, but with a few extra settings added.
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /Od /Ob0 /RTC1")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/Zi /Od /RTC1 /Ob0")
+
+  SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi /GL") # some debugging info for actual release build
 
   #/MD: Causes the application to use the multithread-specific and DLL-specific version of the run-time library
   #/Zi: PDB
   #/Od: no optimization
   #/Z7: inline debug syms
+  #/RTC1: -D__MSVC_RUNTIME_CHECKS, -RTCs and -RTCu (debug only)
 
   # Enable TRACE statements for RelWIthDebInfo mode -- On Windows, this is the typical mode a developer will use when
   # writing code and debugging
   if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
     sdl_compiled_setting(SDL_ENABLE_TRACE_LOGGING 1)
-  endif()
-
-  if(SDL_VALIDATION_BUILD)
-    sdl_linker_flags(/DEBUG)
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Z7 /Od") # disable optimization for faster compile
-    message(STATUS "SDL_VALIDATION_BUILD - faster (no optimization) build for Windows")
-  else()
-    sdl_linker_flags(/LTCG)
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi /GL") # some debugging info for actual release build
-    message(STATUS "!SDL_VALIDATION_BUILD - optimized build for Windows")
   endif()
 
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LTCG")
@@ -428,9 +421,9 @@ elseif(USING_CLANG)
   add_definitions("-Wno-deprecated-declarations")
   # note: llvm libc++ might not be compatible with some of our externals; you can use a libstdc++ from a recent GCC (e.g. 4.7) instead #-stdlib=libc++")
   if(USING_SCAN_BUILD)
-    # sdl_enable_cpp11()
+    sdl_enable_cpp11()
   endif()
-  # sdl_enable_cpp11()
+  sdl_enable_cpp11()
 endif()
 
 

@@ -30,7 +30,7 @@
 */
 
 #include <sdl/Hypergraph/ArcBase.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/SmallVector.hpp>
 #include <sdl/Util/ZeroInitializedArray.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
@@ -194,6 +194,18 @@ struct ArcTpl : ArcBase {
     head_ = head;
   }
   ArcTpl(HeadAndTail, StateId head, StateId tail0, StateId tail1, Weight const& weight)
+      : ArcBase(tail0, tail1), weight_(weight) {
+    head_ = head;
+  }
+
+  template <class Weight>
+  ArcTpl(HeadAndWeight, StateId head, Weight &&weight, StateId tail)
+      : ArcBase(tail), weight_(weight) {
+    head_ = head;
+  }
+
+  template <class Weight>
+  ArcTpl(HeadAndWeight, StateId head, Weight &&weight, StateId tail0, StateId tail1)
       : ArcBase(tail0, tail1), weight_(weight) {
     head_ = head;
   }

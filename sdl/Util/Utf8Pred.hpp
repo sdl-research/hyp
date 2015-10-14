@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <string>
 #include <sdl/Util/Icu.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
@@ -91,7 +91,7 @@ struct Utf8RangePred : std::unary_function<std::string, bool> {
   Utf8RangePred(std::map<std::string, UcharRange> const& ofRanges) {
     using namespace icu;
     typedef std::pair<std::string, UcharRange> NameAndRange;
-    forall (NameAndRange const& range, ofRanges) {
+    for (NameAndRange const& range : ofRanges) {
       UcharRange const& rangeStr = range.second;
       std::size_t sep = rangeStr.find('-');
       if (sep == std::string::npos) {

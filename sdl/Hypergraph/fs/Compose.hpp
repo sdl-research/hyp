@@ -110,7 +110,7 @@
 #include <sdl/Util/RefCount.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Valgrind.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/FlattenGenerators.hpp>
 #include <sdl/Util/SharedGenerator.hpp>
 #include <sdl/Hypergraph/MixFeature.hpp>

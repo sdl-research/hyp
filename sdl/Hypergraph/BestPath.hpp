@@ -64,7 +64,7 @@
 #include <sdl/Hypergraph/SamplePath.hpp>  // placeholder
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Types.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Output.hpp>
 #include <sdl/Util/Performance.hpp>

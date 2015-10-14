@@ -28,7 +28,7 @@
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Hypergraph/SymbolPrint.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Hypergraph/Derivation.hpp>
 #include <sdl/Hypergraph/PrintOptions.hpp>
 #include <sdl/Util/StringBuilder.hpp>

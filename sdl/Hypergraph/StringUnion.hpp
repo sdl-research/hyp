@@ -354,7 +354,7 @@ struct BuildStringUnion {
       for (Sym b = BLOCK_START::ID; b <= BLOCK_END::ID; ++b)
         hg.addArcFsa(trieStart, getEndStringThenFinal(), b);  // preserve on input
 
-    forall (LabelPair t, tags) {  // don't-tokenize brackets
+    for (LabelPair t : tags) {  // don't-tokenize brackets
       StateId stIgnore = hg.addState();
       hg.addArcFsa(start, stIgnore, input(t));  // open tag
       hg.addArcFsa(stIgnore, stIgnore, RHO::ID);  // stay in ignore state ...
@@ -393,7 +393,7 @@ struct BuildStringUnion {
       wSpace.value_ = opt.whitespaceBreakCost;
       LabelPair deleteSpace;
       deleteSpace.second = EPSILON::ID;
-      forall (std::string const& spaceStr, opt.whitespaceTokens) {
+      for (std::string const& spaceStr : opt.whitespaceTokens) {
         SDL_INFO(StatisticalTokenizerTrain, "adding whitespace-token " << spaceStr);
         deleteSpace.first = lexicalSymbol(spaceStr, *voc);
         StateId spaceState = hg.addState(deleteSpace);
@@ -453,7 +453,7 @@ struct BuildStringUnion {
     begin.init(hg, opt.beginStringInput, opt.beginString);
     end.init(hg, opt.endStringInput, opt.endString);
 
-    forall (std::string const& s, opt.ignoreTags) {
+    for (std::string const& s : opt.ignoreTags) {
       tags.push_back(lexicalPair(opt.opentag(s), opt.closetag(s), *voc));
     }
     SDL_TRACE(Hypergraph.StringUnion, "tags=" << print(tags, Util::stateRange(voc)));

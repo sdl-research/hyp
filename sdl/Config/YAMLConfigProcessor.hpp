@@ -22,7 +22,7 @@
 #include <boost/algorithm/string.hpp>
 #include <sdl/Config/Config.hpp>
 #include <sdl/Path.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/StringBuilder.hpp>
 

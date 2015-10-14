@@ -31,7 +31,7 @@
 #define HYPERGRAPH_COMPLEMENT_HPP
 #pragma once
 
-#include <sdl/Util/Forall.hpp>
+
 #include <graehl/shared/os.hpp>
 
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
@@ -107,7 +107,7 @@ void complement(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
   assert(pVoc != 0);
   bool reachedNewFinal = false;
   StateIdRange states = result->getStateIds();
-  forall (StateId s, states) {
+  for (StateId s : states) {
     const bool isLexicalState = result->inputLabel(s).isTerminal();
     // if ((!isLexicalState && result->numOutArcs(s)) || s == newFinal) {
     typedef typename Arc::Weight Weight;

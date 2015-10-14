@@ -26,7 +26,7 @@
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/InsideAlgorithm.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/LogHelper.hpp>
 
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -87,10 +87,10 @@ class ProbabilityArcSampler : public Sampler<Arc> {
     Weight totalWeight = Weight::zero();
     std::vector<Weight> weights;
     std::vector<Arc*> arcs;
-    forall (ArcId arcid, hg.inArcIds(s)) {
+    for (ArcId arcid : hg.inArcIds(s)) {
       Arc* arc = hg.inArc(s, arcid);
       Weight w = arc->weight();
-      forall (StateId tailId, arc->tails()) {
+      for (StateId tailId : arc->tails()) {
         if (!hg.hasLexicalLabel(tailId)) {
           timesBy(insideDistances_[tailId], w);
         }
@@ -143,7 +143,7 @@ void samplePath(IHypergraph<Arc> const& hg, Sampler<Arc>& sampler, IMutableHyper
     }
 
     if (Arc* arc = sampler.sampleArc(hg, hgStateId)) {
-      forall (StateId s, arc->tails()) {
+      for (StateId s : arc->tails()) {
         if (onQueue.insert(s).second) {
           result->addStateId(s, hg.labelPair(s));
           queue.push(s);

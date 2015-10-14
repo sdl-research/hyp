@@ -55,7 +55,7 @@
 #include <sdl/Util/Compare.hpp>
 #include <sdl/Util/Input.hpp>
 
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/ThreadSpecific.hpp>
 #include <sdl/Util/Hash.hpp>
 #include <sdl/Util/Unordered.hpp>
@@ -115,7 +115,7 @@ class Registry {
 
  public:
   ~Registry() {
-    forall (T* item, set_) { delete item; }
+    for (T* item : set_) { delete item; }
   }
 
   /// delete p if it was already in set; return version in set.
@@ -333,7 +333,7 @@ class EarleyParser {
   void init() {
     StateId s = cfg_.final();
     StateId from = fst_.start();
-    forall (ArcId arcid, cfg_.inArcIds(s)) {
+    for (ArcId arcid : cfg_.inArcIds(s)) {
       Arc* arc = cfg_.inArc(s, arcid);
       // Item* item = createItem(from, from, arc, 0, arc->weight());
       Item* item = createItem(from, from, arc, 0);
@@ -366,7 +366,7 @@ class EarleyParser {
     if (alreadyPredicted_.size() > from && alreadyPredicted_[from].find(s) != alreadyPredicted_[from].end()) {
       return;
     }
-    forall (ArcId arcid, cfg_.inArcIds(s)) {
+    for (ArcId arcid : cfg_.inArcIds(s)) {
       Arc* arc = cfg_.inArc(s, arcid);
       StateId to = item->to;
       Item* newItem = createItem(from, to, arc, 0);
@@ -403,7 +403,7 @@ class EarleyParser {
       }
     }
     StateId s = item->to;
-    forall (ArcId arcid, fst_.outArcIds(s)) {
+    for (ArcId arcid : fst_.outArcIds(s)) {
       Arc* fstArc = fst_.outArc(s, arcid);
       Sym label = fst_.inputLabel(fstArc->getTail(1));
       if (label == EPSILON::ID) {
@@ -446,7 +446,7 @@ class EarleyParser {
 
     // Iterate through first arcs to see if we have unconditional
     // matches (i.e., eps or sigma)
-    forall (ArcId arcid, fst_.outArcIds(s)) {
+    for (ArcId arcid : fst_.outArcIds(s)) {
       Arc* fstArc = fst_.outArc(s, arcid);
       Sym foundLabel = fst_.inputLabel(fstArc->getTail(1));
       if (foundLabel == EPSILON::ID) {
@@ -512,7 +512,7 @@ class EarleyParser {
     SDL_TRACE(Hypergraph.Compose, "complete item " << dbgItem(item, *this));
     if (itemsTo_.size() > item->from) {
       StateId head = item->arc->head();
-      forall (Item* oldItem, itemsTo_[item->from][head]) {
+      for (Item* oldItem : itemsTo_[item->from][head]) {
         if (!oldItem->isComplete()) {
           assert(oldItem->arc->getTail(oldItem->dotPos) == head);
           Item* newItem = createItem(oldItem->from, item->to, oldItem->arc, oldItem->dotPos + 1);
@@ -530,7 +530,7 @@ class EarleyParser {
   void findComplete(Item* item) {
     if (completeItemsFrom_.size() > item->to) {
       StateId nextTail = item->arc->getTail(item->dotPos);
-      forall (Item* completeItem, completeItemsFrom_[item->to][nextTail]) {
+      for (Item* completeItem : completeItemsFrom_[item->to][nextTail]) {
         if (completeItem->arc->head() == nextTail) {
           Item* newItem = createItem(item->from, completeItem->to, item->arc, item->dotPos + 1);
           backPointers_[newItem].insert(std::make_pair(item, completeItem));
@@ -559,7 +559,7 @@ class EarleyParser {
     }
     typename BackPointerMap::const_iterator found = backPointers_.find(item);
     if (found != backPointers_.end()) {
-      forall (BackPointer bp, found->second) {
+      for (BackPointer bp : found->second) {
         backtrace("(A) ", bp.first, recursion + 1);
         if (bp.second != NULL) {
           backtrace("(B) ", bp.second, recursion + 1);
@@ -573,7 +573,7 @@ class EarleyParser {
   void backtrace2(Item* item, std::size_t recursion) {
     typename BackPointerMap::const_iterator found = backPointers_.find(item);
     if (found != backPointers_.end()) {
-      forall (BackPointer bp, found->second) {
+      for (BackPointer bp : found->second) {
         std::cerr << registry_.getId(item) << "(\"" << registry_.getId(item) << "\")";
         std::cerr << " <- ";
         std::cerr << registry_.getId(bp.first) << "(\"" << registry_.getId(bp.first) << "\") ";
@@ -665,13 +665,13 @@ class EarleyParser {
   void createResultCfg() {
     SDL_TRACE(Hypergraph.Compose, "createResultCfg");
     ItemAndMatchedArcsSet alreadyExpanded;
-    forall (Item* item, finalItems_) {
+    for (Item* item : finalItems_) {
       SDL_TRACE(Hypergraph.Compose, "Final item: " << dbgItem(item, *this));
       StateId head = getResultCfgState(item->arc->head(), item->from, item->to);
       result_->setFinal(head);
       createResultArcs(item, head, &alreadyExpanded);
     }
-    forall (ItemAndMatchedArcs* p, alreadyExpanded) { delete p; }
+    for (ItemAndMatchedArcs* p : alreadyExpanded) { delete p; }
   }
 
   IMutableHypergraph<A>* parse() {
@@ -859,7 +859,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
 
   typename BackPointerMap::const_iterator found = backPointers_.find(item);
   if (found != backPointers_.end()) {
-    forall (BackPointer bp, backPointers_[item]) {
+    for (BackPointer bp : backPointers_[item]) {
       if (Util::isDebugBuild()) {
         SDL_TRACE(Hypergraph.Compose, "Found backpointers:\n " << dbgItem(bp.first, *this) << "\n "
                                                                << dbgItem(bp.second, *this));

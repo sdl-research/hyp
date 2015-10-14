@@ -28,14 +28,14 @@
 namespace sdl {
 namespace Hypergraph {
 
-template<typename Arc> inline
-void printHgAsMosesLattice(IHypergraph<Arc> const& hg){
-  if(!hg.isFsm()){
+template <typename Arc>
+inline void printHgAsMosesLattice(IHypergraph<Arc> const& hg) {
+  if (!hg.isFsm()) {
     SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error, "Input Hypergraph should be FSM");
   }
   SortStatesOptions opt(kTopSort);
-  MutableHypergraph<Arc>* hg_sort = dynamic_cast<MutableHypergraph<Arc>* >(hg.clone());
-  if(hg_sort == NULL){
+  MutableHypergraph<Arc>* hg_sort = dynamic_cast<MutableHypergraph<Arc>*>(hg.clone());
+  if (hg_sort == NULL) {
     SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error, "Input Hypergraph should be mutable");
   }
 
@@ -43,23 +43,25 @@ void printHgAsMosesLattice(IHypergraph<Arc> const& hg){
   SDL_DEBUG(Hypergraph.PrintHgAsLattice, *hg_sort);
   IVocabularyPtr pVoc = hg_sort->getVocabulary();
   std::cout << '(';
-  for(StateId s = hg_sort->start(), endid = hg_sort->maxNotTerminalState(); s != endid; ++ s) {
-    std::cout << '(' ;
-    forall (ArcId aid, hg_sort->outArcIds(s)){
+  for (StateId s = hg_sort->start(), endid = hg_sort->maxNotTerminalState(); s != endid; ++s) {
+    std::cout << '(';
+    for (ArcId aid : hg_sort->outArcIds(s)) {
       Arc* arc = hg_sort->outArc(s, aid);
       int step = (int)arc->head_ - (int)s;
-      if(step < 0){
-        SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error, "Illegal lattice input that cant be ordered");
+      if (step < 0) {
+        SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error,
+                      "Illegal lattice input that cant be ordered");
       }
       Sym arc_label = hg_sort->inputLabel(arc->getTail(1));
       typename Arc::Weight w = arc->weight();
 
-      std::cout << "(\'" << pVoc->str(arc_label) << "\', " << w.getValue() << ", "<< step << "), " ;
+      std::cout << "(\'" << pVoc->str(arc_label) << "\', " << w.getValue() << ", " << step << "), ";
 
-    } // foreach
-    std::cout << "), " ;
-  } // end while
-  std::cout << ")\n";;
+    }  // foreach
+    std::cout << "), ";
+  }  // end while
+  std::cout << ")\n";
+  ;
 }
 
 

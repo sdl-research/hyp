@@ -15,7 +15,7 @@
 #include <sdl/Vocabulary/ResidentVocabulary.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Syms.hpp>
 #include <sdl/Util/Fields.hpp>
 

@@ -24,7 +24,7 @@
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/Map.hpp>
 #include <sdl/Util/IndexedStrings.hpp>
 #include <sdl/Sym.hpp>

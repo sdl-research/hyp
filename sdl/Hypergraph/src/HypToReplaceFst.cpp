@@ -32,7 +32,7 @@
 #include <sdl/Util/InitLogger.hpp>
 
 #include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/ProgramOptions.hpp>
 
 #include <fst/fst.h>

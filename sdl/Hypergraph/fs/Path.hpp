@@ -19,7 +19,7 @@
 
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Hypergraph/IsFeatureWeight.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/RemovePointer.hpp>
 #include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
@@ -191,7 +191,7 @@ struct Path {
       weight.value_ = totalDistance;
     else if (*this) {
       weight = Weight::one();
-      forall (FstArc const& arc, arcs) { timesBy(arc.weight, weight); }
+      for (FstArc const& arc : arcs) { timesBy(arc.weight, weight); }
     } else
       weight = Weight::zero();
   }
@@ -241,7 +241,7 @@ struct Path {
     return labels;
   }
   void appendSyms(Syms& labels, bool skipEpsilon = true, LabelType inputOrOutput = kOutput) const {
-    forall (FstArc const& arc, arcs) {
+    for (FstArc const& arc : arcs) {
       Hypergraph::appendSyms(labels, arc.labelPair, skipEpsilon, inputOrOutput);
     }
   }

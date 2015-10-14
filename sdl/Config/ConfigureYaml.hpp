@@ -51,7 +51,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/Util/FormattedOstream.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/LexicalCast.hpp>
 
 #include <sdl/Util/Print.hpp>

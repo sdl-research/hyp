@@ -27,7 +27,7 @@
 #include <sdl/Hypergraph/Types.hpp>
 
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Forall.hpp>
+
 #include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Hypergraph/InArcs.hpp>
 

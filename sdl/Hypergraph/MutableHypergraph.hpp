@@ -23,7 +23,7 @@
 #define HYP__HYPERGRAPH_MUTABLEHYPERGRAPH_HPP
 #pragma once
 
-#include <sdl/Util/Forall.hpp>
+
 
 #include <cassert>
 #include <vector>
@@ -147,7 +147,7 @@ struct MutableHypergraphLabels {
   static inline void transferLabels(StateIdTranslation const& stateRemap, LabelForState const& lin,
                                     LabelForState& lout)  //, StateId mastateRemapState
   {
-    forall (StateIdMap::value_type const& io, stateRemap.cache) {
+    for (StateIdMap::value_type const& io : stateRemap.cache) {
       if (io.first < lin.size()) setLabel(lout, io.second, lin[io.first]);
     }
   }
@@ -448,7 +448,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     lstate.clear();  // clear while saving arcs/labels
 
     std::size_t ndel = 0;
-    forall (A* a, arcs) {
+    for (A* a : arcs) {
       if (keepa(a) && x.relabelArc(*a)) {
         if (adding)
           addArc(a);
@@ -506,7 +506,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       ArcPointers<A> arcs(*this);
       StateId ns = (StateId)outArcsPerState_.size();
       Util::reinit(outArcsPerState_, ns);
-      forall (A* a, arcs) {
+      for (A* a : arcs) {
         if (keep(a)) {
           if (addFirst)
             addArcFirstTailOut(a);
@@ -1168,7 +1168,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     this->properties_ &= ~kSortedOutArcs;  // TODO: check if inserted in sort-preserving (ascending) order
     StateIdContainer const& tails = arc->tails();
     StateId N = (StateId)outArcsPerState_.size();
-    forall (StateId tailState, tails) { Util::atExpand(outArcsPerState_, tailState).push_back(arc); }
+    for (StateId tailState : tails) { Util::atExpand(outArcsPerState_, tailState).push_back(arc); }
   }
 
   struct AddIn {
@@ -1252,7 +1252,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       if (!tails.empty()) Util::atExpand(outArcsPerState_, tails.front()).push_back(arc);
     } else if (this->properties_ & kStoreOutArcs) {
       this->properties_ &= ~kSortedOutArcs;
-      forall (StateId t, tails) { Util::atExpand(outArcsPerState_, t).push_back(arc); }
+      for (StateId t : tails) { Util::atExpand(outArcsPerState_, t).push_back(arc); }
     }
   }
 
@@ -1400,7 +1400,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     for (StateId s = 0, N = adj.size(); s < N; ++s) {
       out << "# "<<adjtype<<s<<":\n";
       for(ArcBase *arc : adj[s])
-        print(out, arc, *this);
+        Hypergraph::print(out, arc, *this);
     }
   }
 

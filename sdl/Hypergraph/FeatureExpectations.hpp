@@ -76,7 +76,7 @@ struct AccumulateExpectedValuesFct {
     FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_;
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
-    forall (MapValueType const& idValue, arc->weight_)
+    for (MapValueType const& idValue : arc->weight_)
       updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight + idValue.second);  // times prob
   }
 
@@ -91,7 +91,7 @@ struct AccumulateExpectedValuesFct {
                                                   << *arc << " with posterior weight " << posteriorArcWeight);
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
-    forall (MapValueType const& idValue, arc->weight_)
+    for (MapValueType const& idValue : arc->weight_)
       updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight - log(idValue.second));
     // times prob (which was in linear space, not -log,  because of TakeMin aka FeatureWeight)
     if (Util::isDebugBuild()) printMapInfo(*pResultMap_);
@@ -154,7 +154,7 @@ typename Arc::Weight::FloatT computeFeatureExpectations(IHypergraph<Arc> const& 
 
   // Normalize and remove neglog of feature expectations:
   typedef typename Arc::Weight::Map::value_type ValT;
-  forall (ValT& val, *pResultMap) { val.second = exp(-val.second + pathsSum.value_); }
+  for (ValT& val : *pResultMap) { val.second = exp(-val.second + pathsSum.value_); }
   if (Util::isDebugBuild()) printMapInfo(*pResultMap);
 
   return pathsSum.value_;

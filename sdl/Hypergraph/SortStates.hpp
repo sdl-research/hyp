@@ -126,7 +126,7 @@ struct CheckTopo {
   bool operator()(IHypergraph<Arc> const& hg, Arc* a) const {
     StateId head = a->head();
     StateIdContainer const& tails = a->tails();
-    forall (StateId tail, tails) {
+    for (StateId tail : tails) {
       if (tail < endTailState) {
         bool const violation = HeadAfterTails ? head <= tail : tail <= head;
         if (violation) return false;
@@ -147,7 +147,7 @@ struct CheckTopoSkipAxioms {
   bool operator()(IHypergraph<Arc> const& hg, Arc* a) const {
     StateId head = a->head();
     StateIdContainer const& tails = a->tails();
-    forall (StateId tail, tails) {
+    for (StateId tail : tails) {
       if (!hg.isAxiom(tail)) {
         bool const violation = HeadAfterTails ? head <= tail : tail <= head;
         if (violation) return false;
