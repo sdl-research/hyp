@@ -204,6 +204,12 @@ struct CharsFromUtf8Impl : FixUnicode {
   explicit CharsFromUtf8Impl(std::string const& bytes) : chars(arrayBegin(bytes), arrayEnd(bytes)), i() {}
   explicit CharsFromUtf8Impl(std::vector<char> const& bytes)
       : chars(arrayBegin(bytes), arrayEnd(bytes)), i() {}
+  explicit CharsFromUtf8Impl(Slice const& bytes, FixUnicode const& fix)
+      : FixUnicode(fix), chars(bytes.first, bytes.second), i() {}
+  explicit CharsFromUtf8Impl(std::string const& bytes, FixUnicode const& fix)
+      : FixUnicode(fix), chars(arrayBegin(bytes), arrayEnd(bytes)), i() {}
+  explicit CharsFromUtf8Impl(std::vector<char> const& bytes, FixUnicode const& fix)
+      : FixUnicode(fix), chars(arrayBegin(bytes), arrayEnd(bytes)), i() {}
   Unicode next() {
     // TODO: test
     for (; chars.first < chars.second; ++chars.first) {
@@ -393,8 +399,8 @@ inline void alignedNormalize(Slice utf8, IcuNormalizer2Ptr normalizer, ITakeAlig
 
 template <class Utf8String, class OutUtf8String>
 inline void alignedNormalize(Utf8String const& str, IcuNormalizer2Ptr normalizer, OutUtf8String& out,
-                             TokenSpans* spans = 0) {
-  CharsFromUtf8Impl chars(str);
+                             TokenSpans* spans = 0, FixUnicode const& fixutf8 = FixUnicode()) {
+  CharsFromUtf8Impl chars(str, fixutf8);
   IcuNormalizeUtf8ByChunks norm(chars, gNfc);
   if (spans) {
     TakeUtf8<OutUtf8String> take(&out, spans);

@@ -154,6 +154,7 @@ endif()
 if("${CMAKE_CXX_COMMAND}" MATCHES "analyzer")
   set(CMAKE_COMPILER_IS_CLANGXX 1)
   set(USING_SCAN_BUILD 1)
+
   message(STATUS "using scan-build c++analyzer from clang")
   set($ENV{CCC_CC} clang)
   set($ENV{CCC_CXX} clang++)
@@ -342,6 +343,9 @@ if(WIN32)
   ## (people should really be forced to make explicit casts or fix their types)
 
 endif()
+
+find_package(GSL)
+find_package(SparseHash)
 
 
 set(SDL_NO_CLANG_OPTIMIZATIONS "-fcx-limited-range -fno-signaling-nans -fno-rounding-math")

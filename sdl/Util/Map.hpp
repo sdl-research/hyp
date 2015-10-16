@@ -337,6 +337,7 @@ bool overrideMap(Map& old, MapNew const& makenew) {
 */
 template <class Map, class MapNew>
 void overrideMapSaveChanged(Map& old, MapNew const& makenew, MapNew& changed) {
+  assert(&old != &makenew);
   for (typename MapNew::const_iterator i = makenew.begin(), e = makenew.end(); i != e; ++i) {
     typename MapNew::key_type const& key = i->first;
     typename MapNew::mapped_type const& newVal = i->second;

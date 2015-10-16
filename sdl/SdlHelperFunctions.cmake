@@ -357,7 +357,7 @@ endfunction(sdl_maven_project)
 
 function(sdl_maven_project_with_profile TARGET_NAME BINARY_DIR PROFILE_NAME)
   set(work_dir ${BINARY_DIR}/target)
-  message(STATUS "Run mvn package: \"${MAVEN_EXECUTABLE}\" wth profile:\"${PROFILE_NAME}\"")
+  message(STATUS "Run mvn package: \"${MAVEN_EXECUTABLE}\" with profile:\"${PROFILE_NAME}\"")
 
   add_custom_target(${TARGET_NAME} ALL COMMAND ${MAVEN_EXECUTABLE} -P${PROFILE_NAME} -Dmaven.project.build.directory=${work_dir} -Dmaven.project.build.directory.parent=${BINARY_DIR} -fae -B -q -f pom.xml -Dmaven.test.skip=true clean compile package
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
@@ -367,6 +367,18 @@ function(sdl_maven_project_with_profile TARGET_NAME BINARY_DIR PROFILE_NAME)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${TARGET_NAME})
 endfunction(sdl_maven_project_with_profile)
+
+function(sdl_deploy_maven_project_with_profile BINARY_DIR PROFILE_NAME)
+  set(work_dir ${BINARY_DIR}/target)
+  message(STATUS "Run mvn deploy: \"${MAVEN_EXECUTABLE}\" with profile:\"${PROFILE_NAME}\"")
+
+  # Deploy current version (git describe) to nexus if SDL_DEPLOY_JAR cmake var is set
+  install(CODE "EXECUTE_PROCESS(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+             COMMAND ${MAVEN_EXECUTABLE} -P${PROFILE_NAME} -Dmaven.project.build.directory=${work_dir} -Dmaven.project.build.directory.parent=${BINARY_DIR} -fae -B -q -f pom.xml -Dmaven.test.skip=true versions:set -DnewVersion=${GIT_DESCRIBE} -DgenerateBackupPoms=false)")
+
+  install(CODE "EXECUTE_PROCESS(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+             COMMAND ${MAVEN_EXECUTABLE} -P${PROFILE_NAME},sdl.deploy.jar -Dmaven.project.build.directory=${work_dir} -Dmaven.project.build.directory.parent=${BINARY_DIR} -fae -B -q -f pom.xml -Dmaven.test.skip=true -Dsdl.deploy.jar=true package deploy)")
+endfunction(sdl_deploy_maven_project_with_profile)
 
 function(sdl_maven_test TARGET_NAME BINARY_DIR)
   set(work_dir ${BINARY_DIR}/target)

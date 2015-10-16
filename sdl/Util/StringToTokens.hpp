@@ -13,6 +13,9 @@
     split line into tokens (word or char or whole-line) with
     original-unicode-index TokenSpan
 
+    used by StringToStringModule string->hg
+
+    TODO: use AlignedChars
 */
 
 #ifndef STRINGTOTOKENS_JG20121015_HPP
@@ -318,6 +321,7 @@ struct StringToTokens : NormalizeUtf8 {
     accept.finishPhrase(0);
   }
 
+  /// used by StringToStringModule StringToHgHelper for string->hg. TODO: use AlignedChars for nfc norm
   void accept(std::string const& line, IAcceptString const& accept) const {
     FixedUtf8 fixed(line);
     acceptValidUtf8(fixed, accept);

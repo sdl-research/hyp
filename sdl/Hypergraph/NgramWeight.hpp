@@ -44,6 +44,7 @@
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Types.hpp>
 
 namespace sdl {
 
@@ -108,9 +109,9 @@ class NgramWeightTpl {
   typedef typename W::FloatT FloatT;  // not useful except to make IHypergraph<Arc>::heuristic compile
   static Self kOne;
   static Self kZero;
-  bool isZero() const { return mZero; }
+  bool isZero() const { return zero_; }
   typedef void HasIsZero;
-  bool isOne() const { return !mZero && ngrams_.empty(); }
+  bool isOne() const { return !zero_ && ngrams_.empty(); }
   bool isEquivalentToOne() const {
     if (isOne()) return true;
     if (ngrams_.size() != 1) return false;
@@ -118,12 +119,9 @@ class NgramWeightTpl {
     return val.first->empty() && Hypergraph::isOne(val.second);
   }
   typedef void HasIsOne;
-  bool mZero;  // this simplifies implementation and avoids static init order dependency on W::one(). //TODO:
-  // appropriate friend
 
   typedef W Weight;
 
-  // TODO: xmt/Ngram.hpp instead?
   typedef Syms Ngram;
   typedef shared_ptr<Ngram> NgramPtr;
 
@@ -131,7 +129,7 @@ class NgramWeightTpl {
      default is insufficent because NgramPtr compare by pointer.
   */
   bool operator==(Self const& b) const {
-    if (mZero != b.mZero) return false;
+    if (zero_ != b.zero_) return false;
     if (ngrams_.size() != b.ngrams_.size()) return false;
     return std::mismatch(ngrams_.begin(), ngrams_.end(), b.ngrams_.begin(), FirstPtrAndSecondEqual()).second
            == b.ngrams_.end();
@@ -170,17 +168,17 @@ class NgramWeightTpl {
      Default constructor; the ngram maxlen will be unspecified
      (value 0).
   */
-  NgramWeightTpl() : mZero(), maxlen_() {}
+  NgramWeightTpl() : zero_(), maxlen_() {}
 
-  explicit NgramWeightTpl(std::size_t maxlen) : mZero(), maxlen_(maxlen) {}
+  explicit NgramWeightTpl(std::size_t maxlen) : zero_(), maxlen_(maxlen) {}
 
-  NgramWeightTpl(bool, bool) : mZero(true), maxlen_() {}  // for zero()
+  NgramWeightTpl(bool, bool) : zero_(true), maxlen_() {}  // for zero()
 
-  NgramWeightTpl(Sym lab, std::size_t maxlen) : mZero(), maxlen_(maxlen) {
+  NgramWeightTpl(Sym lab, std::size_t maxlen) : zero_(), maxlen_(maxlen) {
     if (lab != EPSILON::ID) ngrams_[make_shared<Ngram>(1, lab)] = Weight::one();
   }
 
-  NgramWeightTpl(Sym lab, std::size_t maxlen, Weight const& weight) : mZero(), maxlen_(maxlen) {
+  NgramWeightTpl(Sym lab, std::size_t maxlen, Weight const& weight) : zero_(), maxlen_(maxlen) {
     ngrams_[lab == EPSILON::ID ? kEmptyNgram : make_shared<Ngram>(1, lab)] = weight;
   }
 
@@ -191,7 +189,7 @@ class NgramWeightTpl {
       *this = w2;
       return;
     } else {
-      assert(!mZero);
+      assert(!zero_);
       if (isOne()) setExplicitOne();
       if (w2.isOne()) {
         updateBy(PlusBy<W>(), ngrams_, kEmptyNgram, W::one());
@@ -289,13 +287,13 @@ class NgramWeightTpl {
   }
 
   NgramPtrMap ngrams_;
-
- private:
+  static NgramPtr kEmptyNgram;
   // C++ wart: must friend all or none of the template
   template <class W2>
   friend NgramWeightTpl<W2> times(NgramWeightTpl<W2> const& w1, NgramWeightTpl<W2> const& w2);
-  std::size_t maxlen_;
-  static NgramPtr kEmptyNgram;
+  Position maxlen_;
+ public:
+  bool zero_;
 };
 
 template <class W>

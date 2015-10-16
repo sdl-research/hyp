@@ -25,9 +25,12 @@
 #pragma once
 
 
+#include <functional>
 #include <boost/config.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
+#include <sparsehash/dense_hash_map>
+#include <sparsehash/dense_hash_set>
 
 // TODO: find something higher performance - some tests have shown older boost
 // versions having awful perf for memory with either int or string keys (Google
@@ -42,68 +45,49 @@
 #include <sdl/Util/Contains.hpp>
 #include <sdl/Util/Map.hpp>
 #include <cmath>
+#include <sdl/Util/HashValue.hpp>
 
 namespace sdl {
 
+/// unordered_* are node pointer based (chaining on collision) hash tables and
+/// if there are resizes should outperform for heavy non-moveable keys/values
+/// after many insertions
 using boost::unordered_map;
 using boost::unordered_set;
 using boost::unordered_multimap;
 
+/// dense_hash_map/set: m.set_empty_key(k); where k won't be used as a normal
+/// key - otherwise like unordered_map (if you erase, then set_deleted_key(k2)
+/// too). you may also have to specify default hash fn obj = boost::hash<Key>
+/// also, it's sort-of ok to use the default identity hash for pointers since
+/// google drops the low 3 bits already. i.e. don't use PointerHash w/
+/// dense_hash...
+template <class Key, class T, class HashFcn = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
+          class Alloc = google::libc_allocator_with_realloc<std::pair<const Key, T>>>
+using hash_map = google::dense_hash_map<Key, T, HashFcn, EqualKey, Alloc>;
+
+template <class Key, class HashFcn = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
+          class Alloc = google::libc_allocator_with_realloc<Key>>
+using hash_set = google::dense_hash_set<Key, HashFcn, EqualKey, Alloc>;
+
 namespace Util {
 
 
-// non-commutative
-inline void hashvalCombine(std::size_t& s, std::size_t v) {
-  s ^= v + 0x9e3779b9 + (s << 6) + (s >> 2);
+/// for repeated use of same table, clear but don't free memory prematurely
+template <class HashContainer>
+void clearNoResize(HashContainer& h) {
+  h.clear();
 }
 
-template <class B>
-inline std::size_t hashPairInt(std::size_t s, B b) {
-  hashvalCombine(s, b);
-  return s;
+template <class K, class V, class H, class E, class A>
+void clearNoResize(hash_map<K, V, H, E, A>& h) {
+  h.clear_no_resize();
 }
 
-template <class I>
-inline std::size_t hashRange(I i, I end, std::size_t s = 0) {
-  boost::hash<typename std::iterator_traits<I>::value_type> h;
-  for (; i != end; ++i) hashvalCombine(s, h(*i));
-  return s;
+template <class K, class H, class E, class A>
+void reserveUnordered(hash_set<K, H, E, A>& h) {
+  h.clear_no_resize();
 }
-
-template <class C>
-inline std::size_t hashCont(C const& c) {
-  return hashRange(c.begin(), c.end(), c.size());
-}
-
-struct HashCont {
-  template <class C>
-  std::size_t operator()(C const& c) const {
-    return hashCont(c);
-  }
-};
-
-struct PointedHashCont {
-  template <class C>
-  std::size_t operator()(C const* c) const {
-    return hashCont(*c);
-  }
-};
-
-struct PointedEqual {
-  template <class A, class B>
-  bool operator()(A const* a, B const* b) const {
-    return *a == *b;
-  }
-  typedef bool return_type;
-};
-
-struct PointedLess {
-  template <class A, class B>
-  bool operator()(A const* a, B const* b) const {
-    return *a < *b;
-  }
-  typedef bool return_type;
-};
 
 /**
    reserve enough so that adding to a total size of n won't invalidate iterators due to rehashing or growing.
@@ -135,6 +119,16 @@ void reserveUnordered(unordered_map<K, V, H, E, A>& umap, std::size_t n) {
 
 template <class K, class H, class E, class A>
 void reserveUnordered(unordered_set<K, H, E, A>& uset, std::size_t n) {
+  reserveUnorderedImpl(uset, n);
+}
+
+template <class K, class V, class H, class E, class A>
+void reserveUnordered(hash_map<K, V, H, E, A>& umap, std::size_t n) {
+  reserveUnorderedImpl(umap, n);
+}
+
+template <class K, class H, class E, class A>
+void reserveUnordered(hash_set<K, H, E, A>& uset, std::size_t n) {
   reserveUnorderedImpl(uset, n);
 }
 
