@@ -25,17 +25,11 @@
 #pragma once
 
 
-#include <functional>
-#include <boost/config.hpp>
-#include <boost/functional/hash.hpp>
+#include <boost/functional/hash/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <sparsehash/dense_hash_map>
 #include <sparsehash/dense_hash_set>
 
-// TODO: find something higher performance - some tests have shown older boost
-// versions having awful perf for memory with either int or string keys (Google
-// dense_hash_map?). also, if using new enough compiler, expect high performance
-// std::unordered. or maybe boost is better now.
 #include <boost/unordered_set.hpp>
 
 #include <iterator>
@@ -55,6 +49,7 @@ namespace sdl {
 using boost::unordered_map;
 using boost::unordered_set;
 using boost::unordered_multimap;
+//TODO: benchmark std vs boost unordered_* or just use google dense_hash below:
 
 /// dense_hash_map/set: m.set_empty_key(k); where k won't be used as a normal
 /// key - otherwise like unordered_map (if you erase, then set_deleted_key(k2)
@@ -69,6 +64,11 @@ using hash_map = google::dense_hash_map<Key, T, HashFcn, EqualKey, Alloc>;
 template <class Key, class HashFcn = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
           class Alloc = google::libc_allocator_with_realloc<Key>>
 using hash_set = google::dense_hash_set<Key, HashFcn, EqualKey, Alloc>;
+
+/// dense_hash_map and dense_hash_set have faster repeated lookups; also uses
+/// slightly more memory than unordered_ unless the (key, val) pair is small
+/// (because of unordered_map chaining: sizeof(pointer) for empty slot vs
+/// sizeof(entry))
 
 namespace Util {
 
@@ -85,8 +85,27 @@ void clearNoResize(hash_map<K, V, H, E, A>& h) {
 }
 
 template <class K, class H, class E, class A>
-void reserveUnordered(hash_set<K, H, E, A>& h) {
+void clearNoResize(hash_set<K, H, E, A>& h) {
   h.clear_no_resize();
+}
+
+template <class HashContainer>
+void setEmptyKey(HashContainer& h, typename HashContainer::key_type const& k) {
+}
+
+template <class K, class V, class H, class E, class A>
+void setEmptyKey(hash_map<K, V, H, E, A>& h, K const& k) {
+  h.set_empty_key(k);
+}
+
+template <class K, class H, class E, class A>
+void setEmptyKey(hash_set<K, H, E, A>& h, K const& k) {
+  h.set_empty_key(k);
+}
+
+template <class HashContainer>
+void setEmptyKey(HashContainer& h) {
+  setEmptyKey(h, typename HashContainer::key_type());
 }
 
 /**

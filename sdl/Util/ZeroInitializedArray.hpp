@@ -50,6 +50,7 @@ struct ZeroInitializedArray
   static inline std::size_t size() { return NT; }
   static inline std::size_t bytes() { return NT * sizeof(T); }
 
+
   T *begin() {
     return space;
   }
@@ -75,6 +76,12 @@ struct ZeroInitializedArray
   void zero() {
     assert(sizeof(space) == NT * sizeof(T));
     std::memset(space, 0, sizeof(space));
+  }
+
+  bool isZero() const {
+    for (const_iterator i = begin(), e = end(); i != e; ++i)
+      if (*i) return false;
+    return true;
   }
 
   void clear() {

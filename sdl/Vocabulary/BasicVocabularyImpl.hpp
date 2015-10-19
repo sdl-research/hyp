@@ -19,8 +19,7 @@
 #pragma once
 
 #include <string>
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
+#include <sdl/Util/Unordered.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/LogHelper.hpp>
