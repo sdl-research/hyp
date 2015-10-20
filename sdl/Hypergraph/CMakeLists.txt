@@ -8,10 +8,7 @@ if(OPENFST_FOUND)
   message(STATUS "Have openfst: -I${OPENFST_SRC_DIR} -I${OPENFST_INCLUDE_DIR}")
 endif()
 
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/..)
-include_directories(${LOG4CXX_INCLUDE_DIR})
-include_directories(${ICU_INCLUDE_DIR})
+sdl_util_includes()
 
 file(GLOB LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HYP_SOURCES ${PROJECT_SOURCE_DIR}/src/Hyp*.cpp)

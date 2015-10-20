@@ -61,6 +61,7 @@
 // -----------------------------------------------------------
 
 #include <assert.h>
+#include <utility>
 #include <string>
 #include <stdexcept>
 #include <algorithm>
@@ -317,11 +318,18 @@ public:
 
     // copy constructor
     dynamic_bitset(dynamic_bitset const& b);
+    dynamic_bitset(dynamic_bitset && o) : bits_(std::move(o.bits_)), num_bits_(o.num_bits_) {}
 
     ~dynamic_bitset();
 
     void swap(dynamic_bitset& b);
     dynamic_bitset& operator=(dynamic_bitset const& b);
+    dynamic_bitset& operator=(dynamic_bitset && o) {
+      bits_ = std::move(o.bits_);
+      num_bits_ = o.num_bits_;
+      return *this;
+    }
+
 
     allocator_type get_allocator() const;
 

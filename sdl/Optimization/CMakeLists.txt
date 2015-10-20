@@ -1,12 +1,7 @@
 project (Optimization)
 
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/..)
-include_directories(${LOG4CXX_INCLUDE_DIR})
+sdl_util_includes()
 include_directories(${LBFGS_INCLUDE_DIR})
-include_directories(${YAML_CPP_INCLUDE_DIR})
-include_directories(${ICU_INCLUDE_DIR})
-include_directories(${TBB_INCLUDE_DIR})
 
 #set (CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
 

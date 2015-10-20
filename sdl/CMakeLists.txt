@@ -252,6 +252,9 @@ if(UNIX AND NOT APPLE)
   find_package(AprUtil)
 endif()
 
+set(SPARSEHASH_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/sparsehash-c11")
+set(GSL_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/GSL")
+
 
 #
 # Windows specific settings.
@@ -345,7 +348,10 @@ if(WIN32)
 endif()
 
 find_package(GSL)
+message(STATUS "GSL (include only): ${GSL_INCLUDE_DIR}")
+
 find_package(SparseHash)
+message(STATUS "SPARSEHASH (include only): ${SPARSEHASH_INCLUDE_DIR}")
 
 
 set(SDL_NO_CLANG_OPTIMIZATIONS "-fcx-limited-range -fno-signaling-nans -fno-rounding-math")
@@ -990,16 +996,23 @@ endif()
 # use Util header-only)
 set(UTIL_LIBRARIES ${UTIL_LIBRARY_NAME} ${INDIRECT_UTIL_LIB_DEPENDENCIES})
 
-macro(sdl_util_includes)
-  include_directories(${Boost_INCLUDE_DIRS})
+macro(sdl_base_includes)
+  #header only:
+  include_directories(${SPARSEHASH_INCLUDE_DIR})
+  include_directories(${GSL_INCLUDE_DIR})
   include_directories(${CMAKE_SOURCE_DIR}/..)
+  include_directories(${UTF8_INCLUDE_DIR})
+  #lib:
+  include_directories(${ZLIB_INCLUDE_DIR})
+  include_directories(${Boost_INCLUDE_DIRS})
   include_directories(${LOG4CXX_INCLUDE_DIR})
+endmacro()
+macro(sdl_util_includes)
+  sdl_base_includes()
   include_directories(${ICU_INCLUDE_DIR})
   include_directories(${YAML_CPP_INCLUDE_DIR})
   include_directories(${TBB_INCLUDE_DIR})
-  include_directories(${UTF8_INCLUDE_DIR})
   include_directories(${ZEROMQ_INCLUDE_DIR})
-  include_directories(${ZLIB_INCLUDE_DIR})
 endmacro()
 
 

@@ -26,10 +26,11 @@
 
 namespace sdl {
 
+struct Constraints;
+
 enum { kXmtDefaultNfc = false };
 
 namespace Util {
-
 
 /// until we have original-byte-span or original-unicode-code-point alignments
 /// when doing nfc, we disable all on-by-default normalizations that might apply
@@ -111,20 +112,20 @@ inline bool getlineNfcUntil(std::istream& in, std::string& utf8, char until, boo
 }
 
 struct NfcOptions {
-  bool nfc, nfkc, warnIfNotNfc, warnIfResultNotNfc;
-  NfcOptions() : nfc(kXmtDefaultNfc), nfkc(), warnIfNotNfc(), warnIfResultNotNfc(true) {}
-  NfcOptions(bool nfc) : nfc(nfc), nfkc(), warnIfNotNfc(), warnIfResultNotNfc(true) {}
+  bool nfc = kXmtDefaultNfc, nfkc = false, warnIfNotNfc = false, warnIfResultNotNfc = true;
+  NfcOptions() {}
+  NfcOptions(bool nfc) : nfc(nfc) {}
   template <class Config>
   void configure(Config& config) {
     config("nfc", &nfc)
         .self_init()(
-            "normalize input utf8 to Unicode NFC (at decode time, if there are constraints, then caller must "
-            "refer to post-NFC codepoints)");
+            "normalize input utf8 to Unicode NFC (if there are constraints, then caller must "
+            "refer to post-NFC codepoints - we don't adjust them while nfc normalizing)");
     config("nfkc", &nfkc)
         .self_init()(
-            "(takes precedence over nfc) normalize input utf8 to Unicode NFKC (at decode time, if there are "
+            "(takes precedence over nfc) normalize input utf8 to Unicode NFKC (if there are "
             "constraints, then caller must "
-            "refer to post-NFKC codepoints)");
+            "refer to post-NFKC codepoints - we don't adjust them while nfkc normalizing)");
     config("warn-if-not-nfc", &warnIfNotNfc)
         .self_init()("warn if any non-NFC input is observed (and then nfc/nfkc normalize if enabled)");
     config("warn-if-result-not-nfc", &warnIfResultNotNfc)
@@ -154,6 +155,8 @@ struct NfcOptions {
     else
       maybeWarn(in);
   }
+
+  void normalize(std::string &in, Constraints &c) const;
 
   void normalize(std::string const& in, std::string& out) const {
     if (nfc)

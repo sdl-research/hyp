@@ -22,6 +22,9 @@
 #include <sdl/Util/Chomp.hpp>
 
 namespace sdl {
+
+struct Constraints;
+
 namespace Util {
 
 /// FixUnicode deals in 1:1 Unicode subst and deletions; Nfc is many:many
@@ -38,30 +41,17 @@ struct NormalizeUtf8 : NfcOptions, FixUnicode {
     config.is("NormalizeUtf8");
   }
 
-  void normalize(std::string& str) const {
-    FixedUtf8 fixed(str, *this);
-    if (fixed.modified()) {
-      // TODO: test
-      if (nfc) {
-        // this branch could be handle every case, but we save some copies when
-        // possible by avoiding it
-        str.clear();
-        NfcOptions::normalize(fixed, str);
-      } else {
-        str = fixed;
-        NfcOptions::maybeWarn(str);
-      }
-    } else {
-      NfcOptions::normalize(str);
-    }
-  }
-  void normalize(std::string const& str, std::string& out) const {
-    assert(out.empty());
-    if (FixUnicode::maybeNormalize(str, out))
-      NfcOptions::normalize(out);
-    else
-      NfcOptions::normalize(str, out);
-  }
+  /// normalize: also does FixUnicode
+  void normalize(std::string& str) const;
+
+  /// does all but FixUnicode. you may want this if you handle FixUnicode yourself e.g. StringToTokens
+  void normalizeNfc(std::string& str, Constraints &c) const;
+
+  void normalizeNfc(std::string& str) const;
+  void normalize(std::string& str, Constraints &c) const;
+
+  void normalize(std::string const& str, std::string& out) const;
+
   bool getlineNormalized(std::istream& in, std::string& utf8) const {
     if ((bool)std::getline(in, utf8)) {
       normalize(utf8);

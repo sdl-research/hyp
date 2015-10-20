@@ -37,10 +37,9 @@ std::string& fixUtf8(std::string& string) {
   if (validUtf8(string))
     return string;
   else {
-    // TODO: test
     std::string fixedStr;
     fixUtf8To(string, fixedStr);
-    std::swap(fixedStr, string);
+    string = std::move(fixedStr);
     return string;
   }
 }

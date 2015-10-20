@@ -11,9 +11,21 @@
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/IntTypes.hpp>
 #include <sdl/Util/Utf8.hpp>
+#include <sdl/Constraints/Constraints.hpp>
 
 namespace sdl {
 namespace Util {
+
+void NfcOptions::normalize(std::string& in, Constraints& c) const {
+  bool warn = warnIfResultNotNfc;
+  if (nfc && c.empty()) {
+    std::string out;
+    normalizeToNfc(in, out, nfkc);
+    in = std::move(out);
+    return;
+  }
+  if (warn) maybeWarn(in);  // TODO: adjust constraints while -> nfc (by  AlignedChars.hpp)
+}
 
 void normalizeToNfc(std::string const& utf8, std::string& out, bool warnIfNotNfc, bool K) {
   // TODO: test

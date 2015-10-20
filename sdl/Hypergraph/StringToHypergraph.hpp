@@ -104,9 +104,11 @@ struct TokenWeights {
    Converts a vector of strings, inputTokens to a flat-line hypergraph. Gives all
    non-lexical states lower state IDs than lexical states, which is
    what most algorithms need.
+
+   \return number of tokens
  */
 template <class Arc, class Strings>
-void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHgResult,
+Position stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHgResult,
                         StringToHypergraphOptions const& opts = StringToHypergraphOptions(),
                         TokenWeights const& inputWeights = TokenWeights()) {
   IVocabularyPtr const& pVoc = pHgResult->getVocabulary();
@@ -118,8 +120,8 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
 
   typedef typename Arc::Weight Weight;
   typedef FeatureInsertFct<Weight> FI;
-
-  for (Position i = 0, n = inputTokens.size(); i != n; ++i) {
+  Position i = 0, n = inputTokens.size();
+  for (; i != n; ++i) {
     std::string const& token = inputTokens[i];
     SDL_TRACE(Hypergraph.StringToHypergraph, i << ": " << token);
     const Sym sym = opts.terminalMaybeUnk(pVoc.get(), token);
@@ -136,6 +138,7 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
     prevState = nextState;
   }
   pHgResult->setFinal(prevState);
+  return n;
 }
 
 /**
@@ -143,12 +146,12 @@ void stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHg
    \param pHgResult
 */
 template <class Arc>
-void stringToHypergraph(std::string const& utf8string, IMutableHypergraph<Arc>* pHgResult,
+Position stringToHypergraph(std::string const& utf8string, IMutableHypergraph<Arc>* pHgResult,
                         StringToHypergraphOptions const& opts = StringToHypergraphOptions(),
                         TokenWeights const& inputWeights = TokenWeights()) {
   std::vector<std::string> utf8chars;
   Util::toUtf8Chs(utf8string, utf8chars);
-  stringToHypergraph(utf8chars, pHgResult, opts, inputWeights);
+  return stringToHypergraph(utf8chars, pHgResult, opts, inputWeights);
 }
 
 /**

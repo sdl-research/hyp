@@ -31,6 +31,7 @@
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/Enum.hpp>
 #include <sdl/Util/LineOptions.hpp>
+#include <sdl/Util/NormalizeUtf8.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -43,30 +44,24 @@ class FlatStringHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
   FlatStringHypergraphsIterator(std::istream& in, shared_ptr<IPerThreadVocabulary> const& perThreadVocab,
                                 sdl::shared_ptr<IFeaturesPerInputPosition> feats)
       : in_(in), pHg_(NULL), perThreadVocab_(perThreadVocab), done_(false), hgProp_(kStoreOutArcs) {
-    opts.doAddUnknownSymbols = true;
-    opts.inputFeatures = feats;
+    toHypergraphOpt.doAddUnknownSymbols = true;
+    toHypergraphOpt.inputFeatures = feats;
   }
 
-  StringToHypergraphOptions opts;
+  StringToHypergraphOptions toHypergraphOpt;
+  Util::NormalizeUtf8 normalize;
 
-  // TODO: use full xmt/StringToHg options?
   virtual void next() {
     delete pHg_;
     pHg_ = new MutableHypergraph<Arc>(hgProp_);
     pHg_->setVocabulary(*perThreadVocab_);
     using namespace std;
-    getline(in_, line);
-    Util::normalizeToNfcInplace(line, Util::kWarnUnlessNfc);
-    vector<string> tokens;
-    Util::splitSpaces(tokens, line);
-
-    if (tokens.empty()) {
+    normalize.getlineNormalized(in_, line);
+    if (!stringToHypergraph(line, pHg_, toHypergraphOpt)) {
       delete pHg_;
       pHg_ = NULL;
       done_ = true;
     } else {
-      stringToHypergraph(tokens, pHg_, opts);
-      // sortStates(*pHg_); // already done by stringToHypergraph
       SDL_DEBUG(Hypergraph, "Constructed input hypergraph:\n" << *pHg_);
     }
   }

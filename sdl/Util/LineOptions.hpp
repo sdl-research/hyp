@@ -53,6 +53,14 @@ struct LineOptions : NormalizeUtf8 {
         "'chomp')");
   }
 
+  void normalize(std::string& str, Constraints &c) const {
+    NormalizeUtf8::normalize(str, c);
+    if (trim)
+      Util::trim(str);
+    else if (chomp)
+      Util::chomp(str);
+  }
+
   void normalize(std::string& str) const {
     NormalizeUtf8::normalize(str);
     if (trim)

@@ -147,6 +147,7 @@ SDL_ENUM(BadUtf8HandlerType, 3, (Unsafe_Ignore, Remove, Replace));
 Unicode const kMinWindows1252Unicode = 0x0080;
 Unicode const kMaxWindows1252Unicode = 0x009f;
 Unicode const kNWindows1252Unicode = 1 + kMaxWindows1252Unicode - kMinWindows1252Unicode;
+/* these all take 2-byte utf8 to 2- or 3-byte utf8 so it's not safe to transform utf8 inplace*/
 extern Unicode gWindows1252ToUnicode[kNWindows1252Unicode];
 
 /// is this a control character that can be translated from windows 1252 codepage?
@@ -275,12 +276,12 @@ struct FixUnicode {
     config("remove-control-characters", &removeControlChars)
         .self_init()(
             "Remove non-whitespace control characters (whitespace is normalized/handled by a different "
-            "mechanism).");
+            "mechanism). TODO: this is unsafe to use w/ constraints unless those constraints magically refer "
+            "to post-removal unicode ids");
     config("convert-windows-1252", &convertWindows1252)
         .self_init()(
             "Interpret Unicode range U+0080 - U+009F control characters as encoded Windows 1252 characters "
-            "and "
-            "convert to correct Unicode equivalents (this option has precedence over removal of control "
+            "and convert to correct Unicode equivalents (this option has precedence over removal of control "
             "characters). If someone uses control characters for their intended purpose (unlikely) or for "
             "another font/codepage (somewhat likely) you will get some gibberish");
   }
@@ -357,13 +358,20 @@ struct FixUnicode {
       return false;
   }
 
+  typedef EncodeUtf8Iter<std::string::iterator> Encoder;
+
   void normalize(std::string& string, bool alreadyValidUtf8) const {
-    if (alreadyValidUtf8 && !convertWindows1252)
-      normalize(string, string,
-                alreadyValidUtf8);  // # of bytes in substring translation is <= input so we can do in-place
-    else {
-      std::string in(string);
-      normalize(in, string, alreadyValidUtf8);
+    if (alreadyValidUtf8 && !convertWindows1252) {
+      // # of bytes in substring translation is <= input so we can do in-place
+      std::string::iterator begin = string.begin(), o = begin, end = string.end();
+      Encoder toutf8(o);
+      utf8To(begin, end, toutf8, alreadyValidUtf8);
+      assert(o <= end);
+      string.resize(o - begin);
+    } else {
+      std::string out;
+      normalize(string, out, alreadyValidUtf8);
+      string = std::move(out);
     }
   }
 
@@ -374,7 +382,6 @@ struct FixUnicode {
     }
   }
 
-  typedef EncodeUtf8Iter<std::string::iterator> Encoder;
 
   void normalize(std::string const& in, std::string& out) const {
     sizeOutputImpl(in.size(), out);
@@ -398,13 +405,6 @@ struct FixUnicode {
     std::string::iterator begin = out.begin(), o = begin;
     Encoder toutf8(o);
     utf8To(in.begin(), in.end(), toutf8, alreadyValidUtf8);
-    out.resize(o - begin);
-  }
-
-  void normalizeValidUtf8Inplace(std::string& out) const {
-    std::string::iterator begin = out.begin(), o = begin;
-    Encoder toutf8(o);
-    fixedUtf8To(begin, out.end(), toutf8);
     out.resize(o - begin);
   }
 
@@ -559,6 +559,17 @@ struct FixedUtf8 : boost::noncopyable {
 
   bool modified() const { return fixed == &storage; }
   std::string const& str() const { return *fixed; }
+
+  ///
+  /**
+     usage: FixedUtf8(inout).moveTo(x);
+
+     where x may be inout.
+  */
+  void moveTo(std::string &out) {
+    if (&out != fixed)
+      out = std::move(*fixed);
+  }
 
   /**
      input string must be valid for as long as you use the fixed result.

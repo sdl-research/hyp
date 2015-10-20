@@ -108,6 +108,34 @@ void setEmptyKey(HashContainer& h) {
   setEmptyKey(h, typename HashContainer::key_type());
 }
 
+template <class HashMap>
+HashMap *new_hashed() {
+  HashMap *m = new HashMap;
+  setEmptyKey(*m);
+  return m;
+}
+
+template <class HashMap>
+shared_ptr<HashMap> make_hashed() {
+  shared_ptr<HashMap> m = make_shared<HashMap>();
+  setEmptyKey(*m);
+  return m;
+}
+
+template <class HashMap>
+HashMap *new_hashed(typename HashMap::key_type const& k) {
+  HashMap *m = new HashMap;
+  setEmptyKey(*m, k);
+  return m;
+}
+
+template <class HashMap>
+shared_ptr<HashMap> make_hashed(typename HashMap::key_type const& k) {
+  shared_ptr<HashMap> m = make_shared<HashMap>();
+  setEmptyKey(*m, k);
+  return m;
+}
+
 /**
    reserve enough so that adding to a total size of n won't invalidate iterators due to rehashing or growing.
 */

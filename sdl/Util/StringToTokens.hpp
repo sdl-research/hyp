@@ -34,6 +34,7 @@
 #include <sdl/Util/AcceptStringImpls.hpp>
 #include <sdl/Util/NormalizeUtf8.hpp>
 #include <sdl/Util/AlignedChars.hpp>
+#include <sdl/Constraints/Constraints.hpp>
 
 namespace sdl {
 namespace Util {
@@ -306,9 +307,17 @@ struct StringToTokens : NormalizeUtf8 {
 
 
   template <class Accept>
-  void acceptImpl(std::string const& line, Accept const& accept) const {
-    FixedUtf8 fixed(line);
-    acceptValidUtf8Impl(fixed, accept);
+  void acceptImpl(std::string line, Accept const& accept) const {
+    NormalizeUtf8::normalizeNfc(line);
+    acceptValidUtf8Impl(line, accept);
+  }
+
+  template <class Accept>
+  void acceptImpl(std::string line, Accept const& accept, Constraints &c) const {
+    if (c.empty())
+      acceptImpl(std::move(line), accept);
+    NormalizeUtf8::normalizeNfc(line, c); //TODO: track # of codepoints changed and update c
+    acceptValidUtf8(line, accept);
   }
 
   void acceptValidUtf8(std::string const& fixed, IAcceptString const& accept) const {
@@ -322,9 +331,13 @@ struct StringToTokens : NormalizeUtf8 {
   }
 
   /// used by StringToStringModule StringToHgHelper for string->hg. TODO: use AlignedChars for nfc norm
-  void accept(std::string const& line, IAcceptString const& accept) const {
-    FixedUtf8 fixed(line);
-    acceptValidUtf8(fixed, accept);
+  void accept(std::string line, IAcceptString const& accept) const {
+    acceptImpl(std::move(line), accept);
+  }
+
+  void accept(std::string line, IAcceptString const& accept, Constraints &c) const {
+    NormalizeUtf8::normalizeNfc(line, c); //TODO: track # of codepoints changed and update c
+    acceptValidUtf8(line, accept);
   }
 
   void split(std::string const& line, Tokens& tokens) const {
