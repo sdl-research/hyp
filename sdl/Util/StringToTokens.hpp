@@ -34,7 +34,6 @@
 #include <sdl/Util/AcceptStringImpls.hpp>
 #include <sdl/Util/NormalizeUtf8.hpp>
 #include <sdl/Util/AlignedChars.hpp>
-#include <sdl/Constraints/Constraints.hpp>
 
 namespace sdl {
 namespace Util {
@@ -314,10 +313,11 @@ struct StringToTokens : NormalizeUtf8 {
 
   template <class Accept>
   void acceptImpl(std::string line, Accept const& accept, Constraints &c) const {
-    if (c.empty())
+    if (constraintsIndexUnicodes(c)) {
+      NormalizeUtf8::normalizeNfc(line, c); //TODO: track # of codepoints changed and update c
+      acceptValidUtf8(line, accept);
+    } else
       acceptImpl(std::move(line), accept);
-    NormalizeUtf8::normalizeNfc(line, c); //TODO: track # of codepoints changed and update c
-    acceptValidUtf8(line, accept);
   }
 
   void acceptValidUtf8(std::string const& fixed, IAcceptString const& accept) const {
