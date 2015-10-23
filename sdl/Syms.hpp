@@ -28,6 +28,7 @@
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Util/SmallVector.hpp>
+#include <graehl/shared/likely.hpp>
 
 namespace sdl {
 
@@ -59,7 +60,6 @@ inline unsigned nLexical(Syms const& syms) {
     count += i->isLexical();
   return count;
 }
-
 
 /**
    explicit hash fn for Syms keys

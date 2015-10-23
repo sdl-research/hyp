@@ -73,7 +73,7 @@
 #endif
 
 #if SDL_HASH_COMPOSE_ITEM
-#include <sdl/Util/Index.hpp>
+#include <sdl/Util/OwnedRegistry.hpp>
 #endif
 
 namespace sdl {
@@ -133,9 +133,10 @@ class Registry {
 // only used in debug mode, for nicer output
 template <class T>
 class RegistryWithIds : public Registry<T> {
- public:
   typedef std::map<T*, std::size_t> TsToIdsMap;
-
+  std::size_t nextId_;
+  TsToIdsMap ids_;
+ public:
   RegistryWithIds() : nextId_(1) {}
 
   /**
@@ -152,14 +153,9 @@ class RegistryWithIds : public Registry<T> {
     }
     return found->second;
   }
-
- private:
-  std::size_t nextId_;
-  TsToIdsMap ids_;
 };
 
 struct EarleyParserOptions {
-
   bool enablePhiRhoMatch;
   bool sigmaPreventsPhiRhoMatch;
 
@@ -742,7 +738,7 @@ class EarleyParser {
   // For nicer debug output:
   typedef RegistryWithIds<Item> ItemRegistry;
 #elif SDL_HASH_COMPOSE_ITEM
-  typedef Util::Registry<Item> ItemRegistry;
+  typedef Util::OwnedRegistry<Item> ItemRegistry;
 #else
   typedef Registry<Item> ItemRegistry;
 #endif

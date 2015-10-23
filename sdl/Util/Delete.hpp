@@ -25,6 +25,7 @@
 #include <sdl/Util/SizeIsUnsigned.hpp>
 #include <memory>
 #include <cstring>
+#include <sdl/Pool/poolfwd.hpp>
 
 namespace sdl {
 namespace Util {
@@ -65,55 +66,72 @@ struct DeleteArrayFn {
    auto_ptr)
 */
 struct AutoFree {
-  operator void*() const { return toFree; }
-  operator void*&() { return toFree; }
-  mutable void* toFree;
-  AutoFree() : toFree() {}
-  explicit AutoFree(std::size_t mallocBytes) : toFree(std::malloc(mallocBytes)) {}
+  operator void*() const { return p_; }
+  operator void*&() { return p_; }
+  mutable void* p_;
+  AutoFree() : p_() {}
+  explicit AutoFree(std::size_t mallocBytes) : p_(std::malloc(mallocBytes)) {}
 #if !SDL_SIZE_IS_UINT32
-  explicit AutoFree(unsigned mallocBytes) : toFree(std::malloc(mallocBytes)) {}
+  explicit AutoFree(unsigned mallocBytes) : p_(std::malloc(mallocBytes)) {}
 #endif
-  explicit AutoFree(int mallocBytes) : toFree(std::malloc((unsigned)mallocBytes)) {}
-  explicit AutoFree(char* toFree) : toFree((void*)toFree) {}
-  explicit AutoFree(char const* toFree) : toFree((void*)toFree) {}
-  explicit AutoFree(void* toFree) : toFree(toFree) {}
-  explicit AutoFree(void const* toFree) : toFree((void*)toFree) {}
-  AutoFree(AutoFree const& other) : toFree(other.toFree) { other.release(); }
+  explicit AutoFree(int mallocBytes) : p_(std::malloc((unsigned)mallocBytes)) {}
+  explicit AutoFree(char* p) : p_((void*)p) {}
+  explicit AutoFree(char const* p) : p_((void*)p) {}
+  explicit AutoFree(void* p) : p_(p) {}
+  explicit AutoFree(void const* p) : p_((void*)p) {}
+  AutoFree(AutoFree&& o) {
+    p_ = o.p_;
+    o.p_ = 0;
+  }
+  AutoFree& operator=(AutoFree&& o) {
+    assert(this != &o);
+    assert(!p_ || p_ != o.p_);
+    std::free(p_);
+    p_ = o.p_;
+    o.p_ = 0;
+    return *this;
+  }
+
+  AutoFree(AutoFree const& other) = delete;
+  AutoFree& operator=(AutoFree& o) = delete;
+
+  ~AutoFree() { std::free(p_); }
+
   /**
      called repeatedly w/ the same mallocBytes = idempotent. called w/ larger mallocBytes than the last real
      allocation = bug
   */
   void ensure_malloc(std::size_t mallocBytes) {
-    if (!toFree) malloc(mallocBytes);
+    if (!p_) malloc(mallocBytes);
   }
 
   void* malloc(std::size_t mallocBytes) {
     init(std::malloc(mallocBytes));
-    return toFree;
+    return p_;
   }
-  void init(void* malloced) { toFree = malloced; }
+  void init(void* malloced) { p_ = malloced; }
   void initCopying(void* data, std::size_t n) { std::memcpy(malloc(n), data, n); }
   void set(void* malloced) {
-    std::free(toFree);
-    toFree = malloced;
+    std::free(p_);
+    p_ = malloced;
   }
   void reset(void* malloced) {
-    std::free(toFree);
-    toFree = malloced;
+    std::free(p_);
+    p_ = malloced;
   }
   void free() const {
-    std::free(toFree);
-    toFree = 0;
+    std::free(p_);
+    p_ = 0;
   }
   /**
-     \return toFree, which is no longer owned by this AutoFree.
+     \return p_, which is no longer owned by this Aup_.
   */
   void* release() const {
-    void* r = toFree;
-    toFree = 0;
+    void* r = p_;
+    p_ = 0;
     return r;
   }
-  ~AutoFree() { std::free(toFree); }
+  void nodelete() const { p_ = 0; }
 };
 
 struct AutoFreeAll : std::vector<void*> {
@@ -154,41 +172,68 @@ struct AutoDestroy {
 
 template <class T>
 struct AutoDelete {
-  operator T*() const { return toDelete; }
-  T* get() const { return toDelete; }
-  T& operator*() const { return *toDelete; }
-  T* operator->() const { return toDelete; }
-  T* toDelete;
+  operator T*() const { return p_; }
+  T* get() const { return p_; }
+  T& operator*() const { return *p_; }
+  T* operator->() const { return p_; }
+  T* p_;
   void reset(T* r = 0) {
-    delete toDelete;
-    toDelete = r;
+    delete p_;
+    p_ = r;
   }
+  void nodelete() { p_ = 0; }
   T* release() {
-    T* r = toDelete;
-    toDelete = 0;
+    T* r = p_;
+    p_ = 0;
     return r;
   }
   T* set(T* r) {
     reset(r);
     return r;
   }
-  AutoDelete(T* toDelete = 0) : toDelete(toDelete) {}
-  AutoDelete(T const* toDelete) : toDelete((T*)toDelete) {}
-  ~AutoDelete() { delete toDelete; }
-  void clone(T const& r) { reset(new T(r)); }
-
+  AutoDelete() : p_() {}
+  explicit AutoDelete(T* p) : p_(p) {}
+  explicit AutoDelete(T const* p) : p_(const_cast<T*>(p)) {}
+  ~AutoDelete() { delete p_; }
   AutoDelete(AutoDelete&& o) {
-    toDelete = o.toDelete;
-    o.toDelete = 0;
+    p_ = o.p_;
+    o.p_ = 0;
   }
   AutoDelete& operator=(AutoDelete&& o) {
     assert(this != &o);
-    reset(o.toDelete);
-    o.toDelete = 0;
+    assert(!p_ || p_ != o.p_);
+    delete p_;
+    p_ = o.p_;
+    o.p_ = 0;
     return *this;
   }
   AutoDelete(AutoDelete const& o) = delete;
   AutoDelete& operator=(AutoDelete const& o) = delete;
+  void clone(T const& r) { reset(new T(r)); }
+};
+
+template <class T, class Pool = Pool::pool<>>
+struct AutoDeletePool {
+  Pool& pool_;
+  T* p_;
+  void destroyFree(T* p) {
+    if (p) {
+      p->~T();
+      pool_.free(p);
+    }
+  }
+  void reset(T* r = 0) {
+    destroyFree(p_);
+    p_ = r;
+  }
+  void nodelete() { p_ = 0; }
+  T* release() {
+    T* r = p_;
+    p_ = 0;
+    return r;
+  }
+  AutoDeletePool(Pool& pool, T const* p) : pool_(pool), p_(const_cast<T*>(p)) {}
+  ~AutoDeletePool() { destroyFree(p_); }
 };
 
 /// use a default-constructed T unless an existing T* was provided
@@ -201,7 +246,7 @@ struct ExistingOrTemporary : AutoDelete<T> {
   ExistingOrTemporary(T& fallback, T* temporary)
       : AutoDelete<T>(temporary ? temporary : &fallback), existing_(!temporary) {}
   ~ExistingOrTemporary() {
-    if (existing_) this->toDelete = 0;
+    if (existing_) this->nodelete();
   }
 };
 
@@ -230,18 +275,18 @@ struct AutoDeleteAll : std::vector<T*> {
 
 template <class T>
 struct AutoDeleteArray {
-  operator T*() const { return toDelete; }
-  T* begin() const { return toDelete; }
-  T* toDelete;
+  operator T*() const { return p_; }
+  T* begin() const { return p_; }
+  T* p_;
   void init(std::size_t n, T const& x) {
-    toDelete = new T[n];
-    std::uninitialized_fill(toDelete, toDelete + n, x);
+    p_ = new T[n];
+    std::uninitialized_fill(p_, p_ + n, x);
   }
-  void reset(T* array) { toDelete = array; }
-  AutoDeleteArray(T* toDelete = 0) : toDelete(toDelete) {}
-  explicit AutoDeleteArray(std::size_t n) : toDelete(new T[n]()) {}
+  void reset(T* array) { p_ = array; }
+  AutoDeleteArray(T* p = 0) : p_(p) {}
+  explicit AutoDeleteArray(std::size_t n) : p_(new T[n]()) {}
   AutoDeleteArray(std::size_t n, T const& x) { init(n, x); }
-  ~AutoDeleteArray() { delete[] toDelete; }
+  ~AutoDeleteArray() { delete[] p_; }
 
   AutoDeleteArray(AutoDeleteArray const&) = delete;
 };

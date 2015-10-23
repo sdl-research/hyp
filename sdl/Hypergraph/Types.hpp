@@ -23,6 +23,7 @@
 #include <limits>
 #include <iostream>
 #include <map>
+#include <cassert>
 
 #include <sdl/Types.hpp>
 
@@ -72,6 +73,7 @@
 #include <sdl/IVocabulary-fwd.hpp>
 #include <sdl/Util/SmallVector.hpp>
 #include <sdl/Util/Unordered.hpp>
+#include <graehl/shared/is_null.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -135,9 +137,11 @@ typedef boost::iterator_range<TailIdIterator> TailIdRange;
 typedef Util::BitSet StateSet;
 BOOST_STATIC_ASSERT(sizeof(StateSet::size_type) >= sizeof(StateId));
 
-static const ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
-static const StateId kNoState = boost::integer_traits<StateId>::const_max;
-static const StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max - 1;
+static constexpr ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
+static constexpr StateId kNoState = boost::integer_traits<StateId>::const_max;
+static constexpr StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max - 1;
+
+using ::set_null;
 
 typedef std::pair<StateId, StateId> StateIdInterval;
 

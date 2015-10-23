@@ -32,6 +32,8 @@ enum { kXmtDefaultNfc = false };
 
 namespace Util {
 
+bool constraintsIndexUnicodes(Constraints const& c);
+
 /// until we have original-byte-span or original-unicode-code-point alignments
 /// when doing nfc, we disable all on-by-default normalizations that might apply
 /// before tokenizers record spans.

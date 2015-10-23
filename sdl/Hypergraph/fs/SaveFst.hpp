@@ -22,7 +22,9 @@
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Project.hpp>
 #include <sdl/Hypergraph/PruneToBest.hpp>
+#include <graehl/shared/is_null.hpp>
 #include <graehl/shared/hex_int.hpp>
+#include <sdl/Util/Unordered.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -57,7 +59,7 @@ struct SaveFst {
   typedef typename Fst::State State;
   typedef typename Fst::Arc FstArc;
   typedef typename Fst::Arcs FstArcs;
-  typedef unordered_map<State, StateId> StateMap;
+  typedef hash_map<State, StateId> StateMap;
   typedef ArcTpl<Weight> HgArc;
   typedef IMutableHypergraph<HgArc> Hg;
   Hg& out;
@@ -67,11 +69,13 @@ struct SaveFst {
   bool projectOutput;
   bool annotations_;
   SaveFst(Fst& fst, Hg& out, SaveFstOptions const& opt)
-      : fst(fst), out(out), projectOutput(opt.projectOutput), annotations_(opt.annotations) {
+      : fst(fst), out(out), projectOutput(opt.projectOutput), annotations_(opt.annotations), stateMap(opt.reserveStates) {
+    State empty;
+    adl::call_set_null(empty);
+    Util::setEmptyKey(stateMap, empty);
     out.setVocabulary(fst.getVocabulary());
     out.setEmpty();
     if (opt.forceOutArcs) out.forceFirstTailOutArcs();
-    Util::reserveUnorderedImpl(stateMap, opt.reserveStates);
     SDL_DEBUG(Hypergraph.fs.SaveFst, "saving to hg &" << graehl::hex(&out) << ": " << withProperties(out));
     out.setStart(outStateFor(fst.startState()));
   }

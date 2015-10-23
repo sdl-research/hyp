@@ -19,6 +19,8 @@
 #define INTTYPES_JG_2013_05_31_HPP
 #pragma once
 
+#include <graehl/shared/is_null.hpp>
+
 #if CPP11
 #include <cstdint>
 #else
@@ -83,7 +85,6 @@ inline unsigned getNumBytes(Type val) {
     return n;
   }
 }
-
 
 }
 

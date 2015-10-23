@@ -19,6 +19,7 @@
 
 #include <cstring>
 #include <sdl/SharedPtr.hpp>
+#include <cstdint>
 
 namespace sdl {
 namespace Util {
@@ -119,8 +120,27 @@ struct LessByValue {
  */
 template <class T>
 struct EqualByValue {
-  bool operator()(shared_ptr<T> a, shared_ptr<T> b) const { return *a == *b; }
+  bool operator()(shared_ptr<T> const& a, shared_ptr<T> const& b) const { return *a == *b; }
   bool operator()(T const* a, T const* b) const { return *a == *b; }
+};
+
+
+inline bool isPointer0or1(void const* p) {
+  return (std::uintptr_t)p <= 1;
+}
+
+/// for google dense_hash_map of ptrs w/ null as empty value
+template <class T>
+struct EqualByValueExcept01 {
+  bool operator()(T const* a, T const* b) const {
+    return isPointer0or1(a) ? a == b : (!isPointer0or1(b) && *a == *b);
+  }
+};
+
+template <class T>
+struct EqualByValueExcept0 {
+  bool operator()(shared_ptr<T> const& a, shared_ptr<T> const& b) const { return !a ? !b : (b && *a == *b); }
+  bool operator()(T const* a, T const* b) const { return !a ? !b : (b && *a == *b); }
 };
 
 /**

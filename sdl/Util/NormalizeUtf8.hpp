@@ -22,9 +22,6 @@
 #include <sdl/Util/Chomp.hpp>
 
 namespace sdl {
-
-struct Constraints;
-
 namespace Util {
 
 /// FixUnicode deals in 1:1 Unicode subst and deletions; Nfc is many:many

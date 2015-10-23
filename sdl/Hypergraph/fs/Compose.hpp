@@ -304,17 +304,24 @@ struct EpsilonCombine : Epsilon1First {
   }
 };
 
-
 /**
-   state in composition of input * match.
+   state in composition of input * match. (Filter: empty base optimization for NoEpsilonFilter)
 */
 template <class InputStateId, class Filter = NoEpsilonFilter, class MatchStateId = StateId>
-struct Compose2State : public Filter  // inherit rather than member because e.g. NoEpsilonFilter has no state
-                       {
+struct Compose2State : public Filter
+{
   typedef InputStateId InputState;
   typedef MatchStateId MatchState;
   InputState input;
   MatchState match;
+  void set_null_impl() {
+    adl::call_set_null(input);
+    setFilterStart();
+    adl::call_set_null(match);
+  }
+  friend inline void set_null(Compose2State &x) {
+    x.set_null_impl();
+  }
   friend inline std::ostream& operator<<(std::ostream& out, Compose2State const& self) {
     out << self.input << (Filter const&)self << self.match;
     return out;

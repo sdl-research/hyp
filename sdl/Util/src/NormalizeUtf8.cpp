@@ -9,14 +9,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <sdl/Util/NormalizeUtf8.hpp>
-#include <sdl/Constraints/Constraints.hpp>
 
 namespace sdl {
 namespace Util {
 
 void NormalizeUtf8::normalize(std::string& str, Constraints& c) const {
   normalizeNfc(str, c);
-  if (!c.empty() && FixUnicode::removeControlChars)
+  if (constraintsIndexUnicodes(c) && FixUnicode::removeControlChars)
     SDL_THROW_LOG(NormalizeUtf8, ConfigException,
                   "remove-control-characters can't be true when using constraints (yet)");
   FixUnicode::normalize(str, true);

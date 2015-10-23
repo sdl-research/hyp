@@ -72,7 +72,6 @@ using hash_set = google::dense_hash_set<Key, HashFcn, EqualKey, Alloc>;
 
 namespace Util {
 
-
 /// for repeated use of same table, clear but don't free memory prematurely
 template <class HashContainer>
 void clearNoResize(HashContainer& h) {
@@ -89,9 +88,32 @@ void clearNoResize(hash_set<K, H, E, A>& h) {
   h.clear_no_resize();
 }
 
+#ifdef _MSC_VER
+template <class K, class V, class H, class E, class A>
+void setEmptyKey(unordered_map<K, V, H, E, A>& h, K const& k) {
+}
+
+template <class K, class H, class E, class A>
+void setEmptyKey(unordered_set<K, H, E, A>& h, K const& k) {
+}
+
+
+template <class K, class V, class H, class E, class A>
+void setDeletedKey(unordered_map<K, V, H, E, A>& h, K const& k) {
+}
+
+template <class K, class H, class E, class A>
+void setDeletedKey(unordered_set<K, H, E, A>& h, K const& k) {
+}
+#else
 template <class HashContainer>
 void setEmptyKey(HashContainer& h, typename HashContainer::key_type const& k) {
 }
+
+template <class HashContainer>
+void setDeletedKey(HashContainer& h, typename HashContainer::key_type const& k) {
+}
+#endif
 
 template <class K, class V, class H, class E, class A>
 void setEmptyKey(hash_map<K, V, H, E, A>& h, K const& k) {
@@ -103,9 +125,28 @@ void setEmptyKey(hash_set<K, H, E, A>& h, K const& k) {
   h.set_empty_key(k);
 }
 
+template <class K, class V, class H, class E, class A>
+void setDeletedKey(hash_map<K, V, H, E, A>& h, K const& k) {
+  h.set_deleted_key(k);
+}
+
+template <class K, class H, class E, class A>
+void setDeletedKey(hash_set<K, H, E, A>& h, K const& k) {
+  h.set_deleted_key(k);
+}
+
+template <class K, class V, class H, class E, class A>
+void setEmptyKey(hash_map<K, V, H, E, A>& h) {
+  h.set_empty_key(K());
+}
+
+template <class K, class H, class E, class A>
+void setEmptyKey(hash_set<K, H, E, A>& h) {
+  h.set_empty_key(K());
+}
+
 template <class HashContainer>
 void setEmptyKey(HashContainer& h) {
-  setEmptyKey(h, typename HashContainer::key_type());
 }
 
 template <class HashMap>

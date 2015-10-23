@@ -27,7 +27,6 @@
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/AsciiCase.hpp>
 #include <sdl/Util/Chomp.hpp>
-#include <boost/regex.hpp>
 #include <sdl/Util/Math.hpp>
 
 namespace sdl {
@@ -82,68 +81,43 @@ bool floatEqualWarn(T a, T b, T epsilon = (T)1e-6, char const* first_name = "GOT
   return eq;
 }
 
-typedef std::set<std::string> LinesUnordered;
-
-inline LinesUnordered difference(LinesUnordered const& a, LinesUnordered const& b) {
-  LinesUnordered a_minus_b;
-  std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::inserter(a_minus_b, a_minus_b.end()));
-  return a_minus_b;
-}
-
 /**
    \return whether sets of lines are the same.
 */
-inline bool StreamLinesUnorderedEqual(std::istream& stream1, std::istream& stream2,
-                                      char const* first_name = "GOT", char const* second_name = "REF") {
-  LinesUnordered stream1_lines, stream2_lines;
-  std::copy(linesNoTrailingSpacesBegin(stream1), linesNoTrailingSpacesEnd(),
-            std::inserter(stream1_lines, stream1_lines.end()));
-  std::copy(linesNoTrailingSpacesBegin(stream2), linesNoTrailingSpacesEnd(),
-            std::inserter(stream2_lines, stream2_lines.end()));
-
-  bool ok = stream1_lines == stream2_lines;
-
-  if (!ok) {
-    SDL_WARN(Util, "NOT (unordered) EQUAL:\n "
-                       << first_name << ": {[(\n" << print(stream1_lines, multiLineNoBrace()) << "\n)]} "
-                       << second_name << ": {(" << print(stream2_lines, multiLine()) << ")}\n\n difference "
-                       << first_name << " - " << second_name << ": {"
-                       << print(difference(stream1_lines, stream2_lines), multiLine()) << "} difference "
-                       << second_name << " - " << first_name << ": {"
-                       << print(difference(stream2_lines, stream1_lines), multiLine()));
-  }
-
-  return ok;
-}
+bool StreamLinesUnorderedEqual(std::istream& stream1, std::istream& stream2,
+                                      char const* first_name = "GOT", char const* second_name = "REF",
+                                      bool warn = true);
 
 inline bool StreamLinesUnorderedEqual(std::istream& stream1, std::string const& str2,
-                                      char const* first_name = "GOT", char const* second_name = "REF") {
+                                      char const* first_name = "GOT", char const* second_name = "REF",
+                                      bool warn = true) {
   std::istringstream stream2(str2);
-  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name);
+  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name, warn);
 }
 
 inline bool LinesUnorderedEqual(std::string const& str1, std::string const& str2,
-                                char const* first_name = "GOT", char const* second_name = "REF") {
+                                char const* first_name = "GOT", char const* second_name = "REF",
+                                bool warn = true) {
   std::istringstream stream1(str1);
   std::istringstream stream2(str2);
-  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name);
+  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name, warn);
 }
 
 template <class Val1>
 inline bool LinesUnorderedEqual(Val1 const& val1, std::string const& ref, char const* first_name = "GOT",
-                                char const* second_name = "REF") {
+                                char const* second_name = "REF", bool warn = true) {
   std::stringstream stream1;
   stream1 << val1;
-  return StreamLinesUnorderedEqual(stream1, ref, first_name, second_name);
+  return StreamLinesUnorderedEqual(stream1, ref, first_name, second_name, warn);
 }
 
 template <class Val1, class Val2>
 inline bool PrintedLinesUnorderedEqual(Val1 const& val1, Val2 const& val2, char const* first_name = "GOT",
-                                       char const* second_name = "REF") {
+                                       char const* second_name = "REF", bool warn = true) {
   std::stringstream stream1, stream2;
   stream1 << val1;
   stream2 << val2;
-  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name);
+  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name, warn);
 }
 
 inline void ReplaceDigits(std::string& str, char replaceDigitsBy = '#') {
@@ -161,25 +135,9 @@ inline void ReplaceDigits(std::string& str, char replaceDigitsBy = '#') {
 
    followed by end of line or '['
 
-   (the last is a hacks for hypergraph output)
-
-   perl regex:
-
-   (?!abc) matches zero characters only if they are not followed by the expression "abc".
-
-   (?<!pattern) consumes zero characters, only if pattern could not be matched
-   against the characters preceding the current position (pattern must be of
-   fixed length) (negative lookbehind: Patterns which start with negative
-   lookbehind assertions may match at the beginning of the string being
-   searched.)
+   (the last is a hack for comparing hypergraph output)
 */
-
-inline std::string ReplaceIntegersCopy(std::string const& str, std::string const& replaceIntegersBy = "#") {
-  static boost::regex integerRegexp("(?<![-0-9.])[[:digit:]]+(?:(?![.0-9[])|$)");
-  using namespace boost::regex_constants;
-  return boost::regex_replace(str, integerRegexp, replaceIntegersBy, format_literal | format_all);
-}
-
+std::string ReplaceIntegersCopy(std::string const& str, std::string const& replaceIntegersBy = "#");
 inline void ReplaceIntegers(std::string& str, std::string const& replaceIntegersBy = "#") {
   str = ReplaceIntegersCopy(str, replaceIntegersBy);
 }
@@ -187,7 +145,7 @@ inline void ReplaceIntegers(std::string& str, std::string const& replaceIntegers
 inline bool LinesUnorderedEqualIgnoringDigits(std::string str1, std::string str2,
                                               char const* first_name = "GOT", char const* second_name = "REF",
                                               char replaceDigitsBy = '#') {
-  if (LinesUnorderedEqual(str1, str2, first_name, second_name)) return true;
+  if (LinesUnorderedEqual(str1, str2, first_name, second_name, false)) return true;
   SDL_TRACE(Util.Equal, "not exactly equal - trying with digits replaced: [(test)" << str1 << " != " << str2
                                                                                    << "(reference)]\n");
   ReplaceDigits(str1, replaceDigitsBy);
@@ -205,15 +163,15 @@ inline bool LinesUnorderedEqualIgnoringIntegers(std::string str1, std::string st
                                                 char const* first_name = "GOT",
                                                 char const* second_name = "REF",
                                                 std::string const& replaceIntegersBy = "#") {
-  if (LinesUnorderedEqual(str1, str2, first_name, second_name)) return true;
+  if (LinesUnorderedEqual(str1, str2, first_name, second_name, false)) return true;
   SDL_TRACE(Util.Equal, "not exactly equal - trying with digits replaced: [(test)" << str1 << " != " << str2
                                                                                    << "(reference)]\n");
   ReplaceIntegers(str1, replaceIntegersBy);
   ReplaceIntegers(str2, replaceIntegersBy);
   bool ok = LinesUnorderedEqual(str1, str2, first_name, second_name);
   if (!ok)
-    SDL_WARN(Util.Equal, "not exactly equal even after integer replacement and ignoring line order: [(test)"
-                             << str1 << "  !=  " << str2 << " (reference)]\n");
+    SDL_WARN(Util.Equal, "not exactly equal even after integer replacement and ignoring line order: [(test)\n"
+                             << str1 << "\n  !=  \n" << str2 << "\n (reference)]\n");
   else
     SDL_WARN(Util.Equal, " OK - Equal after integer replacement.");
   return ok;
@@ -278,21 +236,16 @@ bool byStrEqual(T const& obj, T const& obj2, char const* name = "", char const* 
 /**
    \return whether lists of lines are the same ignoring leading/trailing space differences
 */
-inline bool StreamLinesEqual(std::istream& stream1, std::istream& stream2, char const* first_name = "GOT",
-                             char const* second_name = "REF") {
-  std::vector<std::string> stream1_lines, stream2_lines;
-  std::copy(linesNoTrailingSpacesBegin(stream1), linesNoTrailingSpacesEnd(), std::back_inserter(stream1_lines));
-  std::copy(linesNoTrailingSpacesBegin(stream2), linesNoTrailingSpacesEnd(), std::back_inserter(stream2_lines));
-  return stream1_lines == stream2_lines;
-}
+bool StreamLinesEqual(std::istream& stream1, std::istream& stream2, char const* first_name = "GOT",
+                             char const* second_name = "REF");
 
 template <class Val1, class Val2>
 inline bool PrintedLinesEqual(Val1 const& val1, Val2 const& val2, char const* first_name = "GOT",
-                              char const* second_name = "REF") {
+                              char const* second_name = "REF", bool warn = true) {
   std::stringstream stream1, stream2;
   stream1 << val1;
   stream2 << val2;
-  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name);
+  return StreamLinesUnorderedEqual(stream1, stream2, first_name, second_name, warn);
 }
 }
 }

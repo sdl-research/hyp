@@ -26,6 +26,7 @@
 #include <sdl/Util/Fields.hpp>
 #include <sdl/IntTypes.hpp>
 #include <sdl/Util/Log10Ln.hpp>
+#include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
 
@@ -53,6 +54,30 @@ typedef SparseFeatures::value_type SparseFeatureEntry;
 
 template <class Map, class Key>
 inline FeatureValue featureValue(Map const& map, Key const& key) {
+  typename Map::const_iterator i = map.find(key);
+  return i == map.end() ? (FeatureValue)0 : i->second;
+}
+
+template <class Map, class Key>
+inline FeatureValue featureWarn(Map const& map, Key const& key) {
+  typename Map::const_iterator i = map.find(key);
+  if (i == map.end()) {
+    SDL_WARN(FeatureValue, "missing feature '"<<key<<"'");
+    return (FeatureValue)0;
+  } else
+    return i->second;
+}
+
+template <class Map, class Key>
+inline FeatureValue featureRequire(Map const& map, Key const& key) {
+  typename Map::const_iterator i = map.find(key);
+  if (i == map.end())
+    SDL_THROW_LOG(FeatureValue, ConfigException, "missing feature '"<<key<<"'");
+  return i->second;
+}
+
+template <class Map, class Key>
+inline FeatureValue featureValueRequire(Map const& map, Key const& key) {
   typename Map::const_iterator i = map.find(key);
   return i == map.end() ? (FeatureValue)0 : i->second;
 }

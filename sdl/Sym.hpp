@@ -418,6 +418,11 @@ struct Sym {
   SymInt id() const { return id_; }
 
   SymInt id_;
+  bool isLexicalGivenIsTerminal() const {
+    assert(isTerminal());
+    return (1 << 31) & id_;
+  }
+
   void operator+=(SymInt deltaIndex) {
     assert(index() + deltaIndex <= maxIndex());
     id_ += deltaIndex;

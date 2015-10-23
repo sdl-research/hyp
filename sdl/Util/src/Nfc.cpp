@@ -11,14 +11,17 @@
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/IntTypes.hpp>
 #include <sdl/Util/Utf8.hpp>
-#include <sdl/Constraints/Constraints.hpp>
 
 namespace sdl {
 namespace Util {
 
+bool constraintsIndexUnicodes(Constraints const& c) {
+  return false;
+}
+
 void NfcOptions::normalize(std::string& in, Constraints& c) const {
   bool warn = warnIfResultNotNfc;
-  if (nfc && c.empty()) {
+  if (nfc && !constraintsIndexUnicodes(c)) {
     std::string out;
     normalizeToNfc(in, out, nfkc);
     in = std::move(out);

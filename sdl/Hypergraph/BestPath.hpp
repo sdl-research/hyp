@@ -75,7 +75,7 @@
 #include <graehl/shared/os.hpp>
 #include <graehl/shared/pool_traits.hpp>
 #include <graehl/shared/teestream.hpp>
-#include <boost/pool/pool.hpp>
+#include <sdl/Pool.hpp>
 #include <sdl/Hypergraph/AcyclicBest.hpp>
 #include <sdl/Config/Init.hpp>
 #include <sdl/Hypergraph/Visit.hpp>
@@ -765,8 +765,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
     /**
        storage for BinaryDerivations.
     */
-    typedef boost::pool<> Dpool;
-    // avoiding boost object_pool since we don't need destructor for BinaryDerivation
+    typedef ChunkPool Dpool;
 
     /// a note about nbest ties: either we put in some extra work to make sure the bare 1-best derivation is
     /// the same one chosen by the n-best 1-best, or we allow the 1-best to change whether you print 1 or 2.
