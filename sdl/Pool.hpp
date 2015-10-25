@@ -17,13 +17,29 @@
 #define POOL_GRAEHL_2015_10_21_HPP
 #pragma once
 
-#include <sdl/Pool/pool.hpp>
+#include <sdl/Pool-fwd.hpp>
+#include <utility>
 
 namespace sdl {
 
-/// Pool pool(allocsz); pool.free(pool.malloc())
-typedef Pool::pool<> ChunkPool;
+template <class T>
+void deletePool(T* t, ChunkPool& pool) {
+  t->~T();
+  assert(pool.get_requested_size() >= sizeof(T));  // subclass could be larger
+  pool.free(t);
+}
 
+template <class I>
+void deleteRangePool(I begin, I end, ChunkPool& pool) {
+  for (; begin != end; ++begin) deletePool(*begin, pool);
+}
+
+template <class T, class... Args>
+void constructFromPool(T*& t, ChunkPool& pool, Args&&... args) {
+  assert(pool.get_requested_size() == sizeof(T));
+  new (t) T(std::forward<Args>(args)...);
+  t = pool.malloc();
+}
 
 
 }

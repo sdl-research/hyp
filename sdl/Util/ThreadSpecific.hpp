@@ -39,11 +39,11 @@ std::string configure::configure_usage<sdl::Lowercase::Recase>() (configure_is.h
 #endif
 #endif
 
+#include <type_traits>
 #include <string>
 #include <memory>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/tss.hpp>
-#include <sdl/SharedPtr.hpp>
 #include <sdl/IntTypes.hpp>
 #include <sdl/Util/ThreadId.hpp>
 #include <stdint.h>
@@ -52,6 +52,8 @@ std::string configure::configure_usage<sdl::Lowercase::Recase>() (configure_is.h
 // warning: std::uintptr_t is in C++11 only. most compilers' stdint.h will have uintptr_t, though
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
 #include <pthread.h>
+#else
+#include <boost/shared_ptr.hpp>
 #endif
 
 namespace sdl {
@@ -72,15 +74,6 @@ using boost::detail::set_tss_data;
 using boost::detail::tss_cleanup_function;
 #endif
 }
-
-// Boost for Windows has a TSS bug. Probably fixed in 1.52
-// https://svn.boost.org/trac/boost/ticket/5696
-#if BOOST_VERSION < 105200 && defined(_WIN32)
-#define SDL_BOOST_TSS_BUG 1
-shared_ptr<impl::tss_cleanup_function> makeDummyTssCleanupFunction();
-#else
-#define SDL_BOOST_TSS_BUG 0
-#endif
 
 inline bool isThreadStackAddress(void const* p) {
   return false;
@@ -125,6 +118,7 @@ struct ThreadSpecificInt : boost::noncopyable {
     return static_cast<Int>((PtrInt)impl::get_tss_data(this));
 #endif
   }
+  static_assert(sizeof(Int) <= sizeof(PtrInt), "ThreadSpecificInt must be no larger than void*");
   void set(Int i) {
     if (alreadyThreadSpecific())
       ki.i = i;
@@ -132,16 +126,12 @@ struct ThreadSpecificInt : boost::noncopyable {
       setThreadSpecific(i);
   }
   void setThreadSpecific(Int i) {
-    BOOST_STATIC_ASSERT(sizeof(Int) <= sizeof(PtrInt));
 #if SDL_USE_PTHREAD_THREAD_SPECIFIC
     (void)::pthread_setspecific(ki.key, (void const*)static_cast<PtrInt>(i));
 #else
-#if !SDL_BOOST_TSS_BUG
-    impl::set_tss_data(this, shared_ptr<impl::tss_cleanup_function>(), (void*)static_cast<PtrInt>(i), false);
-#else
-    // Boost (before 1.52) bug on Windows: The cleanup function must be provided.
-    impl::set_tss_data(this, makeDummyTssCleanupFunction(), (void*)static_cast<PtrInt>(i), false);
-#endif
+    impl::set_tss_data(this, boost::shared_ptr<impl::tss_cleanup_function>(), (void*)static_cast<PtrInt>(i),
+                       false);
+    // Boost (pre- 1.52) bug on Windows: must past pointer to do-nothing tss_cleanup_function instead of nullptr
 #endif
   }
   typedef ThreadSpecificInt<Int> Self;

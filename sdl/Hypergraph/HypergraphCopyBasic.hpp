@@ -296,7 +296,7 @@ shared_ptr<IHypergraph<A> const> ensureProperties(IHypergraph<A>& i, Properties 
   shared_ptr<IHypergraph<A> > p;
   ensureProperties(i, p, forceOn, maybeOff, forceOff, onMissing, orForceOn);
   if (!p) setNoDelete(p, i);
-  return boost::const_pointer_cast<IHypergraph<A> const>(p);
+  return const_pointer_cast<IHypergraph<A> const>(p);
 }
 
 template <class A>

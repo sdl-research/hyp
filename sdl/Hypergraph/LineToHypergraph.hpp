@@ -100,7 +100,7 @@ struct LineToHypergraph : ParseTokensOptions
     shared_ptr<MutableHypergraph<A> > const& hg = make_shared<MutableHypergraph<A> >(prop);
     hg->setVocabulary(vocab);
     toHypergraph(line, hg.get(), lineNum);
-    return boost::static_pointer_cast<IHypergraph<A> >(hg);
+    return static_pointer_cast<IHypergraph<A> >(hg);
   }
 
 };

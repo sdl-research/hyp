@@ -32,21 +32,16 @@
 #pragma once
 
 #include <iostream>
-#include <graehl/shared/warning_push.h>
-#if HAVE_GCC_4_6
-GCC_DIAG_OFF(delete-non-virtual-dtor)
-#endif
-#include <boost/shared_ptr.hpp>
-#include <boost/smart_ptr/make_shared.hpp>
-#include <graehl/shared/warning_pop.h>
+#include <memory>
 
 namespace sdl {
 
-using boost::shared_ptr;
-using boost::make_shared;
-using boost::static_pointer_cast;
-using boost::dynamic_pointer_cast;
-using boost::const_pointer_cast;
+using std::shared_ptr;
+using std::weak_ptr;
+using std::make_shared;
+using std::static_pointer_cast;
+using std::dynamic_pointer_cast;
+using std::const_pointer_cast;
 
 template <class Ptr>
 Ptr ifEnabled(bool enabled, Ptr const& p) {

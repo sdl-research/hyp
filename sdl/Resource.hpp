@@ -130,7 +130,7 @@ AnyResourcePtr anyResourcePtr(Impl* newImpl) {
 
 template <class Impl>
 AnyResourcePtr anyResourcePtr(shared_ptr<Impl> const& pImpl) {
-  return boost::static_pointer_cast<Resource>(pImpl);
+  return static_pointer_cast<Resource>(pImpl);
 }
 
 

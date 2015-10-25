@@ -341,7 +341,7 @@ bool lazyBestForHgPtr(HgPtr const& sortedHg, FstPath& path, LazyBestOptions cons
   typedef IMutableHypergraph<Arc> MutableHg;
   if (sortedHg->isMutable()) {
     typedef HypergraphFst<Arc> Fst;
-    Fst fst(boost::dynamic_pointer_cast<MutableHg const>(sortedHg), opt.annotations);
+    Fst fst(dynamic_pointer_cast<MutableHg const>(sortedHg), opt.annotations);
     lazyBest(fst, path, opt);
   } else {
     typedef ConstHypergraphFst<Arc> Fst;

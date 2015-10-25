@@ -32,7 +32,7 @@
 #include <sdl/Hypergraph/WeightUtil.hpp>
 
 #include <functional>
-#include <boost/make_shared.hpp>
+#include <type_traits>
 
 #include <sdl/Util/Math.hpp>
 
@@ -389,14 +389,13 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   }
 
   /**
-     Uses BOOST_STATIC_ASSERT to give compile error if the
+     Uses static_assert to give compile error if the
      SumPolicy of this class is not the same as the passed sum policy
      (OtherSumPolicy).
   */
   template <class OtherSumPolicy>
   void checkSumPolicy() {
-    typedef boost::is_same<SumPolicy, OtherSumPolicy> SamePolicy;
-    BOOST_STATIC_ASSERT(SamePolicy::value);
+    static_assert(std::is_same<SumPolicy, OtherSumPolicy>::value, "can't add different-type Feature + Expectation -Weights");
   }
 
   static Map const staticEmptyMap;

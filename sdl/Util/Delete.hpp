@@ -19,6 +19,7 @@
 #pragma once
 
 #include <sdl/SharedPtr.hpp>
+#include <cassert>
 #include <cstdlib>
 #include <new>
 #include <vector>

@@ -45,7 +45,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/make_shared.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/ptr_container/ptr_set.hpp>
 #include <boost/iterator/indirect_iterator.hpp>

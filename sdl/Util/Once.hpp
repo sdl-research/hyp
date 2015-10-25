@@ -18,7 +18,6 @@
 #define SDL_ONCE_HPP
 #pragma once
 
-#include <boost/static_assert.hpp>
 #include <sdl/Util/PointerSet.hpp>
 #include <sdl/Util/LogHelper.hpp>
 
@@ -29,7 +28,6 @@ namespace Util {
 // wrap pointer-visitors so each pointer gets visited once - mark the pointer seen the first time (via IntSet)
 
 struct Once : public PointerSet {
-  BOOST_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void*));
   template <class V>
   bool first(V const* p) {
     return this->insert((intptr_t)p).second;
@@ -40,7 +38,6 @@ struct Once : public PointerSet {
 // regular pointer equality. maybe specifying hash avoids this problem only.
 template <class V>
 struct OnceTypedP : public unordered_set<V const*, PtrDiffHash<V> > {
-  BOOST_STATIC_ASSERT(sizeof(intptr_t) == sizeof(void*));
   // careful: don't pass by val:
   bool first(V const& p) { return first(&p); }
   bool first(V const* p) { return this->insert(p).second; }

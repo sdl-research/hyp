@@ -135,7 +135,7 @@ typedef boost::iterator_range<TailIdIterator> TailIdRange;
 // iterators, which would hurt performance.
 
 typedef Util::BitSet StateSet;
-BOOST_STATIC_ASSERT(sizeof(StateSet::size_type) >= sizeof(StateId));
+static_assert(sizeof(StateSet::size_type) >= sizeof(StateId), "StateSet must hold StateIds");
 
 static constexpr ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
 static constexpr StateId kNoState = boost::integer_traits<StateId>::const_max;

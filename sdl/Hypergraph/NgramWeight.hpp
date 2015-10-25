@@ -28,12 +28,12 @@
 #include <limits>
 #include <string>
 #include <utility>
-#include <boost/make_shared.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 
 #include <sdl/Syms.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Util/Add.hpp>
 #include <sdl/Util/Map.hpp>

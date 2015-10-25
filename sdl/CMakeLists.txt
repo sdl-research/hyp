@@ -1037,7 +1037,7 @@ sdl_finish_cflags()
 if(OPEN_SOURCE_RELEASE)
   MESSAGE(STATUS "OPEN_SOURCE_RELEASE: setting defines")
   sdl_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1) #necessary
-  sdl_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0) # better performance (but you may be interested in using them - see code)
+  sdl_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0) # 0 => better performance (but you may be interested in using them - see code)
 
   sdl_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 0) #necessary
   sdl_compiled_setting(SDL_OBJECT_COUNT 0) #necessary

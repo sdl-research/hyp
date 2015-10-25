@@ -153,7 +153,7 @@ struct HypergraphFst {
     arcFn.init(pHg.get(), annotations);
   }
   void init(shared_ptr<MutableHg const> const& pHg, bool annotations = true) {
-    init(boost::static_pointer_cast<ConstHg const>(pHg), annotations);
+    init(static_pointer_cast<ConstHg const>(pHg), annotations);
   }
   void init(ConstHg const& hg, bool annotations = true) { init(ptrNoDelete(hg), annotations); }
 

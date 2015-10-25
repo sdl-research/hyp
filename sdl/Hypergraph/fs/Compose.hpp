@@ -403,7 +403,7 @@ struct HypergraphMatchFst : HypergraphFst<ArcT> {
   void init(shared_ptr<Hg> const& pHg, WhichFstComposeSpecials which) {
     pHg->forceProperties(kSortedOutArcs);
     initSpecials(*pHg, which);
-    Base::init(boost::static_pointer_cast<Hg const>(pHg));
+    Base::init(static_pointer_cast<Hg const>(pHg));
   }
   void init(shared_ptr<ConstHg const> const& pHg, WhichFstComposeSpecials which) {
     if (!(pHg->properties() & kSortedOutArcs))

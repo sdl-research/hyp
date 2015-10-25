@@ -347,16 +347,16 @@ bool inplace(shared_ptr<IHypergraph<A> >& pi, Transform const& t) {
   typedef IHypergraph<A> Hg;
   if (pi->isMutable()) {
     typedef IMutableHypergraph<A> MHg;
-    shared_ptr<MHg> pm(boost::static_pointer_cast<MHg>(pi));
+    shared_ptr<MHg> pm(static_pointer_cast<MHg>(pi));
     if (inplace(pm, t)) {
-      pi = boost::static_pointer_cast<Hg>(pm);
+      pi = static_pointer_cast<Hg>(pm);
       return true;
     } else
       return false;
   }
   shared_ptr<Hg const> cpi = pi;
   inplace(cpi, t);
-  pi = boost::const_pointer_cast<Hg>(cpi);
+  pi = const_pointer_cast<Hg>(cpi);
   return false;
 }
 

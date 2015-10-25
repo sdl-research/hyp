@@ -260,13 +260,11 @@ O& printRangeState(O& o, PrintState& q, I i, I const& end, RangeSep const& r = R
 
 template <class O, class PrintState, class C>
 O& printRangeState(O& o, PrintState const& q, C const& c, RangeSep const& r = RangeSep()) {
-  using namespace boost;
   return printRangeState(o, q, boost::begin(c), boost::end(c), r);
 }
 
 template <class O, class PrintState, class C>
 O& printRangeState(O& o, PrintState& q, C const& c, RangeSep const& r = RangeSep()) {
-  using namespace boost;
   return printRangeState(o, q, boost::begin(c), boost::end(c), r);
 }
 

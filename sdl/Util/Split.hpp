@@ -33,7 +33,6 @@
 #include <sdl/Util/Chomp.hpp>
 #include <sdl/Util/Trim.hpp>
 #include <sdl/Util/IsChar.hpp>
-#include <boost/static_assert.hpp>
 
 namespace sdl {
 namespace Util {

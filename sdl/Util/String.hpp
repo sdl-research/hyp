@@ -54,7 +54,10 @@ inline bool split2(std::string const& str, std::string& first, std::string& rest
 }
 
 /**
-   \return true and strip (whitespace* prefix) if str starts with that, else return false
+   \return if trim(str, whitespace) begins with prefix, set str to the trimmed
+   string with prefix removed and \return true, else \return false and don't set
+   str. close to 'stripPrefix(trim(str), prefix)' but avoids wasted work
+   if return value is false.
 */
 inline bool stripPrefixTrim(std::string& str, std::string const& prefix,
                             std::string const& whitespace = "\n\r\t ") {
@@ -62,7 +65,7 @@ inline bool stripPrefixTrim(std::string& str, std::string const& prefix,
   b = str.find_first_not_of(whitespace);
   std::string::iterator nonspaceBegin = str.begin() + b;
   using namespace boost;
-  if (algorithm::starts_with(make_iterator_range(nonspaceBegin, str.end()), prefix)) {
+  if (boost::algorithm::starts_with(boost::make_iterator_range(nonspaceBegin, str.end()), prefix)) {
     str.erase(str.begin(), nonspaceBegin + prefix.size());
     return true;
   } else

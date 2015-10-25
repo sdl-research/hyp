@@ -21,8 +21,8 @@
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Pool/object_pool.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
 namespace sdl { namespace Hypergraph {
@@ -135,7 +135,7 @@ struct CacheArcWeight
   typedef CacheArcWeight<Impl, Wt> Self;
   typedef shared_ptr<Self> SharedPtr;
   SharedPtr sharedPtr() {
-    return boost::static_pointer_cast<Self>(make_shared<Impl>(impl()));
+    return static_pointer_cast<Self>(make_shared<Impl>(impl()));
   }
   struct Shared {
     typedef Wt Weight;
