@@ -18,6 +18,7 @@
 #pragma once
 
 #include <sdl/Pool-fwd.hpp>
+#include <sdl/Pool/pool.hpp>
 #include <utility>
 
 namespace sdl {
@@ -29,6 +30,14 @@ void deletePool(T* t, ChunkPool& pool) {
   pool.free(t);
 }
 
+template <class T>
+void deletePool(T* t, ChunkPool* pool) {
+  if (pool)
+    deletePool(t, *pool);
+  else
+    delete t;
+}
+
 template <class I>
 void deleteRangePool(I begin, I end, ChunkPool& pool) {
   for (; begin != end; ++begin) deletePool(*begin, pool);
@@ -37,9 +46,24 @@ void deleteRangePool(I begin, I end, ChunkPool& pool) {
 template <class T, class... Args>
 void constructFromPool(T*& t, ChunkPool& pool, Args&&... args) {
   assert(pool.get_requested_size() == sizeof(T));
+  t = (T*)pool.malloc();
   new (t) T(std::forward<Args>(args)...);
-  t = pool.malloc();
 }
+
+template <class T>
+struct Constructed {
+  T* p_;
+  template <class... Args>
+  Constructed(T* p = 0, Args&&... args)
+      : p_() {
+    new (p) T(std::forward<Args>(args)...);
+    p_ = p;  // exception safety for T ctor
+  }
+  void release() { p_ = 0; }
+  ~Constructed() {
+    if (p_) p_->~T();
+  }
+};
 
 
 }

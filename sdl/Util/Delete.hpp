@@ -80,6 +80,10 @@ struct AutoFree {
   explicit AutoFree(char const* p) : p_((void*)p) {}
   explicit AutoFree(void* p) : p_(p) {}
   explicit AutoFree(void const* p) : p_((void*)p) {}
+  template <class Data>
+  AutoFree(Data *&a, unsigned n)
+      : p_(a = (Data*)std::malloc(n * sizeof(Data))) {
+  }
   AutoFree(AutoFree&& o) {
     p_ = o.p_;
     o.p_ = 0;
@@ -272,6 +276,30 @@ struct AutoDeleteAll : std::vector<T*> {
     for (typename Base::const_iterator i = Base::begin(), e = Base::end(); i != e; ++i) delete *i;
   }
   AutoDeleteAll(AutoDeleteAll const&) = delete;
+};
+
+template <class T>
+struct AutoDestroyAll : std::vector<T*> {
+  typedef std::vector<T*> Base;
+  void hold(T* p) { Base::push_back(p); }
+  T* releaseOne() {
+    T* r = Base::back();
+    Base::pop_back();
+    return r;
+  }
+  void destroyAll() {
+    destroyAllImpl();
+    releaseAll();
+  }
+  void releaseAll() { Base::clear(); }
+  AutoDestroyAll() {}
+  AutoDestroyAll(T* toDestroy) : Base(1, toDestroy) {}
+  ~AutoDestroyAll() { destroyAllImpl(); }
+  AutoDestroyAll(AutoDestroyAll const&) = delete;
+ private:
+  void destroyAllImpl() {
+    for (typename Base::const_iterator i = Base::begin(), e = Base::end(); i != e; ++i) (*i)->~T();
+  }
 };
 
 template <class T>

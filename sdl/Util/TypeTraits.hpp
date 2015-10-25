@@ -19,14 +19,14 @@
 
 #include <type_traits>
 
-namespace std {
 #if __cplusplus < 201400L
+namespace std {
 template <bool B, class T = void>
 using enable_if_t = typename enable_if<B, T>::type;
 template <class E>
 using underlying_type_t = typename underlying_type<E>::type;
-#endif
 }
+#endif
 
 namespace sdl {
 
