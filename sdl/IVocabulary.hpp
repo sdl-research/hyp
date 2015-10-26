@@ -32,6 +32,7 @@
 #include <sdl/Util/ThreadSpecific.hpp>
 #include <sdl/Util/Utf8.hpp>
 #include <sdl/Util/IsDebugBuild.hpp>
+#include <sdl/gsl.hpp>
 
 namespace sdl {
 
@@ -77,9 +78,16 @@ struct IVocabulary : Resource {
      add symbol if it doesn't exist. return id of added or existing symbol of type SymbolType
   */
   Sym add(std::string const& str, SymbolType symType) { return addImpl(str, symType); }
-
+  template <std::size_t X>
+  Sym add(string_view<X> const& strview, SymbolType symType) {
+    return doAddField(Slice(strview.begin(), strview.end()), symType);
+  }
   Sym add(Slice const& field, SymbolType symType) { return doAddField(field, symType); }
   Sym addTerminal(Slice const& field) { return doAddField(field, kTerminal); }
+  template <std::size_t X>
+  Sym addTerminal(string_view<X> const& strview, SymbolType symType) {
+    return doAddField(Slice(strview.begin(), strview.end()), kTerminal);
+  }
 
   Sym add(Unicode c, SymbolType symType) { return addImpl(Util::utf8s(c), symType); }
 

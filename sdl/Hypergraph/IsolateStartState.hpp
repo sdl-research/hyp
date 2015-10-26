@@ -17,7 +17,7 @@
 #define ISOLATESTARTSTATE_JG2012104_HPP
 #pragma once
 
-
+#include <sdl/Util/Once.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 
 namespace sdl {
@@ -43,7 +43,9 @@ bool hasInArcs(IHypergraph<Arc> const& hg, StateId head) {
 
 struct CollectArcPointers {
   Util::PointerSet& arcPointers;
-  explicit CollectArcPointers(Util::PointerSet& arcPointers) : arcPointers(arcPointers) {}
+  explicit CollectArcPointers(Util::PointerSet& arcPointers) : arcPointers(arcPointers) {
+    Util::setEmptyKey(arcPointers);
+  }
 
   template <class Arc>
   bool operator()(StateId, Arc* pArc) const {
@@ -99,13 +101,11 @@ struct IsolateStartState : TransformBase<Transform::Inplace>, IsolateStartStateO
     StateId newStart = hg.addState();
     hg.setStart(newStart);
 
-    Util::PointerSet arcPointers;  // collect all the outarcs from start state
+    Util::Once arcPointers;  // collect all the outarcs from start state
     hg.forArcsOutSearch(oldStart, CollectArcPointers(arcPointers));
 
-    for (Util::PointerSet::const_iterator i = arcPointers.begin(), e = arcPointers.end(); i != e; ++i) {
-      Arc* pArc = (Arc*)*i;
-      hg.addArc(new Arc(*pArc, oldStart, newStart));  // clone replacing in tails: old -> new start state
-    }
+    for (auto arc : arcPointers)
+      hg.addArc(new Arc(*(Arc*)arc, oldStart, newStart));  // clone replacing in tails: old -> new start state
   }
 };
 

@@ -37,6 +37,7 @@
 #include <sdl/Optimization/FeatureHypergraphPairs.hpp>
 #include <sdl/Optimization/ExternalFeatHgPairs.hpp>
 #include <sdl/Optimization/Types.hpp>
+#include <sdl/Util/Unordered.hpp>
 
 namespace sdl {
 namespace CrfDemo {
@@ -79,7 +80,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   typedef typename Pairs::value_type value_type;
   typedef typename Pairs::IHgPtr IHgPtr;
   typedef Optimization::TrainingDataIndex TrainingDataIndex;
-  typedef boost::unordered_map<Sym, std::set<Sym> > LabelsPerPosMap;
+  typedef unordered_map<Sym, std::set<Sym> > LabelsPerPosMap;
 
  public:
   CreateSearchSpace(ConfigNode const& yamlConfig)
@@ -295,7 +296,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       }
     }
 
-    boost::unordered_map<Sym, StateId> stateId;
+    unordered_map<Sym, StateId> stateId;
 
     // (NP) <- (B-NP)
     // (NP) <- (B-NP) (NP0)
@@ -649,7 +650,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   shared_ptr<Optimization::IFeatureHypergraphPairs<Arc> > pairs_;
   CrfDemoConfig opts_;
   std::set<Sym> allLabels_;
-  boost::unordered_map<Sym, std::set<Sym> > labelsPerPos_;
+  LabelsPerPosMap labelsPerPos_;
   bool testMode_;
   boost::mutex mutex_;
 };

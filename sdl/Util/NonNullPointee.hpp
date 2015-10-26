@@ -34,7 +34,7 @@ struct NonNullPointeeEqual {
 };
 
 /**
-   if value == is expensive, check pointers first.
+   if value == is expensive and pointers may alias, check pointers first.
 */
 struct NonNullPointeeEqualExpensive {
   typedef bool result_type;

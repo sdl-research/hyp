@@ -191,7 +191,8 @@ struct property_factory<sdl::Hypergraph::IHypergraph<A>, edge_tag> {
     rebind(property_factory & p) : p(p) {}
     rebind(rebind const& o) : p(o.p) {}
     std::size_t init() const { return p.template init<V>(); }
-    typedef UNORDERED_NS::unordered_map<sdl::Hypergraph::ArcHandle, V, ptr_hash<A> > impl;
+    typedef sdl::unordered_map<sdl::Hypergraph::ArcHandle, V, ptr_hash<A> > impl;
+    //TODO: hash_map w/ setEmpty w/ setEmptyKey(map)
     typedef boost::associative_property_map<impl> reference;
   };
 };

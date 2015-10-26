@@ -59,7 +59,7 @@ struct SaveFst {
   typedef typename Fst::State State;
   typedef typename Fst::Arc FstArc;
   typedef typename Fst::Arcs FstArcs;
-  typedef hash_map<State, StateId> StateMap;
+  typedef unordered_map<State, StateId> StateMap;
   typedef ArcTpl<Weight> HgArc;
   typedef IMutableHypergraph<HgArc> Hg;
   Hg& out;

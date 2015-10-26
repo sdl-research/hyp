@@ -280,6 +280,7 @@ struct HypergraphBase : Resource {
   }
 
   virtual StateId sizeForLabels() const { return maxLabeledState() + 1; }
+  virtual StateId sizeForInputLabels() const { return sizeForLabels(); }
 
   bool haveState(StateId s) const { return s < size(); }
 
@@ -750,6 +751,7 @@ struct HypergraphBase : Resource {
   */
   virtual void inArcs(StateId st, ArcsContainer& arcs) const;
 
+
   /**
      these may return NULL instead of empty. (the const versions will return a
      pointer to empty instead)
@@ -758,6 +760,7 @@ struct HypergraphBase : Resource {
      addArcs with bigger stateids than before, in the relevant position (head
      for in, first tail for first-tail-out-arcs, all tails for out-arcs))
 
+     if you can bound how many additional arcs you'll add, try reserveAdditionalStates(n)
   */
   virtual ArcsContainer* maybeInArcs(StateId state) {
     unimplementedMutableOnly("maybeInArcs");
@@ -779,19 +782,30 @@ struct HypergraphBase : Resource {
     return 0;
   }
 
-  ArcsContainer const* maybeInArcsConst(StateId state) const {
-    return maybeInArcs(state);
-    return 0;
-  }
+  ArcsContainer const* maybeInArcsConst(StateId state) const { return maybeInArcs(state); }
 
-  ArcsContainer const* maybeOutArcsConst(StateId state) const {
-    return maybeOutArcs(state);
-    return 0;
-  }
+  ArcsContainer const* maybeOutArcsConst(StateId state) const { return maybeOutArcs(state); }
 
   ArcsContainer const* maybeArcsConst(StateId state, bool inarcs) const {
     return inarcs ? maybeInArcs(state) : maybeOutArcs(state);
   }
+
+  template <class V>
+  void visitOutArcs(StateId s, V const& v) const {
+    ArcsContainer const* arcs = maybeOutArcs(s);
+    if (arcs)
+      for (ArcBase* arc : *arcs) v(arc);
+  }
+
+  template <class V>
+  void visitInArcs(StateId s, V const& v) const {
+    ArcsContainer const* arcs = maybeInArcs(s);
+    if (arcs)
+      for (ArcBase* arc : *arcs) v(arc);
+  }
+
+  /// allow adding this many states without invalidating maybe*Arcs
+  virtual void reserveAdditionalStates(StateId n) { unimplementedMutableOnly("reserveAdditionalStates"); }
 
   virtual ArcBase* inArc(StateId state, ArcId aid) const = 0;
 
@@ -800,7 +814,6 @@ struct HypergraphBase : Resource {
   virtual HypergraphBase* clone() const = 0;
   typedef ArcBase Arc;
 #include <sdl/Hypergraph/src/IHypergraphForArcs.ipp>
-
 
   void throwStoresNoArcs() const NORETURN {
     SDL_THROW_LOG(Hypergraph.IHypergraphBase, InvalidInputException,
@@ -811,12 +824,25 @@ struct HypergraphBase : Resource {
 
   typedef std::vector<Sym> Labels;
   typedef std::pair<Labels const*, Labels const*> MaybeLabels;
+
   /// for MutableHypergraph, this will give direct read-write access to labels,
   /// which may have fewer elements than #states. of course, modifying these
   /// labels (by casting away const) could invalidate label-dependent
   /// (e.g. kOneLexical) properties, after which you should
   /// clearUncomputedProperties(...)
   virtual MaybeLabels maybeLabels() const { return MaybeLabels((Labels const*)0, (Labels const*)0); }
+
+  /// return by value should optimize fine; Labels[s] = inputLabel(s) if
+  /// !outputLabels, else outputLabel(s). note: outputLabels missing has special
+  /// interpretation (same as input). returned labels size may end early for
+  /// no-label, i.e. be less than size()
+  Labels copyOfLabels(bool outputLabels = false) {
+    MaybeLabels labels = maybeLabels();
+    Labels const* from = outputLabels ? labels.second : labels.first;
+    if (from) return *from;
+    else return Labels();
+  }
+
 
   virtual void printArc(std::ostream& out, ArcBase const* a, bool inlineLabel) const;
 

@@ -26,11 +26,10 @@
 
 
 #include <boost/functional/hash/hash.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_set>
+#include <unordered_map>
 #include <sparsehash/dense_hash_map>
 #include <sparsehash/dense_hash_set>
-
-#include <boost/unordered_set.hpp>
 
 #include <iterator>
 #include <cstdlib>
@@ -40,16 +39,41 @@
 #include <sdl/Util/Map.hpp>
 #include <cmath>
 #include <sdl/Util/HashValue.hpp>
+#include <graehl/shared/farmhash.hpp>
 
 namespace sdl {
+
+using graehl::Farmhash;
 
 /// unordered_* are node pointer based (chaining on collision) hash tables and
 /// if there are resizes should outperform for heavy non-moveable keys/values
 /// after many insertions
-using boost::unordered_map;
-using boost::unordered_set;
-using boost::unordered_multimap;
-//TODO: benchmark std vs boost unordered_* or just use google dense_hash below:
+template <class Key, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
+          class Alloc = std::allocator<Key>>
+using unordered_set = std::unordered_set<Key, Hash, Equal, Alloc>;
+
+template <class Key, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
+          class Alloc = std::allocator<Key>>
+using unordered_multiset = std::unordered_multiset<Key, Hash, Equal, Alloc>;
+
+template <class Key, class Val, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
+          class Alloc = std::allocator<Key>>
+using unordered_map = std::unordered_map<Key, Val, Hash, Equal, Alloc>;
+
+template <class Key, class Val, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
+          class Alloc = std::allocator<Key>>
+using unordered_multimap = std::unordered_multimap<Key, Val, Hash, Equal, Alloc>;
+
+/// high-quality StringView (data, length) hash. empty string is a reserved key (stands for absent from
+/// map/set). must call setEmptyKey(map) first
+template <class Key, class Hash = Farmhash, class Equal = std::equal_to<Key>, class Alloc = std::allocator<Key>>
+using farm_unordered_set = std::unordered_set<Key, Hash, Equal, Alloc>;
+
+template <class Key, class Val, class Hash = Farmhash, class Equal = std::equal_to<Key>,
+          class Alloc = std::allocator<Key>>
+using farm_unordered_map = std::unordered_map<Key, Val, Hash, Equal, Alloc>;
+
+// TODO: benchmark std vs boost unordered_* or just use google dense_hash below:
 
 /// dense_hash_map/set: m.set_empty_key(k); where k won't be used as a normal
 /// key - otherwise like unordered_map (if you erase, then set_deleted_key(k2)
@@ -57,13 +81,22 @@ using boost::unordered_multimap;
 /// also, it's sort-of ok to use the default identity hash for pointers since
 /// google drops the low 3 bits already. i.e. don't use PointerHash w/
 /// dense_hash...
-template <class Key, class T, class HashFcn = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
+template <class Key, class T, class Hash = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
           class Alloc = google::libc_allocator_with_realloc<std::pair<const Key, T>>>
-using hash_map = google::dense_hash_map<Key, T, HashFcn, EqualKey, Alloc>;
+using hash_map = google::dense_hash_map<Key, T, Hash, EqualKey, Alloc>;
 
-template <class Key, class HashFcn = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
+template <class Key, class Hash = boost::hash<Key>, class EqualKey = std::equal_to<Key>,
           class Alloc = google::libc_allocator_with_realloc<Key>>
-using hash_set = google::dense_hash_set<Key, HashFcn, EqualKey, Alloc>;
+using hash_set = google::dense_hash_set<Key, Hash, EqualKey, Alloc>;
+
+/// high-quality StringView (data, length) hash
+template <class Key, class Hash = Farmhash, class Equal = std::equal_to<Key>,
+          class Alloc = google::libc_allocator_with_realloc<Key>>
+using farm_hash_set = google::dense_hash_set<Key, Hash, Equal, Alloc>;
+
+template <class Key, class Val, class Hash = Farmhash, class Equal = std::equal_to<Key>,
+          class Alloc = google::libc_allocator_with_realloc<Key>>
+using farm_hash_map = google::dense_hash_map<Key, Val, Hash, Equal, Alloc>;
 
 /// dense_hash_map and dense_hash_set have faster repeated lookups; also uses
 /// slightly more memory than unordered_ unless the (key, val) pair is small
@@ -88,42 +121,27 @@ void clearNoResize(hash_set<K, H, E, A>& h) {
   h.clear_no_resize();
 }
 
-#ifdef _MSC_VER
 template <class K, class V, class H, class E, class A>
-void setEmptyKey(unordered_map<K, V, H, E, A>& h, K const& k) {
-}
+void setEmptyKey(unordered_map<K, V, H, E, A>& h, K const& k = K()) {}
 
 template <class K, class H, class E, class A>
-void setEmptyKey(unordered_set<K, H, E, A>& h, K const& k) {
-}
-
+void setEmptyKey(unordered_set<K, H, E, A>& h, K const& k = K()) {}
 
 template <class K, class V, class H, class E, class A>
-void setDeletedKey(unordered_map<K, V, H, E, A>& h, K const& k) {
-}
-
-template <class K, class H, class E, class A>
-void setDeletedKey(unordered_set<K, H, E, A>& h, K const& k) {
-}
-#else
-template <class HashContainer>
-void setEmptyKey(HashContainer& h, typename HashContainer::key_type const& k) {
-}
-
-template <class HashContainer>
-void setDeletedKey(HashContainer& h, typename HashContainer::key_type const& k) {
-}
-#endif
-
-template <class K, class V, class H, class E, class A>
-void setEmptyKey(hash_map<K, V, H, E, A>& h, K const& k) {
+void setEmptyKey(hash_map<K, V, H, E, A>& h, K const& k = K()) {
   h.set_empty_key(k);
 }
 
 template <class K, class H, class E, class A>
-void setEmptyKey(hash_set<K, H, E, A>& h, K const& k) {
+void setEmptyKey(hash_set<K, H, E, A>& h, K const& k = K()) {
   h.set_empty_key(k);
 }
+
+template <class K, class V, class H, class E, class A>
+void setDeletedKey(unordered_map<K, V, H, E, A>& h, K const& k) {}
+
+template <class K, class H, class E, class A>
+void setDeletedKey(unordered_set<K, H, E, A>& h, K const& k) {}
 
 template <class K, class V, class H, class E, class A>
 void setDeletedKey(hash_map<K, V, H, E, A>& h, K const& k) {
@@ -135,23 +153,9 @@ void setDeletedKey(hash_set<K, H, E, A>& h, K const& k) {
   h.set_deleted_key(k);
 }
 
-template <class K, class V, class H, class E, class A>
-void setEmptyKey(hash_map<K, V, H, E, A>& h) {
-  h.set_empty_key(K());
-}
-
-template <class K, class H, class E, class A>
-void setEmptyKey(hash_set<K, H, E, A>& h) {
-  h.set_empty_key(K());
-}
-
-template <class HashContainer>
-void setEmptyKey(HashContainer& h) {
-}
-
 template <class HashMap>
-HashMap *new_hashed() {
-  HashMap *m = new HashMap;
+HashMap* new_hashed() {
+  HashMap* m = new HashMap;
   setEmptyKey(*m);
   return m;
 }
@@ -164,8 +168,8 @@ shared_ptr<HashMap> make_hashed() {
 }
 
 template <class HashMap>
-HashMap *new_hashed(typename HashMap::key_type const& k) {
-  HashMap *m = new HashMap;
+HashMap* new_hashed(typename HashMap::key_type const& k) {
+  HashMap* m = new HashMap;
   setEmptyKey(*m, k);
   return m;
 }
@@ -211,12 +215,12 @@ void reserveUnordered(unordered_set<K, H, E, A>& uset, std::size_t n) {
 }
 
 template <class K, class V, class H, class E, class A>
-void reserveUnordered(hash_map<K, V, H, E, A>& umap, std::size_t n) {
+void reserveUnordered(google::dense_hash_map<K, V, H, E, A>& umap, std::size_t n) {
   reserveUnorderedImpl(umap, n);
 }
 
 template <class K, class H, class E, class A>
-void reserveUnordered(hash_set<K, H, E, A>& uset, std::size_t n) {
+void reserveUnordered(google::dense_hash_set<K, H, E, A>& uset, std::size_t n) {
   reserveUnorderedImpl(uset, n);
 }
 

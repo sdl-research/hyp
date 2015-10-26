@@ -145,7 +145,7 @@ bool HypergraphBase::checkValid() const {
   StateId s = start(), f = final();
   assert(s == kNoState || s < N);
   assert(f == kNoState || f < N);
-  Util::PointerSet once;
+  Util::Once once;
   if (storesInArcs() || storesFirstTailOutArcs()) try {
       forArcs(CheckOnce(once));
     } catch (MoreThanOnceException& e) {

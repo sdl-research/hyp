@@ -31,7 +31,7 @@ namespace sdl { namespace Util {
    */
 template <class Ptr, class Hash, class Pred = NonNullPointeeEqualExpensive>
 class Registry {
-  typedef boost::unordered_set<Ptr const*, Hash, Pred> Set;
+  typedef unordered_set<Ptr const*, Hash, Pred> Set;
   Set ptrs_;
 
  public:

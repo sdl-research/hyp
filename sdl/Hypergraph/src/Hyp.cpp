@@ -33,6 +33,7 @@
 #if HAVE_OPENFST
 #include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
 #endif
+#include <sdl/Hypergraph/src/HypWordToCharacters.cpp>
 #include <sdl/Hypergraph/src/HypReweightBest.cpp>
 #include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
 #include <sdl/Hypergraph/src/HypComplement.cpp>
@@ -78,6 +79,7 @@ sdl::Util::DefaultLocaleFastCout initCout;
 #define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x)
 #else
 #define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x) \
+  x(HypWordToCharacters) \
   x(HypReweightBest) \
   x(HypConvertCharsToTokens) \
   x(HypComplement) \

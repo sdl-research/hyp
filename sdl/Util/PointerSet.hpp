@@ -10,12 +10,15 @@
 // limitations under the License.
 /** \file
 
-    hashed set of pointers.
+    hashed set of pointers. we discard low bits (usually we're pointing at
+    things that are 8 bytes or more, so we drop 3 bits at least)
 */
 
 #ifndef POINTERSET_JG_2014_12_16_HPP
 #define POINTERSET_JG_2014_12_16_HPP
 #pragma once
+
+#define SDL_POINTER_SET_GOOGLE_HASH 1
 
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/Sym.hpp>
@@ -31,8 +34,17 @@ typedef INT_PTR intptr_t;
 
 namespace sdl { namespace Util {
 
-typedef unordered_set<intptr_t> PointerSet;
+struct DiscardConstantLowPointerBits {
+  inline std::size_t operator()(std::size_t x) const { return x >> 3; }
+};
 
+#if SDL_POINTER_SET_GOOGLE_HASH
+typedef hash_set<intptr_t, DiscardConstantLowPointerBits> PointerSet;
+#else
+typedef unordered_set<intptr_t, DiscardConstantLowPointerBits> PointerSet;
+#endif
+
+/// use exact value size info to get more-significant bits
 template <class P>
 struct PtrDiffHash {
   std::size_t operator()(P const* p) const { return p - (P const*)0; }

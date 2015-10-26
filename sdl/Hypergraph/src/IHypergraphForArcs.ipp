@@ -13,6 +13,8 @@
     (no include guard) - to include at class level for both HypergraphBase
     and IHypergraph<Arc> (so we can have statically known Arc* arg for
     IHypergraph<Arc> vs ArcBase* for HypergraphBase
+
+    //TODO: some of these should be removed or made global templates
 */
 
 /* call v(a) for all Arc *a - possibly more than once if you have nodes
@@ -226,7 +228,6 @@
     else
       this->throwStoresNoArcs();
   }
-
 
   // NO LONGER start state first, if there is one
   // - only WriteOpenFstFormat wanted that, and we replaced it w/ explicit per-state calls.

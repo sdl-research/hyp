@@ -24,7 +24,7 @@
 
 
 #include <utility>  // make_pair
-#include <boost/unordered_map.hpp>
+#include <sdl/Util/Unordered.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -39,9 +39,10 @@ class MapHypergraph final : public IHypergraph<ToA> {
   typedef FromA FromArc;
   typedef ToA ToArc;
   typedef MapFct Mapper;
-  typedef boost::unordered_map<FromArc*, ToArc*> ArcsMap;
+  typedef hash_map<FromArc*, ToArc*> ArcsMap;
 
   MapHypergraph(IHypergraph<FromA> const& hg, Mapper mapper = Mapper()) : hg_(hg), mapper_(mapper) {
+    Util::setEmptyKey(oldArcsToNewArcs_);
     this->start_ = hg.start();
     this->final_ = hg.final();
   }

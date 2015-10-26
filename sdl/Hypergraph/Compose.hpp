@@ -110,12 +110,14 @@ struct CmpInputLabelWithSearchLabel {
 template <class T>
 class Registry {
   // TODO: use unordered_set
-  typedef std::set<T*, Util::LessByValue<T> > TSet;
+  typedef std::set<T*, Util::LessByValue<T>> TSet;
   TSet set_;
 
  public:
   ~Registry() {
-    for (T* item : set_) { delete item; }
+    for (T* item : set_) {
+      delete item;
+    }
   }
 
   /// delete p if it was already in set; return version in set.
@@ -136,6 +138,7 @@ class RegistryWithIds : public Registry<T> {
   typedef std::map<T*, std::size_t> TsToIdsMap;
   std::size_t nextId_;
   TsToIdsMap ids_;
+
  public:
   RegistryWithIds() : nextId_(1) {}
 
@@ -605,7 +608,7 @@ class EarleyParser {
 
   // at each dot position in a CFG rule item, a possible sequence of
   // FST arcs that matched there (it's sequence b/c of eps)
-  typedef std::vector<std::vector<Arc*> > ArcVecPerDotPos;
+  typedef std::vector<std::vector<Arc*>> ArcVecPerDotPos;
   typedef shared_ptr<ArcVecPerDotPos> ArcVecPerDotPosPtr;
 
   /**
@@ -646,8 +649,8 @@ class EarleyParser {
     std::size_t operator()(ItemAndMatchedArcs* obj) const { return obj->hashCode; }
   };
 
-  typedef boost::unordered_set<ItemAndMatchedArcs*, ItemAndMatchedArcsHashFct,
-                               Util::NonNullPointeeEqualExpensive> ItemAndMatchedArcsSet;
+  typedef unordered_set<ItemAndMatchedArcs*, ItemAndMatchedArcsHashFct, Util::NonNullPointeeEqualExpensive>
+      ItemAndMatchedArcsSet;
 
   void createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs, StateId head, ArcVecPerDotPosPtr matchedArcs,
                          StateIdContainer const& tails, Weight w, ItemAndMatchedArcsSet* alreadyExpanded);
@@ -667,7 +670,9 @@ class EarleyParser {
       result_->setFinal(head);
       createResultArcs(item, head, &alreadyExpanded);
     }
-    for (ItemAndMatchedArcs* p : alreadyExpanded) { delete p; }
+    for (ItemAndMatchedArcs* p : alreadyExpanded) {
+      delete p;
+    }
   }
 
   IMutableHypergraph<A>* parse() {
@@ -730,8 +735,8 @@ class EarleyParser {
   IMutableHypergraph<A>* result_;
 
   // map from head to matching items
-  std::vector<std::map<StateId, ItemsSet> > itemsTo_;
-  std::vector<std::map<StateId, ItemsSet> > completeItemsFrom_;
+  std::vector<std::map<StateId, ItemsSet>> itemsTo_;
+  std::vector<std::map<StateId, ItemsSet>> completeItemsFrom_;
 // TODO: ptr_vector to avoid expensive copies
 
 #if SDL_IS_DEBUG_BUILD
@@ -745,20 +750,20 @@ class EarleyParser {
 
   ItemRegistry registry_;
   // foreach position and CFG state
-  std::vector<std::set<StateId> > alreadyPredicted_;
+  std::vector<std::set<StateId>> alreadyPredicted_;
 
 #if 1
   std::queue<Item*> agenda_;
 #else
   /// work on leftmost spans first? (std::less) - see Hypergraph2/regtest-compose3.yml
-  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority> > agenda_;
+  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority>> agenda_;
 #endif
   // TODO: maybe std::priority_queue w/ old comparison object (no ItemPriorityMap) was correct?
 
   /// queue (no priority): bad. less: bad. greater: bad. problem w/ HypCompose props?
   std::set<Item*> finalItems_;
 
-  typedef std::map<Item*, std::set<BackPointer> > BackPointerMap;
+  typedef std::map<Item*, std::set<BackPointer>> BackPointerMap;
   BackPointerMap backPointers_;
 
   // TODO: use unordered_map or some custom open hash table
@@ -874,7 +879,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
       tails2.push_back(rightmost);
       Weight prod = times(w, fstWeight);
       ArcVecPerDotPosPtr matchedArcs2(
-          new std::vector<std::vector<Arc*> >(matchedArcs->begin(), matchedArcs->end()));
+          new std::vector<std::vector<Arc*>>(matchedArcs->begin(), matchedArcs->end()));
       if (isLexical) {  // store the lexical FST arcs that matched the item
         atExpand(*matchedArcs2, item->dotPos).push_back(complete->arc);
       }
@@ -887,7 +892,8 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
       if (tails.empty())
         result_->setStart(head);
       else
-        result_->addArc(new Arc(head, StateIdContainer(tails.rbegin(), tails.rend()), times(w, item->arc->weight())));
+        result_->addArc(
+            new Arc(head, StateIdContainer(tails.rbegin(), tails.rend()), times(w, item->arc->weight())));
     }
   }
 }
@@ -895,7 +901,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
 template <class Arc>
 void EarleyParser<Arc>::createResultArcs(Item* item, StateId head, ItemAndMatchedArcsSet* alreadyExpanded) {
   StateIdContainer tails;
-  ArcVecPerDotPosPtr matchedArcs(new std::vector<std::vector<Arc*> >());
+  ArcVecPerDotPosPtr matchedArcs(new std::vector<std::vector<Arc*>>());
   ItemAndMatchedArcs* irts = new ItemAndMatchedArcs(item, matchedArcs, head, tails);
   return createResultArcs1(irts, head, matchedArcs, tails, Weight::one(), alreadyExpanded);
 }
@@ -1060,8 +1066,7 @@ struct ComposeTransform : TransformBase<Transform::Inout>, ComposeTransformOptio
 
   template <class ResourceManager>
   void loadResources(ResourceManager&) {
-    if (!fst.empty())
-      fstname = fst;
+    if (!fst.empty()) fstname = fst;
   }
 
   template <class ResourceManager>

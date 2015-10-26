@@ -27,17 +27,27 @@ namespace Util {
 
 // wrap pointer-visitors so each pointer gets visited once - mark the pointer seen the first time (via IntSet)
 
-struct Once : public PointerSet {
+struct Once : PointerSet {
+  Once() {
+    Util::setEmptyKey(*this);
+  }
   template <class V>
   bool first(V const* p) {
     return this->insert((intptr_t)p).second;
+  }
+  template <class V>
+  bool contains(V const* p) const {
+    return find((intptr_t)p) == end();
   }
 };
 
 // NOTE: default char * equality may be wrong in some impls for unordered_set, but std says it should just be
 // regular pointer equality. maybe specifying hash avoids this problem only.
 template <class V>
-struct OnceTypedP : public unordered_set<V const*, PtrDiffHash<V> > {
+struct OnceTypedP : hash_set<V const*, PtrDiffHash<V> > {
+  OnceTypedP() {
+    Util::setEmptyKey(*this);
+  }
   // careful: don't pass by val:
   bool first(V const& p) { return first(&p); }
   bool first(V const* p) { return this->insert(p).second; }
@@ -94,11 +104,11 @@ VisitOnceRef<F> makeVisitOnceRef(F const& f, PointerSet* once) {
   return VisitOnceRef<F>(f, once);
 }
 
-struct CheckOnce {
+struct CheckOnce : Once {
   mutable Once once_;
   template <class V>
   void operator()(V const* p) const {
-    if (!once_.first(p))
+    if (!first(p))
       SDL_THROW_LOG(Once.CheckOnce, ProgrammerMistakeException, "pointer " << (void*)p
                                                                            << " was seen more than once");
   }

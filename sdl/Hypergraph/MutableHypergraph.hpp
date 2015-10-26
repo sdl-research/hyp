@@ -24,7 +24,6 @@
 #pragma once
 
 
-
 #include <cassert>
 #include <vector>
 #include <algorithm>
@@ -232,7 +231,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       orderGraphStatesImpl(permutation, inversePermutation, this->inArcsPerState_);
     } else {
       this->forceFirstTailOutArcs();
-   FirstTail:
+    FirstTail:
       assert(!(this->properties_ & kStoreOutArcs));
       orderGraphStatesImpl(permutation, inversePermutation, this->outArcsPerState_);
     }
@@ -261,7 +260,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   typedef IMutableHypergraph<A> MutableBase;
   typedef HypergraphBase::ArcsContainer ArcsContainer;
   typedef ArcsContainer::const_iterator ArcIter;
-  typedef shared_ptr<MutableHypergraph<Arc> > Ptr;
+  typedef shared_ptr<MutableHypergraph<Arc>> Ptr;
   typedef typename A::Weight Weight;
   typedef typename A::ArcFilter ArcFilter;
   typedef std::vector<ArcsContainer> Adjs;
@@ -288,6 +287,8 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   StateId sizeForLabels() const override { return hgSizeForLabels(); }
+
+  StateId sizeForInputLabels() const override { return iLabelForState.size(); }
 
   StateId canonicalExistingStateForLabelPair(LabelPair io) override {
     assert(this->properties_ & kCanonicalLex);
@@ -356,7 +357,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     ArcsContainer& arcs = inArcsPerState_[state];
     if (storesOutArcsImpl()) {
       if (this->properties_ & kStoreFirstTailOutArcs) {
-        Util::PointerSet deleted;
+        Util::Once deleted;
         interested_.reserve(numStates_);
         for (ArcIter i = arcs.begin(), e = arcs.end(); i != e; ++i) {
           Arc* a = (Arc*)*i;
@@ -378,7 +379,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
         removeDeletedArcsFromInterested(deleted, outArcsPerState_);
         interested_.clear();
       } else {
-        Util::PointerSet deleted;
+        Util::Once deleted;
         for (ArcIter i = arcs.begin(), e = arcs.end(); i != e; ++i) {
           Arc* a = (Arc*)*i;
           deleted.insert((intptr_t)a);
@@ -404,7 +405,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     if (state >= outArcsPerState_.size()) return;
     ArcsContainer& arcs = outArcsPerState_[state];
     if (storesInArcs()) {
-      Util::PointerSet deleted;
+      Util::Once deleted;
       interested_.reserve(numStates_);
       for (ArcIter i = arcs.begin(), e = arcs.end(); i != e; ++i) {
         Arc* a = (Arc*)*i;
@@ -1168,7 +1169,9 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     this->properties_ &= ~kSortedOutArcs;  // TODO: check if inserted in sort-preserving (ascending) order
     StateIdContainer const& tails = arc->tails();
     StateId N = (StateId)outArcsPerState_.size();
-    for (StateId tailState : tails) { Util::atExpand(outArcsPerState_, tailState).push_back(arc); }
+    for (StateId tailState : tails) {
+      Util::atExpand(outArcsPerState_, tailState).push_back(arc);
+    }
   }
 
   struct AddIn {
@@ -1252,7 +1255,9 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       if (!tails.empty()) Util::atExpand(outArcsPerState_, tails.front()).push_back(arc);
     } else if (this->properties_ & kStoreOutArcs) {
       this->properties_ &= ~kSortedOutArcs;
-      for (StateId t : tails) { Util::atExpand(outArcsPerState_, t).push_back(arc); }
+      for (StateId t : tails) {
+        Util::atExpand(outArcsPerState_, t).push_back(arc);
+      }
     }
   }
 
@@ -1396,19 +1401,16 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   AdjacentArcs inArcsPerState_;
   AdjacentArcs outArcsPerState_;
 
-  void printAdj(std::ostream &out, AdjacentArcs const& adj, char const* adjtype) const {
+  void printAdj(std::ostream& out, AdjacentArcs const& adj, char const* adjtype) const {
     for (StateId s = 0, N = adj.size(); s < N; ++s) {
-      out << "# "<<adjtype<<s<<":\n";
-      for(ArcBase *arc : adj[s])
-        Hypergraph::print(out, arc, *this);
+      out << "# " << adjtype << s << ":\n";
+      for (ArcBase* arc : adj[s]) Hypergraph::print(out, arc, *this);
     }
   }
 
-  void printUnchecked(std::ostream &out) const override {
-    if (this->storesOutArcs())
-      printAdj(out, outArcsPerState_, "=>");
-    if (this->storesInArcs())
-      printAdj(out, inArcsPerState_, "<=");
+  void printUnchecked(std::ostream& out) const override {
+    if (this->storesOutArcs()) printAdj(out, outArcsPerState_, "=>");
+    if (this->storesInArcs()) printAdj(out, inArcsPerState_, "<=");
   }
 
   void clearLabelImpl(Properties prop) {
@@ -1416,6 +1418,13 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     iLabelForState.clear();
     oLabelForState.clear();
     this->properties_ = prop | kFsmProperties;
+  }
+
+  void reserveAdditionalStates(StateId n) override {
+    StateId n2 = numStates_ + n;
+    Properties p = this->properties_;
+    if (p | kStoreInArcs) inArcsPerState_.reserve(n2);
+    if (p | kStoreAnyOutArcs) outArcsPerState_.reserve(n2);
   }
 };
 

@@ -110,7 +110,6 @@ inline uint64 hashPointer(void const* p) {
   return mixbitsQuick((uint64)p);
 }
 
-
 template <class V>
 inline uint64 hashPointer(V const* p) {
   return mixbitsQuick(pointerSignificantBits(p));

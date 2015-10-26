@@ -198,15 +198,6 @@ struct GradientUpdate : public IUpdate<FloatT> {
   FloatT* gradients_;
 };
 
-// template<class FloatT>
-// struct GradientUpdate_Map : public IUpdate<FloatT> {
-//  void update(FeatureId index, FloatT value) {
-//    aMap[index] += value;
-//  }
-//  typedef boost::unordered_map<FeatureId, FloatT> Map;
-//  Map aMap;
-//};
-
 template <class FloatT>
 struct ScaledGradientUpdate : public IUpdate<FloatT> {
   ScaledGradientUpdate(FloatT* gradients, FloatT scale = (FloatT)1.0)

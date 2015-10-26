@@ -161,19 +161,6 @@ struct AutoFreeAll : std::vector<void*> {
   AutoFreeAll(AutoFreeAll const&) = delete;
 };
 
-template <class T>
-struct AutoDestroy {
-  AutoDestroy(T* p) : p_(p) {}
-  T* p_;
-  void destroy() {
-    assert(p_);
-    p_->~T();
-    p_ = 0;
-  }
-  ~AutoDestroy() {
-    if (p_) p_->~T();
-  }
-};
 
 template <class T>
 struct AutoDelete {
@@ -279,7 +266,7 @@ struct AutoDeleteAll : std::vector<T*> {
 };
 
 template <class T>
-struct AutoDestroyAll : std::vector<T*> {
+struct DestroyAll : std::vector<T*> {
   typedef std::vector<T*> Base;
   void hold(T* p) { Base::push_back(p); }
   T* releaseOne() {
@@ -292,10 +279,10 @@ struct AutoDestroyAll : std::vector<T*> {
     releaseAll();
   }
   void releaseAll() { Base::clear(); }
-  AutoDestroyAll() {}
-  AutoDestroyAll(T* toDestroy) : Base(1, toDestroy) {}
-  ~AutoDestroyAll() { destroyAllImpl(); }
-  AutoDestroyAll(AutoDestroyAll const&) = delete;
+  DestroyAll() {}
+  DestroyAll(T* toDestroy) : Base(1, toDestroy) {}
+  ~DestroyAll() { destroyAllImpl(); }
+  DestroyAll(DestroyAll const&) = delete;
  private:
   void destroyAllImpl() {
     for (typename Base::const_iterator i = Base::begin(), e = Base::end(); i != e; ++i) (*i)->~T();

@@ -51,17 +51,89 @@ void constructFromPool(T*& t, ChunkPool& pool, Args&&... args) {
 }
 
 template <class T>
-struct Constructed {
+struct Destroy {
   T* p_;
-  template <class... Args>
-  Constructed(T* p = 0, Args&&... args)
-      : p_() {
-    new (p) T(std::forward<Args>(args)...);
-    p_ = p;  // exception safety for T ctor
+  operator T&() const { return *p_; }
+  T* get() const { return p_; }
+  T& operator*() const { return *p_; }
+  T* operator->() const { return p_; }
+  Destroy(T* p = 0) : p_(p) {}
+  void destroy() {
+    assert(p_);
+    p_->~T();
+    p_ = 0;
   }
   void release() { p_ = 0; }
-  ~Constructed() {
+  ~Destroy() {
     if (p_) p_->~T();
+  }
+};
+
+template <class T>
+struct Constructed : Destroy<T> {
+  template <class... Args>
+  Constructed(T* p = 0, Args&&... args)
+      : Destroy<T>() {
+    new (p) T(std::forward<Args>(args)...);
+    this->p_ = p;  // exception safety for T ctor
+  }
+};
+
+template <class T>
+struct PoolDelete {
+  T* p_;
+  ChunkPool& pool_;
+  operator T&() const { return *p_; }
+  T* get() const { return p_; }
+  T& operator*() const { return *p_; }
+  T* operator->() const { return p_; }
+  PoolDelete(ChunkPool& pool, T* p = 0) : p_(p), pool_(pool) {
+    assert(pool.get_requested_size() >= sizeof(T));
+  }
+  void destroy() {
+    destroyImpl();
+    p_ = 0;
+  }
+  void release() { p_ = 0; }
+  ~PoolDelete() {
+    if (p_) destroyImpl();
+  }
+
+ private:
+  void destroyImpl() const {
+    assert(p_);
+    p_->~T();
+    pool_.free(p_);
+  }
+};
+
+template <class T>
+struct PoolConstructed : PoolDelete<T> {
+  template <class... Args>
+  PoolConstructed(ChunkPool& pool, Args&&... args)
+      : PoolDelete<T>(pool) {
+    assert(pool.get_requested_size() == sizeof(T));
+    T* p = pool.malloc();
+    new (p) T(std::forward<Args>(args)...);
+    this->p_ = p;  // exception safety for T ctor
+  }
+};
+
+
+/// shared_ptr deleters for memory allocated from pool. class template rather
+/// than member so we can have shared_ptr<base>.
+template <class T>
+struct Destroyer {
+  void operator()(void const* p) const { ((T*)p)->~T(); }
+};
+
+template <class T>
+struct PoolFreeDeleter {
+  ChunkPool& pool_;
+  PoolFreeDeleter(ChunkPool& pool) : pool_(pool) {}
+  void operator()(void const* p) const {
+    ((T*)p)->~T();
+    pool_.free((void*)p);
   }
 };
 
