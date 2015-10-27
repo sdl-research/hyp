@@ -81,6 +81,12 @@ struct EqualPointer {
 template <class P>
 using pointer_set = sdl::hash_set<void *, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
 
+template <class P, class Val>
+using pointer_hash_map = sdl::hash_map<void *, Val, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
+
+template <class P, class Val>
+using pointer_unordered_map = sdl::unordered_map<void *, Val, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
+
 
 }}
 

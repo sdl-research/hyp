@@ -55,7 +55,6 @@
 #endif
 #include <boost/config.hpp>
 #include <sdl/SharedPtr.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/integer_traits.hpp>
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -66,7 +65,6 @@
 #pragma warning(pop)
 #endif
 
-#include <boost/tuple/tuple.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <sdl/Syms.hpp>

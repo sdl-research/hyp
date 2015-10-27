@@ -28,9 +28,7 @@
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/CartesianProduct.hpp>
 
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
-#include <boost/tuple/tuple_io.hpp>
+#include <tuple>
 
 #include <map>
 #include <vector>
@@ -120,7 +118,6 @@ Span getSourceSpansBubbleUp(IHypergraph<Arc> const& hg, StateId s, StateIdToSpan
   }
   SDL_DEBUG(Hypergraph.SubUnion, "getSourceSpansBubbleUp(s=" << s << ")");
 
-  using boost::get;  // tuple fct
   std::map<StateId, StateId> votesForLeft, votesForRight;
 
   // Look at the spans of children

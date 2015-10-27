@@ -24,8 +24,7 @@
 #include <utility>
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/unordered_set.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
+#include <tuple>
 
 #include <vector>
 #include <map>
@@ -34,8 +33,6 @@
 #include <utility>
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/unordered_set.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
 
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
@@ -74,6 +71,10 @@
 
 #if SDL_HASH_COMPOSE_ITEM
 #include <sdl/Util/OwnedRegistry.hpp>
+#include <sdl/Hypergraph/LabelPair.hpp>
+#include <sdl/Util/Map.hpp>
+#include <graehl/shared/int_types.hpp>
+#include <sdl/Util/PointerSet.hpp>
 #endif
 
 namespace sdl {
@@ -94,10 +95,10 @@ struct CmpInputLabelWithSearchLabel {
   bool operator()(ArcId a, ArcId b) const {
     if (a == fakeArcId) {
       A* otherArc = fst_.outArc(tail_, b);
-      return searchLabel_ < fst_.inputLabel((otherArc->getTail(1)));
+      return searchLabel_ < fst_.inputLabel((otherArc->tails_[1]));
     } else {
       A* otherArc = fst_.outArc(tail_, a);
-      return searchLabel_ > fst_.inputLabel((otherArc->getTail(1)));
+      return searchLabel_ > fst_.inputLabel((otherArc->tails_[1]));
     }
   }
 
@@ -165,6 +166,7 @@ struct EarleyParserOptions {
   explicit EarleyParserOptions() : enablePhiRhoMatch(true), sigmaPreventsPhiRhoMatch(false) {}
 };
 
+
 // Does matching an eps (or sigma) arc prevent matching a phi or rho
 // arc? (phi and rho mean "match otherwise") This should usually not
 // be the case. E.g., we want to match 'x' or else, transition to
@@ -173,31 +175,9 @@ struct EarleyParserOptions {
 // const boost::uint32_t kEarleyEpsPreventsPhiRhoMatch =   0x00000002;
 
 template <class A>
-class EarleyParser {
-
- public:
+struct EarleyParser {
   typedef A Arc;
   typedef typename Arc::Weight Weight;
-
-  struct Item;
-
-// TODO: use unordered_set
-#if SDL_HASH_COMPOSE_ITEM
-  typedef unordered_set<Item*, Util::NonNullPointeeHash<Item>, Util::NonNullPointeeEqual> ItemsSet;
-#else
-  typedef std::set<Item*> ItemsSet;
-#endif
-
-  EarleyParser(IHypergraph<A> const& cfg, IHypergraph<A> const& fst, IMutableHypergraph<A>* resultCfg,
-               EarleyParserOptions opts = EarleyParserOptions())
-      : fst_(fst), cfg_(cfg), result_(resultCfg), cfgPseudoStartArc_((A*)NULL), options_(opts) {
-    pVoc_ = fst.getVocabulary();
-  }
-
-  ~EarleyParser() { delete cfgPseudoStartArc_; }
-
-  typedef TailId DotPos;
-
   struct Item {
     Item()
         : from(kNoState)
@@ -226,7 +206,7 @@ class EarleyParser {
         , chartWeight(HUGE_VAL)
         , lastWasPhiOrEps(lastWasPhiOrEps_) {}
 
-    bool isComplete() const { return dotPos == arc->getNumTails(); }
+    bool isComplete() const { return dotPos == arc->tails_.size(); }
 
     bool operator<(Item const& other) const {
       if (from != other.from)
@@ -260,8 +240,21 @@ class EarleyParser {
     // transition? in that case, we can say we have
     // something lexical right before the dot (we
     // traversed an FST arc)
-  };  // end Item
+  };
+  typedef std::pair<Item*, Item*> BackPointer;
+  struct BackPointerHash  {
+    static constexpr std::size_t ceil_log2_size = graehl::ceil_log2_const(sizeof(Item));
+    std::size_t operator()(BackPointer bp) const {
+      return (((std::size_t)bp.first << 12) ^ (std::size_t)bp.second ^ (std::size_t)bp.first) >> ceil_log2_size;
+    }
+  };
 
+// TODO: use unordered_set
+#if SDL_HASH_COMPOSE_ITEM
+  typedef unordered_set<Item*, Util::NonNullPointeeHash<Item>, Util::NonNullPointeeEqual> ItemsSet;
+#else
+  typedef std::set<Item*> ItemsSet;
+#endif
   typedef uint64 ItemPriority;
 
   struct ItemPriorityMap {
@@ -275,14 +268,127 @@ class EarleyParser {
     ItemPriority const& operator[](Item* key) const { return get(*this, key); }
   };
 
+  // at each dot position in a CFG rule item, a possible sequence of
+  // FST arcs that matched there (it's sequence b/c of eps)
+  typedef std::vector<std::vector<Arc*>> ArcVecPerDotPos;
+  typedef shared_ptr<ArcVecPerDotPos> ArcVecPerDotPosPtr;
+
+
+  /**
+     Groups an item (i.e., CFG rule and dot position) with the
+     FST arcs that have matched up to the dot position.
+  */
+  struct ItemAndMatchedArcs {
+    ItemAndMatchedArcs(Item* i, ArcVecPerDotPosPtr s, StateId h, StateIdContainer const& t)
+        : item(i), stateIds(s), head(h), tails(t) {
+      hashCode = (std::size_t)(item - (Item*)0);
+      boost::hash_combine(hashCode, h);
+      boost::hash_range(hashCode, stateIds->begin(), stateIds->end());
+      boost::hash_range(hashCode, tails.begin(), tails.end());
+    }
+
+    bool operator==(ItemAndMatchedArcs const& other) const {
+      return other.item == item && other.head == head && *other.stateIds == *stateIds && other.tails == tails;
+    }
+    bool operator<(ItemAndMatchedArcs const& other) const {
+      if (item != other.item)
+        return item < other.item;
+      else if (head != other.head)
+        return head < other.head;
+      else if (*stateIds != *other.stateIds)
+        return *stateIds < *other.stateIds;
+      else
+        return tails < other.tails;
+    }
+
+    Item* item;
+    const ArcVecPerDotPosPtr stateIds;
+    std::size_t hashCode;
+    StateId head;
+    StateIdContainer tails;  // TODO: too expensive?
+  };
+
+  struct ItemAndMatchedArcsHashFct {
+    std::size_t operator()(ItemAndMatchedArcs* obj) const { return obj->hashCode; }
+  };
+
+  typedef unordered_set<ItemAndMatchedArcs*, ItemAndMatchedArcsHashFct, Util::NonNullPointeeEqualExpensive>
+      ItemAndMatchedArcsSet;
+  IHypergraph<A> const& fst_;
+  IHypergraph<A> const& cfg_;
+
+ private:
+  IMutableHypergraph<A>* result_;
+
+  // map from head to matching items
+  std::vector<std::map<StateId, ItemsSet>> itemsTo_;
+  std::vector<std::map<StateId, ItemsSet>> completeItemsFrom_;
+// TODO: ptr_vector to avoid expensive copies
+
+#if SDL_IS_DEBUG_BUILD
+  // For nicer debug output:
+  typedef RegistryWithIds<Item> ItemRegistry;
+#elif SDL_HASH_COMPOSE_ITEM
+  typedef Util::OwnedRegistry<Item> ItemRegistry;
+#else
+  typedef Registry<Item> ItemRegistry;
+#endif
+
+  ItemRegistry registry_;
+  // foreach position and CFG state
+  std::vector<std::set<StateId>> alreadyPredicted_;
+
+#if 1
+  std::queue<Item*> agenda_;
+#else
+  /// work on leftmost spans first? (std::less) - see Hypergraph2/regtest-compose3.yml
+  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority>> agenda_;
+#endif
+  // TODO: maybe std::priority_queue w/ old comparison object (no ItemPriorityMap) was correct?
+
+  /// queue (no priority): bad. less: bad. greater: bad. problem w/ HypCompose props?
+  std::set<Item*> finalItems_;
+
+
+  typedef unordered_set<BackPointer, BackPointerHash> BackPointers;
+  typedef Util::pointer_unordered_map<Item*, BackPointers> BackPointerMap;
+  BackPointerMap backPointers_;
+
+  typedef std::tuple<StateId, std::size_t, std::size_t> Triple;
+  // TODO: use unordered_map or some custom open hash table
+  // states (in the result machine) of (cfg-state, from, to) triples
+  typedef std::map<Triple, StateId> TripleToResultStateMap;
+  TripleToResultStateMap tripleToResultState_;
+
+
+  typedef std::map<LabelPair, StateId> LabelPairToStateId;
+  LabelPairToStateId resultLabelPairToStateId_;
+
+  // A CFG arc "s <- / 0" that we add as backpointer for the start of
+  // the CFG
+  Arc* cfgPseudoStartArc_;
+
+  EarleyParserOptions options_;
+  IVocabularyPtr pVoc_;
+
+ public:
+  EarleyParser(IHypergraph<A> const& cfg, IHypergraph<A> const& fst, IMutableHypergraph<A>* resultCfg,
+               EarleyParserOptions opts = EarleyParserOptions())
+      : fst_(fst), cfg_(cfg), result_(resultCfg), cfgPseudoStartArc_((A*)NULL), options_(opts) {
+    pVoc_ = fst.getVocabulary();
+  }
+
+  ~EarleyParser() { delete cfgPseudoStartArc_; }
+
+  typedef TailId DotPos;
+
+
   /**
      \return Pointer to unique item
   */
   Item* createItem(StateId from, StateId to, Arc* arc, TailId dotPos = 0, bool lastWasPhiOrEps = false) {
     return registry_.insert(new Item(from, to, arc, dotPos, lastWasPhiOrEps));
   }
-
-  typedef std::pair<Item*, Item*> BackPointer;
 
   std::ostream& writeItem(std::ostream& out, Item* item, IHypergraph<A> const& hg) {
     out << "[";
@@ -298,21 +404,6 @@ class EarleyParser {
     return out;
   }
 
-  template <class T>
-  struct DbgItem {
-    DbgItem(Item* i, EarleyParser<T>& ep) : i(i), ep(ep) {}
-
-    friend std::ostream& operator<<(std::ostream& out, DbgItem const& di) {
-      // by convention:
-      const bool isFstEpsItem = (di.i->from == kNoState);
-      return isFstEpsItem ? di.ep.writeItem(out, di.i, di.ep.fst_) : di.ep.writeItem(out, di.i, di.ep.cfg_);
-    }
-
-    Item* i;
-    EarleyParser<T>& ep;
-  };
-
-  typedef DbgItem<Arc> dbgItem;
 
   // TODO: allow improvements only. Also, what if item had already been derived
   // and is in the chart now, with better weight? see BestPath 'rereach' options
@@ -322,10 +413,8 @@ class EarleyParser {
     if (isZero(item->agendaWeight)) {
       item->agendaWeight = agendaWeight;
       agenda_.push(item);
-      SDL_TRACE(Hypergraph.Compose, "Pushing new item " << dbgItem(item, *this));
     } else {
       plusBy(agendaWeight, item->agendaWeight);
-      SDL_TRACE(Hypergraph.Compose, "Updated " << dbgItem(item, *this) << " to " << item->agendaWeight);
     }
   }
 
@@ -343,8 +432,7 @@ class EarleyParser {
   }
 
   void predict(Item* item) {
-    SDL_TRACE(Hypergraph.Compose, "predict from " << dbgItem(item, *this));
-    StateId s = item->arc->getTail(item->dotPos);
+    StateId s = item->arc->tails_[item->dotPos];
 
     if (s == cfg_.start()) {
       // automatically derive start state
@@ -396,7 +484,7 @@ class EarleyParser {
     // Don't attach eps right before a non-lexical nontermial (will
     // instead attach inse that nonterminal)
     if (!item->isComplete()) {
-      StateId next = item->arc->getTail(item->dotPos);
+      StateId next = item->arc->tails_[item->dotPos];
       if (!cfg_.outputLabel(next).isTerminal()) {
         return;
       }
@@ -404,10 +492,10 @@ class EarleyParser {
     StateId s = item->to;
     for (ArcId arcid : fst_.outArcIds(s)) {
       Arc* fstArc = fst_.outArc(s, arcid);
-      Sym label = fst_.inputLabel(fstArc->getTail(1));
+      Sym label = fst_.inputLabel(fstArc->tails_[1]);
       if (label == EPSILON::ID) {
         Weight w = times(item->chartWeight, fstArc->weight());
-        Item* newItem = createItem(item->from, fstArc->head(), item->arc, item->dotPos, true);
+        Item* newItem = createItem(item->from, fstArc->head_, item->arc, item->dotPos, true);
         // newItem->lastWasPhiOrEps = true;
         pushAgendaItem(newItem, w);
         Item* bpEpsItem = createItem(kNoState, kNoState, fstArc, 1);
@@ -421,14 +509,11 @@ class EarleyParser {
      Attempts to match a label at the current FST state.
   */
   void scan(Item* item) {
-    SDL_TRACE(Hypergraph.Compose, "scan from " << dbgItem(item, *this));
-    Sym searchLabel = cfg_.outputLabel(item->arc->getTail(item->dotPos));
+    Sym searchLabel = cfg_.outputLabel(item->arc->tails_[item->dotPos]);
     if (searchLabel == EPSILON::ID) {  // the CFG has an eps
       Item* newItem = createItem(item->from, item->to, item->arc, item->dotPos + 1);
       pushAgendaItem(newItem, item->chartWeight);
-      // backPointers_[newItem].insert(BackPointer(item, reinterpret_cast<Item*>(NULL)));
-      Item* nullItem = createItem(kNoState, kNoState, cfgPseudoStartArc_, 0);
-      backPointers_[newItem].insert(BackPointer(item, nullItem));
+      backPointers_[newItem].insert(BackPointer(item, createItem(kNoState, kNoState, cfgPseudoStartArc_, 0)));
       return;
     } else if (searchLabel == PHI::ID || searchLabel == RHO::ID || searchLabel == SIGMA::ID) {
       SDL_THROW_LOG(Hypergraph, InvalidInputException,
@@ -447,15 +532,14 @@ class EarleyParser {
     // matches (i.e., eps or sigma)
     for (ArcId arcid : fst_.outArcIds(s)) {
       Arc* fstArc = fst_.outArc(s, arcid);
-      Sym foundLabel = fst_.inputLabel(fstArc->getTail(1));
+      Sym foundLabel = fst_.inputLabel(fstArc->tails_[1]);
       if (foundLabel == EPSILON::ID) {
         continue;  // scanEps is a separate function
       } else if (foundLabel == SIGMA::ID) {
         // match unconditionally and consume
-        Item* newItem = createItem(item->from, fstArc->head(), item->arc, item->dotPos + 1);
+        Item* newItem = createItem(item->from, fstArc->head_, item->arc, item->dotPos + 1);
         pushAgendaItem(newItem, times(item->chartWeight, fstArc->weight()));
-        Item* bpItem = createItem(kNoState, kNoState, fstArc, 1);
-        backPointers_[newItem].insert(BackPointer(item, bpItem));
+        backPointers_[newItem].insert(BackPointer(item, createItem(kNoState, kNoState, fstArc, 1)));
         if (options_.sigmaPreventsPhiRhoMatch) ++numMatches;
       } else {
         firstConditionalArcId = arcid;
@@ -471,13 +555,12 @@ class EarleyParser {
         = boost::lower_bound(arcIdsRange, fakeArcId, CmpInputLabelWithSearchLabel<A>(fst_, s, searchLabel));
     for (; matchingArcIdsIter != arcEnd; ++matchingArcIdsIter, ++numMatches) {
       Arc* matchingArc = fst_.outArc(s, *matchingArcIdsIter);
-      if (fst_.inputLabel(matchingArc->getTail(1)) != searchLabel) {
+      if (fst_.inputLabel(matchingArc->tails_[1]) != searchLabel) {
         break;
       }
-      Item* newItem = createItem(item->from, matchingArc->head(), item->arc, item->dotPos + 1);
+      Item* newItem = createItem(item->from, matchingArc->head_, item->arc, item->dotPos + 1);
       pushAgendaItem(newItem, times(item->chartWeight, matchingArc->weight()));
-      Item* fstArcItem = createItem(kNoState, kNoState, matchingArc, 1);
-      backPointers_[newItem].insert(BackPointer(item, fstArcItem));
+      backPointers_[newItem].insert(BackPointer(item, createItem(kNoState, kNoState, matchingArc, 1)));
     }
 
     // Look for phi or rho
@@ -487,15 +570,15 @@ class EarleyParser {
            aiter != arcEnd; ++aiter) {
         Arc* arc = fst_.outArc(s, *aiter);
         Item* fstArcItem = createItem(kNoState, kNoState, arc, 1);
-        if (fst_.inputLabel(arc->getTail(1)) == PHI::ID) {
+        if (fst_.inputLabel(arc->tails_[1]) == PHI::ID) {
           // non-consuming
-          Item* newItem = createItem(item->from, arc->head(), item->arc, item->dotPos, true);
+          Item* newItem = createItem(item->from, arc->head_, item->arc, item->dotPos, true);
           // newItem->lastWasPhiOrEps = true;
           pushAgendaItem(newItem, times(item->chartWeight, arc->weight()));
           backPointers_[newItem].insert(BackPointer(item, fstArcItem));
-        } else if (fst_.inputLabel(arc->getTail(1)) == RHO::ID) {
+        } else if (fst_.inputLabel(arc->tails_[1]) == RHO::ID) {
           // consuming
-          Item* newItem = createItem(item->from, arc->head(), item->arc, item->dotPos + 1);
+          Item* newItem = createItem(item->from, arc->head_, item->arc, item->dotPos + 1);
           pushAgendaItem(newItem, times(item->chartWeight, arc->weight()));
           backPointers_[newItem].insert(BackPointer(item, fstArcItem));
         }
@@ -508,14 +591,13 @@ class EarleyParser {
      incomplete one i..j.
   */
   void complete(Item* item) {
-    SDL_TRACE(Hypergraph.Compose, "complete item " << dbgItem(item, *this));
     if (itemsTo_.size() > item->from) {
-      StateId head = item->arc->head();
+      StateId head = item->arc->head_;
       for (Item* oldItem : itemsTo_[item->from][head]) {
         if (!oldItem->isComplete()) {
           assert(oldItem->arc->getTail(oldItem->dotPos) == head);
           Item* newItem = createItem(oldItem->from, item->to, oldItem->arc, oldItem->dotPos + 1);
-          backPointers_[newItem].insert(std::make_pair(oldItem, item));
+          backPointers_[newItem].insert(BackPointer(oldItem, item));
           pushAgendaItem(newItem, times(item->chartWeight, oldItem->chartWeight));
         }
       }
@@ -528,18 +610,21 @@ class EarleyParser {
   */
   void findComplete(Item* item) {
     if (completeItemsFrom_.size() > item->to) {
-      StateId nextTail = item->arc->getTail(item->dotPos);
+      StateId nextTail = item->arc->tails_[item->dotPos];
       for (Item* completeItem : completeItemsFrom_[item->to][nextTail]) {
-        if (completeItem->arc->head() == nextTail) {
+        if (completeItem->arc->head_ == nextTail) {
           Item* newItem = createItem(item->from, completeItem->to, item->arc, item->dotPos + 1);
-          backPointers_[newItem].insert(std::make_pair(item, completeItem));
+          backPointers_[newItem].insert(BackPointer(item, completeItem));
           pushAgendaItem(newItem, times(item->chartWeight, completeItem->chartWeight));
         }
       }
     }
   }
 
-  StateId addLexicalState(Sym ilabel, Sym olabel);
+  StateId addLexicalState(Sym ilabel, Sym olabel) { return addLexicalState(LabelPair(ilabel, olabel)); }
+
+  StateId addLexicalState(LabelPair label);
+
 
   StateId createTerminalState(BackPointer bp);
 
@@ -553,8 +638,6 @@ class EarleyParser {
     if (itemMeansEpsScan) {
       std::cerr << "eps\n";
       ;
-    } else {
-      std::cerr << dbgItem(item, *this) << '\n';
     }
     typename BackPointerMap::const_iterator found = backPointers_.find(item);
     if (found != backPointers_.end()) {
@@ -594,63 +677,16 @@ class EarleyParser {
   }
 
   StateId getResultCfgState(StateId inputCfgState, std::size_t from, std::size_t to) {
-    TripleToResultStateMap::const_iterator found
-        = tripleToResultState_.find(boost::make_tuple(inputCfgState, from, to));
+    TripleToResultStateMap::const_iterator found = tripleToResultState_.find(Triple(inputCfgState, from, to));
     StateId resultId = kNoState;
     if (found == tripleToResultState_.end()) {
       resultId = result_->addState(cfg_.outputLabel(inputCfgState), cfg_.outputLabel(inputCfgState));
-      tripleToResultState_[boost::make_tuple(inputCfgState, from, to)] = resultId;
+      tripleToResultState_[Triple(inputCfgState, from, to)] = resultId;
     } else {
       resultId = found->second;
     }
     return resultId;
   }
-
-  // at each dot position in a CFG rule item, a possible sequence of
-  // FST arcs that matched there (it's sequence b/c of eps)
-  typedef std::vector<std::vector<Arc*>> ArcVecPerDotPos;
-  typedef shared_ptr<ArcVecPerDotPos> ArcVecPerDotPosPtr;
-
-  /**
-     Groups an item (i.e., CFG rule and dot position) with the
-     FST arcs that have matched up to the dot position.
-  */
-  struct ItemAndMatchedArcs {
-    ItemAndMatchedArcs(Item* i, ArcVecPerDotPosPtr s, StateId h, StateIdContainer const& t)
-        : item(i), stateIds(s), head(h), tails(t) {
-      hashCode = (std::size_t)(item - (Item*)0);
-      boost::hash_combine(hashCode, h);
-      boost::hash_range(hashCode, stateIds->begin(), stateIds->end());
-      boost::hash_range(hashCode, tails.begin(), tails.end());
-    }
-
-    bool operator==(ItemAndMatchedArcs const& other) const {
-      return other.item == item && other.head == head && *other.stateIds == *stateIds && other.tails == tails;
-    }
-    bool operator<(ItemAndMatchedArcs const& other) const {
-      if (item != other.item)
-        return item < other.item;
-      else if (head != other.head)
-        return head < other.head;
-      else if (*stateIds != *other.stateIds)
-        return *stateIds < *other.stateIds;
-      else
-        return tails < other.tails;
-    }
-
-    Item* item;
-    const ArcVecPerDotPosPtr stateIds;
-    std::size_t hashCode;
-    StateId head;
-    StateIdContainer tails;  // TODO: too expensive?
-  };
-
-  struct ItemAndMatchedArcsHashFct {
-    std::size_t operator()(ItemAndMatchedArcs* obj) const { return obj->hashCode; }
-  };
-
-  typedef unordered_set<ItemAndMatchedArcs*, ItemAndMatchedArcsHashFct, Util::NonNullPointeeEqualExpensive>
-      ItemAndMatchedArcsSet;
 
   void createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs, StateId head, ArcVecPerDotPosPtr matchedArcs,
                          StateIdContainer const& tails, Weight w, ItemAndMatchedArcsSet* alreadyExpanded);
@@ -665,8 +701,7 @@ class EarleyParser {
     SDL_TRACE(Hypergraph.Compose, "createResultCfg");
     ItemAndMatchedArcsSet alreadyExpanded;
     for (Item* item : finalItems_) {
-      SDL_TRACE(Hypergraph.Compose, "Final item: " << dbgItem(item, *this));
-      StateId head = getResultCfgState(item->arc->head(), item->from, item->to);
+      StateId head = getResultCfgState(item->arc->head_, item->from, item->to);
       result_->setFinal(head);
       createResultArcs(item, head, &alreadyExpanded);
     }
@@ -686,7 +721,7 @@ class EarleyParser {
     if (item->isComplete()) {
       complete(item);
     } else {
-      StateId nextTail = item->arc->getTail(item->dotPos);
+      StateId nextTail = item->arc->tails_[item->dotPos];
       if (cfg_.outputLabel(nextTail).isTerminal()) {
         scan(item);
       } else {
@@ -710,10 +745,10 @@ class EarleyParser {
       // Enter into chart, unless already there
       if (isZero(oldChartWeight)) {
         const bool isComplete = item->isComplete();
-        const bool isFinalReached = isComplete && cfg_.final() == item->arc->head()
+        const bool isFinalReached = isComplete && cfg_.final() == item->arc->head_
                                     && fst_.start() == item->from && fst_.final() == item->to;
         if (isComplete) {
-          atExpand(completeItemsFrom_, item->from)[item->arc->head()].insert(item);
+          atExpand(completeItemsFrom_, item->from)[item->arc->head_].insert(item);
         } else {
           atExpand(itemsTo_, item->to)[item->arc->getTail((TailId)item->dotPos)].insert(item);
         }
@@ -726,61 +761,7 @@ class EarleyParser {
       }
     }
   }
-
- public:
-  IHypergraph<A> const& fst_;
-  IHypergraph<A> const& cfg_;
-
- private:
-  IMutableHypergraph<A>* result_;
-
-  // map from head to matching items
-  std::vector<std::map<StateId, ItemsSet>> itemsTo_;
-  std::vector<std::map<StateId, ItemsSet>> completeItemsFrom_;
-// TODO: ptr_vector to avoid expensive copies
-
-#if SDL_IS_DEBUG_BUILD
-  // For nicer debug output:
-  typedef RegistryWithIds<Item> ItemRegistry;
-#elif SDL_HASH_COMPOSE_ITEM
-  typedef Util::OwnedRegistry<Item> ItemRegistry;
-#else
-  typedef Registry<Item> ItemRegistry;
-#endif
-
-  ItemRegistry registry_;
-  // foreach position and CFG state
-  std::vector<std::set<StateId>> alreadyPredicted_;
-
-#if 1
-  std::queue<Item*> agenda_;
-#else
-  /// work on leftmost spans first? (std::less) - see Hypergraph2/regtest-compose3.yml
-  Util::priority_queue<std::vector<Item*>, 4, ItemPriorityMap, std::greater<ItemPriority>> agenda_;
-#endif
-  // TODO: maybe std::priority_queue w/ old comparison object (no ItemPriorityMap) was correct?
-
-  /// queue (no priority): bad. less: bad. greater: bad. problem w/ HypCompose props?
-  std::set<Item*> finalItems_;
-
-  typedef std::map<Item*, std::set<BackPointer>> BackPointerMap;
-  BackPointerMap backPointers_;
-
-  // TODO: use unordered_map or some custom open hash table
-  // states (in the result machine) of (cfg-state, from, to) triples
-  typedef std::map<boost::tuple<StateId, std::size_t, std::size_t>, StateId> TripleToResultStateMap;
-  TripleToResultStateMap tripleToResultState_;
-
-  typedef std::map<std::pair<Sym, Sym>, StateId> LabelPairToStateId;
-  LabelPairToStateId resultLabelPairToStateId_;
-
-  // A CFG arc "s <- / 0" that we add as backpointer for the start of
-  // the CFG
-  Arc* cfgPseudoStartArc_;
-
-  EarleyParserOptions options_;
-  IVocabularyPtr pVoc_;
-};  // end class
+};
 
 /// Functions that create the result Hypergraph from the chart:
 
@@ -788,14 +769,12 @@ class EarleyParser {
    Adds lexical state in the result CFG (unique per label pair)
 */
 template <class A>
-StateId EarleyParser<A>::addLexicalState(Sym ilabel, Sym olabel) {
-  LabelPairToStateId::const_iterator found = resultLabelPairToStateId_.find(std::make_pair(ilabel, olabel));
-  if (found == resultLabelPairToStateId_.end()) {
-    StateId s = result_->addState(ilabel, olabel);
-    resultLabelPairToStateId_.insert(std::make_pair(std::make_pair(ilabel, olabel), s));
-    return s;
-  }
-  return found->second;
+StateId EarleyParser<A>::addLexicalState(LabelPair label) {
+  StateId* s;
+  if (Util::update(resultLabelPairToStateId_, label, s))
+    return * s = result_->addState(label);
+  else
+    return *s;
 }
 
 /**
@@ -814,7 +793,7 @@ StateId EarleyParser<A>::createTerminalState(BackPointer bp) {
   }
 
   StateId s;
-  StateId fstLabelState = bp.second->arc->getTail(1);
+  StateId fstLabelState = bp.second->arc->tails_[1];
   Sym fstInputLabel = fst_.inputLabel(fstLabelState);
   const bool isNonconsuming = fstInputLabel == EPSILON::ID || fstInputLabel == PHI::ID;
   if (isNonconsuming) {
@@ -843,8 +822,7 @@ template <class Arc>
 void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs, StateId head,
                                           ArcVecPerDotPosPtr matchedArcs, StateIdContainer const& tails,
                                           Weight w, ItemAndMatchedArcsSet* alreadyExpanded) {
-  SDL_TRACE(Hypergraph.Compose, "createResultArcs1 for "
-                                    << dbgItem(itemAndMatchedArcs->item, *this) << ", head=" << head
+  SDL_TRACE(Hypergraph.Compose, "createResultArcs1 for head=" << head
                                     << ", tails=" << Util::makePrintable(tails)
                                     << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
   using namespace Util;
@@ -861,10 +839,6 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
   typename BackPointerMap::const_iterator found = backPointers_.find(item);
   if (found != backPointers_.end()) {
     for (BackPointer bp : backPointers_[item]) {
-      if (Util::isDebugBuild()) {
-        SDL_TRACE(Hypergraph.Compose, "Found backpointers:\n " << dbgItem(bp.first, *this) << "\n "
-                                                               << dbgItem(bp.second, *this));
-      }
       Item* complete = bp.second;
       const bool isLexical = (complete->from == kNoState);
       StateId rightmost;
@@ -873,7 +847,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
         rightmost = createTerminalState(bp);
         fstWeight = complete->arc->weight();
       } else {
-        rightmost = getResultCfgState(complete->arc->head(), complete->from, complete->to);
+        rightmost = getResultCfgState(complete->arc->head_, complete->from, complete->to);
       }
       StateIdContainer tails2(tails.begin(), tails.end());
       tails2.push_back(rightmost);

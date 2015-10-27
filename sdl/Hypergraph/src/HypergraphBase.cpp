@@ -25,6 +25,7 @@
 #include <sdl/Hypergraph/ContainsEmptyString.hpp>
 #include <sdl/Util/Once.hpp>
 #include <sdl/Util/PointerSet.hpp>
+#include <algorithm>
 
 namespace sdl {
 namespace Hypergraph {
@@ -45,7 +46,7 @@ StateId maxTail(HypergraphBase const& h) {
       for (ArcId t = 0, e = h.numInArcs(state); t != e; ++t) {
         StateIdContainer const& tails = h.inArc(state, t)->tails_;
         if (tails.empty()) continue;
-        StateId mt = *boost::max_element(tails);
+        StateId mt = *std::max_element(tails.begin(), tails.end());
         if (r == kNoState || mt > r) r = mt;
       }
     }

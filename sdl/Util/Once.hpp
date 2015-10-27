@@ -105,10 +105,9 @@ VisitOnceRef<F> makeVisitOnceRef(F const& f, PointerSet* once) {
 }
 
 struct CheckOnce : Once {
-  mutable Once once_;
   template <class V>
   void operator()(V const* p) const {
-    if (!first(p))
+    if (!const_cast<CheckOnce&>(*this).first(p))
       SDL_THROW_LOG(Once.CheckOnce, ProgrammerMistakeException, "pointer " << (void*)p
                                                                            << " was seen more than once");
   }

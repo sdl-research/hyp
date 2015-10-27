@@ -57,7 +57,7 @@ namespace Util {
 
 #define bitset_grow(n) (2 * (n))
 
-typedef Util::dynamic_bitset<std::size_t, std::allocator<std::size_t> > BitSet;
+typedef Util::dynamic_bitset<std::size_t, std::allocator<std::size_t>> BitSet;
 
 /// these macros allow us to use an enhanced dynamic_bitset instead of
 /// boost::dynamic_bitset - see diffs vs. master in
@@ -70,7 +70,7 @@ typedef Util::dynamic_bitset<std::size_t, std::allocator<std::size_t> > BitSet;
   }
 #define SDL_BITSET_NAMESPACE sdl::Util
 
-template <class I, class A = std::allocator<I> >
+template <class I, class A = std::allocator<I>>
 struct SetBitsIter : std::iterator<std::forward_iterator_tag, bool> {
   typedef SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> B;
   B const* b;
@@ -118,8 +118,8 @@ SetBitsIter<I, A> end(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
 }
 
 template <class I, class A>
-std::pair<SetBitsIter<I, A>, SetBitsIter<I, A> > setBits(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
-  return std::pair<SetBitsIter<I, A>, SetBitsIter<I, A> >(SetBitsIter<I, A>(c), SetBitsIter<I, A>());
+std::pair<SetBitsIter<I, A>, SetBitsIter<I, A>> setBits(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
+  return std::pair<SetBitsIter<I, A>, SetBitsIter<I, A>>(SetBitsIter<I, A>(c), SetBitsIter<I, A>());
 }
 
 typedef SetBitsIter<std::size_t> BitSetOnesIter;
@@ -194,12 +194,12 @@ range_calculate_size(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
 }
 
 template <class I, class A>
-struct range_const_iterator<SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> > {
+struct range_const_iterator<SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>> {
   typedef sdl::Util::SetBitsIter<I, A> type;
 };
 
 template <class I, class A>
-struct range_mutable_iterator<SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> > {
+struct range_mutable_iterator<SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>> {
   typedef sdl::Util::SetBitsIter<I, A> type;
 };
 }
@@ -337,7 +337,7 @@ void reset(std::vector<Bool>& v, std::size_t i) {
   v[i] = 0;
 }
 
-static const std::size_t npos = (std::size_t) - 1;
+static const std::size_t npos = (std::size_t)-1;
 
 template <class Bool>
 std::size_t find_first(std::vector<Bool> const& v) {

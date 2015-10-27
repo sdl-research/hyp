@@ -25,7 +25,6 @@
 #include <cstddef>
 #include <cassert>
 #include <boost/range/detail/safe_bool.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #include <boost/serialization/level.hpp>
