@@ -22,6 +22,7 @@
 
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/Sym.hpp>
+#include <graehl/shared/int_types.hpp>
 
 #if defined(WIN32)
 #if !defined(_INTPTR_T_DEFINED)
@@ -32,9 +33,11 @@ typedef INT_PTR intptr_t;
 #include <stdint.h>
 #endif
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 struct DiscardConstantLowPointerBits {
+  inline std::size_t operator()(intptr_t x) const { return x >> 3; }
   inline std::size_t operator()(std::size_t x) const { return x >> 3; }
 };
 
@@ -48,7 +51,36 @@ typedef unordered_set<intptr_t, DiscardConstantLowPointerBits> PointerSet;
 template <class P>
 struct PtrDiffHash {
   std::size_t operator()(P const* p) const { return p - (P const*)0; }
+  std::size_t operator()(intptr_t p) const { return (P const*)p - (P const*)0; }
+  std::size_t operator()(std::size_t p) const { return (P const*)p - (P const*)0; }
 };
+
+template <std::size_t sz>
+struct DiscardPointerLsbsHash {
+  static constexpr std::size_t ceil_log2_size = graehl::ceil_log2_const(sz);
+  static_assert((1 << ceil_log2_size) >= sz && (1 << (ceil_log2_size + 1)) > sz, "error in ceil_log2_size(sz)");
+  std::size_t operator()(void const* p) const {
+    return operator()((std::size_t)p);
+  }
+  std::size_t operator()(std::size_t p) const { return p >> ceil_log2_size; }
+  std::size_t operator()(intptr_t p) const { return operator()((std::size_t)p); }
+};
+
+struct EqualPointer {
+  bool operator()(void const* a, void const* b) const {
+    return a == b;
+  }
+  bool operator()(std::size_t a, std::size_t b) const {
+    return a == b;
+  }
+  bool operator()(intptr_t a, intptr_t b) const {
+    return a == b;
+  }
+};
+
+template <class P>
+using pointer_set = sdl::hash_set<void *, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
+
 
 }}
 

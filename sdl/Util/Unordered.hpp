@@ -103,6 +103,49 @@ using farm_hash_map = google::dense_hash_map<Key, Val, Hash, Equal, Alloc>;
 /// (because of unordered_map chaining: sizeof(pointer) for empty slot vs
 /// sizeof(entry))
 
+
+/// try_emplace / insert_or_assign will be members of map in C++17. free fns for now:
+/// http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2014/n4279.html
+
+/// obviously member could be much more efficient. here we default construct a
+/// mapped_type (yuck), assuming that's cheap
+template <class Keyed, class... Args>
+std::pair<typename Keyed::iterator, bool> try_emplace(Keyed& self, typename Keyed::key_type const& k,
+                                                      Args&&... args) {
+  typedef typename Keyed::mapped_type M;
+  std::pair<typename Keyed::iterator, bool> r = self.insert(typename Keyed::value_type(k, M()));
+  if (r.second) {
+    M& m = r.first->second;
+    m.~M();
+    new (&m) M(std::forward<Args>(args)...);
+  }
+  return r;
+}
+
+template <class Keyed, class... Args>
+std::pair<typename Keyed::iterator, bool> try_emplace(Keyed& self, typename Keyed::key_type&& k,
+                                                      Args&&... args) {
+  typedef typename Keyed::mapped_type M;
+  std::pair<typename Keyed::iterator, bool> r = self.insert(typename Keyed::value_type(std::move(k), M()));
+  if (r.second) {
+    M& m = r.first->second;
+    m.~M();
+    new (&m) M(std::forward<Args>(args)...);
+  }
+  return r;
+}
+
+template <class Keyed, class M>
+std::pair<typename Keyed::iterator, bool> insert_or_assign(Keyed& self, typename Keyed::key_type const& k,
+                                                           M&& obj) {
+  return self.insert(typename Keyed::value_type(k, std::forward(obj)));
+}
+
+template <class Keyed, class M>
+std::pair<typename Keyed::iterator, bool> insert_or_assign(Keyed& self, typename Keyed::key_type&& k, M&& obj) {
+  return self.insert(typename Keyed::value_type(std::move(k), std::forward(obj)));
+}
+
 namespace Util {
 
 /// for repeated use of same table, clear but don't free memory prematurely
@@ -182,7 +225,8 @@ shared_ptr<HashMap> make_hashed(typename HashMap::key_type const& k) {
 }
 
 /**
-   reserve enough so that adding to a total size of n won't invalidate iterators due to rehashing or growing.
+   reserve enough so that adding to a total size of n won't invalidate iterators due to rehashing or
+   growing.
 */
 template <class MapNotUnordered>
 void reserveUnordered(MapNotUnordered& map, std::size_t n) {
