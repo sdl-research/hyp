@@ -17,6 +17,7 @@
 #define HYP__HYPERGRAPH_COMPOSE_HPP
 #pragma once
 
+#include <utility>
 #include <vector>
 #include <map>
 #include <queue>
@@ -241,13 +242,6 @@ struct EarleyParser {
     // something lexical right before the dot (we
     // traversed an FST arc)
   };
-  typedef std::pair<Item*, Item*> BackPointer;
-  struct BackPointerHash  {
-    static constexpr std::size_t ceil_log2_size = graehl::ceil_log2_const(sizeof(Item));
-    std::size_t operator()(BackPointer bp) const {
-      return (((std::size_t)bp.first << 12) ^ (std::size_t)bp.second ^ (std::size_t)bp.first) >> ceil_log2_size;
-    }
-  };
 
 // TODO: use unordered_set
 #if SDL_HASH_COMPOSE_ITEM
@@ -349,9 +343,17 @@ struct EarleyParser {
   /// queue (no priority): bad. less: bad. greater: bad. problem w/ HypCompose props?
   std::set<Item*> finalItems_;
 
+  typedef std::pair<Item*, Item*> BackPointer;
+  struct BackPointerHash  {
+    static constexpr std::size_t ceil_log2_size = graehl::ceil_log2_const(sizeof(Item));
+    std::size_t operator()(BackPointer bp) const {
+      return (((std::size_t)bp.first << 12) ^ (std::size_t)bp.second ^ (std::size_t)bp.first) >> ceil_log2_size;
+    }
+  };
 
-  typedef unordered_set<BackPointer, BackPointerHash> BackPointers;
-  typedef Util::pointer_unordered_map<Item*, BackPointers> BackPointerMap;
+  //  typedef unordered_set<BackPointer, BackPointerHash, std::equal_to<BackPointer>> BackPointers;
+  typedef std::set<BackPointer> BackPointers;
+  typedef Util::pointer_unordered_map<Item, BackPointers> BackPointerMap;
   BackPointerMap backPointers_;
 
   typedef std::tuple<StateId, std::size_t, std::size_t> Triple;
@@ -498,8 +500,7 @@ struct EarleyParser {
         Item* newItem = createItem(item->from, fstArc->head_, item->arc, item->dotPos, true);
         // newItem->lastWasPhiOrEps = true;
         pushAgendaItem(newItem, w);
-        Item* bpEpsItem = createItem(kNoState, kNoState, fstArc, 1);
-        backPointers_[newItem].insert(BackPointer(item, bpEpsItem));
+        backPointers_[newItem].insert(BackPointer(item, createItem(kNoState, kNoState, fstArc, 1)));
       } else
         return;  // all following labels are non-eps
     }

@@ -58,34 +58,27 @@ struct PtrDiffHash {
 template <std::size_t sz>
 struct DiscardPointerLsbsHash {
   static constexpr std::size_t ceil_log2_size = graehl::ceil_log2_const(sz);
-  static_assert((1 << ceil_log2_size) >= sz && (1 << (ceil_log2_size + 1)) > sz, "error in ceil_log2_size(sz)");
-  std::size_t operator()(void const* p) const {
-    return operator()((std::size_t)p);
-  }
+  static_assert((1 << ceil_log2_size) >= sz && (1 << (ceil_log2_size + 1)) > sz,
+                "error in ceil_log2_size(sz)");
+  std::size_t operator()(void const* p) const { return operator()((std::size_t)p); }
   std::size_t operator()(std::size_t p) const { return p >> ceil_log2_size; }
   std::size_t operator()(intptr_t p) const { return operator()((std::size_t)p); }
 };
 
 struct EqualPointer {
-  bool operator()(void const* a, void const* b) const {
-    return a == b;
-  }
-  bool operator()(std::size_t a, std::size_t b) const {
-    return a == b;
-  }
-  bool operator()(intptr_t a, intptr_t b) const {
-    return a == b;
-  }
+  bool operator()(void const* a, void const* b) const { return a == b; }
+  bool operator()(std::size_t a, std::size_t b) const { return a == b; }
+  bool operator()(intptr_t a, intptr_t b) const { return a == b; }
 };
 
 template <class P>
-using pointer_set = sdl::hash_set<void *, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
+using pointer_set = sdl::hash_set<P*, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
 
 template <class P, class Val>
-using pointer_hash_map = sdl::hash_map<void *, Val, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
+using pointer_hash_map = sdl::hash_map<P*, Val, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
 
 template <class P, class Val>
-using pointer_unordered_map = sdl::unordered_map<void *, Val, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
+using pointer_unordered_map = sdl::unordered_map<P*, Val, DiscardPointerLsbsHash<sizeof(P)>, EqualPointer>;
 
 
 }}
