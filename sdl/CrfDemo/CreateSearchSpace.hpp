@@ -16,8 +16,8 @@
 #include <set>
 #include <sstream>
 #include <boost/functional/hash.hpp>
-#include <boost/thread.hpp>
-#include <boost/noncopyable.hpp>
+#include <thread>
+#include <mutex>
 
 #include <sdl/Util/Input.hpp>
 
@@ -38,6 +38,9 @@
 #include <sdl/Optimization/ExternalFeatHgPairs.hpp>
 #include <sdl/Optimization/Types.hpp>
 #include <sdl/Util/Unordered.hpp>
+#include <sdl/Util/Sleep.hpp>
+#include <graehl/shared/thread_group.hpp>
+#include <functional>
 
 namespace sdl {
 namespace CrfDemo {
@@ -506,17 +509,17 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
                                Pairs& pairs) {
     Hypergraph::IHypergraph<Arc>* clamped = createSearchSpace(sent, transitionModel, kClamped);
     Hypergraph::IHypergraph<Arc>* unclamped = createSearchSpace(sent, transitionModel, kUnclamped);
-    boost::lock_guard<boost::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     pairs.push_back(value_type(IHgPtr(clamped), IHgPtr(unclamped)));
   }
 
   ///
 
   /// Threads can call this functor
-  struct ProcessTrainingExampleRange : boost::noncopyable {
+  struct ProcessTrainingExampleRange {
 
     typedef CreateSearchSpace<A> Outer;
-
+    ProcessTrainingExampleRange(ProcessTrainingExampleRange const&) = delete;
     ProcessTrainingExampleRange(Outer& o, std::size_t begin, std::size_t end,
                                 std::vector<Sentence> const& sents,
                                 Hypergraph::IHypergraph<A> const& transitionModel,
@@ -603,7 +606,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       for (Sentence const& sent : sents) { processTrainingSentence(sent, *transitionModel, *pairs_); }
     } else {  // multi-threaded:
       std::size_t numProducers = opts_.numThreads;
-      boost::thread_group producer_threads;
+      graehl::thread_group producer_threads;
 
       std::size_t size = sents.size();
       std::size_t blockSize = size / numProducers;
@@ -618,8 +621,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         TrainingDataIndex end = (i == numProducerThreads - 1) ? size : (i + 1) * blockSize;
         producers.push_back(update = new ProcessTrainingExampleRange(*this, begin, end, sents,
                                                                      *transitionModel, *pairs_, i == 0));
-        // boost::ref prevents copy:
-        producer_threads.create_thread(boost::ref(*update));
+        producer_threads.create_thread(std::ref(*update));
       }
       producer_threads.join_all();
     }
@@ -638,7 +640,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     if (!opts_.writeTrainArchivePath.empty()
         && !opts_.readTrainArchivePath.empty()) {  // Read after we've just written
-      boost::this_thread::sleep(boost::posix_time::milliseconds(1000));  // just in case
+      Util::sleepSeconds(1); // probably not needed
       pairs_.reset(new Optimization::ExternalFeatHgPairs<Arc>(opts_.readTrainArchivePath));
     }
   }
@@ -652,7 +654,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   std::set<Sym> allLabels_;
   LabelsPerPosMap labelsPerPos_;
   bool testMode_;
-  boost::mutex mutex_;
+  std::mutex mutex_;
 };
 
 

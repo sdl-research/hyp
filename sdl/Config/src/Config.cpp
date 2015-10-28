@@ -90,7 +90,7 @@ namespace Config {
 
 ConfigPath parsePath(std::string const& yamlPathDotSeparated) {
   ConfigPath r;
-  graehl::split_into(yamlPathDotSeparated, r, ".");
+  graehl::split_into(r, yamlPathDotSeparated, '.');
   return r;
 }
 

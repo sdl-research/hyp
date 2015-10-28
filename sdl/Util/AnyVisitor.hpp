@@ -39,7 +39,7 @@ namespace sdl {
 namespace Util {
 
 /*
-  TODO: assuming no performance penalty, use mechanism like boost::function<bool (int)> to make creation of
+  TODO: assuming no performance penalty, use mechanism like std::function<bool (int)> to make creation of
   AnyFnPtr from static template fns easier (right now, requires redundantly specifying function type, which
   could be deduced from the free or member fn ptr name at compile time)
 */

@@ -22,7 +22,7 @@
 #include <sdl/Hypergraph/BestPath.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
 #include <boost/variant/static_visitor.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Util/WordToPhrase.hpp>
 #include <sdl/Config/Init.hpp>
@@ -33,7 +33,7 @@
 namespace sdl {
 namespace Hypergraph {
 
-typedef boost::function<void(Syms&, IVocabulary*)> SymsRewrite;
+typedef std::function<void(Syms&, IVocabulary*)> SymsRewrite;
 struct IdentitySymsRewrite {
   void operator()(Syms&, IVocabulary*) const {}
 };

@@ -42,7 +42,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
-#include <boost/function.hpp>
+#include <functional>
 
 
 namespace sdl {
@@ -162,8 +162,8 @@ struct ArcTpl : ArcBase {
 
 
   typedef ArcTpl<W> Arc;
-  typedef boost::function<bool(Arc*)> ArcFilter;
-  typedef boost::function<void(Arc*)> ArcVisitor;
+  typedef std::function<bool(Arc*)> ArcFilter;
+  typedef std::function<void(Arc*)> ArcVisitor;
   // TODO: consider using a fixed-size boost::array, e.g. for 2 tails
   // (binarized hypergraph)
   // better name: StateIds
@@ -388,8 +388,8 @@ class ArcWithDataTpl : public ArcTpl<W> {
   typedef W Weight;
   typedef ArcTpl<W> Base;
   typedef ArcWithDataTpl<W> Arc;
-  typedef boost::function<bool(Arc*)> ArcFilter;
-  typedef boost::function<void(Arc*)> ArcVisitor;
+  typedef std::function<bool(Arc*)> ArcFilter;
+  typedef std::function<void(Arc*)> ArcVisitor;
 
   static bool fnFilterTrue(Arc*) { return true; }
   static bool fnFilterFalse(Arc*) { return false; }

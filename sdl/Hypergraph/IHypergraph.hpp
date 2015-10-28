@@ -244,7 +244,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
   typedef shared_ptr<Immutable> ImmutablePtr;
   typedef shared_ptr<Immutable const> ConstImmutablePtr;
   typedef A Arc;
-  typedef typename A::ArcVisitor ArcVisitor;  // like a boost::function<void (Arc *)>
+  typedef typename A::ArcVisitor ArcVisitor;  // like a std::function<void (Arc *)>
 
   typedef typename A::Weight Weight;
 

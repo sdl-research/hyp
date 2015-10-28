@@ -16,10 +16,10 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <mutex>
 
-#include <boost/scoped_ptr.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <boost/filesystem.hpp>
-
 #include <sdl/SharedPtr.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
@@ -83,7 +83,7 @@ void ExternalFeatHgPairs<Arc>::push_back(value_type const&) {
 
 template <class Arc>
 void ExternalFeatHgPairs<Arc>::setFeatureWeights(FloatT const* featWeights, FeatureId numParams) {
-  boost::lock_guard<boost::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   weights_ = featWeights;
   numParams_ = numParams;
   SDL_DEBUG(Optimization, "Received " << numParams << " feature weights");

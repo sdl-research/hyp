@@ -20,9 +20,7 @@
 
 #include <cassert>
 #include <vector>
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/locks.hpp>
-
+#include <mutex>
 #include <sdl/Util/ThreadSpecific.hpp>
 #include <sdl/Util/Flag.hpp>
 #include <sdl/Util/LogHelper.hpp>
@@ -42,8 +40,8 @@ enum InitProcessPhase { kPhase0, kPhase1, knInitProcessPhase };
 
 struct Evictable : Config::INamed {
  protected:
-  typedef boost::recursive_mutex Mutex;
-  typedef boost::lock_guard<Mutex> Lock;
+  typedef std::recursive_mutex Mutex;
+  typedef std::lock_guard<Mutex> Lock;
 
   /// set to true in subclass if you want maybeInit to init every time. there's
   /// no easy way I know of without a per-process mutex to modify threadlocal
@@ -188,7 +186,7 @@ struct Evictable : Config::INamed {
   virtual void initProcess() {}
 
   Util::Flag processInitDone_[knInitProcessPhase];
-  boost::recursive_mutex initProcessMutex_;
+  std::recursive_mutex initProcessMutex_;
 
   /**
      should be called while holding initProcessMutex_

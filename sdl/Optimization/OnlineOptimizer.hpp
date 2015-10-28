@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <cmath>
 #include <sdl/SharedPtr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <sdl/SharedPtr.hpp>
 
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Math.hpp>
@@ -183,7 +183,7 @@ class OnlineOptimizer {
     bool useAdagrad = opts_.learningRateOptions.method == kAdagrad;
     bool useAdagradL1 = opts_.learningRateOptions.adagradL1Strength > 0.0f;
 
-    boost::scoped_ptr<ParameterUpdate<FloatT> > update;
+    unique_ptr<ParameterUpdate<FloatT> > update;
     if (useAdagrad) {
       // TODO: test
       if (useAdagradL1)

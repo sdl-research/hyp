@@ -23,7 +23,7 @@
 #include <string>
 #include <ostream>
 #include <stdexcept>
-#include <boost/scoped_ptr.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <sdl/Sym.hpp>  // std::string, Sym
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Exception.hpp>

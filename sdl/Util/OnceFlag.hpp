@@ -20,8 +20,7 @@
 
 #include <sdl/Util/MemFence.hpp>
 #include <sdl/Util/Flag.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/locks.hpp>
+#include <mutex>
 
 namespace sdl {
 namespace Util {
@@ -42,8 +41,8 @@ struct OnceFlagAtomic {
   */
   void finishNonAtomic() { done_ = true; }
 
-  typedef boost::mutex Mutex;
-  typedef boost::lock_guard<Mutex> Lock;
+  typedef std::mutex Mutex;
+  typedef std::lock_guard<Mutex> Lock;
 
   Mutex mutex_;
 

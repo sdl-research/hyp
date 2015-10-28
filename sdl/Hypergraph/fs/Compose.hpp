@@ -117,7 +117,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/mpl/and.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 #include <algorithm>
 #include <sdl/Hypergraph/fs/SaveFst.hpp>
 
@@ -791,7 +791,7 @@ struct AllowDuplicateFilter {
 };
 
 template <class Weight>
-struct AllowDuplicateFilter<Weight, typename boost::enable_if<WeightIdempotentPlus<Weight>>::type> {
+struct AllowDuplicateFilter<Weight, typename std::enable_if<WeightIdempotentPlus<Weight>::value>::type> {
   typedef NoEpsilonFilter type;
 };
 

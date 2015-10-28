@@ -17,21 +17,20 @@
 #include <sdl/Util/MemoryInfo.hpp>
 #include <boost/format.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-std::string Elapsed::str() const
-{
-  const double inMB = 1./(1024*1024);
+std::string Elapsed::str() const {
+  const double inMB = 1. / (1024 * 1024);
   if (peakBytes)
-    return boost::str(boost::format("%1$.2fs (%2$.2fs real time), %3$+.2f MB => [%4$.2f MB]")
-                      % sec % wallSec % (deltaBytes*inMB) % (peakBytes*inMB));
+    return boost::str(boost::format("%1$.2fs (%2$.2fs real time), %3$+.2f MB => [%4$.2f MB]") % sec % wallSec
+                      % (deltaBytes * inMB) % (peakBytes * inMB));
   else
     return boost::str(boost::format("%1$.2fs (%2$.2fs real time)") % sec % wallSec);
 }
 
 // Performance
-void Performance::init(StringConsumer const& s)
-{
+void Performance::init(StringConsumer const& s) {
   stringConsumer = s;
   restart();
 }
@@ -47,15 +46,13 @@ double processBytes() {
 
 // PerformancePer
 
-void PerformancePer::init(PerformancePerOptions const& opt_, std::string const& name)
-{
+void PerformancePer::init(PerformancePerOptions const& opt_, std::string const& name) {
   opt = opt_;
   opt.provideDefaultName(name);
   stringConsumer = LogInfo(kPerformancePerLogPrefix + opt.name);
 }
 
-PerformancePer &PerformancePer::recordElapsedUnitless(double size, Elapsed const &delta)
-{
+PerformancePer& PerformancePer::recordElapsedUnitless(double size, Elapsed const& delta) {
   {
     Mutex::scoped_lock guard(mutex);
     totalElapsed += delta;
@@ -63,15 +60,13 @@ PerformancePer &PerformancePer::recordElapsedUnitless(double size, Elapsed const
     totalInputSize.amount += size;
   }
   if (opt.showIncrement)
-    stringConsumer(boost::str(boost::format("Input #%1% of size %2% took %3%")
-                              % nInputs % quantity(size, totalInputSize.units) % delta));
+    stringConsumer(boost::str(boost::format("Input #%1% of size %2% took %3%") % nInputs
+                              % quantity(size, totalInputSize.units) % delta));
   return *this;
 }
 
-PerformancePer &PerformancePer::recordElapsed(InputSize const& size, Elapsed const &delta)
-{
-  if (totalInputSize.units.empty())
-    totalInputSize.units = size.units;
+PerformancePer& PerformancePer::recordElapsed(InputSize const& size, Elapsed const& delta) {
+  if (totalInputSize.units.empty()) totalInputSize.units = size.units;
   // this assertion won't work for multi-thread case
   //  assert(totalInputSize.units==size.units);
   return recordElapsedUnitless(size.amount, delta);
@@ -83,22 +78,20 @@ std::string PerformancePer::str() const {
       % totalInputSize % nInputs % sizePerInput() % totalElapsed % elapsedPerSize() % inputSizeUnits());
 }
 
-void PerformancePer::finalReport()
-{
+void PerformancePer::finalReport() {
   if (!latch(reported)) return;
   report();
 }
 
-void PerformancePer::report()
-{
-  if (opt.enabled() && nInputs)
-    stringConsumer(str());
+void PerformancePer::report() {
+  if (opt.enabled() && nInputs) stringConsumer(str());
 }
 
-CpuTimer gTimer; // The timer is started automatically when it gets initialized
+CpuTimer gTimer;  // The timer is started automatically when it gets initialized
 
 CpuTimes cpuTimesNow() {
   return gTimer.elapsed();
 }
+
 
 }}

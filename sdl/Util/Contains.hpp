@@ -48,7 +48,7 @@ inline bool contains(std::deque<V> const& s, V const& k) {
 }
 
 template <class Set>
-inline typename boost::enable_if<HasKeyType<Set>, bool>::type  // bool
+inline typename std::enable_if<HasKeyType<Set>::value, bool>::type  // bool
     contains(Set const& s, typename Set::key_type const& k) {
   return s.find(k) != s.end();
 }

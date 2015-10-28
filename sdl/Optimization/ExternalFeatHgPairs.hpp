@@ -13,7 +13,7 @@
 #pragma once
 
 #include <string>
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 
 #include <sdl/SharedPtr.hpp>
 #include <sdl/IVocabulary.hpp>
@@ -62,7 +62,7 @@ class ExternalFeatHgPairs : public IFeatureHypergraphPairs<ArcT> {
   std::string location_;
   FloatT const* weights_;
   FeatureId numParams_;
-  boost::mutex mutex_;
+  std::mutex mutex_;
 };
 
 }}

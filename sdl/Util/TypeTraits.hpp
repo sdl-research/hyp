@@ -32,9 +32,9 @@ namespace sdl {
 
 /// usage: (see has_hash_value) callable_name<T, int(float, int)>
 #define SDL_CALLABLE_MEMBER_NAME(name, member) \
-template <typename C, typename F, typename = void> \
+template <class C, class F, class = void> \
 struct callable_##name : public std::false_type {}; \
-template <typename C, typename R, typename... A> \
+template <class C, class R, class... A> \
 struct callable_##name<C, R(A...),  \
     typename std::enable_if< \
         std::is_same<R, void>::value || \

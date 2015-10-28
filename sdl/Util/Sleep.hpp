@@ -17,53 +17,38 @@
 #define SLEEP_JG_2014_05_21_HPP
 #pragma once
 
-#include <boost/thread/thread.hpp>
+#include <thread>
 
-#ifndef SDL_POSIX_TIME_MICROSLEEP
-# ifdef _MSC_VER
-# define SDL_POSIX_TIME_MICROSLEEP 1
-/**
-   must be 1 for vs2010 or else this expression fails
-   (nanosecs_per_tic <= 0.0L) ||
-   (!boost::detail::winapi::QueryPerformanceCounter( &pcount ))
-*/
-# else
-# define SDL_POSIX_TIME_MICROSLEEP 0
-// 1 is needed for older boost (e.g. 1.49)
-#endif
-#endif
-
-#if SDL_POSIX_TIME_MICROSLEEP
-# include <boost/date_time/posix_time/posix_time.hpp>
-#else
-# include <boost/chrono/duration.hpp>
-#endif
-
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 
-inline void microSleep(std::size_t microsecondsToSleep = 1e5)
-{
-  if (microsecondsToSleep)
-#if SDL_POSIX_TIME_MICROSLEEP
-    boost::this_thread::sleep(
-        boost::posix_time::microseconds(microsecondsToSleep));
-#else
-  boost::this_thread::sleep_for (
-      boost::chrono::microseconds(microsecondsToSleep));
-#endif
+inline void usSleep(std::size_t microsecondsToSleep = 1e5) {
+  if (microsecondsToSleep) std::this_thread::sleep_for(std::chrono::microseconds(microsecondsToSleep));
+}
+
+
+inline void msSleep(std::size_t millisecondsToSleep = 1e2) {
+  if (millisecondsToSleep) std::this_thread::sleep_for(std::chrono::milliseconds(millisecondsToSleep));
+}
+
+/// use sleepSeconds instead for fractional seconds
+inline void sSleep(std::size_t wholeSeconds = 1) {
+  if (wholeSeconds) std::this_thread::sleep_for(std::chrono::seconds((std::size_t)wholeSeconds));
 }
 
 inline std::size_t clampedSize(double x) {
   return x > (double)(std::size_t)-2 ? (std::size_t)-2 : (std::size_t)x;
 }
 
-double const kSecondsToMicroseconds = 1e6;
-double const kMicrosecondsToSeconds = 1e-6;
+double constexpr kSecondsToMicroseconds = 1e6;
+double constexpr kMicrosecondsToSeconds = 1e-6;
 
-inline void sleepSeconds(double seconds) {
-  microSleep(clampedSize(kSecondsToMicroseconds * seconds));
+/// note: fractional seconds.
+inline void sleepSeconds(double secondsToSleep) {
+  return usSleep(secondsToSleep * kSecondsToMicroseconds);
 }
+
 
 }}
 

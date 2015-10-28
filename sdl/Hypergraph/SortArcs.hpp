@@ -19,7 +19,7 @@
 #pragma once
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <algorithm>
 

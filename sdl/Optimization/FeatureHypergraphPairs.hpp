@@ -188,7 +188,7 @@ class WriteFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
 
   WriteFeatureHypergraphPairs(std::string const& fname) : dir_(fname), size_(0), project_(true) {
     bfs::create_directories(fname + "/hg");
-    Util::microSleep(kSleepForMicroSeconds);  // to be safe on NFS
+    Util::usSleep(kSleepForMicroSeconds);  // to be safe on NFS
     SDL_INFO(Optimization.WriteFeatureHypergraphPairs, "Writing training archive to '" << fname << "'");
   }
 

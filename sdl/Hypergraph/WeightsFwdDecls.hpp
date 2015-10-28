@@ -26,7 +26,7 @@
 #define HYP__HYPERGRAPH_WEIGHTS_FWD_HPP
 #pragma once
 
-#include <boost/mpl/logical.hpp>
+#include <type_traits>
 
 namespace sdl {
 namespace Hypergraph {
@@ -60,8 +60,8 @@ struct Expectation;
 template <class W1, class W2, class W3, class W4, class W5>
 class CompositeWeight;
 
-typedef boost::mpl::true_ IsIdempotent;
-typedef boost::mpl::false_ NotIdempotent;
+typedef std::true_type IsIdempotent;
+typedef std::false_type NotIdempotent;
 
 template <class Weight>
 struct WeightIdempotentPlus : NotIdempotent {};

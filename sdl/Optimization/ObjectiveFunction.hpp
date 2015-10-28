@@ -26,25 +26,26 @@
 #include <utility>
 #include <algorithm>
 
-#include <boost/thread/mutex.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <mutex>
+#include <thread>
+#include <sdl/SharedPtr.hpp>
+#include <sdl/Util/Unordered.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/lockfree/queue.hpp>
-#include <boost/atomic.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/bind.hpp>
 
+#include <atomic>
 #include <sdl/Exception.hpp>
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/Equal.hpp>
 #include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/Util/Delete.hpp>
 #include <sdl/Optimization/IOriginalFeatureIds.hpp>
-
+#include <functional>
 #include <sdl/Optimization/Types.hpp>
 #include <sdl/Util/Sleep.hpp>
+#include <graehl/shared/thread_group.hpp>
 
 namespace sdl {
 namespace Optimization {
@@ -119,7 +120,7 @@ class L2RegularizeFct : public IRegularizeFct<FloatT> {
 template <class FloatT>
 class IObjectiveFunction {
  protected:
-  sdl::shared_ptr<IRegularizeFct<FloatT> > regularize_;
+  sdl::shared_ptr<IRegularizeFct<FloatT>> regularize_;
 
  public:
   virtual void setRegularizeFct(IRegularizeFct<FloatT>* f) { regularize_.reset(f); }
@@ -218,7 +219,7 @@ struct ScaledGradientUpdate : public IUpdate<FloatT> {
 template <class Queue, class FloatT>
 struct ConsumeUpdates {
 
-  ConsumeUpdates(IUpdate<FloatT>& updates_, Queue& queue_, boost::atomic<bool>& areProducersDone_)
+  ConsumeUpdates(IUpdate<FloatT>& updates_, Queue& queue_, std::atomic<bool>& areProducersDone_)
       : updates(updates_), queue(queue_), areProducersDone(areProducersDone_) {}
 
   typedef PodPair<FeatureId, FloatT> Pair;
@@ -236,7 +237,7 @@ struct ConsumeUpdates {
         fails = 0;
       }
       if (fails >= kSleepAfterFails)
-        Util::microSleep(kSleepForMicroSeconds);
+        Util::usSleep(kSleepForMicroSeconds);
       else
         ++fails;
     }
@@ -248,7 +249,7 @@ struct ConsumeUpdates {
 #endif
   IUpdate<FloatT>& updates;
   Queue& queue;
-  boost::atomic<bool>& areProducersDone;
+  std::atomic<bool>& areProducersDone;
 };
 
 /**
@@ -288,7 +289,7 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     fctVal_ += this->regularize(newParams, resultingGradients, numParams);
 
     typedef IUpdate<FloatT> Update;
-    boost::scoped_ptr<Update> update(
+    unique_ptr<Update> update(
         doScale_ ? (Update*)new ScaledGradientUpdate<FloatT>(resultingGradients, (FloatT)getNumExamples())
                  : (Update*)new GradientUpdate<FloatT>(resultingGradients));
 
@@ -325,8 +326,8 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     SDL_THROW_LOG(Optimization, UnimplementedException, "unimplemented");
   }
 
-  struct CallGetUpdates : boost::noncopyable {
-
+  struct CallGetUpdates {
+    CallGetUpdates(CallGetUpdates const&) = delete;
     CallGetUpdates(DataObjectiveFunction<FloatT>* obj, TrainingDataIndex begin, TrainingDataIndex end,
                    IUpdate<FloatT>& updates)
         : obj_(obj), begin_(begin), end_(end), updates_(updates) {}
@@ -357,7 +358,7 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     TrainingDataIndex numProducers = numThreads_ - 1;  // one of the threads is the consumer
     Queue queue(50 * numProducers);
 
-    boost::thread_group producerThreads, consumerThreads;
+    graehl::thread_group producerThreads, consumerThreads;
 
     TrainingDataIndex size = end - begin;
     TrainingDataIndex blockSize = size / numProducers;
@@ -374,10 +375,10 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
       // process one more in the first 'rest' threads so no training examples are left out
       producers.push_back(update = new CallGetUpdates(this, prevBlockEnd, blockEnd, updateQueue));
       prevBlockEnd = blockEnd;
-      producerThreads.create_thread(boost::ref(*update));  // boost::ref prevents copy
+      producerThreads.create_thread(std::ref(*update));
     }
 
-    boost::atomic<bool> areProducersDone(false);
+    std::atomic<bool> areProducersDone(false);
 
     // just one consumer; consumes gradient updates from queue and
     // writes them into gradient array
@@ -421,7 +422,8 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
       end).
    */
   virtual void setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end, FloatT const* params,
-                                 FeatureId numParams) = 0;
+                                 FeatureId numParams)
+      = 0;
 
   FloatT fctVal_;
   TrainingDataIndex numThreads_;
@@ -453,8 +455,7 @@ class MockObjectiveFunction : public IObjectiveFunction<FloatT> {
 
  private:
   FloatT function_value_;
-
-};  // end class
+};
 
 
 }}

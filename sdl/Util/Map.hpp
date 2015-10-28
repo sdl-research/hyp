@@ -35,11 +35,10 @@
 #include <utility>
 #include <stdexcept>
 #include <algorithm>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 namespace sdl {
 namespace Util {
-
 
 template <class Map, class Enable = void>
 struct ValueCopyable {
@@ -70,7 +69,6 @@ void eraseKeyStartsWith(Map& map, Prefix const& prefix) {
   typename Map::iterator i, e;
   if (keyStartsWith(map, prefix, i, e)) map.erase(i, e);
 }
-
 
 /**
    set map[k] = val, returning true if any previous value existed.
