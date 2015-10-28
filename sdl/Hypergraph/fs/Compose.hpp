@@ -256,7 +256,7 @@ struct Epsilon1First : FilterBase {
   bool allowMatchEpsilon() const { return s == 0; }
   void matchEpsilon() {}  // s = 0
   bool allowInputMatchEpsilon() const { return false; }
-  void hashCombine(std::size_t& h) const { h ^= ((std::size_t) - 1) * s; }
+  void hashCombine(std::size_t& h) const { h ^= ((std::size_t)-1) * s; }
   bool operator==(Epsilon1First const& o) const { return s == o.s; }
   void setStart() { s = false; }
   friend inline std::ostream& operator<<(std::ostream& out, Epsilon1First const& self) {
@@ -308,8 +308,7 @@ struct EpsilonCombine : Epsilon1First {
    state in composition of input * match. (Filter: empty base optimization for NoEpsilonFilter)
 */
 template <class InputStateId, class Filter = NoEpsilonFilter, class MatchStateId = StateId>
-struct Compose2State : public Filter
-{
+struct Compose2State : public Filter {
   typedef InputStateId InputState;
   typedef MatchStateId MatchState;
   InputState input;
@@ -319,9 +318,7 @@ struct Compose2State : public Filter
     setFilterStart();
     adl::call_set_null(match);
   }
-  friend inline void set_null(Compose2State &x) {
-    x.set_null_impl();
-  }
+  friend inline void set_null(Compose2State& x) { x.set_null_impl(); }
   friend inline std::ostream& operator<<(std::ostream& out, Compose2State const& self) {
     out << self.input << (Filter const&)self << self.match;
     return out;
@@ -461,7 +458,7 @@ struct TimesByMix<FeatureWeight, FeatureWeight, typename FeatureWeight::IsFeatur
    or InputFst = ComposeFst<...>
 */
 template <class InputFst, class MatchFst, class Filter = Epsilon1First,
-          class TimesFn = TimesByMix<typename InputFst::Weight, typename MatchFst::Weight> >
+          class TimesFn = TimesByMix<typename InputFst::Weight, typename MatchFst::Weight>>
 struct ComposeFst : TimesFn {
   typedef ComposeFst<InputFst, MatchFst, Filter, TimesFn> Compose;
   typedef TimesFn Times;
@@ -643,8 +640,8 @@ struct ComposeFst : TimesFn {
   struct ArcsGenGen : Util::intrusive_refcount<ArcsGenGen, unsigned>,
                       Util::GeneratorBase<ArcsGenGen, ArcsGen, Util::NonPeekableT>,
                       Times
-                      // non-atomic count because these are only held by one thread
-                      {
+  // non-atomic count because these are only held by one thread
+  {
     typedef ArcsGen result_type;
     enum ConcatState { matchEpsilon, matchRegular, matchDone };
     operator bool() const { return concatState != matchDone; }
@@ -794,7 +791,7 @@ struct AllowDuplicateFilter {
 };
 
 template <class Weight>
-struct AllowDuplicateFilter<Weight, typename boost::enable_if<WeightIdempotentPlus<Weight> >::type> {
+struct AllowDuplicateFilter<Weight, typename boost::enable_if<WeightIdempotentPlus<Weight>>::type> {
   typedef NoEpsilonFilter type;
 };
 
@@ -811,7 +808,7 @@ void composeWithEpsilonFilterImpl(InHg const& inHg, MatchHg& matchHg, IMutableHy
     SDL_THROW_LOG(Hypergraph.fs.Compose, ConfigException, "input*match FST compose vocabularies must match");
   typedef FstForArc<Arc1> Input;
   typedef HypergraphMatchFst<Arc2> Match;
-  typedef ComposeFst<Input, Match, Filter, TimesByMix<typename Arc1::Weight, typename Arc2::Weight> > ComposedLazy;
+  typedef ComposeFst<Input, Match, Filter, TimesByMix<typename Arc1::Weight, typename Arc2::Weight>> ComposedLazy;
   ComposedLazy composedLazy;
   composedLazy.input.reset(new Input(inHg, opt.annotations));
   composedLazy.match.reset(new Match(matchHg, which));
@@ -867,18 +864,8 @@ void compose(InHg& inHg, MatchHg& matchHg, IMutableHypergraph<ArcOut>* outHg, Fs
   else
     composeWithEpsilonFilter<Epsilon1First>(inHg, matchHg, outHg, opt, which);
 }
-}
-}
-}
 
 
-namespace boost {
-template <class A, class B, class C>
-struct hash<sdl::Hypergraph::fs::Compose2State<A, B, C> > {
-  std::size_t operator()(sdl::Hypergraph::fs::Compose2State<A, B, C> const& x) const { return hash_value(x); }
-};
-
-
-}
+}}}
 
 #endif

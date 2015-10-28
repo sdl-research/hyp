@@ -79,19 +79,8 @@ inline bool compatible(LabelPair const& a, LabelPair const& b) {
   return a.first == b.first
          && (a.second == b.second || (a.second ? (!b.second && b.first == a.second) : a.first == b.second));
 }
-}
-}
 
 
-namespace boost {
-template <>
-struct hash<sdl::Hypergraph::LabelPair> {
-  std::size_t operator()(sdl::Hypergraph::LabelPair const& x) const {
-    return sdl::Util::hashPairInt(x.first.id(), x.second.id());
-  }
-};
-
-
-}
+}}
 
 #endif

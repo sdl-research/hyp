@@ -112,7 +112,7 @@
 namespace sdl {
 namespace Hypergraph {
 
-typedef Util::DupCount<sdl::unordered_set<Sym> > DupSymbols;
+typedef Util::DupCount<sdl::unordered_set<Sym>> DupSymbols;
 
 struct IsDetState {  // unlike DupSymbols, allow epsilon to final only!
   HypergraphBase const& hg;
@@ -185,7 +185,7 @@ typedef QSet const* Qp;
 DEFINE_PRINTRANGE(QSet)
 
 #if SDL_DETERMINIZE_SORT
-typedef unordered_map<Qp, StateId, IntSetHash, IntSetEqual<StateSet> > Explored;
+typedef unordered_map<Qp, StateId, IntSetHash, IntSetEqual<StateSet>> Explored;
 // FIXME: threadsafe IntSetEqual
 #else
 typedef unordered_map<Qp, StateId, Util::PointedHashCont, Util::PointedEqual> Explored;
@@ -336,7 +336,9 @@ struct DeterminizeFsa {
         f = qfinals[0];
       else {
         f = o->addState();
-        for (StateId q : qfinals) { o->addArcFsa(q, f); }
+        for (StateId q : qfinals) {
+          o->addArcFsa(q, f);
+        }
       }
       o->setFinal(f);
     }
@@ -374,7 +376,7 @@ struct DeterminizeFsa {
       destroy(&qs);
       return *id;
     }
-    QSet* pcqs = &qs, * newpcqs = 0;
+    QSet *pcqs = &qs, *newpcqs = 0;
     bool anyadded = false;
     if (specialEps) {
       newpcqs = qsp.construct(qs);
@@ -473,7 +475,9 @@ struct DeterminizeFsa {
 #endif
     }
 #if SDL_DETERMINIZE_SORT
-    for (Delta::value_type& v : d) { addArc(q, uniq(v.second), v.first); }
+    for (Delta::value_type& v : d) {
+      addArc(q, uniq(v.second), v.first);
+    }
 #endif
   }
 
@@ -678,17 +682,8 @@ shared_ptr<IHypergraph<A> const> determinized(IHypergraph<A> const& i,
   inplace(p, d);
   return p;
 }
-}
-}
 
 
-namespace boost {
-template <>
-struct hash<sdl::Hypergraph::Qp> {
-  std::size_t operator()(sdl::Hypergraph::Qp const& x) const { return sdl::Util::hashCont(*x); }
-};
-
-
-}
+}}
 
 #endif
