@@ -25,7 +25,7 @@
 #include <sdl/Syms.hpp>
 #include <sdl/Util/SizeIsUnsigned.hpp>
 #include <sdl/Hypergraph/LabelPair.hpp>
-#include <sdl/Util/Print.hpp>
+#include <sdl/Printer.hpp>
 #include <sdl/Util/PrintRange.hpp>
 
 #include <sdl/Util/Enum.hpp>

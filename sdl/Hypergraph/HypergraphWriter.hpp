@@ -19,7 +19,7 @@
 
 #include <sdl/Hypergraph/HypergraphBase.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
-#include <sdl/Util/Print.hpp>
+#include <sdl/Printer.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/FeatureWeight.hpp>

@@ -182,7 +182,6 @@ typedef std::set<StateId> QSet;  // set instead of unordered_set for better hash
 #endif
 typedef QSet const* Qp;
 
-DEFINE_PRINTRANGE(QSet)
 
 #if SDL_DETERMINIZE_SORT
 typedef unordered_map<Qp, StateId, IntSetHash, IntSetEqual<StateSet>> Explored;
@@ -191,7 +190,7 @@ typedef unordered_map<Qp, StateId, IntSetHash, IntSetEqual<StateSet>> Explored;
 typedef unordered_map<Qp, StateId, Util::PointedHashCont, Util::PointedEqual> Explored;
 #endif
 inline std::ostream& operator<<(std::ostream& o, Explored::value_type const& p) {
-  o << '(' << *p.first << ',' << p.second << ')';
+  o << '(' << printer(*p.first) << ',' << printer(p.second) << ')';
   return o;
 }
 
@@ -199,11 +198,10 @@ struct ToDo {
   Qp qs;  // states
   StateId q;  // result-state
   friend inline std::ostream& operator<<(std::ostream& o, ToDo const& t) {
-    return o << "ToDo:" << t.q << "=" << *t.qs;
+    return o << "ToDo:" << t.q << "=" << printer(*t.qs);
   }
 };
 typedef std::vector<ToDo> Agenda;
-DEFINE_PRINTRANGE(Agenda)
 
 /**
    these objects must not be shared across threads.

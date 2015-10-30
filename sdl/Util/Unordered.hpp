@@ -138,12 +138,12 @@ std::pair<typename Keyed::iterator, bool> try_emplace(Keyed& self, typename Keye
 template <class Keyed, class M>
 std::pair<typename Keyed::iterator, bool> insert_or_assign(Keyed& self, typename Keyed::key_type const& k,
                                                            M&& obj) {
-  return self.insert(typename Keyed::value_type(k, std::forward(obj)));
+  return self.insert(typename Keyed::value_type(k, std::forward<M>(obj)));
 }
 
 template <class Keyed, class M>
 std::pair<typename Keyed::iterator, bool> insert_or_assign(Keyed& self, typename Keyed::key_type&& k, M&& obj) {
-  return self.insert(typename Keyed::value_type(std::move(k), std::forward(obj)));
+  return self.insert(typename Keyed::value_type(std::move(k), std::forward<M>(obj)));
 }
 
 namespace Util {

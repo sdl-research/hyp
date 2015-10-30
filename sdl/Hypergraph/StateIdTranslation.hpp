@@ -384,7 +384,7 @@ struct StateIdTranslation : boost::noncopyable {
       o << "=Identity";
     } else {
       if (frozenMap) o << "(frozen)";
-      o << "= {" << Util::print(cache, Util::multiLine()) << "}";
+      o << "= {" << sdl::printer(cache, Util::multiLine()) << "}";
     }
   }
 

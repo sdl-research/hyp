@@ -27,7 +27,7 @@ void Token::print(std::ostream& out, IVocabulary const* voc) const {
     out << getEndState();
   out << ",";
   if (!syms_.empty()) {
-    sdl::print(out, syms_, voc);
+    adl::adl_print(out, syms_, voc);
     out << ",";
   }
   if (props_ == kUnspecified)

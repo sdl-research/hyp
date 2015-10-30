@@ -10,7 +10,8 @@
 // limitations under the License.
 /** \file
 
-    add c++14 enable_if_t etc aliases
+    add c++14 enable_if_t etc aliases (in sdl namespace in case someone jumped
+    the gun in std)
 */
 
 #ifndef TYPETRAITS_GRAEHL_2015_10_16_HPP
@@ -19,36 +20,122 @@
 
 #include <type_traits>
 
-#if __cplusplus < 201400L
-namespace std {
-template <bool B, class T = void>
-using enable_if_t = typename enable_if<B, T>::type;
-template <class E>
-using underlying_type_t = typename underlying_type<E>::type;
-}
-#endif
-
 namespace sdl {
 
+/**
+   usage:
+   template<typename T>
+   struct wrapper
+   {
+   T value;
+   template<typename U, typename X =
+   disable_if_same_or_derived<wrapper,U>>
+   wrapper( U && u )
+   : value( std::forward<U>(u) )
+   {}
+   };
+
+   to avoid an unhelpful 'copy constructor'
+*/
+
+#if __cplusplus < 201400L
+
+template <std::size_t Len, std::size_t Align = /*default-alignment*/>
+using aligned_storage_t = typename std::aligned_storage<Len, Align>::type;
+
+template <std::size_t Len, class... Types>
+using aligned_union_t = typename std::aligned_union<Len, Types...>::type;
+
+template <bool B, class T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+template <bool b, class T, class F>
+using conditional_t = typename std::conditional<b, T, F>::type;
+
+template <class... T>
+using common_type_t = typename std::common_type<T...>::type;
+
+#define SDL_TYPETRAITS_T(traitname) \
+  template <class E>                \
+  using traitname##_t = typename std::traitname<E>::type;
+
+#else
+
+using std::aligned_storage_t;
+using std::aligned_union_t;
+using std::enable_if_t;
+using std::conditional_t;
+using std::common_type_t;
+
+#define SDL_TYPETRAITS_T(traitname) using std::traitname##_t;
+
+#endif
+
+// const-volatile modifications:
+SDL_TYPETRAITS_T(remove_const)
+SDL_TYPETRAITS_T(remove_volatile)
+SDL_TYPETRAITS_T(remove_cv)
+SDL_TYPETRAITS_T(add_const)
+SDL_TYPETRAITS_T(add_volatile)
+SDL_TYPETRAITS_T(add_cv)
+
+// reference modifications:
+SDL_TYPETRAITS_T(remove_reference)
+SDL_TYPETRAITS_T(add_lvalue_reference)
+SDL_TYPETRAITS_T(add_rvalue_reference)
+
+// sign modifications:
+SDL_TYPETRAITS_T(make_signed)
+SDL_TYPETRAITS_T(make_unsigned)
+
+// array modifications:
+SDL_TYPETRAITS_T(remove_extent)
+SDL_TYPETRAITS_T(remove_all_extents)
+
+// pointer modifications:
+SDL_TYPETRAITS_T(remove_pointer)
+SDL_TYPETRAITS_T(add_pointer)
+
+SDL_TYPETRAITS_T(underlying_type)
+SDL_TYPETRAITS_T(result_of)
+
+SDL_TYPETRAITS_T(decay)
+
+
+/**
+   special situation:
+   safely making a wrapper WITHOUT a copy ctor:
+
+template<class T>
+struct wrapper
+{
+    T value;
+    template<typename U>
+    wrapper(U && u)
+      : value(std::forward<U>(u)) {}
+};
+
+   per http://ericniebler.com/2013/08/07/universal-references-and-the-copy-constructo/
+*/
+template <class A, class B>
+using disable_if_same_or_derived = enable_if_t<!std::is_base_of<A, decay_t<B>>::value>;
+
 /// usage: (see has_hash_value) callable_name<T, int(float, int)>
-#define SDL_CALLABLE_MEMBER_NAME(name, member) \
-template <class C, class F, class = void> \
-struct callable_##name : public std::false_type {}; \
-template <class C, class R, class... A> \
-struct callable_##name<C, R(A...),  \
-    typename std::enable_if< \
-        std::is_same<R, void>::value || \
-        std::is_convertible<decltype( \
-            std::declval<C>().member(std::declval<A>()...) \
-        ), R>::value \
-    >::type \
-> : public std::true_type {};
+#define SDL_CALLABLE_MEMBER_NAME(name, member)                                                             \
+  template <class C, class F, class = void>                                                                \
+  struct callable_##name : public std::false_type {};                                                      \
+  template <class C, class R, class... A>                                                                  \
+  struct callable_##name<C, R(A...),                                                                       \
+                         typename std::enable_if<std::is_same<R, void>::value                              \
+                                                 || std::is_convertible<decltype(std::declval<C>().member( \
+                                                                            std::declval<A>()...)),        \
+                                                                        R>::value>::type>                  \
+      : public std::true_type {};
 #define SDL_CALLABLE_MEMBER(name) SDL_CALLABLE_MEMBER_NAME(name, name)
 
 SDL_CALLABLE_MEMBER_NAME(function, operator())
 
 
 }
-
 
 #endif

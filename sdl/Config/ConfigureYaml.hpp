@@ -54,7 +54,7 @@
 
 #include <sdl/LexicalCast.hpp>
 
-#include <sdl/Util/Print.hpp>
+#include <sdl/Printer.hpp>
 #include <sdl/Util/Nfc.hpp>
 
 namespace sdl {
@@ -387,7 +387,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     ConfigNode const& yaml = conf.depth ? ctx->node(conf.name()) : root;
     bool const shouldStore = conf.depth ? yaml.IsDefined() : true;
     SDL_TRACE(ConfigureYaml, "store=" << shouldStore << " init_tree " << conf.path_name() << ": "
-                                      << Util::print(yaml, Config::kShallow));
+                                      << sdl::printer(yaml, Config::kShallow));
     ctx->push(new Subtree(yaml, conf.path_name(), warn, !shouldStore));
     return shouldStore;
   }
@@ -414,7 +414,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     std::string const& name = conf.name();
     std::string const& pathname = conf.path_name();
     ConfigNode const& n = ctx->node(name, opt.is_required(), opt.is_required_err());
-    SDL_TRACE(ConfigureYaml, "store sequence " << pathname << ": " << Util::print(n, Config::kShallow));
+    SDL_TRACE(ConfigureYaml, "store sequence " << pathname << ": " << sdl::printer(n, Config::kShallow));
     if (!n.IsDefined()) return;
     if (n.IsNull()) return;  // null value should not be acceptable, but:
     // user may prefer to have shorthand feature-weights: (end of line/indent) meaning empty seq
@@ -448,7 +448,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     std::string const& name = conf.name();
     std::string const& pathname = conf.path_name();
     ConfigNode const& n = ctx->node(name, opt.is_required(), opt.is_required_err());
-    SDL_TRACE(ConfigureYaml, "store set " << pathname << ": " << Util::print(n, Config::kShallow));
+    SDL_TRACE(ConfigureYaml, "store set " << pathname << ": " << sdl::printer(n, Config::kShallow));
     if (!n.IsDefined()) return;
     if (n.IsNull()) return;  // null value should not be acceptable, but:
     // user may prefer to have shorthand feature-weights: (end of line/indent) meaning empty set
@@ -474,7 +474,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     std::string const& name = conf.name();
     std::string const& pathname = conf.path_name();
     ConfigNode const& n = ctx->node(name, opt.is_required(), opt.is_required_err());
-    SDL_TRACE(ConfigureYaml, "store map " << pathname << ": " << Util::print(n, Config::kShallow));
+    SDL_TRACE(ConfigureYaml, "store map " << pathname << ": " << sdl::printer(n, Config::kShallow));
     if (!n.IsDefined()) return;
     if (n.IsNull()) return;  // null value should not be acceptable, but:
     // 1. yaml-cpp parser mis-parses {} as null
@@ -503,7 +503,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     std::string const& name = conf.name();
     std::string const& pathname = conf.path_name();
     ConfigNode const& n = ctx->node(name, opt.is_required(), opt.is_required_err());
-    SDL_TRACE(ConfigureYaml, "store map " << pathname << ": " << Util::print(n, Config::kShallow));
+    SDL_TRACE(ConfigureYaml, "store map " << pathname << ": " << sdl::printer(n, Config::kShallow));
     if (!n.IsDefined()) return;
     if (n.IsNull()) return;  // null value should not be acceptable, but:
     // 1. yaml-cpp parser mis-parses {} as null
@@ -531,7 +531,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     std::string const& pathname = conf.path_name();
 
     ConfigNode const& n = ctx->node(name, opt.is_required(), opt.is_required_err());
-    SDL_TRACE(ConfigureYaml, "store leaf " << pathname << ": " << Util::print(n, Config::kShallow));
+    SDL_TRACE(ConfigureYaml, "store leaf " << pathname << ": " << sdl::printer(n, Config::kShallow));
     if (n.IsDefined()) {
       conf.warn_if_deprecated();
       if (n.IsNull()) {
@@ -703,7 +703,7 @@ template <class Val>
 void applyYaml(ConfigNode const& yamlRoot, Val* pRootVal, char const* component = "configure",
                bool init = true, bool validate = true, bool verbose = true, bool trace = true) {
   StringConsumer warn = Util::logWarning(component);
-  LOG_TRACE_NAMESTR(kLogPrefix + component, "applyYaml node:\n" << Util::print(yamlRoot, Config::oneline));
+  LOG_TRACE_NAMESTR(kLogPrefix + component, "applyYaml node:\n" << sdl::printer(yamlRoot, Config::oneline));
   if (init) configure::configure_init(pRootVal, warn);
 
   if (trace) {

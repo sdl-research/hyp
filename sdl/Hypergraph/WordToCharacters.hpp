@@ -19,6 +19,7 @@
 #pragma once
 
 #include <vector>
+#include <sdl/Syms.hpp>
 #include <sdl/Exception.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Util/Once.hpp>
@@ -61,6 +62,7 @@ struct WordToCharacters {
     HypergraphBase::Labels labels = hg_->copyOfLabels();
     // avoid canonical-lex problem by copying (can't store ref if non-canonical, either)
     StateId s = 0, N = labels.size();
+    SDL_TRACE(WordToCharacters, "input labels: " << sdl::printer(labels, vocab_));
     replaceByStates_.resize(N);
     for (; s < N; ++s) {
       Sym wordsym = labels[s];
@@ -80,12 +82,16 @@ struct WordToCharacters {
       toStates.resize(nunicode);
       Chars::const_iterator i = chars.begin(), end = chars.end();
       StateIdContainer::iterator to = toStates.begin();
-      if (!insertingPrefix)
-        hg_->setInputLabel(s, vocab_->addTerminal(*i++));
-      else
+      if (insertingPrefix)
         hg_->setInputLabel(s, tokenPrefixSym_);
+      else {
+        hg_->setInputLabel(s, vocab_->addTerminal(*i));
+        ++i;
+      }
       for (; i != end; ++i) *to++ = hg_->addState(vocab_->addTerminal(*i));
-      // TODO: iterate utf8 char slices (string_view) instead.
+      SDL_DEBUG(WordToCharacters, "for input state " << s
+                                                     << " with input label: " << sdl::printer(wordsym, vocab_)
+                                                     << ": output: " << sdl::printer(toStates, hg_));
     }
   }
 
@@ -134,6 +140,7 @@ struct WordToCharacters {
       hg_->reserveAdditionalStates(nAddedArcsMinimum_);
       // if all labeled states were used, we add at least this many tails (could
       // be more if multiple arcs per state)
+      hg_->clearCanonicalLexCache(); // we will be modifying some labels
       hg_->forceFirstTailOutArcsOnly();
       for (StateId s = 0, N = hg_->sizeForHeads(); s < N; ++s) hg_->visitOutArcs(s, *this);
       addArcLater_.finish();

@@ -25,6 +25,7 @@
 #pragma once
 
 #include <graehl/shared/string_to.hpp>
+#include <graehl/shared/string_builder.hpp>
 
 namespace sdl {
 namespace Util {

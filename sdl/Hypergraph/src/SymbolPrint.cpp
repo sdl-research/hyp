@@ -15,7 +15,7 @@
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Sym.hpp>
 
-#include <sdl/Util/Print.hpp>
+#include <sdl/Printer.hpp>
 #include <sdl/Util/QuoteEsc.hpp>
 
 #include <sdl/Vocabulary/SpecialSymbols.hpp>

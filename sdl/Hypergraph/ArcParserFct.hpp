@@ -139,8 +139,8 @@ void addState(ParserUtil::State& s, SymsToState* symsToState, StateId& highestSt
     } else {
       SDL_THROW_LOG(Hypergraph.ArcParserFct, FileFormatException,
                     src << ":" << linenum << ": syntax error (incompatible symbols for state " << s.id << ")"
-                        << ": " << s << "; previous labels=" << Util::print(existingLabels, &voc)
-                        << " vs. new labels=" << Util::print(newLabels, &voc));
+                        << ": " << s << "; previous labels=" << sdl::printer(existingLabels, &voc)
+                        << " vs. new labels=" << sdl::printer(newLabels, &voc));
     }
   }
 }

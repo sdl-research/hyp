@@ -99,7 +99,7 @@ struct SearchDirs : std::unary_function<std::string, std::string> {
 
   template <class O>
   void print(O& o) const {
-    o << Util::print(*pDirs, RangeSep(" ", "(search directories: ", " )"));
+    o << sdl::printer(*pDirs, RangeSep(" ", "(search directories: ", " )"));
   }
   template <class C, class T>
   friend std::basic_ostream<C, T>& operator<<(std::basic_ostream<C, T>& o, SearchDirs const& self) {

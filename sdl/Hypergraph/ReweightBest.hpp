@@ -60,7 +60,7 @@ struct ReweightDerivation {
   ReweightDerivation(IMutableHypergraph<Arc>& h, ReweightBest const& opt) : h(h), opt(opt), rng(opt.seed) {}
   mutable Util::Random01 rng;
   bool operator()(DerivationPtr const& dp, Weight const& w, NbestId n) const {
-    SDL_DEBUG(Hypergraph.ReweightBest, "reweighting arcs in 1-best derivation " << print(*dp, h));
+    SDL_DEBUG(Hypergraph.ReweightBest, "reweighting arcs in 1-best derivation " << printer(*dp, h));
     dp->visitDfs(*this);
     return true;
   }

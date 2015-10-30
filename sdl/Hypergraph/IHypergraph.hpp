@@ -201,7 +201,7 @@ struct FstArc {
 
   void printLabel(std::ostream& out, IVocabulary const* vocab) const {
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
-    if (!annotations.empty()) out << "annotations:" << Util::print(annotations, vocab);
+    if (!annotations.empty()) out << "annotations:" << sdl::printer(annotations, vocab);
 #endif
     out << '(';
     out << vocab->str(labelPair.first);

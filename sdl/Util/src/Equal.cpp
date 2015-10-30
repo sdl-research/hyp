@@ -47,14 +47,14 @@ bool StringsUnorderedEqual(Strings const& lines1, Strings const& lines2, bool so
   StringsSet lines1Set, lines2Set;
   normalizeLines(lines1, lines1Set, sortWords);
   normalizeLines(lines2, lines2Set, sortWords);
-#define SDL_EQUAL_MSG()                                                                                     \
-  "NOT (unordered) EQUAL:\n "                                                                               \
-      << name1 << ": {[(\n" << print(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {("          \
-      << print(lines2Set, multiLine()) << ")}\n\n difference " << name1 << " - " << name2 << ": {"          \
-      << print(difference(lines1Set, lines2Set), multiLine()) << "} difference " << name2 << " - " << name1 \
-      << ": {" << print(difference(lines2Set, lines1Set), multiLine()) << "\n} original " << name1          \
-      << ": {[\n" << print(lines1, multiLineNoBrace()) << "\n]} original " << name2 << ": {[\n"             \
-      << print(lines2, multiLineNoBrace()) << "]}"
+#define SDL_EQUAL_MSG()                                                                                   \
+  "NOT (unordered) EQUAL:\n "                                                                             \
+      << name1 << ": {[(\n" << sdl::printer(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {(" \
+      << sdl::printer(lines2Set, multiLine()) << ")}\n\n difference " << name1 << " - " << name2 << ": {" \
+      << sdl::printer(difference(lines1Set, lines2Set), multiLine()) << "} difference " << name2 << " - " \
+      << name1 << ": {" << sdl::printer(difference(lines2Set, lines1Set), multiLine()) << "\n} original " \
+      << name1 << ": {[\n" << sdl::printer(lines1, multiLineNoBrace()) << "\n]} original " << name2       \
+      << ": {[\n" << sdl::printer(lines2, multiLineNoBrace()) << "]}"
   if (lines1Set == lines2Set)
     return true;
   else {

@@ -212,6 +212,7 @@ class Token {
   void print(std::ostream& out, IVocabularyPtr const& pVoc) const { print(out, pVoc.get()); }
   void print(std::ostream& out, IVocabulary const* voc) const;
 
+
   bool operator==(Token const& other) const {
     return props_ == other.props_ && start_ == other.start_ && endState_ == other.endState_
            && syms_ == other.syms_;
@@ -241,8 +242,11 @@ class Token {
 };  // end class Token
 
 inline std::ostream& operator<<(std::ostream& out, Token const& tok) {
-  tok.print(out, IVocabularyPtr());
+  tok.print(out, 0);
   return out;
+}
+inline void print(std::ostream& out, Token const& tok, IVocabulary const* voc) {
+  tok.print(out, voc);
 }
 
 /**
@@ -253,6 +257,7 @@ inline std::ostream& operator<<(std::ostream& out, Token const& tok) {
 template <class W>
 class TokenWeightTpl {
   typedef TokenWeightTpl<W> Self;
+
  public:
   void allTimesBy(W const& delta) {
     for (typename TokenMap::iterator i = pTokens_->begin(), e = pTokens_->end(); i != e; ++i)
