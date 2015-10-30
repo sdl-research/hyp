@@ -54,16 +54,28 @@
 #define GRAEHL_ADL_PRINTER_MOVE_OVERLOAD 1
 #endif
 
-/// this namespace will contain no user types so should be the last resort
+/// this namespace will contain no user types so should be the last resort. but
+/// that's not how ADL works (priority ignores namespace, using, ADL), so
+/// they're made worse matches (lower priority) if possible.
 namespace adl_default {
-template <class O, class V>
-typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type operator<<(O&, V const&);
-template <class O, class V, class S>
-typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type print(O&, V const&, S const&);
+
+/// careful to avoid noncontainers (ADL doesn't help w/ ambiguity)
+template <class O, class V, class If = typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type>
+O & operator<<(O& o, V const& v);
+
+#if GRAEHL_ADL_PRINT_CONTAINER3
+template <class O, class V, class S, class If = typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type>
+void print(O& o, V const& v, S const& s);
+#endif
+
 template <class O, class A, class B>
 void operator<<(O&, std::pair<A, B> const&);
 template <class O, class A, class B, class S>
 void print(O&, std::pair<A, B> const&, S const&);
+
+// TODO: alternatively: make state-sequence-print decay to no state after 1 go (i.e. have a depth template
+// arg)?
+// TODO: is_fundamental?
 template <class O, class V, class S>
 typename graehl::enable_if<!graehl::is_class<V>::value>::type print(O& o, V const& v, S const&) {
   o << v;
@@ -148,8 +160,8 @@ void adl_print(O& o, V const& v, S const& s) {
 }
 
 namespace adl_default {
-template <class O, class V>
-typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type operator<<(O& o, V const& v) {
+template <class O, class V, class If = typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type>
+O & operator<<(O& o, V const& v) {
   bool first = true;
   for (typename V::const_iterator i = v.begin(), e = v.end(); i != e; ++i) {
     if (first)
@@ -158,9 +170,12 @@ typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type opera
       o << ' ';
     adl::adl_print(o, *i);
   }
+  return o;
 }
-template <class O, class V, class S>
-typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type print(O& o, V const& v, S const& s) {
+
+#if GRAEHL_ADL_PRINT_CONTAINER3
+template <class O, class V, class S, class If = typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type>
+void print(O& o, V const& v, S const& s) {
   bool first = true;
   for (typename V::const_iterator i = v.begin(), e = v.end(); i != e; ++i) {
     if (first)
@@ -170,6 +185,7 @@ typename graehl::enable_if<graehl::is_nonstring_container<V>::value>::type print
     adl::adl_print(o, *i, s);
   }
 }
+#endif
 
 template <class O, class A, class B>
 void operator<<(O& o, std::pair<A, B> const& v) {
@@ -244,12 +260,6 @@ typename enable_if<is_container<std::ostream>::value, O>::type& operator<<(O& ou
   return out;
 }
 
-/// warning: captures reference.
-template <class V>
-AdlPrinter<V> printer(V const& v) {
-  return v;
-}
-
 #if __cplusplus >= 201103L && GRAEHL_ADL_PRINTER_MOVE_OVERLOAD
 template <class V, class S>
 struct PrinterMove {
@@ -280,10 +290,6 @@ struct AdlPrinterMove {
   AdlPrinterMove(V&& v) : v(std::forward<V>(v)) {}
 };
 
-template <class V>
-AdlPrinterMove<V> printer(V&& v) {
-  return AdlPrinterMove<V>(std::forward<V>(v));
-}
 
 /// it's important to return ostream and not the more specific stream.
 template <class V>
@@ -300,7 +306,6 @@ typename enable_if<is_container<std::ostream>::value, O>::type& operator<<(O& ou
   ::adl::Print<V>::call(out, x.v);
   return out;
 }
-
 
 #if 0
 // is_lvalue_reference
@@ -334,6 +339,12 @@ template <class V, class S>
 auto printer(V&& v, S const& s) -> decltype(printer_impl(std::forward<V>(v), s, is_lvalue_reference<V>())) {
   return printer_impl(std::forward<V>(v), s, is_lvalue_reference<V>());
 }
+
+template <class V>
+AdlPrinterMove<V> printer(V&& v) {
+  return AdlPrinterMove<V>(std::forward<V>(v));
+}
+
 #else
 
 template <class V, class Lvalue = true_type>
@@ -365,8 +376,15 @@ template <class V, class S>
 typename PrinterType<V, S, is_lvalue_reference<V> >::type printer(V&& v, S const& s) {
   return typename PrinterType<V, S, is_lvalue_reference<V> >::type(std::forward<V>(v), s);
 }
+
 #endif
 
+#else
+/// warning: captures reference.
+template <class V>
+AdlPrinter<V> printer(V const& v) {
+  return v;
+}
 #endif
 
 

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <type_traits>
+#include <iostream>
 
 namespace sdl {
 
@@ -134,6 +135,32 @@ using disable_if_same_or_derived = enable_if_t<!std::is_base_of<A, decay_t<B>>::
 #define SDL_CALLABLE_MEMBER(name) SDL_CALLABLE_MEMBER_NAME(name, name)
 
 SDL_CALLABLE_MEMBER_NAME(function, operator())
+
+template <class T>
+using not_istream = std::enable_if<!std::is_base_of<std::istream, T>::value, bool>;
+template <class T>
+using not_istream_t = typename not_istream<T>::type;
+
+template <class T>
+using not_istream_or_string
+    = std::enable_if<!std::is_base_of<std::istream, T>::value && !std::is_convertible<T, std::string>::value, bool>;
+template <class T>
+using not_istream_or_string_t = typename not_istream_or_string<T>::type;
+
+template <class T>
+using not_ostream = std::enable_if<!std::is_base_of<std::ostream, T>::value, bool>;
+template <class T>
+using not_ostream_t = typename not_ostream<T>::type;
+
+template <class T>
+using is_istream = std::enable_if<std::is_base_of<std::istream, T>::value, bool>;
+template <class T>
+using is_istream_t = typename is_istream<T>::type;
+
+template <class T>
+using is_ostream = std::enable_if<std::is_base_of<std::ostream, T>::value, bool>;
+template <class T>
+using is_ostream_t = typename is_ostream<T>::type;
 
 
 }

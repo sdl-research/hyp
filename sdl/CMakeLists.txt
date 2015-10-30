@@ -255,6 +255,7 @@ endif()
 
 set(SPARSEHASH_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/sparsehash-c11")
 set(GSL_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/GSL")
+set(RangeV3_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/range-v3")
 
 
 #
@@ -347,6 +348,9 @@ if(WIN32)
   ## (people should really be forced to make explicit casts or fix their types)
 
 endif()
+
+find_package(RangeV3)
+message(STATUS "RangeV3 (include only): ${RangeV3_INCLUDE_DIR}")
 
 find_package(GSL)
 message(STATUS "GSL (include only): ${GSL_INCLUDE_DIR}")
@@ -1001,6 +1005,7 @@ macro(sdl_base_includes)
   #header only:
   include_directories(${SPARSEHASH_INCLUDE_DIR})
   include_directories(${GSL_INCLUDE_DIR})
+  include_directories(${RangeV3_INCLUDE_DIR})
   include_directories(${CMAKE_SOURCE_DIR}/..)
   include_directories(${UTF8_INCLUDE_DIR})
   #lib:

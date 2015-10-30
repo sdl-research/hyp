@@ -136,7 +136,9 @@ namespace sdl {
 // TODO: it would be nice to put print in a .cpp somewhere since performance
 // isn't critical. but we have no lib for the toplevel xmt/ headers.
 inline void print(std::ostream& out, sdl::Sym sym, sdl::IVocabulary const* voc) {
-  if (voc)
+  if (!sym)
+    out << "<NULL>";
+  else if (voc)
     out << voc->str(sym);  // if you want quotes + escaping, use Hypergraph/SymbolPrint.hpp
   else
     out << sym.getTypeNameShort() << sym.index();

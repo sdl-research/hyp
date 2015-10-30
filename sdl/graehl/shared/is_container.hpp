@@ -14,7 +14,9 @@
 /** \file
 
     boost type_traits for 'is a container' (for printing containers, for
-    e.g. show.hpp debug prints)
+    e.g. show.hpp debug prints) possibly excluding std::string (which you
+    usually want to print normally). does not exclude char* or other
+    string-likes.
 */
 
 
@@ -58,6 +60,12 @@ struct print_maybe_container<Val, typename enable_if<is_nonstring_container<Val>
   }
 };
 
+#if __cplusplus >= 201103L
+template <class T>
+using is_container_t = typename is_container<T>::type;
+template <class T>
+using is_nonstring_container_t = typename is_nonstring_container<T>::type;
+#endif
 
 }
 

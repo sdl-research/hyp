@@ -68,13 +68,23 @@ inline bool LinesUnorderedEqual(std::string const& str1, std::string const& str2
   return StringsUnorderedEqual(chomped_lines(str1), chomped_lines(str2), sortWords, name1, name2, warn);
 }
 
-template <class Val1>
-inline typename std::enable_if<!std::is_base_of<std::istream, Val1>::value, bool>::type
-LinesUnorderedEqual(Val1 const& val1, std::string const& val2, bool sortWords = false,
-                    char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
+template <class Val1, class If1 = typename not_istream_or_string<Val1>::type>
+bool LinesUnorderedEqual(Val1 const& val1, std::string const& val2, bool sortWords = false,
+                         char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
   std::stringstream stream1;
   stream1 << val1;
   return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(val2), sortWords, name1, name2, warn);
+}
+
+template <class Val1, class Val2, class If1 = typename not_istream_or_string<Val1>::type,
+          class If2 = not_istream_or_string_t<Val2>>
+bool LinesUnorderedEqual(Val1 const& val1, Val2 const& val2, bool sortWords = false,
+                         char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
+  std::stringstream stream1;
+  stream1 << val1;
+  std::stringstream stream2;
+  stream1 << val2;
+  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(stream2), sortWords, name1, name2, warn);
 }
 
 inline void ReplaceDigits(std::string& str, char replaceDigitsBy = '#') {
@@ -133,7 +143,8 @@ inline bool LinesUnorderedEqualIgnoringIntegers(std::string str1, std::string st
 template <class Val1>
 bool LinesUnorderedEqualIgnoringDigits(Val1 const& val1, std::string const& ref, bool sortWords = false,
                                        char const* name1 = "GOT", char const* name2 = "REF",
-                                       char replaceDigitsBy = '#') {
+                                       char replaceDigitsBy = '#',
+                                       typename not_istream_or_string<Val1>::type* = 0) {
   std::stringstream ss;
   ss << val1;
   return LinesUnorderedEqualIgnoringDigits(ss.str(), ref, sortWords, name1, name2, replaceDigitsBy);
@@ -142,18 +153,21 @@ bool LinesUnorderedEqualIgnoringDigits(Val1 const& val1, std::string const& ref,
 template <class Val1>
 bool LinesUnorderedEqualIgnoringIntegers(Val1 const& val1, std::string const& ref, bool sortWords = false,
                                          char const* name1 = "GOT", char const* name2 = "REF",
-                                         std::string const& replaceIntegersBy = "#") {
+                                         std::string const& replaceIntegersBy = "#",
+                                         typename not_istream_or_string<Val1>::type* = 0) {
   std::stringstream ss;
   ss << val1;
   return LinesUnorderedEqualIgnoringIntegers(ss.str(), ref, sortWords, name1, name2, replaceIntegersBy);
 }
 
-template <class Val, class Val2>
-bool LinesUnorderedEqualIgnoringIntegers(Val const& val, Val2 const& val2, bool sortWords = false,
+template <class Val1, class Val2>
+bool LinesUnorderedEqualIgnoringIntegers(Val1 const& val1, Val2 const& val2, bool sortWords = false,
                                          char const* name1 = "GOT", char const* name2 = "REF",
-                                         std::string const& replaceIntegersBy = "#") {
+                                         std::string const& replaceIntegersBy = "#",
+                                         typename not_istream_or_string<Val1>::type* = 0,
+                                         typename not_istream_or_string<Val2>::type* = 0) {
   std::stringstream ss;
-  ss << val;
+  ss << val1;
   std::stringstream ss2;
   ss2 << val2;
   return LinesUnorderedEqualIgnoringIntegers(ss.str(), ss2.str(), sortWords, name1, name2, replaceIntegersBy);

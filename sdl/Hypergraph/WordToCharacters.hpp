@@ -54,7 +54,7 @@ struct WordToCharacters {
   // (FeatureId) as a marker. new arcs get no added cost/features.
   Util::FixUnicode fixUnicode_;
   StateId nAddedArcsMinimum_ = 0;
-  std::vector<StateIdContainer> replaceByStates_;
+  std::vector<StateIdContainer> insertStatesForTail_;
 
   /// compute (>1 char lexical state)->(char states) mapping
   void splitInputLabelChars() {
@@ -63,7 +63,7 @@ struct WordToCharacters {
     // avoid canonical-lex problem by copying (can't store ref if non-canonical, either)
     StateId s = 0, N = labels.size();
     SDL_TRACE(WordToCharacters, "input labels: " << sdl::printer(labels, vocab_));
-    replaceByStates_.resize(N);
+    insertStatesForTail_.resize(N);
     for (; s < N; ++s) {
       Sym wordsym = labels[s];
       if (!wordsym.isLexical()) continue;
@@ -74,24 +74,29 @@ struct WordToCharacters {
       Chars chars;
       chars.reserve(nchars);  // upper bound
       Util::toUtf8Chs(word, chars, fixUnicode_);  // assume utf8 is well-formed
-      StateId nunicode = chars.size();
+      SDL_TRACE(WordToCharacters, "unicode chars={ " << sdl::printer(chars) << " }");
+      StateId const nunicode = chars.size();
       if (!nunicode) continue;
-      if (!insertingPrefix) --nunicode;
-      nAddedArcsMinimum_ += nunicode;
-      StateIdContainer& toStates = replaceByStates_[s];
-      toStates.resize(nunicode);
+      StateId const ninsert = nunicode - !insertingPrefix;
+      nAddedArcsMinimum_ += ninsert;
+      StateIdContainer& insertStates = insertStatesForTail_[s];
+      insertStates.resize(ninsert);
       Chars::const_iterator i = chars.begin(), end = chars.end();
-      StateIdContainer::iterator to = toStates.begin();
-      if (insertingPrefix)
+      StateIdContainer::iterator to = insertStates.begin();
+      if (insertingPrefix) {
         hg_->setInputLabel(s, tokenPrefixSym_);
-      else {
+      } else {
         hg_->setInputLabel(s, vocab_->addTerminal(*i));
         ++i;
       }
+      SDL_DEBUG(WordToCharacters, "for input state "
+                << s << " with input label: " << sdl::printer(wordsym, vocab_)
+                << ": replaced => label: " << sdl::printer(hg_->inputLabel(s), vocab_));
       for (; i != end; ++i) *to++ = hg_->addState(vocab_->addTerminal(*i));
+      assert(to == insertStates.begin() + ninsert);
       SDL_DEBUG(WordToCharacters, "for input state " << s
                                                      << " with input label: " << sdl::printer(wordsym, vocab_)
-                                                     << ": output: " << sdl::printer(toStates, hg_));
+                                                     << ": output: " << sdl::printer(insertStates, hg_));
     }
   }
 
@@ -99,29 +104,24 @@ struct WordToCharacters {
     Arc* arc = (Arc*)a;
     StateIdContainer& tails = arc->tails_;
     for (StateIdContainer::iterator i = tails.begin(), iend = tails.end(); i != iend; ++i) {
-      StateIdContainer const& replacelex = replaceByStates_[*i];
+      StateIdContainer const& replacelex = insertStatesForTail_[*i];
       StateIdContainer::const_iterator j = replacelex.begin(), jend = replacelex.end();
       if (j != jend) {
-        *i = *j;
-        ++j;
-        assert(j < jend);
         StateId lastHead = arc->head_;
         StateId tail = hg_->addState();
         arc->head_ = tail;
-        if (++j != jend)
-          for (;;) {
-            assert(j < jend);
-            StateId symstate = *j;
-            if (++j == jend) {
-              addArcLater_(new Arc(HeadAndTail(), lastHead, tail, symstate));
-              break;
-            } else {
-              StateId head = hg_->addState();
-              addArcLater_(new Arc(HeadAndTail(), head, tail, symstate));
-              tail = head;
-            }
+        for (;;) {
+          assert(j < jend);
+          StateId symstate = *j;
+          if (++j == jend) {
+            addArcLater_(new Arc(HeadAndTail(), lastHead, tail, symstate));
+            return; // only one lexical sym expanded per arc (recall input is graph + one lexical per tail)
+          } else {
+            StateId const head = hg_->addState();
+            addArcLater_(new Arc(HeadAndTail(), head, tail, symstate));
+            tail = head;
           }
-        break;
+        }
       }
     }
   }
@@ -140,7 +140,7 @@ struct WordToCharacters {
       hg_->reserveAdditionalStates(nAddedArcsMinimum_);
       // if all labeled states were used, we add at least this many tails (could
       // be more if multiple arcs per state)
-      hg_->clearCanonicalLexCache(); // we will be modifying some labels
+      hg_->clearCanonicalLexCache();  // we will be modifying some labels
       hg_->forceFirstTailOutArcsOnly();
       for (StateId s = 0, N = hg_->sizeForHeads(); s < N; ++s) hg_->visitOutArcs(s, *this);
       addArcLater_.finish();

@@ -94,7 +94,7 @@ Out& printRange(Out& out, Iter i, Iter end, RangeSep const& sep = RangeSep()) {
   return out;
 }
 
-template <class O, class C, class Enable = graehl::is_nonstring_container<C>>
+template <class O, class C>
 O& printRange(O& o, C const& c, RangeSep const& r = RangeSep()) {
   //  return printRange(o, boost::begin(c), boost::end(c), r);
   return printRange(o, std::begin(c), std::end(c), r);
@@ -230,16 +230,6 @@ StateRangeSep<add_lvalue_reference_t<X>> stateRange(X& x, RangeSep s = RangeSep(
   return StateRangeSep<add_lvalue_reference_t<X>>(x, s);
 }
 
-template <class V>
-inline void print(std::ostream& o, V const& v, RangeSep const& r) {
-  printRange(o, v, r);
-}
-
-template <class V, class X>
-inline void print(std::ostream& o, V const& v, StateRangeSep<X> const& r) {
-  printRangeState(o, r.state, v, r.r);
-}
-
 template <class X>
 struct StateRangeRangeSep {
   RangeSep outer;
@@ -258,11 +248,6 @@ template <class X>
 StateRangeRangeSep<add_lvalue_reference_t<X>> stateRangeRange(X& x, RangeSep outer = RangeSep(multiline()),
                                                               RangeSep inner = RangeSep(singleline())) {
   return StateRangeRangeSep<add_lvalue_reference_t<X>>(x, outer, inner);
-}
-
-template <class V, class X>
-void print(std::ostream& o, V const& v, StateRangeRangeSep<X> const& rr) {
-  printRangeState(o, rr.inner, v, rr.outer);
 }
 
 // Wraps range in PrintableRange, which has output operator.
@@ -379,6 +364,20 @@ std::string printed(Val const& val, State const& state) {
   return out.str();
 }
 
+template <class C, class Enable = typename graehl::is_nonstring_container<C>::type>
+inline void print(std::ostream& o, C const& c, RangeSep const& r) {
+  printRange(o, c, r);
+}
+
+template <class C, class X, class Enable = typename graehl::is_nonstring_container<C>::type>
+inline void print(std::ostream& o, C const& c, StateRangeSep<X> const& r) {
+  printRangeState(o, r.state, c, r.r);
+}
+
+template <class C, class X, class Enable = typename graehl::is_nonstring_container<C>::type>
+void print(std::ostream& o, C const& c, StateRangeRangeSep<X> const& rr) {
+  printRangeState(o, rr.inner, c, rr.outer);
+}
 
 }}
 

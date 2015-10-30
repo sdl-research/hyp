@@ -192,10 +192,12 @@ struct ArcTpl : ArcBase {
   }
   ArcTpl(HeadAndTail, StateId head, StateId tail0, StateId tail1) : ArcBase(tail0, tail1) {
     head_ = head;
+    setOne(weight_);
   }
   ArcTpl(HeadAndTail, StateId head, StateId tail0, StateId tail1, Weight const& weight)
       : ArcBase(tail0, tail1), weight_(weight) {
     head_ = head;
+    setOne(weight_);
   }
 
   template <class Weight>
