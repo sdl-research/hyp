@@ -33,6 +33,7 @@
 #include <boost/regex_fwd.hpp>
 #include <vector>
 #include <string>
+#include <sdl/gsl.hpp>
 
 namespace boost {
 template <class BidiIterator>
@@ -247,6 +248,7 @@ struct Field : Slice {
       return Field(f, i);
     }
   }
+  //operator string_view<>() const { return string_view<>((char*)begin(), (char*)end()); }
 };
 
 typedef boost::hash<Field> FieldHash;

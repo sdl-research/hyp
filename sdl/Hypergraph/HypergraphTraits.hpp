@@ -26,11 +26,13 @@
 #include <graehl/shared/epsilon.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Util/PointerHash.hpp>
 
 namespace sdl {
 namespace Hypergraph {
 
-/* following boost graph library conventions, even though hyperarcs aren't really edges (don't have a unique source but instead, several tails) */
+/* following boost graph library conventions, even though hyperarcs aren't really edges (don't have a unique
+ * source but instead, several tails) */
 
 struct HypergraphTraversalTag : boost::vertex_list_graph_tag, boost::bidirectional_graph_tag {};
 
@@ -67,7 +69,7 @@ ArcId out_degree(IHypergraph<A> const& h, StateId s) {
 
 template <class A>
 ArcId degree(IHypergraph<A> const& h, StateId s) {
-  return h.numInArcs(s)+h.numOutArcs(s);
+  return h.numInArcs(s) + h.numOutArcs(s);
 }
 
 template <class A>
@@ -107,9 +109,7 @@ struct ReadEdgeCostMap {
   typedef typename Weight::FloatT value_type;
   typedef value_type reference;
   typedef boost::readable_property_map_tag category;
-  reference operator[](ArcHandle a) const {
-    return ((A*)a)->weight().getValue();
-  }
+  reference operator[](ArcHandle a) const { return ((A*)a)->weight().getValue(); }
 };
 
 template <class A>
@@ -121,14 +121,13 @@ template <class A>
 ReadEdgeCostMap<A> readEdgeCostMap(IHypergraph<A> const& h) {
   return ReadEdgeCostMap<A>();
 }
-
-
-}}
+}
+}
 
 namespace boost {
 
 template <class A>
-struct graph_traits<sdl::Hypergraph::IHypergraph<A> > {
+struct graph_traits<sdl::Hypergraph::IHypergraph<A>> {
   typedef A Arc;
   typedef sdl::Hypergraph::IHypergraph<A> H;
 
@@ -150,10 +149,10 @@ struct graph_traits<sdl::Hypergraph::IHypergraph<A> > {
 namespace graehl {
 
 template <class A>
-struct path_traits<sdl::Hypergraph::IHypergraph<A> > : graehl::cost_path_traits<typename A::Weight::FloatT> {};
+struct path_traits<sdl::Hypergraph::IHypergraph<A>> : graehl::cost_path_traits<typename A::Weight::FloatT> {};
 
 template <class A>
-struct edge_traits<sdl::Hypergraph::IHypergraph<A> > {
+struct edge_traits<sdl::Hypergraph::IHypergraph<A>> {
   typedef sdl::Hypergraph::IHypergraph<A> G;
   typedef typename path_traits<G>::cost_type cost_type;
   typedef sdl::Hypergraph::TailId tail_descriptor;
@@ -164,16 +163,16 @@ struct edge_traits<sdl::Hypergraph::IHypergraph<A> > {
 
 // visit is in ns graehl so ADL doesn't cause ambiguity
 template <class A, class V>
-void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V &v) { // v(edge_desciptor = A*)
+void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V& v) {  // v(edge_desciptor = A*)
   h.forArcsSafe(sdl::Util::visitorReference(v));
 }
 
 template <class A, class V>
-void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V const&v) {
+void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V const& v) {
   h.forArcsSafe(sdl::Util::visitorReference(v));
 }
 
-//default factory for vertex_tag is fine (descriptors start at 0)
+// default factory for vertex_tag is fine (descriptors start at 0)
 template <class A>
 struct property_factory<sdl::Hypergraph::IHypergraph<A>, edge_tag> {
   typedef edge_tag ptag;
@@ -181,18 +180,22 @@ struct property_factory<sdl::Hypergraph::IHypergraph<A>, edge_tag> {
   typedef boost::graph_traits<G> GT;
   property_factory() {}
   typename size_traits<G, ptag>::size_type N;
-  property_factory(G const& g) : N(g.size()) {} // COMPILER BUG? size(g, ptag()) isn't found (see property_factory.hpp)
+  property_factory(G const& g)
+      : N(g.size()) {}  // COMPILER BUG? size(g, ptag()) isn't found (see property_factory.hpp)
   property_factory(property_factory const& o) : N(o.N) {}
   template <class V>
-  std::size_t init() const { return 2*N; }
+  std::size_t init() const {
+    return 2 * N;
+  }
   template <class V>
   struct rebind {
-    property_factory &p;
-    rebind(property_factory & p) : p(p) {}
+    property_factory& p;
+    rebind(property_factory& p) : p(p) {}
     rebind(rebind const& o) : p(o.p) {}
     std::size_t init() const { return p.template init<V>(); }
-    typedef sdl::unordered_map<sdl::Hypergraph::ArcHandle, V, ptr_hash<A> > impl;
-    //TODO: hash_map w/ setEmpty w/ setEmptyKey(map)
+    typedef sdl::unordered_map<sdl::Hypergraph::ArcHandle, V, sdl::Util::PointerHash<A>> impl;
+
+    // TODO: hash_map w/ setEmpty w/ setEmptyKey(map)
     typedef boost::associative_property_map<impl> reference;
   };
 };

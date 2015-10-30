@@ -10,36 +10,52 @@
 // limitations under the License.
 #include <sdl/Util/Equal.hpp>
 #include <boost/regex.hpp>
+#include <sdl/Util/Split.hpp>
+#include <graehl/shared/split.hpp>
+#include <sdl/Util/Add.hpp>
+#include <sdl/Util/Sorted.hpp>
 
 namespace sdl {
 namespace Util {
 
+typedef std::set<std::string> StringsSet;
 
-typedef std::set<std::string> LinesUnordered;
-
-LinesUnordered difference(LinesUnordered const& a, LinesUnordered const& b) {
-  LinesUnordered a_minus_b;
+StringsSet difference(StringsSet const& a, StringsSet const& b) {
+  StringsSet a_minus_b;
   std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::inserter(a_minus_b, a_minus_b.end()));
   return a_minus_b;
 }
 
-bool StreamLinesUnorderedEqual(std::istream& stream1, std::istream& stream2, char const* first_name,
-                                      char const* second_name, bool warn) {
-  LinesUnordered stream1_lines, stream2_lines;
-#define SDL_EQUAL_MSG()                                                                                 \
-  "NOT (unordered) EQUAL:\n " << first_name << ": {[(\n" << print(stream1_lines, multiLineNoBrace())    \
-                              << "\n)]} " << second_name << ": {(" << print(stream2_lines, multiLine()) \
-                              << ")}\n\n difference " << first_name << " - " << second_name << ": {"    \
-                              << print(difference(stream1_lines, stream2_lines), multiLine())           \
-                              << "} difference " << second_name << " - " << first_name << ": {"         \
-                              << print(difference(stream2_lines, stream1_lines), multiLine())
 
-  std::copy(linesNoTrailingSpacesBegin(stream1), linesNoTrailingSpacesEnd(),
-            std::inserter(stream1_lines, stream1_lines.end()));
-  std::copy(linesNoTrailingSpacesBegin(stream2), linesNoTrailingSpacesEnd(),
-            std::inserter(stream2_lines, stream2_lines.end()));
+void normalizeLine(std::string& line, bool sortWords, char wordsep) {
+  chomp(line);
+  if (sortWords) {
+    graehl::join_to(line, Util::sorted(graehl::split(line, wordsep)), wordsep);
+    SDL_DEBUG(Equal.getlineWords, "after sortWords: '" << line << "'");
+  }
+}
 
-  if (stream1_lines == stream2_lines)
+static void normalizeLines(Strings const& in, StringsSet& out, bool sortWords, char wordsep = ' ') {
+  for (std::string line : in) {
+    normalizeLine(line, sortWords, wordsep);
+    out.insert(std::move(line));
+  }
+}
+
+bool StringsUnorderedEqual(Strings const& lines1, Strings const& lines2, bool sortWords, char const* name1,
+                           char const* name2, bool warn) {
+  StringsSet lines1Set, lines2Set;
+  normalizeLines(lines1, lines1Set, sortWords);
+  normalizeLines(lines2, lines2Set, sortWords);
+#define SDL_EQUAL_MSG()                                                                                     \
+  "NOT (unordered) EQUAL:\n "                                                                               \
+      << name1 << ": {[(\n" << print(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {("          \
+      << print(lines2Set, multiLine()) << ")}\n\n difference " << name1 << " - " << name2 << ": {"          \
+      << print(difference(lines1Set, lines2Set), multiLine()) << "} difference " << name2 << " - " << name1 \
+      << ": {" << print(difference(lines2Set, lines1Set), multiLine()) << "\n} original " << name1          \
+      << ": {[\n" << print(lines1, multiLineNoBrace()) << "\n]} original " << name2 << ": {[\n"             \
+      << print(lines2, multiLineNoBrace()) << "]}"
+  if (lines1Set == lines2Set)
     return true;
   else {
     if (warn)
@@ -48,14 +64,6 @@ bool StreamLinesUnorderedEqual(std::istream& stream1, std::istream& stream2, cha
       SDL_INFO(Util, SDL_EQUAL_MSG());
     return false;
   }
-}
-
-bool StreamLinesEqual(std::istream& stream1, std::istream& stream2, char const* first_name,
-                      char const* second_name) {
-  std::vector<std::string> stream1_lines, stream2_lines;
-  std::copy(linesNoTrailingSpacesBegin(stream1), linesNoTrailingSpacesEnd(), std::back_inserter(stream1_lines));
-  std::copy(linesNoTrailingSpacesBegin(stream2), linesNoTrailingSpacesEnd(), std::back_inserter(stream2_lines));
-  return stream1_lines == stream2_lines;
 }
 
 /**
@@ -79,7 +87,7 @@ bool StreamLinesEqual(std::istream& stream1, std::istream& stream2, char const* 
    searched.)
 
 */
-std::string ReplaceIntegersCopy(std::string const& str, std::string const& replaceIntegersBy) {
+std::string ReplacedIntegers(std::string const& str, std::string const& replaceIntegersBy) {
   static boost::regex integerRegexp("(?<![-0-9.])[[:digit:]]+(?:(?![.0-9[])|$)");
   using namespace boost::regex_constants;
   return boost::regex_replace(str, integerRegexp, replaceIntegersBy, format_literal | format_all);

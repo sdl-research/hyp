@@ -42,7 +42,7 @@ class FlatStringHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
 
  public:
   FlatStringHypergraphsIterator(std::istream& in, shared_ptr<IPerThreadVocabulary> const& perThreadVocab,
-                                sdl::shared_ptr<IFeaturesPerInputPosition> feats)
+                                shared_ptr<IFeaturesPerInputPosition> feats)
       : in_(in), pHg_(NULL), perThreadVocab_(perThreadVocab), done_(false), hgProp_(kStoreOutArcs) {
     toHypergraphOpt.doAddUnknownSymbols = true;
     toHypergraphOpt.inputFeatures = feats;

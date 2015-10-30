@@ -21,9 +21,9 @@
 #include <algorithm>
 #include <vector>
 #include <list>
+#include <utility>
 #include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Util/VoidIf.hpp>
-
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/size.hpp>
@@ -53,6 +53,12 @@ void sort(Cont& cont) {
 template <class Cont, class Before>
 void sort(Cont& cont, Before before) {
   std::sort(cont.begin(), cont.end(), before);
+}
+
+template <class Cont>
+Cont sorted(Cont &&cont) {
+  sort(cont);
+  return std::forward<Cont>(cont);
 }
 
 template <class Cont>

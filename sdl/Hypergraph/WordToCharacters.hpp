@@ -92,29 +92,29 @@ struct WordToCharacters {
   void operator()(ArcBase* a) const {
     Arc* arc = (Arc*)a;
     StateIdContainer& tails = arc->tails_;
-    for (StateIdContainer::iterator i = tails.begin(), e = tails.end(); i != e; ++i) {
+    for (StateIdContainer::iterator i = tails.begin(), iend = tails.end(); i != iend; ++i) {
       StateIdContainer const& replacelex = replaceByStates_[*i];
       StateIdContainer::const_iterator j = replacelex.begin(), jend = replacelex.end();
-      if (j != e) {
+      if (j != jend) {
         *i = *j;
         ++j;
-        assert(j != jend);
+        assert(j < jend);
         StateId lastHead = arc->head_;
         StateId tail = hg_->addState();
         arc->head_ = tail;
-        ++j;
-        for (;;) {
-          assert(j != jend);
-          StateId symstate = *j;
-          if (++j == jend) {
-            addArcLater_(new Arc(HeadAndTail(), lastHead, tail, symstate));
-            break;
-          } else {
-            StateId head = hg_->addState();
-            addArcLater_(new Arc(HeadAndTail(), head, tail, symstate));
-            tail = head;
+        if (++j != jend)
+          for (;;) {
+            assert(j < jend);
+            StateId symstate = *j;
+            if (++j == jend) {
+              addArcLater_(new Arc(HeadAndTail(), lastHead, tail, symstate));
+              break;
+            } else {
+              StateId head = hg_->addState();
+              addArcLater_(new Arc(HeadAndTail(), head, tail, symstate));
+              tail = head;
+            }
           }
-        }
         break;
       }
     }
@@ -135,7 +135,7 @@ struct WordToCharacters {
       // if all labeled states were used, we add at least this many tails (could
       // be more if multiple arcs per state)
       hg_->forceFirstTailOutArcsOnly();
-      for (StateId s = 0, N = hg_->sizeForHeads(); s < N; ++s) hg_->visitInArcs(s, *this);
+      for (StateId s = 0, N = hg_->sizeForHeads(); s < N; ++s) hg_->visitOutArcs(s, *this);
       addArcLater_.finish();
     }
   }

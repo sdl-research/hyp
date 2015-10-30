@@ -18,7 +18,7 @@ namespace sdl {
 
 struct IVocabulary;
 
-typedef sdl::shared_ptr<IVocabulary> IVocabularyPtr;
+typedef shared_ptr<IVocabulary> IVocabularyPtr;
 
 }
 

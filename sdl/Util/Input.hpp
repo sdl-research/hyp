@@ -320,7 +320,7 @@ struct Inputs : InputsOptions {
 
 // Reads a file (possibly decrypting it) into a string.
 // Should only be used for small files.
-inline sdl::shared_ptr<std::string> readFile(std::string const& filename) {
+inline shared_ptr<std::string> readFile(std::string const& filename) {
   Util::Input in(filename, false);
   return in.decryptedString();
 }

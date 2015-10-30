@@ -56,7 +56,7 @@ void Input::init(std::string const& filename, bool mayDecrypt, bool allowNullFil
   }
 }
 
-sdl::shared_ptr<std::string> const& Input::decryptedString() {
+shared_ptr<std::string> const& Input::decryptedString() {
   if (!decrypted) {
     decrypted.reset(new std::string);
 #if SDL_ENCRYPT

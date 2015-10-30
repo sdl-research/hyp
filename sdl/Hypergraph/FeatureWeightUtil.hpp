@@ -56,7 +56,7 @@ struct FeaturesVisitor {
   static inline void visit(Weight const&, Visitor&) {
     // no op in no-features weight type (e.g., ViterbiWeight)
   }
-  static inline void setFeatures(Weight&, sdl::shared_ptr<Features> const&) {}
+  static inline void setFeatures(Weight&, shared_ptr<Features> const&) {}
   static inline Features* featuresWrite(Weight& w) { return NULL; }
   static inline Features const* maybeFeatures(Weight const& w) { return NULL; }
 };
@@ -68,8 +68,8 @@ struct FeaturesVisitor<Weight, typename Weight::IsFeatureWeight> {
     typedef typename Weight::value_type value_type;
     for (value_type aPair : weight) { visitor(aPair.first, aPair.second); }
   }
-  static inline void setFeatures(Weight& w, sdl::shared_ptr<Features>& f) { w.setFeatures(std::move(f)); }
-  static inline void setFeatures(Weight& w, sdl::shared_ptr<Features> const& f) { w.setFeatures(f); }
+  static inline void setFeatures(Weight& w, shared_ptr<Features>& f) { w.setFeatures(std::move(f)); }
+  static inline void setFeatures(Weight& w, shared_ptr<Features> const& f) { w.setFeatures(f); }
   static inline Features* featuresWrite(Weight& w) { return &w.featuresWrite(); }
   static inline Features const* maybeFeatures(Weight const& w) { return w.maybeFeatures(); }
 };
@@ -96,13 +96,13 @@ Features const* maybeFeatures(Weight const& w) {
 }
 
 template <class Weight>
-inline void setFeatures(Weight& w, sdl::shared_ptr<Features> const& f) {
+inline void setFeatures(Weight& w, shared_ptr<Features> const& f) {
   FeaturesVisitor<Weight>::setFeatures(w, f);
 }
 
 /// may move-assign f (you can't use it after without reassigning to it first)
 template <class Weight>
-inline void setFeatures(Weight& w, sdl::shared_ptr<Features>& f) {
+inline void setFeatures(Weight& w, shared_ptr<Features>& f) {
   FeaturesVisitor<Weight>::setFeatures(w, f);
 }
 

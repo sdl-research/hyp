@@ -20,7 +20,7 @@
 #include <iostream>
 #include <string>
 #include <graehl/shared/normalize_range.hpp>
-#include <graehl/shared/split.hpp>
+#include <graehl/shared/split_noquote.hpp>
 #include <sdl/Util/Utf8.hpp>
 #include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/InvalidInputException.hpp>
@@ -65,7 +65,7 @@ struct WordListOptions : Util::LineOptions {
     c("counts", &counts)("wordlist has counts (implicit count of 1 is used if false)").self_init();
     c("unigram-addk", &unigram_addk)("weight for unigram backoff - take all known chars and add this count - even if the char never appeared as a word (had count 0). this should be >0 or else there may be character sequences that have no derivations").self_init();
     c('c')("chars", &chars)("treat input as utf8 characters (else space separated words)").self_init();
-    c("wordsep", &wordsep)("if not chars, then separate tokens by this char").self_init();
+    c("wordsep", &wordsep)("if not chars, then separate tokens by this string").self_init();
     c("length-base", &lengthBase)("scale counts based on length of word: L^n where word is n long; 1 means neutral, <1 rewards shorter words. note: applies to unigram-addk too").self_init();
     c("max-length-exponent", &maxLength)("limit the length M used in B^M to this - result should fit in double").self_init();
   }

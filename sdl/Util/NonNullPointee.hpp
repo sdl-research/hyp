@@ -34,7 +34,8 @@ struct NonNullPointeeEqual {
 };
 
 /**
-   if value == is expensive and pointers may alias, check pointers first.
+   if value == is expensive and pointers may alias, check pointers first. not
+   useful for hash tables unless you know you'll reuse same raw-pointer key
 */
 struct NonNullPointeeEqualExpensive {
   typedef bool result_type;
