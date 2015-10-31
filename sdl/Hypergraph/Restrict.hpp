@@ -47,6 +47,8 @@ struct Restrict {
 
   explicit Restrict(Filter const& keep, bool clearRemap = true) : keep(keep), clearRemap(clearRemap) {}
 
+  Restrict(Restrict const& o) = delete;
+
   /// you must populate this if it's frozen, in which case it removes states not
   /// mapped. otherwise all states are mapped
   mutable StateIdTranslation stateRemap;
@@ -131,6 +133,7 @@ struct RestrictPrepare : Restrict<A> {
         m.setEmpty();
     }
   }
+  RestrictPrepare(RestrictPrepare const& o) = delete;
 };
 
 

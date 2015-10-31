@@ -307,10 +307,11 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
     PruneEpsilon pruneEpsilon(opt);
     pruneEpsilon.inplace(hg);
   }
-  PruneToBest() {}
+
   template <class Opt>
   PruneToBest(Opt const& opt)
       : opt(opt) {}
+  PruneToBest(PruneToBest const& o) = delete;
 
   bool needs(IHypergraph<A>& hg) const {
     return needsRestrict(hg);
@@ -342,7 +343,6 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
   }
 };
 
-
 template <class Arc>
 void PruneToBestOptions::inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {
   PruneToBest<Arc> p(*this);
@@ -361,6 +361,13 @@ void justBest(IMutableHypergraph<Arc>& hg, bool leaveSimplePathAlone = true) {
   PruneToBestOptions opt;
   opt.skipAlreadySingle = leaveSimplePathAlone;
   inplace(hg, PruneToBestTransform(opt));
+}
+
+template <class Arc>
+void justBest(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>& out, bool leaveSimplePathAlone = true) {
+  PruneToBestOptions opt;
+  opt.skipAlreadySingle = leaveSimplePathAlone;
+  opt.inout(hg, &out);
 }
 
 /// Options is either PruneToBestOptions or PruneEpsilonOptions

@@ -35,18 +35,19 @@ void normalizeLine(std::string& line, bool sortWords, char wordsep) {
   }
 }
 
-static void normalizeLines(Strings const& in, StringsSet& out, bool sortWords, char wordsep = ' ') {
+static void normalizeLines(Strings const& in, StringsSet& out, bool sortWords, bool ignoreBlankLines,
+                           char wordsep = ' ') {
   for (std::string line : in) {
     normalizeLine(line, sortWords, wordsep);
-    out.insert(std::move(line));
+    if (!ignoreBlankLines || !line.empty()) out.insert(std::move(line));
   }
 }
 
 bool StringsUnorderedEqual(Strings const& lines1, Strings const& lines2, bool sortWords, char const* name1,
-                           char const* name2, bool warn) {
+                           char const* name2, bool warn, bool ignoreBlankLines) {
   StringsSet lines1Set, lines2Set;
-  normalizeLines(lines1, lines1Set, sortWords);
-  normalizeLines(lines2, lines2Set, sortWords);
+  normalizeLines(lines1, lines1Set, sortWords, ignoreBlankLines);
+  normalizeLines(lines2, lines2Set, sortWords, ignoreBlankLines);
 #define SDL_EQUAL_MSG()                                                                                   \
   "NOT (unordered) EQUAL:\n "                                                                             \
       << name1 << ": {[(\n" << sdl::printer(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {(" \

@@ -23,25 +23,9 @@
 
 namespace sdl {
 
-/**
-   usage:
-   template<typename T>
-   struct wrapper
-   {
-   T value;
-   template<typename U, typename X =
-   disable_if_same_or_derived<wrapper,U>>
-   wrapper( U && u )
-   : value( std::forward<U>(u) )
-   {}
-   };
-
-   to avoid an unhelpful 'copy constructor'
-*/
-
 #if __cplusplus < 201400L
 
-template <std::size_t Len, std::size_t Align = /*default-alignment*/>
+template <std::size_t Len, std::size_t Align = alignof(std::max_align_t)> /*default-alignment*/
 using aligned_storage_t = typename std::aligned_storage<Len, Align>::type;
 
 template <std::size_t Len, class... Types>

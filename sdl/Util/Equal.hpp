@@ -50,41 +50,50 @@ using graehl::chomped_lines;
 */
 bool StringsUnorderedEqual(std::vector<std::string> const& lines1, std::vector<std::string> const& lines2,
                            bool sortWords = false, char const* name1 = "GOT", char const* name2 = "REF",
-                           bool warn = true);
+                           bool warn = true, bool ignoreBlankLines = true);
 
 inline bool LinesUnorderedEqual(std::istream& stream1, std::istream& stream2, bool sortWords = false,
-                                char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
-  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(stream2), sortWords, name1, name2, warn);
+                                char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                                bool ignoreBlankLines = true) {
+  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(stream2), sortWords, name1, name2, warn,
+                               ignoreBlankLines);
 }
 
 inline bool LinesUnorderedEqual(std::istream& stream1, std::string const& lines2, bool sortWords = false,
-                                char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
+                                char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                                bool ignoreBlankLines = true) {
   return StringsUnorderedEqual(chomped_lines(stream1), graehl::chomped_lines(lines2), sortWords, name1, name2,
                                warn);
 }
 
 inline bool LinesUnorderedEqual(std::string const& str1, std::string const& str2, bool sortWords = false,
-                                char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
-  return StringsUnorderedEqual(chomped_lines(str1), chomped_lines(str2), sortWords, name1, name2, warn);
+                                char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                                bool ignoreBlankLines = true) {
+  return StringsUnorderedEqual(chomped_lines(str1), chomped_lines(str2), sortWords, name1, name2, warn,
+                               ignoreBlankLines);
 }
 
 template <class Val1, class If1 = typename not_istream_or_string<Val1>::type>
 bool LinesUnorderedEqual(Val1 const& val1, std::string const& val2, bool sortWords = false,
-                         char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
+                         char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                         bool ignoreBlankLines = true) {
   std::stringstream stream1;
   stream1 << val1;
-  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(val2), sortWords, name1, name2, warn);
+  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(val2), sortWords, name1, name2, warn,
+                               ignoreBlankLines);
 }
 
 template <class Val1, class Val2, class If1 = typename not_istream_or_string<Val1>::type,
           class If2 = not_istream_or_string_t<Val2>>
 bool LinesUnorderedEqual(Val1 const& val1, Val2 const& val2, bool sortWords = false,
-                         char const* name1 = "GOT", char const* name2 = "REF", bool warn = true) {
+                         char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                         bool ignoreBlankLines = true) {
   std::stringstream stream1;
   stream1 << val1;
   std::stringstream stream2;
   stream1 << val2;
-  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(stream2), sortWords, name1, name2, warn);
+  return StringsUnorderedEqual(chomped_lines(stream1), chomped_lines(stream2), sortWords, name1, name2, warn,
+                               ignoreBlankLines);
 }
 
 inline void ReplaceDigits(std::string& str, char replaceDigitsBy = '#') {
@@ -108,13 +117,14 @@ std::string ReplacedIntegers(std::string const& str, std::string const& replaceI
 
 inline bool LinesUnorderedEqualIgnoringDigits(std::string str1, std::string str2, bool sortWords = false,
                                               char const* name1 = "GOT", char const* name2 = "REF",
+                                              bool warn = true, bool ignoreBlankLines = true,
                                               char replaceDigitsBy = '#') {
   if (LinesUnorderedEqual(str1, str2, sortWords, name1, name2, false)) return true;
   SDL_TRACE(Util.Equal, "not exactly equal - trying with digits replaced: [(test)" << str1 << " != " << str2
                                                                                    << "(reference)]\n");
   ReplaceDigits(str1, replaceDigitsBy);
   ReplaceDigits(str2, replaceDigitsBy);
-  bool ok = LinesUnorderedEqual(str1, str2, sortWords, name1, name2);
+  bool ok = LinesUnorderedEqual(str1, str2, sortWords, name1, name2, warn, ignoreBlankLines);
   if (ok)
     SDL_WARN(Util.Equal, " OK - Equal after digit replacement.");
   else
@@ -125,13 +135,14 @@ inline bool LinesUnorderedEqualIgnoringDigits(std::string str1, std::string str2
 
 inline bool LinesUnorderedEqualIgnoringIntegers(std::string str1, std::string str2, bool sortWords = false,
                                                 char const* name1 = "GOT", char const* name2 = "REF",
+                                                bool warn = true, bool ignoreBlankLines = true,
                                                 std::string const& replaceIntegersBy = "#") {
-  if (LinesUnorderedEqual(str1, str2, sortWords, name1, name2, false)) return true;
+  if (LinesUnorderedEqual(str1, str2, sortWords, name1, name2, false, ignoreBlankLines)) return true;
   SDL_TRACE(Util.Equal, "not exactly equal - trying with digits replaced: [(test)" << str1 << " != " << str2
                                                                                    << "(reference)]\n");
   str1 = ReplacedIntegers(str1, replaceIntegersBy);
   str2 = ReplacedIntegers(str2, replaceIntegersBy);
-  bool ok = LinesUnorderedEqual(str1, str2, sortWords, name1, name2);
+  bool ok = LinesUnorderedEqual(str1, str2, sortWords, name1, name2, warn, ignoreBlankLines);
   if (!ok)
     SDL_WARN(Util.Equal, "not exactly equal even after integer replacement and ignoring line order: [(test)\n"
                              << str1 << "\n  !=  \n" << str2 << "\n (reference)]\n");
@@ -142,27 +153,31 @@ inline bool LinesUnorderedEqualIgnoringIntegers(std::string str1, std::string st
 
 template <class Val1>
 bool LinesUnorderedEqualIgnoringDigits(Val1 const& val1, std::string const& ref, bool sortWords = false,
-                                       char const* name1 = "GOT", char const* name2 = "REF",
-                                       char replaceDigitsBy = '#',
+                                       char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                                       bool ignoreBlankLines = true, char replaceDigitsBy = '#',
                                        typename not_istream_or_string<Val1>::type* = 0) {
   std::stringstream ss;
   ss << val1;
-  return LinesUnorderedEqualIgnoringDigits(ss.str(), ref, sortWords, name1, name2, replaceDigitsBy);
+  return LinesUnorderedEqualIgnoringDigits(ss.str(), ref, sortWords, name1, name2, warn, ignoreBlankLines,
+                                           replaceDigitsBy);
 }
 
 template <class Val1>
 bool LinesUnorderedEqualIgnoringIntegers(Val1 const& val1, std::string const& ref, bool sortWords = false,
                                          char const* name1 = "GOT", char const* name2 = "REF",
+                                         bool warn = true, bool ignoreBlankLines = true,
                                          std::string const& replaceIntegersBy = "#",
                                          typename not_istream_or_string<Val1>::type* = 0) {
   std::stringstream ss;
   ss << val1;
-  return LinesUnorderedEqualIgnoringIntegers(ss.str(), ref, sortWords, name1, name2, replaceIntegersBy);
+  return LinesUnorderedEqualIgnoringIntegers(ss.str(), ref, sortWords, name1, name2, warn, ignoreBlankLines,
+                                             replaceIntegersBy);
 }
 
 template <class Val1, class Val2>
 bool LinesUnorderedEqualIgnoringIntegers(Val1 const& val1, Val2 const& val2, bool sortWords = false,
                                          char const* name1 = "GOT", char const* name2 = "REF",
+                                         bool warn = true, bool ignoreBlankLines = true,
                                          std::string const& replaceIntegersBy = "#",
                                          typename not_istream_or_string<Val1>::type* = 0,
                                          typename not_istream_or_string<Val2>::type* = 0) {
@@ -170,7 +185,8 @@ bool LinesUnorderedEqualIgnoringIntegers(Val1 const& val1, Val2 const& val2, boo
   ss << val1;
   std::stringstream ss2;
   ss2 << val2;
-  return LinesUnorderedEqualIgnoringIntegers(ss.str(), ss2.str(), sortWords, name1, name2, replaceIntegersBy);
+  return LinesUnorderedEqualIgnoringIntegers(ss.str(), ss2.str(), sortWords, name1, name2, warn,
+                                             ignoreBlankLines, replaceIntegersBy);
 }
 
 /**
@@ -199,12 +215,9 @@ bool byStrEqual(T const& val1, T const& val2, char const* name1 = "", char const
 }
 
 void normalizeLine(std::string& line, bool sortWords, char wordsep = ' ');
+
 }
 }
 
-
-#define SDL_ARE_EQUAL_STR(obj, val2) sdl::Util::byStrEqual(obj, val2, #obj, #val2)
-#define SDL_REQUIRE_EQUAL_STR(obj, val2) BOOST_REQUIRE(SDL_ARE_EQUAL_STR(obj, val2))
-#define SDL_CHECK_EQUAL_STR(obj, val2) BOOST_CHECK(SDL_ARE_EQUAL_STR(obj, val2))
 
 #endif
