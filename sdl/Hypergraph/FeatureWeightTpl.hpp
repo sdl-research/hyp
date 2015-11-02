@@ -129,11 +129,15 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
 
   FeatureWeightTpl() = default;
 
+  FeatureWeightTpl(FeatureWeightTpl const& o) = default;
+  FeatureWeightTpl(FeatureWeightTpl && o) = default;
+  FeatureWeightTpl & operator=(FeatureWeightTpl const& o) = default;
+  FeatureWeightTpl & operator=(FeatureWeightTpl && o) = default;
+
   /** copy ctor that immediately makes a unique writable pointer */
   FeatureWeightTpl(FeatureWeightTpl const& cpfrom, bool)
       : Base(cpfrom), pMap_(sdl::make_shared<Map>(cpfrom.features())) {}
 
-  /// copy, operator=(), C++11 moves are all default
 
   FeatureWeightTpl(FloatT weight, shared_ptr<Map> const& pMap) : Base(weight), pMap_(pMap) {}
 
