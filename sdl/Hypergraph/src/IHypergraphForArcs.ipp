@@ -53,19 +53,19 @@
       forArcsOutFirstTail(v);
       return;
     }
-#define FORSTATE(state)                                \
+#define FORSTATE(s)                                \
   do {                                                 \
-    if (!hasLexicalLabel(state)) forArcsOut(state, v); \
+    if (!hasLexicalLabel(s)) forArcsOut(s, v); \
   } while (0)
     StateId st = start();
-    StateId state = 0, e = this->size();
+    StateId s = 0, e = this->size();
     if (st == Hypergraph::kNoState)
-      for (; state < e; ++state) FORSTATE(state);
+      for (; s < e; ++s) FORSTATE(s);
     else {
       assert(!hasLexicalLabel(st));
       FORSTATE(st);
-      for (; state < st; ++state) FORSTATE(state);
-      for (++state; state < e; ++state) FORSTATE(state);
+      for (; s < st; ++s) FORSTATE(s);
+      for (++s; s < e; ++s) FORSTATE(s);
 #undef FORSTATE
     }
   }
@@ -81,11 +81,11 @@
   }
 
   template <class V>
-  void forArcsOut(StateId state, V const& v, bool firstTailOnly) const {
+  void forArcsOut(StateId s, V const& v, bool firstTailOnly) const {
     if (firstTailOnly)
-      forArcsOutFirstTail(state, v);
+      forArcsOutFirstTail(s, v);
     else
-      forArcsOut(state, v);
+      forArcsOut(s, v);
   }
 
   /**
@@ -100,9 +100,9 @@
       return forArcsOutAny(tail, v);
     else
       // TODO: test
-      for (StateId state = 0, e = this->size(); state < e; ++state)
-        for (ArcId a = 0, f = this->numInArcs(state); a != f; ++a) {
-          Arc* pa = this->inArc(state, a);
+      for (StateId s = 0, e = this->size(); s < e; ++s)
+        for (ArcId a = 0, f = this->numInArcs(s); a != f; ++a) {
+          Arc* pa = this->inArc(s, a);
           if (Util::contains(pa->tails_, tail))
             if (v(tail, pa)) return true;
         }
@@ -119,10 +119,10 @@
       return forArcsInAny(head, v);
     else {
       bool storefirst = p & kStoreFirstTailOutArcs;
-      for (StateId state = 0, e = this->size(); state < e; ++state)
-        for (ArcId a = 0, f = this->numOutArcs(state); a != f; ++a) {
-          Arc* pa = this->outArc(state, a);
-          if (pa->head_ == head && (storefirst || !firstTailOnly || pa->tails_[0] == state))
+      for (StateId s = 0, e = this->size(); s < e; ++s)
+        for (ArcId a = 0, f = this->numOutArcs(s); a != f; ++a) {
+          Arc* pa = this->outArc(s, a);
+          if (pa->head_ == head && (storefirst || !firstTailOnly || pa->tails_[0] == s))
             // TODO: test
             if (v(pa)) return true;
         }
@@ -132,56 +132,56 @@
 
   // prefer in if have, else out
   template <class V>
-  void forArcs(StateId state, V const& v) const {
+  void forArcs(StateId s, V const& v) const {
     if (storesInArcs())
-      forArcsIn(state, v);
+      forArcsIn(s, v);
     else
-      forArcsOut(state, v);
+      forArcsOut(s, v);
   }
 
   /**
-     v(state, &a) -> bool. for arcs a with tail 'state'.
+     v(s, &a) -> bool. for arcs a with tail 's'.
 
      \return true iff any v(tail, &a) returned true
   */
   template <class V>
-  bool forArcsOutAny(StateId state, V const& v) const {
-    for (ArcId a = 0, f = this->numOutArcs(state); a < f; ++a)
-      if (v(state, this->outArc(state, a))) return true;
+  bool forArcsOutAny(StateId s, V const& v) const {
+    for (ArcId a = 0, f = this->numOutArcs(s); a < f; ++a)
+      if (v(s, this->outArc(s, a))) return true;
     return false;
   }
 
   /**
-     v(&a) -> bool. for arcs a with head 'state'.
+     v(&a) -> bool. for arcs a with head 's'.
 
      \return true iff any v(&a) returned true
   */
   template <class V>
-  bool forArcsInAny(StateId state, V const& v) const {
-    for (ArcId a = 0, f = this->numInArcs(state); a < f; ++a)
-      if (v(this->inArc(state, a))) return true;
+  bool forArcsInAny(StateId s, V const& v) const {
+    for (ArcId a = 0, f = this->numInArcs(s); a < f; ++a)
+      if (v(this->inArc(s, a))) return true;
     return false;
   }
 
   template <class V>
-  void forArcsOut(StateId state, V const& v) const {
-    for (ArcId a = 0, f = this->numOutArcs(state); a < f; ++a) v(this->outArc(state, a));
+  void forArcsOut(StateId s, V const& v) const {
+    for (ArcId a = 0, f = this->numOutArcs(s); a < f; ++a) v(this->outArc(s, a));
   }
 
   template <class V>
   void forArcsOutEveryTail(V const& v) const {
-    for (StateId state = 0, e = this->size(); state < e; ++state) forArcsOut(state, v);
+    for (StateId s = 0, e = this->size(); s < e; ++s) forArcsOut(s, v);
   }
 
   template <class V>
-  void forArcsIn(StateId state, V const& v) const {
-    for (ArcId a = 0, f = this->numInArcs(state); a != f; ++a) v(this->inArc(state, a));
+  void forArcsIn(StateId s, V const& v) const {
+    for (ArcId a = 0, f = this->numInArcs(s); a != f; ++a) v(this->inArc(s, a));
   }
 
   template <class V>
   void forArcsIn(V const& v) const {
     assert(storesInArcs());
-    for (StateId state = 0, e = this->size(); state != e; ++state) forArcsIn(state, v);
+    for (StateId s = 0, e = this->size(); s != e; ++s) forArcsIn(s, v);
   }
 
   // forArcs visits each Arc * once. for sure. also doesn't mind if there are no
@@ -229,46 +229,47 @@
       this->throwStoresNoArcs();
   }
 
-  // NO LONGER start state first, if there is one
-  // - only WriteOpenFstFormat wanted that, and we replaced it w/ explicit per-state calls.
   template <class V>
   void forArcsOutFirstTail(V const& v) const {
     assert(this->storesOutArcs());
-    StateId state = 0, e = this->size();
-    for (; state < e; ++state) forArcsOutFirstTail(state, v);
+    StateId s = 0, e = this->size();
+    if (this->storesFirstTailOutArcs()) {
+      for (; s < e; ++s) forArcsOut(s, v);
+    } else
+      for (; s < e; ++s) forArcsOutFirstTail(s, v);
   }
 
   // visits out arc only when tail node is same as first tail (can still lead to repeats, though not in Fsm)
   template <class V>
-  void forArcsOutFirstTail(StateId state, V const& v) const {
-    for (ArcId a = 0, f = this->numOutArcs(state); a < f; ++a) {
-      Arc* pa = this->outArc(state, a);
+  void forArcsOutFirstTail(StateId s, V const& v) const {
+    for (ArcId a = 0, f = this->numOutArcs(s); a < f; ++a) {
+      Arc* pa = this->outArc(s, a);
       StateIdContainer const& tails = pa->tails_;
       assert(!tails.empty());
       StateId t0 = *tails.begin();
-      if (t0 == state) v(pa);
+      if (t0 == s) v(pa);
     }
   }
 
   template <class Val, class F>
   void arcsInOnce(F& f, unordered_map<Arc*, Val>& map) const {
     assert(this->storesInArcs());
-    for (StateId state = 0, e = this->size(); state != e; ++state)
-      for (ArcId a = 0, n = this->numInArcs(state); a != n; ++a) Util::getLazy(f, map, this->inArc(state, a));
+    for (StateId s = 0, e = this->size(); s != e; ++s)
+      for (ArcId a = 0, n = this->numInArcs(s); a != n; ++a) Util::getLazy(f, map, this->inArc(s, a));
   }
 
   template <class Val, class F>
   void arcsOutOnce(F& f, unordered_map<Arc*, Val>& map) const {
     assert(this->storesOutArcs());
-    for (StateId state = 0, e = this->size(); state != e; ++state)
-      for (ArcId a = 0, n = this->numOutArcs(state); a != n; ++a) Util::getLazy(f, map, this->outArc(state, a));
+    for (StateId s = 0, e = this->size(); s != e; ++s)
+      for (ArcId a = 0, n = this->numOutArcs(s); a != n; ++a) Util::getLazy(f, map, this->outArc(s, a));
   }
 
   // v(inputLabel(a->tails_[1]), a) - input label only (fsa)
   template <class V>
-  void forArcsFsa(StateId state, V const& v) const {
-    for (ArcId a = 0, f = this->numOutArcs(state); a < f; ++a) {
-      Arc* pa = this->outArc(state, a);
+  void forArcsFsa(StateId s, V const& v) const {
+    for (ArcId a = 0, f = this->numOutArcs(s); a < f; ++a) {
+      Arc* pa = this->outArc(s, a);
       v(this->inputLabel(pa->fsmSymbolState()), *pa);
     }
   }

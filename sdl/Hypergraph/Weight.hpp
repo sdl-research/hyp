@@ -60,7 +60,7 @@
 #define SDL_DEFINE_FLOATWT_CMP(c, cmp)                \
   template <class T>                                  \
   bool operator cmp(c<T> const& w1, c<T> const& w2) { \
-    return w1.value_ cmp w2.value_;           \
+    return w1.value_ cmp w2.value_;                   \
   }
 
 #define SDL_DEFINE_FLOATWT_CMPS(c) \
@@ -91,9 +91,9 @@ class FloatWeightTpl : public WeightBase {
  public:
   typedef T FloatT;
 
-  static inline FloatT kOneValue() { return 0; }
-  //TODO: C++11 constexpr
-  static inline FloatT kZeroValue() { return std::numeric_limits<T>::infinity(); }
+  static inline constexpr FloatT kOneValue() { return 0; }
+  // TODO: C++11 constexpr
+  static inline constexpr FloatT kZeroValue() { return std::numeric_limits<T>::infinity(); }
 
   typedef void HasIsZero;
   bool isZero() const { return value_ == std::numeric_limits<T>::infinity(); }
@@ -105,19 +105,17 @@ class FloatWeightTpl : public WeightBase {
 
   /// uninitialized - we want users to explicitly init to zero or one as
   /// appropriate e.g. vector<ViterbiWeight>(N, ViterbiWeight::zero())
-  FloatWeightTpl() = default;  // uninitialized but an explicit weight() init would then 0-init?
-  FloatWeightTpl(T v) : value_(v) {}
-  FloatWeightTpl(DoubleT v) : value_((T)v) {}
-  FloatWeightTpl(int v) : value_((T)v) {}
-  FloatWeightTpl(std::size_t v) : value_((T)v) {}
+  constexpr FloatWeightTpl() = default;  // uninitialized but an explicit weight() init would then 0-init?
+  constexpr FloatWeightTpl(T v) : value_(v) {}
+  constexpr FloatWeightTpl(DoubleT v) : value_((T)v) {}
+  constexpr FloatWeightTpl(int v) : value_((T)v) {}
+  constexpr FloatWeightTpl(std::size_t v) : value_((T)v) {}
 
   T& value() { return value_; }
 
   T getValue() const { return value_; }
 
-  void set(std::string const& s) {
-    value_ = sdl::lexical_cast<T>(s);
-  }
+  void set(std::string const& s) { value_ = sdl::lexical_cast<T>(s); }
 
   T value_;
 };
@@ -176,11 +174,11 @@ class BooleanWeight : public FloatWeightTpl<bool> {
   typedef bool FloatT;
 
   BooleanWeight() : FloatWeightTpl<bool>() {}
-  static inline bool kOneValue() { return 1; }
-  static inline bool kZeroValue() { return 0; }
+  static inline constexpr bool kOneValue() { return 1; }
+  static inline constexpr bool kZeroValue() { return 0; }
 
   // explicit only because somebody was wrongly activating this implicitly (they should use safe_bool idiom?)
-  explicit BooleanWeight(bool v) : FloatWeightTpl<bool>(v) {}
+  explicit constexpr BooleanWeight(bool v) : FloatWeightTpl<bool>(v) {}
 
   typedef BooleanWeight Self;
   DEFINE_OPENFST_COMPAT_FUNCTIONS(Boolean)
@@ -188,13 +186,12 @@ class BooleanWeight : public FloatWeightTpl<bool> {
   typedef void HasIsOne;
   bool isOne() const { return value_ == true; }
   friend inline void setOne(BooleanWeight& x) { x.value_ = true; }
-  static inline BooleanWeight one() { return BooleanWeight(true); }
+  static inline constexpr BooleanWeight one() { return BooleanWeight(true); }
 
   typedef void HasIsZero;
   bool isZero() const { return value_ == false; }
   friend inline void setZero(BooleanWeight& x) { x.value_ = false; }
-  static inline BooleanWeight zero() { return BooleanWeight(false); }
-
+  static inline constexpr BooleanWeight zero() { return BooleanWeight(false); }
 };
 
 template <class T>
@@ -210,21 +207,23 @@ class ViterbiWeightTpl : public FloatWeightTpl<T> {
 
   typedef T FloatT;
 
-  ViterbiWeightTpl() : Base() {}
+  constexpr ViterbiWeightTpl() : Base() {}
 
-  ViterbiWeightTpl(T v) : Base(v) {}
-  ViterbiWeightTpl(int v) : Base(v) {}
-  ViterbiWeightTpl(std::size_t v) : Base(v) {}
-  ViterbiWeightTpl(typename Base::DoubleT v) : Base(v) {}
+  constexpr ViterbiWeightTpl(T v) : Base(v) {}
+  constexpr ViterbiWeightTpl(int v) : Base(v) {}
+  constexpr ViterbiWeightTpl(std::size_t v) : Base(v) {}
+  constexpr ViterbiWeightTpl(typename Base::DoubleT v) : Base(v) {}
 
   Self& operator=(Base const& other) {
     this->value_ = other.value_;
     return *this;
   }
 
-  static inline ViterbiWeightTpl<T> one() { return ViterbiWeightTpl<T>(0.0f); }
+  static inline constexpr ViterbiWeightTpl<T> one() { return ViterbiWeightTpl<T>(0.0f); }
 
-  static inline ViterbiWeightTpl<T> zero() { return ViterbiWeightTpl<T>(std::numeric_limits<T>::infinity()); }
+  static inline constexpr ViterbiWeightTpl<T> zero() {
+    return ViterbiWeightTpl<T>(std::numeric_limits<T>::infinity());
+  }
 
   void plusBy(Self const& b) {
     if (b.value_ < this->value_) this->value_ = b.value_;
@@ -294,16 +293,18 @@ class LogWeightTpl : public FloatWeightTpl<T> {
 
   typedef T FloatT;
 
-  LogWeightTpl() : Base() {}
+  constexpr LogWeightTpl() : Base() {}
 
-  LogWeightTpl(T v) : Base(v) {}
-  LogWeightTpl(typename Base::DoubleT v) : Base(v) {}
-  LogWeightTpl(int v) : Base(v) {}
-  LogWeightTpl(std::size_t v) : Base(v) {}
+  constexpr LogWeightTpl(T v) : Base(v) {}
+  constexpr LogWeightTpl(typename Base::DoubleT v) : Base(v) {}
+  constexpr LogWeightTpl(int v) : Base(v) {}
+  constexpr LogWeightTpl(std::size_t v) : Base(v) {}
 
-  static inline LogWeightTpl<T> one() { return LogWeightTpl<T>(0.0f); }
+  static inline constexpr LogWeightTpl<T> one() { return LogWeightTpl<T>(0.0f); }
 
-  static inline LogWeightTpl<T> zero() { return LogWeightTpl<T>(std::numeric_limits<T>::infinity()); }
+  static inline constexpr LogWeightTpl<T> zero() {
+    return LogWeightTpl<T>(std::numeric_limits<T>::infinity());
+  }
 
   Self& operator=(Base const& other) {
     this->value_ = other.value_;
@@ -343,8 +344,7 @@ LogWeightTpl<T> minus(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
     return W(f1 - Util::logExpMinus(d));
   else if (d >= FloatConstants<T>::epsilon)
     SDL_THROW_LOG(Hypergraph.Weight, LogNegativeException,
-                  "a-b=" << w1.value_ - w2.value_
-                         << " greater than epsilon=" << FloatConstants<T>::epsilon);
+                  "a-b=" << w1.value_ - w2.value_ << " greater than epsilon=" << FloatConstants<T>::epsilon);
   return W::zero();
 }
 

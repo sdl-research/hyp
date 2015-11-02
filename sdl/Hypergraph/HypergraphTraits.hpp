@@ -46,7 +46,6 @@ std::size_t num_edges(IHypergraph<A> const& h) {
   return h.getNumEdges();
 }
 
-
 template <class A>
 StateIdRange vertices(IHypergraph<A> const& h) {
   return StateIdRange(StateIdIterator(0), StateIdIterator(num_vertices(h)));
@@ -164,12 +163,12 @@ struct edge_traits<sdl::Hypergraph::IHypergraph<A>> {
 // visit is in ns graehl so ADL doesn't cause ambiguity
 template <class A, class V>
 void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V& v) {  // v(edge_desciptor = A*)
-  h.forArcsSafe(sdl::Util::visitorReference(v));
+  h.forArcsSafe([&v](A *a) { v(a); });
 }
 
 template <class A, class V>
 void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V const& v) {
-  h.forArcsSafe(sdl::Util::visitorReference(v));
+  h.forArcsSafe(v);
 }
 
 // default factory for vertex_tag is fine (descriptors start at 0)

@@ -23,7 +23,6 @@
 #include <sdl/Hypergraph/FeatureWeightUtil.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/IsFeatureWeight.hpp>
-#include <sdl/Util/FnReference.hpp>
 #include <graehl/shared/normalize_range.hpp>
 #include <sdl/Util/Random.hpp>
 #include <graehl/shared/is_null.hpp>
@@ -159,11 +158,13 @@ struct ReweightNormalize {
   typedef typename A::Weight Weight;
   ReweightOptions opt;
   typedef std::vector<Weight> Sums;
-  Sums normsum;
+  mutable Sums normsum;
+  mutable Util::Random01 rng;
   const bool norm;
+
   ReweightNormalize(ReweightOptions const& opt, IMutableHypergraph<A>& hg)
       : opt(opt), normsum(opt.normalize() ? hg.size() : 0, Weight::zero()), norm(opt.normalize()), rng(opt.seed) {
-    hg.forArcsSafe(Util::visitorReference(*this));
+    hg.forArcsSafe(*this);
     if (opt.normalize()) hg.forArcsSafe(NormalizePass(*this));
   }
 
@@ -180,12 +181,11 @@ struct ReweightNormalize {
     }
   };
 
-  Weight& normFor(A const& a) {
+  Weight& normFor(A const& a) const {
     assert(norm);
     return normsum[opt.head_normalize ? a.head() : a.fsmSrc()];
   }
-  Util::Random01 rng;
-  void operator()(A* ap) {
+  void operator()(A* ap) const {
     A& a = *ap;
     Weight& wt = a.weight();
     opt.reweight(wt, rng);

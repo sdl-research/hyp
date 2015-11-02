@@ -57,7 +57,7 @@ class FeatureWeightTpl;
 struct TakeMin;
 struct Expectation;
 
-template <class W1, class W2, class W3, class W4, class W5>
+template <class W1, class W2, class W3>
 class CompositeWeight;
 
 typedef std::true_type IsIdempotent;
@@ -129,12 +129,12 @@ template <class FloatT, class MapT>
 FeatureWeightTpl<FloatT, MapT, Expectation> divide(FeatureWeightTpl<FloatT, MapT, Expectation> const& w1,
                                                    FeatureWeightTpl<FloatT, MapT, Expectation> const& w2);
 
-template <class W1, class W2, class W3, class W4, class W5>
-CompositeWeight<W1, W2, W3, W4, W5> plus(CompositeWeight<W1, W2, W3, W4, W5> const&,
-                                         CompositeWeight<W1, W2, W3, W4, W5> const&);
-template <class W1, class W2, class W3, class W4, class W5>
-CompositeWeight<W1, W2, W3, W4, W5> times(CompositeWeight<W1, W2, W3, W4, W5> const&,
-                                          CompositeWeight<W1, W2, W3, W4, W5> const&);
+template <class W1, class W2, class W3>
+CompositeWeight<W1, W2, W3> plus(CompositeWeight<W1, W2, W3> const&,
+                                         CompositeWeight<W1, W2, W3> const&);
+template <class W1, class W2, class W3>
+CompositeWeight<W1, W2, W3> times(CompositeWeight<W1, W2, W3> const&,
+                                          CompositeWeight<W1, W2, W3> const&);
 
 // less is recommended by markus for use in best-path algs (graehl's solution
 // was to invent a specializable traits class in HypergraphTraits.hpp, akin to
@@ -156,8 +156,8 @@ bool less(TokenWeightTpl<W> const&, TokenWeightTpl<W> const&);
 template <class F, class MapT, class SumT>
 bool less(FeatureWeightTpl<F, MapT, SumT> const&, FeatureWeightTpl<F, MapT, SumT> const&);
 
-template <class W1, class W2, class W3, class W4, class W5>
-bool less(CompositeWeight<W1, W2, W3, W4, W5> const&, CompositeWeight<W1, W2, W3, W4, W5> const&);
+template <class W1, class W2, class W3>
+bool less(CompositeWeight<W1, W2, W3> const&, CompositeWeight<W1, W2, W3> const&);
 
 
 }}

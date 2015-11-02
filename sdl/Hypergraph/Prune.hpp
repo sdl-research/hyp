@@ -22,7 +22,6 @@
 
 #include <sdl/Hypergraph/Restrict.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
-#include <sdl/Util/FnReference.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 
 namespace sdl {
@@ -109,8 +108,7 @@ void pruneUnreachable(IHypergraph<Arc> const& hgInput, IMutableHypergraph<Arc>* 
 }
 
 struct PruneTransform : TransformBase<Transform::Inout>, PruneOptions {
-  PruneTransform(PruneOptions const& o  = PruneOptions())
-      : PruneOptions(o) {}
+  PruneTransform(PruneOptions const& o = PruneOptions()) : PruneOptions(o) {}
   enum { OptionalInplace = true };
   template <class Arc>
   void inout(IHypergraph<Arc> const& h, IMutableHypergraph<Arc>* o) const {

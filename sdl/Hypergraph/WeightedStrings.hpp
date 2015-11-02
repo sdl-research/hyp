@@ -37,8 +37,7 @@ namespace Hypergraph {
 template <class W>
 struct WeightedStrings {
   typedef W Weight;
-  typedef boost::tuple<Syms, W> SW;
-  // typedef std::vector<SW> SWS;
+  typedef std::tuple<Syms, W> SW;
   typedef std::vector<Syms> Strings;
   typedef std::vector<W> Weights;
   Strings strings;
@@ -52,10 +51,8 @@ struct WeightedStrings {
   void openString(W w = W::one()) { addString(Syms(), w); }
   void closeString() {}
   Sym charId(std::string const& s) const { return lexicalSymbol(s, *voc); }
-  bool operator()(std::string const& s) {
-    // TODO: test
+  void addNonEmptyChar(std::string const& s) {
     if (!s.empty()) addChar(charId(s));
-    return true;
   }
   void addChar(std::string const& s) {
     SDL_TRACE(Hypergraph.WeightedStrings, "addChar " << s);
@@ -102,7 +99,9 @@ struct WeightedStrings {
   double unigramk;
   WeightedStrings(IVocabularyPtr voc, double unigramk = 0) : voc(voc), unigramk(unigramk) {}
   Util::RangeSep sepchars;
-  void print(std::ostream& o, Syms const& s) const { ::adl::adl_print(o, s, Util::stateRange(voc, sepchars)); }
+  void print(std::ostream& o, Syms const& s) const {
+    ::adl::adl_print(o, s, Util::stateRange(voc, sepchars));
+  }
   void print(std::ostream& o, std::size_t i) const {
     assert(i < size());
     o << weights[i] << " ";

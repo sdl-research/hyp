@@ -138,18 +138,17 @@ class FeatureWeightTpl : public FloatWeightTpl<T> {
   FeatureWeightTpl(FeatureWeightTpl const& cpfrom, bool)
       : Base(cpfrom), pMap_(sdl::make_shared<Map>(cpfrom.features())) {}
 
-
   FeatureWeightTpl(FloatT weight, shared_ptr<Map> const& pMap) : Base(weight), pMap_(pMap) {}
 
-  explicit FeatureWeightTpl(FloatT weight) : Base(weight) {}
+  explicit constexpr FeatureWeightTpl(FloatT weight) : Base(weight) {}
 
   explicit FeatureWeightTpl(typename Base::DoubleT weight) : Base(weight) {}
 
   explicit FeatureWeightTpl(int weight) : Base(weight) {}
 
-  static inline Self one() { return Self(static_cast<FloatT>(0.0)); }
+  static inline constexpr Self one() { return Self(static_cast<FloatT>(0.0)); }
 
-  static inline Self zero() { return Self(std::numeric_limits<FloatT>::infinity()); }
+  static inline constexpr Self zero() { return Self(std::numeric_limits<FloatT>::infinity()); }
 
   typedef void HasIsZero;
   bool isZero() const { return this->value_ == std::numeric_limits<FloatT>::infinity(); }

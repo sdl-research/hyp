@@ -84,7 +84,6 @@
 #include <sdl/Pool/object_pool.hpp>
 #include <sdl/Hypergraph/Graph.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/Hypergraph/OperateOn.hpp>
 
@@ -112,52 +111,40 @@
 namespace sdl {
 namespace Hypergraph {
 
-typedef Util::DupCount<sdl::unordered_set<Sym>> DupSymbols;
+typedef unordered_set<Sym> SymSet;
 
-struct IsDetState {  // unlike DupSymbols, allow epsilon to final only!
-  HypergraphBase const& hg;
-  StateId final;
-  typedef unordered_set<Sym> S;
-  S s;
-  bool r;
-  bool anyeps;
-  explicit IsDetState(HypergraphBase const& hg) : hg(hg), final(hg.final()) {
-    r = true;
-    anyeps = false;
-  }
-  template <class A>
-  void operator()(A* a) {
+inline bool isDeterminized(StateId s, SymSet& seen, StateId final, HypergraphBase const& hg,
+                           bool allow_epsilon = false) {
+  bool r = true;
+  auto* arcs = hg.maybeOutArcs(s);
+  if (!arcs) return true;
+  seen.clear();
+  for (auto* a : *arcs) {
     Sym const in = hg.firstLexicalInput(a);
-    if (in == EPSILON::ID) anyeps = true;
-    if (!(Util::latch(s, in) && (in || a->head() == final))) r = false;
+    if (!allow_epsilon && !in) return false;
+    if (!(Util::latch(seen, in) && (in || a->head_ == final))) return false;
   }
-};
-
-inline bool isDeterminized(StateId s, HypergraphBase const& i, bool allow_epsilon = false) {
-  if (i.prunedEmpty()) return true;
-  IsDetState det(i);
-  i.forArcsOutFirstTail(s, Util::visitorReference(det));
-  return det.r && (allow_epsilon || !det.anyeps);
-}
-
-inline bool isDeterminized(HypergraphBase const& i, bool allow_epsilon = false) {
-  if (i.prunedEmpty()) return true;
-  StateId ns = i.size();
-  for (StateId s = 0; s < ns; ++s)
-    if (i.isGraphState(s) && !isDeterminized(s, i, allow_epsilon)) {
-      return false;
-    }
   return true;
 }
 
-inline bool containsEmptyStringDet(HypergraphBase const& i) {
-  assert(i.storesOutArcs());
-  assert(isDeterminized(i));
-  StateId st = i.start(), f = i.final();
+inline bool isDeterminized(HypergraphBase const& hg, bool allow_epsilon = false) {
+  StateId final = hg.final();
+  if (final == kNoState) return true;
+  StateId ns = hg.size();
+  SymSet seen;
+  for (StateId s = 0; s < ns; ++s)
+    if (hg.isGraphState(s) && !isDeterminized(s, seen, final, hg, allow_epsilon)) return false;
+  return true;
+}
+
+inline bool containsEmptyStringDet(HypergraphBase const& hg) {
+  assert(hg.storesOutArcs());
+  assert(isDeterminized(hg));
+  StateId st = hg.start(), f = hg.final();
   if (st == f) return true;
-  for (ArcId a = 0, e = i.numOutArcs(st); a != e; ++a) {
-    ArcBase* pa = i.outArc(st, a);
-    if (pa->head() == f && i.inputLabel(pa->fsmSymbolState()) == EPSILON::ID) return true;
+  for (ArcId a = 0, e = hg.numOutArcs(st); a != e; ++a) {
+    ArcBase* pa = hg.outArc(st, a);
+    if (pa->head() == f && hg.inputLabel(pa->fsmSymbolState()) == EPSILON::ID) return true;
   }
   return false;
 }

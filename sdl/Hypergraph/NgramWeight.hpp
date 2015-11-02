@@ -151,8 +151,8 @@ class NgramWeightTpl {
 
 #if SDL_WEIGHT_USE_AT_STATIC_INIT
   // reasonably cheap construction. spare us the thread synch difficulty
-  static inline Self one() { return Self(); }
-  static inline Self zero() { return Self(false, false); }
+  static inline constexpr Self one() { return Self(); }
+  static inline constexpr Self zero() { return Self(false, false); }
 #else
   // The one weight has no ngram:
   static Self const& one() { return kOne; }

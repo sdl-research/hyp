@@ -31,9 +31,9 @@ namespace sdl {
 namespace Hypergraph {
 
 namespace Transform {
-const bool Inplace = true;
-const bool Inout = false;
-const bool NoProperties = 0;
+static constexpr const bool Inplace = true;
+static constexpr const bool Inout = false;
+static constexpr const bool NoProperties = 0;
 }
 
 

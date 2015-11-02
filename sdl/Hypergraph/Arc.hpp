@@ -160,16 +160,14 @@ struct ArcTpl : ArcBase {
                       mixedbits(head_) + Util::hashFloat(weight_.value_));
   }
 
-
   typedef ArcTpl<W> Arc;
-  typedef std::function<bool(Arc*)> ArcFilter;
-  typedef std::function<void(Arc*)> ArcVisitor;
-  // TODO: consider using a fixed-size boost::array, e.g. for 2 tails
-  // (binarized hypergraph)
-  // better name: StateIds
 
   static bool fnFilterTrue(Arc*) { return true; }
   static bool fnFilterFalse(Arc*) { return false; }
+
+  typedef std::function<bool(Arc*)> ArcFilter;
+  typedef std::function<void(Arc*)> ArcVisitor;
+
   static ArcFilter filterTrue() { return (ArcFilter)fnFilterTrue; }
   static ArcFilter filterFalse() { return (ArcFilter)fnFilterFalse; }
 

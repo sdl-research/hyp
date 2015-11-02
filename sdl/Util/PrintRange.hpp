@@ -31,7 +31,6 @@
 #include <sdl/Util/TypeTraits.hpp>
 #include <sdl/Util/Sep.hpp>
 #include <sdl/Printer.hpp>
-#include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/VoidIf.hpp>
 #include <algorithm>
 

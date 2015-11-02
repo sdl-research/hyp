@@ -133,7 +133,7 @@ class Token {
     return Token(startState, endState, false);
   }
 
-  Token(StateId startState, StateId endState, bool)
+  constexpr Token(StateId startState, StateId endState, bool)
       : props_(kUnspecified), start_(startState), endState_(endState) {}
 
   /**
@@ -293,8 +293,8 @@ class TokenWeightTpl {
   bool isOne() const { return pTokens_->empty(); }
 
   // reasonably cheap construction. spare us the thread synch difficulty
-  static inline Self one() { return Self(); }
-  static inline Self zero() { return Self(Token(kNoState, kNoState, false), W::zero()); }
+  static inline constexpr Self one() { return Self(); }
+  static inline constexpr Self zero() { return Self(Token(kNoState, kNoState, false), W::zero()); }
 
   std::pair<iterator, bool> insert(Token const& tok, Weight const& weight) {
     return pTokens_->insert(value_type(tok, weight));

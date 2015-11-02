@@ -29,10 +29,9 @@
 
 
 #include <sdl/Exception.hpp>
-#include <sdl/Util/FnReference.hpp>
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/HypergraphWriter.hpp> //dbg print
+#include <sdl/Hypergraph/HypergraphWriter.hpp>  //dbg print
 
 namespace sdl {
 namespace Hypergraph {
@@ -108,7 +107,7 @@ struct StateNamesSymbolTable : public IVocabularySymbolTable {
 
   template <class A>
   explicit StateNamesSymbolTable(IHypergraph<A> const& h, LabelType labelType = kInput,
-                                bool allowLexical = false)
+                                 bool allowLexical = false)
       : IVocabularySymbolTable(h.getVocabulary()), ssym(h.size(), NoSymbol) {
     for (StateId s = 0, ns = ssym.size(); s != ns; ++s) {
       Sym i = h.label(s, labelType);
@@ -123,7 +122,7 @@ struct StateNamesSymbolTable : public IVocabularySymbolTable {
   }
 };
 
-template <class Arc, class FArc = fst::ArcTpl<typename Arc::Weight> >
+template <class Arc, class FArc = fst::ArcTpl<typename Arc::Weight>>
 struct ToOpenFst : boost::noncopyable {
   IVocabularySymbolTable syms;
   typedef shared_ptr<StateNamesSymbolTable> Ssymp;
@@ -133,9 +132,9 @@ struct ToOpenFst : boost::noncopyable {
   typedef FArc FstArc;
   typedef typename FstArc::Weight FWeight;
   IHypergraph<Arc> const& h;
-  fst::VectorFst<FstArc> fst;
+  mutable fst::VectorFst<FstArc> fst;
 
-  void operator()(Arc const* a) {
+  void operator()(Arc const* a) const {
     LabelPair io = h.labelPair(a->fsmSymbolState());
     fst.AddArc(a->fsmSrc(),
                FstArc(input(io).id(), output(io).id(), FWeight(a->weight().getValue()), a->head()));
@@ -153,7 +152,7 @@ struct ToOpenFst : boost::noncopyable {
     StateId s = h.start(), f = h.final();
     if (s != Hypergraph::kNoState) fst.SetStart(s);
     if (f != Hypergraph::kNoState) fst.SetFinal(f, FWeight::One());
-    h.forArcs(Util::visitorReference(*this));
+    h.forArcs(*this);
   }
 
   typedef fst::Fst<FstArc> Fst;

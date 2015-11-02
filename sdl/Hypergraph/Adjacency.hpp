@@ -20,46 +20,21 @@
 namespace sdl {
 namespace Hypergraph {
 
-namespace detail {
-struct nIn {
-  // TODO: test
-  StateId s;
-  ArcId n;
-  nIn(StateId s) : s(s), n() {}
-  template <class A>
-  void operator()(A const* a) {
-    if (a->head() == s) ++n;
-  }
-};
-
-struct nOut {
-  // TODO: test
-  StateId s;
-  ArcId n;
-  nOut(StateId s) : s(s), n() {}
-  template <class A>
-  void operator()(A const* a) {
-    if (!a->tails_.empty() && a->tails_[0] == s) ++n;
-  }
-};
-}
-
-template <class A>
-ArcId countInArcs(IHypergraph<A> const& h, StateId s) {
+inline ArcId countInArcs(HypergraphBase const& h, StateId s) {
   if (h.storesInArcs()) return h.numInArcs(s);
+  ArcId n = 0;
   // TODO: test
-  detail::nIn v(s);
-  h.forArcs(Util::visitorReference(v));
-  return v.n;
+  h.forArcs([&n, s](ArcBase const* a) { if (a->head_ == s) ++n; });
+  return n;
 }
 
-template <class A>
-ArcId countOutArcs(IHypergraph<A> const& h, StateId s) {
+/// return # of first-tail outarcs or outarcs (not saying which). i.e. call graph states
+inline ArcId countOutArcs(HypergraphBase const& h, StateId s) {
   if (h.storesOutArcs()) return h.numOutArcs(s);
   // TODO: test
-  detail::nOut v(s);
-  h.forArcs(Util::visitorReference(v));
-  return v.n;
+  ArcId n = 0;
+  h.forArcs([&n, s](ArcBase const* a) { if (!a->tails_.empty() && a->tails_[0] == s) ++n; });
+  return n;
 }
 
 

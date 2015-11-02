@@ -63,7 +63,7 @@ struct Concat : TransformBase<Transform::Inplace, 0> {
   typedef shared_ptr<HG const> PHG;
   PHG rh;
   ConcatOptions opt;
-  explicit Concat(PHG const& rh, ConcatOptions const& opt = ConcatOptions()) : rh(rh), opt(opt) {}
+  Concat(PHG const& rh, ConcatOptions const& opt) : rh(rh), opt(opt) {}
   bool mustCopy(HG const& h) const {
     // can't update h with r if h is same as r
     copyIfSame(rh, h);
@@ -122,9 +122,6 @@ struct Concat : TransformBase<Transform::Inplace, 0> {
       A* ss = new A(newf, ff);
       l.addArc(ss);  // S->Sl Sr
     }
-  }
-  void operator()(IHypergraph<A> const& h, IMutableHypergraph<A>* o) const {
-    SDL_THROW_LOG(Hypergraph, UnimplementedException, "unimplemented in->out transform");
   }
 };
 

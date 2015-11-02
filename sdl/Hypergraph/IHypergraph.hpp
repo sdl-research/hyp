@@ -127,7 +127,6 @@
 #include <sdl/Hypergraph/Exception.hpp>
 
 #include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/FnReference.hpp>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/Once.hpp>
 #include <sdl/Util/LogHelper.hpp>
@@ -372,7 +371,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
 
   WeightCount countArcs() const {
     WeightCount r;
-    forArcs(Util::visitorReference(r));
+    forArcs([&r](Arc const*a) { r(a); });
     return r;
   }
 
@@ -456,10 +455,10 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
 // iterate over pointers to arcs
 template <class Arc>
 struct ArcPointers : public std::vector<Arc*> {
-  void operator()(ArcBase* a) { this->push_back((Arc*)a); }
+  void operator()(ArcBase const* a) { this->push_back((Arc*)a); }
   ArcPointers(HypergraphBase const& h) {
     this->reserve(h.estimatedNumEdges());
-    h.forArcs(Util::visitorReference(*this));
+    h.forArcs([this](ArcBase const* a) { this->push_back((Arc*)a); });
   }
   template <class V>
   void visit(V const& v) const {
