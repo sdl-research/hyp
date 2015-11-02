@@ -18,13 +18,23 @@
 #define TYPETRAITS_GRAEHL_2015_10_16_HPP
 #pragma once
 
+#include <graehl/shared/cpp11.hpp>
 #include <type_traits>
 #include <iostream>
 
 namespace sdl {
 
-#if __cplusplus < 201400L
+#if GRAEHL_CPP14_TYPETRAITS
 
+using std::aligned_storage_t;
+using std::aligned_union_t;
+using std::enable_if_t;
+using std::conditional_t;
+using std::common_type_t;
+
+#define SDL_TYPETRAITS_T(traitname) using std::traitname##_t;
+
+#else
 template <std::size_t Len, std::size_t Align = alignof(std::max_align_t)> /*default-alignment*/
 using aligned_storage_t = typename std::aligned_storage<Len, Align>::type;
 
@@ -43,16 +53,6 @@ using common_type_t = typename std::common_type<T...>::type;
 #define SDL_TYPETRAITS_T(traitname) \
   template <class E>                \
   using traitname##_t = typename std::traitname<E>::type;
-
-#else
-
-using std::aligned_storage_t;
-using std::aligned_union_t;
-using std::enable_if_t;
-using std::conditional_t;
-using std::common_type_t;
-
-#define SDL_TYPETRAITS_T(traitname) using std::traitname##_t;
 
 #endif
 
