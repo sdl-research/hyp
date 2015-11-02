@@ -162,10 +162,6 @@ struct PerformancePer {
     void init(PerformancePer& total, InputSize const& inputSize_) { init(&total, inputSize_); }
 
     RecordElapsed() {}
-    template <class InputVariant>
-    RecordElapsed(PerformancePer& total, InputVariant const& inputVariant) {
-      init(total, inputVariant);
-    }
     RecordElapsed(PerformancePer& total, InputSize const& inputSize) { init(total, inputSize); }
     RecordElapsed(PerformancePer* total, InputSize const& inputSize) { init(total, inputSize); }
     Elapsed now() const { return Elapsed(timer, ptotal->measuringMemory()); }
