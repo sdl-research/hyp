@@ -260,6 +260,10 @@ Printer<T, RangeSep> makePrintable(T const& range) {
   return Printer<T, RangeSep>(range, RangeSep());
 }
 
+std::string const& makePrintable(std::string const& str) {
+  return str;
+}
+
 template <class T>
 Printer<T, RangeSep> makePrintable(T const& range, RangeSep const& sep) {
   return Printer<T, RangeSep>(range, sep);

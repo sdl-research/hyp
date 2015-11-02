@@ -138,40 +138,53 @@ class BasicVocabularyImpl {
     return sym;
   }
 
-  Sym add(Slice s) { return add(std::string(s.first, s.second)); }
-
-  Sym add(std::string const& symbol) {
-    SymInt i = symbols_.index(symbol);
+  Sym add(cstring_view<> word) {
+    SymInt i = symbols_.index(word);
     assert(i < maxLstSize_);
     return symForIndex(i);
   }
 
-  SymInt indexAdding(std::string const& symbol) {
-    SymInt i = symbols_.index(symbol);
+  Sym add(std::string const& word) {
+    SymInt i = symbols_.index(word);
+    assert(i < maxLstSize_);
+    return symForIndex(i);
+  }
+
+  SymInt indexAdding(std::string const& word) {
+    SymInt i = symbols_.index(word);
     assert(i < maxLstSize_);
     return i;
   }
 
-  SymInt indexAdding(Slice s) { return indexAdding(std::string(s.first, s.second)); }
+  SymInt indexAdding(cstring_view<> word) {
+    SymInt i = symbols_.index(word);
+    assert(i < maxLstSize_);
+    return i;
+  }
 
-  Sym addSymbolMustBeNew(Slice s) { return addSymbolMustBeNew(std::string(s.first, s.second)); }
+  SymInt indexAdding(Slice s) { return indexAdding(cstring_view<>(s.first, s.second)); }
 
-  Sym addSymbolMustBeNew(std::string const& symbol) {
+  /// no benefit to using string_view to query; will create string anyway
+  Sym addSymbolMustBeNew(std::string const& word) {
     SymInt const oldsz = size();
-    SymInt const i = symbols_.index(symbol);
+    SymInt const i = symbols_.index(word);
     if (size() == oldsz || i >= maxLstSize_)
       throw std::out_of_range("BasicVocab::addSymbolMustBeNew - string was not new");
     return symForIndex(i);
   }
 
-  Sym add(std::string const& symbol, SymbolType type) {
-    assert(type == type_);
-    return add(symbol);
+  Sym addSymbolMustBeNew(Slice word) {
+    return addSymbolMustBeNew(std::string(word.first, word.second));
   }
 
-  Sym addSymbolMustBeNew(std::string const& symbol, SymbolType type) {
+  Sym add(std::string const& word, SymbolType type) {
     assert(type == type_);
-    return addSymbolMustBeNew(symbol);
+    return add(word);
+  }
+
+  Sym add(cstring_view<> word, SymbolType type) {
+    assert(type == type_);
+    return add(word);
   }
 
   std::string const& str(Sym sym) const {
@@ -179,10 +192,15 @@ class BasicVocabularyImpl {
     return symbols_[sym.index() - offset_];
   }
 
-  SymInt index(std::string const& symbol) const { return symbols_.find(symbol); }
+  SymInt index(std::string const& word) const { return symbols_.find(word); }
 
-  Sym sym(std::string const& symbol) const {
-    SymInt const i = symbols_.find(symbol);
+  Sym sym(std::string const& word) const {
+    SymInt const i = symbols_.find(word);
+    return i == kNullIndex ? NoSymbol : symForIndex(i);
+  }
+
+  Sym sym(cstring_view<> word) const {
+    SymInt const i = symbols_.find(word);
     return i == kNullIndex ? NoSymbol : symForIndex(i);
   }
 
@@ -199,7 +217,7 @@ class BasicVocabularyImpl {
 
   bool containsIndex(SymInt i) const { return i - offset_ < symbols_.size(); }
 
-  bool contains(std::string const& symbol) const { return symbols_.find(symbol) != kNullIndex; }
+  bool contains(std::string const& word) const { return symbols_.find(word) != kNullIndex; }
 
   SymInt getNumSymbols() const { return size(); }
 

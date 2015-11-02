@@ -21,45 +21,38 @@
 using namespace sdl;
 using namespace sdl::Vocabulary;
 
-Sym IVocabulary::addTerminal(std::string const& word) {
-  return addImpl(word, kTerminal);
-}
-
-Sym IVocabulary::getTerminal(std::string const& word) const {
-  return symImpl(word, kTerminal);
-}
 
 Sym IVocabulary::getVariableId(unsigned index) const {
   return Sym::getVariableId(index);
 }
 
 std::string const& IVocabulary::str(Sym sym) const {
-  if (sym.isSpecial()) return specialSymbols().str(sym);
+  if (sym.isSpecial()) return specialSymbols().str(sym);  // TODO: why?
   assert(containsSymImpl(sym));
   return strImpl(sym);
 }
 
 Sym IVocabulary::sym(std::string const& symbol, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().sym(symbol);
+  if (symType == kSpecialTerminal) return specialSymbols().sym(symbol);  // TODO: why?
   return symImpl(symbol, symType);
 }
 
 unsigned IVocabulary::getNumSymbols(SymbolType symType) const {
   if (symType == kSpecialTerminal) return specialSymbols().getNumSymbols();
-  return doGetNumSymbols(symType);
+  return getNumSymbolsImpl(symType);
 }
 
 std::size_t IVocabulary::getSize() const {
-  return doGetSize() + specialSymbols().getSize();
+  return getSizeImpl() + specialSymbols().getSize();
 }
 
 bool IVocabulary::containsSym(Sym sym) const {
-  if (sym.isSpecial()) return specialSymbols().containsSym(sym);
+  if (sym.isSpecial()) return specialSymbols().containsSym(sym);  // TODO: why?
   return containsSymImpl(sym);
 }
 
 bool IVocabulary::contains(std::string const& symbol, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().contains(symbol);
+  if (symType == kSpecialTerminal) return specialSymbols().contains(symbol);  // TODO: why?
   return containsImpl(symbol, symType);
 }
 
@@ -79,9 +72,9 @@ void IVocabulary::print(std::ostream& out) const {
 
 bool IVocabulary::evictThread(Occupancy const&) {
   SDL_DEBUG(evict.Vocabulary, "vocabulary evictThread " << getName());
-  std::size_t const before = doGetSize();
+  std::size_t const before = getSizeImpl();
   clearSinceFreeze();
-  std::size_t const after = doGetSize();
+  std::size_t const after = getSizeImpl();
   assert(after <= before);
   bool const changed = after != before;
   if (changed)

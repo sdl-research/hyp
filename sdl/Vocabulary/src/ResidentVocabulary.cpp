@@ -25,14 +25,6 @@ void ResidentVocabulary::addLeakChecks(Util::ILeakChecks& leaks) {
   leaks.add(new VocabularyResidentLeakCheck(*this));
 }
 
-Sym ResidentVocabulary::addTerminal(std::string const& word) {
-  return vocabTerminal.add(word);
-}
-
-Sym ResidentVocabulary::getTerminal(std::string const& word) const {
-  return vocabTerminal.sym(word);
-}
-
 void ResidentVocabulary::loadTerminals(std::string const& terminalPath) {
   // TODO: test
   std::string entry;
@@ -73,10 +65,6 @@ void ResidentVocabulary::initStarts(unsigned startingTerminal, unsigned starting
 
 Sym ResidentVocabulary::_Add(std::string const& symbol, SymbolType symType) {
   return getVocab(symType).add(symbol, symType);
-}
-
-Sym ResidentVocabulary::_AddSymbolMustBeNew(std::string const& symbol, SymbolType symType) {
-  return getVocab(symType).addSymbolMustBeNew(symbol);
 }
 
 Sym ResidentVocabulary::_Sym(std::string const& symbol, SymbolType symType) const {

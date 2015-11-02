@@ -78,16 +78,12 @@ struct IVocabulary : Resource {
      add symbol if it doesn't exist. return id of added or existing symbol of type SymbolType
   */
   Sym add(std::string const& str, SymbolType symType) { return addImpl(str, symType); }
-  template <std::size_t X>
-  Sym add(string_view<X> const& strview, SymbolType symType) {
-    return doAddField(Slice(strview.begin(), strview.end()), symType);
+  Sym add(cstring_view<> strview, SymbolType symType) { return addImpl(strview, symType); }
+  Sym add(char const* word, SymbolType symType) { return addImpl(std::string(word), symType); }
+  Sym add(Slice field, SymbolType symType) {
+    return addImpl(cstring_view<>(field.first, field.second), symType);
   }
-  Sym add(Slice const& field, SymbolType symType) { return doAddField(field, symType); }
-  Sym addTerminal(Slice const& field) { return doAddField(field, kTerminal); }
-  template <std::size_t X>
-  Sym addTerminal(string_view<X> const& strview, SymbolType symType) {
-    return doAddField(Slice(strview.begin(), strview.end()), kTerminal);
-  }
+  Sym addTerminal(Slice field) { return addTerminal(cstring_view<>(field.first, field.second)); }
 
   Sym add(Unicode c, SymbolType symType) { return addImpl(Util::utf8s(c), symType); }
 
@@ -193,12 +189,26 @@ struct IVocabulary : Resource {
   std::string const& str(Sym) const;
 
   /// add(word, kTerminal) but should be faster
-  virtual Sym addTerminal(std::string const& word);
+  virtual Sym addTerminal(std::string const& word) = 0;
+  virtual Sym addTerminal(cstring_view<> word) = 0;
 
   /// sym(word, kTerminal), but should be faster
-  virtual Sym getTerminal(std::string const& word) const;
+  virtual Sym getTerminal(std::string const& word) const = 0;
+
+  virtual Sym getTerminal(cstring_view<> word) const = 0;
+
+  Sym sym(char const* word, SymbolType symType) const { return sym(std::string(word), symType); }
 
   Sym sym(std::string const&, SymbolType) const;
+
+  Sym sym(cstring_view<> strview, SymbolType symType) const { return symImpl(strview, symType); }
+  Sym sym(Slice field, SymbolType symType) const {
+    return symImpl(cstring_view<>(field.first, field.second), symType);
+  }
+  Sym getTerminal(Slice field) const { return getTerminal(cstring_view<>(field.first, field.second)); }
+
+  virtual Sym symImpl(cstring_view<> strview, SymbolType symType) const { return sym(strview, symType); }
+
   SymInt getNumSymbols(SymbolType) const;
   // TODO@SK: what is the purpose of having these nonvirtual and also having virtual doX? shouldn't we just
   // have virtual X?
@@ -265,11 +275,7 @@ struct IVocabulary : Resource {
     SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not Implemented.");
   }
 
-  virtual Sym doAddField(Slice const& word, SymbolType t) {
-    return addImpl(std::string(word.first, word.second), t);
-  }
-
-  virtual Sym doAddSymbolMustBeNew(std::string const&, SymbolType) {
+  virtual Sym addImpl(cstring_view<> str, SymbolType t) {
     SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not Implemented.");
   }
 
@@ -284,9 +290,9 @@ struct IVocabulary : Resource {
   */
   virtual Sym symImpl(std::string const& symbol, SymbolType symType) const = 0;
 
-  virtual unsigned doGetNumSymbols(SymbolType) const = 0;
+  virtual unsigned getNumSymbolsImpl(SymbolType) const = 0;
 
-  virtual WordCount doGetSize() const = 0;
+  virtual WordCount getSizeImpl() const = 0;
 
   virtual bool containsSymImpl(Sym symbolId) const = 0;
 

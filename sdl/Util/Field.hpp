@@ -248,7 +248,7 @@ struct Field : Slice {
       return Field(f, i);
     }
   }
-  //operator string_view<>() const { return string_view<>((char*)begin(), (char*)end()); }
+  //operator cstring_view<>() const { return cstring_view<>(begin(), end()); }
 };
 
 typedef boost::hash<Field> FieldHash;
