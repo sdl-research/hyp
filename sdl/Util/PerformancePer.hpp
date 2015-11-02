@@ -160,10 +160,6 @@ struct PerformancePer {
     }
 
     void init(PerformancePer& total, InputSize const& inputSize_) { init(&total, inputSize_); }
-    template <class InputVariant>
-    void init(PerformancePer& total, InputVariant const& inputVariant) {
-      init(&total, getVariantInputSize(inputVariant));
-    }
 
     RecordElapsed() {}
     template <class InputVariant>

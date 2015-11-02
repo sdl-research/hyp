@@ -71,7 +71,7 @@ struct SaveFst {
   SaveFst(Fst& fst, Hg& out, SaveFstOptions const& opt)
       : fst(fst), out(out), projectOutput(opt.projectOutput), annotations_(opt.annotations), stateMap(opt.reserveStates) {
     State empty;
-    adl::call_set_null(empty);
+    adl::adl_set_null(empty);
     Util::setEmptyKey(stateMap, empty);
     out.setVocabulary(fst.getVocabulary());
     out.setEmpty();

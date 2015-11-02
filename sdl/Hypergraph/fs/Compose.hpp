@@ -314,9 +314,9 @@ struct Compose2State : public Filter {
   InputState input;
   MatchState match;
   void set_null_impl() {
-    adl::call_set_null(input);
+    adl::adl_set_null(input);
     setFilterStart();
-    adl::call_set_null(match);
+    adl::adl_set_null(match);
   }
   friend inline void set_null(Compose2State& x) { x.set_null_impl(); }
   friend inline std::ostream& operator<<(std::ostream& out, Compose2State const& self) {

@@ -79,14 +79,14 @@ Out& printRange(Out& out, Iter i, Iter end, RangeSep const& sep = RangeSep()) {
     for (; i != end; ++i) {
       out << sep.space;
       if (sep.index) out << index << ':';
-      adl::adl_print(out, *i);
+      ::adl::adl_print(out, *i);
       ++index;
     }
   else {
     for (; i != end; ++i) {
       if (index) out << sep.space;
       if (sep.index) out << index << ':';
-      adl::adl_print(out, *i);
+      ::adl::adl_print(out, *i);
       ++index;
     }
   }
@@ -127,13 +127,13 @@ Out& printPointerRange(Out& out, Iter i, Iter end, RangeSep const& sep = RangeSe
   if (sep.spaceBefore)
     for (; i != end; ++i) {
       out << sep.space;
-      adl::adl_print(out, **i);
+      ::adl::adl_print(out, **i);
     }
   else {
     Sep s(sep.space);
     for (; i != end; ++i) {
       out << s;
-      adl::adl_print(out, **i);
+      ::adl::adl_print(out, **i);
     }
   }
   out << sep.post;
@@ -174,13 +174,13 @@ O& printRangeState(O& out, PrintState const& q, Iter it, Iter const& end, RangeS
   if (rs.spaceBefore)
     for (; it != end; ++it) {
       out << rs.space;
-      adl::adl_print(out, *it, q);
+      ::adl::adl_print(out, *it, q);
     }
   else {
     Sep sep(rs.space);
     for (; it != end; ++it) {
       out << sep;
-      adl::adl_print(out, *it, q);
+      ::adl::adl_print(out, *it, q);
     }
   }
   out << rs.post;
@@ -191,10 +191,10 @@ template <class O, class PrintState, class I>
 O& printRangeState(O& o, PrintState& q, I i, I const& end, RangeSep const& r = RangeSep()) {
   o << r.pre;
   if (r.spaceBefore)
-    for (; i != end; ++i) adl::adl_print(o << r.space, *i, q);
+    for (; i != end; ++i) ::adl::adl_print(o << r.space, *i, q);
   else {
     Sep s(r.space);
-    for (; i != end; ++i) adl::adl_print(o << s, *i, q);
+    for (; i != end; ++i) ::adl::adl_print(o << s, *i, q);
   }
   o << r.post;
   return o;
@@ -278,9 +278,9 @@ struct PrintPair {
 
   template <class Out>
   void printImpl(Out& o) const {
-    adl::adl_print(o, p.first);
+    ::adl::adl_print(o, p.first);
     o << sep;
-    adl::adl_print(o, p.second);
+    ::adl::adl_print(o, p.second);
   }
 
   template <class Ch, class Tr>
@@ -364,7 +364,7 @@ struct Elide : std::string {
 template <class Val, class State>
 std::string printed(Val const& val, State const& state) {
   std::ostringstream out;
-  adl::adl_print(out, val, state);
+  ::adl::adl_print(out, val, state);
   return out.str();
 }
 

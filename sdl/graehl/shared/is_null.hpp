@@ -39,12 +39,12 @@
 #define DOUBLE_NULL double(NAN)
 
 template <class C>
-inline bool is_null(C const& c) {
+inline bool is_null(C const& c, void * = 0) {
   return !c;
 }
 
 template <class C>
-inline void set_null(C& c) {
+inline void set_null(C& c, void * = 0) {
   c = C();
 }
 
@@ -79,14 +79,15 @@ struct as_null {};
 
 namespace adl {
 template <class T>
-inline void call_set_null(T &x) {
-  set_null(x);
+bool adl_is_null(T const& t) {
+  return is_null(t);
 }
 template <class T>
-inline bool call_is_null(T const& x) {
-  return is_null(x);
+void adl_set_null(T & t) {
+  return set_null(t);
 }
 }
+
 
 #ifdef GRAEHL_TEST
 BOOST_AUTO_TEST_CASE(TEST_is_null) {

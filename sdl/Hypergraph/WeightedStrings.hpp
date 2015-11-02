@@ -102,7 +102,7 @@ struct WeightedStrings {
   double unigramk;
   WeightedStrings(IVocabularyPtr voc, double unigramk = 0) : voc(voc), unigramk(unigramk) {}
   Util::RangeSep sepchars;
-  void print(std::ostream& o, Syms const& s) const { adl::adl_print(o, s, Util::stateRange(voc, sepchars)); }
+  void print(std::ostream& o, Syms const& s) const { ::adl::adl_print(o, s, Util::stateRange(voc, sepchars)); }
   void print(std::ostream& o, std::size_t i) const {
     assert(i < size());
     o << weights[i] << " ";
