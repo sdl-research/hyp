@@ -260,7 +260,7 @@ Printer<T, RangeSep> makePrintable(T const& range) {
   return Printer<T, RangeSep>(range, RangeSep());
 }
 
-std::string const& makePrintable(std::string const& str) {
+inline std::string const& makePrintable(std::string const& str) {
   return str;
 }
 
