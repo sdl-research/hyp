@@ -113,27 +113,25 @@ namespace Hypergraph {
 
 typedef unordered_set<Sym> SymSet;
 
-inline bool isDeterminized(StateId s, SymSet& seen, StateId final, HypergraphBase const& hg,
-                           bool allow_epsilon = false) {
+inline bool isDeterminized(StateId s, SymSet& seen, StateId final, HypergraphBase const& hg) {
   bool r = true;
   auto* arcs = hg.maybeOutArcs(s);
   if (!arcs) return true;
   seen.clear();
   for (auto* a : *arcs) {
     Sym const in = hg.firstLexicalInput(a);
-    if (!allow_epsilon && !in) return false;
     if (!(Util::latch(seen, in) && (in || a->head_ == final))) return false;
   }
   return true;
 }
 
-inline bool isDeterminized(HypergraphBase const& hg, bool allow_epsilon = false) {
+inline bool isDeterminized(HypergraphBase const& hg) {
   StateId final = hg.final();
   if (final == kNoState) return true;
   StateId ns = hg.size();
   SymSet seen;
   for (StateId s = 0; s < ns; ++s)
-    if (hg.isGraphState(s) && !isDeterminized(s, seen, final, hg, allow_epsilon)) return false;
+    if (hg.isGraphState(s) && !isDeterminized(s, seen, final, hg)) return false;
   return true;
 }
 
@@ -571,7 +569,7 @@ void determinize(IHypergraph<Arc> const& i,  // input
   }
   o->forcePropertiesOnOff(prop_on, prop_off);
   assertCanDeterminize(i, flags);
-  if (isDeterminized(i, !DET_SPECIAL_SYMBOL(flags, EPSILON)))
+  if (isDeterminized(i))
     copyHypergraph(i, o);
   else
     determinize_always(i, o, flags);
@@ -633,7 +631,7 @@ struct Determinize : TransformBase<Transform::Inout, (kFsm | kStoreOutArcs)>, De
   Properties outSubProps() const { return prop_off; }
   template <class H>
   bool needs(H const& h) const {
-    if (isDeterminized(h, !DET_SPECIAL_SYMBOL(flags, EPSILON))) return false;
+    if (isDeterminized(h)) return false;
     assertCanDeterminize(h, flags);
     return true;
   }

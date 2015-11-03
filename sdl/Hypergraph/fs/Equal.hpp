@@ -15,7 +15,8 @@
 
    no rho, sigma, phi allowed in first position in compose
 
-   therefore, implement fs-only Compose that supports them? note: openfst doesn't allow them in first position either.
+   therefore, implement fs-only Compose that supports them? note: openfst doesn't allow them in first position
+   either.
 */
 
 #ifndef HYP__HYPERGRAPH__EQUAL_HPP
@@ -34,14 +35,14 @@ namespace fs {
 
 template <class A>
 bool equal(IHypergraph<A> const& a, IHypergraph<A> const& b) {
-  ASSERT_VALID_HG(a);ASSERT_VALID_HG(b);
-  if (&a==&b) return true;
-  if (a.prunedEmpty())
-    return empty(b);
-  if (b.prunedEmpty())
-    return empty(a);
+  ASSERT_VALID_HG(a);
+  ASSERT_VALID_HG(b);
+  if (&a == &b) return true;
+  if (a.prunedEmpty()) return empty(b);
+  if (b.prunedEmpty()) return empty(a);
   if (!a.isFsm() || !b.isFsm()) {
-    SDL_THROW_LOG(Hypergraph, InvalidInputException, "equal(a, b) is undecidable for general CFG a and b - convert to Fsm first");
+    SDL_THROW_LOG(Hypergraph, InvalidInputException,
+                  "equal(a, b) is undecidable for general CFG a and b - convert to Fsm first");
   }
   if (a.getVocabulary() != b.getVocabulary()) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "Difference: hypergraphs must have same vocabulary");
@@ -55,22 +56,24 @@ bool equal(IHypergraph<A> const& a, IHypergraph<A> const& b) {
   //  HP pa=ensureProperties(a, kStoreInArcs|kStoreOutArcs);
   //  HP pb=ensureProperties(b, kStoreInArcs|kStoreOutArcs);
 
-  Properties p=kStoreOutArcs; // |kStoreInArcs
+  Properties p = kStoreOutArcs;  // |kStoreInArcs
 
-#define HG_EQUAL_CHECK_DIFF(a, b, msgv, msgempty) do {                     \
-    MutableHypergraph<A> d(p);                                          \
-    difference(a, b, &d);                                                 \
-    if (!empty(d)) {                                                    \
-      return false;                                                     \
-    }                                                                   \
-  } while(0)
+#define HG_EQUAL_CHECK_DIFF(a, b, msgv, msgempty) \
+  do {                                            \
+    MutableHypergraph<A> d(p);                    \
+    difference(a, b, &d);                         \
+    if (!empty(d)) {                              \
+      return false;                               \
+    }                                             \
+  } while (0)
 
 
-  HG_EQUAL_CHECK_DIFF(a, b,5, "test_fsm_equal empty a-b (may be equal!)");
-  HG_EQUAL_CHECK_DIFF(b, a,4, "test_fsm_equal a-b == b-a == EMPTY, so a==b.\n");
+  HG_EQUAL_CHECK_DIFF(a, b, 5, "test_fsm_equal empty a-b (may be equal!)");
+  HG_EQUAL_CHECK_DIFF(b, a, 4, "test_fsm_equal a-b == b-a == EMPTY, so a==b.\n");
 #undef HG_EQUAL_CHECK_DIFF
   return true;
 }
+
 
 }}}
 
