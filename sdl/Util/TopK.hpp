@@ -18,34 +18,43 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <sdl/Util/PrintRange.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-template <class V>
-struct TopK {
-  TopK(std::size_t k)
-      : k(k)
-  {}
-  std::vector<V> topk;
-  std::size_t k;
-  void add(V const& v) {
-    if (k)
-      topk.push_back(v);
+template <class Vec, class Less = std::less<typename Vec::value_type>>
+void topkSorted(Vec& vec, std::size_t k, Less less = Less()) {
+  std::size_t n = vec.size();
+  typedef typename Vec::value_type V;
+  V *begin = vec.data(), *end = begin + n, *mid = begin + k;
+  if (mid <= end) {
+    std::sort(begin, end);
+  } else {
+    std::partial_sort(begin, mid, end);
+    vec.resize(k);
   }
-  void filter(bool sortedAlways = true) {
-    std::size_t n = topk.size();
-    if (n < k) {
-      if (sortedAlways)
-        std::sort(topk.begin(), topk.end());
-    } else {
-      V *b = &topk[0];
-      std::partial_sort(b, b + k, b + n);
-      topk.resize(k);
-    }
-    SDL_DEBUG(TopK.filter, Util::arrayPrintable(&topk[0], n));
+}
+
+template <class Vec, class Less = std::less<typename Vec::value_type>>
+void topkUnsorted(Vec& vec, std::size_t k, Less less = Less()) {
+  typedef typename Vec::value_type V;
+  std::size_t n = vec.size();
+  if (k < n) {
+    V* b = vec.data();
+    std::partial_sort(b, b + k, b + n);
+    vec.resize(k);
   }
-};
+}
+
+template <class V, class Less = std::less<typename V::value_type>>
+void topk(V& vec, std::size_t k, Less less = Less(), bool sorted = false) {
+  if (sorted)
+    topkSorted(vec, k, less);
+  else
+    topkUnsorted(vec, k, less);
+}
 
 
 }}

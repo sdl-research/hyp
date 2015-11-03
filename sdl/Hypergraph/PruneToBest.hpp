@@ -233,15 +233,16 @@ struct ArcInBest {
                    opt.beamPlusStates ? HUGE_VAL : opt.beamEpsilon + worstAllowedCost);
       if (opt.beamPlusStates) {
         typedef std::pair<SdlFloat, StateId> S;
-        Util::TopK<S> topk(opt.beamPlusStates);
+
+        std::vector<S> topk;
         for (unsigned i = 0; i < N; ++i) {
           SdlFloat c = outside0[i];
           if (hg.isAxiom(i)) inside[i] = 0;
           c += inside[i];
-          if (!is_null(c) && c > worstAllowedCost) topk.add(S(c, i));
+          if (!is_null(c) && c > worstAllowedCost) topk.emplace_back(c, i);
         }
-        topk.filter(true);
-        if (!topk.topk.empty()) worstAllowedCost = topk.topk.back().first;
+        Util::topk(topk, opt.beamPlusStates);
+        if (!topk.empty()) worstAllowedCost = topk.back().first;
       }
       worstAllowedCost += opt.beamEpsilon;
       SDL_DEBUG(PruneToBest, "worst allowed: " << worstAllowedCost);

@@ -453,9 +453,8 @@ struct BuildStringUnion {
     begin.init(hg, opt.beginStringInput, opt.beginString);
     end.init(hg, opt.endStringInput, opt.endString);
 
-    for (std::string const& s : opt.ignoreTags) {
+    for (std::string const& s : opt.ignoreTags)
       tags.push_back(lexicalPair(opt.opentag(s), opt.closetag(s), *voc));
-    }
     SDL_TRACE(Hypergraph.StringUnion, "tags=" << printer(tags, Util::stateRange(voc)));
     build();
   }

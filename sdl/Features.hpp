@@ -36,7 +36,7 @@ typedef std::string FeatureName;
 typedef SdlFloat FeatureValue;
 typedef SdlFloat FeatureValueWeight;  // Hypergraph::FeatureWeight conflict
 typedef std::pair<FeatureName, FeatureValue> FeatureEntry;
-typedef std::pair<FeatureName const, FeatureValue> ConstFeatureEntry;
+typedef std::pair<FeatureName const, FeatureValue> FeaturePair;
 
 typedef std::map<FeatureName, FeatureValue> Features;
 typedef std::vector<FeatureEntry> FeaturesVec;
