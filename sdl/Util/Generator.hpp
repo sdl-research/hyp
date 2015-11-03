@@ -112,7 +112,7 @@
    int n=appendGenerate(g, vec,10); // like v.push_back(g()) up to 10 times, returning number of items
   appended.
    int n=appendGenerate(g, vec); // unlimited
-   std::function<bool (V const&)> f;
+   sdl::function<bool (V const&)> f;
    int n = visitGenerate(g, f,10); // same as: vec.clear();append(vec, g,10);for (V const& x : vec) if (!f(x))
   break;
    //NOTE: if false is returned by visitor, maybe the rest of the items were generated, maybe not.

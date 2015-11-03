@@ -74,7 +74,7 @@ struct PushWeights : SimpleTransform<PushWeights, Transform::Inplace, false> {
         "for acyclic hg, push weights to final state; for acyclic graph only, push weights to start state "
         "keeping local normalization [sum(arc weight)=1] except for start state which gets the residual");
     config("push-to-final", &pushToFinal)
-        .self_init()("push weights toward final state instead of start state (also supports acyclic HG)");
+        .defaulted()("push weights toward final state instead of start state (also supports acyclic HG)");
   }
 };
 

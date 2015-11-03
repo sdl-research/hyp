@@ -43,7 +43,7 @@ struct PruneOptions : TransformOptionsBase {
   template <class Conf>
   void configure(Conf& c) {
     c.is("Prune");
-    c("pack-states", &packStates).self_init()("renumber remaining states to have contiguous ids");
+    c("pack-states", &packStates).defaulted()("renumber remaining states to have contiguous ids");
   }
 };
 

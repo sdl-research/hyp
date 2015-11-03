@@ -47,8 +47,8 @@ struct LineOptions : NormalizeUtf8 {
   void configure(Config& config) {
     NormalizeUtf8::configure(config);
     config.is("LineOptions");
-    config("chomp", &chomp).self_init();
-    config("trim", &trim)('t').self_init()(
+    config("chomp", &chomp).defaulted();
+    config("trim", &trim)('t').defaulted()(
         "remove initial and trailing whitespace from each line first (otherwise just remove endline if "
         "'chomp')");
   }

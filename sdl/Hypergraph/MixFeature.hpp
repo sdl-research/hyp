@@ -86,11 +86,11 @@ struct MixFeature {
     c("Enabled only if weight is set (to 0 or otherwise). Adds feature if id != -1");
     c("name", &name)
         .verbose()("feature name");  //  (TODO: use to set id automatically from feature-names dictionary)
-    c("id", &id).self_init()(
+    c("id", &id).defaulted()(
         "feature id (for FeatureWeight hypergraphs) -1 means don't add feature (but will still use feature "
         "if a weight is given)");
     c("weight", &scale)
-        .self_init()(
+        .defaulted()(
             "weight for this feature's contribution to cost. 'nan' (not a number) means disabled (even if id "
             "is configured).");
   }

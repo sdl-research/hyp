@@ -50,11 +50,11 @@ struct WhichSymbolOptions {
   void configure(Config& config, bool hide = false) {
     config("skip-epsilon", &epsilon).verbose()("backward compatability for 'epsilon' option");
     config("lexical-only", &types).verbose()("backward compatability for 'types' option");
-    config("types", &types).verbose(hide).self_init()(
+    config("types", &types).verbose(hide).defaulted()(
         "all-symbols includes <xmt-blockN> <tok> etc; lexical-only implies 'epsilon: skip-epsilon' and "
         "'block: skip-block')");
-    config("epsilon", &epsilon).verbose(hide).self_init()("skip or keep epsilon (<eps>)");
-    config("block", &block).verbose(hide).self_init()(
+    config("epsilon", &epsilon).verbose(hide).defaulted()("skip or keep epsilon (<eps>)");
+    config("block", &block).verbose(hide).defaulted()(
         "skip or keep block/entity symbols (<xmt-blockN> </xmt-block> <xmt-entityN>)");
     config("label-type", &labelType).verbose(hide).init(kOutput).verbose()(
         "Print input or output for transducer state labels, where output may differ from input. 'output' will use the input symbol if the state has no output label.");
@@ -120,10 +120,10 @@ struct DerivationStringOptions : WhichSymbolOptions {
   void configure(Config& config, bool hide = false) {
     WhichSymbolOptions::configure(config);
     config.is("hypergraph nbest -> string");
-    config("quote", &quote).verbose(hide).self_init()(
+    config("quote", &quote).verbose(hide).defaulted()(
         "quote/escape symbols - if false (unquoted)O, you can't distinguish special (e.g. <eps>) from "
         "lexical symbols");
-    config("space", &space).verbose(hide).self_init()(
+    config("space", &space).verbose(hide).defaulted()(
         "separate tokens with this (always a space between weight and tokens)");
   }
 };

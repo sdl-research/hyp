@@ -165,8 +165,8 @@ struct ArcTpl : ArcBase {
   static bool fnFilterTrue(Arc*) { return true; }
   static bool fnFilterFalse(Arc*) { return false; }
 
-  typedef std::function<bool(Arc*)> ArcFilter;
-  typedef std::function<void(Arc*)> ArcVisitor;
+  typedef sdl::function<bool(Arc*)> ArcFilter;
+  typedef sdl::function<void(Arc*)> ArcVisitor;
 
   static ArcFilter filterTrue() { return (ArcFilter)fnFilterTrue; }
   static ArcFilter filterFalse() { return (ArcFilter)fnFilterFalse; }
@@ -388,8 +388,8 @@ class ArcWithDataTpl : public ArcTpl<W> {
   typedef W Weight;
   typedef ArcTpl<W> Base;
   typedef ArcWithDataTpl<W> Arc;
-  typedef std::function<bool(Arc*)> ArcFilter;
-  typedef std::function<void(Arc*)> ArcVisitor;
+  typedef sdl::function<bool(Arc*)> ArcFilter;
+  typedef sdl::function<void(Arc*)> ArcVisitor;
 
   static bool fnFilterTrue(Arc*) { return true; }
   static bool fnFilterFalse(Arc*) { return false; }

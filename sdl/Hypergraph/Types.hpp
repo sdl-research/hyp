@@ -110,7 +110,7 @@ typedef uint64 ArcId;
 typedef uint32 ArcId;
 #endif
 
-// typedef std::function<bool (StateId s)> StateFilter;
+// typedef sdl::function<bool (StateId s)> StateFilter;
 typedef std::vector<StateId> StateString;
 typedef std::pair<StateId, ArcHandle> StateArc;  // for derivations: leaf states have Arc *==0.
 typedef std::vector<StateArc> DerivationYield;

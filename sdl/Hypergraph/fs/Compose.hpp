@@ -144,21 +144,21 @@ struct FstComposeOptions : SaveFstOptions {
   void configure(Config& config) {
     SaveFstOptions::configure(config);
     config("fst-compose", &fstCompose)
-        .self_init()("true: optimized fst1*fst2 compose (false: cfg*fst, which is slower)");
+        .defaulted()("true: optimized fst1*fst2 compose (false: cfg*fst, which is slower)");
     config("sort-best-first", &sortBestFirst)
-        .self_init()(
+        .defaulted()(
             "for fst-compose, if not saving whole output HG attempt to sort out-arcs best-first (ignored for "
             "non-mutable hypergraphs)");
     config("epsilon-matching-paths", &epsilonMatchingFilter)
-        .self_init()(
+        .defaulted()(
             "use a three-valued filter state that prefers matching input x:<eps> match <eps>:y directly into "
             "x:y. this result may be larger or smaller. (TODO: seems buggy - ate some paths in testing)");
     config("allow-duplicate-paths", &allowDuplicatePaths)
-        .self_init()(
+        .defaulted()(
             "for viterbi-like (idempotent plus - i.e. plus(x, x) = x) semirings, allow repeated equivalent "
             "paths involving epsilons. this will result in n-best duplicates, but otherwise may be faster");
     config("allow-duplicate-paths-if-1best", &allowDuplicatePathsIf1Best)
-        .self_init()(
+        .defaulted()(
             "allow-duplicate-paths only if prune-to-nbest=1 (because the downside of allow-duplicate-paths "
             "is "
             "extra paths)");

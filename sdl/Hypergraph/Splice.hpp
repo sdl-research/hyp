@@ -57,10 +57,10 @@ struct SplicePrefixOptions {
     c("prefix", &prefix)(
         "entity-FSA accepted tokens will be prefixed by this string (the open/close token tags are the "
         "same). empty=<eps>")
-        .self_init();
+        .defaulted();
     c("weight",
       &weight)("entering the entity-FSA as opposed to using a dictionary token has this cost (Weight).")
-        .self_init();
+        .defaulted();
   }
   SplicePrefixOptions() { defaults(); }
   void defaults() {

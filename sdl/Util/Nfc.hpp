@@ -120,18 +120,18 @@ struct NfcOptions {
   template <class Config>
   void configure(Config& config) {
     config("nfc", &nfc)
-        .self_init()(
+        .defaulted()(
             "normalize input utf8 to Unicode NFC (if there are constraints, then caller must "
             "refer to post-NFC codepoints - we don't adjust them while nfc normalizing)");
     config("nfkc", &nfkc)
-        .self_init()(
+        .defaulted()(
             "(takes precedence over nfc) normalize input utf8 to Unicode NFKC (if there are "
             "constraints, then caller must "
             "refer to post-NFKC codepoints - we don't adjust them while nfkc normalizing)");
     config("warn-if-not-nfc", &warnIfNotNfc)
-        .self_init()("warn if any non-NFC input is observed (and then nfc/nfkc normalize if enabled)");
+        .defaulted()("warn if any non-NFC input is observed (and then nfc/nfkc normalize if enabled)");
     config("warn-if-result-not-nfc", &warnIfResultNotNfc)
-        .self_init()(
+        .defaulted()(
             "warn if the result isn't NFC (if nfc or nfkc normalization is enabled, then you won't ever see "
             "this warning, so it's safe to leave on)");
     // option warn-if-not-nfkc? wait til requested.

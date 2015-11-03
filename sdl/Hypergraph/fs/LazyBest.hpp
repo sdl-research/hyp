@@ -75,11 +75,11 @@ struct LazyBestOptions {
     config("remove-epsilon", &removeEpsilon)
         .init(true)("possibly remove some epsilon transitions in the result (if prune-to-nbest: 1)");
     config("project-output", &projectOutput)
-        .self_init()("output an fsa using the composition's output symbols (setting input == output");
+        .defaulted()("output an fsa using the composition's output symbols (setting input == output");
     config("log-num-words-name", &logNumWordsName)(
         "if nonempty, log # of output words under sdl.PerformancePer.[log-num-words-name]");
 #if SDL_HYPERGRAPH_FS_ANNOTATIONS
-    config("annotations", &annotations).self_init()("preserve annotations (e.g. constraints) on input hg");
+    config("annotations", &annotations).defaulted()("preserve annotations (e.g. constraints) on input hg");
 #else
     config("annotations", &annotations).init(false)("(not enabled in this build; must be false)").verbose();
 #endif

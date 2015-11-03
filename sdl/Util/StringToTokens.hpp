@@ -280,12 +280,12 @@ struct StringToTokens : NormalizeUtf8 {
     NormalizeUtf8::configure(config);
     config.is("string to tokens");
     config("unsplit", &unsplit)
-        .self_init()(
+        .defaulted()(
             "'unsplit: true' means take the whole line as a single string - WARNING: "
             "hypergraphs/vocabularies "
             "don't allow whitespace inside tokens");
     config("split-on-whitespace", &splitOnWhitespace)
-        .self_init()("Split on whitespace? False means split on any character boundary.");
+        .defaulted()("Split on whitespace? False means split on any character boundary.");
     config("normalize-whitespace", &normalizeWhitespace)(
         "Force replacement of utf8 whitespace[s] by a single ascii space (always happens if "
         "'split-on-whitespace'). Does not affect 'unsplit: true'.)")

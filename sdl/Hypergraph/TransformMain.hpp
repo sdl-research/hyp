@@ -170,7 +170,7 @@ struct TransformMainBase : HypergraphMainBase {
     std::string qual(ambig ? "" : "no choice - must be ");
 
     c("arc-type", &arcType)('a')
-        .self_init()("Hypergraph arc weight semiring type: " + qual + semiringsUsage())
+        .defaulted()("Hypergraph arc weight semiring type: " + qual + semiringsUsage())
         .verbose(ambig);
     // TODO: use SDL_ENUM for arcType
     if (configureProperties)

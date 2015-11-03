@@ -33,7 +33,7 @@
 namespace sdl {
 namespace Hypergraph {
 
-typedef std::function<void(Syms&, IVocabulary*)> SymsRewrite;
+typedef sdl::function<void(Syms&, IVocabulary*)> SymsRewrite;
 struct IdentitySymsRewrite {
   void operator()(Syms&, IVocabulary*) const {}
 };

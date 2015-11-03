@@ -82,7 +82,7 @@ struct InputHypergraphs : LineToHypergraph
           ("input lines or hypergraph from this file");
     c("multiple-input-hgs", &multiple).init(true)
         ("allow multiple consecutive inputs");
-    c("lines", &lines).self_init()
+    c("lines", &lines).defaulted()
         ("plain text input lines converted to hg (instead of a single hypergraph file)");
   }
   void setIn(Util::InputStream const& newIn)

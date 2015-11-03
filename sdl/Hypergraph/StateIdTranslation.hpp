@@ -13,7 +13,7 @@
     StateIdMapping: function that maps original stateids to destination hg stateids, for either
    HypergraphCopy.hpp copy() or IMutableHypergraph restrict()
 
-    used instead of std::function<StateId (StateID)> for metadata e.g. some transformations are
+    used instead of sdl::function<StateId (StateID)> for metadata e.g. some transformations are
    stateAdding() and some aren't, and performance
 
     StateIdTranslation: caches StateIdMapping so we don't overgenerate states (in case StateIdMapping is lazy)
@@ -30,7 +30,7 @@
     the mapping can be lazy or eager:
 
     A. lazy (allocating starting with max stateid+1 of HG you're copying to) - then we'd want a
-   std::function or whatever, for anything beyond a simple "contiguous as needed" or "fixed offset" (status
+   sdl::function or whatever, for anything beyond a simple "contiguous as needed" or "fixed offset" (status
    quo)
 
     B. eager (populate mapping in advance)
@@ -51,7 +51,7 @@
    state (status quo)
 
     By (eager+in-place) - for in-place, we don't want states added at all - we haven't removed them yet.
-   option: move initialization into post-clear (requires type-erased std::function etc for generating the
+   option: move initialization into post-clear (requires type-erased sdl::function etc for generating the
    mapping)
 
     kCanonicalLex : in-place: if you want same state for same labelpair, then build the original hg w/

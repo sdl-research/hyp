@@ -64,13 +64,13 @@ struct SortStatesOptions {
   void configure(Conf& c) {
     c.is("state sorting options");
     c("sort-order", &sortOrder)
-        .self_init()(kSortStatesOptionsSortOrderString)
+        .defaulted()(kSortStatesOptionsSortOrderString)
         .validate(Config::boundedRangeInclusive(1, 3, kSortStatesOptionsSortOrderString));
     c("canonical-lex", &canonicalLex)
-        .self_init()(
+        .defaulted()(
             "for copying transform, ensure lexical-labeled states are reused (TODO: implement for in-place)");
     c("stable", &stable)
-        .self_init()("don't sort if already sorted (ensures a saved sorted input will have stable state ids");
+        .defaulted()("don't sort if already sorted (ensures a saved sorted input will have stable state ids");
   }
   void validate() const { Config::boundedRangeInclusive(1, 4, kSortStatesOptionsSortOrderString)(sortOrder); }
   friend inline void validate(SortStatesOptions& x) { x.validate(); }

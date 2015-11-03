@@ -76,7 +76,7 @@ struct ParseTokensOptions : Util::LineOptions
   {
     Util::LineOptions::configure(config);
     config(usage());
-    config("chars", &characterBased)('c').self_init()
+    config("chars", &characterBased)('c').defaulted()
         ("(utf8) character tokens instead of space-separated (quoted?) strings");
     config("quoted", &quoted)('q').init(false)
         ("parse quoted tokens (else just space-separated, unquoted strings)");

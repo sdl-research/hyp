@@ -21,7 +21,7 @@
 
 namespace sdl {
 
-typedef graehl::string_consumer StringConsumer; // std::function(string) without newline
+typedef graehl::string_consumer StringConsumer; // sdl::function(string) without newline
 typedef graehl::warn_consumer StringOut; // StringConsumer c=StringOut(cerr, "PREFIX: ");
 typedef graehl::ignore StringIgnore; // StringConsumer c=StringIgnore();
 

@@ -145,8 +145,8 @@ struct ArcBase SDL_OBJECT_TRACK_BASE(ArcBase) {
   virtual ~ArcBase() {}
 
   /*
-  typedef std::function<bool(ArcBase*)> ArcFilter;
-  typedef std::function<void(ArcBase*)> ArcVisitor;
+  typedef sdl::function<bool(ArcBase*)> ArcFilter;
+  typedef sdl::function<void(ArcBase*)> ArcVisitor;
   */
 };
 

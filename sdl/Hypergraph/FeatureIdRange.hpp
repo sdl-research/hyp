@@ -63,8 +63,8 @@ struct FeatureIdRange {
   void configure(Config& config) {
     config.is("Feature Id Range");
     config("select features with half-open interval begin <= id < end; (end-begin) feature ids");
-    config("begin", &begin)("minimum (inclusive) feature id").self_init();
-    config("end", &end)("id one higher than the maximum (end-1). 0 disables the range completely").self_init();
+    config("begin", &begin)("minimum (inclusive) feature id").defaulted();
+    config("end", &end)("id one higher than the maximum (end-1). 0 disables the range completely").defaulted();
   }
 
   FeatureId size() const { return end - begin; }

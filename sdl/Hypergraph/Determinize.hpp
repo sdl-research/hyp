@@ -591,11 +591,11 @@ struct DeterminizeOptions {
   void configure(Config const& c) {
     c.is(type());
     c(caption());
-    c("epsilon-ordinary", &epsilonOrdinary).self_init()("treat <eps> as regular symbol for determinization");
-    c("rho-ordinary", &rhoOrdinary).self_init()("treat <rho> as regular symbol for determinization");
-    c("phi-ordinary", &phiOrdinary).self_init()("treat <phi> as regular symbol for determinization");
-    c("sigma-ordinary", &sigmaOrdinary).self_init()("treat <sigma> as regular symbol for determinization");
-    c("determinize-by", &operateOn).self_init()("what symbols to determinize on");
+    c("epsilon-ordinary", &epsilonOrdinary).defaulted()("treat <eps> as regular symbol for determinization");
+    c("rho-ordinary", &rhoOrdinary).defaulted()("treat <rho> as regular symbol for determinization");
+    c("phi-ordinary", &phiOrdinary).defaulted()("treat <phi> as regular symbol for determinization");
+    c("sigma-ordinary", &sigmaOrdinary).defaulted()("treat <sigma> as regular symbol for determinization");
+    c("determinize-by", &operateOn).defaulted()("what symbols to determinize on");
   }
   DeterminizeFlags flags;
   OperateOn operateOn;

@@ -52,7 +52,7 @@ class ConstantLearningRateFct : public ILearningRate {
   void configure(Config& config) {
     config("Options for a constant learning rate");
     config.is("ConstantLearningRateFct");
-    config("eta", &eta).self_init()
+    config("eta", &eta).defaulted()
         ("Float value to use as constant learning rate");
   }
 

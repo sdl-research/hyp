@@ -57,7 +57,7 @@ struct PreventDuplicateOptions {
   template <class Config>
   void configure(Config& config) {
     config("prevent-duplicate-original", &preventDuplicateOriginal)
-        .self_init()(
+        .defaulted()(
             "don't propose original correction if it's already present via 'include-original: true' in "
             "module options. this means you won't get transform features wherever output phrase = input "
             "word");

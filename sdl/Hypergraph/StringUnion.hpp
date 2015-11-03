@@ -123,47 +123,47 @@ struct StringUnionOptions {
     c('u')("unk-weight", &unkUnigramWeight)(
         "add a wildcard transition with this weight (to start state only) for oov chars that adds end-string "
         "symbols. since these are oov chars, ")
-        .self_init();
+        .defaulted();
     c("wildcard-is-rho", &wildcardIsRho)(
         "the wildcard used in unk-weight only applies to chars not seen (in which case unk-weight doesn't "
         "matter. however, if ne.fsa-file starts accepting an unknown-to-wordlist character but doesn't "
         "complete it with a token, this should be false, or else you will fail to derive some strings. "
         "otherwise the default, true, is better")
-        .self_init();
+        .defaulted();
     c('l')("loop",
            &loop)("accept String* rather than just String (final = start state unless weight-stop!=0)")
-        .self_init();
+        .defaulted();
     c('s')("stop-weight", &endOfTokenSequenceWeight)(
         "go to final state from start with this weight (epsilon); use only with --loop. this is the "
         "probability of generating no more words")
-        .self_init();
+        .defaulted();
     // TODO: separate end of tok weight vs end of sentence weight
     c('T')("tok-weight",
            &perTokenWeight)("cost for each token e.g. 1-[stop-weight]. unset means prob = 1 (cost 0)")
-        .self_init();
-    c('t')("ignore-tags", &ignoreTags)("ignore tokens between <ignore-tag> ... </ignore-tag>").self_init();
+        .defaulted();
+    c('t')("ignore-tags", &ignoreTags)("ignore tokens between <ignore-tag> ... </ignore-tag>").defaulted();
     c("xmt-block", &xmtBlock)(
         "force <xmt-blockN> and </xmt-block> in a token to be single-character words - effectively forcing a "
         "token to end on the left and start on the right of the block open or close tag. this already "
         "happens by default (see xmt-block-via-unk-unigram) if you allow the unk-weight novel-character "
         "backoff.")
-        .self_init();
+        .defaulted();
     c("xmt-block-via-unk-unigram", &xmtBlockViaUnkUnigram)(
         "allow the unk-weight unigram cost to apply for xmt-block tokens (should be harmless except for the "
         "extra weight, and faster)")
-        .self_init();
+        .defaulted();
     c('b')("begin-string",
            &beginString)("also output this token before each recognized word. empty means epsilon")
-        .self_init();
+        .defaulted();
     c('e')("end-string", &endString)("also output this token after each recognized word. empty means epsilon")
-        .self_init();
+        .defaulted();
     c('E')("input-end-string", &endStringInput)("input token expected after words. empty means epsilon")
-        .self_init();
+        .defaulted();
     c('B')("input-begin-string", &beginStringInput)("input token expected before words. empty means epsilon")
-        .self_init();
+        .defaulted();
     c('p')("push-weights", &push_weights)(
         "push weights as early toward start as possible before forming loop if any (TODO: implement)")
-        .self_init()
+        .defaulted()
         .verbose()
         .todo();
     c("whitespace-break-cost", &whitespaceBreakCost)(
@@ -174,15 +174,15 @@ struct StringUnionOptions {
     c('w')("whitespace-tokens", &whitespaceTokens)(
         "TODO: these (multiple args allowed) tokens are deleted, but 1 or more of them force a token "
         "boundary on either side")
-        .self_init();
+        .defaulted();
     c('A')("greedy-ascii-weight", &wGreedyAscii)(
         "combine consecutive printable non-space ascii (unicode codepoints 33-127, i.e. '!'-'~') chars into "
         "a single token, with this weight per character (empty weight string=disabled). this means that "
         "ascii characters don't propose unk-weight single-character words.")
-        .self_init();
+        .defaulted();
     c("start-greedy-ascii-weight",
       &wStartGreedyAscii)("if set, a different weight for the first character of an ascii-run token.")
-        .self_init();
+        .defaulted();
     c("avoid-epsilon", &avoidEpsilon)(
         "(in case begin and end string are both epsilon) make the trie nondeterministic in input symbol to "
         "avoid epsilon transitions")

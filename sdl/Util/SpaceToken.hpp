@@ -36,7 +36,7 @@ struct SpaceTokenOptions {
   }
   template <class Config>
   void configure(Config &config) {
-    config("space-token", &spaceToken).self_init()
+    config("space-token", &spaceToken).defaulted()
         ("(for input-type hypergraph) token used to encode a space character (we turn it into token breaks in the resulting unknown word rule) - shouldn't need changing from default, but do train your pbmt pipeline with that token in the target bitext + lm if you have multi-word target names from a single source word). empty string disables.");
   }
 };

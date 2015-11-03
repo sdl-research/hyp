@@ -55,7 +55,7 @@ struct PruneToNbestOptions : PruneEpsilonOptions {
   void configure(Config& config) {
     PruneEpsilonOptions::configure(config);
     config("prune-to-nbest", &pruneToNbest)
-        .self_init()(
+        .defaulted()(
             "if >0, prune output so as to preserve just the [prune-to-nbest]-best paths (or you can use the "
             "separate PruneToBest module instead). only 1-best is supported so far.");
     config("skip-already-single", &skipAlreadySingle)
@@ -120,18 +120,18 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
   void configure(Config& config) {
     PruneToNbestOptions::configure(config);
     config("beam-epsilon", &beamEpsilon)
-        .self_init()(
+        .defaulted()(
             "extra margin added to beam-width to allow '0' to be safely used w/ floating point rounding "
             "differences");
     config("beam-width", &beam)
-        .self_init()(
+        .defaulted()(
             "cost difference from best path to preserve (used instead of prune-to-nbest if specified");
     config("beam-plus-states", &beamPlusStates)
-        .self_init()(
+        .defaulted()(
             "after beam-width, keep an additional number of states (meaning: make the beam just wide enough "
             "to include those extra states");
     config("single", &single)
-        .self_init()
+        .defaulted()
         .verbose()(
             "prune to exactly a single derivation (if false, no pruning except if beam-width is set >= 0)");
     PruneOptions::configure(config);  // could make hierarchical like best

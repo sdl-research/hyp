@@ -37,13 +37,13 @@ struct ForceArcs {
   void configure(Config &config) {
     config.is("ForceArcs");
     config("force arc adjacencies");
-    config("in-arcs", &inArcs).self_init()
+    config("in-arcs", &inArcs).defaulted()
         ("index arcs by head (in-arcs)");
-    config("graph-out-arcs", &graphOutArcs).self_init()
+    config("graph-out-arcs", &graphOutArcs).defaulted()
         ("index arcs by first tail only - for graph/fsm (first-tail-out-arcs)");
-    config("out-arcs", &outArcs).self_init()
+    config("out-arcs", &outArcs).defaulted()
         ("index arcs by all tails (out-arcs)");
-    config("canonical-lex", &canonicalLex).self_init()
+    config("canonical-lex", &canonicalLex).defaulted()
         ("reuse lexical states");
   }
 

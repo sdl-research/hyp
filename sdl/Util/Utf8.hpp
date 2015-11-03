@@ -274,12 +274,12 @@ struct FixUnicode {
             "replacement character 0xfffd, or ignoring them. warning: the quality of our models is severely "
             "degraded if you use Ignore for text that is not really utf8");
     config("remove-control-characters", &removeControlChars)
-        .self_init()(
+        .defaulted()(
             "Remove non-whitespace control characters (whitespace is normalized/handled by a different "
             "mechanism). TODO: this is unsafe to use w/ constraints unless those constraints magically refer "
             "to post-removal unicode ids");
     config("convert-windows-1252", &convertWindows1252)
-        .self_init()(
+        .defaulted()(
             "Interpret Unicode range U+0080 - U+009F control characters as encoded Windows 1252 characters "
             "and convert to correct Unicode equivalents (this option has precedence over removal of control "
             "characters). If someone uses control characters for their intended purpose (unlikely) or for "

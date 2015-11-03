@@ -97,7 +97,7 @@ struct ReweightOptions : TransformOptionsBase {
     c.is("Reweight");
     c("Modify hypergraph arc weights' values (real-valued costs, or -log (base e) probs, in a series of "
       "optional steps (numbered 0-5). nan means disabled");
-    c("set", &set).self_init()("0. set to constant s");
+    c("set", &set).defaulted()("0. set to constant s");
     c("weights", &weights)(
         "1. (feature weighted FHG only) if nonempty, set cost to dotprod(weights, features) if "
         "weights-add=false, else add to existing cost");
@@ -105,9 +105,9 @@ struct ReweightOptions : TransformOptionsBase {
     c("weights-add", &weightsAdd)
         .init(false)(
             " modifying 1, weighted feature dotproduct adds to existing cost instead of replacing it");
-    c("random-add", &random_add).self_init()("2. add randomly [0..r) - r may be negative");
-    c("plus", &add).self_init()("3. add [plus]");
-    c("times", &scale).self_init()("4. multiply by t - like probability^t");
+    c("random-add", &random_add).defaulted()("2. add randomly [0..r) - r may be negative");
+    c("plus", &add).defaulted()("3. add [plus]");
+    c("times", &scale).defaulted()("4. multiply by t - like probability^t");
     if (normalizeOpt) {
       c("head-normalize", &head_normalize)
           .init(false)("5a. normalize probabilities; sum_inarcs(exp(-cost))=1");

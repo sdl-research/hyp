@@ -10,13 +10,13 @@
 // limitations under the License.
 /** \file
 
- workaround for MSCV2015 std::function defect
+     workaround for MSCV2015 sdl::function defect:
 
- http://stackoverflow.com/questions/32078339/valid-code-fail-to-be-compiled-by-visual-studio-2015-std-function-bug
+http://stackoverflow.com/questions/32078339/valid-code-fail-to-be-compiled-by-visual-studio-2015-std-function-bug
 
           VS 2015 does not (yet) support expression SFINAE, so you can't use
-          std::is_constructible on std::function. (Note that this is strictly
-          speaking a C++14 feature; C++11 std::function construction is not
+          std::is_constructible on sdl::function. (Note that this is strictly
+          speaking a C++14 feature; C++11 sdl::function construction is not
           SFINAE-enabled.)
 
           From
@@ -28,8 +28,8 @@
           2015 Update 1. It might take longer.)
 */
 
-#ifndef FUNCTION_GRAEHL_2015_11_02_HPP
-#define FUNCTION_GRAEHL_2015_11_02_HPP
+#ifndef SDL__FUNCTION_GRAEHL_2015_11_02_HPP
+#define SDL__FUNCTION_GRAEHL_2015_11_02_HPP
 #pragma once
 
 #if defined(_MSC_VER) && _MSC_VER <= 1900

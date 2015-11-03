@@ -95,9 +95,9 @@ struct NbestPlusTies {
   template <class Config>
   void configure(Config& config) {
     config("nbest", &nbest)('n')
-        .self_init()("limit hypergraph paths to this many, keeping the lowest totalcost");
+        .defaulted()("limit hypergraph paths to this many, keeping the lowest totalcost");
     config("num-ties", &numTies)
-        .self_init()(
+        .defaulted()(
             "allow this many extra same-score derivations with cost tied for the final place (if num-best > "
             "1)");
     config("num-best", &nbest).alias();
@@ -235,10 +235,10 @@ struct PathOutOptions : DerivationStringOptions {
         .init(false)(
             "if there are m<n derivations, print n-m blank lines (making a total of n lines, provided you "
             "don't enable additional lines of output).");
-    c("weight", &weight)('w').self_init()(
+    c("weight", &weight)('w').defaulted()(
         "before path yields and derivation, print weight, space (if no yield, then newline follows anyway)");
     c("nbest-index", &nbestIndex)
-        .self_init()  // because StatisticalTokenizer needs different default
+        .defaulted()  // because StatisticalTokenizer needs different default
         ("before weight, print 'n = N' where N = 1..[--nbest]");
     c("prefix", &prefix).init("")("prepend this string to each nbest line (include your own trailing space)");
     c("inyield", &inyield)('y').init(true)("just print string (input yield) if it exists (one line)");
@@ -1423,18 +1423,18 @@ struct NbestHypergraphOptions : NbestPathOptions {
   void configure(Conf& c) {
     NbestPathOptions::configure(c);
     c("nbest-hypergraph", &nbestHypergraph)
-        .self_init()("output nbest hypergraph instead of original hypergraph");
+        .defaulted()("output nbest hypergraph instead of original hypergraph");
     c("push-weight-value-to-start", &pushWeightValueToStart)
-        .self_init()(
+        .defaulted()(
             "put total cost on first arc from start (so start state out arcs are sorted by increasing "
             "value)");
     c("epsilon-start", &epsilonStart)
-        .self_init()(
+        .defaulted()(
             "use an epsilon arc leaving start state such that a state u adjacent to start identifies a path. "
             "the push-weight-value-to-start weight will be on the arc leaving u and not the new epsilon arc "
             "leaving start");
     c("epsilon-final", &epsilonFinal)
-        .self_init()(
+        .defaulted()(
             "add an epsilon arc to final state such that a state v adjacent to final identifies a path");
   }
 
@@ -1668,7 +1668,7 @@ struct MaybeBestPathOutOptions : BestPathOutToOptions {
   template <class Conf>
   void configure(Conf& c) {
     BestPathOutToOptions::configure(c);
-    c("enable-best", &enable)("print best path(s) if enabled; otherwise print hypergraph instead").self_init();
+    c("enable-best", &enable)("print best path(s) if enabled; otherwise print hypergraph instead").defaulted();
   }
 
   template <class Arc>

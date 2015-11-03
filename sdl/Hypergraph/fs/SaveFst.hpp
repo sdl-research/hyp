@@ -44,8 +44,8 @@ struct SaveFstOptions : LazyBestOptions, PruneToNbestOptions {
     config("reserve-states", &reserveStates)(
         "expect about this many result states (too high wastes memory; too low may be ~10% slower from "
         "copying")
-        .self_init();
-    config("force-out-arcs", &forceOutArcs)("make result store (first-tail-only) fst out arcs").self_init();
+        .defaulted();
+    config("force-out-arcs", &forceOutArcs)("make result store (first-tail-only) fst out arcs").defaulted();
   }
   friend inline void validate(SaveFstOptions& x) { x.validate(); }
 };
