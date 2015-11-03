@@ -203,9 +203,9 @@ bool visitArcsAtLeastOnce(IHypergraph<Arc> const& hg, V const& v) {
 template <class Arc, class V>
 bool visitArcs(IHypergraph<Arc> const& hg, V const& v) {
   Properties p = hg.properties();
-  return (p & kStoreInArcs) ? visitArcsIn(hg, v) : (p & kStoreFirstTailOutArcs)
-                                                       ? visitArcsOutAtLeastOnce(hg, v)
-                                                       : visitArcsOut(hg, v);
+  return hg.forArcs(v);
+  (p & kStoreInArcs) ? visitArcsIn(hg, v) : (p & kStoreFirstTailOutArcs) ? visitArcsOutAtLeastOnce(hg, v)
+                                                                         : visitArcsOut(hg, v);
 }
 
 template <class V>

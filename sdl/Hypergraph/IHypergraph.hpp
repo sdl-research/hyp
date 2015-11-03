@@ -243,7 +243,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
   typedef shared_ptr<Immutable> ImmutablePtr;
   typedef shared_ptr<Immutable const> ConstImmutablePtr;
   typedef A Arc;
-  typedef typename A::ArcVisitor ArcVisitor;  // like a std::function<void (Arc *)>
+  typedef typename A::ArcVisitor ArcVisitor;  // std::function<void (Arc *)>
 
   typedef typename A::Weight Weight;
 
@@ -331,6 +331,10 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
      don't (via IMutableHypergraph) change arc storage options, or otherwise delete states
 
      however, you may add states (but not arcs) e.g. in changing arc labels
+
+     if you don't want a std::function, then instead use forArcs
+     directly. tradeoff: forArcs is less efficient than visitArcs (but visit is
+     then inline)
   */
   virtual void visitArcs(ArcVisitor const& v) const { forArcs(v); }
 

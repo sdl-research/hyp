@@ -131,8 +131,8 @@ bool checkGradients(IObjectiveFunction<FloatT>& objFct, FloatT* params, const Fe
     FloatT wantGradient = (fctValAfter - fctValBefore) / kGradientCheckEpsilon;
     if (!Util::floatEqual(wantGradient, gradients[i], tolerance)) {
       SDL_WARN(Optimization.OptimizationProcedure, std::setprecision(12)
-                                                   << "Gradient for feature " << i << " is " << gradients[i]
-                                                   << ", but should be " << wantGradient);
+                                                       << "Gradient for feature " << i << " is "
+                                                       << gradients[i] << ", but should be " << wantGradient);
       ++cntWarnings;
     }
     params[i] = orig;
@@ -141,12 +141,14 @@ bool checkGradients(IObjectiveFunction<FloatT>& objFct, FloatT* params, const Fe
     SDL_WARN(Optimization.OptimizationProcedure,
              "Number of incorrect gradients: " << cntWarnings << " / " << numParams << " = "
                                                << graehl::percent<5>(cntWarnings, numParams) << "%");
-  } else { SDL_INFO(Optimization.OptimizationProcedure, "Gradients OK"); }
+  } else {
+    SDL_INFO(Optimization.OptimizationProcedure, "Gradients OK");
+  }
   return !cntWarnings;
 }
 }
 
-OptimizationProcedure::OptimizationProcedure(shared_ptr<ICreateSearchSpace<Arc> >& searchSpace,
+OptimizationProcedure::OptimizationProcedure(shared_ptr<ICreateSearchSpace<Arc>>& searchSpace,
                                              OptimizationProcedureOptions const& opts)
     : opts_(opts), checkIntersectionNonEmpty_(false), checkGradients_(false), pSearchSpace_(searchSpace) {
   if (opts_.testMode) {
@@ -170,21 +172,21 @@ void OptimizationProcedure::test() {
   for (std::size_t i = 0, end = hgPairs.size(); i < end; ++i) {
     SDL_TRACE(Optimize, "Example " << i);
     IHgPtr unclamped(hgPairs[i].second);
-    unclamped->visitArcs(addDotProduct);
+    unclamped->forArcs(addDotProduct);
     if (i == 0)
       SDL_DEBUG_ALWAYS(Optimize.first.unclamped, "Unclamped first hg:\n" << *unclamped);
     else
       SDL_TRACE(Optimize.unclamped, "Unclamped hg:\n" << *unclamped);
     if (opts_.testModeDetailed) {
-      Hypergraph::DerivationPtr deriv
-          = Hypergraph::bestPath(*unclamped, Hypergraph::BestPathOptions());
+      Hypergraph::DerivationPtr deriv = Hypergraph::bestPath(*unclamped, Hypergraph::BestPathOptions());
       std::cout << deriv->weightForArc<Arc>() << "\t";
-      std::cout << Hypergraph::textFromDeriv(deriv, *unclamped, Hypergraph::DerivationStringOptions())
-                << "\n";
+      std::cout << Hypergraph::textFromDeriv(deriv, *unclamped, Hypergraph::DerivationStringOptions()) << "\n";
     } else if (opts_.testModeOutputHypergraph) {
       if (i > 0) std::cout << "-----\n";
       std::cout << *unclamped;
-    } else { std::cout << Hypergraph::bestPathString(*unclamped) << '\n'; }
+    } else {
+      std::cout << Hypergraph::bestPathString(*unclamped) << '\n';
+    }
   }
 }
 
@@ -216,17 +218,19 @@ void OptimizationProcedure::optimize() {
       } else {
         SDL_THROW_LOG(Optimization, OptimizationException,
                       "L-BFGS returned non-zero error code: "
-                      << errorCode << " - " << detail::lbfgsStatus(errorCode)
-                      << ". Debugging: setCheckIntersectionNonEmpty() can help diagnose input-output "
-                         "mismatch; "
-                      << "setCheckGradients() can help diagnose gradient computation bugs.");
+                          << errorCode << " - " << detail::lbfgsStatus(errorCode)
+                          << ". Debugging: setCheckIntersectionNonEmpty() can help diagnose input-output "
+                             "mismatch; "
+                          << "setCheckGradients() can help diagnose gradient computation bugs.");
       }
     }
   } else if (opts_.optimizationMethod == kOnline) {
     SDL_INFO(sdl.Optimization, "Using online optimization");
     OnlineOptimizer<FloatT> optimizer(opts_.onlineOptions);
     optimizer.optimize(objFct, params, numParams);
-  } else { SDL_THROW_LOG(Optimization, OptimizationException, "Unknown optimization method"); }
+  } else {
+    SDL_THROW_LOG(Optimization, OptimizationException, "Unknown optimization method");
+  }
 
   SDL_DEBUG(OptimizationProcedure, "Writing learned weights to " << opts_.weightsPath);
   Util::Output weightsOutput(opts_.weightsPath);

@@ -1215,8 +1215,8 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   /// mere optimization over IHypergraph::visitArcs
   virtual void visitArcs(ArcVisitor const& v) const override {
     if (this->properties_ & kStoreInArcs) {
-      for (StateId s = 0, n = (StateId)inArcsPerState_.size(); s < n;
-           ++s)  // so you can add states in visitor
+      for (StateId s = 0, n = (StateId)inArcsPerState_.size(); s < n; ++s)
+        // using stateid s so you can add states in visitor
         for (ArcIter i = inArcsPerState_[s].begin(), e = inArcsPerState_[s].end(); i != e; ++i) v((Arc*)*i);
     } else if (this->properties_ & kStoreFirstTailOutArcs) {
       for (StateId s = 0, n = (StateId)outArcsPerState_.size(); s < n;

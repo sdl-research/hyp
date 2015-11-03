@@ -970,7 +970,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
           // some v aren't derivable. in that case NULL.
         }
         // add edges to forest - binarized edges are already sorted but the rest need to be
-        visitArcs(hg, *this);
+        hg.forArcs(*this);
         sort();
         StateSet& seen = env.derivation_factory.seen;  // reusing an existing array for efficiency
         seen.clear();
@@ -992,16 +992,16 @@ struct BestPath : TransformBase<Transform::Inplace> {
          lazy-forest node structure, rooted at existing derivation and forest for
          hypergraph state
       */
-      bool operator()(IHypergraph<Arc> const&, Arc* a) const {
+      void operator()(Arc* a) const {
         StateId h = a->head();
         NbestForest& fh = fv[h];
         Dp dh = dv[h];
-        if (!dh) return true;
+        if (!dh) return;
         StateIdContainer const& tails = a->tails();
         unsigned N = (unsigned)tails.size();
         for (unsigned i = 0; i < N; ++i) {
           StateId tl = tails[i];
-          if (!dv[tl]) return true;
+          if (!dv[tl]) return;
         }
         Dp d;
         Cost w = bestCost(a);
@@ -1048,7 +1048,6 @@ struct BestPath : TransformBase<Transform::Inplace> {
           d->children[1] = dv[r];
           fh.add(d, lf, &fv[r]);
         }
-        return true;
       }
 
      private:
@@ -1081,7 +1080,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
     struct IgnoreVisitor {
       template <class Weight>
       bool operator()(DerivationPtr const&, Weight const&, NbestId) const {
-        return true;
+        return false;
       }
     };
 

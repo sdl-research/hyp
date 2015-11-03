@@ -118,21 +118,21 @@ struct GetTokenSpan {
 
   bool haveSpan() const { return !nullTokenSpan(span); }
 
-  //TODO: test
+  // TODO: test
   template <class Arc>
   void operator()(Arc* arc) const {
     setNullTokenSpan(span);
     Hypergraph::visitFeatureRange(arc->weight(), *this, ids);
   }
 
-  //TODO: test
+  // TODO: test
   template <class Arc>
   TokenSpan const& spanFor(Arc* arc) const {
     operator()(arc);
     return span;
   }
 
-  //TODO: test
+  // TODO: test
   TokenSpan const& spanForFeature(FeatureId id) const {
     FeatureId const index = id - ids.begin;
     if (index >= spans->size())
@@ -142,7 +142,7 @@ struct GetTokenSpan {
     return (*spans)[index];
   }
 
-  //TODO: test
+  // TODO: test
   void operator()(std::pair<FeatureId const, FeatureValue> const& idVal) const {
     FeatureId const id = idVal.first;
     if (haveSpan())
@@ -202,7 +202,7 @@ struct SaveTokens {
   explicit SaveTokens(IHypergraph<Arc> const& hg, FeatureIdRange const& ids)
       : hg(hg), pTokens(new Tokens(hg.getVocabulary(), ids)), nextId(ids.begin) {
     SDL_DEBUG(SaveTokens, "Saving lexical tokens (first per arc only) to alignment ids " << ids);
-    hg.visitArcs(*this);
+    hg.forArcs(*this);
   }
   void operator()(Arc* arc) const {
     // Limitation: At most one lexical tail per arc with alignment features

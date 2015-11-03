@@ -63,6 +63,9 @@ struct AccumulateExpectedValuesFct {
   typedef MapT Map;
 
   HypergraphBase const& hg_;
+  Map* pResultMap_;
+  mutable boost::ptr_vector<LogW> insideWeights_;
+  mutable boost::ptr_vector<LogW> outsideWeights_;
 
   AccumulateExpectedValuesFct(HypergraphBase const& hg, boost::ptr_vector<LogW> const& insideWeights,
                               boost::ptr_vector<LogW> const& outsideWeights, Map* pResultMap)
@@ -72,7 +75,7 @@ struct AccumulateExpectedValuesFct {
      Accumulates feature expectations found on a feature
      weight arc. (Gets called with *expectation* feature weights.)
   */
-  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, Expectation> > const* arc) {
+  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, Expectation> > const* arc) const {
     FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_;
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
@@ -84,7 +87,7 @@ struct AccumulateExpectedValuesFct {
      Accumulates feature expectations found on a feature
      weight arc. (Gets called with *viterbi* feature weights.)
   */
-  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, TakeMin> > const* arc) {
+  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, TakeMin> > const* arc) const {
     FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_ + arc->weight_.value_;
     // unlike Expectation, which already includes this factor in the feature values
     SDL_DEBUG(Hypergraph.FeatureExpectations, "Accumulate feature expectations for "
@@ -99,7 +102,7 @@ struct AccumulateExpectedValuesFct {
 
  private:
   template <class Arc>
-  LogWeightTpl<FloatT> computeInsideTimesOutside(Arc const& arc) {
+  LogWeightTpl<FloatT> computeInsideTimesOutside(Arc const& arc) const {
     assert(outsideWeights_.size() > arc->head());
     LogW result(outsideWeights_[arc->head()]);
     StateIdContainer const& tails = arc->tails();
@@ -110,9 +113,6 @@ struct AccumulateExpectedValuesFct {
     return result;
   }
 
-  Map* pResultMap_;
-  boost::ptr_vector<LogW> insideWeights_;
-  boost::ptr_vector<LogW> outsideWeights_;
 };
 
 
@@ -143,8 +143,7 @@ typename Arc::Weight::FloatT computeFeatureExpectations(IHypergraph<Arc> const& 
   insideAlgorithm(logWeightHg, &insideWeights, false);
   outsideAlgorithm(logWeightHg, insideWeights, &outsideWeights, false);
 
-  AccumulateExpectedValuesFct<FloatT, Map> fct(hg, insideWeights, outsideWeights, pResultMap);
-  hg.visitArcs(fct);
+  hg.forArcs(AccumulateExpectedValuesFct<FloatT, Map>(hg, insideWeights, outsideWeights, pResultMap));
 
   // Negative log of sum over all paths (used for global
   // normalization):

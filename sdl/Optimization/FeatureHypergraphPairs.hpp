@@ -53,10 +53,7 @@ namespace detail {
 template <class Arc>
 void insertFeatureWeights(Hypergraph::IMutableHypergraph<Arc>* pHg,
                           typename Arc::Weight::FloatT const* pWeights, FeatureId nWeights) {
-  if (pWeights) {
-    Hypergraph::InsertWeightsVisitor<Arc> inserter(pWeights, nWeights);
-    pHg->visitArcs(inserter);
-  }
+  if (pWeights) pHg->forArcs(Hypergraph::InsertWeightsVisitor<Arc>(pWeights, nWeights));
 }
 }
 
@@ -92,7 +89,8 @@ class IFeatureHypergraphPairs {
       new feature weights. (Good for online learning.)
    */
   virtual void setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end, FloatT const* featWeights,
-                                 FeatureId numParams) = 0;
+                                 FeatureId numParams)
+      = 0;
 
   /**
       \return The number of Hypergraph pairs.
