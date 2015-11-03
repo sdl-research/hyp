@@ -1,6 +1,6 @@
 # `hyp` -- The Hypergraph Toolkit
 
-`hyp` is a general toolkit for the representation,
+`hyp` is a general C++11 toolkit for the representation,
 manipulation, and optimization of weighted hypergraphs. Finite-state
 machines are modeled as a special case.
 
@@ -43,7 +43,7 @@ repository, which contains pre-built third-party libraries used by
 
 * Set an environment variable `SDL_EXTERNALS_PATH` to point to the
   `Windows` subdirectory of your `sdl-externals` clone. Example: `set
-  SDL_EXTERNALS_PATH=c:/src/sdl-externals/Windows` 
+  SDL_EXTERNALS_PATH=c:/src/sdl-externals/Windows`
 
 * Create and change to a directory `build-hyp` inside your `hyp`
   directory.
@@ -52,9 +52,12 @@ repository, which contains pre-built third-party libraries used by
   -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 10 Win64"
   c:/src/hyp/sdl`
 
-* Then build the project as usual with Visual Studio.
+* Then build the project as usual with Visual Studio 2015 or later.
 
 ### Linux
+
+* For older versions of gcc or clang, edit SdlHelperFunction.cmake to
+ replace `-std=c++14` by `-std=c++11`
 
 * Set an environment variable `SDL_EXTERNALS_PATH` to point to the
   `FC12` subdirectory of your `sdl-externals` clone. This also works
@@ -79,7 +82,7 @@ wasted effort.
 ## Citations
 
 If you use the `hyp` toolkit in your publication, please cite the
-tutorial document: 
+tutorial document:
 
 Markus Dreyer and Jonathan Graehl (2014): Tutorial: The hyp hypergraph
 toolkit. Url:

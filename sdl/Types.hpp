@@ -26,6 +26,8 @@ __asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
 //http://www.win.tue.nl/~aeb/linux/misc/gcc-semibug.html
 #endif
 
+#include <sdl/Function.hpp>
+
 #include <string>
 #include <map>
 #include <vector>

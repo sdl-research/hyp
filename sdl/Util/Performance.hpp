@@ -170,8 +170,8 @@ struct Performance : boost::noncopyable {
 
   /** log usage now, without preventing logging at destructor */
   void report() {
-    if (stringConsumer.empty()) return;
-    stringConsumer("(FINISHED) "+elapsed().str());
+    if (stringConsumer)
+      stringConsumer("(FINISHED) "+elapsed().str());
   }
 
   std::string str() const {
@@ -185,8 +185,8 @@ struct Performance : boost::noncopyable {
 
   /** log usage now, and don't log again at destructor */
   void finalReport() {
-    if (!latch(reported)) return;
-    report();
+    if (latch(reported))
+      report();
   }
 
   bool disableReport() { return latch(reported); }

@@ -33,6 +33,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sdl/Function.hpp>
 
 namespace sdl {
 
