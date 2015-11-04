@@ -83,9 +83,7 @@ std::string lookupSymbolsToString(ForwardIterator begin, ForwardIterator end, IV
   return ss.str();
 }
 }
-}
 
-namespace sdl {
 struct PrintSyms {
   Syms const& syms;
   IVocabulary const* voc;
@@ -97,6 +95,8 @@ struct PrintSyms {
   }
   void print(std::ostream& out) const { Vocabulary::lookupAndPrintSymbols(syms, voc, out); }
 };
+
+
 }
 
 #endif

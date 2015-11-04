@@ -125,11 +125,7 @@ inline Sym const* lexicalInteriorLength(Syms const& syms, SymsIndex& lenInterior
   } else
     return 0;
 }
-}
 
-
-
-namespace sdl {
 /**
    for out << sdl::printer(phrase, voc).
 */

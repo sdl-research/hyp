@@ -18,13 +18,10 @@
 #define SDL_LWUTIL_OUTPUT_HPP
 #pragma once
 
-
-#include <sdl/Util/Input.hpp>
+#include <sdl/Util/Fileargs.hpp>
 
 namespace sdl {
 namespace Util {
-
-typedef graehl::file_arg<std::ostream> OutputStream;
 
 /**
    Represents output, either to STDOUT (default, or filename '-'), or
@@ -39,40 +36,31 @@ typedef graehl::file_arg<std::ostream> OutputStream;
 */
 struct Output : OutputStream {
 
-  static std::string help() {
-    return "output file - "+graehl::file_arg_usage();
-  }
-  static std::string helpId() {
-    return "output file - "+fileForIdHelp();
-  }
+  static std::string help() { return "output file - " + graehl::file_arg_usage(); }
+  static std::string helpId() { return "output file - " + kFileForIdHelp; }
 
   Output() : OutputStream("-") {}
   Output(std::string const& filename) : OutputStream(filename) {}
-  Output(std::string const& filenamePrefix, std::string const& id) : OutputStream(fileForId(filenamePrefix, id)) {}
+  Output(std::string const& filenamePrefix, std::string const& id)
+      : OutputStream(fileForId(filenamePrefix, id)) {}
 
-  operator bool() const {
-    return (OutputStream const&)*this;
-  }
+  operator bool() const { return (OutputStream const&)*this; }
 
-  void setFilename(std::string const& filename) {
-    OutputStream::set(filename);
-  }
+  void setFilename(std::string const& filename) { OutputStream::set(filename); }
 
-  std::ostream& getStream() const {
-    return **this;
-  }
-
+  std::ostream& getStream() const { return **this; }
 };
+}
+}
 
-}}
-
-namespace boost { namespace program_options {
-inline void validate(boost::any& v,
-                     std::vector<std::string> const& values,
-                     sdl::Util::Output* target_type, int)
-{
+namespace boost {
+namespace program_options {
+inline void validate(boost::any& v, std::vector<std::string> const& values, sdl::Util::Output* target_type,
+                     int) {
   v = boost::any(sdl::Util::Output(graehl::get_single_arg(v, values)));
 }
-}} // boost::program_options
+
+
+}}
 
 #endif

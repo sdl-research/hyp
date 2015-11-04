@@ -52,7 +52,7 @@ template <class Val>
 sdl::InputSizeAmount sizeAmount(Val const* pval) {
   return sizeAmount(*pval);
 }
-};
+}
 
 namespace adl {
 

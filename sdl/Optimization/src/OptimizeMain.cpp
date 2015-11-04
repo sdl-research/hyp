@@ -90,8 +90,7 @@ int main(int ac, char* av[]) {
 
     opt("config,c", po::value(&configFile)->default_value("./SDLConfig.yml"),
         "SDL config file that describes the DB");
-    opt("search-dir,I", po::value<std::vector<std::string> >(),
-        "Directories where config files are searched");
+    opt("search-dir,I", po::value<std::vector<std::string>>(), "Directories where config files are searched");
     opt("log-config", po::value(&logConfigFile), "optional log4cxx xml config file");
     opt("model", po::value(&modelName)->default_value("SimpleCrf"),
         "Name of the model (specifies shared library to load)");
@@ -118,7 +117,7 @@ int main(int ac, char* av[]) {
     po::notify(varMap);
 
     if (varMap.count("search-dir")) {
-      findFile().setDirs(varMap["search-dir"].as<std::vector<std::string> >());
+      findFile().setDirs(varMap["search-dir"].as<std::vector<std::string>>());
     }
 
     initLoggerFromConfig(logConfigFile, "OptimizeMain", Util::kLogInfo);

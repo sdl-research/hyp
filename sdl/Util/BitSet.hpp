@@ -155,10 +155,10 @@ struct PrintBits {
 }
 
 SDL_BITSET_OPEN_NAMESPACE
-// ADL for bitset means we need to be in boost ns
+// ADL for bitset (must be in bitset namespace)
 
 template <class I, class A>
-inline std::size_t hash_value(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& c) {
+inline std::size_t hash_value(dynamic_bitset<I, A> const& c) {
   return boost::hash_range(c.bits_.begin(), c.bits_.end());
 }
 

@@ -96,10 +96,6 @@ struct WithInitLogging : FinishLoggingAfterScope {
   WithInitLogging(char const* name = "InitLogger(default)", LogLevel level = kLogDebug);
 };
 }
-}
-
-
-namespace sdl {
 static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) and then set hardware watchpoint
 // on gLogSeqXmt == the # you see printed
 }
@@ -130,14 +126,14 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 // the LOG4CXX_ macros unfortunately only enclose in {} and not do {} while (0), so we must:
 
-#define LOG_DEBUG_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                  \
+#define LOG_DEBUG_NAMESTR(loggerName, expression)                     \
+  do {                                                                \
     LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
 
 #if !defined(NDEBUG) || defined(SDL_ENABLE_TRACE_LOGGING)
-#define LOG_TRACE_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                  \
+#define LOG_TRACE_NAMESTR(loggerName, expression)                     \
+  do {                                                                \
     LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
   } while (0)
 #else

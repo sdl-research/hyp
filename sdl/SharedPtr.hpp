@@ -51,7 +51,7 @@ Ptr ifEnabled(bool enabled, Ptr const& p) {
 }
 
 template <class Val>
-Val *ptrIfEnabled(bool enabled, Val &p) {
+Val* ptrIfEnabled(bool enabled, Val& p) {
   return enabled ? &p : NULL;
 }
 
@@ -102,7 +102,7 @@ shared_ptr<Val> notNull(shared_ptr<Val> const& p) {
 
 struct DoNothing {
   template <class V>
-  void operator()(V &) const {}
+  void operator()(V&) const {}
 };
 
 template <class Val>

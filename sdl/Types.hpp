@@ -21,9 +21,9 @@
 #pragma once
 
 
-#if defined(__GNUC__) && defined(__LP64__)  /* only under 64 bit gcc */
+#if defined(__GNUC__) && defined(__LP64__) /* only under 64 bit gcc */
 __asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
-//http://www.win.tue.nl/~aeb/linux/misc/gcc-semibug.html
+// http://www.win.tue.nl/~aeb/linux/misc/gcc-semibug.html
 #endif
 
 #include <sdl/Function.hpp>
@@ -59,7 +59,7 @@ SegmentId const kNullSegmentId((SegmentId)-1);
 
 typedef char const* Pchar;
 
-//TODO: use boost::string_ref or std::experimental::string_view instead in C++11
+// TODO: use boost::string_ref or std::experimental::string_view instead in C++11
 typedef std::pair<Pchar, Pchar> Slice;  // see Util/Fields for a richer interface
 
 inline std::size_t len(Slice const& slice) {
