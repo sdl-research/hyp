@@ -35,9 +35,17 @@ http://stackoverflow.com/questions/32078339/valid-code-fail-to-be-compiled-by-vi
 #if defined(_MSC_VER) && _MSC_VER <= 1900
 #define SDL_FUNCTION_NS boost
 #include <boost/function.hpp>
+template <class F>
+void setNullFunction(boost::function<F>& f) {
+  f.clear();  // should also work: f = 0;
+}
 #else
-#include <functional>
 #define SDL_FUNCTION_NS std
+#include <functional>
+template <class F>
+void setNullFunction(std::function<F>& f) {
+  f = nullptr;  // should also work: f = 0;
+}
 #endif
 
 namespace sdl {

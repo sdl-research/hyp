@@ -368,14 +368,14 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
   // so we don't have to distinguish between real and fake epsilons)
   bool hasAllOut(StateId s) const override;
 
-  /// forArcs(v) -  call v(a) for all Arc *a, exactly once for each a
+/// forArcs(v) -  call v(a) for all Arc *a, exactly once for each a
 
-  /// forArcsAllowRepeats - v(a) 1 or more times per Arc *a
+/// forArcsAllowRepeats - v(a) 1 or more times per Arc *a
 #include <sdl/Hypergraph/src/IHypergraphForArcs.ipp>
 
   WeightCount countArcs() const {
     WeightCount r;
-    forArcs([&r](Arc const*a) { r(a); });
+    forArcs([&r](Arc const* a) { r(a); });
     return r;
   }
 
@@ -454,33 +454,18 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
     Hypergraph::printArc<Arc>(out, (Arc*)arc, (HypergraphBase const*)this, inlineLabel);
   }
 
+  typedef std::vector<Arc*> AllArcs;
+  virtual void fetchArcs(AllArcs& arcs) const {
+    arcs.reserve(this->estimatedNumEdges());
+    forArcs([&arcs](Arc* arc) { arcs.push_back(arc); });
+  }
 };  // end class IHypergraph
 
-// iterate over pointers to arcs
-template <class Arc>
-struct ArcPointers : public std::vector<Arc*> {
-  void operator()(ArcBase const* a) { this->push_back((Arc*)a); }
-  ArcPointers(HypergraphBase const& h) {
-    this->reserve(h.estimatedNumEdges());
-    h.forArcs([this](ArcBase const* a) { this->push_back((Arc*)a); });
-  }
-  template <class V>
-  void visit(V const& v) const {
-    for (Arc* arc : *this)
-      v(arc);
-  }
-  template <class V>
-  void visit(V& v) const {
-    for (Arc* arc : *this)
-      v(arc);
-  }
-};
 
 template <class Arc>
 bool isEpsilonLikeGraphArc(IHypergraph<Arc> const& hg, Arc const& arc) {
   return isOne(arc.weight_) && isEpsilonLikeGraphArcAnyWeight(hg, arc);
 }
-
 
 template <class Arc>
 struct PrintInArcs {
@@ -546,24 +531,25 @@ ArcPrint<Arc> arcPrint(Arc const* arc, HypergraphBase const* hg) {
 }
 
 template <class Arc>
-void print(std::ostream &out, Arc const& arc, IHypergraph<Arc> const* hg) {
+void print(std::ostream& out, Arc const& arc, IHypergraph<Arc> const* hg) {
   printArc(out, &arc, hg);
 }
 
 template <class Arc>
-void print(std::ostream &out, Arc const* arc, IHypergraph<Arc> const* hg) {
+void print(std::ostream& out, Arc const* arc, IHypergraph<Arc> const* hg) {
   printArc(out, arc, hg);
 }
 
 template <class Arc>
-void print(std::ostream &out, Arc const& arc, IHypergraph<Arc> const& hg) {
+void print(std::ostream& out, Arc const& arc, IHypergraph<Arc> const& hg) {
   printArc(out, &arc, hg);
 }
 
 template <class Arc>
-void print(std::ostream &out, Arc const* arc, IHypergraph<Arc> const& hg) {
+void print(std::ostream& out, Arc const* arc, IHypergraph<Arc> const& hg) {
   printArc(out, arc, hg);
 }
+
 
 }}
 

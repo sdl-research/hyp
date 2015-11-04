@@ -43,9 +43,7 @@ bool hasInArcs(IHypergraph<Arc> const& hg, StateId head) {
 
 struct CollectArcPointers {
   Util::PointerSet& arcPointers;
-  explicit CollectArcPointers(Util::PointerSet& arcPointers) : arcPointers(arcPointers) {
-    Util::setEmptyKey(arcPointers);
-  }
+  explicit CollectArcPointers(Util::PointerSet& arcPointers) : arcPointers(arcPointers) {}
 
   template <class Arc>
   bool operator()(StateId, Arc* pArc) const {
@@ -101,11 +99,15 @@ struct IsolateStartState : TransformBase<Transform::Inplace>, IsolateStartStateO
     StateId newStart = hg.addState();
     hg.setStart(newStart);
 
-    Util::Once arcPointers;  // collect all the outarcs from start state
-    hg.forArcsOutSearch(oldStart, CollectArcPointers(arcPointers));
+    Util::OnceTypedP<Arc> unique;  // collect all the outarcs from start state
+    std::vector<Arc*> startarcs;
+    hg.forArcsOutSearch(oldStart, [&startarcs](StateId, Arc* arc) { startarcs.push_back(arc); return false; });
 
-    for (auto arc : arcPointers)
-      hg.addArc(new Arc(*(Arc*)arc, oldStart, newStart));  // clone replacing in tails: old -> new start state
+    for (Arc* arc : startarcs) {
+      if (unique.first(arc))
+        hg.addArc(
+            new Arc(*(Arc*)arc, oldStart, newStart));  // clone replacing in tails: old -> new start state
+    }
   }
 };
 

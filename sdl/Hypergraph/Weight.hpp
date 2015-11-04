@@ -111,6 +111,11 @@ class FloatWeightTpl : public WeightBase {
   constexpr FloatWeightTpl(int v) : value_((T)v) {}
   constexpr FloatWeightTpl(std::size_t v) : value_((T)v) {}
 
+  FloatWeightTpl(FloatWeightTpl const& o) = default;
+  FloatWeightTpl& operator=(FloatWeightTpl const& o) = default;
+  FloatWeightTpl(FloatWeightTpl && o) = default;
+  FloatWeightTpl& operator=(FloatWeightTpl && o) = default;
+
   T& value() { return value_; }
 
   T getValue() const { return value_; }
@@ -214,6 +219,11 @@ class ViterbiWeightTpl : public FloatWeightTpl<T> {
   constexpr ViterbiWeightTpl(std::size_t v) : Base(v) {}
   constexpr ViterbiWeightTpl(typename Base::DoubleT v) : Base(v) {}
 
+  ViterbiWeightTpl(ViterbiWeightTpl const& o) = default;
+  ViterbiWeightTpl& operator=(ViterbiWeightTpl const& o) = default;
+  ViterbiWeightTpl(ViterbiWeightTpl && o) = default;
+  ViterbiWeightTpl& operator=(ViterbiWeightTpl && o) = default;
+
   Self& operator=(Base const& other) {
     this->value_ = other.value_;
     return *this;
@@ -299,6 +309,10 @@ class LogWeightTpl : public FloatWeightTpl<T> {
   constexpr LogWeightTpl(typename Base::DoubleT v) : Base(v) {}
   constexpr LogWeightTpl(int v) : Base(v) {}
   constexpr LogWeightTpl(std::size_t v) : Base(v) {}
+  LogWeightTpl(LogWeightTpl const& o) = default;
+  LogWeightTpl& operator=(LogWeightTpl const& o) = default;
+  LogWeightTpl(LogWeightTpl && o) = default;
+  LogWeightTpl& operator=(LogWeightTpl && o) = default;
 
   static inline constexpr LogWeightTpl<T> one() { return LogWeightTpl<T>(0.0f); }
 

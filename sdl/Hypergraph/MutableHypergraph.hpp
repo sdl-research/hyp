@@ -183,7 +183,7 @@ struct MutableHypergraphLabels {
 typedef std::vector<StateId> InterestedStates;
 
 template <class A>
-struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabels {
+struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergraphLabels {
  private:
   typedef std::vector<HypergraphBase::ArcsContainer> AdjacentArcs;
   static inline void transform(StateIds const& permutation, StateId& s) {
@@ -257,6 +257,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   }
 
   typedef A Arc;
+  typedef IHypergraph<A> Base;
   typedef IMutableHypergraph<A> MutableBase;
   typedef HypergraphBase::ArcsContainer ArcsContainer;
   typedef ArcsContainer::const_iterator ArcIter;
@@ -438,7 +439,8 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     if (x.identity()) return restrict(keep);
     bool adding = x.stateAdding();
     // TODO: special case !x.frozen - faster than checking when translating
-    ArcPointers<A> arcs(*this);
+    AllArcs arcs;
+    this->fetchArcs(arcs);
     clearArcsPer(this->numStates_);
     this->numStates_ = 0;  // this is necessary! x.relabelArc(*this, *a) actually calls addState
     LabelForState in, out;
@@ -449,7 +451,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     lstate.clear();  // clear while saving arcs/labels
 
     std::size_t ndel = 0;
-    for (A* a : arcs) {
+    for (Arc* a : arcs) {
       if (keepa(a) && x.relabelArc(*a)) {
         if (adding)
           addArc(a);
@@ -504,10 +506,11 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
       rebuildOutArcs();
     } else {
       bool addFirst = this->properties_ & kStoreFirstTailOutArcs;
-      ArcPointers<A> arcs(*this);
+      AllArcs arcs;
+      this->fetchArcs(arcs);
       StateId ns = (StateId)outArcsPerState_.size();
       Util::reinit(outArcsPerState_, ns);
-      for (A* a : arcs) {
+      for (Arc* a : arcs) {
         if (keep(a)) {
           if (addFirst)
             addArcFirstTailOut(a);
@@ -706,6 +709,14 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     if (this->properties_ & kStoreAnyOutArcs) outArcsPerState_.reserve(n);
   }
 
+  void rebuildArcAdjacencies() override {
+    AllArcs arcs;
+    fetchArcs(arcs);
+    releaseArcs();
+    addArcs(arcs);
+  }
+
+
   void rebuildOutArcs() {
     if (this->properties_ & kStoreInArcs) {
       if (this->properties_ & kStoreFirstTailOutArcs) {
@@ -788,7 +799,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   // improved: default props get set no matter what you pass in.
   MutableHypergraph(Properties props = kDefaultStoreArcsPerState) { init(props); }
 
-  IMutableHypergraph<Arc>* clone() const override {
+  MutableHypergraph<Arc>* clone() const override {
     MutableHypergraph* pHg = new MutableHypergraph<A>(this->properties_);
     pHg->setVocabulary(pVocab_);
     copyHypergraph(*this, pHg);
@@ -1200,11 +1211,12 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
     Adder adder(*this);
     if (this->properties_ & kStoreInArcs) {
       Util::reinit(outArcsPerState_, inArcsPerState_.size());
-      this->forArcs(adder);
+      this->forArcsImpl(adder);
     } else {
-      ArcPointers<Arc> arcs(*this);
+      AllArcs arcs;
+      this->fetchArcs(arcs);
       Util::reinit(outArcsPerState_, numStates_);
-      arcs.visit(adder);
+      for (Arc* arc : arcs) adder(arc);
     }
     this->properties_ |= Adder::addProperties;
     this->properties_ &= ~Adder::removeProperties;
@@ -1212,19 +1224,34 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
 
   bool storesOutArcsImpl() const { return this->properties_ & kStoreAnyOutArcs; }
 
-  /// mere optimization over IHypergraph::visitArcs
-  virtual void visitArcs(ArcVisitor const& v) const override {
+  using typename Base::AllArcs;
+
+  void addArcs(AllArcs const& arcs) override {
+    for (Arc* arc : arcs) addArc(arc);
+  }
+
+  void fetchArcs(AllArcs& arcs) const {
+    arcs.reserve(this->estimatedNumEdges());
+    forArcsImpl([&arcs](Arc* arc) { arcs.push_back(arc); });
+  }
+
+  /// mere optimization over IHypergraph::visitArcs (also, you can trust it uses
+  /// inarcs iff possible - see buildOut)
+  template <class Visitor>
+  void forArcsImpl(Visitor const& v) const {
+    // using stateid s so you can add states in visitor
     if (this->properties_ & kStoreInArcs) {
       for (StateId s = 0, n = (StateId)inArcsPerState_.size(); s < n; ++s)
-        // using stateid s so you can add states in visitor
-        for (ArcIter i = inArcsPerState_[s].begin(), e = inArcsPerState_[s].end(); i != e; ++i) v((Arc*)*i);
+        for (ArcBase* a : inArcsPerState_[s]) v((Arc*)a);
     } else if (this->properties_ & kStoreFirstTailOutArcs) {
-      for (StateId s = 0, n = (StateId)outArcsPerState_.size(); s < n;
-           ++s)  // so you can add states in visitor
-        for (ArcIter i = outArcsPerState_[s].begin(), e = outArcsPerState_[s].end(); i != e; ++i) v((Arc*)*i);
+      for (StateId s = 0, n = (StateId)outArcsPerState_.size(); s < n; ++s)
+        for (ArcBase* a : outArcsPerState_[s]) v((Arc*)a);
     } else
+      // will also use stateid s.
       IHypergraph<Arc>::forArcs(v);
   }
+
+  virtual void visitArcs(ArcVisitor const& v) const override { forArcsImpl(v); }
 
  public:
   /// the new arc might not be graph/fsm/one-lexical. we defer checking until
@@ -1264,8 +1291,7 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   /// addArc after calling addStateId on head, tails.
   virtual void addArcCreatingStates(Arc* arc) override {
     StateId maxState = arc->head_;
-    for (StateIdContainer::const_iterator i = arc->tails_.begin(), e = arc->tails_.end(); i != e; ++i)
-      Util::maxEq(maxState, *i);
+    for (StateId t : arc->tails_) Util::maxEq(maxState, t);
     Util::maxEq(numStates_, maxState + 1);
     addArc(arc);
   }
@@ -1273,26 +1299,27 @@ struct MutableHypergraph : IMutableHypergraph<A>, private MutableHypergraphLabel
   void forceFirstTailOutArcs() override {
     if (!(this->properties_ & kStoreFirstTailOutArcs)) {
       this->properties_ |= kStoreFirstTailOutArcs;
-      if (this->properties_ & kStoreOutArcs) {
+      bool hadout = this->properties_ & kStoreOutArcs;
+      if (!hadout)
+        buildOut<AddFirstTailOut>();
+      else {
         this->properties_ &= ~kStoreOutArcs;
         StateId s = 0;
-        for (typename AdjacentArcs::iterator i = outArcsPerState_.begin(), e = outArcsPerState_.end(); i != e;
-             ++i, ++s) {
-          ArcsContainer& arcs = *i;
+        for (ArcsContainer& arcs : outArcsPerState_) {
           ArcsContainer::iterator in = arcs.begin(), out = in, end = arcs.end();
           for (; in != end; ++in) {
             Arc* a = (Arc*)*in;
-            StateIdContainer const& tails = a->tails();
-            assert(!tails.empty());
-            if (tails[0] == s) {
+            assert(!a->tails_.empty());
+            if (a->tails_[0] == s) {
+              /// s is the state for [out]arcs so this means first tail arc.
               *out = a;
-              ++out;
+              ++out;  // keeping a.
             }
           }
           arcs.erase(out, end);
+          ++s;
         }
-      } else
-        buildOut<AddFirstTailOut>();
+      }
     }
   }
 

@@ -51,12 +51,12 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
  protected:
-
   friend struct SortStates<A>;
   StateId sortedStatesNumNotTerminal_;  // this is set only if properties() & kSortedStates
 
  public:
   typedef IHypergraph<A> Base;
+  using typename Base::AllArcs;
   typedef typename A::ArcFilter ArcFilter;
   typedef IMutableHypergraph<A> Self;
   typedef shared_ptr<Self> Ptr;
@@ -109,10 +109,8 @@ struct IMutableHypergraph : IHypergraph<A> {
 
   /// up to you to deleteOutArcs(state) first if that makes sense (i.e. you
   /// weren't just editing from maybeOutArcs in-place)
-  virtual void setOutArcs(StateId state, ArcsContainer &&arcs) = 0;
-  void setOutArcs(StateId state, ArcsContainer const& arcs) {
-    setOutArcs(state, ArcsContainer(arcs));
-  }
+  virtual void setOutArcs(StateId state, ArcsContainer&& arcs) = 0;
+  void setOutArcs(StateId state, ArcsContainer const& arcs) { setOutArcs(state, ArcsContainer(arcs)); }
 
   virtual void deleteInArcsImpl(StateId) = 0;
   virtual void deleteOutArcsImpl(StateId) = 0;
@@ -135,7 +133,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   virtual bool isMutable() const override { return true; }
 
   /// does *not* delete old outarcs first (call deleteOutArcs(from) if you want that
-  virtual void replaceFirstTailOutArcsMove(StateId from, ArcsContainer && with) = 0;
+  virtual void replaceFirstTailOutArcsMove(StateId from, ArcsContainer&& with) = 0;
 
   // if you know you've added arcs out of order (or in order), inform us by setting the property
   void setBestFirstArcs(bool on = true) { setPropertiesAt(kOutArcsSortedBestFirst, on); }
@@ -168,7 +166,8 @@ struct IMutableHypergraph : IHypergraph<A> {
     return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ : this->size();
   }
 
-  /// remap graph states permutation[i] -> i. inversePermutation[permutation[j]] -> j. pre: isGraph(). post: kStoreFirstTailOutArcs()
+  /// remap graph states permutation[i] -> i. inversePermutation[permutation[j]] -> j. pre: isGraph(). post:
+  /// kStoreFirstTailOutArcs()
   virtual void orderGraphStates(StateIds const& permutation, StateIds const& inversePermutation) = 0;
 
  private:
@@ -496,6 +495,11 @@ struct IMutableHypergraph : IHypergraph<A> {
   /// should call this so kGraph and kFsm will be recomputed properly
   virtual void notifyArcsModified() = 0;
 
+  /// if arcs were modified in a way that disrespects invariants, we can rebuild
+  /// the adjacencies after (similar to AddArcsLater, releaseArcs, but perhaps
+  /// more efficient
+  virtual void rebuildArcAdjacencies() = 0;
+
   /// faster than IHypergraph::forArcs
   template <class V>
   void forArcs(V const& v) const {
@@ -562,6 +566,10 @@ struct IMutableHypergraph : IHypergraph<A> {
       addProperties(bits);
     else
       clearProperties(bits);
+  }
+
+  virtual void addArcs(AllArcs const& arcs) {
+    for (Arc* arc : arcs) this->addArc(arc);
   }
 
   void setAllStrings(Sym sigma = RHO::ID) {

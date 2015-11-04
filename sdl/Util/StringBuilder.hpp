@@ -51,16 +51,6 @@ typedef graehl::string_builder StringBuilder;
 */
 typedef graehl::word_spacer WordSpacer;
 
-/**
-   value object (ref to StringBuilder).
-*/
-typedef graehl::append_string_builder AppendStringBuilder;
-
-/**
-   value object (ref to StringBuilder) appends a newline after every write operation.
-*/
-typedef graehl::append_string_builder_newline AppendStringBuilderNewline;
-
 
 }}
 

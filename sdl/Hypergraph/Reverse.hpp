@@ -27,10 +27,10 @@
 #pragma once
 
 #include <algorithm>
-
+#include <utility>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-
+#include <sdl/Hypergraph/DeferAddArcs.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 
 #include <sdl/SharedPtr.hpp>
@@ -39,60 +39,44 @@
 namespace sdl {
 namespace Hypergraph {
 
-// TODO: This would be a good test case for a lazy (on-demand)
-// operation.
-
-namespace fs {
-
 template <class Arc>
-struct ArcReverser {
-  HypergraphBase* hg_;
-  ArcReverser(HypergraphBase* hg) : hg_(hg) {}
-  void operator()(Arc const& arc) const {
-    StateIdContainer const& tails = arc.tails_;
-    assert(tails.size() == 2);
-    hg_->addArc(new Arc(HeadAndTail(), tails[0], arc.head_, tails[1], arc.weight_));
-  }
-  void operator()(Arc const* arc) const { (*this)(*(Arc*)arc); }
-};
-
-template <class Arc>
-void reverseFsm(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
-  if (!inhg.isFsm())
-    SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseFsm called on CFG");
-  for (StateId s : inhg.getStateIds()) {
-    result->addStateId(s, inhg.labelPair(s));
-  }
-  result->setVocabulary(inhg.getVocabulary());
-  result->setStart(inhg.final());
-  result->setFinal(inhg.start());
-  ArcReverser<Arc> fct(result);
-  inhg.forArcs(fct);
+Arc* newGraphReversedArc(Arc* a) {
+  StateIdContainer const& tails = a->tails_;
+  return new Arc(a->head_, tails, tails[0], a->weight_);
 }
 
 template <class Arc>
-void reverseFsm(IMutableHypergraph<Arc>& h) {
-  IMutableHypergraph<Arc>* i = h.clone();
-  h.clear();
-  reverseFsm(*i, &h);
-  delete i;
+void reverseGraph(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* result) {
+  if (!hg.isGraph()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseGraph called on CFG");
+  for (StateId s : hg.getStateIds()) result->addStateId(s, hg.labelPair(s));
+  result->setVocabulary(hg.getVocabulary());
+  result->setStart(hg.final());
+  result->setFinal(hg.start());
+  hg.forArcs([&hg, result](Arc* arc) { result->addArc(newGraphReversedArc(arc)); });
 }
+
+template <class Arc>
+void reverseGraph(IMutableHypergraph<Arc>& hg) {
+  if (!hg.isGraph()) SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseGraph called on CFG");
+  hg.forArcs([](Arc* arc) { std::swap(arc->tails_[0], arc->head_); });
+  StateId final = hg.final();
+  hg.setFinal(hg.start());
+  hg.setStart(final);
+  hg.rebuildArcAdjacencies();
 }
 
 template <class Arc>
 struct ArcReverserCfgInplace {
   ArcReverserCfgInplace(IMutableHypergraph<Arc>*) {}
-  void operator()(StateIdContainer& tails) const {
-    std::reverse(tails.begin(), tails.end());
-  }
+  void operator()(StateIdContainer& tails) const { std::reverse(tails.begin(), tails.end()); }
   void operator()(ArcBase* arc) const { (*this)(arc->tails_); }
 };
 
 template <class Arc>
 void reverseCfg(IMutableHypergraph<Arc>& hg) {
   if (hg.prunedEmpty()) return;
-  if (hg.isFsm()) {
-    SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseCfg called on FSM (reverseFsm instead)");
+  if (hg.isGraph()) {
+    SDL_THROW_LOG(Hypergraph, InvalidInputException, "reverseCfg called on FSM (reverseGraph instead)");
   }
   forceInArcsOnly(hg);
   ArcReverserCfgInplace<Arc> rev(&hg);
@@ -100,19 +84,19 @@ void reverseCfg(IMutableHypergraph<Arc>& hg) {
 }
 
 template <class Arc>
-void reverse(IHypergraph<Arc> const& inhg, IMutableHypergraph<Arc>* result) {
-  if (inhg.isFsm())
-    fs::reverseFsm(inhg, result);
+void reverse(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* result) {
+  if (hg.isGraph())
+    reverseGraph(hg, result);
   else {
-    copyHypergraph(inhg, result);
+    copyHypergraph(hg, result);
     reverseCfg(*result);
   }
 }
 
 template <class Arc>
 void reverse(IMutableHypergraph<Arc>& h) {
-  if (h.isFsm())
-    fs::reverseFsm(h);
+  if (h.isGraph())
+    reverseGraph(h);
   else
     reverseCfg(h);
 }

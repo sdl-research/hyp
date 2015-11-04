@@ -83,7 +83,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   typedef typename Pairs::value_type value_type;
   typedef typename Pairs::IHgPtr IHgPtr;
   typedef Optimization::TrainingDataIndex TrainingDataIndex;
-  typedef unordered_map<Sym, std::set<Sym> > LabelsPerPosMap;
+  typedef unordered_map<Sym, std::set<Sym>> LabelsPerPosMap;
 
  public:
   CreateSearchSpace(ConfigNode const& yamlConfig)
@@ -105,7 +105,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
   void writeLabelsFile(std::string const& fname) {
     SDL_INFO(CrfDemo, "Writing labels file '" << fname << "'");
     Util::Output output(fname);
-    for (Sym labelId : allLabels_) { *output << pVoc_->str(labelId) << '\n'; }
+    for (Sym labelId : allLabels_) {
+      *output << pVoc_->str(labelId) << '\n';
+    }
   }
 
   void readLabelsPerPosFile(std::string const& fname) {
@@ -128,7 +130,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     Util::Output output(fname);
     for (LabelsPerPosMap::const_iterator it = labelsPerPos_.begin(); it != labelsPerPos_.end(); ++it) {
       *output << pVoc_->str(it->first);
-      for (Sym labelId : it->second) { *output << "\t" << pVoc_->str(labelId); }
+      for (Sym labelId : it->second) {
+        *output << "\t" << pVoc_->str(labelId);
+      }
       *output << '\n';
     }
   }
@@ -139,7 +143,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     return NULL;
   }
 
-  shared_ptr<Optimization::IFeatureHypergraphPairs<Arc> > getFeatureHypergraphPairs() const { return pairs_; }
+  shared_ptr<Optimization::IFeatureHypergraphPairs<Arc>> getFeatureHypergraphPairs() const { return pairs_; }
 
   std::size_t getNumFeatures() { return opts_.numFeatures; }
 
@@ -248,7 +252,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     std::vector<Sym> historyNames;  // just for more meaningful feature names
     historyNames.reserve(allLabels_.size() + 1);
     historyNames.push_back(EPSILON::ID);
-    for (Sym label : allLabels_) { historyNames.push_back(label); }
+    for (Sym label : allLabels_) {
+      historyNames.push_back(label);
+    }
 
     std::size_t numStates = allLabels_.size() + 2;
     for (std::size_t i = 0; i < numStates; ++i) {
@@ -482,7 +488,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         if (iter != labelsPerPos_.end()) {
           labels = &(iter->second);
         }
-        for (Sym label : *labels) { addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1); }
+        for (Sym label : *labels) {
+          addLabelArc(result, sent.words[i], sent.poss[i], label, i, i + 1);
+        }
       }
     }
 
@@ -603,7 +611,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     if (opts_.numThreads < 2) {
       std::size_t cnt = 0;
-      for (Sentence const& sent : sents) { processTrainingSentence(sent, *transitionModel, *pairs_); }
+      for (Sentence const& sent : sents) {
+        processTrainingSentence(sent, *transitionModel, *pairs_);
+      }
     } else {  // multi-threaded:
       std::size_t numProducers = opts_.numThreads;
       graehl::thread_group producer_threads;
@@ -640,7 +650,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     if (!opts_.writeTrainArchivePath.empty()
         && !opts_.readTrainArchivePath.empty()) {  // Read after we've just written
-      Util::sleepSeconds(1); // probably not needed
+      Util::sleepSeconds(1);  // probably not needed
       pairs_.reset(new Optimization::ExternalFeatHgPairs<Arc>(opts_.readTrainArchivePath));
     }
   }
@@ -649,7 +659,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
  private:
   IVocabularyPtr pVoc_;
-  shared_ptr<Optimization::IFeatureHypergraphPairs<Arc> > pairs_;
+  shared_ptr<Optimization::IFeatureHypergraphPairs<Arc>> pairs_;
   CrfDemoConfig opts_;
   std::set<Sym> allLabels_;
   LabelsPerPosMap labelsPerPos_;
