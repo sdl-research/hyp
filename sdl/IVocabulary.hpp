@@ -59,6 +59,7 @@ struct IVocabularyVisitor {
 
 struct IVocabulary : Resource {
 
+  static char const* getTypeName() { return "vocabulary"; }
   /**
      Purge (some) words from the vocabulary, so that they may get different
      ids next time they're added. Phrase grammar knows about some words;

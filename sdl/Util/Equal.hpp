@@ -23,6 +23,7 @@
 #include <iostream>
 #include <iterator>
 #include <type_traits>
+#include <utility>
 #include <sdl/LexicalCast.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/PrintRange.hpp>
@@ -48,9 +49,17 @@ using graehl::chomped_lines;
 /**
    \return whether sets of lines are the same.
 */
-bool StringsUnorderedEqual(std::vector<std::string> const& lines1, std::vector<std::string> const& lines2,
+bool StringsUnorderedEqual(std::vector<std::string> lines1, std::vector<std::string> lines2,
                            bool sortWords = false, char const* name1 = "GOT", char const* name2 = "REF",
-                           bool warn = true, bool ignoreBlankLines = true);
+                           bool warn = true, bool ignoreBlankLines = true, bool sortLines = true);
+
+template <class S1, class S2>
+inline bool LinesEqual(S1&& s1, S2&& s2, bool sortLines = false, bool sortWords = false,
+                       char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
+                       bool ignoreBlankLines = true) {
+  return StringsUnorderedEqual(chomped_lines(std::forward<S1>(s1)), chomped_lines(std::forward<S2>(s2)),
+                               sortWords, name1, name2, warn, ignoreBlankLines, sortLines);
+}
 
 inline bool LinesUnorderedEqual(std::istream& stream1, std::istream& stream2, bool sortWords = false,
                                 char const* name1 = "GOT", char const* name2 = "REF", bool warn = true,
@@ -216,8 +225,7 @@ bool byStrEqual(T const& val1, T const& val2, char const* name1 = "", char const
 
 void normalizeLine(std::string& line, bool sortWords, char wordsep = ' ');
 
-}
-}
 
+}}
 
 #endif

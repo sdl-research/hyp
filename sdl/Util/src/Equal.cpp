@@ -35,30 +35,44 @@ void normalizeLine(std::string& line, bool sortWords, char wordsep) {
   }
 }
 
-static void normalizeLines(Strings const& in, StringsSet& out, bool sortWords, bool ignoreBlankLines,
+static void normalizeLines(Strings &in, StringsSet& out, bool sortWords, bool ignoreBlankLines,
                            char wordsep = ' ') {
-  for (std::string line : in) {
+  Strings::iterator begin = in.begin(), end = in.end(), i = begin, o = begin;
+  for (; i!= end; ++i) {
+    std::string &line = *i;
     normalizeLine(line, sortWords, wordsep);
-    if (!ignoreBlankLines || !line.empty()) out.insert(std::move(line));
+    bool empty = ignoreBlankLines && line.empty();
+    if (!empty) {
+      out.insert(line);
+      if (i != o) *o = std::move(*i);
+      ++o;
+    }
   }
+  in.erase(o, end);
 }
 
-bool StringsUnorderedEqual(Strings const& lines1, Strings const& lines2, bool sortWords, char const* name1,
-                           char const* name2, bool warn, bool ignoreBlankLines) {
+bool StringsUnorderedEqual(Strings lines1, Strings lines2, bool sortWords, char const* name1,
+                           char const* name2, bool warn, bool ignoreBlankLines, bool sortLines) {
   StringsSet lines1Set, lines2Set;
   normalizeLines(lines1, lines1Set, sortWords, ignoreBlankLines);
   normalizeLines(lines2, lines2Set, sortWords, ignoreBlankLines);
+#define SDL_ORIGINAL_ORDER_MSG() "original " \
+      << name1 << ": {[\n" << sdl::printer(lines1, multiLineNoBrace()) << "\n]} original " << name2       \
+      << ": {[\n" << sdl::printer(lines2, multiLineNoBrace()) << "]}"
 #define SDL_EQUAL_MSG()                                                                                   \
   "NOT (unordered) EQUAL:\n "                                                                             \
       << name1 << ": {[(\n" << sdl::printer(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {(" \
       << sdl::printer(lines2Set, multiLine()) << ")}\n\n difference " << name1 << " - " << name2 << ": {" \
       << sdl::printer(difference(lines1Set, lines2Set), multiLine()) << "} difference " << name2 << " - " \
-      << name1 << ": {" << sdl::printer(difference(lines2Set, lines1Set), multiLine()) << "\n} original " \
-      << name1 << ": {[\n" << sdl::printer(lines1, multiLineNoBrace()) << "\n]} original " << name2       \
-      << ": {[\n" << sdl::printer(lines2, multiLineNoBrace()) << "]}"
-  if (lines1Set == lines2Set)
-    return true;
-  else {
+      << name1 << ": {" << sdl::printer(difference(lines2Set, lines1Set), multiLine()) << "\n}" \
+      << SDL_ORIGINAL_ORDER_MSG()
+  if (lines1Set == lines2Set) {
+    if (!sortLines && lines1 != lines2) {
+      SDL_WARN(Util, "lines appear in different order:\n" << SDL_ORIGINAL_ORDER_MSG());
+      return false;
+    } else
+      return true;
+  } else {
     if (warn)
       SDL_WARN(Util, SDL_EQUAL_MSG());
     else

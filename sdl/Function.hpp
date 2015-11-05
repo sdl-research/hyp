@@ -32,7 +32,8 @@ http://stackoverflow.com/questions/32078339/valid-code-fail-to-be-compiled-by-vi
 #define SDL__FUNCTION_GRAEHL_2015_11_02_HPP
 #pragma once
 
-#if defined(_MSC_VER) && _MSC_VER <= 1900
+#if defined(_MSC_VER) && _MSC_VER < 1900
+//<=
 #define SDL_FUNCTION_NS boost
 #include <boost/function.hpp>
 template <class F>
@@ -44,7 +45,7 @@ void setNullFunction(boost::function<F>& f) {
 #include <functional>
 template <class F>
 void setNullFunction(std::function<F>& f) {
-  f = nullptr;  // should also work: f = 0;
+  f = 0;  // should also work: f = nullptr;
 }
 #endif
 
