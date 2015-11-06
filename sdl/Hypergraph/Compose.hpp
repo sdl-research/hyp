@@ -824,7 +824,7 @@ void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs
                                           ArcVecPerDotPosPtr matchedArcs, StateIdContainer const& tails,
                                           Weight w, ItemAndMatchedArcsSet* alreadyExpanded) {
   SDL_TRACE(Hypergraph.Compose, "createResultArcs1 for head=" << head
-                                    << ", tails=" << Util::makePrintable(tails)
+                                    << ", tails=" << printer(tails)
                                     << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
   using namespace Util;
   typename ItemAndMatchedArcsSet::const_iterator foundItem = alreadyExpanded->find(itemAndMatchedArcs);

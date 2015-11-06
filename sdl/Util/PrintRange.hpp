@@ -15,7 +15,7 @@
 
     also, you may provide functions print(val, state) which create a printer
     object that will call print(o, val, state) (e.g. state is a vocabulary used
-    to print symbol ids). then you can o << sdl::printer(val, state) << "\n";
+    to print symbol ids). then you can o << printer(val, state) << "\n";
     etc. you can call those with impl::adl_print(o, val, state)
 */
 
@@ -249,25 +249,6 @@ StateRangeRangeSep<add_lvalue_reference_t<X>> stateRangeRange(X& x, RangeSep out
   return StateRangeRangeSep<add_lvalue_reference_t<X>>(x, outer, inner);
 }
 
-// Wraps range in PrintableRange, which has output operator.
-// Usage: std::cerr << Util::makePrintable(myVector) << '\n';
-//        std::cerr << Util::makePrintable(myMap)    << '\n';
-//        ...
-/// \return shorthand for sdl::printer(range, Util::RangeSep())
-template <class T>
-Printer<T, RangeSep> makePrintable(T const& range) {
-  return Printer<T, RangeSep>(range, RangeSep());
-}
-
-inline std::string const& makePrintable(std::string const& str) {
-  return str;
-}
-
-template <class T>
-Printer<T, RangeSep> makePrintable(T const& range, RangeSep const& sep) {
-  return Printer<T, RangeSep>(range, sep);
-}
-
 template <class Pair>
 struct PrintPair {
   Pair p;
@@ -289,10 +270,6 @@ struct PrintPair {
   }
 };
 
-template <class T1, class T2>
-PrintPair<std::pair<T1, T2>> makePrintable(std::pair<T1, T2> p) {
-  return PrintPair<std::pair<T1, T2>>(p);
-}
 
 template <class Iter>
 struct PrintRange : RangeSep {
@@ -310,11 +287,6 @@ struct PrintRange : RangeSep {
     return o;
   }
 };
-
-template <class Iter>
-PrintRange<Iter> makePrintable(Iter begin, Iter end, bool printIndex = false) {
-  return PrintRange<Iter>(begin, end, printIndex);
-}
 
 template <class Range>
 PrintRange<typename Range::const_iterator> rangePrintable(Range const& range, bool printIndex = false) {
@@ -381,6 +353,7 @@ template <class C, class X, class Enable = typename graehl::is_nonstring_contain
 void print(std::ostream& o, C const& c, StateRangeRangeSep<X> const& rr) {
   printRangeState(o, rr.inner, c, rr.outer);
 }
+
 
 }}
 

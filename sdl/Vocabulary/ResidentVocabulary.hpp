@@ -87,11 +87,11 @@ struct ResidentVocabulary final : IVocabulary {
     return vocabTerminal.sym(word);
   }
 
-  Sym addTerminal(cstring_view<> word) override final {
+  Sym addTerminal(cstring_span<> word) override final {
     return vocabTerminal.add(word);
   }
 
-  Sym getTerminal(cstring_view<> word) const override final {
+  Sym getTerminal(cstring_span<> word) const override final {
     return vocabTerminal.sym(word);
   }
 
@@ -108,7 +108,7 @@ struct ResidentVocabulary final : IVocabulary {
     //return _Add(str, symType);
   }
 
-  Sym addImpl(cstring_view<> word, SymbolType symType) override final {
+  Sym addImpl(cstring_span<> word, SymbolType symType) override final {
     return getVocab(symType).add(word, symType);
     //return _Add(word, symType);
     // TODO: add Slice hash lookup to readonly/resident vocabs
@@ -120,7 +120,7 @@ struct ResidentVocabulary final : IVocabulary {
     return getVocab(symType).sym(word);
   }
 
-  Sym symImpl(cstring_view<> word, SymbolType symType) const override final {
+  Sym symImpl(cstring_span<> word, SymbolType symType) const override final {
     return getVocab(symType).sym(word);
   }
 

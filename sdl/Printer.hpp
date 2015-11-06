@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    for when you have x.print(out, context) - out << sdl::printer(x, context)
+    for when you have x.print(out, context) - out << printer(x, context)
 
    // 3 arg print(state const&,val const&,ostream &) partial application to 1arg print_state_val(ostream). so
    you can do o << printer(val, state). calls free function print(ostream, val, state).

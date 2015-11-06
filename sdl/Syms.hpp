@@ -30,14 +30,15 @@
 #include <sdl/IVocabulary.hpp>
 #include <sdl/IVocabulary-fwd.hpp>
 #include <sdl/Util/PrintRange.hpp>
+#include <sdl/gsl.hpp> // span
 
 namespace sdl {
 
 typedef SymInt SymsIndex;
-typedef std::pair<SymInt, SymInt> SymSpan;
 typedef Sym const* Psym;
 typedef std::pair<Psym, Psym> SymSlice;
 typedef graehl::pod_array_ref<Sym> SymPodArrayRef;  // TODO: use this instead of SymSlice. faster <=> Syms.
+typedef span<Sym const> SymsRef;
 
 enum { kInlineSyms = 3 };
 // 16 bytes (more if >3 elements). note: small_vector<SymInt, 1> and <SymInt, 2> have the same size due to
@@ -60,6 +61,15 @@ inline unsigned nLexical(Syms const& syms) {
   unsigned count = 0;
   for (Syms::const_iterator i = syms.begin(), e = syms.end(); i != e; ++i) count += i->isLexical();
   return count;
+}
+
+
+inline Syms toSyms(SymsRef span) {
+  return Syms(span.data(), span.size());
+}
+
+inline SymsRef toSpan(Syms const& syms) {
+  return SymsRef(syms.begin(), syms.size());
 }
 
 /**
@@ -127,7 +137,7 @@ inline Sym const* lexicalInteriorLength(Syms const& syms, SymsIndex& lenInterior
 }
 
 /**
-   for out << sdl::printer(phrase, voc).
+   for out << printer(phrase, voc).
 */
 // TODO: it would be nice to put print in a .cpp somewhere since performance
 // isn't critical. but we have no lib for the toplevel xmt/ headers.

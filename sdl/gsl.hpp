@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    GSL: stuff that will be in C++14 and later (string_view, array_view, owner,
+    GSL: stuff that will be in C++14 and later (string_span, span, owner,
     not_null, final_act. Expects(..) Ensures(..) pre/postcond assert
 */
 

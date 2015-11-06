@@ -59,7 +59,7 @@ struct Tokens {
   }
 
   void print(std::ostream& out) const {
-    out << sdl::printer(symbols, Util::stateRange(vocab)) << "(" << ids.begin << " indexed)";
+    out << printer(symbols, Util::stateRange(vocab)) << "(" << ids.begin << " indexed)";
   }
 
   void push_back(std::string const& symbol) { symbols.push_back(vocab->add(symbol, kTerminal)); }

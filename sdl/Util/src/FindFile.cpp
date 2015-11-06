@@ -74,7 +74,7 @@ std::string findExistingFile(std::string const& filename, Dirs const& searchDirs
   SDL_THROW_LOG(FindFile, ConfigException,
                 "Could not find file '"
                     << filename << "' "
-                    << sdl::printer(searchDirs, RangeSep(":", "(search directories: ", ")")));
+                    << printer(searchDirs, RangeSep(":", "(search directories: ", ")")));
 }
 
 void splitFilePath(std::string const& resolvedPath, std::string* pStrDir, std::string* pStrFileName) {

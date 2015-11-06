@@ -119,7 +119,7 @@ void print(ConfigNode const& in, std::string const& indent, std::ostream& os, bo
           bool newLine = true, unsigned maxDepth = (unsigned)-1);
 
 /**
-   usage: os << sdl::printer(node, format).
+   usage: os << printer(node, format).
 */
 inline void print(std::ostream& os, ConfigNode const& node, ConfigNodeFormat const& format) {
   print(node, format.indentSpace, os, format.longMap, format.multiLine, format.maxDepth);

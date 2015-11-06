@@ -17,6 +17,8 @@
 #define ISOLATESTARTSTATE_JG2012104_HPP
 #pragma once
 
+#include <graehl/shared/warning_push.h>
+GCC_DIAG_IGNORE(maybe-uninitialized)
 #include <sdl/Util/Once.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 
@@ -101,7 +103,10 @@ struct IsolateStartState : TransformBase<Transform::Inplace>, IsolateStartStateO
 
     Util::OnceTypedP<Arc> unique;  // collect all the outarcs from start state
     std::vector<Arc*> startarcs;
-    hg.forArcsOutSearch(oldStart, [&startarcs](StateId, Arc* arc) { startarcs.push_back(arc); return false; });
+    hg.forArcsOutSearch(oldStart, [&startarcs](StateId, Arc* arc) {
+      startarcs.push_back(arc);
+      return false;
+    });
 
     for (Arc* arc : startarcs) {
       if (unique.first(arc))
@@ -113,5 +118,7 @@ struct IsolateStartState : TransformBase<Transform::Inplace>, IsolateStartStateO
 
 
 }}
+
+#include <graehl/shared/warning_pop.h>
 
 #endif

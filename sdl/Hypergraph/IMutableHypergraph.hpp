@@ -600,6 +600,8 @@ struct IMutableHypergraph : IHypergraph<A> {
     return s;
   }
 
+  static char const* getTypeName() { return "hypergraph"; }
+
  protected:
   virtual void removeOutputLabels() = 0;
 

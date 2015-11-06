@@ -191,7 +191,7 @@ struct AcyclicBest {
     SDL_DEBUG(Hypergraph.AcyclicBest, "acyclic best: " << back_edges_ << " back edges  - max allowed is "
                                                        << maxBackEdges);
     SDL_TRACE(Hypergraph.AcyclicBest,
-              "reverse acyclic order: " << sdl::printer(orderReverse, Util::singleline()) << " for hg:\n" << hg);
+              "reverse acyclic order: " << printer(orderReverse, Util::singleline()) << " for hg:\n" << hg);
     if (back_edges_ > maxBackEdges) return;
     if (orderReverse.empty()) return;
 

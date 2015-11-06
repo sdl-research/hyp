@@ -15,7 +15,7 @@
     no-copy string slices with convenience access (numeric conversion, trim
     whitespace, etc)
 
-    TODO: use boost::string_ref or std::experimental::string_view instead in C++11
+    TODO: use boost::string_ref or std::experimental::string_span instead in C++11
 */
 
 #ifndef FIELD_JG_2015_06_18_HPP
@@ -55,7 +55,7 @@ namespace Util {
 
    TODO: move to Util/Field.hpp
 
-   TODO: use boost::string_ref or std::experimental::string_view instead in C++11
+   TODO: use boost::string_ref or std::experimental::string_span instead in C++11
 */
 struct Field : Slice {
   Field() {}
@@ -248,7 +248,7 @@ struct Field : Slice {
       return Field(f, i);
     }
   }
-  //operator cstring_view<>() const { return cstring_view<>(begin(), end()); }
+  //operator cstring_span<>() const { return cstring_span<>(begin(), end()); }
 };
 
 typedef boost::hash<Field> FieldHash;

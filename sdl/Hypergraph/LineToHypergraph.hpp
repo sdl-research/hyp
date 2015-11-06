@@ -84,7 +84,7 @@ struct LineToHypergraph : ParseTokensOptions
   void toHypergraph(std::string const& line, IMutableHypergraph<A> *phg, std::size_t lineNum = 0) const
   {
     Strings words = parseTokens(line, (ParseTokensOptions const&)*this);
-    SDL_DEBUG(Hypergraph.HgConvertString, lineNum << ": " << sdl::printer(words, Util::RangeSep(" ","","")));
+    SDL_DEBUG(Hypergraph.HgConvertString, lineNum << ": " << printer(words, Util::RangeSep(" ","","")));
     SDL_INFO(Hypergraph.HgConvertString, lineNum << ": len=" << words.size());
     phg->clear(properties());
     assert(phg->storesArcs());

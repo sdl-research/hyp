@@ -62,7 +62,7 @@ struct WordToCharacters {
     HypergraphBase::Labels labels = hg_->copyOfLabels();
     // avoid canonical-lex problem by copying (can't store ref if non-canonical, either)
     StateId s = 0, N = labels.size();
-    SDL_TRACE(WordToCharacters, "input labels: " << sdl::printer(labels, vocab_));
+    SDL_TRACE(WordToCharacters, "input labels: " << printer(labels, vocab_));
     insertStatesForTail_.resize(N);
     for (; s < N; ++s) {
       Sym wordsym = labels[s];
@@ -74,7 +74,7 @@ struct WordToCharacters {
       Chars chars;
       chars.reserve(nchars);  // upper bound
       Util::toUtf8Chs(word, chars, fixUnicode_);  // assume utf8 is well-formed
-      SDL_TRACE(WordToCharacters, "unicode chars={ " << sdl::printer(chars) << " }");
+      SDL_TRACE(WordToCharacters, "unicode chars={ " << printer(chars) << " }");
       StateId const nunicode = chars.size();
       if (!nunicode) continue;
       StateId const ninsert = nunicode - !insertingPrefix;
@@ -90,13 +90,13 @@ struct WordToCharacters {
         ++i;
       }
       SDL_DEBUG(WordToCharacters, "for input state "
-                << s << " with input label: " << sdl::printer(wordsym, vocab_)
-                << ": replaced => label: " << sdl::printer(hg_->inputLabel(s), vocab_));
+                << s << " with input label: " << printer(wordsym, vocab_)
+                << ": replaced => label: " << printer(hg_->inputLabel(s), vocab_));
       for (; i != end; ++i) *to++ = hg_->addState(vocab_->addTerminal(*i));
       assert(to == insertStates.begin() + ninsert);
       SDL_DEBUG(WordToCharacters, "for input state " << s
-                                                     << " with input label: " << sdl::printer(wordsym, vocab_)
-                                                     << ": output: " << sdl::printer(insertStates, hg_));
+                                                     << " with input label: " << printer(wordsym, vocab_)
+                                                     << ": output: " << printer(insertStates, hg_));
     }
   }
 

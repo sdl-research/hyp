@@ -32,20 +32,29 @@ http://stackoverflow.com/questions/32078339/valid-code-fail-to-be-compiled-by-vi
 #define SDL__FUNCTION_GRAEHL_2015_11_02_HPP
 #pragma once
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
-//<=
+#if defined(_MSC_VER) && _MSC_VER <= 1900
 #define SDL_FUNCTION_NS boost
 #include <boost/function.hpp>
 template <class F>
 void setNullFunction(boost::function<F>& f) {
   f.clear();  // should also work: f = 0;
 }
+/*
+/// MSCV2015 chokes if we don't use boost::function
+  std::_Invoke_ret<_Rx,_Callable&,_Ty>(std::_Forced<_Rx,false>,_Callable &,_Ty &&)' being compiled
+           with
+           [
+               _Rx=bool,
+               _Callable=_Decayed,
+               _Ty=sdl::Hypergraph::ArcTpl<sdl::Hypergraph::Weight> *
+           ]
+*/
 #else
 #define SDL_FUNCTION_NS std
 #include <functional>
 template <class F>
 void setNullFunction(std::function<F>& f) {
-  f = 0;  // should also work: f = nullptr;
+  f = 0;
 }
 #endif
 

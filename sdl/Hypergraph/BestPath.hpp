@@ -282,7 +282,7 @@ struct PathOutOptions : DerivationStringOptions {
   void maybe_print_deriv(Out& out, DerivationPtr const& d, IHypergraph<Arc> const& hg, NbestId n = 0) const {
     if (outderiv) {
       print_header<Arc>(out, d, n);
-      out << sdl::printer(d, hg) << '\n';
+      out << printer(d, hg) << '\n';
     }
     maybe_print_paths(out, hg, d, n);
     if (outHypergraph) {
@@ -1071,7 +1071,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
                                                 << " != derivation cost=" << deriv_cost);
           SDL_DEBUG(Hypergraph.BestPath, (n + 1) << "-best cost=" << cost
                                                  << " does not match derivation.weight() cost=" << deriv_cost
-                                                 << " deriv=" << sdl::printer(d, hg));
+                                                 << " deriv=" << printer(d, hg));
         }
         return v(d, w, n);
       }
@@ -1764,7 +1764,7 @@ DerivationPtr computeTrivialBestPath(IHypergraph<Arc> const& hg, StateId final, 
     for (;;) {
       if (start == final) {
         SDL_TRACE(Hypergraph.BestPath.computeTrivialBestPath, "found graph-out-arc trivial best-path to "
-                                                                  << final << ": " << sdl::printer(r, hg));
+                                                                  << final << ": " << printer(r, hg));
         return r;
       }
       if (hg.numOutArcs(start) == 1) {

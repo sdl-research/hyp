@@ -89,7 +89,7 @@ endmacro()
 # so we use macros for setting globals
 macro(sdl_enable_cpp11)
   set(SDL_CPP11 1)
-  sdl_add_cflags("-std=c++11") #c++11 is also supported (for now)
+  sdl_add_cflags("-std=c++14") #c++11 is also supported (for now)
   if(UNIX)
     add_definitions("-D_GLIBCXX_USE_CXX11_ABI=0")
   endif()

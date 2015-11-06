@@ -152,7 +152,7 @@ bool HypergraphBase::checkValid() const {
     } catch (MoreThanOnceException& e) {
       SDL_ERROR(Hypergraph.CheckValid,
                 "arc stored more than once: " << e.duplicate << " = "
-                                              << sdl::printer(*(ArcBase const*)e.duplicate, *this));
+                                              << printer(*(ArcBase const*)e.duplicate, *this));
       SDL_DEBUG(Hypergraph.CheckValid, PrintUnchecked(*this));
       return false;
     }

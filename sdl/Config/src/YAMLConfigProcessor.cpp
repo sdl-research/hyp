@@ -59,7 +59,7 @@ struct MapIndex : MapIndexBase {
     for (YAML::const_iterator i = in.begin(), e = in.end(); i != e; ++i)
       if (!insert(value_type(i->first.Scalar(), i->second)).second)
         SDL_THROW_LOG(Config.YAMLConfigProcessor, ProgrammerMistakeException,
-                      "duplicate map key " << i->first << ": " << sdl::printer(i->second, oneline));
+                      "duplicate map key " << i->first << ": " << printer(i->second, oneline));
   }
 };
 
@@ -111,8 +111,8 @@ ConfigNode copy(ConfigNode const& in, bool deep) {
           addKeyVal(copy, i->first, childNotParent(i->second, in));
       break;
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << sdl::printer(in, oneline) << " => "
-                                                   << sdl::printer(copy, oneline));
+  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << printer(in, oneline) << " => "
+                                                   << printer(copy, oneline));
   return copy;
 }
 
@@ -149,8 +149,8 @@ ConfigNode copyRemovingKey(ConfigNode const& in, std::string const& removeKey, b
       break;
   }
   SDL_TRACE(Configure.YAMLConfigProcessor, "copyRemovingKey " << removeKey << " from "
-                                                              << sdl::printer(in, oneline) << " => "
-                                                              << sdl::printer(copy, oneline));
+                                                              << printer(in, oneline) << " => "
+                                                              << printer(copy, oneline));
   return copy;
 }
 
@@ -187,8 +187,8 @@ ConfigNode copy(ConfigNode const& in, bool deep, YAMLConfigProcessor const& proc
         }
       break;
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << proc.path() << ": " << sdl::printer(in, oneline)
-                                                   << " => " << sdl::printer(copy, oneline));
+  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << proc.path() << ": " << printer(in, oneline)
+                                                   << " => " << printer(copy, oneline));
   return copy;
 }
 
@@ -291,8 +291,8 @@ ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem:
     ConfigNode const& expanded = expandBasis(toExpand, fsPrefix);
 
     SDL_TRACE(Configure.YAMLConfigProcessor.basis, "basis expanded path=["
-                                                       << path() << "]: " << sdl::printer(toExpand, oneline)
-                                                       << " ... to: " << sdl::printer(expanded, oneline));
+                                                       << path() << "]: " << printer(toExpand, oneline)
+                                                       << " ... to: " << printer(expanded, oneline));
 
     assert(optPath_.size() >= optPathInitialDepth_);
     bool rootLevel = optPath_.empty();  // TODO: or optPathInitialDepth_ == optPath_.size() ?
@@ -300,10 +300,10 @@ ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem:
       ConfigNode const& replaced = processReplaceNodes(expanded);  // TODO: rootLevel for file vs. at end?
       if (optPath_.empty()) {
         SDL_DEBUG(Configure.YAMLConfigProcessor,
-                  "final root config file: " << sdl::printer(replaced, kMultilineBraces));
+                  "final root config file: " << printer(replaced, kMultilineBraces));
       } else {
         SDL_DEBUG(Configure.YAMLConfigProcessor,
-                  "expanded config file for " << path() << ": " << sdl::printer(replaced, kMultilineBraces));
+                  "expanded config file for " << path() << ": " << printer(replaced, kMultilineBraces));
       }
       return replaced;
     } else
@@ -526,7 +526,7 @@ ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in,
       }
 
       SDL_TRACE(Configure.YAMLConfigProcessor.expandBasis,
-                "Removing node:  < [ " << path() << ": basis ] -> " << sdl::printer(inBasis, oneline) << " >");
+                "Removing node:  < [ " << path() << ": basis ] -> " << printer(inBasis, oneline) << " >");
 
       // BasisAccumulator accum(*this, fsPrefix);
       Util::AutoDelete<ConfigNode> result;
@@ -545,7 +545,7 @@ ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in,
 
         // accum(**i, kCopyBasisKey);
         // SDL_TRACE(Configure.YAMLConfigProcessor.expandBasis, "merged basis; result = " <<
-        // sdl::printer(accum, oneline));
+        // printer(accum, oneline));
       }
 
       // return accum(in, kSkipBasisKey);
@@ -555,7 +555,7 @@ ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in,
 }
 
 inline std::ostream& operator<<(std::ostream& out, YAMLConfigProcessor::Instance const& instance) {
-  return out << instance.first << " " << sdl::printer(instance.second, oneline);
+  return out << instance.first << " " << printer(instance.second, oneline);
 }
 
 void YAMLConfigProcessor::registerInstance(std::string const& name, std::string const& category,
@@ -626,7 +626,7 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
       SDL_TRACE(Configure.YAMLConfigProcessor, "After resolveCategories node: < [ "
                                                    << path() << ": " << key << " ] "
                                                    << "of category: " << category << ": "
-                                                   << sdl::printer(finalVal, oneline));
+                                                   << printer(finalVal, oneline));
     }
     return out;
   }
@@ -663,7 +663,7 @@ ConfigNode YAMLConfigProcessor::processReplaceNodes(ConfigNode const& in) {
       else {
         if (replaceBy)
           SDL_TRACE(Configure.YAMLConfigProcessor,
-                    "Replacing [ " << path() << "." << key << " ] by: " << sdl::printer(replaceBy, oneline));
+                    "Replacing [ " << path() << "." << key << " ] by: " << printer(replaceBy, oneline));
         std::string keyUnescaped(key);
         Util::stripPrefix(keyUnescaped, kLiterally);
         push(keyUnescaped);
@@ -674,7 +674,7 @@ ConfigNode YAMLConfigProcessor::processReplaceNodes(ConfigNode const& in) {
     }
   }
   SDL_TRACE(Configure.YAMLConfigProcessor, "Done replacing: [ " << path() << " ] => "
-                                                                << sdl::printer(out, oneline));
+                                                                << printer(out, oneline));
   return out;
 }
 

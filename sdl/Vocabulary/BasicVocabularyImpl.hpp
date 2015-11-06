@@ -138,7 +138,7 @@ class BasicVocabularyImpl {
     return sym;
   }
 
-  Sym add(cstring_view<> word) {
+  Sym add(cstring_span<> word) {
     SymInt i = symbols_.index(word);
     assert(i < maxLstSize_);
     return symForIndex(i);
@@ -156,15 +156,15 @@ class BasicVocabularyImpl {
     return i;
   }
 
-  SymInt indexAdding(cstring_view<> word) {
+  SymInt indexAdding(cstring_span<> word) {
     SymInt i = symbols_.index(word);
     assert(i < maxLstSize_);
     return i;
   }
 
-  SymInt indexAdding(Slice s) { return indexAdding(cstring_view<>(s.first, s.second)); }
+  SymInt indexAdding(Slice s) { return indexAdding(cstring_span<>(s.first, s.second)); }
 
-  /// no benefit to using string_view to query; will create string anyway
+  /// no benefit to using string_span to query; will create string anyway
   Sym addSymbolMustBeNew(std::string const& word) {
     SymInt const oldsz = size();
     SymInt const i = symbols_.index(word);
@@ -182,7 +182,7 @@ class BasicVocabularyImpl {
     return add(word);
   }
 
-  Sym add(cstring_view<> word, SymbolType type) {
+  Sym add(cstring_span<> word, SymbolType type) {
     assert(type == type_);
     return add(word);
   }
@@ -199,7 +199,7 @@ class BasicVocabularyImpl {
     return i == kNullIndex ? NoSymbol : symForIndex(i);
   }
 
-  Sym sym(cstring_view<> word) const {
+  Sym sym(cstring_span<> word) const {
     SymInt const i = symbols_.find(word);
     return i == kNullIndex ? NoSymbol : symForIndex(i);
   }

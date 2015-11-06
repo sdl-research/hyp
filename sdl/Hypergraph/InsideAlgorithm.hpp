@@ -110,7 +110,7 @@ struct ComputeDistanceStatesVisitor : IStatesVisitor, private ArcWtFn, private S
       }
       ArcWtFn::timesBy(&arc, prod);
       // arcw has to come after the states for non-commutative e.g. SingleBlockWeight
-      SDL_TRACE(FinalOutput.InsideAlgorithm, "after arc wt for " << sdl::printer(arc, hg_) << " for " << s
+      SDL_TRACE(FinalOutput.InsideAlgorithm, "after arc wt for " << printer(arc, hg_) << " for " << s
                                                                  << " prod = " << prod);
 
       Hypergraph::plusBy(prod, sum);

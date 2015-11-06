@@ -88,7 +88,7 @@ void readWordList(std::istream& in, WeightedStrings<W>& ws, WordListOptions cons
   assert(ws.size() == 0);
   ws.unigramk = opt.unigram_addk * opt.lengthBase;
   typename WeightedStrings<W>::Counts counts;
-  SDL_TRACE(Hypergraph.WordList, "normalized counts: " << sdl::printer(counts, Util::multiLine()));
+  SDL_TRACE(Hypergraph.WordList, "normalized counts: " << printer(counts, Util::multiLine()));
   std::string tok;
   for (std::size_t i = 0; i < opt.maxlines && in; ++i) {
     double c = 1;
@@ -127,15 +127,15 @@ void readWordList(std::istream& in, WeightedStrings<W>& ws, WordListOptions cons
       Util::throwInvalidInputException(in, "Couldn't read count (double) for TrieWordList", i);
   }
   SDL_TRACE(Hypergraph.WordList,
-            "utf8 char strings: " << sdl::printer(ws.strings, Util::stateRange(ws.voc)));  // ws
+            "utf8 char strings: " << printer(ws.strings, Util::stateRange(ws.voc)));  // ws
   if (unweighted)
     ws.doneAdding();
   else {
     ws.doneAdding(counts);
-    SDL_TRACE(Hypergraph.WordList, "pre-normalized counts: " << sdl::printer(counts, Util::multiLine()));
+    SDL_TRACE(Hypergraph.WordList, "pre-normalized counts: " << printer(counts, Util::multiLine()));
     if (opt.enablenormalize) {
       graehl::normalize(counts, opt.normalizeOpt);
-      SDL_TRACE(Hypergraph.WordList, "normalized counts: " << sdl::printer(counts, Util::multiLine()));
+      SDL_TRACE(Hypergraph.WordList, "normalized counts: " << printer(counts, Util::multiLine()));
       boost::transform(counts, ws.weights.begin(), ProbToNeglog<typename W::FloatT>());
     } else {
       boost::transform(counts, ws.weights.begin(), Identity<typename W::FloatT>());

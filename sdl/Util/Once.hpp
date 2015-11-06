@@ -18,19 +18,19 @@
 #define SDL_ONCE_HPP
 #pragma once
 
+#include <graehl/shared/warning_push.h>
+GCC_DIAG_IGNORE(maybe-uninitialized)
+#include <sdl/Util/Unordered.hpp>
 #include <sdl/Util/PointerSet.hpp>
 #include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
 namespace Util {
 
-
 // wrap pointer-visitors so each pointer gets visited once - mark the pointer seen the first time (via IntSet)
 
 struct Once : PointerSet {
-  Once() {
-    Util::setEmptyKey(*this);
-  }
+  Once() { Util::setEmptyKey(*this); }
   template <class V>
   bool first(V const* p) {
     return this->insert((intptr_t)p).second;
@@ -44,10 +44,8 @@ struct Once : PointerSet {
 // NOTE: default char * equality may be wrong in some impls for unordered_set, but std says it should just be
 // regular pointer equality. maybe specifying hash avoids this problem only.
 template <class V>
-struct OnceTypedP : hash_set<V const*, PtrDiffHash<V> > {
-  OnceTypedP() {
-    Util::setEmptyKey(*this);
-  }
+struct OnceTypedP : hash_set<V const*, PtrDiffHash<V>> {
+  OnceTypedP() { Util::setEmptyKey(*this); }
   // careful: don't pass by val:
   bool first(V const& p) { return first(&p); }
   bool first(V const* p) { return this->insert(p).second; }
@@ -115,5 +113,7 @@ struct CheckOnce : Once {
 
 
 }}
+
+#include <graehl/shared/warning_pop.h>
 
 #endif
