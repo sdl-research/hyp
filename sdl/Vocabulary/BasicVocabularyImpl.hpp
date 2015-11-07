@@ -177,6 +177,10 @@ class BasicVocabularyImpl {
     return addSymbolMustBeNew(std::string(word.first, word.second));
   }
 
+  Sym addSymbolMustBeNew(cstring_span<> word) {
+    return addSymbolMustBeNew(std::string(word.data(), word.size()));
+  }
+
   Sym add(std::string const& word, SymbolType type) {
     assert(type == type_);
     return add(word);
@@ -218,6 +222,8 @@ class BasicVocabularyImpl {
   bool containsIndex(SymInt i) const { return i - offset_ < symbols_.size(); }
 
   bool contains(std::string const& word) const { return symbols_.find(word) != kNullIndex; }
+
+  bool contains(cstring_span<> word) const { return symbols_.find(word) != kNullIndex; }
 
   SymInt getNumSymbols() const { return size(); }
 

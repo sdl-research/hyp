@@ -225,6 +225,7 @@ struct IVocabulary : Resource {
 
   bool containsSym(Sym) const;
   bool contains(std::string const&, SymbolType) const;
+  bool contains(cstring_span<>, SymbolType) const;
 
   /// deprecated - just call symbolId.type()
   SymbolType getSymbolType(Sym symbolId) const { return symbolId.type(); }
@@ -299,6 +300,7 @@ struct IVocabulary : Resource {
 
   // TODO@SK: better names: if containsSymbol then idForSymbol and if containsId then symbolForId
   virtual bool containsImpl(std::string const& symbol, SymbolType symType) const = 0;
+  virtual bool containsImpl(cstring_span<> str, SymbolType symType) const = 0;
 };
 
 namespace {

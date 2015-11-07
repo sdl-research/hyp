@@ -47,8 +47,14 @@ class SpecialSymbolVocab {
   std::string const& str(Sym id) const;
 
   Sym sym(std::string const& symbol) const { return vocab->sym(symbol); }
+  Sym sym(cstring_span<>symbol) const { return vocab->sym(symbol); }
 
   bool containsSym(Sym id) const;
+
+  bool contains(cstring_span<>symbol) const {
+    // Currently all special symbols are terminals.
+    return vocab->contains(symbol);
+  }
 
   bool contains(std::string const& symbol) const {
     // Currently all special symbols are terminals.

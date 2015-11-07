@@ -24,6 +24,8 @@
 #define SDL_UNORDERED_HPP
 #pragma once
 
+#include <graehl/shared/warning_push.h>
+GCC_DIAG_IGNORE(maybe-uninitialized)
 
 #include <boost/functional/hash/hash.hpp>
 #include <unordered_set>
@@ -341,5 +343,7 @@ void visitUnordered(Unordered& unordered, Visitor const& v) {
 
 
 }}
+
+#include <graehl/shared/warning_pop.h>
 
 #endif

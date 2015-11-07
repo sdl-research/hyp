@@ -49,8 +49,8 @@ struct ResidentVocabulary final : IVocabulary {
   friend struct ExtendedVocabulary;
   friend class MultiVocabulary;
 
-  void loadTerminals(std::string const& terminalPath) override final;  //, std::string const& sourcePath);
-  void loadNonterminals(std::string const& nonTerminalPath) override final;  //, std::string const& sourcePath);
+  void loadTerminals(std::string const& terminalPath) override final;
+  void loadNonterminals(std::string const& nonTerminalPath) override final;
 
   void clearSinceFreeze() override final {
     SDL_DEBUG(Leak.ResidentVocabulary.clearSinceFreeze, *this);
@@ -79,24 +79,15 @@ struct ResidentVocabulary final : IVocabulary {
     _enterThreadLocal();
   }
 
-  Sym addTerminal(std::string const& word) override final {
-    return vocabTerminal.add(word);
-  }
+  Sym addTerminal(std::string const& word) override final { return vocabTerminal.add(word); }
 
-  Sym getTerminal(std::string const& word) const override final {
-    return vocabTerminal.sym(word);
-  }
+  Sym getTerminal(std::string const& word) const override final { return vocabTerminal.sym(word); }
 
-  Sym addTerminal(cstring_span<> word) override final {
-    return vocabTerminal.add(word);
-  }
+  Sym addTerminal(cstring_span<> word) override final { return vocabTerminal.add(word); }
 
-  Sym getTerminal(cstring_span<> word) const override final {
-    return vocabTerminal.sym(word);
-  }
+  Sym getTerminal(cstring_span<> word) const override final { return vocabTerminal.sym(word); }
 
  protected:
-
   /**
      before this, addSymbol go to per-process state and must be synchronized
      from the outside. after, they go to per-thread. the transition is one-way
@@ -105,12 +96,12 @@ struct ResidentVocabulary final : IVocabulary {
 
   Sym addImpl(std::string const& word, SymbolType symType) override final {
     return getVocab(symType).add(word, symType);
-    //return _Add(str, symType);
+    // return _Add(str, symType);
   }
 
   Sym addImpl(cstring_span<> word, SymbolType symType) override final {
     return getVocab(symType).add(word, symType);
-    //return _Add(word, symType);
+    // return _Add(word, symType);
     // TODO: add Slice hash lookup to readonly/resident vocabs
   }
 
@@ -130,6 +121,10 @@ struct ResidentVocabulary final : IVocabulary {
     return _contains(word, symType);
   }
 
+  bool containsImpl(cstring_span<> word, SymbolType symType) const override final {
+    return _contains(word, symType);
+  }
+
   unsigned getNumSymbolsImpl(SymbolType symType) const override final { return _GetNumSymbols(symType); }
 
   std::size_t getSizeImpl() const override final { return _GetSize(); }
@@ -146,19 +141,34 @@ struct ResidentVocabulary final : IVocabulary {
   SymInt pastFrozenTerminalIndex() const override final { return vocabTerminal.pastFrozenIndex(); }
 
   // faster calls for ExtendedVocabulary - no need for dispatch. //TODO: redundant w/ final?
-  Sym _Add(std::string const&, SymbolType symType);
+  Sym _Add(std::string const& word, SymbolType symType) { return getVocab(symType).add(word); }
+  Sym _Add(cstring_span<> word, SymbolType symType) { return getVocab(symType).add(word); }
+
   std::string const& _Str(Sym) const;
-  Sym _Sym(std::string const&, SymbolType symType) const;
+  Sym _Sym(std::string const& word, SymbolType symType) const { return getVocab(symType).sym(word); }
+  Sym _Sym(cstring_span<> word, SymbolType symType) const { return getVocab(symType).sym(word); }
+
+
   bool _containsSym(Sym symbolId) const;
   bool _boundsSym(Sym symbolId) const;
-  bool _contains(std::string const& word, SymbolType symType) const;
+  bool _contains(std::string const& word, SymbolType symType) const {
+    return getVocab(symType).contains(word);
+  }
+  bool _contains(cstring_span<> word, SymbolType symType) const { return getVocab(symType).contains(word); }
+
   void _Accept(IVocabularyVisitor& visitor);
   void _AcceptType(IVocabularyVisitor&, SymbolType);
   unsigned _GetNumSymbols(SymbolType) const;
   SymInt _pastFrozenTerminalIndex() const { return vocabTerminal.pastFrozenIndex(); }
 
   std::size_t _GetSize() const;
-  Sym _AddSymbolMustBeNew(std::string const&, SymbolType);
+  Sym _AddSymbolMustBeNew(std::string const& str, SymbolType type) {
+    return getVocab(type).addSymbolMustBeNew(str);
+  }
+  Sym _AddSymbolMustBeNew(cstring_span<> str, SymbolType type) {
+    return getVocab(type).addSymbolMustBeNew(str);
+  }
+
 
   BasicVocabularyImpl& getVocab(SymbolType type) {
     return const_cast<BasicVocabularyImpl&>(const_cast<ResidentVocabulary const*>(this)->getVocab(type));
@@ -176,8 +186,9 @@ struct ResidentVocabulary final : IVocabulary {
     }
   }
 
- protected:
   BasicVocabularyImpl vocabTerminal;
+
+ protected:
   BasicVocabularyImpl vocabNonterminal;
   BasicVocabularyImpl vocabVariable;
 };

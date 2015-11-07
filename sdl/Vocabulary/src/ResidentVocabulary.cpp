@@ -63,21 +63,8 @@ void ResidentVocabulary::initStarts(unsigned startingTerminal, unsigned starting
   vocabVariable.init(kVariable, startingViable);
 }
 
-Sym ResidentVocabulary::_Add(std::string const& symbol, SymbolType symType) {
-  return getVocab(symType).add(symbol, symType);
-}
-
-Sym ResidentVocabulary::_Sym(std::string const& symbol, SymbolType symType) const {
-  return getVocab(symType).sym(symbol);
-}
-
 std::string const& ResidentVocabulary::_Str(Sym const symId) const {
   return getVocab(symId.type()).str(symId);
-}
-
-bool ResidentVocabulary::_contains(std::string const& symbol, SymbolType symType) const {
-  bool const have = getVocab(symType).contains(symbol);
-  return have;
 }
 
 bool ResidentVocabulary::_containsSym(Sym symId) const {

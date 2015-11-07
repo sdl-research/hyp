@@ -8,6 +8,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+/** \file
+
+    TODO: would be faster to make Vocabulary::getVocab for kSpecialTerminal
+    return the specialSymbols() BasicVocabularyImpl. then all this can go inline
+*/
+
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -32,9 +38,9 @@ std::string const& IVocabulary::str(Sym sym) const {
   return strImpl(sym);
 }
 
-Sym IVocabulary::sym(std::string const& symbol, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().sym(symbol);  // TODO: why?
-  return symImpl(symbol, symType);
+Sym IVocabulary::sym(std::string const& word, SymbolType symType) const {
+  if (symType == kSpecialTerminal) return specialSymbols().sym(word);  // TODO: why?
+  return symImpl(word, symType);
 }
 
 unsigned IVocabulary::getNumSymbols(SymbolType symType) const {
@@ -51,9 +57,14 @@ bool IVocabulary::containsSym(Sym sym) const {
   return containsSymImpl(sym);
 }
 
-bool IVocabulary::contains(std::string const& symbol, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().contains(symbol);  // TODO: why?
-  return containsImpl(symbol, symType);
+bool IVocabulary::contains(std::string const& word, SymbolType symType) const {
+  if (symType == kSpecialTerminal) return specialSymbols().contains(word);  // TODO: why?
+  return containsImpl(word, symType);
+}
+
+bool IVocabulary::contains(cstring_span<> word, SymbolType symType) const {
+  if (symType == kSpecialTerminal) return specialSymbols().contains(word);  // TODO: why?
+  return containsImpl(word, symType);
 }
 
 void IVocabulary::print(std::ostream& out) const {

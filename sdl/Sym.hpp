@@ -112,6 +112,13 @@ enum SymbolType {
   kAllSymbols = kNoSymbol - 1,
 };
 
+/// we don't use any other types at the moment - why not simplify how the id
+/// space is cut up, then? might have to deal w/ some legacy db format
+/// translation, but that's all that would be needed
+inline void assertValidSymbolType(SymbolType t) {
+  assert(t == SymbolType::kTerminal || t == SymbolType::kNonterminal || t == SymbolType::kVariable || t == SymbolType::kSpecialTerminal);
+}
+
 inline std::ostream& operator<<(std::ostream& o, SymbolType t) {
   return o << "SymbolType=" << ((unsigned)t >> 29);
 }
