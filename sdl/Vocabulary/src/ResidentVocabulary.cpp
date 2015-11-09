@@ -56,6 +56,7 @@ void ResidentVocabulary::loadNonterminals(std::string const& nonTerminalPath) {
 void ResidentVocabulary::initStarts(unsigned startingTerminal, unsigned startingNonterminal) {
   vocabTerminal.init(kTerminal, startingTerminal);
   vocabNonterminal.init(kNonterminal, startingNonterminal);
+  vocabVariable.init(kVariable, 0);
 }
 
 std::string const& ResidentVocabulary::_Str(Sym const symId) const {
