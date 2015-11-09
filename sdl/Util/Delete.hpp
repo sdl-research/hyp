@@ -102,6 +102,7 @@ struct AutoFree {
 
   ~AutoFree() { std::free(p_); }
 
+  void* get() const { return p_; }
   /**
      called repeatedly w/ the same mallocBytes = idempotent. called w/ larger mallocBytes than the last real
      allocation = bug
