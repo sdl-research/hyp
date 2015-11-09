@@ -41,7 +41,7 @@ typedef std::pair<FeatureName const, FeatureValue> FeaturePair;
 typedef std::map<FeatureName, FeatureValue> Features;
 typedef std::vector<FeatureEntry> FeaturesVec;
 typedef Features::value_type NamedFeature;
-typedef Features NamedFeatureWeights;
+typedef Features NamedFeatureWeights; //TODO: should definitely be (compiled to) farm_hash_map for speed - see FeatureWeightsByCase
 typedef NamedFeatureWeights NamedFeatureValues;
 
 /// rule feature encodings (for boost serialization grammar db format)

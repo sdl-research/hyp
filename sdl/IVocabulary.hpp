@@ -100,6 +100,11 @@ struct IVocabulary : Resource {
                                      : symImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
   }
 
+  Sym symTranslate(Sym symFromOtherVocab, IVocabulary const& otherVocab) const {
+    assert(symFromOtherVocab);
+    return symImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+  }
+
   /// return same string in our vocabulary. pre: symFromOtherVocab is not NoSymbol
   Sym add(Sym symFromOtherVocab, IVocabulary const& otherVocab) {
     assert(symFromOtherVocab);

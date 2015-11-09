@@ -24,6 +24,7 @@
 #include <vector>
 #include <cstddef>
 #include <cassert>
+#include <sdl/IntTypes.hpp>
 #include <boost/range/detail/safe_bool.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
@@ -116,7 +117,8 @@ enum SymbolType {
 /// space is cut up, then? might have to deal w/ some legacy db format
 /// translation, but that's all that would be needed
 inline void assertValidSymbolType(SymbolType t) {
-  assert(t == SymbolType::kTerminal || t == SymbolType::kNonterminal || t == SymbolType::kVariable || t == SymbolType::kSpecialTerminal);
+  assert(t == SymbolType::kTerminal || t == SymbolType::kNonterminal || t == SymbolType::kVariable
+         || t == SymbolType::kSpecialTerminal);
 }
 
 inline std::ostream& operator<<(std::ostream& o, SymbolType t) {
@@ -437,9 +439,9 @@ struct Sym {
 };
 
 /// if kNumXnVariables is >0 but <=36, we'll preopulate ResidentVocabulary with
-/// two-letter variables X0,...,Xa,Xb,... (you may still add your own
+/// two-letter variables x0,...,xa,xb,... (you may still add your own
 /// arbitrary-named variables)
-enum { kNumXnVariables = 0 };
+enum { kNumXnVariables = (SymInt)((uint8)'Z' - (uint8)'0') };
 enum { kMaxVariableIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kMaxNTIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kNumPossibleNT = (SymInt)(kMaxNTIndex + 1) };
