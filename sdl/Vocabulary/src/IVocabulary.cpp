@@ -27,44 +27,34 @@
 using namespace sdl;
 using namespace sdl::Vocabulary;
 
+IVocabulary::IVocabulary() : threadlocal_(), nSpecials_(specialSymbols().size()) { setThreadSpecific(); }
 
-Sym IVocabulary::getVariableId(unsigned index) const {
-  return Sym::getVariableId(index);
+IVocabulary::~IVocabulary() {}
+
+std::string const& IVocabulary::strSpecial(Sym special) {
+  assert(special.isSpecial());
+  return specialSymbols().str(special);
 }
 
-std::string const& IVocabulary::str(Sym sym) const {
-  if (sym.isSpecial()) return specialSymbols().str(sym);  // TODO: why?
-  assert(containsSymImpl(sym));
-  return strImpl(sym);
+bool IVocabulary::containsSymSpecial(Sym special) {
+  assert(special.isSpecial());
+  return specialSymbols().containsSym(special);
 }
 
-Sym IVocabulary::sym(std::string const& word, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().sym(word);  // TODO: why?
-  return symImpl(word, symType);
+bool IVocabulary::containsSpecial(std::string const& word) {
+  return specialSymbols().contains(word);
 }
 
-unsigned IVocabulary::getNumSymbols(SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().getNumSymbols();
-  return getNumSymbolsImpl(symType);
+bool IVocabulary::containsSpecial(cstring_span<> word) {
+  return specialSymbols().contains(word);
 }
 
-std::size_t IVocabulary::getSize() const {
-  return getSizeImpl() + specialSymbols().getSize();
+Sym IVocabulary::symSpecial(std::string const& word) {
+  return specialSymbols().sym(word);
 }
 
-bool IVocabulary::containsSym(Sym sym) const {
-  if (sym.isSpecial()) return specialSymbols().containsSym(sym);  // TODO: why?
-  return containsSymImpl(sym);
-}
-
-bool IVocabulary::contains(std::string const& word, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().contains(word);  // TODO: why?
-  return containsImpl(word, symType);
-}
-
-bool IVocabulary::contains(cstring_span<> word, SymbolType symType) const {
-  if (symType == kSpecialTerminal) return specialSymbols().contains(word);  // TODO: why?
-  return containsImpl(word, symType);
+Sym IVocabulary::symSpecial(cstring_span<> word) {
+  return specialSymbols().sym(word);
 }
 
 void IVocabulary::print(std::ostream& out) const {
@@ -83,9 +73,9 @@ void IVocabulary::print(std::ostream& out) const {
 
 bool IVocabulary::evictThread(Occupancy const&) {
   SDL_DEBUG(evict.Vocabulary, "vocabulary evictThread " << getName());
-  std::size_t const before = getSizeImpl();
+  std::size_t const before = sizeImpl();
   clearSinceFreeze();
-  std::size_t const after = getSizeImpl();
+  std::size_t const after = sizeImpl();
   assert(after <= before);
   bool const changed = after != before;
   if (changed)

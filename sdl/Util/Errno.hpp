@@ -43,7 +43,7 @@ template <class Exception, class String>
 inline void throwErrno(String const& callname, char const* logname = "sdl.Util.errno") {
   char buf[kErrnoBufsize];
   using namespace std;
-#ifdef WIN32
+#ifdef _WIN32
   char const* msg = buf;
   ::strerror_s(buf, kErrnoBufsize, errno);
 #elif(__APPLE__ || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE

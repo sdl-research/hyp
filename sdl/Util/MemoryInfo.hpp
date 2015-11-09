@@ -12,9 +12,9 @@
 
     Usage:
 
-    MemoryInfo::instance().getSize();
-    MemoryInfo::instance().getSizeInMB();
-    MemoryInfo::instance().getSizeInGB();
+    MemoryInfo::instance().size();
+    MemoryInfo::instance().sizeInMB();
+    MemoryInfo::instance().sizeInGB();
 
     This is useful for debug output; it can also be set to throw an
     exception if a memory limit is reached.
@@ -44,9 +44,9 @@ class MemoryInfo {
   static MemoryInfo instance_;
   static MemoryInfo& instance() { return instance_; };
 
-  std::size_t getSize(); // TODO: change type?
-  double getSizeInMB();
-  double getSizeInGB();
+  std::size_t size(); // TODO: change type?
+  double sizeInMB();
+  double sizeInGB();
 
 
  private:

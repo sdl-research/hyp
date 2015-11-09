@@ -37,13 +37,12 @@ struct ResidentVocabulary final : IVocabulary {
      in the size of the first parts so we can put them all in the same
      (not-'persistent') space
   */
-  explicit ResidentVocabulary(unsigned startingTerminal = 0, unsigned startingNonterminal = 0,
-                              unsigned startingVariable = 0) {
-    initStarts(startingTerminal, startingNonterminal, startingVariable);
+  explicit ResidentVocabulary(unsigned startingTerminal = 0, unsigned startingNonterminal = 0) {
+    initStarts(startingTerminal, startingNonterminal);
+    vocabVariable.initVariables();
   }
 
-  void initStarts(unsigned startingTerminal = 0, unsigned startingNonterminal = 0,
-                  unsigned startingVariable = 0);
+  void initStarts(unsigned startingTerminal = 0, unsigned startingNonterminal = 0);
 
   template <class ReadOnlyVocab>
   friend struct ExtendedVocabulary;
@@ -70,7 +69,7 @@ struct ResidentVocabulary final : IVocabulary {
 
   void addSymbolCounts(SymbolType type, SymbolCounts& symbols) const override final {
     // TODO: test
-    symbols.thread += _GetNumSymbols(type);
+    symbols.thread += _Size(type);
     symbols.symbolType = type;
   }
 
@@ -81,11 +80,11 @@ struct ResidentVocabulary final : IVocabulary {
 
   Sym addTerminal(std::string const& word) override final { return vocabTerminal.add(word); }
 
-  Sym getTerminal(std::string const& word) const override final { return vocabTerminal.sym(word); }
+  Sym terminal(std::string const& word) const override final { return vocabTerminal.sym(word); }
 
   Sym addTerminal(cstring_span<> word) override final { return vocabTerminal.add(word); }
 
-  Sym getTerminal(cstring_span<> word) const override final { return vocabTerminal.sym(word); }
+  Sym terminal(cstring_span<> word) const override final { return vocabTerminal.sym(word); }
 
  protected:
   /**
@@ -125,9 +124,9 @@ struct ResidentVocabulary final : IVocabulary {
     return _contains(word, symType);
   }
 
-  unsigned getNumSymbolsImpl(SymbolType symType) const override final { return _GetNumSymbols(symType); }
+  unsigned sizeImpl(SymbolType symType) const override final { return _Size(symType); }
 
-  std::size_t getSizeImpl() const override final { return _GetSize(); }
+  std::size_t sizeImpl() const override final { return _size(); }
 
   void accept(IVocabularyVisitor& visitor) override final {
     // TODO: test
@@ -158,10 +157,10 @@ struct ResidentVocabulary final : IVocabulary {
 
   void _Accept(IVocabularyVisitor& visitor);
   void _AcceptType(IVocabularyVisitor&, SymbolType);
-  unsigned _GetNumSymbols(SymbolType) const;
+  unsigned _Size(SymbolType) const;
   SymInt _pastFrozenTerminalIndex() const { return vocabTerminal.pastFrozenIndex(); }
 
-  std::size_t _GetSize() const;
+  std::size_t _size() const;
   Sym _AddSymbolMustBeNew(std::string const& str, SymbolType type) {
     return getVocab(type).addSymbolMustBeNew(str);
   }

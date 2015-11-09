@@ -59,12 +59,31 @@ class BasicVocabularyImpl {
   */
   explicit BasicVocabularyImpl(SymbolType type, SymInt offset = 0) { init(type, offset); }
 
+  void initVariables() {
+    if (type_ == (SymbolType)kVariable && !freezeEndIndex_) {
+      //TODO: could just declare variables unprintable, or print without => str
+      freezeEndIndex_ = kNumXnVariables;
+      assert(kNumXnVariables <= 1 + ('Z' - '0'));
+      std::string x="X_";
+      char &c = x[1];
+      c = '0';
+      for (unsigned i = 0 ; i < kNumXnVariables; ++i) {
+        symbols_.index(x);
+        ++c;
+      }
+    }
+  }
+
+  void clearVariables() {
+    if (type_ == (SymbolType)kVariable && freezeEndIndex_)
+      reset();
+  }
+
   void init(SymbolType type, SymInt offset = 0) {
     type_ = type;
     offset_ = offset;
     type_offset_ = type + offset;
     maxLstSize_ = (~(SymInt)0) - offset;  // can't add if you already have this many
-    freezeEndIndex_ = 0;
   }
 
   virtual ~BasicVocabularyImpl() {}
@@ -224,10 +243,6 @@ class BasicVocabularyImpl {
   bool contains(std::string const& word) const { return symbols_.find(word) != kNullIndex; }
 
   bool contains(cstring_span<> word) const { return symbols_.find(word) != kNullIndex; }
-
-  SymInt getNumSymbols() const { return size(); }
-
-  std::size_t getSize() const { return symbols_.size(); }
 
   void reset() {
     symbols_.clear();

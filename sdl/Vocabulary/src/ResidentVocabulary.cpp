@@ -53,14 +53,9 @@ void ResidentVocabulary::loadNonterminals(std::string const& nonTerminalPath) {
   }
 }
 
-void ResidentVocabulary::initStarts(unsigned startingTerminal, unsigned startingNonterminal,
-                                    unsigned startingViable) {
-  unsigned offsetTerminal = startingTerminal;
-  unsigned offsetNonterminal = startingNonterminal;
-
-  vocabTerminal.init(kTerminal, offsetTerminal);
-  vocabNonterminal.init(kNonterminal, offsetNonterminal);
-  vocabVariable.init(kVariable, startingViable);
+void ResidentVocabulary::initStarts(unsigned startingTerminal, unsigned startingNonterminal) {
+  vocabTerminal.init(kTerminal, startingTerminal);
+  vocabNonterminal.init(kNonterminal, startingNonterminal);
 }
 
 std::string const& ResidentVocabulary::_Str(Sym const symId) const {
@@ -75,12 +70,12 @@ bool ResidentVocabulary::_boundsSym(Sym symId) const {
   return getVocab(symId.type()).boundsSym(symId);
 }
 
-unsigned ResidentVocabulary::_GetNumSymbols(SymbolType symType) const {
-  return getVocab(symType).getNumSymbols();
+unsigned ResidentVocabulary::_Size(SymbolType symType) const {
+  return getVocab(symType).size();
 }
 
-std::size_t ResidentVocabulary::_GetSize() const {
-  return vocabTerminal.getSize() + vocabNonterminal.getSize() + vocabVariable.getSize();
+std::size_t ResidentVocabulary::_size() const {
+  return vocabTerminal.size() + vocabNonterminal.size() + vocabVariable.size();
 }
 
 void ResidentVocabulary::_Accept(IVocabularyVisitor& visitor) {

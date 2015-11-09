@@ -34,6 +34,7 @@
 #include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/gsl.hpp>
 
+
 namespace sdl {
 
 /// a symbol string should not *usually* not contain space tab or newline (those
@@ -58,6 +59,11 @@ struct IVocabularyVisitor {
 };
 
 struct IVocabulary : Resource {
+  typedef std::size_t WordCount;
+  WordCount const nSpecials_;
+ protected:
+  bool threadlocal_;
+ public:
 
   static char const* getTypeName() { return "vocabulary"; }
   /**
@@ -69,11 +75,9 @@ struct IVocabulary : Resource {
      addSymbol that are immune to this purging. */
   bool evictThread(Occupancy const&) override;
 
-  IVocabulary() : threadlocal_() {
-    setThreadSpecific();  // TODO:CM-377
-  }
+  IVocabulary();
 
-  virtual ~IVocabulary() {}
+  virtual ~IVocabulary();
 
   /**
      add symbol if it doesn't exist. return id of added or existing symbol of type SymbolType
@@ -125,8 +129,6 @@ struct IVocabulary : Resource {
     if (threadlocal) enterThreadLocal();
   }
 
-  typedef std::size_t WordCount;
-
   struct SymbolCounts {
     WordCount disk, process, thread, threadUnknown;
     SymbolType symbolType;
@@ -148,7 +150,7 @@ struct IVocabulary : Resource {
   };
 
   virtual void addSymbolCounts(SymbolType type, SymbolCounts& symbols) const {
-    symbols.process += getNumSymbols(type);
+    symbols.process += size(type);
     symbols.symbolType = type;
   }
 
@@ -165,7 +167,7 @@ struct IVocabulary : Resource {
   virtual void freeze() = 0;
 
   /// all frozen terminal syms have index lower than this
-  virtual SymInt pastFrozenTerminalIndex() const { return getNumSymbols(kTerminal); }
+  virtual SymInt pastFrozenTerminalIndex() const { return size(kTerminal); }
 
   /**
      \return number of symbols added since freeze.
@@ -178,43 +180,51 @@ struct IVocabulary : Resource {
   */
   virtual void clearSinceFreeze() = 0;
 
-  // variables are supposed to start from 0 index
-  // this is a mapping from indices to variable id in vocabulary
-  // TODO@SK: Should we check the presence of this variable in vocabulary?
-  Sym getVariableId(unsigned) const;
-
   // TODO: rename. getSymbolId should be called getSymbol and this should be
   // called getString. then, getSymbol/addSymbol could be getSym / addSym and
   // Sym could be Sym
 
-  std::string const& str(Sym) const;
+  std::string const& str(Sym sym) const {
+    return sym.isSpecial() ? strSpecial(sym) : strImpl(sym);
+  }
+
+  static std::string const& strSpecial(Sym special);
+  static bool containsSymSpecial(Sym special);
+  static bool containsSpecial(std::string const& word);
+  static bool containsSpecial(cstring_span<> word);
+  static Sym symSpecial(std::string const& word);
+  static Sym symSpecial(cstring_span<> word);
 
   /// add(word, kTerminal) but should be faster
   virtual Sym addTerminal(std::string const& word) = 0;
   virtual Sym addTerminal(cstring_span<> word) = 0;
 
   /// sym(word, kTerminal), but should be faster
-  virtual Sym getTerminal(std::string const& word) const = 0;
-
-  virtual Sym getTerminal(cstring_span<> word) const = 0;
+  virtual Sym terminal(std::string const& word) const = 0;
+  virtual Sym terminal(cstring_span<> word) const = 0;
+  Sym terminal(Slice field) const { return terminal(cstring_span<>(field.first, field.second)); }
 
   Sym sym(char const* word, SymbolType symType) const { return sym(std::string(word), symType); }
 
-  Sym sym(std::string const&, SymbolType) const;
+  Sym sym(std::string const& word, SymbolType symType) const {
+    return symType == kSpecialTerminal ? symSpecial(word): symImpl(word, symType);
+  }
 
-  Sym sym(cstring_span<> strview, SymbolType symType) const { return symImpl(strview, symType); }
+  Sym sym(cstring_span<> word, SymbolType symType) const {
+    return symType == kSpecialTerminal ? symSpecial(word): symImpl(word, symType);
+  }
+
   Sym sym(Slice field, SymbolType symType) const {
     return symImpl(cstring_span<>(field.first, field.second), symType);
   }
-  Sym getTerminal(Slice field) const { return getTerminal(cstring_span<>(field.first, field.second)); }
 
   virtual Sym symImpl(cstring_span<> strview, SymbolType symType) const { return sym(strview, symType); }
 
-  SymInt getNumSymbols(SymbolType) const;
-  // TODO@SK: what is the purpose of having these nonvirtual and also having virtual doX? shouldn't we just
-  // have virtual X?
-  WordCount getSize() const;
-  WordCount size() const { return getSize(); }
+  SymInt size(SymbolType symType) const {
+    return symType == kSpecialTerminal ? nSpecials_ : sizeImpl(symType);
+  }
+
+  WordCount size() const { return nSpecials_ + sizeImpl(); }
 
   /// \return number of symbols *possibly* unk that would be affected by reset - likely same as
   /// countSinceFreeze
@@ -223,12 +233,17 @@ struct IVocabulary : Resource {
   /// \return number of fixed Sym<->string mappings
   virtual WordCount readOnlySize() const { return 0; }
 
-  bool containsSym(Sym) const;
-  bool contains(std::string const&, SymbolType) const;
-  bool contains(cstring_span<>, SymbolType) const;
+  bool containsSym(Sym sym) const {
+    return sym.isSpecial() ? containsSymSpecial(sym) : containsSymImpl(sym);;
+  }
 
-  /// deprecated - just call symbolId.type()
-  SymbolType getSymbolType(Sym symbolId) const { return symbolId.type(); }
+  bool contains(std::string const& word, SymbolType symType) const {
+    return symType == kSpecialTerminal ? containsSpecial(word) : containsImpl(word, symType);
+  }
+
+  bool contains(cstring_span<> word, SymbolType symType) const {
+    return symType == kSpecialTerminal ? containsSpecial(word) : containsImpl(word, symType);
+  }
 
   virtual void accept(IVocabularyVisitor& visitor) {
     acceptType(visitor, kTerminal);
@@ -243,14 +258,18 @@ struct IVocabulary : Resource {
 
   std::string const& getName() const { return this->name_.empty() ? kUnnamedVocabulary : this->name_; }
 
-  virtual void loadTerminals(std::string const& terminalPath) {}
-  virtual void loadNonterminals(std::string const& nonTerminalPath) {}
+  /// used by RuleSerializer. TODO: cover in regr tests
+  virtual void loadTerminals(std::string const& terminalPath) {
+    SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not implemented: loadTerminals");
+  }
+  virtual void loadNonterminals(std::string const& nonTerminalPath) {
+    SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not implemented: loadTerminals");
+  }
 
   /// return address of string for sym if vocab contains sym. else return null.
   virtual std::string const* strOrNull(Sym sym) const {
     return containsSymImpl(sym) ? &strImpl(sym) : (std::string const*)0;
   }
-
 
   friend inline std::ostream& operator<<(std::ostream& out, IVocabulary const& self) {
     self.print(out);
@@ -269,16 +288,14 @@ struct IVocabulary : Resource {
   void initThread() override { SDL_DEBUG(evict.init.Vocabulary, "vocabulary initThread " << getName()); }
 
  protected:
-  bool threadlocal_;
-
   virtual void enterThreadLocal() {}
 
   virtual Sym addImpl(std::string const&, SymbolType) {
-    SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not Implemented.");
+    SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not implemented: addImpl");
   }
 
   virtual Sym addImpl(cstring_span<> str, SymbolType t) {
-    SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not Implemented.");
+    SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not implemented: addImpl");
   }
 
   /**
@@ -292,9 +309,9 @@ struct IVocabulary : Resource {
   */
   virtual Sym symImpl(std::string const& symbol, SymbolType symType) const = 0;
 
-  virtual unsigned getNumSymbolsImpl(SymbolType) const = 0;
+  virtual unsigned sizeImpl(SymbolType) const = 0;
 
-  virtual WordCount getSizeImpl() const = 0;
+  virtual WordCount sizeImpl() const = 0;
 
   virtual bool containsSymImpl(Sym symbolId) const = 0;
 

@@ -27,6 +27,8 @@ namespace Vocabulary {
 /**
    Vocabulary for special symbols (implemented as a singleton).
    This class closely follows the IVocabulary interface although it does not inherit from it.
+
+   Currently all special symbols are terminals.
 */
 class SpecialSymbolVocab {
  public:
@@ -45,29 +47,20 @@ class SpecialSymbolVocab {
   Sym addAssertId(std::string const& symbol, SymInt id);
 
   std::string const& str(Sym id) const;
+  bool containsSym(Sym id) const;
 
   Sym sym(std::string const& symbol) const { return vocab->sym(symbol); }
   Sym sym(cstring_span<>symbol) const { return vocab->sym(symbol); }
-
-  bool containsSym(Sym id) const;
-
   bool contains(cstring_span<>symbol) const {
-    // Currently all special symbols are terminals.
     return vocab->contains(symbol);
   }
-
   bool contains(std::string const& symbol) const {
-    // Currently all special symbols are terminals.
     return vocab->contains(symbol);
   }
 
   void accept(IVocabularyVisitor& visitor) { vocab->accept(visitor); }
 
-  unsigned getNumSymbols() const { return vocab->getNumSymbols(); }
-
-  unsigned getNumLexicals() { return vocab->getNumSymbols(); }
-
-  std::size_t getSize() const { return vocab->getNumSymbols(); }
+  unsigned size() const { return vocab->size(); }
 
   static SpecialSymbolVocab gInstance_;
 

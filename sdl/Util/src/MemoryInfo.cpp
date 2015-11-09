@@ -86,7 +86,7 @@ double physicalMemoryGB() {
 }
 
 MemoryInfo::MemoryInfo(MemoryInfo const&) {
-  throw UnimplementedException("no copy - use MemoryInfo::instance().getSizeInMB())");
+  throw UnimplementedException("no copy - use MemoryInfo::instance().sizeInMB())");
 }
 
 /**
@@ -99,17 +99,17 @@ MemoryInfo::MemoryInfo() {
 MemoryInfo MemoryInfo::instance_;
 
 #ifdef _WIN32
-std::size_t MemoryInfo::getSize() {
-  SDL_TRACE(MemoryInfo, "MemoryInfo::getSize() not yet supported on Windows.");
+std::size_t MemoryInfo::size() {
+  SDL_TRACE(MemoryInfo, "MemoryInfo::size() not yet supported on Windows.");
   return 0;
 }
 #elif __APPLE__
-std::size_t MemoryInfo::getSize() {
-  SDL_TRACE(MemoryInfo, "MemoryInfo::getSize() not yet supported on Apple.");
+std::size_t MemoryInfo::size() {
+  SDL_TRACE(MemoryInfo, "MemoryInfo::size() not yet supported on Apple.");
   return 0;
 }
 #else
-std::size_t MemoryInfo::getSize() {
+std::size_t MemoryInfo::size() {
   // unsigned long long memoryUsage;
   std::string line;
   SDL_DEBUG(Util.MemoryInfo, "reading " << memoryFilename);
@@ -127,14 +127,14 @@ std::size_t MemoryInfo::getSize() {
 }
 #endif
 
-double MemoryInfo::getSizeInMB() {
+double MemoryInfo::sizeInMB() {
   // TODO: test
-  return getSize() * kOneOverMB;
+  return size() * kOneOverMB;
 }
 
-double MemoryInfo::getSizeInGB() {
+double MemoryInfo::sizeInGB() {
   // TODO: test
-  return getSize() * kOneOverGB;
+  return size() * kOneOverGB;
 }
 
 /**

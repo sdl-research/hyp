@@ -223,16 +223,6 @@ struct Sym {
   }
 #include <graehl/shared/warning_pop.h>
 
-  /**
-     "constructor" (static factory method). that just sets id_ to identifier.
-  */
-  static inline Sym getVariableId(SymInt x) {
-    assert(x <= (SymInt)kSmallSizeMask);
-    Sym id;
-    id.id_ = x | (SymInt)kVariable;
-    return id;
-  }
-
   static inline bool isSpecialType(SymbolType type) { return type == (SymInt)kSpecialTerminal; }
 
   static inline bool isTerminalType(SymbolType type) {
@@ -336,7 +326,6 @@ struct Sym {
       Sym::createSym(0, kPersistentTerminal).index() will return 0.
       Sym::createSym(10234, kPersistentTerminal).index() will return 10234.
       Sym::createSym(4, kVariable).index() will return 4.
-      Sym::getVariableId(4).index() will return 4.
    */
   SymInt index() const { return id_ & maxIndex(); }
 
@@ -447,6 +436,11 @@ struct Sym {
   }
 };
 
+/// if kNumXnVariables is >0 but <=36, we'll preopulate ResidentVocabulary with
+/// two-letter variables X0,...,Xa,Xb,... (you may still add your own
+/// arbitrary-named variables)
+enum { kNumXnVariables = 0 };
+enum { kMaxVariableIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kMaxNTIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kNumPossibleNT = (SymInt)(kMaxNTIndex + 1) };
 enum { kMaxTerminalIndex = (SymInt)Sym::kLargeSizeMask };
@@ -457,25 +451,25 @@ enum { kNumPossibleTerminal = (SymInt)(kMaxTerminalIndex + 1) };
 static const Sym NoSymbol = {(SymInt)kNoSymbol};
 
 inline Sym terminal(SymInt index) {
-  Sym sym;
   assert(index <= kMaxTerminalIndex);
-  sym.id_ = kTerminal | index;
-  return sym;
+  return Sym{kTerminal | index};
 }
 
+/**
+   "constructor" (static factory method). that just sets id_ to identifier.
+*/
+inline Sym variable(SymInt x) {
+  assert(x <= kMaxVariableIndex);
+  return Sym{x | (SymInt)kVariable};
+}
 
 inline Sym specialTerminal(SymInt index) {
-  Sym sym;
   assert(index <= kMaxNTIndex);
-  sym.id_ = index;
-  return sym;
+  return Sym{index};
 }
 
-
 inline Sym operator+(SymInt index, Sym sym) {
-  Sym r(sym);
-  r += index;
-  return r;
+  return Sym{sym.id_ + index};
 }
 
 template <class Rhs>

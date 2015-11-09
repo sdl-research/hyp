@@ -163,6 +163,9 @@ inline void setSpan(Span& span, StateId left, StateId right) {
   span.right = right;
 }
 
+inline bool collides(Span const& x, Span const& y) {
+  return y.right > x.left && x.right > y.left;
+}
 
 }}
 

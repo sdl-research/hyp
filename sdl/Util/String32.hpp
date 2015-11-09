@@ -30,7 +30,7 @@ typedef uint32 UnicodePoint;
 
 // Char32 may need a cast to/from Unicode (even if your platform doesn't seem to need it)
 
-#ifdef WIN32
+#ifdef _WIN32
 #define SDL_UNICODE_IS_WCHAR 0
 typedef Unicode Char32;
 typedef wchar_t Char16;

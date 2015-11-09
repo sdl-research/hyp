@@ -41,7 +41,7 @@ void Performance::restart() {
 }
 
 double processBytes() {
-  return (double)sdl::Util::MemoryInfo::instance_.getSize();
+  return (double)sdl::Util::MemoryInfo::instance_.size();
 }
 
 // PerformancePer

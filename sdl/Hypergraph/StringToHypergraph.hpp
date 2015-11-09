@@ -56,7 +56,7 @@ struct StringToHypergraphOptions {
     if (doAddUnknownSymbols)
       return pVoc->addTerminal(token);
     else {
-      Sym const sym = pVoc->getTerminal(token);
+      Sym const sym = pVoc->terminal(token);
       return sym ? sym : UNK::ID;
     }
   }
