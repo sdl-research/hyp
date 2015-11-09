@@ -61,10 +61,11 @@ struct IVocabularyVisitor {
 struct IVocabulary : Resource {
   typedef std::size_t WordCount;
   WordCount const nSpecials_;
+
  protected:
   bool threadlocal_;
- public:
 
+ public:
   static char const* getTypeName() { return "vocabulary"; }
   /**
      Purge (some) words from the vocabulary, so that they may get different
@@ -92,34 +93,36 @@ struct IVocabulary : Resource {
 
   Sym add(Unicode c, SymbolType symType) { return addImpl(Util::utf8s(c), symType); }
 
-  Sym sym(Sym symFromOtherVocab, IVocabulary const& otherVocab) const {
-    assert(symFromOtherVocab);
-    return symFromOtherVocab.isSpecial()
-               ? symFromOtherVocab
-               : this == &otherVocab ? symFromOtherVocab
-                                     : symImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+  Sym sym(Sym symOther, IVocabulary const& otherVocab) const {
+    assert(symOther);
+    return symOther.isSpecial() ? symOther : this == &otherVocab
+                                                 ? symOther
+                                                 : symImpl(otherVocab.str(symOther), symOther.type());
   }
 
-  Sym symTranslate(Sym symFromOtherVocab, IVocabulary const& otherVocab) const {
-    assert(symFromOtherVocab);
-    return symImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+  Sym symFromOther(Sym symOther, IVocabulary const& otherVocab) const {
+    assert(symOther);
+    return symOther.isSpecial() ? symOther : symImpl(otherVocab.str(symOther), symOther.type());
   }
 
-  /// return same string in our vocabulary. pre: symFromOtherVocab is not NoSymbol
-  Sym add(Sym symFromOtherVocab, IVocabulary const& otherVocab) {
-    assert(symFromOtherVocab);
-    return symFromOtherVocab.isSpecial()
-               ? symFromOtherVocab
-               : this == &otherVocab ? symFromOtherVocab
-                                     : addImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+  /// return same string in our vocabulary. pre: symOther is not NoSymbol
+  Sym add(Sym symOther, IVocabulary const& otherVocab) {
+    assert(symOther);
+    return symOther.isSpecial() ? symOther : this == &otherVocab
+                                                 ? symOther
+                                                 : addImpl(otherVocab.str(symOther), symOther.type());
   }
 
-  /// does symFromOtherVocab = add(symFromOtherVocab, otherVocab). pre: symFromOtherVocab is not
+  Sym addFromOther(Sym symOther, IVocabulary const& otherVocab) {
+    assert(symOther);
+    return symOther.isSpecial() ? symOther : addImpl(otherVocab.str(symOther), symOther.type());
+  }
+
+  /// does symOther = add(symOther, otherVocab). pre: symOther is not
   /// NoSymbol
-  void translateSymbol(Sym& symFromOtherVocab, IVocabulary const& otherVocab) {
-    assert(symFromOtherVocab);
-    if (!symFromOtherVocab.isSpecial())
-      symFromOtherVocab = addImpl(otherVocab.str(symFromOtherVocab), symFromOtherVocab.type());
+  void translateSymbol(Sym& symOther, IVocabulary const& otherVocab) {
+    assert(symOther);
+    if (!symOther.isSpecial()) symOther = addImpl(otherVocab.str(symOther), symOther.type());
   }
 
   /**
@@ -189,9 +192,7 @@ struct IVocabulary : Resource {
   // called getString. then, getSymbol/addSymbol could be getSym / addSym and
   // Sym could be Sym
 
-  std::string const& str(Sym sym) const {
-    return sym.isSpecial() ? strSpecial(sym) : strImpl(sym);
-  }
+  std::string const& str(Sym sym) const { return sym.isSpecial() ? strSpecial(sym) : strImpl(sym); }
 
   static std::string const& strSpecial(Sym special);
   static bool containsSymSpecial(Sym special);
@@ -212,11 +213,11 @@ struct IVocabulary : Resource {
   Sym sym(char const* word, SymbolType symType) const { return sym(std::string(word), symType); }
 
   Sym sym(std::string const& word, SymbolType symType) const {
-    return symType == kSpecialTerminal ? symSpecial(word): symImpl(word, symType);
+    return symType == kSpecialTerminal ? symSpecial(word) : symImpl(word, symType);
   }
 
   Sym sym(cstring_span<> word, SymbolType symType) const {
-    return symType == kSpecialTerminal ? symSpecial(word): symImpl(word, symType);
+    return symType == kSpecialTerminal ? symSpecial(word) : symImpl(word, symType);
   }
 
   Sym sym(Slice field, SymbolType symType) const {
@@ -239,7 +240,8 @@ struct IVocabulary : Resource {
   virtual WordCount readOnlySize() const { return 0; }
 
   bool containsSym(Sym sym) const {
-    return sym.isSpecial() ? containsSymSpecial(sym) : containsSymImpl(sym);;
+    return sym.isSpecial() ? containsSymSpecial(sym) : containsSymImpl(sym);
+    ;
   }
 
   bool contains(std::string const& word, SymbolType symType) const {
