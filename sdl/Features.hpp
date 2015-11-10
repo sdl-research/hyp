@@ -33,8 +33,8 @@ namespace sdl {
 typedef uint32 FeatureId;
 // formerly in FeatureBot/IFeature - could move to Features.hpp instead
 typedef std::string FeatureName;
-typedef SdlFloat FeatureValue;
-typedef SdlFloat FeatureValueWeight;  // Hypergraph::FeatureWeight conflict
+typedef Cost FeatureValue;
+typedef Cost FeatureValueWeight;  // Hypergraph::FeatureWeight conflict
 typedef std::pair<FeatureName, FeatureValue> FeatureEntry;
 typedef std::pair<FeatureName const, FeatureValue> FeaturePair;
 
@@ -114,7 +114,7 @@ inline bool disjointUnion(Features& to, Features const& from) {
 // move but not copy
 typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
 
-FeatureValue constexpr kLnToFeatureValue = (SdlFloat)-M_LOG10E; // multiply ln(prob) by this for neglog10 cost (e^x)
+FeatureValue constexpr kLnToFeatureValue = (Cost)-M_LOG10E; // multiply ln(prob) by this for neglog10 cost (e^x)
 
 /// if str has e.g. "myfeat=4.3 ...", sets to["myfeat"]=4.3 (to may be filled
 /// with features already; only the ones named in str are overwritten)
