@@ -94,12 +94,12 @@ struct ResidentVocabulary final : IVocabulary {
   void _enterThreadLocal() {}
 
   Sym addImpl(std::string const& word, SymbolType symType) override final {
-    return getVocab(symType).add(word, symType);
+    return getVocab(symType).add(word);
     // return _Add(str, symType);
   }
 
   Sym addImpl(cstring_span<> word, SymbolType symType) override final {
-    return getVocab(symType).add(word, symType);
+    return getVocab(symType).add(word);
     // return _Add(word, symType);
     // TODO: add Slice hash lookup to readonly/resident vocabs
   }
@@ -161,18 +161,15 @@ struct ResidentVocabulary final : IVocabulary {
   SymInt _pastFrozenTerminalIndex() const { return vocabTerminal.pastFrozenIndex(); }
 
   std::size_t _size() const;
-  Sym _AddSymbolMustBeNew(std::string const& str, SymbolType type) {
-    return getVocab(type).addSymbolMustBeNew(str);
+  Sym _AddSymbolMustBeNew(std::string const& word, SymbolType type) {
+    return getVocab(type).addSymbolMustBeNew(word);
   }
-  Sym _AddSymbolMustBeNew(cstring_span<> str, SymbolType type) {
-    return getVocab(type).addSymbolMustBeNew(str);
+  Sym _AddSymbolMustBeNew(cstring_span<> word, SymbolType type) {
+    return getVocab(type).addSymbolMustBeNew(word);
   }
 
 
   BasicVocabularyImpl& getVocab(SymbolType type) {
-    return const_cast<BasicVocabularyImpl&>(const_cast<ResidentVocabulary const*>(this)->getVocab(type));
-  }
-  BasicVocabularyImpl const& getVocab(SymbolType type) const {
     switch (type) {
       case kTerminal:
         return vocabTerminal;
@@ -183,6 +180,9 @@ struct ResidentVocabulary final : IVocabulary {
       default:
         SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid type '" << type << "'");
     }
+  }
+  BasicVocabularyImpl const& getVocab(SymbolType type) const {
+    return const_cast<ResidentVocabulary *>(this)->getVocab(type);
   }
 
   BasicVocabularyImpl vocabTerminal;

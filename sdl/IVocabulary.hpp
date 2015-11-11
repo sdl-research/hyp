@@ -83,8 +83,8 @@ struct IVocabulary : Resource {
   /**
      add symbol if it doesn't exist. return id of added or existing symbol of type SymbolType
   */
-  Sym add(std::string const& str, SymbolType symType) { return addImpl(str, symType); }
-  Sym add(cstring_span<> strview, SymbolType symType) { return addImpl(strview, symType); }
+  Sym add(std::string const& word, SymbolType symType) { return addImpl(word, symType); }
+  Sym add(cstring_span<> word, SymbolType symType) { return addImpl(word, symType); }
   Sym add(char const* word, SymbolType symType) { return addImpl(std::string(word), symType); }
   Sym add(Slice field, SymbolType symType) {
     return addImpl(cstring_span<>(field.first, field.second), symType);
@@ -224,7 +224,7 @@ struct IVocabulary : Resource {
     return symImpl(cstring_span<>(field.first, field.second), symType);
   }
 
-  virtual Sym symImpl(cstring_span<> strview, SymbolType symType) const { return sym(strview, symType); }
+  virtual Sym symImpl(cstring_span<> word, SymbolType symType) const { return sym(word, symType); }
 
   SymInt size(SymbolType symType) const {
     return symType == kSpecialTerminal ? nSpecials_ : sizeImpl(symType);
@@ -301,7 +301,7 @@ struct IVocabulary : Resource {
     SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not implemented: addImpl");
   }
 
-  virtual Sym addImpl(cstring_span<> str, SymbolType t) {
+  virtual Sym addImpl(cstring_span<>, SymbolType) {
     SDL_THROW_LOG(IVocabulary, UnimplementedException, "Not implemented: addImpl");
   }
 

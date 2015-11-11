@@ -441,7 +441,8 @@ struct Sym {
 /// if kNumXnVariables is >0 but <=36, we'll preopulate ResidentVocabulary with
 /// two-letter variables x0,...,xa,xb,... (you may still add your own
 /// arbitrary-named variables)
-enum { kNumXnVariables = (SymInt)((uint8)'Z' - (uint8)'0') };
+//enum { kNumXnVariables = (SymInt)((uint8)'Z' - (uint8)'0') };
+enum { kNumXnVariables = 10 };
 enum { kMaxVariableIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kMaxNTIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kNumPossibleNT = (SymInt)(kMaxNTIndex + 1) };

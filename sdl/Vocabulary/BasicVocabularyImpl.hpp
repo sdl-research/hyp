@@ -64,11 +64,15 @@ class BasicVocabularyImpl {
       //TODO: could just declare variables unprintable, or print without => str
       freezeEndIndex_ = kNumXnVariables;
       assert(kNumXnVariables <= 1 + ('Z' - '0'));
-      std::string x="x_";
-      char &c = x[1];
+      char buf[2] = {'x', 0};
+      cstring_span<> key(buf, 2);
+      char &c = buf[1];
       c = '0';
       for (unsigned i = 0 ; i < kNumXnVariables; ++i) {
-        symbols_.index(x);
+        assert(c - '0' == i);
+        SymInt index = symbols_.index(key);
+        assert(index == i);
+        (void)index;
         ++c;
       }
     }

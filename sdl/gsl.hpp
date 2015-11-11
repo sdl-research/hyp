@@ -22,8 +22,28 @@
 
 namespace sdl {
 
-using namespace gsl;
+//using namespace gsl;
 
+/// span<T> is like (T*, size_t). .data() and .size()
+using gsl::span;
+
+/// string_span is span<char>
+using gsl::string_span;
+
+///cstring_span is span<char const>
+using gsl::cstring_span;
+
+/// get a cstring_span from a char const* (if you construct directly from compile time string constant then you get the trailing '0' included in size).
+using gsl::ensure_z;
+
+/// std::string from string_span
+using gsl::to_string;
+
+/// owner<T> - move assign to transfer
+using gsl::owner;
+
+/// not_null<T> - like T* but can't be 0
+using gsl::not_null;
 }
 
 #endif

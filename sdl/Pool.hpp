@@ -38,6 +38,12 @@ void deletePool(T* t, ChunkPool* pool) {
     delete t;
 }
 
+template <class T>
+void deletePool(T* t, bool) {
+  delete t;
+}
+
+
 template <class I>
 void deleteRangePool(I begin, I end, ChunkPool& pool) {
   for (; begin != end; ++begin) deletePool(*begin, pool);
