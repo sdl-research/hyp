@@ -27,17 +27,16 @@ namespace sdl {
 /// span<T> is like (T*, size_t). .data() and .size()
 using gsl::span;
 
-/// string_span is span<char>
+/// string_span<> is span<char> (default template arg char)
 using gsl::string_span;
 
-///cstring_span is span<char const>
+///cstring_span<> is span<char const>
 using gsl::cstring_span;
 
 /// get a cstring_span from a char const* (if you construct directly from compile time string constant then you get the trailing '0' included in size).
 using gsl::ensure_z;
 
-/// std::string from string_span
-using gsl::to_string;
+/// std::string from string_span: to_string(cstring_span<>) (ADL)
 
 /// owner<T> - move assign to transfer
 using gsl::owner;

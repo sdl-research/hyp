@@ -360,8 +360,9 @@ inline LocalePtr getLocalePtr(std::string const& icuLanguageName = "en",
 }
 
 struct IcuLocaleConfig {
-  LocalePtr pLocale;
-  Locale const& locale() const { return *pLocale; }
+  LocalePtr locale_;
+  operator Locale const& () const { return *locale_; }
+  Locale const& locale() const { return *locale_; }
   std::string language, country;
   friend inline std::string to_string_impl(IcuLocaleConfig const& x) { return x.to_string_impl(); }
   std::string to_string_impl() const { return "language='" + language + "' country='" + country + "'"; }
@@ -375,7 +376,7 @@ struct IcuLocaleConfig {
           IcuLocaleConfig, ConfigException,
           "don't specify a language_country (e.g. en_US) --language while also specifying --country: "
               << to_string_impl());
-    pLocale = getLocalePtr(language, country);
+    locale_ = getLocalePtr(language, country);
   }
   template <class Config>
   void configure(Config& c) {

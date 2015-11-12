@@ -163,6 +163,7 @@ struct Evictable : Config::INamed {
   virtual void initProcessPhase(InitProcessPhase phase) {
     if (phase == kPhase0) initProcess();
   }
+
   /**
      \return whether anything needs to be initThread before next use.
   */
