@@ -195,8 +195,7 @@ inline ConfigNode overrideConfig(ConfigNode const& root, std::string const& yaml
     (YamlConfigure is in ConfigYaml.hpp)
 
     which will implement YamlConfigurable (by CRTP) */
-class YamlConfigurable {
- public:
+struct YamlConfigurable {
   std::string category_, type_, name_;
   virtual ~YamlConfigurable() {}
   virtual std::string logname() const { return type_; }

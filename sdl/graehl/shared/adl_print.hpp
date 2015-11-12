@@ -106,25 +106,6 @@ struct Print {
   }
 
 // TODO: maybe. need to test in C++98, msvc. for now use adl_to_string.hpp
-#if 0
-  static std::string str(V const& v) {
-#if 0
-    std::string r;
-    call(r, v);
-    return r;
-#else
-    std::stringstream r;
-    call((std::ostream&)r, v);
-    return r.str();
-#endif
-  }
-  template <class S>
-  static std::string str(V const& v, S& s) {
-    std::string r;
-    call(r, v, s);
-    return r;
-  }
-#endif
 };
 
 //TODO: pointer_traits, type_string
@@ -162,14 +143,6 @@ struct Print<std::string, void> {
     print(o, v, s);
   }
   static std::string const& str(V const& v) { return v; }
-#if 0
-  template <class S>
-  static std::string str(V const& v, S& s) {
-    std::string r;
-    call(r, v, s);
-    return r;
-  }
-#endif
 };
 
 template <class O, class V>
@@ -215,6 +188,22 @@ struct list_format {
     ::adl::Print<V>::call(o, v, s);
   }
 };
+
+/// compare to adl::adl_to_string which should be able to build by string += instead of stringstream
+inline std::string const& str(std::string const& s) { return s; }
+template <class V>
+std::string str(V const& v) {
+  std::stringstream r;
+  ::adl::Print<V>::call((std::ostream&)r, v);
+  return r.str();
+}
+template <class V, class S>
+static std::string str(V const& v, S& s) {
+  std::stringstream r;
+  ::adl::Print<V>::call((std::ostream&)r, v, s);
+  return r.str();
+}
+
 }
 
 namespace adl_default {
