@@ -104,7 +104,6 @@ struct Print {
     using namespace adl_default;
     print(o, v, s);
   }
-
 // TODO: maybe. need to test in C++98, msvc. for now use adl_to_string.hpp
 };
 
@@ -237,6 +236,20 @@ void print(O& o, std::pair<A, B> const& v, S const& s) {
   ::adl::adl_print(o, v.first, s);
   o << '=';
   ::adl::adl_print(o, v.second, s);
+}
+template <class O, class A, class S>
+void print(O& o, std::pair<A *, A *> v, S const& s) {
+  ::adl::list_format<> format;
+  format.open(o);
+  for (; v.first != v.second; ++v.first) format.element(o, *v.first);
+  format.close(o);
+}
+template <class O, class A, class S>
+void print(O& o, std::pair<A const*, A const*> v, S const& s) {
+  ::adl::list_format<> format;
+  format.open(o);
+  for (; v.first != v.second; ++v.first) format.element(o, *v.first);
+  format.close(o);
 }
 }
 

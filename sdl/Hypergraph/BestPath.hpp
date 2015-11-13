@@ -1801,7 +1801,7 @@ DerivationPtr computeTrivialBestPath(IHypergraph<Arc> const& hg, StateId final, 
         }
         return r;
       } else if (atStart || hg.hasLexicalLabel(final))
-        // this is else rather than first check to work around Preorder (CM-450)
+        // this is else rather than first check to work around Preorderer (CM-450)
         // placing terminals in non-leaf position
         return Derivation::kAxiom;
     }
