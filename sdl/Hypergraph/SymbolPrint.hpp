@@ -85,12 +85,12 @@ void print(std::ostream& o, Sym sym, IHypergraph<Arc> const& hg, SymbolQuotation
 
 }  // ns
 
-/* these are in NS sdl so they can be found by Printer */
-inline void print(std::ostream& o, Sym sym, IVocabulary& voc, Hypergraph::SymbolQuotation quote) {
+/* these are in NS sdl so they can be found by adl_print - Sym is sdl::Sym, IVocabulary is sdl::IVocabulary */
+inline void print(std::ostream& o, Sym sym, IVocabulary const& voc, Hypergraph::SymbolQuotation quote) {
 
   Hypergraph::writeLabel(o, sym, voc, quote);
 }
-inline void print(Util::StringBuilder& o, Sym sym, IVocabulary& voc, Hypergraph::SymbolQuotation quote) {
+inline void print(Util::StringBuilder& o, Sym sym, IVocabulary const& voc, Hypergraph::SymbolQuotation quote) {
 
   Hypergraph::writeLabel(o, sym, voc, quote);
 }
@@ -103,14 +103,23 @@ inline void print(Util::StringBuilder& o, Sym sym, IVocabularyPtr const& pVoc,
   Hypergraph::writeLabel(o, sym, pVoc, quote);
 }
 
-inline void print(std::ostream& o, Hypergraph::LabelPair const& l, IVocabulary& v,
+inline void print(std::ostream& o, Sym s, IVocabulary const* voc,
+                  Hypergraph::SymbolQuotation quote) {
+  print(o, s, *voc, quote);
+}
+inline void print(Util::StringBuilder& o, Sym s, IVocabulary const* voc,
+                  Hypergraph::SymbolQuotation quote) {
+  print(o, s, *voc, quote);
+}
+
+inline void print(std::ostream& o, Hypergraph::LabelPair const& l, IVocabulary const& v,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   using namespace Hypergraph;
   Sym const i = input(l), ol = output(l);
   writeLabel(o, i, v, quote);
   if (ol && i != ol) writeLabel(o << ' ', ol, v, quote);
 }
-inline void print(Util::StringBuilder& o, Hypergraph::LabelPair const& l, IVocabulary& v,
+inline void print(Util::StringBuilder& o, Hypergraph::LabelPair const& l, IVocabulary const& v,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   using namespace Hypergraph;
   Sym const i = input(l), ol = output(l);
@@ -127,16 +136,16 @@ inline void print(Util::StringBuilder& o, Hypergraph::LabelPair const& l, IVocab
   print(o, l, *v, quote);
 }
 
-inline void print(std::ostream& o, Hypergraph::LabelPair const& l, IVocabulary* v,
+inline void print(std::ostream& o, Hypergraph::LabelPair const& l, IVocabulary const* v,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   print(o, l, *v, quote);
 }
-inline void print(Util::StringBuilder& o, Hypergraph::LabelPair const& l, IVocabulary* v,
+inline void print(Util::StringBuilder& o, Hypergraph::LabelPair const& l, IVocabulary const* v,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   print(o, l, *v, quote);
 }
 
-inline void print(std::ostream& o, Syms const& s, IVocabulary& voc, char const* space,
+inline void print(std::ostream& o, Syms const& s, IVocabulary const& voc, char const* space,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   Util::Sep sp(space);
   for (Sym w : s) {
@@ -146,7 +155,7 @@ inline void print(std::ostream& o, Syms const& s, IVocabulary& voc, char const* 
     }
   }
 }
-inline void print(Util::StringBuilder& o, Syms const& s, IVocabulary& voc, char const* space,
+inline void print(Util::StringBuilder& o, Syms const& s, IVocabulary const& voc, char const* space,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   Util::Sep sp(space);
   for (Sym w : s) {
@@ -157,25 +166,35 @@ inline void print(Util::StringBuilder& o, Syms const& s, IVocabulary& voc, char 
   }
 }
 
-inline void print(std::ostream& o, SymSlice const& syms, IVocabulary& voc, char const* space = " ",
+inline void print(std::ostream& o, SymSlice syms, IVocabulary const& voc, char const* space = " ",
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
-  Util::Sep sp(space);
-  for (Psym i = syms.first; i < syms.second; ++i) {
-    if (*i) {
-      o << sp;
-      print(o, *i, voc, quote);
-    }
+  for (unsigned i = 0, n = syms.size(); i < n; ++i) {
+    if (!i) o << space;
+    print(o, syms[i], voc, quote);
   }
 }
 
-inline void print(Util::StringBuilder& o, SymSlice const& syms, IVocabulary& voc, char const* space = " ",
+inline void print(Util::StringBuilder& o, SymSlice syms, IVocabulary const& voc, char const* space = " ",
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
-  Util::Sep sp(space);
-  for (Psym i = syms.first; i < syms.second; ++i) {
-    if (*i) {
-      o << sp;
-      print(o, *i, voc, quote);
-    }
+  for (unsigned i = 0, n = syms.size(); i < n; ++i) {
+    if (!i) o << space;
+    print(o, syms[i], voc, quote);
+  }
+}
+
+inline void print(std::ostream& o, SymSlice syms, IVocabulary const* voc, char const* space = " ",
+                  Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
+  for (unsigned i = 0, n = syms.size(); i < n; ++i) {
+    if (!i) o << space;
+    print(o, syms[i], voc, quote);
+  }
+}
+
+inline void print(Util::StringBuilder& o, SymSlice syms, IVocabulary const* voc, char const* space = " ",
+                  Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
+  for (unsigned i = 0, n = syms.size(); i < n; ++i) {
+    if (!i) o << space;
+    print(o, syms[i], voc, quote);
   }
 }
 

@@ -34,6 +34,7 @@
 #include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Hypergraph/SplitState.hpp>
 #include <sdl/Hypergraph/DerivationStringOptions.hpp>
+#include <sdl/gsl.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -145,6 +146,7 @@ getStringWt(IHypergraph<Arc> const& hg, DerivationStringOptions const& opt = Der
 
 struct PrintSyms {
   IVocabulary& voc;
+
   Syms const& syms;
   SymbolQuotation quote;
   PrintSyms(Syms const& syms, IVocabulary& voc, SymbolQuotation quote = kQuoted)

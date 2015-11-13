@@ -45,4 +45,11 @@ using gsl::owner;
 using gsl::not_null;
 }
 
+namespace graehl {
+
+template <class T>
+struct is_nonstring_container<gsl::span<T>, void> : std::true_type {};
+
+}
+
 #endif

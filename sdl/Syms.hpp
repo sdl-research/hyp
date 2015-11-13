@@ -36,16 +36,21 @@ namespace sdl {
 
 typedef SymInt SymsIndex;
 typedef Sym const* Psym;
-typedef std::pair<Psym, Psym> SymSlice;
-typedef graehl::pod_array_ref<Sym> SymPodArrayRef;  // TODO: use this instead of SymSlice. faster <=> Syms.
-typedef span<Sym const> SymsRef;
+typedef gsl::span<Sym const> SymSlice; //TODO: add support for faster <=> Syms
 
+/// Syms is smaller than vector for up to kInlineSyms. if >3 then this wastes
+/// some space for 0-2 item Syms. overall this was about 2% faster than vector
+/// (could re-test w/ C++11)
 enum { kInlineSyms = 3 };
-// 16 bytes (more if >3 elements). note: small_vector<SymInt, 1> and <SymInt, 2> have the same size due to
-// alignment.
-// For release builds, this is faster (by about 1-2%)
-
 typedef Util::small_vector<Sym, kInlineSyms, SymsIndex> Syms;
+
+inline Syms toSyms(SymSlice span) {
+  return Syms(span.data(), span.size());
+}
+
+inline SymSlice toSymSlice(Syms const& syms) {
+  return SymSlice(syms.data(), syms.size());
+}
 
 // 16 on stack only for small phrases (length <=3). else similar to std::vector (array on heap). TODO: test
 // time/space tradeoff w/ 4 or higher?
@@ -61,15 +66,6 @@ inline unsigned nLexical(Syms const& syms) {
   unsigned count = 0;
   for (Syms::const_iterator i = syms.begin(), e = syms.end(); i != e; ++i) count += i->isLexical();
   return count;
-}
-
-
-inline Syms toSyms(SymsRef span) {
-  return Syms(span.data(), span.size());
-}
-
-inline SymsRef toSpan(Syms const& syms) {
-  return SymsRef(syms.begin(), syms.size());
 }
 
 /**

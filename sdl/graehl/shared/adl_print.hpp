@@ -231,6 +231,21 @@ void operator<<(O& o, std::pair<A, B> const& v) {
   o << '=';
   ::adl::adl_print(o, v.second);
 }
+template <class O, class A>
+void print(O& o, std::pair<A *, A *> v) {
+  ::adl::list_format<> format;
+  format.open(o);
+  for (; v.first != v.second; ++v.first) format.element(o, *v.first);
+  format.close(o);
+}
+template <class O, class A>
+void print(O& o, std::pair<A const*, A const*> v) {
+  ::adl::list_format<> format;
+  format.open(o);
+  for (; v.first != v.second; ++v.first) format.element(o, *v.first);
+  format.close(o);
+}
+
 template <class O, class A, class B, class S>
 void print(O& o, std::pair<A, B> const& v, S const& s) {
   ::adl::adl_print(o, v.first, s);
@@ -241,14 +256,14 @@ template <class O, class A, class S>
 void print(O& o, std::pair<A *, A *> v, S const& s) {
   ::adl::list_format<> format;
   format.open(o);
-  for (; v.first != v.second; ++v.first) format.element(o, *v.first);
+  for (; v.first != v.second; ++v.first) format.element(o, *v.first, s);
   format.close(o);
 }
 template <class O, class A, class S>
 void print(O& o, std::pair<A const*, A const*> v, S const& s) {
   ::adl::list_format<> format;
   format.open(o);
-  for (; v.first != v.second; ++v.first) format.element(o, *v.first);
+  for (; v.first != v.second; ++v.first) format.element(o, *v.first, s);
   format.close(o);
 }
 }
