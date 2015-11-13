@@ -723,7 +723,6 @@ struct HypergraphBase : Resource {
     return LabelPair(inputLabel(l), outputLabel(l));
   }
 
-  typedef Util::small_vector<ArcHandle, 1, ArcId> ArcsContainer;
   typedef std::vector<ArcsContainer> Adjs;
 
   typedef Util::MaybeRef<Adjs const> AdjsPtr;
@@ -750,7 +749,6 @@ struct HypergraphBase : Resource {
      (if overriden) may actually be faster than making several virtual calls.
   */
   virtual void inArcs(StateId st, ArcsContainer& arcs) const;
-
 
   /**
      these may return NULL instead of empty. (the const versions will return a

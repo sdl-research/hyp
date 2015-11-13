@@ -88,7 +88,6 @@ typedef uint32 TailId;
 struct ArcBase;
 
 typedef ArcBase *ArcHandle;
-typedef std::vector<ArcHandle> ArcHandles;
 
 #if SDL_64BIT_STATE_ID
 typedef uint64 StateId;
@@ -109,6 +108,8 @@ typedef uint64 ArcId;
 #else
 typedef uint32 ArcId;
 #endif
+
+typedef Util::small_vector<ArcHandle, 1, ArcId> ArcsContainer;
 
 // typedef sdl::function<bool (StateId s)> StateFilter;
 typedef std::vector<StateId> StateString;

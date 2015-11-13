@@ -185,7 +185,7 @@ typedef std::vector<StateId> InterestedStates;
 template <class A>
 struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergraphLabels {
  private:
-  typedef std::vector<HypergraphBase::ArcsContainer> AdjacentArcs;
+  typedef std::vector<ArcsContainer> AdjacentArcs;
   static inline void transform(StateIds const& permutation, StateId& s) {
     assert(s < permutation.size());
     s = permutation[s];
@@ -259,7 +259,6 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
   typedef A Arc;
   typedef IHypergraph<A> Base;
   typedef IMutableHypergraph<A> MutableBase;
-  typedef HypergraphBase::ArcsContainer ArcsContainer;
   typedef ArcsContainer::const_iterator ArcIter;
   typedef shared_ptr<MutableHypergraph<Arc>> Ptr;
   typedef typename A::Weight Weight;

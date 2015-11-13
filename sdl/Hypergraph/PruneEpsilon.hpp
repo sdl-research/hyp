@@ -38,7 +38,6 @@ void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWe
   StateSet usefulState(N);
   StateId const sorig = hg.start();
   assert(sorig != kNoState);
-  typedef HypergraphBase::ArcsContainer ArcsContainer;
   typedef typename Arc::Weight Weight;
   Weight initwt;
   Weight* prevwt = 0;

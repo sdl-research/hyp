@@ -165,8 +165,6 @@ struct AcyclicBest {
 
     if (hg.isMutable()) hgAsMutable = static_cast<IMutableHypergraph<Arc> const*>(&hg);
 
-    typedef typename InArcs<Arc>::ArcsContainer ArcsContainer;
-
     back_edges_ = 0;
     self_loops_ = 0;
     // we wouldn't need to track this except we choose to set the kAcyclic

@@ -62,7 +62,6 @@ void insideCosts(IHypergraph<Arc> const& hg, SdlFloat* inside, StateId N) {
   std::memset(color, 0, N);
   reverseTopologicalOutArcsGraph(hg, hg.start(), e, color, N);
   std::fill(inside, inside + N, (float)HUGE_VAL);
-  typedef HypergraphBase::ArcsContainer ArcsContainer;
   if (hg.isMutable()) {
     IMutableHypergraph<Arc> const& mhg = static_cast<IMutableHypergraph<Arc> const&>(hg);
     for (;;) {

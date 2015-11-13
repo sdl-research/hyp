@@ -39,9 +39,9 @@ namespace Hypergraph {
 template <class Visitor>
 void visitInArcs(Visitor& visit, StateId head, HypergraphBase const& hg, bool isMutable) {
   if (isMutable) {
-    HypergraphBase::ArcsContainer const* arcs = hg.maybeInArcs(head);
+    ArcsContainer const* arcs = hg.maybeInArcs(head);
     if (arcs)
-      for (HypergraphBase::ArcsContainer::const_iterator a = arcs->begin(), ae = arcs->end(); a != ae; ++a)
+      for (ArcsContainer::const_iterator a = arcs->begin(), ae = arcs->end(); a != ae; ++a)
         visit.acceptIn(*a, head);
   } else {
     for (ArcId i = 0, N = hg.numInArcs(head); i < N; ++i) visit.acceptIn(hg.inArc(head, i), head);
@@ -54,9 +54,9 @@ void visitInArcs(Visitor& visit, StateId head, HypergraphBase const& hg, bool is
 template <class Visitor>
 void visitOutArcs(Visitor& visit, StateId tail, HypergraphBase const& hg, bool isMutable) {
   if (isMutable) {
-    HypergraphBase::ArcsContainer const* arcs = hg.maybeOutArcs(tail);
+    ArcsContainer const* arcs = hg.maybeOutArcs(tail);
     if (arcs)
-      for (HypergraphBase::ArcsContainer::const_iterator a = arcs->begin(), ae = arcs->end(); a != ae; ++a)
+      for (ArcsContainer::const_iterator a = arcs->begin(), ae = arcs->end(); a != ae; ++a)
         visit.acceptOut(*a, tail);
   } else {
     for (ArcId i = 0, N = hg.numOutArcs(tail); i < N; ++i) visit.acceptOut(hg.outArc(tail, i), tail);
@@ -146,7 +146,7 @@ struct OutArcsGenerator : PeekableArcGeneratorBase<Arc> {
 */
 template <class Arc>
 struct ContainerArcsGenerator : PeekableArcGeneratorBase<Arc> {
-  void init(HypergraphBase::ArcsContainer const* arcs) {
+  void init(ArcsContainer const* arcs) {
     if (arcs && !arcs->empty()) {
       i = &*arcs->begin();
 #if SDL_WIN32_SECURE_SCL_WORKAROUND
@@ -158,7 +158,7 @@ struct ContainerArcsGenerator : PeekableArcGeneratorBase<Arc> {
       i = end = 0;
   }
   // ContainerArcsGenerator() {}
-  // ContainerArcsGenerator(HypergraphBase::ArcsContainer const* arcs) { init(arcs); }
+  // ContainerArcsGenerator(ArcsContainer const* arcs) { init(arcs); }
   ContainerArcsGenerator(HypergraphBase const& hg, StateId s, OutArcsT) {
     assert(hg.isMutable());
     init(hg.maybeOutArcs(s));
@@ -194,7 +194,6 @@ struct ContainerArcsGenerator : PeekableArcGeneratorBase<Arc> {
 template <bool kMustStoreNatively = false>
 struct AdjacentArcsBase {
   HypergraphBase const& hg;
-  typedef HypergraphBase::ArcsContainer ArcsContainer;
 
  protected:
   ArcsContainer tmpInArcs, emptyInArcs;
@@ -292,7 +291,6 @@ struct InArcs : AdjacentArcsBase<kMustStoreNatively> {
   using Base::emptyInArcs;
 
  public:
-  typedef typename Base::ArcsContainer ArcsContainer;
   using Base::hasNative;
 
   StateId size() const { return hg.sizeForHeads(); }
@@ -315,7 +313,7 @@ struct InArcs : AdjacentArcsBase<kMustStoreNatively> {
     if (hasNative())
       Hypergraph::visitInArcs(visit, head, hg, isMutable);
     else if (head < adj.size())
-      for (HypergraphBase::ArcsContainer::const_iterator a = adj[head].begin(), ae = adj[head].end(); a != ae;
+      for (ArcsContainer::const_iterator a = adj[head].begin(), ae = adj[head].end(); a != ae;
            ++a)
         visit.accept(*a, head);
   }
@@ -404,7 +402,6 @@ struct FirstTailOutArcs : AdjacentArcsBase<kMustStoreNatively> {
 
  public:
   using Base::hasNative;
-  typedef HypergraphBase::ArcsContainer ArcsContainer;
 
   FirstTailOutArcs(HypergraphBase const& hg)
       : Base(hg, hg.storesOutArcs()), adj(hasNative() ? 0 : hg.size()) {

@@ -62,7 +62,6 @@ struct IMutableHypergraph : IHypergraph<A> {
   typedef shared_ptr<Self> Ptr;
   typedef A Arc;
   typedef typename A::Weight Weight;
-  typedef HypergraphBase::ArcsContainer ArcsContainer;
   typedef ArcsContainer::const_iterator OutArcsIter;
   // we could change this to AnyGenerator (at significantly increased cost) if we want to allow alternate
   // IMutableHypergraph impls

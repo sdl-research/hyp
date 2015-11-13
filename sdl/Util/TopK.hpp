@@ -10,7 +10,8 @@
 // limitations under the License.
 /** \file
 
- .
+    keep the k best items in a vector. TODO: optionally pass in visitor for the
+    removed items before resize (e.g. delete)
 */
 
 #ifndef TOPK_JG_2015_06_04_HPP
@@ -39,12 +40,16 @@ void topkSorted(Vec& vec, std::size_t k, Less less = Less()) {
 
 template <class Vec, class Less = std::less<typename Vec::value_type>>
 void topkUnsorted(Vec& vec, std::size_t k, Less less = Less()) {
-  typedef typename Vec::value_type V;
-  std::size_t n = vec.size();
-  if (k < n) {
-    V* b = vec.data();
-    std::partial_sort(b, b + k, b + n);
-    vec.resize(k);
+  if (!k)
+    vec.clear();
+  else {
+    typedef typename Vec::value_type V;
+    std::size_t n = vec.size();
+    if (k < n) {
+      V* b = vec.data();
+      std::nth_element(b, b + k - 1, b + n);
+      vec.resize(k);
+    }
   }
 }
 

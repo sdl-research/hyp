@@ -90,7 +90,6 @@ void sortArcsImpl(IMutableHypergraph<Arc>* hg, SortPolicy const& cmp) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException, "sortArcs is for Fsm with out-arcs index.");
   if (hg->hasSortedArcs()) return;
   for (StateId sid = 0, N = hg->size(); sid < N; ++sid) {
-    typedef HypergraphBase::ArcsContainer ArcsContainer;
     ArcsContainer* a = hg->maybeOutArcs(sid);
     if (a) std::sort(a->begin(), a->end(), cmp);
   }
@@ -129,7 +128,7 @@ template <class Arc, class Less>
 void sortInArcs(IMutableHypergraph<Arc>& hg, Less const& less) {
   hg.forceProperties(kStoreInArcs);
   for (StateId i = 0, N = hg.size(); i < N; ++i) {
-    HypergraphBase::ArcsContainer* a = hg.maybeInArcs(i);
+    ArcsContainer* a = hg.maybeInArcs(i);
     if (a) std::sort(a->begin(), a->end(), less);
   }
 }
@@ -141,12 +140,12 @@ void sortInArcsFirstLexical(IMutableHypergraph<Arc>& hg) {
 template <class Arc>
 std::pair<Arc const* const*, Arc const* const*> findLexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head,
                                                         Sym firstLexical) {
-  HypergraphBase::ArcsContainer* a = hg.maybeInArcs(head);
+  ArcsContainer* a = hg.maybeInArcs(head);
   assert(a);
   return std::equal_range(a->begin(), a->end(), firstLexical, FirstLexicalAscending<Arc>(hg));
 }
 
-inline ArcBase const* const* findNonlexSortedInArcsBegin(HypergraphBase const& hg, HypergraphBase::ArcsContainer const& a) {
+inline ArcBase const* const* findNonlexSortedInArcsBegin(HypergraphBase const& hg, ArcsContainer const& a) {
   // FirstLexicalAscending puts @NoSymbol position (-1) so at end
   typedef ArcBase const* R;
   typedef R const* Iter;
@@ -162,7 +161,7 @@ inline ArcBase const* const* findNonlexSortedInArcsBegin(HypergraphBase const& h
 template <class Arc>
 std::pair<Arc const* const*, Arc const* const*> findNonlexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head) {
   // FirstLexicalAscending puts @NoSymbol position (-1) so at end
-  HypergraphBase::ArcsContainer* a = hg.maybeInArcs(head);
+  ArcsContainer* a = hg.maybeInArcs(head);
   assert(a);
   return std::pair<Arc const* const*, Arc const* const*>((Arc const* const*)findNonlexSortedInArcsBegin(hg, *a), a->end());
 }

@@ -35,8 +35,9 @@ namespace sdl {
 #endif
 
 struct Resource : Evictable, Util::IAddLeakChecks {
-  /// also specific Resource subclasses will have (via ResourceTraits.hpp or otherwise):
-  /// static char const* getTypeName(); (not defined here to force compiler errors if missing)
+  /// subclasses will have (via ResourceTraits.hpp or otherwise):
+  // static char const* getTypeName();
+  /// (not defined here to force compiler errors if missing)
 
 #if SDL_ASSERT_THREAD_SPECIFIC
   /**
