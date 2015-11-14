@@ -142,19 +142,19 @@ inline bool LinesUnorderedEqualIgnoringDigits(std::string str1, std::string str2
   return ok;
 }
 
-inline bool LinesUnorderedEqualIgnoringIntegers(std::string str1, std::string str2, bool sortWords = false,
+inline bool LinesUnorderedEqualIgnoringIntegers(std::string i1, std::string i2, bool sortWords = false,
                                                 char const* name1 = "GOT", char const* name2 = "REF",
                                                 bool warn = true, bool ignoreBlankLines = true,
                                                 std::string const& replaceIntegersBy = "#") {
-  if (LinesUnorderedEqual(str1, str2, sortWords, name1, name2, false, ignoreBlankLines)) return true;
-  SDL_TRACE(Util.Equal, "not exactly equal - trying with digits replaced: [(test)" << str1 << " != " << str2
-                                                                                   << "(reference)]\n");
-  str1 = ReplacedIntegers(str1, replaceIntegersBy);
-  str2 = ReplacedIntegers(str2, replaceIntegersBy);
+  if (LinesUnorderedEqual(i1, i2, sortWords, name1, name2, false, ignoreBlankLines)) return true;
+  SDL_TRACE(Util.Equal, "not exactly equal - trying with digits replaced: [(test)" << i1 << " != " << i2
+            << "(reference)]\n");
+  std::string str1 = ReplacedIntegers(i1, replaceIntegersBy);
+  std::string str2 = ReplacedIntegers(i2, replaceIntegersBy);
   bool ok = LinesUnorderedEqual(str1, str2, sortWords, name1, name2, warn, ignoreBlankLines);
   if (!ok)
     SDL_WARN(Util.Equal, "not exactly equal even after integer replacement and ignoring line order: [(test)\n"
-                             << str1 << "\n  !=  \n" << str2 << "\n (reference)]\n");
+                             << str1 << "\n  !=  \n" << str2 << "\n (reference)]:\n\n"<<i1<<"\n (original test).");
   else
     SDL_WARN(Util.Equal, " OK - Equal after integer replacement.");
   return ok;

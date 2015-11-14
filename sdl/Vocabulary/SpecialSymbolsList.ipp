@@ -84,6 +84,8 @@
 #define SDL_SPECIAL_SYMBOL_TEXT "/tok-protect"
 #include SDL_SPECIAL_SYMBOL_INC
 
+
+/// this is not the SyntaxBased "GLUE" nonterminal.
 #define SDL_SPECIAL_SYMBOL_NAME GLUE
 #define SDL_SPECIAL_SYMBOL_TEXT "glue"
 #include SDL_SPECIAL_SYMBOL_INC
