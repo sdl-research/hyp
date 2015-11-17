@@ -442,7 +442,7 @@ struct Sym {
 /// two-letter variables x0,...,xa,xb,... (you may still add your own
 /// arbitrary-named variables)
 //enum { kNumXnVariables = (SymInt)((uint8)'Z' - (uint8)'0') };
-enum { kNumXnVariables = 10 };
+enum { kNumXnVariables = 0 };
 enum { kMaxVariableIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kMaxNTIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kNumPossibleNT = (SymInt)(kMaxNTIndex + 1) };

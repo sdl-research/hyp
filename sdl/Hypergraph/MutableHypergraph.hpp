@@ -1454,6 +1454,12 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
   }
 };
 
+template <class Arc>
+void setEmptyHg(shared_ptr<IHypergraph<Arc> > &hg) {
+  hg.reset(new MutableHypergraph<Arc>);
+  assert(hg->prunedEmpty());
+}
+
 
 }}
 
