@@ -101,7 +101,7 @@ Float neglogPlus(Float a, Float b) {
 }
 
 template <class Float>
-void neglogPlusby(Float b, Float& a) {
+void neglogPlusBy(Float b, Float& a) {
   if (b != std::numeric_limits<Float>::infinity()) {
     if (a <= b)
       a -= log1plus((Float)exp(a - b));
@@ -118,7 +118,7 @@ Float logPlus(Float a, Float b) {
 }
 
 template <class Float>
-void logPlusby(Float b, Float& a) {
+void logPlusBy(Float b, Float& a) {
   Float b_a = b - a;
   if (b_a < 0)
     a += log1plus((Float)exp(b_a));
@@ -167,7 +167,7 @@ template <class Map>
 void mapAddNeglogPlus(Map& map, typename Map::key_type const& key, typename Map::mapped_type value) {
   std::pair<typename Map::iterator, bool> iNew = map.insert(typename Map::value_type(key, value));
   if (iNew.second) return;
-  neglogPlusby(value, iNew.first->second);
+  neglogPlusBy(value, iNew.first->second);
 }
 
 /**
@@ -178,7 +178,7 @@ struct NeglogPlusFct {
   typedef Float result_type;
   typedef Float increment_type;
 
-  void operator()(Float b, Float& a) const { neglogPlusby(b, a); }
+  void operator()(Float b, Float& a) const { neglogPlusBy(b, a); }
 
   enum { kIsCommutative = 1 };
   static inline Float zeroPlus(Float const& b) { return b; }

@@ -136,7 +136,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(FeatureWeightTpl<FloatT, 
         i->second += neglog2;  // in prob space, we're adding p1+p2
     }
   } else {
-    Util::neglogPlusby(b.value_, this->value_);
+    Util::neglogPlusBy(b.value_, this->value_);
     assert(!isZero());  // adding two nonzero things can never give a zero result
     if (pMap_ == b.pMap_) {  // maps equal by pointer. doesn't imply probabilities are the same too
       if (pMap_) {
