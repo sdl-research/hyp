@@ -220,7 +220,7 @@ inline Float neglogMinus(Float a, Float b) {
 template <class Float>
 inline Float neglogSubFrom1(Float b) {
   if (b < 0)
-    return -log1plus(-exp(b));
+    return -log1plus(-exp(-b));
   else
     SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
   return b;
