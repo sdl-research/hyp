@@ -62,17 +62,17 @@ static inline float log1plus(float x) {
 }
 
 static inline double logExp(double x) {
-  return log1plus(exp(x));
+  return log1plus(std::exp(x));
 }
 static inline float logExp(float x) {
-  return log1plus(exp(x));
+  return log1plus(std::exp(x));
 }
 
 static inline double logExpMinus(double x) {
-  return log1plus(-exp(x));
+  return log1plus(-std::exp(x));
 }
 static inline float logExpMinus(float x) {
-  return log1p(-exp(x));
+  return log1p(-std::exp(x));
 }
 
 
@@ -96,7 +96,7 @@ template <class Float>
 Float neglogPlus(Float a, Float b) {
   if (a == std::numeric_limits<Float>::infinity()) return b;
   if (b == std::numeric_limits<Float>::infinity()) return a;
-  return a <= b ? a - log1plus((Float)exp(a - b)) : b - log1plus((Float)exp(b - a));
+  return a <= b ? a - log1plus((Float)std::exp(a - b)) : b - log1plus((Float)std::exp(b - a));
   //    log1plus(x) = log(1 + x).
 }
 
@@ -104,9 +104,9 @@ template <class Float>
 void neglogPlusBy(Float b, Float& a) {
   if (b != std::numeric_limits<Float>::infinity()) {
     if (a <= b)
-      a -= log1plus((Float)exp(a - b));
+      a -= log1plus((Float)std::exp(a - b));
     else
-      a = b - log1plus((Float)exp(b - a));
+      a = b - log1plus((Float)std::exp(b - a));
   }
 }
 
@@ -114,16 +114,16 @@ void neglogPlusBy(Float b, Float& a) {
 template <class Float>
 Float logPlus(Float a, Float b) {
   Float b_a = b - a;
-  return b_a < 0 ? a + log1plus(exp(b_a)) : b + log1plus(exp(-b_a));
+  return b_a < 0 ? a + log1plus(std::exp(b_a)) : b + log1plus(std::exp(-b_a));
 }
 
 template <class Float>
 void logPlusBy(Float b, Float& a) {
   Float b_a = b - a;
   if (b_a < 0)
-    a += log1plus((Float)exp(b_a));
+    a += log1plus((Float)std::exp(b_a));
   else
-    a = b + log1plus((Float)exp(-b_a));
+    a = b + log1plus((Float)std::exp(-b_a));
 }
 
 /**
@@ -208,7 +208,7 @@ inline Float neglogMinus(Float a, Float b) {
   if (b == std::numeric_limits<Float>::infinity()) return a;
   const Float d = a - b;
   if (d <= 0)
-    return a - log1plus(-exp(d));
+    return a - log1plus(-std::exp(d));
   else if (d < FloatConstants<Float>::epsilon)
     return std::numeric_limits<Float>::infinity();
   else
@@ -219,10 +219,11 @@ inline Float neglogMinus(Float a, Float b) {
 /// \return neglogMinus(0, b)
 template <class Float>
 inline Float neglogSubFrom1(Float b) {
-  if (b < 0)
-    return -log1plus(-exp(-b));
-  else
-    SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
+  if (b >= 0)
+    return -log1plus(-std::exp(-b));
+  else {
+    SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space: 1 - exp()");
+  }
   return b;
 }
 
