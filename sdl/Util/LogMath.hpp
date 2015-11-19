@@ -11,16 +11,20 @@
 /** \file
 
    add and subtract log probs.
+
 */
 
 #ifndef SDL_UTIL_LOGMATH_HPP
 #define SDL_UTIL_LOGMATH_HPP
 #pragma once
 
-
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <cmath>
 
+#ifndef SDL_EXACT_LOG1P
+#define SDL_EXACT_LOG1P 1
+#endif
 /**
    you want to use log1p() for numbers very close to 1 that can’t be accurately
    represented directly — but if, and only if, your algorithm is already
@@ -35,160 +39,207 @@
 
    (our usage of these to compute log(exp(a) + exp(b)) and log(exp(a) - exp(b)) qualifies)
 */
-#if _MSC_VER
-// #  include <amp_math.h>  // TODO: when we have MSVC2012
-#include <boost/math/special_functions/log1p.hpp>
-using boost::math::log1p;
-// using Concurrency::precise_math::log1p; // TODO: when we have MSVC2012
-#else
-#include <math.h>
-namespace boost {
-namespace math {
-}
-}
-// have log1p from <math.h>
-#endif
 
 namespace sdl {
 namespace Util {
 
+///  \return log1plus(x) = log(1 + x).
+static inline double log1plus(double x) {
+#if SDL_EXACT_LOG1P
+  using namespace std;
+  return log1p(x);
+#else
+  return log(1. + x);
+#endif
+}
+static inline float log1plus(float x) {
+#if SDL_EXACT_LOG1P
+  using namespace std;
+  return log1pf(x);
+#else
+  return (float)log1plus((double)x);
+#endif
+}
+
 static inline double logExp(double x) {
-  using namespace boost::math;
-  return log1p(exp(x));
+  return log1plus(exp(x));
 }
 static inline float logExp(float x) {
-  using namespace boost::math;
-  return (float)log1p(exp(x));
+  return log1plus(exp(x));
 }
 
 static inline double logExpMinus(double x) {
-  using namespace boost::math;
-  return log1p(-exp(x));
+  return log1plus(-exp(x));
 }
 static inline float logExpMinus(float x) {
-  using namespace boost::math;
-  return (float)log1p(-exp(x));
+  return log1p(-exp(x));
 }
 
-template <class T>
-inline T logPlus(T f1, T f2) {
-  T d = f1 - f2;
-  if (d > 0) {
-    return f2 - logExp(-d);
-  } else {
-    return f1 - logExp(d);
+
+/**
+   \return -log(exp(-a) + exp(-b))
+
+   A=log(a) + B=log(b) = C=log(a + b)
+   C = log(expA + expB) =
+   log(expA * (1 + expB/expA)) =
+   log(expA) + log(1 + expB/expA) =
+   A + log(1 + exp(B - A))
+
+   now negate A, B, C:
+   A=-log(a) + B=-log(b) = C=-log(a+b)
+
+   C = -(-A + log(1 + exp(-B - -A)) =
+   A - log(1 + exp(A - B))
+
+*/
+template <class Float>
+Float neglogPlus(Float a, Float b) {
+  if (a == std::numeric_limits<Float>::infinity()) return b;
+  if (b == std::numeric_limits<Float>::infinity()) return a;
+  return a <= b ? a - log1plus((Float)exp(a - b)) : b - log1plus((Float)exp(b - a));
+  //    log1plus(x) = log(1 + x).
+}
+
+template <class Float>
+void neglogPlusby(Float b, Float& a) {
+  if (b != std::numeric_limits<Float>::infinity()) {
+    if (a <= b)
+      a -= log1plus((Float)exp(a - b));
+    else
+      a = b - log1plus((Float)exp(b - a));
   }
+}
+
+/// \return -neglogPlus(-a, -b)
+template <class Float>
+Float logPlus(Float a, Float b) {
+  Float b_a = b - a;
+  return b_a < 0 ? a + log1plus(exp(b_a)) : b + log1plus(exp(-b_a));
+}
+
+template <class Float>
+void logPlusby(Float b, Float& a) {
+  Float b_a = b - a;
+  if (b_a < 0)
+    a += log1plus((Float)exp(b_a));
+  else
+    a = b + log1plus((Float)exp(-b_a));
 }
 
 /**
    Functor that multiplies two negated log numbers and returns
    negated log number.
 
-   \return <pre> -log( exp(-a) * exp(-b) ) </pre>
+   \return -log( exp(-a) * exp(-b) )
 */
-template <class FloatT>
+template <class Float>
 struct NeglogTimesFct {
-  typedef FloatT result_type;
-  typedef FloatT increment_type;
-  FloatT operator()(FloatT const& a, FloatT const& b) const { return a + b; }
-  void operator()(FloatT const& b, FloatT& a) const { a += b; }
+  typedef Float result_type;
+  typedef Float increment_type;
+  Float operator()(Float const& a, Float const& b) const { return a + b; }
+  void operator()(Float const& b, Float& a) const { a += b; }
 
   enum { kIsCommutative = 1 };
-  static inline FloatT zeroPlus(FloatT const& b) { return b; }
-  static inline FloatT zero() { return (FloatT)0; }
+  static inline Float zeroPlus(Float const& b) { return b; }
+  static inline Float zero() { return (Float)0; }
 };
 
 /**
    Functor that divides two negated log numbers and returns
    negated log number.
 
-   \return <pre> -log( exp(-a) / exp(-b) ) </pre>
+   \return -log( exp(-a) / exp(-b) )
 */
-template <class FloatT>
+template <class Float>
 struct NeglogDivideFct {
-  typedef FloatT result_type;
-  typedef FloatT increment_type;
-  FloatT operator()(FloatT const& a, FloatT const& b) const { return a - b; }
-  void operator()(FloatT const& b, FloatT& a) const { a -= b; }
+  typedef Float result_type;
+  typedef Float increment_type;
+  Float operator()(Float const& a, Float const& b) const { return a - b; }
+  void operator()(Float const& b, Float& a) const { a -= b; }
 
   enum { kIsCommutative = 0 };
-  static inline FloatT zeroPlus(FloatT const& b) { return -b; }
-  static inline FloatT zero() { return (FloatT)0; }
+  static inline Float zeroPlus(Float const& b) { return -b; }
+  static inline Float zero() { return (Float)0; }
 };
 
+
+template <class Map>
+void mapAddNeglogPlus(Map& map, typename Map::key_type const& key, typename Map::mapped_type value) {
+  std::pair<typename Map::iterator, bool> iNew = map.insert(typename Map::value_type(key, value));
+  if (iNew.second) return;
+  neglogPlusby(value, iNew.first->second);
+}
+
 /**
-   Functor that adds two negated log numbers and returns
-   negated log number.
-
-   \return <pre> -log( exp(-a) + exp(-b) ) </pre>
+   For Map.hpp updateBy
 */
-template <class FloatT>
+template <class Float>
 struct NeglogPlusFct {
-  typedef FloatT result_type;
-  typedef FloatT increment_type;
-  template <class Map>
-  void addToMap(Map& map, typename Map::key_type const& key, FloatT value) const {
-    std::pair<typename Map::iterator, bool> iNew = map.insert(typename Map::value_type(key, value));
-    if (iNew.second) return;
-    (*this)(value, iNew.first->second);
-  }
+  typedef Float result_type;
+  typedef Float increment_type;
 
-  FloatT operator()(FloatT const& a, FloatT const& b) const {
-    if (a == std::numeric_limits<FloatT>::infinity()) {
-      return b;
-    }
-    if (b == std::numeric_limits<FloatT>::infinity()) {
-      return a;
-    }
-    if (a <= b) {
-      return a - log1p((FloatT)exp(a - b));
-    } else {
-      return b - log1p((FloatT)exp(b - a));
-    }
-  }
-  void operator()(FloatT const& b, FloatT& a) const {
-    if (b != std::numeric_limits<FloatT>::infinity()) {
-      if (a <= b)
-        a -= log1p((FloatT)exp(a - b));
-      else
-        a = b - log1p((FloatT)exp(b - a));
-    }
-  }
+  void operator()(Float b, Float& a) const { neglogPlusby(b, a); }
 
   enum { kIsCommutative = 1 };
-  static inline FloatT zeroPlus(FloatT const& b) { return b; }
+  static inline Float zeroPlus(Float const& b) { return b; }
 };
 
+
 /**
-   Functor that subtracts two negated log numbers and returns
-   negated log number.
+   \return -log(exp(-a) - exp(-b))
 
-   \return <pre> -log( exp(-a) - exp(-b) ) </pre>
+   (A > B)
+
+   A=log(a) - B=log(b) = C=log(a - b)
+   C = log(expA - expB) =
+   log(expA * (1 - expB/expA)) =
+   log(expA) + log(1 - expB/expA) =
+   A + log(1 - exp(B - A))
+
+   now negate A, B, C:
+   A=-log(a) + B=-log(b) = C=-log(a+b)
+
+   C = -(-A + log(1 - exp(-B - -A)) =
+   A - log(1 - exp(A - B))
+
 */
-template <class FloatT>
-struct NeglogSubFct {
-  typedef FloatT result_type;
-  typedef FloatT increment_type;
-  FloatT operator()(FloatT const& a, FloatT const& b) const {
-    if (b == std::numeric_limits<FloatT>::infinity()) return a;
-    const FloatT d = a - b;
-    if (d <= 0)
-      return a - Util::logExpMinus(d);
-    else if (d < FloatConstants<FloatT>::epsilon)
-      return zero();
-    else
-      SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
-    return b;
-  }
-  void operator()(FloatT const& b, FloatT& a) const { a = operator()(a, b); }
+template <class Float>
+inline Float neglogMinus(Float a, Float b) {
+  if (b == std::numeric_limits<Float>::infinity()) return a;
+  const Float d = a - b;
+  if (d <= 0)
+    return a - log1plus(-exp(d));
+  else if (d < FloatConstants<Float>::epsilon)
+    return std::numeric_limits<Float>::infinity();
+  else
+    SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
+  return b;
+}
 
+/// \return neglogMinus(0, b)
+template <class Float>
+inline Float neglogSubFrom1(Float b) {
+  if (b < 0)
+    return -log1plus(-exp(b));
+  else
+    SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
+  return b;
+}
+
+/**
+   For Map.hpp updateBy
+*/
+template <class Float>
+struct NeglogSubFct {
+  typedef Float result_type;
+  typedef Float increment_type;
+  void operator()(Float b, Float& a) const { a = neglogMinus(a, b); }
   enum { kIsCommutative = 0 };
-  static inline FloatT zeroPlus(FloatT const& b) {
-    if (b == std::numeric_limits<FloatT>::infinity()) return b;  // zero-zero=zero
+  static inline Float zeroPlus(Float const& b) {
+    if (b == std::numeric_limits<Float>::infinity()) return b;  // zero-zero=zero
     SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space");
     return b;  // doesn't execute
   }
-  static inline FloatT zero() { return std::numeric_limits<FloatT>::infinity(); }
 };
 
 

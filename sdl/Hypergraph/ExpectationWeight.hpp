@@ -136,8 +136,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(FeatureWeightTpl<FloatT, 
         i->second += neglog2;  // in prob space, we're adding p1+p2
     }
   } else {
-    Util::NeglogPlusFct<FloatT> neglogplus;
-    neglogplus(b.value_, this->value_);
+    Util::neglogPlusby(b.value_, this->value_);
     assert(!isZero());  // adding two nonzero things can never give a zero result
     if (pMap_ == b.pMap_) {  // maps equal by pointer. doesn't imply probabilities are the same too
       if (pMap_) {
@@ -156,7 +155,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(FeatureWeightTpl<FloatT, 
         assert(&thismap != bmap);
         if (bmap)
           for (typename MapT::const_iterator i = bmap->begin(), e = bmap->end(); i != e; ++i)
-            neglogplus.addToMap(thismap, i->first, i->second);
+            Util::mapAddNeglogPlus(thismap, i->first, i->second);
       }
     }
   }
@@ -179,11 +178,10 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(FeatureWeightTpl<FloatT,
     FloatT const aval = this->value_;
     FloatT const bval = b.value_;
     this->value_ = aval + bval;  // pa' = pa*pb
-    Util::NeglogPlusFct<FloatT> neglogplus;
     if (pMap_ == b.pMap_) {  // special (rare) case to avoid modifying map while reading from it
       ownMap();  // note: this must occur after the test above
       // fC[i] <= logplus(costB + fC[i], costC + fB[i]) = logplus(costB, costC) + fC[i]
-      FloatT const aplusbval = neglogplus(aval, bval);  // we're setting (in prob space) v'=v*(pa+pb)
+      FloatT const aplusbval = Util::neglogPlus(aval, bval);  // we're setting (in prob space) v'=v*(pa+pb)
       SDL_DEBUG_ALWAYS(Hypergraph.ExpectationWeight, "same map for a*b; result[i] = a[i] + neglogplus("
                                                      << aval << ", " << bval << ") = " << aplusbval);
       for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
@@ -202,7 +200,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(FeatureWeightTpl<FloatT,
         assert(&thismap != bmap);
         if (bmap)
           for (typename MapT::const_iterator i = bmap->begin(), e = bmap->end(); i != e; ++i)
-            neglogplus.addToMap(thismap, i->first, i->second + aval);
+            Util::mapAddNeglogPlus(thismap, i->first, i->second + aval);
       }
     }
     assert(!isZero());  // we shouldn't ever underflow by adding two non-zero probs in logspace

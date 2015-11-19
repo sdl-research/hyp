@@ -334,32 +334,12 @@ class LogWeightTpl : public FloatWeightTpl<T> {
 
 template <class T>
 LogWeightTpl<T> plus(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
-  if (w1 == LogWeightTpl<T>::zero()) return w2;
-  if (w2 == LogWeightTpl<T>::zero()) return w1;
-
-  const T f1 = w1.value_;
-  const T f2 = w2.value_;
-  const T d = f2 - f1;  // d>0 means prob1>prob2
-  if (d > 0)
-    return LogWeightTpl<T>(f1 - Util::logExp(-d));
-  else
-    return LogWeightTpl<T>(f2 - Util::logExp(d));
+  return {Util::neglogPlus(w1.value_, w2.value_)};
 }
 
 template <class T>
 LogWeightTpl<T> minus(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& w2) {
-  typedef LogWeightTpl<T> W;
-  if (w2 == W::zero()) return w1;
-
-  const T f1 = w1.value_;
-  const T f2 = w2.value_;
-  const T d = f1 - f2;  // d>0 means prob1>prob2
-  if (d < 0)  // w1>w2 because cost1 < cost2
-    return W(f1 - Util::logExpMinus(d));
-  else if (d >= FloatConstants<T>::epsilon)
-    SDL_THROW_LOG(Hypergraph.Weight, LogNegativeException,
-                  "a-b=" << w1.value_ - w2.value_ << " greater than epsilon=" << FloatConstants<T>::epsilon);
-  return W::zero();
+  return {Util::neglogMinus(w1.value_, w2.value_)};
 }
 
 template <class T>

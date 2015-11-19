@@ -29,13 +29,14 @@ ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: false
 PenaltyBreakBeforeFirstCallParameter: 1
 ColumnLimit:     110
-PenaltyExcessCharacter: 10
-PenaltyBreakComment: 300
-PenaltyBreakString: 80
+PenaltyExcessCharacter: 2
+PenaltyBreakComment: 400
+PenaltyBreakString: 100
 PenaltyBreakFirstLessLess: 10
 PenaltyReturnTypeOnItsOwnLine: 100
 
 DerivePointerAlignment: false
+PointerBindsToType: true
 PointerAlignment: Left
 
 BinPackParameters: true
