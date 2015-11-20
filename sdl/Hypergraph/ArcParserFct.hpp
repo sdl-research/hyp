@@ -64,9 +64,8 @@ inline bool isInAngleBrackets(std::string const& str) {
    Special syms like <eps> are not enclosed in quotes but in < >. If the parsed
    text contains other syms like "the" or "<html>", they will be in quotes.
 */
-inline Sym add(IVocabulary& voc, std::string const& word, bool lex,
-                       std::size_t* numBlockStartSymsSeen, Sym defaultSym = NoSymbol,
-                      bool increaseNumBlocks = true) {
+inline Sym add(IVocabulary& voc, std::string const& word, bool lex, std::size_t* numBlockStartSymsSeen,
+               Sym defaultSym = NoSymbol, bool increaseNumBlocks = true) {
   if (word.empty()) return defaultSym;
 
   // we don't allow quoted "<special>"
@@ -98,10 +97,10 @@ void addState(ParserUtil::State& s, SymsToState* symsToState, StateId& highestSt
               IMutableHypergraph<Arc>* result, std::string const& src, std::size_t linenum,
               std::size_t* numBlockStartSymsSeen) {
   // need to call input before output symbol so block-start is incremented (true)
-  Sym const input = ArcParserFctUtil::add(voc, s.inputSymbol, s.isInputSymbolLexical,
-                                                  numBlockStartSymsSeen, NoSymbol, true);
+  Sym const input = ArcParserFctUtil::add(voc, s.inputSymbol, s.isInputSymbolLexical, numBlockStartSymsSeen,
+                                          NoSymbol, true);
   Sym const output = ArcParserFctUtil::add(voc, s.outputSymbol, s.isOutputSymbolLexical,
-                                                   numBlockStartSymsSeen, NoSymbol, false);
+                                           numBlockStartSymsSeen, NoSymbol, false);
   LabelPair newLabels(input, output);
 
   if (s.id == kNoState) {
@@ -170,7 +169,7 @@ struct ParsedArcsConsumer {
 
 template <class Arc>
 void parseText(std::istream& in, std::string const& inFilename, IMutableHypergraph<Arc>* result,
-              bool requireNfc = true) {
+               bool requireNfc = true) {
   ParsedArcs arcs;
   impl::ParsedArcsConsumer accept(arcs);
   Util::visitChompedLines(in, accept, requireNfc);
@@ -188,9 +187,9 @@ MutableHypergraph<Arc>* readHypergraphNew(std::istream& in, IVocabularyPtr pVoc,
 }
 
 template <class Arc>
-shared_ptr<IHypergraph<Arc> > readHypergraph(std::istream& in, IVocabularyPtr pVoc,
-                                             Properties props = kFsmOutProperties,
-                                             std::string const& inName = "input") {
+shared_ptr<IHypergraph<Arc>> readHypergraph(std::istream& in, IVocabularyPtr pVoc,
+                                            Properties props = kFsmOutProperties,
+                                            std::string const& inName = "input") {
   return readHypergraphNew<Arc>(in, pVoc, props, inName);
 }
 
@@ -204,8 +203,8 @@ IHypergraph<Arc>& readHypergraph(std::istream& in, IMutableHypergraph<Arc>& hg,
 }
 
 template <class Arc>
-shared_ptr<IHypergraph<Arc> > readHypergraph(Util::InputStream const& in, IVocabularyPtr pVoc,
-                                             Properties props = kFsmOutProperties) {
+shared_ptr<IHypergraph<Arc>> readHypergraph(Util::InputStream const& in, IVocabularyPtr pVoc,
+                                            Properties props = kFsmOutProperties) {
   return readHypergraph<Arc>(*in, pVoc, props, in.name);
 }
 

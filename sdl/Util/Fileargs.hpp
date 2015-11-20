@@ -36,7 +36,9 @@ using graehl::stdout_filename;
 using graehl::stderr_filename;
 using graehl::null_filename;
 
-std::string const kFileForIdHelp((graehl::file_arg_usage()+"; if empty, nothing; otherwise, for each segment id filename.gz -> filename.id.gz or filename -> filename.id"));
+std::string const kFileForIdHelp((graehl::file_arg_usage() + "; if empty, nothing; otherwise, for each "
+                                                             "segment id filename.gz -> filename.id.gz or "
+                                                             "filename -> filename.id"));
 
 char const* const kStdoutFilename("-");
 char const* const kStderrFilename("-2");

@@ -113,8 +113,8 @@ class FloatWeightTpl : public WeightBase {
 
   FloatWeightTpl(FloatWeightTpl const& o) = default;
   FloatWeightTpl& operator=(FloatWeightTpl const& o) = default;
-  FloatWeightTpl(FloatWeightTpl && o) = default;
-  FloatWeightTpl& operator=(FloatWeightTpl && o) = default;
+  FloatWeightTpl(FloatWeightTpl&& o) = default;
+  FloatWeightTpl& operator=(FloatWeightTpl&& o) = default;
 
   T& value() { return value_; }
 
@@ -221,8 +221,8 @@ class ViterbiWeightTpl : public FloatWeightTpl<T> {
 
   ViterbiWeightTpl(ViterbiWeightTpl const& o) = default;
   ViterbiWeightTpl& operator=(ViterbiWeightTpl const& o) = default;
-  ViterbiWeightTpl(ViterbiWeightTpl && o) = default;
-  ViterbiWeightTpl& operator=(ViterbiWeightTpl && o) = default;
+  ViterbiWeightTpl(ViterbiWeightTpl&& o) = default;
+  ViterbiWeightTpl& operator=(ViterbiWeightTpl&& o) = default;
 
   Self& operator=(Base const& other) {
     this->value_ = other.value_;
@@ -275,7 +275,7 @@ inline ViterbiWeightTpl<T> divide(ViterbiWeightTpl<T> const& w1, ViterbiWeightTp
   if (w1 == ViterbiWeightTpl<T>::zero() || w2 == ViterbiWeightTpl<T>::zero())
     // Technically can't divide by 0. but practically ok.
     return ViterbiWeightTpl<T>::zero();
-  return ViterbiWeightTpl<T>(w1.value_ - w2.value_);
+  return ViterbiWeightTpl<T>(w1.value_-w2.value_);
 }
 
 template <class T>
@@ -311,8 +311,8 @@ class LogWeightTpl : public FloatWeightTpl<T> {
   constexpr LogWeightTpl(std::size_t v) : Base(v) {}
   LogWeightTpl(LogWeightTpl const& o) = default;
   LogWeightTpl& operator=(LogWeightTpl const& o) = default;
-  LogWeightTpl(LogWeightTpl && o) = default;
-  LogWeightTpl& operator=(LogWeightTpl && o) = default;
+  LogWeightTpl(LogWeightTpl&& o) = default;
+  LogWeightTpl& operator=(LogWeightTpl&& o) = default;
 
   static inline constexpr LogWeightTpl<T> one() { return LogWeightTpl<T>(0.0f); }
 
@@ -359,7 +359,7 @@ inline LogWeightTpl<T> divide(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& 
     // Technically can't divide by zero. but practically ok.
     return LogWeightTpl<T>::zero();
   }
-  return LogWeightTpl<T>(w1.value_ - w2.value_);
+  return LogWeightTpl<T>(w1.value_-w2.value_);
 }
 
 template <class T>

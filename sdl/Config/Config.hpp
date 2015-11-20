@@ -102,10 +102,7 @@ typedef std::map<std::string, std::string> UnrecognizedOptions;
 
 struct ConfigNodeFormat {
   ConfigNodeFormat(ConfigNodeFormat const& base, unsigned maxDepth = (unsigned)-1)
-      : indentSpace(base.indentSpace)
-      , longMap(base.longMap)
-      , multiLine(base.multiLine)
-      , maxDepth(base.maxDepth) {}
+      : indentSpace(base.indentSpace), longMap(base.longMap), multiLine(base.multiLine), maxDepth(base.maxDepth) {}
   explicit ConfigNodeFormat(std::string const& indentSpace = "", bool longMap = false, bool multiLine = true,
                             unsigned maxDepth = (unsigned)-1)
       : indentSpace(indentSpace), longMap(longMap), multiLine(multiLine), maxDepth(maxDepth) {}
@@ -116,7 +113,7 @@ struct ConfigNodeFormat {
 
 /** print a YAML ConfigNode in our preferred format. */
 void print(ConfigNode const& in, std::string const& indent, std::ostream& os, bool longMap = false,
-          bool newLine = true, unsigned maxDepth = (unsigned)-1);
+           bool newLine = true, unsigned maxDepth = (unsigned)-1);
 
 /**
    usage: os << printer(node, format).
@@ -168,8 +165,7 @@ inline ConfigNode parseConfig(std::string const& yamlString) {
   return r;
 }
 
-ConfigNode overrideConfig(ConfigNode const& root, ConfigPath const& replaceAt,
-                          ConfigNode const& substituteAtPath);
+ConfigNode overrideConfig(ConfigNode const& root, ConfigPath const& replaceAt, ConfigNode const& substituteAtPath);
 
 /**
    \return tree replaced by substituteAtPath at path replaceAt (doesn't modify input)
@@ -178,7 +174,7 @@ ConfigNode overrideConfig(ConfigNode const& root, ConfigPath const& replaceAt,
 
    \param yamlPathDotSeparated string, split on ., giving map or sequence keys from root.
 
-   \param substituteAtPath - tree used as value at yamlPathDotSeparated
+   \param substituteAtPath-tree used as value at yamlPathDotSeparated
 
    creates map nodes wherever null or nothing was defined before, but won't replace a non-map node with a map
    node (will throw ConfigException in that case).
@@ -218,7 +214,7 @@ struct YamlConfigurable {
 
   /** init, store, validate.
 
-      \param logEffective - show effective config as a single LOG_INFO message
+      \param logEffective-show effective config as a single LOG_INFO message
 
       \param effectiveVerbosity (if logEffective)
   */
@@ -235,7 +231,7 @@ struct YamlConfigurable {
   virtual void showExample(std::ostream& out, int verbosity = 0) const = 0;
   /** print configuration reflecting current settings.
 
-      see effective() which returns a YAML ConfigNode - printing that should
+      see effective() which returns a YAML ConfigNode-printing that should
       give similar results. */
   virtual void showEffective(std::ostream& out, int verbosity = 0) const = 0;
   /** showEffective to string. */

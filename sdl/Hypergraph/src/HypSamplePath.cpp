@@ -32,8 +32,10 @@ struct HypSamplePath : TransformMain<HypSamplePath> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(SamplePath)
+
+
+

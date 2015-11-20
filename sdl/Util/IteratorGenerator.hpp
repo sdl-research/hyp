@@ -33,40 +33,37 @@ namespace sdl {
 namespace Util {
 
 template <class Iterator, class Result = typename std::iterator_traits<Iterator>::value_type>
-struct IteratorGenerator
-    : GeneratorBase<IteratorGenerator<Iterator, Result>, Result, PeekableT>
-{
-  //for boost::range
+struct IteratorGenerator : GeneratorBase<IteratorGenerator<Iterator, Result>, Result, PeekableT> {
+  // for boost::range
   typedef Iterator iterator;
   typedef iterator const_iterator;
   iterator begin() const { return iBegin; }
   iterator end() const { return iEnd; }
 
   iterator iBegin, iEnd;
-  void clear() {
-    iBegin = iEnd;
-  }
+  void clear() { iBegin = iEnd; }
   IteratorGenerator() : iBegin(), iEnd() {}
   template <class Range>
-  IteratorGenerator(Range const& range) : iBegin(boost::begin(range)), iEnd(boost::end(range)) {}
+  IteratorGenerator(Range const& range)
+      : iBegin(boost::begin(range)), iEnd(boost::end(range)) {}
   IteratorGenerator(IteratorGenerator const& o) : iBegin(o.iBegin), iEnd(o.iEnd) {}
   IteratorGenerator(iterator iBegin, iterator iEnd) : iBegin(iBegin), iEnd(iEnd) {}
-  IteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd) : iBegin(pairBeginEnd.first), iEnd(pairBeginEnd.second) {}
-  //TODO: test
+  IteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd)
+      : iBegin(pairBeginEnd.first), iEnd(pairBeginEnd.second) {}
+  // TODO: test
   Result peek() const { return (Result)*iBegin; }
-  //TODO: test
+  // TODO: test
   void pop() { ++iBegin; }
-  //TODO: test
-  operator bool() const { return iBegin!=iEnd; }
+  // TODO: test
+  operator bool() const { return iBegin != iEnd; }
 };
 
 template <class Trans, class Iterator, class Result = typename Trans::result_type>
 struct TransformedIteratorGenerator
-    : GeneratorBase<TransformedIteratorGenerator<Trans, Iterator, Result>, Result, PeekableT>
-    , Trans
-{
+    : GeneratorBase<TransformedIteratorGenerator<Trans, Iterator, Result>, Result, PeekableT>,
+      Trans {
   typedef Iterator PreIterator;
-  //for boost::range
+  // for boost::range
   typedef boost::transform_iterator<Trans, PreIterator> iterator;
   typedef iterator const_iterator;
   iterator begin() const { return iterator(iBegin); }
@@ -80,12 +77,13 @@ struct TransformedIteratorGenerator
   TransformedIteratorGenerator() : iBegin(), iEnd() {}
   TransformedIteratorGenerator(iterator iBegin, iterator iEnd, Trans const& t = Trans())
       : Trans(t), iBegin(iBegin), iEnd(iEnd) {}
-  explicit TransformedIteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd, Trans const& t = Trans())
+  explicit TransformedIteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd,
+                                        Trans const& t = Trans())
       : Trans(t), iBegin(pairBeginEnd.first), iEnd(pairBeginEnd.second) {}
   Result operator()() { return (Result)Trans::operator()(*iBegin++); }
   Result peek() const { return (Result)Trans::operator()(*iBegin); }
   void pop() { ++iBegin; }
-  operator bool() const { return iBegin!=iEnd; }
+  operator bool() const { return iBegin != iEnd; }
 };
 
 template <class Iterator, class Result = typename std::iterator_traits<Iterator>::value_type>

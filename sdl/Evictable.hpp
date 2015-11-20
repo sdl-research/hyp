@@ -93,7 +93,7 @@ struct Evictable : Config::INamed {
   /**
      \return whether init had to be performed (post: initialized).
 
-     \param maybeEvict - call evictThread first if true
+     \param maybeEvict-call evictThread first if true
   */
   bool maybeReinitThread(Occupancy const& occupancy, bool maybeEvict = true) {
     if (maybeEvict) maybeEvictThread(occupancy);
@@ -147,7 +147,7 @@ struct Evictable : Config::INamed {
   bool processInitDone(InitProcessPhase phase) const { return processInitDone_[phase].get(); }
 
   bool processInitDone() const {
-    return processInitDone_[0].get() && processInitDone_[knInitProcessPhase - 1].get();
+    return processInitDone_[0].get() && processInitDone_[knInitProcessPhase-1].get();
   }
 
   Evictable() {}
@@ -192,7 +192,7 @@ struct Evictable : Config::INamed {
   /**
      should be called while holding initProcessMutex_
 
-     e.g. when you define/create a new resource in ResourceManager - process
+     e.g. when you define/create a new resource in ResourceManager-process
      specific actions have to happen again. since it would require a mutex in
      every thread's request processing to dirty the thread state as well, we'll
      avoid creating new resources after modules' init methods - see

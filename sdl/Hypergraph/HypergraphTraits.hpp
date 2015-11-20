@@ -163,7 +163,7 @@ struct edge_traits<sdl::Hypergraph::IHypergraph<A>> {
 // visit is in ns graehl so ADL doesn't cause ambiguity
 template <class A, class V>
 void visit(edge_tag, sdl::Hypergraph::IHypergraph<A> const& h, V& v) {  // v(edge_desciptor = A*)
-  h.forArcsSafe([&v](A *a) { v(a); });
+  h.forArcsSafe([&v](A* a) { v(a); });
 }
 
 template <class A, class V>

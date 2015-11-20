@@ -143,8 +143,9 @@ struct InputSize {
     return o;
   }
 };
+}
 
 
-}}
+}
 
 #endif

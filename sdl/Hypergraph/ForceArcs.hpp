@@ -19,7 +19,8 @@
 
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 struct ForceArcs {
   bool inArcs;
@@ -30,39 +31,30 @@ struct ForceArcs {
       : inArcs()
       , graphOutArcs()
       , outArcs()
-      , canonicalLex(false) //TODO: change -> true (but will change many regtest outputs)
+      , canonicalLex(false)  // TODO: change -> true (but will change many regtest outputs)
   {}
 
   template <class Config>
-  void configure(Config &config) {
+  void configure(Config& config) {
     config.is("ForceArcs");
     config("force arc adjacencies");
-    config("in-arcs", &inArcs).defaulted()
-        ("index arcs by head (in-arcs)");
-    config("graph-out-arcs", &graphOutArcs).defaulted()
-        ("index arcs by first tail only - for graph/fsm (first-tail-out-arcs)");
-    config("out-arcs", &outArcs).defaulted()
-        ("index arcs by all tails (out-arcs)");
-    config("canonical-lex", &canonicalLex).defaulted()
-        ("reuse lexical states");
+    config("in-arcs", &inArcs).defaulted()("index arcs by head (in-arcs)");
+    config("graph-out-arcs", &graphOutArcs)
+        .defaulted()("index arcs by first tail only - for graph/fsm (first-tail-out-arcs)");
+    config("out-arcs", &outArcs).defaulted()("index arcs by all tails (out-arcs)");
+    config("canonical-lex", &canonicalLex).defaulted()("reuse lexical states");
   }
 
-  friend inline void validate(ForceArcs & x) {
-    x.validate();
-  }
+  friend inline void validate(ForceArcs& x) { x.validate(); }
 
   void validate() {
     if (graphOutArcs && outArcs)
       SDL_WARN(ForceArcs, "graph-out-arcs and out-arcs are redundant - using out-arcs");
   }
 
-  Properties canonicalProperty() const {
-    return canonicalLex ? kCanonicalLex : 0;
-  }
+  Properties canonicalProperty() const { return canonicalLex ? kCanonicalLex : 0; }
 
-  Properties inArcsProperty() const {
-    return inArcs ? kStoreInArcs : 0;
-  }
+  Properties inArcsProperty() const { return inArcs ? kStoreInArcs : 0; }
 
   Properties outArcsProperty(Properties elseProperty = 0) const {
     return (outArcs ? kStoreOutArcs : graphOutArcs ? kStoreFirstTailOutArcs : elseProperty);
@@ -77,9 +69,8 @@ struct ForceArcs {
   }
 
   template <class Arc>
-  void forceArcs(IMutableHypergraph<Arc> &hg) const {
-    if (inArcs)
-      hg.forceInArcs();
+  void forceArcs(IMutableHypergraph<Arc>& hg) const {
+    if (inArcs) hg.forceInArcs();
     if (outArcs)
       hg.forceOutArcs();
     else if (graphOutArcs)

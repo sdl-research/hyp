@@ -54,7 +54,7 @@ struct HypConvertStrings : HypergraphMainBase {
     MutableHypergraph<Arc> hg;
     hg.setVocabulary(pVoc);
     opt.hgProperties = kStoreInArcs;
-    std::istream &input = in();
+    std::istream& input = in();
     while (opt.getlineNormalized(input, line)) {
       if (!first) std::cout << '\0';  // TODO: deprecated
       opt.toHypergraph(line, &hg, ++linei);
@@ -64,8 +64,10 @@ struct HypConvertStrings : HypergraphMainBase {
     ++linei;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(ConvertStrings)
+
+
+

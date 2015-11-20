@@ -83,13 +83,13 @@ static inline float logExpMinus(float x) {
    C = log(expA + expB) =
    log(expA * (1 + expB/expA)) =
    log(expA) + log(1 + expB/expA) =
-   A + log(1 + exp(B - A))
+   A + log(1 + exp(B-A))
 
    now negate A, B, C:
    A=-log(a) + B=-log(b) = C=-log(a+b)
 
-   C = -(-A + log(1 + exp(-B - -A)) =
-   A - log(1 + exp(A - B))
+   C = -(-A + log(1 + exp(-B--A)) =
+   A-log(1 + exp(A-B))
 
 */
 template <class Float>
@@ -190,17 +190,17 @@ struct NeglogPlusFct {
 
    (A > B)
 
-   A=log(a) - B=log(b) = C=log(a - b)
-   C = log(expA - expB) =
-   log(expA * (1 - expB/expA)) =
-   log(expA) + log(1 - expB/expA) =
-   A + log(1 - exp(B - A))
+   A=log(a) - B=log(b) = C=log(a-b)
+   C = log(expA-expB) =
+   log(expA * (1-expB/expA)) =
+   log(expA) + log(1-expB/expA) =
+   A + log(1-exp(B-A))
 
    now negate A, B, C:
    A=-log(a) + B=-log(b) = C=-log(a+b)
 
-   C = -(-A + log(1 - exp(-B - -A)) =
-   A - log(1 - exp(A - B))
+   C = -(-A + log(1-exp(-B--A)) =
+   A-log(1-exp(A-B))
 
 */
 template <class Float>
@@ -222,7 +222,8 @@ inline Float neglogSubFrom1(Float b) {
   if (b >= 0)
     return -log1plus(-std::exp(-b));
   else {
-    SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space: 1 - exp()");
+    SDL_THROW_LOG(Hypergraph, LogNegativeException,
+                  "Cannot represent negative result in log space: 1-exp()");
   }
   return b;
 }

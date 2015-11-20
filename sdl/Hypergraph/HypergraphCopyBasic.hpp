@@ -228,7 +228,7 @@ IHypergraph<A> const& ensureProperties(IHypergraph<A> const& i, shared_ptr<IHype
 /// see docs to the other ensureProperties above. modifies input hg in place if needed (depending on
 /// 'onMissing'
 template <class A>
-IHypergraph<A>& ensureProperties(IHypergraph<A>& i, shared_ptr<IHypergraph<A> >& p, Properties forceOn = 0,
+IHypergraph<A>& ensureProperties(IHypergraph<A>& i, shared_ptr<IHypergraph<A>>& p, Properties forceOn = 0,
                                  Properties maybeOff = 0, Properties forceOff = 0,
                                  OnMissingProperties onMissing = kCopyEnsuringProperties,
                                  Properties orForceOn = (Properties)-1) {
@@ -293,7 +293,7 @@ shared_ptr<IHypergraph<A> const> ensureProperties(IHypergraph<A>& i, Properties 
                                                   Properties maybeOff = 0, Properties forceOff = 0,
                                                   OnMissingProperties onMissing = kCopyEnsuringProperties,
                                                   Properties orForceOn = (Properties)-1) {
-  shared_ptr<IHypergraph<A> > p;
+  shared_ptr<IHypergraph<A>> p;
   ensureProperties(i, p, forceOn, maybeOff, forceOff, onMissing, orForceOn);
   if (!p) setNoDelete(p, i);
   return const_pointer_cast<IHypergraph<A> const>(p);

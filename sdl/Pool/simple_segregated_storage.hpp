@@ -31,6 +31,7 @@
   Where the block comes from is not important until implementation time.
   A Pool is some object that uses Simple Segregated Storage in this fashion.
 */
+// clang-format off
 
 // std::greater
 #include <functional>

@@ -18,7 +18,7 @@ namespace sdl {
 namespace Optimization {
 
 struct IOriginalFeatureIds {
-  virtual ~IOriginalFeatureIds() {};
+  virtual ~IOriginalFeatureIds(){};
   /**
       Maps contiguous feature IDs (used during training) back to
       the original feature IDs, which can be non-contiguous (see
@@ -28,9 +28,7 @@ struct IOriginalFeatureIds {
 };
 
 struct IdentityOriginalFeatureIds : IOriginalFeatureIds {
-  FeatureId getOriginalFeatureId(FeatureId id) {
-    return id;
-  }
+  FeatureId getOriginalFeatureId(FeatureId id) { return id; }
 };
 
 

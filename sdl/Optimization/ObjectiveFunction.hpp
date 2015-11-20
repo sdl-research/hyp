@@ -108,7 +108,7 @@ class L2RegularizeFct : public IRegularizeFct<FloatT> {
    just updates resembling gradients).
 
    Examples for objective functions: A CRF objective function uses as
-   (gradient) updates the difference A - B, where A=(feature
+   (gradient) updates the difference A-B, where A=(feature
    expectations of the observed input-output pair) and B=(feature
    expectations of all possible outputs given the observed input). A
    perceptron is similar but B=(feature expectations of the current
@@ -355,7 +355,7 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     typedef PodPair<FeatureId, FloatT> Pair;  // Windows compiler didn't like lockfree::queue<std::pair>
     typedef boost::lockfree::queue<Pair> Queue;
     assert(numThreads_ > 1);
-    TrainingDataIndex numProducers = numThreads_ - 1;  // one of the threads is the consumer
+    TrainingDataIndex numProducers = numThreads_-1;  // one of the threads is the consumer
     Queue queue(50 * numProducers);
 
     graehl::thread_group producerThreads, consumerThreads;
@@ -440,8 +440,8 @@ class MockObjectiveFunction : public IObjectiveFunction<FloatT> {
   FloatT update(FloatT const* x, FloatT* g, FeatureId num_params) {
     function_value_ = (FloatT)0.0;
     for (int i = 0; i < num_params; i += 2) {
-      FloatT t1 = (FloatT)1.0 - x[i];
-      FloatT t2 = (FloatT)10.0 * (x[i + 1] - x[i] * x[i]);
+      FloatT t1 = (FloatT)1.0-x[i];
+      FloatT t2 = (FloatT)10.0 * (x[i + 1]-x[i] * x[i]);
       g[i + 1] = (FloatT)20.0 * t2;
       g[i] = (FloatT)-2.0 * (x[i] * g[i + 1] + t1);
       function_value_ += t1 * t1 + t2 * t2;

@@ -28,8 +28,10 @@ struct HypDeterminize : TransformMain<HypDeterminize> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Determinize)
+
+
+

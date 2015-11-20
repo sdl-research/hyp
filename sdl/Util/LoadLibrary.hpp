@@ -18,7 +18,8 @@
 #include <dlfcn.h>
 #endif
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 #ifdef _WIN32
 typedef HMODULE LoadedLib;
@@ -31,6 +32,7 @@ LoadedLib loadLib(const char* name);
 void unloadLib(LoadedLib aLib);
 
 void* loadProc(LoadedLib aLib, const char* name);
+
 
 }}
 

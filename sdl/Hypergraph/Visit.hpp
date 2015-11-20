@@ -16,7 +16,7 @@
 
     convenience functions for visiting the specified arcs or states. since the
     visitor functor is templated, it's not possible to offer more efficient
-    virtual overrides for e.g. IMutableHypergraph - everything goes through the
+    virtual overrides for e.g. IMutableHypergraph-everything goes through the
     public interface
 
     if fsm stores out arcs only, and you don't mind visiting the same arc

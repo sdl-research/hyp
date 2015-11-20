@@ -76,12 +76,8 @@ struct ArcPrinter {
   std::ostream& o;
   ArcPrinter(std::ostream& o = std::cout) : o(o) {}
   ArcPrinter(ArcPrinter const& o) : o(o.o) {}
-  void operator()(ArcBase const* a) const {
-    operator()(*(Arc const*)a);
-  }
-  void operator()(Arc const& a) const {
-    o << a << '\n';
-  }
+  void operator()(ArcBase const* a) const { operator()(*(Arc const*)a); }
+  void operator()(Arc const& a) const { o << a << '\n'; }
 };
 
 /// syntactic sugar, used for new Arc(Head(s), Tails(t, u), Weight::one())
@@ -199,13 +195,13 @@ struct ArcTpl : ArcBase {
   }
 
   template <class Weight>
-  ArcTpl(HeadAndWeight, StateId head, Weight &&weight, StateId tail)
+  ArcTpl(HeadAndWeight, StateId head, Weight&& weight, StateId tail)
       : ArcBase(tail), weight_(weight) {
     head_ = head;
   }
 
   template <class Weight>
-  ArcTpl(HeadAndWeight, StateId head, Weight &&weight, StateId tail0, StateId tail1)
+  ArcTpl(HeadAndWeight, StateId head, Weight&& weight, StateId tail0, StateId tail1)
       : ArcBase(tail0, tail1), weight_(weight) {
     head_ = head;
   }
@@ -218,7 +214,7 @@ struct ArcTpl : ArcBase {
   */
   ArcTpl(StateId srcState, StateId lexState) : ArcBase(srcState, lexState) { setOne(weight_); }
 
-  /// for GraphInlineInputLabels expandInputLabels - otherwise will crash (these aren't real stateids)
+  /// for GraphInlineInputLabels expandInputLabels-otherwise will crash (these aren't real stateids)
   void appendInline(Sym s) { tails_.push_back((StateId)s.id_); }
 
   /// move
@@ -253,10 +249,7 @@ struct ArcTpl : ArcBase {
     tails_[0] = newTail;
   }
 
-  explicit ArcTpl(ArcBase const& base)
-      : ArcBase(base) {
-    setOne(weight_);
-  }
+  explicit ArcTpl(ArcBase const& base) : ArcBase(base) { setOne(weight_); }
 
   /**
      For hypergraph arcs
@@ -462,9 +455,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
   bool isDataEmpty() const { return data_ == NULL; }
 
   /// move
-  ArcWithDataTpl(ArcWithDataTpl&& o) noexcept : Base(static_cast<Base&&>(o)),
-                                                data_(o.data_),
-                                                deleter_(o.deleter_) {
+  ArcWithDataTpl(ArcWithDataTpl&& o) noexcept : Base(static_cast<Base&&>(o)), data_(o.data_), deleter_(o.deleter_) {
     o.deleter_ = 0;
   }
   ArcWithDataTpl& operator=(ArcWithDataTpl&& o) noexcept {

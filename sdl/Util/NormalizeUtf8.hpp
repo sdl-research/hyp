@@ -42,10 +42,10 @@ struct NormalizeUtf8 : NfcOptions, FixUnicode {
   void normalize(std::string& str) const;
 
   /// does all but FixUnicode. you may want this if you handle FixUnicode yourself e.g. StringToTokens
-  void normalizeNfc(std::string& str, Constraints &c) const;
+  void normalizeNfc(std::string& str, Constraints& c) const;
 
   void normalizeNfc(std::string& str) const;
-  void normalize(std::string& str, Constraints &c) const;
+  void normalize(std::string& str, Constraints& c) const;
 
   void normalize(std::string const& str, std::string& out) const;
 

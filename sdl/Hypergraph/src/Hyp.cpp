@@ -68,40 +68,17 @@ sdl::Util::DefaultLocaleFastCout initCout;
 #endif
 
 #define SDL_HYP_FOR_MAINS_MINIMAL(x) \
-  x(HypBest) \
-  x(HypCompose) \
-  x(HypInside) \
-  x(HypEmpty) \
-  x(HypPruneToBest) \
-  x(HypPushWeights)
+  x(HypBest) x(HypCompose) x(HypInside) x(HypEmpty) x(HypPruneToBest) x(HypPushWeights)
 
 #if SDL_MINIMAL_HYP_MAIN
 #define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x)
 #else
-#define SDL_HYP_FOR_MAINS(x) SDL_HYP_FOR_MAINS_MINIMAL(x) \
-  x(HypWordToCharacters) \
-  x(HypReweightBest) \
-  x(HypConvertCharsToTokens) \
-  x(HypComplement) \
-  x(HypInvert) \
-  x(HypIsolateStart) \
-  x(HypDeterminize) \
-  x(HypPrune) \
-  x(HypSamplePath) \
-  x(HypUnion) \
-  x(HypSubUnion) \
-  x(HypConcat) \
-  x(HypReverse) \
-  x(HypReweight) \
-  x(HypToMosesLattice) \
-  x(HypConvertStrings) \
-  x(HypDraw) \
-  x(HypFsmDraw) \
-  x(HypToOpenFstText) \
-  x(HypGetString) \
-  x(HypTrie) \
-  x(HypProject) \
-  SDL_FOR_OPENFST_HYP_MAINS(x)
+#define SDL_HYP_FOR_MAINS(x)                                                                                    \
+  SDL_HYP_FOR_MAINS_MINIMAL(x)                                                                                  \
+  x(HypWordToCharacters) x(HypReweightBest) x(HypConvertCharsToTokens) x(HypComplement) x(HypInvert)            \
+      x(HypIsolateStart) x(HypDeterminize) x(HypPrune) x(HypSamplePath) x(HypUnion) x(HypSubUnion) x(HypConcat) \
+          x(HypReverse) x(HypReweight) x(HypToMosesLattice) x(HypConvertStrings) x(HypDraw) x(HypFsmDraw)       \
+              x(HypToOpenFstText) x(HypGetString) x(HypTrie) x(HypProject) SDL_FOR_OPENFST_HYP_MAINS(x)
 #endif
 
 int main(int argc, char* argv[]) {

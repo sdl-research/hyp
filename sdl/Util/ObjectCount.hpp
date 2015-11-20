@@ -67,7 +67,7 @@ struct ObjectCount {
   static inline void push() { ++count; }
   static inline void pop() {
     --count;
-    assert(size() != (std::size_t) - 1);
+    assert(size() != (std::size_t)-1);
   }
   static inline std::size_t size() { return count; }
   static inline void setName(char const* name_) { name = name_; }

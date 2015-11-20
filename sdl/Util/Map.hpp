@@ -118,9 +118,8 @@ inline typename Map::mapped_type& updateBy(UpdateBy const& updateByFn, Map& map,
    \return m[k]
 */
 template <class Map, class UpdateBy, class UpdateByInit>
-inline typename Map::mapped_type& updateBy(UpdateBy const& updateByFn, Map& map,
-                                           typename Map::key_type const& k, UpdateByInit const& initValue,
-                                           UpdateByInit const& updateValue) {
+inline typename Map::mapped_type& updateBy(UpdateBy const& updateByFn, Map& map, typename Map::key_type const& k,
+                                           UpdateByInit const& initValue, UpdateByInit const& updateValue) {
   typedef typename Map::value_type KeyValue;
   typedef typename Map::mapped_type Value;
   std::pair<typename Map::iterator, bool> i = map.insert(KeyValue(k, initValue));

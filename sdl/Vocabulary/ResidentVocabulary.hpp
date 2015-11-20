@@ -139,7 +139,7 @@ struct ResidentVocabulary final : IVocabulary {
 
   SymInt pastFrozenTerminalIndex() const override final { return vocabTerminal.pastFrozenIndex(); }
 
-  // faster calls for ExtendedVocabulary - no need for dispatch. //TODO: redundant w/ final?
+  // faster calls for ExtendedVocabulary-no need for dispatch. //TODO: redundant w/ final?
   Sym _Add(std::string const& word, SymbolType symType) { return getVocab(symType).add(word); }
   Sym _Add(cstring_span<> word, SymbolType symType) { return getVocab(symType).add(word); }
 
@@ -182,7 +182,7 @@ struct ResidentVocabulary final : IVocabulary {
     }
   }
   BasicVocabularyImpl const& getVocab(SymbolType type) const {
-    return const_cast<ResidentVocabulary *>(this)->getVocab(type);
+    return const_cast<ResidentVocabulary*>(this)->getVocab(type);
   }
 
   BasicVocabularyImpl vocabTerminal;

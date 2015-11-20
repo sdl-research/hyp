@@ -110,7 +110,7 @@ enum SymbolType {
   // TODO@SK: CM-275 changing persistent/nonpersistent changes whether that bit is 0 or 1
 
   kNoSymbolType = kNoSymbol,
-  kAllSymbols = kNoSymbol - 1,
+  kAllSymbols = kNoSymbol-1,
 };
 
 /// we don't use any other types at the moment - why not simplify how the id
@@ -441,7 +441,7 @@ struct Sym {
 /// if kNumXnVariables is >0 but <=36, we'll preopulate ResidentVocabulary with
 /// two-letter variables x0,...,xa,xb,... (you may still add your own
 /// arbitrary-named variables)
-//enum { kNumXnVariables = (SymInt)((uint8)'Z' - (uint8)'0') };
+// enum { kNumXnVariables = (SymInt)((uint8)'Z'-(uint8)'0') };
 enum { kNumXnVariables = 0 };
 enum { kMaxVariableIndex = (SymInt)Sym::kSmallSizeMask };
 enum { kMaxNTIndex = (SymInt)Sym::kSmallSizeMask };
@@ -531,5 +531,8 @@ struct hash<sdl::Sym> {
 BOOST_CLASS_IMPLEMENTATION(sdl::Sym, object_serializable)
 // BOOST_CLASS_IMPLEMENTATION(sdl::Sym, primitive_type)
 BOOST_IS_BITWISE_SERIALIZABLE(sdl::Sym)
+
+
+
 
 #endif

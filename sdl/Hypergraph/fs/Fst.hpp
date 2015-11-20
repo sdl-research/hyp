@@ -163,7 +163,7 @@ struct HypergraphFst {
   void needMutable(ConstHg const& hg) {
     if (!hg.isMutable()) {
       SDL_THROW_LOG(Hypergraph.fs.HypergraphFst, ConfigException,
-                    "can't make HypergraphFst from non-mutable IHypergraph - try ConstHypergraphFst or "
+                    "can't make HypergraphFst from non-mutable IHypergraph-try ConstHypergraphFst or "
                     "MutableHypergraph");
     }
   }
@@ -225,7 +225,7 @@ struct ConstHypergraphFst : HypergraphFst<HgArcT> {
   explicit ConstHypergraphFst(Hg const& hg, bool annotations = true) { this->init(hg, annotations); }
 
   typedef typename Hg::ConstOutArcsGenerator HgArcs;
-  typedef Util::TransformedGenerator<HgArcs, typename Hg::FstArcFor, FstArc<Weight> > Arcs;
+  typedef Util::TransformedGenerator<HgArcs, typename Hg::FstArcFor, FstArc<Weight>> Arcs;
   Arcs outArcs(StateId s) const {
     // TODO: test
     return Arcs(this->pHg->outArcsConst(s), this->arcFn);

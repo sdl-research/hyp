@@ -25,17 +25,16 @@ namespace sdl {
 
 namespace Hypergraph {
 template <class A>
-InputSizeAmount sizeAmount(IHypergraph<A> const& hg)
-{
+InputSizeAmount sizeAmount(IHypergraph<A> const& hg) {
   return double(hg.size());
 }
 
 template <class A>
-std::string sizeUnits(IHypergraph<A> const&)
-{
+std::string sizeUnits(IHypergraph<A> const&) {
   return "state";
 }
 }
+
 
 }
 

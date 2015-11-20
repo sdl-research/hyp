@@ -35,8 +35,10 @@ struct HypProject : TransformMain<HypProject> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Project)
+
+
+

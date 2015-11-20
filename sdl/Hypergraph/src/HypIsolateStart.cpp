@@ -26,8 +26,10 @@ struct HypIsolateStart : TransformMain<HypIsolateStart> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(IsolateStart)
+
+
+

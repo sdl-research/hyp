@@ -152,7 +152,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
   StateId maxNotTerminalState() const override {
-    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ - 1
+    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_-1
                                                 : this->maxNotTerminalStateImpl();
   }
 
@@ -352,7 +352,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
   void forceOnlyProperties(Properties properties) {
-    forceProperties(properties, kAllProperties - properties);
+    forceProperties(properties, kAllProperties-properties);
   }
   void forceProperties(Properties properties, bool on = true) {
     if (on)
@@ -400,7 +400,7 @@ struct IMutableHypergraph : IHypergraph<A> {
       }
       add = on & ~p;
       /* I think we want kStoreFirstTailOutArcs to be satisfied by kStoreArcsPerState. that's easiest achieved
-       * by setting StoreFirstTailOut whenever we have StoreOut - and means we shouldn't forceFirstTailOutArcs
+       * by setting StoreFirstTailOut whenever we have StoreOut-and means we shouldn't forceFirstTailOutArcs
        * if we already called forceOutArcs. thus checking properties after. */
       if (add & kStoreFirstTailOutArcs) this->forceFirstTailOutArcs();
       if (add & (kFsm | kGraph)) this->checkGraph();

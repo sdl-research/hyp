@@ -170,7 +170,7 @@ struct Path {
   FstArc startArc;  // only used to hold startArc.getDst()
  public:
   /// set from outside for constraints in TrainableCapitalizerModule
-  shared_ptr<PrependForInputStateFn<State> > prependForInputState;
+  shared_ptr<PrependForInputStateFn<State>> prependForInputState;
 
   /**
      add to the end of arcs (which is in reverse order) path arc fstArc.
@@ -191,7 +191,9 @@ struct Path {
       weight.value_ = totalDistance;
     else if (*this) {
       weight = Weight::one();
-      for (FstArc const& arc : arcs) { timesBy(arc.weight, weight); }
+      for (FstArc const& arc : arcs) {
+        timesBy(arc.weight, weight);
+      }
     } else
       weight = Weight::zero();
   }
@@ -255,7 +257,7 @@ struct Path {
 
      \return # of non-epsilon output symbols
 
-     \param createAnnotatedGraph - create graph arcs, prefaced by input annotations and omit EPSILON:EPSILON
+     \param createAnnotatedGraph-create graph arcs, prefaced by input annotations and omit EPSILON:EPSILON
      input/output
   */
   template <class Arc>
@@ -335,7 +337,7 @@ struct Path {
    this is like a template typedef (default ctor is the only one).
 */
 template <class WeightT>
-struct PathNoState : Path<FstArcNoState<WeightT> > {};
+struct PathNoState : Path<FstArcNoState<WeightT>> {};
 
 /**
    these are convenience 'template typedefs' from the perspective of a user who
@@ -359,7 +361,7 @@ struct PathForHg {
 template <class Arc>
 struct PathForArc {
   typedef typename Arc::Weight Weight;
-  typedef Path<FstArc<Weight, StateId> > type;
+  typedef Path<FstArc<Weight, StateId>> type;
 };
 
 

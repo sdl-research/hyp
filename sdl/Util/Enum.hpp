@@ -35,9 +35,10 @@
 #define SDL_ENUM(name, size, elems) SDL_ENUM_DEF(name, BOOST_PP_TUPLE_TO_LIST(size, elems))
 
 namespace sdl {
-namespace Util {
+namespace Util {}
 }
-}
+
+
 
 
 

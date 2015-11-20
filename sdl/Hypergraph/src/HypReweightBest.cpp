@@ -29,8 +29,10 @@ struct HypReweightBest : TransformMain<HypReweightBest> {  // CRTP
   }
   void validate_parameters_more() { rw.validate(); }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(ReweightBest)
+
+
+

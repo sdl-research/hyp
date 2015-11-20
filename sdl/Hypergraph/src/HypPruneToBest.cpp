@@ -38,8 +38,10 @@ struct HypPruneToBest : TransformMain<HypPruneToBest> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(PruneToBest)
+
+
+

@@ -46,16 +46,17 @@ struct HypCompose : TransformMain<HypCompose> {
   char const* transform2sep() const { return " * "; }
 
   template <class Arc>
-  bool transform2mm(IMutableHypergraph<Arc>& hg1, IMutableHypergraph<Arc>& hg2,
-                    IMutableHypergraph<Arc>* result) {
+  bool transform2mm(IMutableHypergraph<Arc>& hg1, IMutableHypergraph<Arc>& hg2, IMutableHypergraph<Arc>* result) {
     ComposeTransform<Arc> c(composeOpt);
     c.setFst(hg2);
     c.inout(hg1, result);
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Compose)
+
+
+

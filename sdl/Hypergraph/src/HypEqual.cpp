@@ -35,8 +35,10 @@ struct HypEqual : TransformMain<HypEqual> {
   }
   bool printFinal() const { return false; }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Equal)
+
+
+

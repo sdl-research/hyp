@@ -185,7 +185,9 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
   // you!)
   void setColor(int newcolor = usermin) const {
     if (color == opened) return;
-    for (child_type const& c : this->children) { c->setColor(newcolor); }
+    for (child_type const& c : this->children) {
+      c->setColor(newcolor);
+    }
     color = newcolor;
     // we don't bother avoiding redundant retraversal of children - so you could have an exponential
     // full-binary-tree. to avoid that, would need to make list of things to set then set them later
@@ -333,8 +335,7 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
     WhichDerivationStates whichStates;  // actually, stateids
     VisitOut(Out o, WhichDerivationStates whichStates = kWholeTree) : o(o), whichStates(whichStates) {}
     void out(StateId head, Arc* a) {
-      bool add = whichStates == kWholeTree || a && whichStates == kNonLeafOnly
-                 || !a && whichStates == kLeafOnly;
+      bool add = whichStates == kWholeTree || a && whichStates == kNonLeafOnly || !a && whichStates == kLeafOnly;
       if (add) {
         *o = StateArc(head, a);
         ++o;
@@ -372,7 +373,7 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
   }
 
   template <class Container>
-  static VisitArcsOut<AppendArcs<Container> > visitArcsAdd(Container& o) {
+  static VisitArcsOut<AppendArcs<Container>> visitArcsAdd(Container& o) {
     return visitArcsOut(AppendArcs<Container>(o));
   }
 
@@ -396,7 +397,7 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
   void yieldAdd(Container& cont, StateId head,
                 WhichDerivationStates whichStates = kLeafOnly)  // note: start state will appear in yield
   {
-    VisitOut<Util::Adder<Container> > addVis(cont, whichStates);
+    VisitOut<Util::Adder<Container>> addVis(cont, whichStates);
     visitTree(addVis);
   }
 
@@ -729,18 +730,17 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
   // best means that this is a 1-best derivation, so no need to split in case of subtree sharing
   template <class Arc>
   IMutableHypergraph<Arc>* translateToHypergraphNew(IHypergraph<Arc> const& i,
-                                                    bool keepStateIds = kRenumberStates,
-                                                    bool best = kIsNonBest) {
+                                                    bool keepStateIds = kRenumberStates, bool best = kIsNonBest) {
     IMutableHypergraph<Arc>* pOut = new MutableHypergraph<Arc>();
     translateToHypergraph(i, *pOut, keepStateIds, best);
     return pOut;
   }
 
   template <class Arc>
-  shared_ptr<IMutableHypergraph<Arc> > translateToHypergraph(IHypergraph<Arc> const& i,
-                                                             bool keepStateIds = kRenumberStates,
-                                                             bool best = kIsNonBest) {
-    return shared_ptr<IMutableHypergraph<Arc> >(translateToHypergraphNew(i, keepStateIds, best));
+  shared_ptr<IMutableHypergraph<Arc>> translateToHypergraph(IHypergraph<Arc> const& i,
+                                                            bool keepStateIds = kRenumberStates,
+                                                            bool best = kIsNonBest) {
+    return shared_ptr<IMutableHypergraph<Arc>>(translateToHypergraphNew(i, keepStateIds, best));
   }
 
   // TODO: specify output vocab != input vocab?
@@ -855,7 +855,7 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
      *this derivation is leaf, then it's presumed that it's deriving i's final
      state). note that o will have sharing of subtrees if *this does.
 
-     \param oProperties - set o's properties to this. if 0, use i's properties.
+     \param oProperties-set o's properties to this. if 0, use i's properties.
 
   */
   template <class Arc>
@@ -879,7 +879,6 @@ struct Derivation : graehl::shared_nary_tree<Derivation, Util::RefCount> {
     o.setFinal(computeOnceDfs(toDerivationHg, iRoot).first);  // stateid 0 for final
     o.setStart(istart == kNoState ? kNoState : toDerivationHg.axiom(istart).first);
   }
-
 };
 
 typedef Derivation::pointer_type DerivationPtr;

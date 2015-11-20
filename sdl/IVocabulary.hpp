@@ -95,9 +95,8 @@ struct IVocabulary : Resource {
 
   Sym sym(Sym symOther, IVocabulary const& otherVocab) const {
     assert(symOther);
-    return symOther.isSpecial() ? symOther : this == &otherVocab
-                                                 ? symOther
-                                                 : symImpl(otherVocab.str(symOther), symOther.type());
+    return symOther.isSpecial() ? symOther : this == &otherVocab ? symOther : symImpl(otherVocab.str(symOther),
+                                                                                      symOther.type());
   }
 
   Sym symFromOther(Sym symOther, IVocabulary const& otherVocab) const {
@@ -108,9 +107,8 @@ struct IVocabulary : Resource {
   /// return same string in our vocabulary. pre: symOther is not NoSymbol
   Sym add(Sym symOther, IVocabulary const& otherVocab) {
     assert(symOther);
-    return symOther.isSpecial() ? symOther : this == &otherVocab
-                                                 ? symOther
-                                                 : addImpl(otherVocab.str(symOther), symOther.type());
+    return symOther.isSpecial() ? symOther : this == &otherVocab ? symOther : addImpl(otherVocab.str(symOther),
+                                                                                      symOther.type());
   }
 
   Sym addFromOther(Sym symOther, IVocabulary const& otherVocab) {

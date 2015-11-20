@@ -22,36 +22,38 @@ namespace sdl {
 namespace Util {
 
 FormattedOstreamIterator::~FormattedOstreamIterator() {
-  if (*active_instance_ == this)
-    insert_word();
+  if (*active_instance_ == this) insert_word();
 }
 
-FormattedOstreamIterator& FormattedOstreamIterator::operator = (char c) {
+FormattedOstreamIterator& FormattedOstreamIterator::operator=(char c) {
   *active_instance_ = this;
   if (std::isspace(c)) {
     if (word_buffer_.size() > 0) {
       insert_word();
     }
-  }
-  else {
+  } else {
     word_buffer_.push_back(c);
   }
   return *this;
 }
 
-FormattedOstreamIterator& FormattedOstreamIterator::operator*()     { return *this; }
-FormattedOstreamIterator& FormattedOstreamIterator::operator++()    { return *this; }
-FormattedOstreamIterator FormattedOstreamIterator::operator++(int) { return *this; }
+FormattedOstreamIterator& FormattedOstreamIterator::operator*() {
+  return *this;
+}
+FormattedOstreamIterator& FormattedOstreamIterator::operator++() {
+  return *this;
+}
+FormattedOstreamIterator FormattedOstreamIterator::operator++(int) {
+  return *this;
+}
 
 void FormattedOstreamIterator::insert_word() {
-  if (word_buffer_.size() == 0)
-    return;
+  if (word_buffer_.size() == 0) return;
 
   if (word_buffer_.size() + current_line_length_ <= max_line_length_) {
     write_word(word_buffer_);
   } else {
-    for (unsigned i = 0, e = (unsigned)word_buffer_.size(); i<e; i += max_line_length_)
-    {
+    for (unsigned i = 0, e = (unsigned)word_buffer_.size(); i < e; i += max_line_length_) {
       newline();
       write_word(word_buffer_.substr(i, max_line_length_));
     }
@@ -67,5 +69,6 @@ void FormattedOstreamIterator::write_word(std::string const& word) {
     ++current_line_length_;
   }
 }
+
 
 }}

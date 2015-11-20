@@ -116,9 +116,7 @@ struct Reach {
   }
 
   /// for bottom-up reachability
-  void operator()(HypergraphBase const& hs, StateId s) {
-    reach(s);
-  }
+  void operator()(HypergraphBase const& hs, StateId s) { reach(s); }
 
   void reachGraph(StateId state) {
     assert(state != kNoState);

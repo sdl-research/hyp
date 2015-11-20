@@ -22,7 +22,8 @@
 #include <sdl/Sym.hpp>
 #include <string>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 using graehl::stable_vector;
 

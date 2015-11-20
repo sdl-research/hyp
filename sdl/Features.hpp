@@ -31,7 +31,7 @@
 namespace sdl {
 
 typedef uint32 FeatureId;
-// formerly in FeatureBot/IFeature - could move to Features.hpp instead
+// formerly in FeatureBot/IFeature-could move to Features.hpp instead
 typedef std::string FeatureName;
 typedef Cost FeatureValue;
 typedef Cost FeatureValueWeight;  // Hypergraph::FeatureWeight conflict
@@ -41,7 +41,8 @@ typedef std::pair<FeatureName const, FeatureValue> FeaturePair;
 typedef std::map<FeatureName, FeatureValue> Features;
 typedef std::vector<FeatureEntry> FeaturesVec;
 typedef Features::value_type NamedFeature;
-typedef Features NamedFeatureWeights; //TODO: should definitely be (compiled to) farm_hash_map for speed - see FeatureWeightsByCase
+typedef Features NamedFeatureWeights;  // TODO: should definitely be (compiled to) farm_hash_map for speed -
+                                       // see FeatureWeightsByCase
 typedef NamedFeatureWeights NamedFeatureValues;
 
 /// rule feature encodings (for boost serialization grammar db format)
@@ -62,7 +63,7 @@ template <class Map, class Key>
 inline FeatureValue featureWarn(Map const& map, Key const& key) {
   typename Map::const_iterator i = map.find(key);
   if (i == map.end()) {
-    SDL_WARN(FeatureValue, "missing feature '"<<key<<"'");
+    SDL_WARN(FeatureValue, "missing feature '" << key << "'");
     return (FeatureValue)0;
   } else
     return i->second;
@@ -71,8 +72,7 @@ inline FeatureValue featureWarn(Map const& map, Key const& key) {
 template <class Map, class Key>
 inline FeatureValue featureRequire(Map const& map, Key const& key) {
   typename Map::const_iterator i = map.find(key);
-  if (i == map.end())
-    SDL_THROW_LOG(FeatureValue, ConfigException, "missing feature '"<<key<<"'");
+  if (i == map.end()) SDL_THROW_LOG(FeatureValue, ConfigException, "missing feature '" << key << "'");
   return i->second;
 }
 
@@ -114,7 +114,8 @@ inline bool disjointUnion(Features& to, Features const& from) {
 // move but not copy
 typedef Util::UnsizedArray<FeatureValue> DenseFeatures;
 
-FeatureValue constexpr kLnToFeatureValue = (Cost)-M_LOG10E; // multiply ln(prob) by this for neglog10 cost (e^x)
+FeatureValue constexpr kLnToFeatureValue
+    = (Cost)-M_LOG10E;  // multiply ln(prob) by this for neglog10 cost (e^x)
 
 /// if str has e.g. "myfeat=4.3 ...", sets to["myfeat"]=4.3 (to may be filled
 /// with features already; only the ones named in str are overwritten)
@@ -128,7 +129,7 @@ inline void addFeatures(Features& to, Slice const& str) {
     if (!f.empty()) {
       Pchar eq = f.find_first('=');
       if (!eq)
-        SDL_THROW_LOG(Features.addFeatures, RuleFormatException, "addFeatures - bad name=val format for '"
+        SDL_THROW_LOG(Features.addFeatures, RuleFormatException, "addFeatures-bad name=val format for '"
                                                                      << f << "' in " << Util::Field(str));
       FeatureValue& val = to[std::string(f.first, eq)];
       f.first = eq + 1;

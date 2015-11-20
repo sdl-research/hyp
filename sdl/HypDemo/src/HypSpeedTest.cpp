@@ -12,7 +12,9 @@
 
     Hypergraph demo C++ code
 */
-char const* usage = "measure performance of compose (excluding file input): HypSpeedTest fst1 fst2 [1|0 (prune-to-nbest)] [N=100 repetitions]";
+char const* usage
+    = "measure performance of compose (excluding file input): HypSpeedTest fst1 fst2 [1|0 (prune-to-nbest)] "
+      "[N=100 repetitions]";
 
 #include <time.h>
 #include <iostream>
@@ -81,8 +83,7 @@ int main(int argc, char** argv) {
         }
         tend = graehl::monotonic_time();
         double dt = tend - tstart;
-        fprintf(stderr, "Elapsed dup=%d eps=%d time: %.6f seconds N=%d seconds-per=%g\n", dup, eps, dt, N,
-                dt / N);
+        fprintf(stderr, "Elapsed dup=%d eps=%d time: %.6f seconds N=%d seconds-per=%g\n", dup, eps, dt, N, dt / N);
         std::cout << hyp3 << '\n';
         try {
           best.outputForId(hyp3, std::cerr);

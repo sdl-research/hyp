@@ -125,15 +125,13 @@ struct CheckOnce {
   CheckOnce(Util::PointerSet& p) : p(&p) {}
   Util::PointerSet* p;
   // mutating via pointer p - const helps compiler out?
-  bool first(void const* v) const {
-    return p->insert((intptr_t)v).second;
-  }
+  bool first(void const* v) const { return p->insert((intptr_t)v).second; }
   void operator()(void const* v) const {
     if (!first(v)) throw MoreThanOnceException(v);
   }
 };
 
-void HypergraphBase::printUnchecked(std::ostream &out) const {
+void HypergraphBase::printUnchecked(std::ostream& out) const {
   out << *this;
 }
 
@@ -167,7 +165,7 @@ inline void printStartOrFinal(char const* prefix, std::ostream& out, HypergraphB
   }
 }
 
-void printStartAndFinal(std::ostream &out, HypergraphBase const& hg) {
+void printStartAndFinal(std::ostream& out, HypergraphBase const& hg) {
   printStartOrFinal("START", out, hg, hg.start());
   printStartOrFinal("FINAL", out, hg, hg.final());
 }

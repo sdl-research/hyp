@@ -42,13 +42,11 @@ typedef FromUnicodes FromString32;
 */
 bool isUtf8Whitespace(std::string const& utf8);
 
-inline std::string toUtf8Char(Unicode ch)
-{
+inline std::string toUtf8Char(Unicode ch) {
   return utf8s(ch);
 }
 
-inline std::string toUtf8String(icu::UnicodeString const& str)
-{
+inline std::string toUtf8String(icu::UnicodeString const& str) {
   return fromIcu(str);
 }
 
@@ -58,15 +56,15 @@ String16 toString16(std::string const& utf8);
 String32 toString32(Slice const& utf8);
 String16 toString16(Slice const& utf8);
 
-void toString32(std::string const& utf8, String32 &to);
-void toString16(std::string const& utf8, String16 &to);
+void toString32(std::string const& utf8, String32& to);
+void toString16(std::string const& utf8, String16& to);
 
-void toString32(Slice const& utf8, String32 &to);
-void toString16(Slice const& utf8, String16 &to);
+void toString32(Slice const& utf8, String32& to);
+void toString16(Slice const& utf8, String16& to);
 
 
 /// pre: to is an empty wstring. post: to is utf8 converted to wstring
-inline void toWideString(std::string const& utf8, std::wstring &to) {
+inline void toWideString(std::string const& utf8, std::wstring& to) {
   if (sizeof(wchar_t) == sizeof(Char32))
     toString32(utf8, reinterpret_cast<String32&>(to));
   else if (sizeof(wchar_t) == sizeof(Char16))
@@ -74,7 +72,7 @@ inline void toWideString(std::string const& utf8, std::wstring &to) {
 }
 
 /// pre: to is an empty wstring. post: to is utf8 converted to wstring
-inline void toWideString(Slice const& utf8, std::wstring &to) {
+inline void toWideString(Slice const& utf8, std::wstring& to) {
   if (sizeof(wchar_t) == sizeof(Char32))
     toString32(utf8, reinterpret_cast<String32&>(to));
   else if (sizeof(wchar_t) == sizeof(Char16))
@@ -83,18 +81,12 @@ inline void toWideString(Slice const& utf8, std::wstring &to) {
 
 /// for efficient creation of temporary wstring from utf8 or whatever
 struct ToWideString : std::wstring {
-  explicit ToWideString(Slice const& word)
-  {
-    toWideString(word, *this);
-  }
-  explicit ToWideString(std::string const& word)
-  {
-    toWideString(word, *this);
-  }
+  explicit ToWideString(Slice const& word) { toWideString(word, *this); }
+  explicit ToWideString(std::string const& word) { toWideString(word, *this); }
   explicit ToWideString(Unicodes const& unicodes)
 #if SDL_UNICODE_IS_WCHAR
-      : std::wstring(unicodes.begin(), unicodes.end())
-  {}
+      : std::wstring(unicodes.begin(), unicodes.end()) {
+  }
 #else
   {
     toString16(FromUnicodes(unicodes), reinterpret_cast<String16&>(*this));
@@ -102,8 +94,8 @@ struct ToWideString : std::wstring {
 #endif
   explicit ToWideString(String32 const& unicodes)
 #if SDL_UNICODE_IS_WCHAR
-      : std::wstring(unicodes.begin(), unicodes.end())
-  {}
+      : std::wstring(unicodes.begin(), unicodes.end()) {
+  }
 #else
   {
     toString16(FromString32(unicodes), reinterpret_cast<String16&>(*this));
@@ -112,21 +104,13 @@ struct ToWideString : std::wstring {
 };
 
 struct ToString32 : String32 {
-  explicit ToString32(Slice const& word)
-  {
-    toString32(word, *this);
-  }
-  explicit ToString32(std::string const& word)
-  {
-    toString32(word, *this);
-  }
-  explicit ToString32(Unicodes const& unicodes)
-      : String32(unicodes.begin(), unicodes.end())
-  {}
+  explicit ToString32(Slice const& word) { toString32(word, *this); }
+  explicit ToString32(std::string const& word) { toString32(word, *this); }
+  explicit ToString32(Unicodes const& unicodes) : String32(unicodes.begin(), unicodes.end()) {}
   ToString32(std::wstring const& word)
 #if SDL_UNICODE_IS_WCHAR
-      : String32(word.begin(), word.end())
-  {}
+      : String32(word.begin(), word.end()) {
+  }
 #else
   {
     std::vector<char> utf8;
@@ -140,12 +124,8 @@ struct ToString32 : String32 {
 typedef FromUnicodes FromWideString;
 #else
 struct FromWideString : std::string {
-  FromWideString(std::wstring const& word) {
-    setUtf8From16(*this, word.begin(), word.end());
-  }
-  FromWideString(WideSlice const& word) {
-    setUtf8From16(*this, word.first, word.second);
-  }
+  FromWideString(std::wstring const& word) { setUtf8From16(*this, word.begin(), word.end()); }
+  FromWideString(WideSlice const& word) { setUtf8From16(*this, word.first, word.second); }
 };
 #endif
 
@@ -181,15 +161,17 @@ struct TokenizerBaseImpl {
       , fix_(fix)
 #if SDL_UTF8_CPP_TOKENIZER
       , fixed(utf8Str)
-      , i(fixed.begin()), end(fixed.end())
+      , i(fixed.begin())
+      , end(fixed.end())
 #else
-      , s(icu::UnicodeString::fromUTF8(utf8Str)), charIter_(s)
-        // fromUTF8: "Illegal input is replaced with U+FFFD. Otherwise, errors result in a bogus string"
+      , s(icu::UnicodeString::fromUTF8(utf8Str))
+      , charIter_(s)
+// fromUTF8: "Illegal input is replaced with U+FFFD. Otherwise, errors result in a bogus string"
 #endif
-      , done_()
-  {}
+      , done_() {
+  }
 
-  //TODO: replace w/ faster Utf8.hpp
+  // TODO: replace w/ faster Utf8.hpp
   bool charHasNext() const {
 #if SDL_UTF8_CPP_TOKENIZER
     return i != end;
@@ -200,7 +182,7 @@ struct TokenizerBaseImpl {
 
   Unicode charNext() {
 #if SDL_UTF8_CPP_TOKENIZER
-    Unicode r = utf8::unchecked::next(i); // unchecked is ok because we already sanitized input utf8
+    Unicode r = utf8::unchecked::next(i);  // unchecked is ok because we already sanitized input utf8
 #else
     Unicode r = charIter_.current32();
     charIter_.next32();
@@ -220,19 +202,19 @@ struct TokenizerBaseImpl {
 
   Unicode charPeek() {
 #if SDL_UTF8_CPP_TOKENIZER
-    return utf8::unchecked::peek_next(i); // unchecked is ok because we already sanitized input utf8
+    return utf8::unchecked::peek_next(i);  // unchecked is ok because we already sanitized input utf8
 #else
     return charIter_.current32();
 #endif
   }
 
   /// return true iff isspace = space. if true, cursor advanced by one
-  bool readUnlessSpace(Unicode &ch, bool space = true) {
+  bool readUnlessSpace(Unicode& ch, bool space = true) {
     using namespace icu;
 #if SDL_UTF8_CPP_TOKENIZER
     if (i == end) return false;
     std::string::const_iterator current(i);
-    ch = utf8::unchecked::next(i); // unchecked is ok because we already sanitized input utf8
+    ch = utf8::unchecked::next(i);  // unchecked is ok because we already sanitized input utf8
     if ((bool)u_isspace(ch) == space) {
       i = current;
       return false;
@@ -246,7 +228,6 @@ struct TokenizerBaseImpl {
     ++idx_;
     return true;
   }
-
 };
 
 struct UnicodeSpace {
@@ -261,26 +242,22 @@ inline bool unicodeSpace(Unicode c) {
 }
 
 struct UnicodeAll {
-  bool operator()(Unicode) const {
-    return true;
-  }
+  bool operator()(Unicode) const { return true; }
 };
 
 /**
-   Tokenizes using any unicode space character as delimiter. output to whatever kind of string you like; input is via TokenizerBaseImpl (UnicodeString)
+   Tokenizes using any unicode space character as delimiter. output to whatever kind of string you like; input
+   is via TokenizerBaseImpl (UnicodeString)
 
    \tparam GenericString std::basic_string<char32> or icu::UnicodeString
 
 */
-template<class GenericString = icu::UnicodeString>
+template <class GenericString = icu::UnicodeString>
 struct Tokenizer : private TokenizerBaseImpl {
  public:
-
   explicit Tokenizer(std::string const& str, FixUnicode const& fix = FixUnicode());
 
-  bool done() const {
-    return done_;
-  }
+  bool done() const { return done_; }
 
   void next();
 
@@ -288,7 +265,6 @@ struct Tokenizer : private TokenizerBaseImpl {
   GenericString const& value(TokenSpan&) const;
 
  private:
-
   GenericString currToken_;
   TokenSpan tokSpan_;
 };
@@ -296,18 +272,18 @@ struct Tokenizer : private TokenizerBaseImpl {
 ////////////////////////////
 
 inline void appendChar(UChar32 ch, Unicodes* pStr) {
-  assert(sizeof(Unicode)==sizeof(UChar32));
+  assert(sizeof(Unicode) == sizeof(UChar32));
   pStr->push_back(static_cast<Unicode>(ch));
 }
 
 inline void appendChar(UChar32 ch, String32* pStr) {
-  assert(sizeof(Char32)==sizeof(UChar32));
+  assert(sizeof(Char32) == sizeof(UChar32));
   pStr->push_back(static_cast<Char32>(ch));
 }
 
 inline void appendChar(UChar32 ch, String16* pStr) {
   icu::UnicodeString icuStr(ch);
-  assert(sizeof(Char16)==sizeof(UChar));
+  assert(sizeof(Char16) == sizeof(UChar));
   pStr->append(static_cast<Char16 const*>(icuStr.getTerminatedBuffer()));
 }
 
@@ -315,23 +291,22 @@ inline void appendChar(UChar32 ch, icu::UnicodeString* pStr) {
   pStr->append(ch);
 }
 
-template<class GenericString>
+template <class GenericString>
 Tokenizer<GenericString>::Tokenizer(std::string const& utf8Str, FixUnicode const& fix)
-    : TokenizerBaseImpl(utf8Str, fix)
-{
+    : TokenizerBaseImpl(utf8Str, fix) {
   next();
 }
 
 template <class GenericString>
-void clearString(GenericString &str) {
+void clearString(GenericString& str) {
   str.clear();
 }
 
-inline void clearString(icu::UnicodeString &str) {
+inline void clearString(icu::UnicodeString& str) {
   str.truncate(0);
 }
 
-template<class GenericString>
+template <class GenericString>
 void Tokenizer<GenericString>::next() {
   using namespace icu;
   if (!charHasNext()) {
@@ -348,18 +323,17 @@ void Tokenizer<GenericString>::next() {
 
   Unicode ch;
   while (readUnlessSpace(ch)) {
-    if (fix_(ch))
-      appendChar(ch, &currToken_);
+    if (fix_(ch)) appendChar(ch, &currToken_);
   }
   tokSpan_.second = idx_;
 }
 
-template<class GenericString>
+template <class GenericString>
 GenericString const& Tokenizer<GenericString>::value() const {
   return currToken_;
 }
 
-template<class GenericString>
+template <class GenericString>
 GenericString const& Tokenizer<GenericString>::value(TokenSpan& tokSpan) const {
   tokSpan = tokSpan_;
   return currToken_;

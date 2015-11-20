@@ -71,14 +71,14 @@ struct YAMLConfigProcessor {
    */
   void push(std::string const& key) const {
     optPath_.push_back(key);
-    //SDL_DEBUG(Config.PushPop, "push +" << optPath_.back() << " => " << optPath_.size());
+    // SDL_DEBUG(Config.PushPop, "push +" << optPath_.back() << " => " << optPath_.size());
   }
 
   /**
       Pop a key.
    */
   void pop() const {
-    //SDL_DEBUG(Config.PushPop, "popped " << optPath_.back() << " -1 => " << optPath_.size() - 1);
+    // SDL_DEBUG(Config.PushPop, "popped " << optPath_.back() << " -1 => " << optPath_.size() - 1);
     optPath_.pop_back(false);
   }
 
@@ -175,7 +175,7 @@ struct YAMLConfigProcessor {
 
   boost::filesystem::path filePath_;
   mutable OptPath optPath_;  // for log messages. mutable because of insanity - DFS push/pop discipline. to
-                             // keep refs sane have ot use StableVector
+  // keep refs sane have ot use StableVector
   std::size_t const optPathInitialDepth_;
   Instances instances;
 };

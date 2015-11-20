@@ -25,24 +25,25 @@
 #pragma once
 
 
-#include <stdint.h> // intptr_t is here until C++11
+#include <stdint.h>  // intptr_t is here until C++11
 #include <climits>
 #include <cassert>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-///requires sizeof(T)>1 !
+/// requires sizeof(T)>1 !
 template <class T>
-bool lsb(T *t) {
+bool lsb(T* t) {
   return (intptr_t)t & 1;
 }
 
-inline void * pointerForInteger(std::size_t i) {
-  return (void *)((i << 1) | 1);
+inline void* pointerForInteger(std::size_t i) {
+  return (void*)((i << 1) | 1);
 }
 
 template <class T>
-T * specificPointerForInteger(std::size_t i) {
+T* specificPointerForInteger(std::size_t i) {
   return (T*)((i << 1) | 1);
 }
 
@@ -52,7 +53,7 @@ inline bool msb(Int i) {
 }
 
 template <class T>
-std::size_t integerFromPointer(T *t) {
+std::size_t integerFromPointer(T* t) {
 #ifdef NDEBUG
   return (std::size_t)t >> 1;
 #else
@@ -65,29 +66,30 @@ std::size_t integerFromPointer(T *t) {
 }
 
 template <class T>
-T *withoutLsb(T *t) {
+T* withoutLsb(T* t) {
   return (T*)((intptr_t)t & ~(intptr_t)1);
 }
 
 template <class T>
-T *withLsb(T *t, intptr_t lsb = 1) {
+T* withLsb(T* t, intptr_t lsb = 1) {
   return (T*)((intptr_t)t | lsb);
 }
 
 template <class T>
-T *withLsbs(T *t, unsigned lsbs) {
+T* withLsbs(T* t, unsigned lsbs) {
   return (T*)((intptr_t)t | lsbs);
 }
 
 template <class T>
-unsigned lsbs(T *t, unsigned mask) {
+unsigned lsbs(T* t, unsigned mask) {
   return (intptr_t)t & mask;
 }
 
-//TODO: use fancy boost enable stuff, or template on T rather than T*? this is an exact duplicate of above but with T const*
+// TODO: use fancy boost enable stuff, or template on T rather than T*? this is an exact duplicate of above
+// but with T const*
 // I don't just template for T t because this may be inappropriate for integral or other value types
 
-///requires sizeof(T)>1 !
+/// requires sizeof(T)>1 !
 template <class T>
 bool lsb(T const* t) {
   return (intptr_t)t & 1;

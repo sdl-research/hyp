@@ -52,25 +52,32 @@ SDL_ENUM(OptimizationMethod, 2, (Lbfgs, Online));
 
 struct OptimizationProcedureOptions {
 
-  OptimizationProcedureOptions() {
-    Config::inits(this);
-  }
+  OptimizationProcedureOptions() { Config::inits(this); }
 
   template <class Config>
   void configure(Config& config) {
     config("Optimize the weights of an SDL module");
     config.is("OptimizationProcedure");
 
-    config("optimization-method", &optimizationMethod)("Either 'lbfgs' or 'online'. For each method you can specify options, e.g., lbfgs").init(kLbfgs);
+    config("optimization-method", &optimizationMethod)(
+        "Either 'lbfgs' or 'online'. For each method you can specify options, e.g., lbfgs")
+        .init(kLbfgs);
     config("lbfgs", &lbfgsOptions)("Options for 'lbfgs' (use if optimization-method is 'lbfgs')");
     config("online", &onlineOptions)("Options for 'online' (use if optimization-method is 'online')");
 
     config("variance", &variance)("Variance for L2 regularization").init(floatCast(2.0));
     config("weights-path", &weightsPath)("Output path for learned weights ('-' is stdout)").init("-");
-    config("test-mode", &testMode)("Test mode? In test mode, we don't optimize, but read the weights and get the best path").init(false);
-    config("test-mode-output-hypergraph", &testModeOutputHypergraph)("Prints hypergraph output (test mode)").init(false);
-    config("test-mode-detailed-output", &testModeDetailed)("Will produce detailed info for 1-best (alignment, features, scores) ").init(false);
-    config("num-threads", &numThreads)("Number of threads for computing feature expectations on the aligned data").init(1);
+    config("test-mode", &testMode)(
+        "Test mode? In test mode, we don't optimize, but read the weights and get the best path")
+        .init(false);
+    config("test-mode-output-hypergraph", &testModeOutputHypergraph)("Prints hypergraph output (test mode)")
+        .init(false);
+    config("test-mode-detailed-output",
+           &testModeDetailed)("Will produce detailed info for 1-best (alignment, features, scores) ")
+        .init(false);
+    config("num-threads",
+           &numThreads)("Number of threads for computing feature expectations on the aligned data")
+        .init(1);
   }
 
   OptimizationMethod optimizationMethod;
@@ -88,14 +95,12 @@ struct OptimizationProcedureOptions {
 /*
 Procedure for optimizing hypergraph weights.
  */
-class OptimizationProcedure
-{
+class OptimizationProcedure {
  public:
   typedef Optimization::FloatT FloatT;
   typedef Optimization::Arc Arc;
 
-  OptimizationProcedure(shared_ptr<ICreateSearchSpace<Arc> >& searchSpace
-                        , OptimizationProcedureOptions const&);
+  OptimizationProcedure(shared_ptr<ICreateSearchSpace<Arc>>& searchSpace, OptimizationProcedureOptions const&);
 
   /**
       Starts the optimization. Call this after all training
@@ -108,18 +113,14 @@ class OptimizationProcedure
       created hypergraphs are compatible (i.e., they
       intersect). Expensive test, use only for debugging.
    */
-  void setCheckIntersectionNonEmpty(bool b = true) {
-    checkIntersectionNonEmpty_ = b;
-  }
+  void setCheckIntersectionNonEmpty(bool b = true) { checkIntersectionNonEmpty_ = b; }
 
   /**
       If true: Will check if the gradients and the function
       value (as computed based on the task-specific CreateSearchSpace
       functor) are compatible. Expensive test, use only for debugging.
    */
-  void setCheckGradients(bool b = true) {
-    checkGradients_ = b;
-  }
+  void setCheckGradients(bool b = true) { checkGradients_ = b; }
 
   /**
       Gets the best path from all unclamped hypergraphs, after
@@ -130,7 +131,7 @@ class OptimizationProcedure
  private:
   OptimizationProcedureOptions opts_;
 
-  shared_ptr<ICreateSearchSpace<Arc> > pSearchSpace_;
+  shared_ptr<ICreateSearchSpace<Arc>> pSearchSpace_;
   bool checkIntersectionNonEmpty_;
   bool checkGradients_;
   Weight::Map weightsmap_;

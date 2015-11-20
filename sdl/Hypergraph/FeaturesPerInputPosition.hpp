@@ -50,7 +50,7 @@ struct NoFeatures : public IFeaturesPerInputPosition {
      Returns all features for a given input position.
   */
   FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) override {
-    return feats_; // empty
+    return feats_;  // empty
   }
 
  private:
@@ -62,9 +62,7 @@ struct NoFeatures : public IFeaturesPerInputPosition {
    vector.
 */
 struct TakeFeaturesFromVector : public IFeaturesPerInputPosition {
-  TakeFeaturesFromVector(FeatureIdVec const& vec)
-      : from_(vec), feats_(1)
-  {}
+  TakeFeaturesFromVector(FeatureIdVec const& vec) : from_(vec), feats_(1) {}
 
   FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) override {
     assert(position < from_.size());
@@ -81,15 +79,14 @@ struct TakeFeaturesFromVector : public IFeaturesPerInputPosition {
    vector.
 */
 struct MultipleFeaturesPerInputPosition : public IFeaturesPerInputPosition {
-  MultipleFeaturesPerInputPosition(std::vector<FeatureIdVec > const& feats)
-      : feats_(feats) {}
+  MultipleFeaturesPerInputPosition(std::vector<FeatureIdVec> const& feats) : feats_(feats) {}
 
   FeatureIdVec const& getFeaturesForInputPosition(FeatureId position) override {
     return position < feats_.size() ? feats_[position] : empty_;
   }
 
   std::vector<FeatureIdVec> const& feats_;
-  FeatureIdVec const empty_; // for the case that feats_ is too small
+  FeatureIdVec const empty_;  // for the case that feats_ is too small
 };
 
 

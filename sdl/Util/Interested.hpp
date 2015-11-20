@@ -23,7 +23,8 @@
 
 #include <sdl/Util/BitSet.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 template <class Index>
 struct Interested : std::vector<Index> {
@@ -39,8 +40,7 @@ struct Interested : std::vector<Index> {
     inInterested_.resize(n);
   }
   void add(Index s) {
-    if (!inInterested_.test_set(s))
-      this->push_back(s);
+    if (!inInterested_.test_set(s)) this->push_back(s);
   }
   bool addIsNew(Index s) {
     if (inInterested_.test_set(s))
@@ -56,12 +56,8 @@ struct Interested : std::vector<Index> {
       this->push_back(s);
     return true;
   }
-  bool containsSparse(Index s) const {
-    return testSparse(inInterested_, s);
-  }
-  bool contains(Index s) const {
-    return inInterested_.test(s);
-  }
+  bool containsSparse(Index s) const { return testSparse(inInterested_, s); }
+  bool contains(Index s) const { return inInterested_.test(s); }
   void assertEmpty() {
     assert(this->empty());
     assert(inInterested_.count() == 0);

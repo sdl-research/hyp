@@ -19,14 +19,14 @@
 namespace sdl {
 namespace Hypergraph {
 
-template<class Arc>
-IMutableHypergraph<Arc>* constructHypergraphFromString(std::string const& hgstr,
-                                                       IVocabularyPtr const& pVoc) {
+template <class Arc>
+IMutableHypergraph<Arc>* constructHypergraphFromString(std::string const& hgstr, IVocabularyPtr const& pVoc) {
   IMutableHypergraph<Arc>* hg = new MutableHypergraph<Arc>();
   hg->setVocabulary(pVoc);
   std::stringstream ss(hgstr);
   parseText(ss, "<string-input>", hg);
   return hg;
 }
+
 
 }}

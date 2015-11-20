@@ -86,6 +86,7 @@
 
    ---
 */
+// clang-format off
 
 // Copyright (C) 2000, 2001 Stephen Cleary
 //

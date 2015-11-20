@@ -13,7 +13,7 @@
     composite tuple of weights w/ semiring ops pairwise on the tuple elements.
 
     normally a weight W is required to return correct W::one() and W::zero()
-    even during static init (we relax this for CompositeWeight - you're not
+    even during static init (we relax this for CompositeWeight-you're not
     allowed to have CompositeWeight of CompositeWeight). that is: nobody should
     use any CompositeWeight<..>::one() or zero() before static init is done.
 

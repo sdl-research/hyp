@@ -27,7 +27,9 @@
 using namespace sdl;
 using namespace sdl::Vocabulary;
 
-IVocabulary::IVocabulary() : threadlocal_(), nSpecials_(specialSymbols().size()) { setThreadSpecific(); }
+IVocabulary::IVocabulary() : threadlocal_(), nSpecials_(specialSymbols().size()) {
+  setThreadSpecific();
+}
 
 IVocabulary::~IVocabulary() {}
 
@@ -79,8 +81,7 @@ bool IVocabulary::evictThread(Occupancy const&) {
   assert(after <= before);
   bool const changed = after != before;
   if (changed)
-    SDL_DEBUG(evict.Vocabulary, "evictThread vocabulary " << getName() << " - size " << before << " -> "
-                                                          << after);
+    SDL_DEBUG(evict.Vocabulary, "evictThread vocabulary " << getName() << " - size " << before << " -> " << after);
   else
     SDL_DEBUG(evict.Vocabulary, "evictThread vocabulary " << getName() << " - no change");
   return changed;

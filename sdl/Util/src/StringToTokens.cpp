@@ -10,21 +10,21 @@
 // limitations under the License.
 #include <sdl/Util/StringToTokens.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-void utf8ToCharPos(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix, bool normalizeConsecutiveWhitespace)
-{
+void utf8ToCharPos(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix,
+                   bool normalizeConsecutiveWhitespace) {
   utf8ToCharPosImpl(i, end, accept, fix, normalizeConsecutiveWhitespace);
 }
 
-void utf8ToWordSpan(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix)
-{
+void utf8ToWordSpan(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix) {
   utf8ToWordSpanImpl(i, end, accept, fix);
 }
 
-void utf8ToWholeSpan(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix)
-{
+void utf8ToWholeSpan(Pchar i, Pchar end, IAcceptString const& accept, NormalizeUtf8 const& fix) {
   utf8ToWholeSpanImpl(i, end, accept, fix);
 }
+
 
 }}

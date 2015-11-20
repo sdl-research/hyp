@@ -37,7 +37,7 @@ namespace Hypergraph {
 */
 template <class Arc, class Mu, class Pi, bool IsGraph = true>
 struct AcyclicBest {
-  typedef graehl::path_traits<IHypergraph<Arc> > path_traits;
+  typedef graehl::path_traits<IHypergraph<Arc>> path_traits;
 
   /**
      mu[StateId] = best cost from start/axioms to state. property_map so by value
@@ -87,8 +87,7 @@ struct AcyclicBest {
         path_traits::extendBy(tailCost, w);
       }
     }
-    SDL_TRACE(Hypergraph.AcyclicBest, "arc " << *arc << " with cost " << bestCost << " vs. previous "
-                                             << bestCost);
+    SDL_TRACE(Hypergraph.AcyclicBest, "arc " << *arc << " with cost " << bestCost << " vs. previous " << bestCost);
     if (path_traits::better(w, bestCost)) {
       bestCost = w;
       if (pi) put(pi, head, arc);
@@ -188,8 +187,8 @@ struct AcyclicBest {
 
     SDL_DEBUG(Hypergraph.AcyclicBest, "acyclic best: " << back_edges_ << " back edges  - max allowed is "
                                                        << maxBackEdges);
-    SDL_TRACE(Hypergraph.AcyclicBest,
-              "reverse acyclic order: " << printer(orderReverse, Util::singleline()) << " for hg:\n" << hg);
+    SDL_TRACE(Hypergraph.AcyclicBest, "reverse acyclic order: " << printer(orderReverse, Util::singleline())
+                                                                << " for hg:\n" << hg);
     if (back_edges_ > maxBackEdges) return;
     if (orderReverse.empty()) return;
 

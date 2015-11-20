@@ -20,16 +20,17 @@
 #include <cstdlib>
 
 #ifdef _MSC_VER
-//TODO (fix isStackAddress fn in ThreadId.hpp)
-# undef SDL_ASSERT_THREAD_SPECIFIC
-# define SDL_ASSERT_THREAD_SPECIFIC 0
+// TODO (fix isStackAddress fn in ThreadId.hpp)
+#undef SDL_ASSERT_THREAD_SPECIFIC
+#define SDL_ASSERT_THREAD_SPECIFIC 0
 #endif
 
 #ifndef SDL_ASSERT_THREAD_SPECIFIC
-# define SDL_ASSERT_THREAD_SPECIFIC !defined(NDEBUG)
+#define SDL_ASSERT_THREAD_SPECIFIC !defined(NDEBUG)
 #endif
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 typedef std::size_t ThreadId;
 
@@ -48,9 +49,7 @@ extern ThreadId gLastThreadId;
 void setSingleThreadProgram(bool singleThread = true);
 
 struct DeclareSingleThreadProgram {
-  DeclareSingleThreadProgram(bool singleThread = true) {
-    setSingleThreadProgram(singleThread);
-  }
+  DeclareSingleThreadProgram(bool singleThread = true) { setSingleThreadProgram(singleThread); }
 };
 
 /**
@@ -73,8 +72,7 @@ void setFixedSingleThread();
 */
 inline bool isSingleThreadProgram() {
 #if SDL_ASSERT_THREAD_SPECIFIC || NDEBUG
-  if (impl::gSingleThreadProgram)
-    checkSingleThread();
+  if (impl::gSingleThreadProgram) checkSingleThread();
 #endif
   setFixedSingleThread();
   return impl::gSingleThreadProgram;
@@ -85,17 +83,17 @@ ThreadId threadId();
 
 namespace {
 #ifdef _MSC_VER
-std::size_t const kStackMask = 0; //TODO
+std::size_t const kStackMask = 0;  // TODO
 #else
 // linux
-//TODO: mac
-std::size_t const kStackMask = sizeof(void *) == 8 ? 0x7f0000000000 : 0xb0000000;
+// TODO: mac
+std::size_t const kStackMask = sizeof(void*) == 8 ? 0x7f0000000000 : 0xb0000000;
 #endif
 }
 
 inline bool isStackAddress(void const* ptr) {
 #ifdef _MSC_VER
-  //TODO: find api fn or 32 and 64 kStackMask
+  // TODO: find api fn or 32 and 64 kStackMask
   return false;
 #else
   return ((std::size_t)ptr & kStackMask) == kStackMask;

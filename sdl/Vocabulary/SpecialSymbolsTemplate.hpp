@@ -30,15 +30,15 @@ template <typename Symbol>
 struct SpecialSymbolTemplate {
   static std::string const TOKEN;
   static Sym const ID_LINKED;
-#ifdef WIN32 // Still needed on MSVC2015
+#ifdef WIN32  // Still needed on MSVC2015
   static Sym const ID;  // = { Symbol::id };
 #else
-  static constexpr Sym ID = { Symbol::id };
+  static constexpr Sym ID = {Symbol::id};
 #endif
 };
 #ifdef WIN32
 template <typename Symbol>
-Sym const SpecialSymbolTemplate<Symbol>::ID = { Symbol::id };
+Sym const SpecialSymbolTemplate<Symbol>::ID = {Symbol::id};
 #else
 template <typename Symbol>
 Sym constexpr SpecialSymbolTemplate<Symbol>::ID;

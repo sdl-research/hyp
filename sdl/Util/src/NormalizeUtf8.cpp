@@ -44,8 +44,7 @@ void NormalizeUtf8::normalizeNfc(std::string& str, Constraints& c) const {
   if (str.empty()) return;
   FixedUtf8 fixed(str);
   fixed.moveTo(str);
-  SDL_TRACE(NormalizeUtf8, "fixed-utf8: '" << str << "' #bytes=" << str.size()
-                                           << " #unicode=" << utf8length(str));
+  SDL_TRACE(NormalizeUtf8, "fixed-utf8: '" << str << "' #bytes=" << str.size() << " #unicode=" << utf8length(str));
   NfcOptions::normalize(str, c);
   SDL_TRACE(NormalizeUtf8, "nfc-normalized: '" << str << "' #bytes=" << str.size()
                                                << " #unicode=" << utf8length(str));
@@ -57,8 +56,7 @@ void NormalizeUtf8::normalizeNfc(std::string& str) const {
   if (str.empty()) return;
   FixedUtf8 fixed(str);
   fixed.moveTo(str);
-  SDL_TRACE(NormalizeUtf8, "fixed-utf8: '" << str << "' #bytes=" << str.size()
-                                           << " #unicode=" << utf8length(str));
+  SDL_TRACE(NormalizeUtf8, "fixed-utf8: '" << str << "' #bytes=" << str.size() << " #unicode=" << utf8length(str));
   NfcOptions::normalize(str);
   SDL_TRACE(NormalizeUtf8, "nfc-normalized: '" << str << "' #bytes=" << str.size()
                                                << " #unicode=" << utf8length(str));

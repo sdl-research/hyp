@@ -19,7 +19,8 @@
 
 #include <graehl/shared/int_types.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 /// use exact value size info to get more-significant bits
 template <class P>
@@ -39,7 +40,8 @@ struct HashDiscardLowBits {
 
 
 template <class T>
-using PointerHash = HashDiscardLowBits<graehl::ceil_log2_const(sizeof(T))>;;
+using PointerHash = HashDiscardLowBits<graehl::ceil_log2_const(sizeof(T))>;
+;
 
 struct EqualPointer {
   bool operator()(void const* a, void const* b) const { return a == b; }

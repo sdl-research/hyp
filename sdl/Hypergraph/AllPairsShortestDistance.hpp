@@ -223,7 +223,7 @@ struct AllPairsSortedDag : private ArcWtFn, private KeepFn {  // empty base clas
   }
 
   void compute() {
-    StateId *maxEnds = 0;
+    StateId* maxEnds = 0;
     if (maxEnd) {
       maxEnd->clear();
       maxEnd->resize(nStates);

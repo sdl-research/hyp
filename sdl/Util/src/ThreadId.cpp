@@ -14,7 +14,8 @@
 #include <windows.h>
 #endif
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 namespace impl {
 bool gSingleThreadProgram;
@@ -25,8 +26,7 @@ ThreadId gLastThreadId;
 
 /// if program is declared as single thread, throw if reached by more than one thread
 void maybeCheckSingleThread() {
-  if (impl::gFixedSingleThreadProgram && isSingleThreadProgram())
-    checkSingleThread();
+  if (impl::gFixedSingleThreadProgram && isSingleThreadProgram()) checkSingleThread();
 }
 
 
@@ -34,8 +34,8 @@ void checkSingleThread() {
   ThreadId const id = threadId();
   if (impl::gLastThreadId && id != impl::gLastThreadId)
     SDL_THROW_LOG(Util.ThreadId, ProgrammerMistakeException,
-                  "more than one thread: called checkSingleThread from " << id <<
-                  " and also " << impl::gLastThreadId);
+                  "more than one thread: called checkSingleThread from " << id << " and also "
+                                                                         << impl::gLastThreadId);
 }
 
 void setFixedSingleThread() {
@@ -47,8 +47,8 @@ void setSingleThreadProgram(bool singleThread) {
   if (singleThread != gSingleThreadProgram) {
     if (gFixedSingleThreadProgram)
       SDL_THROW_LOG(Util.ThreadId, ProgrammerMistakeException,
-                    "must call only once: setSingleThreadProgram(" << singleThread<<
-                    ") - previous value was " << gSingleThreadProgram);
+                    "must call only once: setSingleThreadProgram("
+                        << singleThread << ") - previous value was " << gSingleThreadProgram);
     gSingleThreadProgram = singleThread;
     setFixedSingleThread();
   }
@@ -72,5 +72,6 @@ ThreadId threadId() {
 }
 
 #endif
+
 
 }}

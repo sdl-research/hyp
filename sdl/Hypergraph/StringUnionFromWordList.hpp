@@ -32,24 +32,22 @@ struct StringUnionFromWordList {
   WordListOptions wordlist;
   StringUnionOptions stringUnion;
 
-  std::string usageSuffix() const {
-    return " from "+wordlist.usage();
-  }
+  std::string usageSuffix() const { return " from " + wordlist.usage(); }
 
   template <class Config>
-  void configure(Config &config) {
+  void configure(Config& config) {
     stringUnion.configure(config);
     wordlist.configure(config);
   }
 
   template <class Arc>
-  void build(std::istream &in, MutableHypergraph<Arc> *outHg) const {
+  void build(std::istream& in, MutableHypergraph<Arc>* outHg) const {
     DoNothing f;
     build(in, outHg, f);
   }
 
   template <class Arc, class FinishBuilding>
-  void build(std::istream &in, MutableHypergraph<Arc> *outHg, FinishBuilding &finish) const {
+  void build(std::istream& in, MutableHypergraph<Arc>* outHg, FinishBuilding& finish) const {
     IVocabularyPtr vocab = outHg->getVocabulary();
     typedef typename Arc::Weight Weight;
     WeightedStrings<Weight> ws(vocab ? vocab : Vocabulary::createDefaultVocab());
@@ -58,7 +56,7 @@ struct StringUnionFromWordList {
 
     outHg->clear(kFsmOutProperties);
 
-    BuildStringUnion<Arc> build(ws, *outHg, stringUnion); //sets vocab
+    BuildStringUnion<Arc> build(ws, *outHg, stringUnion);  // sets vocab
     finish(build);
   }
 };

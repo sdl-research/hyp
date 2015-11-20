@@ -29,7 +29,8 @@ inline bool isLexical(HypergraphBase const& hg, ArcBase const& arc) {
 }
 
 template <class Adjacency>
-bool containsEmptyString(HypergraphBase const& hg, Adjacency const& adj, StateId from, StateId goal, StateSet &once) {
+bool containsEmptyString(HypergraphBase const& hg, Adjacency const& adj, StateId from, StateId goal,
+                         StateSet& once) {
   if (once.test_set(from)) return false;
   // check once in any order (as opposed to toposort) is ok because we're not
   // trying to get best path, just detect any path to goal (which causes

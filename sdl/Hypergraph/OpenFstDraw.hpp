@@ -121,9 +121,8 @@ struct DrawOptions {
   fst::script::FstDrawerArgs drawArgs(std::ostream& o, fst::script::FstClass const& fstc,
                                       fst::SymbolTable const& isyms, fst::SymbolTable const& osyms,
                                       fst::SymbolTable const* pStateNames = 0) const {
-    return fst::script::FstDrawerArgs(fstc, &isyms, &osyms, pStateNames, accep, title, width, height,
-                                      portrait, vertical, ranksep, nodesep, fontsize, precision,
-                                      show_weight_one, &o, dest);
+    return fst::script::FstDrawerArgs(fstc, &isyms, &osyms, pStateNames, accep, title, width, height, portrait,
+                                      vertical, ranksep, nodesep, fontsize, precision, show_weight_one, &o, dest);
   }
 
   fst::script::FstPrinterArgs printArgs(std::ostream& o, fst::script::FstClass const& fstc,
@@ -187,7 +186,9 @@ struct DrawOptions {
     typedef typename FstArc::Weight FW;
     typedef ToOpenFst<A, FstArc> T;
     T t(h, stateNames);
-    if (pruneBeam != std::numeric_limits<double>::infinity()) { fst::Prune(&t.fst, FW(pruneBeam)); }
+    if (pruneBeam != std::numeric_limits<double>::infinity()) {
+      fst::Prune(&t.fst, FW(pruneBeam));
+    }
     drawFst<FstArc>(t.getFst(), t.stateNames());
   }
   template <class A>

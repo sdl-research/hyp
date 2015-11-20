@@ -26,12 +26,10 @@ namespace Hypergraph {
 **/
 
 template <class Weight, class Enable = void>
-struct IsFeatureWeight
-    : public std::false_type {};
+struct IsFeatureWeight : public std::false_type {};
 
 template <class Weight>
-struct IsFeatureWeight<Weight, typename Weight::IsFeatureWeight>
-    : public std::true_type {};
+struct IsFeatureWeight<Weight, typename Weight::IsFeatureWeight> : public std::true_type {};
 
 template <class Weight>
 bool isFeatureWeight(Weight* p = 0) {
@@ -44,12 +42,10 @@ bool isFeatureWeight(Weight* p = 0) {
 */
 
 template <class Weight, class Enable = void>
-struct IsDistanceWeight
-    : public std::true_type {};
+struct IsDistanceWeight : public std::true_type {};
 
 template <class Weight>
-struct IsDistanceWeight<Weight, typename Weight::IsFeatureWeight>
-    : public std::false_type {};
+struct IsDistanceWeight<Weight, typename Weight::IsFeatureWeight> : public std::false_type {};
 
 template <class Weight>
 bool isDistanceWeight(Weight* p = 0) {

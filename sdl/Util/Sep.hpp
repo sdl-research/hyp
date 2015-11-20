@@ -17,7 +17,8 @@
 #define SEP_JG_2015_05_16_HPP
 #pragma once
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 struct Sep {
   char const* s;
@@ -44,6 +45,7 @@ struct Sep {
     return out;
   }
 };
+
 
 }}
 

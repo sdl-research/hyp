@@ -46,13 +46,13 @@
 #endif
 
 #if !SDL_STATIC_LOCAL_INIT_ATOMIC
-# include <stdexcept>
-# include <boost/thread/thread.hpp>
-# include <boost/thread/once.hpp>
+#include <stdexcept>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/once.hpp>
 #endif
 
 #ifndef SDL_FREE_SINGLETON
-# define SDL_FREE_SINGLETON 1
+#define SDL_FREE_SINGLETON 1
 #endif
 
 namespace sdl {
@@ -67,13 +67,9 @@ namespace Util {
    for switching between lazy Singleton and EagerSingleton.
 */
 template <class T, class InstanceTag = void>
-struct EagerSingleton
-{
+struct EagerSingleton {
   static T singleton;
-  static inline T &get()
-  {
-    return singleton;
-  }
+  static inline T& get() { return singleton; }
 };
 
 template <class T, class Tag>
@@ -85,43 +81,37 @@ T EagerSingleton<T, Tag>::singleton;
    InstanceTag (any type, contents not used).
 */
 template <class T, class InstanceTag = void>
-struct Singleton
-{
+struct Singleton {
 #if SDL_STATIC_LOCAL_INIT_ATOMIC
-  static T &get()
-  {
+  static T& get() {
     static T singleton;
     return singleton;
   }
 #else
-  static inline T &get()
-  {
-    for (; ; ) {
+  static inline T& get() {
+    for (;;) {
       // pSingleton is volatile so this is partial memory fence on windows
-      if (pSingleton)
-        return *(T*)pSingleton;
+      if (pSingleton) return *(T*)pSingleton;
       boost::call_once(once, &initSingleton);
       // now either constructException (eventually), or pSingleton (memory fenced)
-      if (constructException)
-        throw std::runtime_error(constructExceptionWhat);
+      if (constructException) throw std::runtime_error(constructExceptionWhat);
     }
   }
+
  private:
-  struct FreeSingleton
-  {
-# if SDL_FREE_SINGLETON
+  struct FreeSingleton {
+#if SDL_FREE_SINGLETON
     ~FreeSingleton() {
-      delete pSingleton; // don't need to check 0
-      pSingleton = 0; // unnecessary but feels safer
+      delete pSingleton;  // don't need to check 0
+      pSingleton = 0;  // unnecessary but feels safer
     }
-# endif
+#endif
   };
 
   /**
      to be called only once.
   */
-  static void initSingleton()
-  {
+  static void initSingleton() {
     assert(!pSingleton);
     try {
       volatile T* volatile constructed = new volatile T();
@@ -143,18 +133,19 @@ struct Singleton
          volatile read in the compiled binary.
       */
       pSingleton = (T*)constructed;
-    } catch(std::exception &e) {
+    } catch (std::exception& e) {
       constructException = true;
-      constructExceptionWhat="singleton constructor: ";
+      constructExceptionWhat = "singleton constructor: ";
       constructExceptionWhat.append(e.what());
-    } catch(...) {
+    } catch (...) {
       constructException = true;
-      constructExceptionWhat="singleton constructor: unknown exception";
+      constructExceptionWhat = "singleton constructor: unknown exception";
     }
   }
   static boost::once_flag once;
-  static volatile T *pSingleton; //NOTE: tried to use scoped_ptr but realized that the ctor might be called after another static initializer has used it! bare pointer is safe.
-  static FreeSingleton freeSingleton; // call singleton destructor if needed, on static destruction
+  static volatile T* pSingleton;  // NOTE: tried to use scoped_ptr but realized that the ctor might be called
+                                  // after another static initializer has used it! bare pointer is safe.
+  static FreeSingleton freeSingleton;  // call singleton destructor if needed, on static destruction
   static std::string constructExceptionWhat;
   static bool constructException;
 #endif
@@ -179,14 +170,12 @@ typename Singleton<T, Tag>::FreeSingleton Singleton<T, Tag>::freeSingleton;
 #endif
 
 template <class T>
-T &singleton()
-{
+T& singleton() {
   return Singleton<T>::get();
 }
 
 template <class T, class InstanceTag>
-T &singleton()
-{
+T& singleton() {
   return Singleton<T, InstanceTag>::get();
 }
 

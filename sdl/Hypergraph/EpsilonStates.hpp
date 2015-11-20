@@ -19,11 +19,12 @@
 
 #include <sdl/Hypergraph/Types.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 struct EpsilonStates : StateSet {
 
-  EpsilonStates(HypergraphBase const &hg);
+  EpsilonStates(HypergraphBase const& hg);
 };
 
 

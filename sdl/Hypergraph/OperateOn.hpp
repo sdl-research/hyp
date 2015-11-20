@@ -35,43 +35,38 @@
 #include <sdl/Util/Enum.hpp>
 #include <sdl/Config/Init.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
-SDL_ENUM(OperateOn,3, (OperateOnInput, OperateOnOutput, OperateOnInputOutput))
+SDL_ENUM(OperateOn, 3, (OperateOnInput, OperateOnOutput, OperateOnInputOutput))
 
-inline bool inputEnabled(OperateOn operateOn)
-{
-  return operateOn==kOperateOnInput||operateOn==kOperateOnInputOutput;
+inline bool inputEnabled(OperateOn operateOn) {
+  return operateOn == kOperateOnInput || operateOn == kOperateOnInputOutput;
 }
 
-inline bool outputEnabled(OperateOn operateOn)
-{
-  return operateOn==kOperateOnOutput||operateOn==kOperateOnInputOutput;
+inline bool outputEnabled(OperateOn operateOn) {
+  return operateOn == kOperateOnOutput || operateOn == kOperateOnInputOutput;
 }
 
 /**
    this is tricky - see file comment for intended usage
 */
-inline bool inputNeeded(OperateOn operateOn)
-{
+inline bool inputNeeded(OperateOn operateOn) {
   return inputEnabled(operateOn);
 }
 
 template <class Hypergraph>
-bool outputNeeded(OperateOn operateOn, Hypergraph const& h)
-{
-  return operateOn==kOperateOnOutput || operateOn==kOperateOnInputOutput && !h.outputLabelFollowsInput();
+bool outputNeeded(OperateOn operateOn, Hypergraph const& h) {
+  return operateOn == kOperateOnOutput || operateOn == kOperateOnInputOutput && !h.outputLabelFollowsInput();
 }
 
 template <class Hypergraph>
-bool outputNeeded(OperateOn operateOn, Hypergraph const& h, StateId s)
-{
-  return operateOn==kOperateOnOutput || operateOn==kOperateOnInputOutput && !h.outputLabelFollowsInput(s);
+bool outputNeeded(OperateOn operateOn, Hypergraph const& h, StateId s) {
+  return operateOn == kOperateOnOutput || operateOn == kOperateOnInputOutput && !h.outputLabelFollowsInput(s);
 }
 
-inline bool outputOnly(OperateOn operateOn)
-{
-  return operateOn==kOperateOnOutput;
+inline bool outputOnly(OperateOn operateOn) {
+  return operateOn == kOperateOnOutput;
 }
 
 struct OperateOnConfig {
@@ -80,9 +75,10 @@ struct OperateOnConfig {
   }
   template <class Config>
   void configure(Config& config) {
-    config("operate-on", &operateOn).init(kOperateOnInput)
-        ("which labels of a hypergraph to transform; OperateOnOutput has the effect of preserving the original FSA input symbol and placing the result on the output")
-      ;
+    config("operate-on", &operateOn)
+        .init(kOperateOnInput)(
+            "which labels of a hypergraph to transform; OperateOnOutput has the effect of preserving the "
+            "original FSA input symbol and placing the result on the output");
   }
   OperateOn operateOn;
   operator OperateOn() const { return operateOn; }

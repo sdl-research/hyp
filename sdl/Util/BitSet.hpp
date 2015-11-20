@@ -60,7 +60,7 @@ namespace Util {
 typedef Util::dynamic_bitset<std::size_t, std::allocator<std::size_t>> BitSet;
 
 /// these macros allow us to use an enhanced dynamic_bitset instead of
-/// boost::dynamic_bitset - see diffs vs. master in
+/// boost::dynamic_bitset-see diffs vs. master in
 /// https://github.com/graehl/boost/tree/dynamic_bitset
 #define SDL_BITSET_OPEN_NAMESPACE \
   namespace sdl {                 \
@@ -126,8 +126,7 @@ typedef SetBitsIter<std::size_t> BitSetOnesIter;
 
 struct PrintSetBits {
   template <class I, class A>
-  friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b,
-                    PrintSetBits const& p) {
+  friend void print(std::ostream& o, SDL_BITSET_NAMESPACE::dynamic_bitset<I, A> const& b, PrintSetBits const& p) {
     typedef SetBitsIter<I, A> Set;
     printRange(o, Set(b), Set());
   }
@@ -257,7 +256,7 @@ void addSetFromMap(B& v, std::size_t i) {
   v[i] = 1;
 }
 
-// see also setGrow - requires preallocation
+// see also setGrow-requires preallocation
 // NOTE: for vector, add = push_back
 template <class I, class A, class Val>
 void add(SDL_BITSET_NAMESPACE::dynamic_bitset<I, A>& b, Val i) {

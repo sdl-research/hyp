@@ -8,8 +8,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#define USAGE_HypWordToCharacters                                                                                 \
-  "split hypergraph labels so they're at most 1 unicode codepoint long, optionally inserting token-begin symbols"
+#define USAGE_HypWordToCharacters                                                                          \
+  "split hypergraph labels so they're at most 1 unicode codepoint long, optionally inserting token-begin " \
+  "symbols"
 #define HG_TRANSFORM_MAIN
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/WordToCharacters.hpp>
@@ -38,8 +39,10 @@ struct HypWordToCharacters : TransformMain<HypWordToCharacters> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(WordToCharacters)
+
+
+

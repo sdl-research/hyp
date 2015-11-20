@@ -23,37 +23,26 @@
 
 namespace sdl {
 
-struct AddSymbol
-{
-  IVocabulary *pVoc;
-  AddSymbol(IVocabulary &voc)
-    : pVoc(&voc) {}
-  AddSymbol(IVocabulary *pVoc)
-    : pVoc(pVoc) {}
-  AddSymbol(IVocabularyPtr const& pVoc)
-    : pVoc(pVoc.get()) {}
+struct AddSymbol {
+  IVocabulary* pVoc;
+  AddSymbol(IVocabulary& voc) : pVoc(&voc) {}
+  AddSymbol(IVocabulary* pVoc) : pVoc(pVoc) {}
+  AddSymbol(IVocabularyPtr const& pVoc) : pVoc(pVoc.get()) {}
   AddSymbol(AddSymbol const& o) : pVoc(o.pVoc) {}
   typedef Sym result_type;
   typedef std::string const& argument_type;
-  Sym operator()(std::string const& str) const
-  {
-    return pVoc->add(str, kTerminal);
-  }
+  Sym operator()(std::string const& str) const { return pVoc->add(str, kTerminal); }
 };
 
 
-struct GetSymbol
-{
-  IVocabulary * pVoc; // don't want to make copies of smart ptr
-  GetSymbol(IVocabulary *pVoc) : pVoc(pVoc) {}
+struct GetSymbol {
+  IVocabulary* pVoc;  // don't want to make copies of smart ptr
+  GetSymbol(IVocabulary* pVoc) : pVoc(pVoc) {}
   GetSymbol(IVocabularyPtr const& pVoc) : pVoc(pVoc.get()) {}
   GetSymbol(GetSymbol const& o) : pVoc(o.pVoc) {}
   typedef std::string result_type;
   typedef Sym argument_type;
-  std::string operator()(Sym symId) const
-  {
-    return pVoc->str(symId);
-  }
+  std::string operator()(Sym symId) const { return pVoc->str(symId); }
 };
 
 
@@ -61,26 +50,24 @@ struct GetSymbol
 /// AddSymbol: if the vocab didn't have the symbols before, it certainly will
 /// after.
 template <class InStrings, class OutSymbolIter>
-inline OutSymbolIter toSymbols(InStrings const& symStrs, OutSymbolIter o, IVocabularyPtr const& voc)
-{
+inline OutSymbolIter toSymbols(InStrings const& symStrs, OutSymbolIter o, IVocabularyPtr const& voc) {
   return boost::transform(symStrs, o, AddSymbol(voc));
 }
 
 /// as above but back_insert (push_back) to output container
 template <class InStrings, class OutSymbols>
-inline void appendSymbols(InStrings const& symStrs, OutSymbols &o, IVocabularyPtr const& voc)
-{
+inline void appendSymbols(InStrings const& symStrs, OutSymbols& o, IVocabularyPtr const& voc) {
   toSymbols(symStrs, std::back_inserter(o), voc);
 }
 
 /// as above but return vec
 template <class InStrings>
-inline Syms toSymbols(InStrings const& symStrs, IVocabularyPtr const& voc)
-{
+inline Syms toSymbols(InStrings const& symStrs, IVocabularyPtr const& voc) {
   Syms r;
   appendSymbols(symStrs, r, voc);
   return r;
 }
+
 
 }
 

@@ -74,7 +74,7 @@
    fC[i] = logplus(costB + fC[i], costC + fC[i]) =(prob) probB*pC[i] + probC*pC[i] = (probB+probC)*pC[i]
    = logplus(costB, costC) + fC[i]
 
-   in case C==B (so further costB == costC), you can take logplus(costC, costC) = costC - log(2)
+   in case C==B (so further costB == costC), you can take logplus(costC, costC) = costC-log(2)
 
 
    graehl thinks it really simplifies thinking about expectations if we use
@@ -151,7 +151,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::plusBy(FeatureWeightTpl<FloatT, 
       if (!b.empty()) {
         ownMap();
         MapT& thismap = *pMap_;
-        MapT *bmap = b.pMap_.get();
+        MapT* bmap = b.pMap_.get();
         assert(&thismap != bmap);
         if (bmap)
           for (typename MapT::const_iterator i = bmap->begin(), e = bmap->end(); i != e; ++i)
@@ -183,7 +183,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(FeatureWeightTpl<FloatT,
       // fC[i] <= logplus(costB + fC[i], costC + fB[i]) = logplus(costB, costC) + fC[i]
       FloatT const aplusbval = Util::neglogPlus(aval, bval);  // we're setting (in prob space) v'=v*(pa+pb)
       SDL_DEBUG_ALWAYS(Hypergraph.ExpectationWeight, "same map for a*b; result[i] = a[i] + neglogplus("
-                                                     << aval << ", " << bval << ") = " << aplusbval);
+                                                         << aval << ", " << bval << ") = " << aplusbval);
       for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
         i->second += aplusbval;  // *=(pa+pb)
     } else {
@@ -191,8 +191,7 @@ void FeatureWeightTpl<FloatT, MapT, SumPolicy>::timesBy(FeatureWeightTpl<FloatT,
       ownMap();
       // fC[i] = logplus(costB + fC[i], costC + fB[i])
       // multiply A expectations by probB
-      for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i)
-        i->second += bval;
+      for (typename MapT::iterator i = pMap_->begin(), e = pMap_->end(); i != e; ++i) i->second += bval;
       // then add (B expectations multiplied by probA).
       if (!b.empty()) {
         MapT& thismap = *pMap_;

@@ -22,7 +22,6 @@
 #include <sdl/Util/LogHelper.hpp>
 
 
-
 #include <utility>  // make_pair
 #include <sdl/Util/Unordered.hpp>
 
@@ -104,7 +103,9 @@ class MapHypergraph final : public IHypergraph<ToA> {
     if (found == oldArcsToNewArcs_.end()) {
       mappedArc = mapper_(fromArc);
       oldArcsToNewArcs_.insert(std::make_pair(fromArc, mappedArc));
-    } else { mappedArc = found->second; }
+    } else {
+      mappedArc = found->second;
+    }
     return mappedArc;
   }
 

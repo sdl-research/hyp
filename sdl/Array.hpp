@@ -72,9 +72,9 @@ typename C::value_type* arrayBegin(C& c) {
 }
 
 template <class C>
-typename C::value_type * zeroArrayBegin(C & c) {
+typename C::value_type* zeroArrayBegin(C& c) {
   typedef typename C::value_type Val;
-  Val *r = arrayBegin(c);
+  Val* r = arrayBegin(c);
   std::memset(r, 0, sizeof(Val) * c.size());
   return r;
 }

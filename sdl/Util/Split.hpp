@@ -13,7 +13,7 @@
     split space-separated words from string into vector<string> or vector<SplitRange>.
 
     note that it's an error to split into an iterator range into a temporary
-    copy via splitSpaces - you must use NoTrim or Inplace
+    copy via splitSpaces-you must use NoTrim or Inplace
 
     the most reliable/desirable split in most cases is splitSpaces(words,
     string), because any \r\n \n issues are moot, and because we report no empty
@@ -77,7 +77,7 @@ void splitSpaceKeepEmpties(Strings& words, std::string const& line) {
 
 template <class Strings, class String>
 void splitChars(Strings& words, String const& str) {
-  for(typename String::const_iterator i = str.begin(), e = str.end(); i!=e; ++i)
+  for (typename String::const_iterator i = str.begin(), e = str.end(); i != e; ++i)
     words.push_back(typename Strings::value_type(1, *i));
 }
 

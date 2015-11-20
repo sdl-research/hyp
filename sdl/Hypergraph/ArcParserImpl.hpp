@@ -53,19 +53,13 @@ namespace ParserUtil = sdl::Hypergraph::ParserUtil;
    http://www.boost.org/doc/libs/1_56_0/libs/spirit/doc/html/spirit/qi/tutorials/employee___parsing_into_structs.html
 */
 BOOST_FUSION_ADAPT_STRUCT(ParserUtil::State,
-                          (sdl::Hypergraph::StateId, id)
-                          (std::string, inputSymbol)
-                          (std::string, outputSymbol)
-                          (bool, isInputSymbolLexical)
-                          (bool, isOutputSymbolLexical)
-                          )
+                          (sdl::Hypergraph::StateId, id)(std::string, inputSymbol)(std::string, outputSymbol)(
+                              bool, isInputSymbolLexical)(bool, isOutputSymbolLexical))
 
-enum { kAtId = 0, kAtInputSymbol = 1, kAtOutputSymbol = 2, kAtInputLexical = 3, kAtOutputLexical = 4};
+enum { kAtId = 0, kAtInputSymbol = 1, kAtOutputSymbol = 2, kAtInputLexical = 3, kAtOutputLexical = 4 };
 
-BOOST_FUSION_ADAPT_STRUCT(ParserUtil::Arc,
-                          (ParserUtil::State, head)
-                          (std::vector<ParserUtil::State>, tails)
-                          (std::string, weightStr))
+BOOST_FUSION_ADAPT_STRUCT(ParserUtil::Arc, (ParserUtil::State, head)(std::vector<ParserUtil::State>,
+                                                                     tails)(std::string, weightStr))
 
 namespace sdl {
 namespace Hypergraph {
@@ -78,20 +72,12 @@ namespace phoenix = boost::phoenix;
 // adapted from:
 // http://boost-spirit.com/home/articles/qi-example/parsing-escaped-string-input-using-spirit-qi
 template <typename InputIterator>
-struct DoubleQuotedEscapedString
-    : qi::grammar<InputIterator, std::string()>
-{
-  DoubleQuotedEscapedString()
-      : DoubleQuotedEscapedString::base_type(startRule),
-        quote("\"")
-  {
+struct DoubleQuotedEscapedString : qi::grammar<InputIterator, std::string()> {
+  DoubleQuotedEscapedString() : DoubleQuotedEscapedString::base_type(startRule), quote("\"") {
     Util::DoubleQuoteEsc e;
     e.toQi(escChar);
 
-    startRule = quote
-        >> *(escChar | "\\x" >> qi::hex | (qi::char_ - quote))
-        >> quote
-        ;
+    startRule = quote >> *(escChar | "\\x" >> qi::hex | (qi::char_-quote)) >> quote;
   }
 
   qi::rule<InputIterator, std::string()> startRule;
@@ -100,19 +86,11 @@ struct DoubleQuotedEscapedString
 };
 
 template <typename InputIterator>
-struct SingleQuotedString
-    : qi::grammar<InputIterator, std::string()>
-{
-  SingleQuotedString()
-      : SingleQuotedString::base_type(startRule),
-        quote("'")
-  {
+struct SingleQuotedString : qi::grammar<InputIterator, std::string()> {
+  SingleQuotedString() : SingleQuotedString::base_type(startRule), quote("'") {
     Util::SingleQuoteEsc e;
     e.toQi(escQuote);
-    startRule = quote
-        >> *(escQuote | (qi::char_ - quote))
-        >> quote
-        ;
+    startRule = quote >> *(escQuote | (qi::char_-quote)) >> quote;
   }
 
   qi::rule<InputIterator, std::string()> startRule;
@@ -138,13 +116,12 @@ struct ArcParserImpl : qi::grammar<Iterator, ParserUtil::Arc(), ascii::space_typ
   ParserUtil::Arc* parse(std::string const& str) const {
     Iterator iter = str.begin(), end = str.end();
     Util::AutoDelete<ParserUtil::Arc> arc(new ParserUtil::Arc());
-    return (qi::phrase_parse(iter, end, *this, ascii::space, *arc) && iter == end) ?
-        arc.release() :
-        (ParserUtil::Arc*)0;
+    return (qi::phrase_parse(iter, end, *this, ascii::space, *arc) && iter == end) ? arc.release()
+                                                                                   : (ParserUtil::Arc*)0;
   }
 };
 
-template<class Iterator>
+template <class Iterator>
 ArcParserImpl<Iterator>::ArcParserImpl()
     : ArcParserImpl<Iterator>::base_type(start) {
 
@@ -154,59 +131,34 @@ ArcParserImpl<Iterator>::ArcParserImpl()
   using qi::lexeme;
 
   // nonterminal symbol, e.g., S, NP, VP
-  ntSymbol %=
-      +(qi::print - char_("\\()\"' "))
-      ;
+  ntSymbol %= +(qi::print - char_("\\()\"' "));
 
   // lexical symbol, e.g., "foo"
-  lexSymbol %=
-      doubleQuotedEscapedStr
-      | singleQuotedStr
-      ;
+  lexSymbol %= doubleQuotedEscapedStr | singleQuotedStr;
 
   // the weight (as a string, to be parsed later)
   weight %= +char_;
 
   // input or output symbol for a state
-  symbol %=
-      lexSymbol | ntSymbol
-      ;
+  symbol %= lexSymbol | ntSymbol;
 
   // state with optional ID, input symbol and optional output symbol
-  state1 %=
-      lexeme[ (int_
-               | qi::eps [phoenix::at_c<kAtId>(_val) = -1]
-               )
-              >> '(' ]
-      >> (lexSymbol [phoenix::at_c<kAtInputLexical>(_val) = true]
-          | symbol)
-      >> -(lexSymbol [phoenix::at_c<kAtOutputLexical>(_val) = true]
-           | symbol)
-      >> ')'
-      ;
+  state1 %= lexeme[(int_ | qi::eps[phoenix::at_c<kAtId>(_val) = -1]) >> '(']
+            >> (lexSymbol[phoenix::at_c<kAtInputLexical>(_val) = true] | symbol)
+            >> -(lexSymbol[phoenix::at_c<kAtOutputLexical>(_val) = true] | symbol) >> ')';
 
   // state without input/output symbols
   state2 %= int_;
 
   // special case, state as in "START <- 0"
-  state3 %=
-      qi::lit("START") [phoenix::at_c<kAtId>(_val) = -2]
-      | qi::lit("FINAL") [phoenix::at_c<kAtId>(_val) = -3]
-      ;
+  state3 %= qi::lit("START")[phoenix::at_c<kAtId>(_val) = -2] | qi::lit("FINAL")[phoenix::at_c<kAtId>(_val) = -3];
 
-  state %=
-      state1 | state2 | state3
-      ;
+  state %= state1 | state2 | state3;
 
   states %= +state;
 
   // complete line describing an arc
-  start %=
-      state
-      >> "<-"
-      >> states
-      >> -("/" >> weight)
-      ;
+  start %= state >> "<-" >> states >> -("/" >> weight);
 }
 
 

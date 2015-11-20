@@ -56,7 +56,7 @@ void sort(Cont& cont, Before before) {
 }
 
 template <class Cont>
-Cont sorted(Cont &&cont) {
+Cont sorted(Cont&& cont) {
   sort(cont);
   return std::forward<Cont>(cont);
 }

@@ -125,11 +125,14 @@ const PropertiesInt kConstraintStarts = 0x2000ULL;
 /// fixed state endBlock(id) is the graph source
 const PropertiesInt kConstraintEnds = 0x4000ULL;
 
-/// stateids for all but first tail are Sym.id_ (directly using GraphInlineInputLabels.hpp is the only way to achieve this property, and after setting it, the normal hg 'label' interface is unavailable (but that's fine; you have the labels). kGraphInlineInputLabels means only in-arcs and first-tail-out-arcs are allowed (not full out-arcs)
+/// stateids for all but first tail are Sym.id_ (directly using GraphInlineInputLabels.hpp is the only way to
+/// achieve this property, and after setting it, the normal hg 'label' interface is unavailable (but that's
+/// fine; you have the labels). kGraphInlineInputLabels means only in-arcs and first-tail-out-arcs are allowed
+/// (not full out-arcs)
 const PropertiesInt kGraphInlineInputLabels = 0x8000ULL;
 
 const PropertiesInt kPropertyEnd = kConstraintEnds << 1;
-const PropertiesInt kAllProperties = kPropertyEnd - 1;
+const PropertiesInt kAllProperties = kPropertyEnd-1;
 
 const PropertiesInt kAnyConstraints = kConstraintEnds | kConstraintStarts;
 

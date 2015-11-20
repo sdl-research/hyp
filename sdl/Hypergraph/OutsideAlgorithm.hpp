@@ -134,8 +134,7 @@ void outsideAlgorithm(IHypergraph<Arc> const& hg, boost::ptr_vector<typename Arc
 
   // Traverse states in reverse topsorted order (i.e., starting from
   // FINAL root), and compute outsideScore for each state:
-  ComputeOutsideScoreStatesVisitor<Arc> outsideScoreComputer(hg, insideScores, outsideScores,
-                                                             haveInsideForAxiom);
+  ComputeOutsideScoreStatesVisitor<Arc> outsideScoreComputer(hg, insideScores, outsideScores, haveInsideForAxiom);
   ReverseTopsortStatesTraversal<Arc>(hg, &outsideScoreComputer);
 }
 

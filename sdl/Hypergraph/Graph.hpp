@@ -132,8 +132,7 @@ struct Graph {
   void print(Out& o) const {
     for (unsigned i = 0; i < outs.size(); ++i) {
       o << i << " ->";
-      for (StateId d : outs[i])
-        o << ' ' << d;
+      for (StateId d : outs[i]) o << ' ' << d;
       o << '\n';
     }
   }

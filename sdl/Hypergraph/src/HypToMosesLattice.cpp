@@ -56,14 +56,15 @@ struct HypToMosesLattice {
       std::string const& file = vm["input-file"].as<std::string>();
       input.init(file);
     }
-    //TODO: configurable logging
+    // TODO: configurable logging
     Util::initLoggerFromConfig(logConfigFile, "HypToMosesLattice", Util::kLogInfo);
     IVocabularyPtr pVoc = Vocabulary::createDefaultVocab();
     std::istream& instream = input.getStream();
-    typedef Hypergraph::ArcTpl<Hypergraph::ViterbiWeightTpl<float> > Arc;
+    typedef Hypergraph::ArcTpl<Hypergraph::ViterbiWeightTpl<float>> Arc;
     PerProcessVocabulary voc(pVoc);
-    Hypergraph::IHypergraphsIteratorTpl<Arc>* pHgIter = Hypergraph::IHypergraphsIteratorTpl<Arc>::create(
-        instream, Hypergraph::kDashesSeparatedHg, ptrNoDelete(voc));
+    Hypergraph::IHypergraphsIteratorTpl<Arc>* pHgIter
+        = Hypergraph::IHypergraphsIteratorTpl<Arc>::create(instream, Hypergraph::kDashesSeparatedHg,
+                                                           ptrNoDelete(voc));
     pHgIter->setHgProperties(Hypergraph::kStoreFirstTailOutArcs);
     while (!pHgIter->done()) {
       Hypergraph::IHypergraph<Arc>* pHg = pHgIter->value();
@@ -73,8 +74,10 @@ struct HypToMosesLattice {
     return 0;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(ToMosesLattice)
+
+
+

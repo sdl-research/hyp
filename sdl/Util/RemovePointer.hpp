@@ -24,24 +24,32 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 template <class Ptr, class Enable = void>
 struct RemovePointer : std::remove_pointer<Ptr> {};
 
 template <class T>
-struct RemovePointer<boost::intrusive_ptr<T>, void> { typedef T type; };
+struct RemovePointer<boost::intrusive_ptr<T>, void> {
+  typedef T type;
+};
 
 template <class T>
-struct RemovePointer<boost::shared_ptr<T>, void> { typedef T type; };
+struct RemovePointer<boost::shared_ptr<T>, void> {
+  typedef T type;
+};
 
 template <class T>
-struct RemovePointer<std::shared_ptr<T>, void> { typedef T type; };
+struct RemovePointer<std::shared_ptr<T>, void> {
+  typedef T type;
+};
 
 template <class T>
 struct RemoveConstPointer {
   typedef typename std::remove_const<typename RemovePointer<T>::type>::type type;
 };
+
 
 }}
 

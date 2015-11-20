@@ -21,7 +21,7 @@
 namespace sdl {
 namespace Hypergraph {
 
-template<class Iter>
+template <class Iter>
 struct ArcParserImpl;
 
 /// hide implementation (which uses slow to compile boost::spirit) of arc parser
@@ -34,8 +34,8 @@ struct ArcParser {
   ParserUtil::Arc* parse(std::string const& str) const;
 
   shared_ptr<Impl> pImpl_;
-
 };
+
 
 }}
 

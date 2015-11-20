@@ -145,8 +145,7 @@ struct StateAddMapping : public StateIdMapping {
   StateAddMapping(IMutableHypergraph<A>* outHg) : outHg(outHg) {}
   virtual StateId remap(StateId s) override {
     StateId r = outHg->addState();
-    SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s
-                                                                            << " -> r=" << r
+    SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s << " -> r=" << r
                                                                             << " numStates=" << outHg->size());
     return r;
   }
@@ -163,8 +162,7 @@ struct StateAddIdentityMapping : public StateIdMapping {
   // we don't declare this as identity because we want to make sure remap is actually called
   virtual StateId remap(StateId s) override {
     StateId r = outHg->addStateId(s);
-    SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s
-                                                                            << " -> r=" << r
+    SDL_TRACE(Hypergraph.StateIdTranslation, "StateAddMapping remap outhg=" << outHg << " s=" << s << " -> r=" << r
                                                                             << " numStates=" << outHg->size());
     assert(r == s);
     return s;
@@ -353,8 +351,7 @@ struct StateIdTranslation : boost::noncopyable {
 
   template <class A>
   void transferLabelsPartial(IHypergraph<A> const& ihg, IMutableHypergraph<A>& ohg) {
-    for (StateIdMap::value_type const& io : cache)
-      ohg.setLabelPair(io.second, ihg.labelPair(io.first));
+    for (StateIdMap::value_type const& io : cache) ohg.setLabelPair(io.second, ihg.labelPair(io.first));
   }
 
   template <class A>

@@ -219,8 +219,7 @@ struct StateRangeSep {
 };
 
 template <class X>
-StateRangeSep<add_lvalue_reference_t<add_const_t<X>>> stateRange(X const& x,
-                                                                 RangeSep s = RangeSep(singleline())) {
+StateRangeSep<add_lvalue_reference_t<add_const_t<X>>> stateRange(X const& x, RangeSep s = RangeSep(singleline())) {
   return StateRangeSep<add_lvalue_reference_t<add_const_t<X>>>(x, s);
 }
 
@@ -311,8 +310,8 @@ PrintRange<Iter> printPrefix(Iter begin, Iter end, std::size_t maxPrefixSize) {
 
 template <class Container>
 PrintRange<typename Container::const_iterator> printPrefix(Container const& range, std::size_t maxPrefixSize) {
-  return PrintRange<typename Container::const_iterator>(
-      range.begin(), range.begin() + std::min(range.size(), maxPrefixSize));
+  return PrintRange<typename Container::const_iterator>(range.begin(),
+                                                        range.begin() + std::min(range.size(), maxPrefixSize));
 }
 
 template <class Val>

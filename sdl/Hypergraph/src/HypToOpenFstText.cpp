@@ -98,8 +98,10 @@ struct HypToOpenFstText {
     return EXIT_SUCCESS;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(ToOpenFstText)
+
+
+

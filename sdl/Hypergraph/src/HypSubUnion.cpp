@@ -43,8 +43,10 @@ struct HypSubUnion : TransformMain<HypSubUnion> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(SubUnion)
+
+
+

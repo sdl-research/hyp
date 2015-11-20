@@ -48,9 +48,7 @@ class CastHypergraph final : public IHypergraph<ToA> {
 
   Properties uncomputedProperties() const override { return hg_.uncomputedProperties(); }
 
-  CastHypergraph<FromArc, ToArc>* clone() const override {
-    return new CastHypergraph<FromArc, ToArc>(hg_);
-  }
+  CastHypergraph<FromArc, ToArc>* clone() const override { return new CastHypergraph<FromArc, ToArc>(hg_); }
 
   /**
      Casts the arc using reinterpret_cast and returns it.

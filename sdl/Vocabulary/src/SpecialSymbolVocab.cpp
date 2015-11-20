@@ -21,8 +21,7 @@ namespace Vocabulary {
 SpecialSymbolVocab SpecialSymbolVocab::gInstance_;
 
 void SpecialSymbolVocab::init() {
-  if (!vocab)
-    vocab = new BasicVocabularyImpl(kSpecialTerminal);
+  if (!vocab) vocab = new BasicVocabularyImpl(kSpecialTerminal);
 }
 
 SpecialSymbolVocab::~SpecialSymbolVocab() {
@@ -42,7 +41,7 @@ char const* const kXmtBlockStr("<xmt-block>");
 
 char const* const kXmtEntityStr("<xmt-entity>");
 
-static Sym addSdlNumBlocks(BasicVocabularyImpl &s, std::string const& pre) {
+static Sym addSdlNumBlocks(BasicVocabularyImpl& s, std::string const& pre) {
   std::string name(pre);
   std::size_t const szpre = name.size() - 1;
   name.resize(szpre);
@@ -50,12 +49,12 @@ static Sym addSdlNumBlocks(BasicVocabularyImpl &s, std::string const& pre) {
   name.push_back('>');
   Sym const r = s.add(name);
   assert(SDL_NUM_BLOCKS % 10 == 0);
-  for (unsigned tens = 0; tens < SDL_NUM_BLOCKS; ) {
+  for (unsigned tens = 0; tens < SDL_NUM_BLOCKS;) {
     name.resize(szpre);
     graehl::utos_append(name, tens);
     name.push_back('>');
     tens += 10;
-    char &ones = name[name.size() - 2];
+    char& ones = name[name.size() - 2];
     s.add(name);
     for (char c = '1'; c <= '9'; ++c) {
       ones = c;

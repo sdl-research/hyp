@@ -38,8 +38,7 @@ namespace Vocabulary {
    are printed)
  */
 template <class ForwardIterator>
-void lookupAndPrintSymbols(ForwardIterator begin, ForwardIterator end, IVocabulary const* pVoc,
-                           std::ostream& out) {
+void lookupAndPrintSymbols(ForwardIterator begin, ForwardIterator end, IVocabulary const* pVoc, std::ostream& out) {
   Util::Sep space(" ");
   for (ForwardIterator symbolIdIter = begin; symbolIdIter != end; ++symbolIdIter) {
     if (pVoc)

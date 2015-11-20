@@ -45,8 +45,10 @@ struct HypConcat : TransformMain<HypConcat> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Concat)
+
+
+

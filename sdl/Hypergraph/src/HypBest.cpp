@@ -28,8 +28,10 @@ struct HypBest : TransformMain<HypBest> {
 
   void validate_parameters_more() {}
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Best)
+
+
+

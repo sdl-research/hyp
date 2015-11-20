@@ -128,7 +128,7 @@ bool checkGradients(IObjectiveFunction<FloatT>& objFct, FloatT* params, const Fe
 
     // 4. Check that the scaled function value difference is the same
     // as the provided gradient:
-    FloatT wantGradient = (fctValAfter - fctValBefore) / kGradientCheckEpsilon;
+    FloatT wantGradient = (fctValAfter-fctValBefore) / kGradientCheckEpsilon;
     if (!Util::floatEqual(wantGradient, gradients[i], tolerance)) {
       SDL_WARN(Optimization.OptimizationProcedure, std::setprecision(12)
                                                        << "Gradient for feature " << i << " is "
@@ -234,8 +234,7 @@ void OptimizationProcedure::optimize() {
 
   SDL_DEBUG(OptimizationProcedure, "Writing learned weights to " << opts_.weightsPath);
   Util::Output weightsOutput(opts_.weightsPath);
-  Optimization::IOriginalFeatureIds* ids
-      = dynamic_cast<Optimization::IOriginalFeatureIds*>(pSearchSpace_.get());
+  Optimization::IOriginalFeatureIds* ids = dynamic_cast<Optimization::IOriginalFeatureIds*>(pSearchSpace_.get());
   bool doDelete = false;
   if (ids == NULL) {
     ids = new Optimization::IdentityOriginalFeatureIds();

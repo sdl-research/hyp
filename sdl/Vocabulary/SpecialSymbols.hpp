@@ -130,7 +130,7 @@ inline bool isConstraintSubstituteSym(Sym sym) {
 
 inline BlockId blockIdForSubstituteSym(Sym sym) {
   assert(isConstraintSubstituteSym(sym));
-  return sym.id() - (BLOCK_START::ID.id() + (SDL_NUM_BLOCKS - 1));
+  return sym.id() - (BLOCK_START::ID.id() + (SDL_NUM_BLOCKS-1));
 }
 
 /// \return blockIdForSubstituteSym(sym) - 1 for a 0-based index instead of 1-based
@@ -147,7 +147,7 @@ inline Sym substituteSymForIndex(BlockId id) {
 inline Sym substituteSymForBlockId(BlockId id) {
   assert(id <= SDL_NUM_BLOCKS);
   assert(id > 0);
-  return (BLOCK_START::ID + SDL_NUM_BLOCKS - 1) + id;
+  return (BLOCK_START::ID + SDL_NUM_BLOCKS-1) + id;
 }
 
 /**
@@ -243,7 +243,7 @@ inline void checkBlockId(BlockId id) {
 inline Sym getBlockOpen(BlockId id) {
   assert(id <= SDL_NUM_BLOCKS);
   assert(id > 0);
-  return (BLOCK_START::ID - 1) + id;
+  return (BLOCK_START::ID-1) + id;
 }
 
 inline Sym blockOpenForIndex(BlockId index) {
@@ -258,10 +258,11 @@ inline Sym blockOpenForIndex(BlockId index) {
 
 inline Sym getBlockOpenChecked(BlockId id) {
   checkBlockId(id);
-  return (BLOCK_START::ID - 1) + id;
+  return (BLOCK_START::ID-1) + id;
+}
 }
 
 
-}}
+}
 
 #endif

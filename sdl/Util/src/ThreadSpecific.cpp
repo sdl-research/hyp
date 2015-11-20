@@ -10,7 +10,8 @@
 // limitations under the License.
 #include <sdl/Util/ThreadSpecific.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 #if SDL_BOOST_TSS_BUG
 struct DummyTssCleanupFunction : public impl::tss_cleanup_function {
@@ -23,5 +24,6 @@ shared_ptr<impl::tss_cleanup_function> makeDummyTssCleanupFunction() {
   return gDummyTssCleanupFunction;
 }
 #endif
+
 
 }}

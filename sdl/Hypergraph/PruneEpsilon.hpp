@@ -24,10 +24,10 @@ namespace Hypergraph {
 
 template <class Arc>
 void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWeights = true,
-                                bool pathPruneAllStates = false) {
+                                 bool pathPruneAllStates = false) {
   hg.forceFirstTailOutArcsOnly();
   SDL_DEBUG(Hypergraph.PruneEpsilon, "before pruneSimplePathGraphEpsilon properties: "
-                                     << PrintProperties(hg.properties()) << ":\n" << hg);
+                                         << PrintProperties(hg.properties()) << ":\n" << hg);
   assert(hg.isGraph());
   StateId final = hg.final();
   if (final == kNoState) {
@@ -51,8 +51,8 @@ void pruneSimplePathGraphEpsilon(IMutableHypergraph<Arc>& hg, bool keepEpsilonWe
     }
     if (outarcs->size() != 1) {
       SDL_THROW_LOG(Hypergraph.PruneEpsilon, InvalidInputException, "input hg was not a simple path: state "
-                                                                    << s << " had " << outarcs->size()
-                                                                    << " out arcs instead of 0 or 1\n");
+                                                                        << s << " had " << outarcs->size()
+                                                                        << " out arcs instead of 0 or 1\n");
       return;  // not a path
     }
     Arc* a = (Arc*)outarcs->front();
@@ -140,9 +140,7 @@ struct PruneEpsilonOptions {
 };
 
 struct PruneEpsilon : PruneEpsilonOptions, TransformBase<Transform::Inplace> {
-  PruneEpsilon(PruneEpsilonOptions const& opt = PruneEpsilonOptions())
-      : PruneEpsilonOptions(opt)
-  {}
+  PruneEpsilon(PruneEpsilonOptions const& opt = PruneEpsilonOptions()) : PruneEpsilonOptions(opt) {}
   bool enabled() const { return pruneEpsilon; }
   template <class Arc>
   bool needs(IMutableHypergraph<Arc>& h) const {

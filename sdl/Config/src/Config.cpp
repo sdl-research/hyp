@@ -119,8 +119,7 @@ ConfigNode overrideConfig(ConfigNode const& in, ConfigPath const& replaceAt,
   return out;
 }
 
-ConfigNode overrideConfig(ConfigNode const& root, ConfigPath const& replaceAt,
-                          ConfigNode const& substituteAtPath) {
+ConfigNode overrideConfig(ConfigNode const& root, ConfigPath const& replaceAt, ConfigNode const& substituteAtPath) {
   return overrideConfig(root, replaceAt, substituteAtPath, 0);
 }
 
@@ -295,6 +294,7 @@ ConfigNode loadConfig(boost::filesystem::path const& path, OptPath const& forPat
                                                              << configure::join_opt_path(forPath));
   }
 }
+}
 
 
-}}
+}

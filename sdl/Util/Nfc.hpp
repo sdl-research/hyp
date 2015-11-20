@@ -56,8 +56,7 @@ inline bool maybeNormalizeToNfc(std::string const& in, std::string& out, bool wa
 void normalizeToNfc(Slice in, std::string& out, bool warnIfNotNfc = kSilentlyNfc, bool nfkc = false);
 
 /// pre: out is empty
-void normalizeToNfc(std::string const& in, std::string& out, bool warnIfNotNfc = kSilentlyNfc,
-                    bool nfkc = false);
+void normalizeToNfc(std::string const& in, std::string& out, bool warnIfNotNfc = kSilentlyNfc, bool nfkc = false);
 
 std::string normalizedToNfc(std::string const& s, bool nfkc = false);
 
@@ -95,8 +94,7 @@ inline void normalizeToNfcInplace(std::string& s, bool warnIfNotNfc = kSilentlyN
   if (&nfc != &s) s = nfc;
 }
 
-inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = kSilentlyNfc,
-                       bool nfkc = false) {
+inline bool getlineNfc(std::istream& in, std::string& utf8, bool warnIfNotNfc = kSilentlyNfc, bool nfkc = false) {
   if ((bool)std::getline(in, utf8)) {
     normalizeToNfcInplace(utf8, warnIfNotNfc, nfkc);
     return true;
@@ -158,7 +156,7 @@ struct NfcOptions {
       maybeWarn(in);
   }
 
-  void normalize(std::string &in, Constraints &c) const;
+  void normalize(std::string& in, Constraints& c) const;
 
   void normalize(std::string const& in, std::string& out) const {
     if (nfc)
@@ -209,8 +207,9 @@ struct NfcOptions {
 
   bool enabled() const { return warnIfResultNotNfc || nfc; }
 };
+}
 
 
-}}
+}
 
 #endif

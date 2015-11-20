@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    type-erased Generator - see Generator.hpp for concept details
+    type-erased Generator-see Generator.hpp for concept details
 
     if you want to type-erase the implementation, an AnyGenerator is superior in
     implementation effort and run-time expense to a pair of dynamic-type
@@ -50,8 +50,8 @@ struct IGeneratorBase : intrusive_refcount<IGeneratorBase<V>, RefCount> {
   // ref?
 
   virtual std::size_t visit(AnyVisitor<V> const& v) = 0;  // these are more efficient by virtue of a single
-                                                          // dynamic dispatch per item rather than more()
-                                                          // followed by next()
+  // dynamic dispatch per item rather than more()
+  // followed by next()
   virtual std::size_t visit(AnyVisitor<V> const& v, std::size_t max) = 0;
   virtual std::size_t append(std::vector<V>& v) = 0;
   virtual std::size_t append(std::vector<V>& v, std::size_t max) = 0;
@@ -67,7 +67,7 @@ struct IGeneratorBase : intrusive_refcount<IGeneratorBase<V>, RefCount> {
   virtual bool more() const = 0;
   virtual V next() = 0;
   virtual ~IGeneratorBase() {}
-  typedef boost::intrusive_ptr<IGeneratorBase<V> > Pointer;
+  typedef boost::intrusive_ptr<IGeneratorBase<V>> Pointer;
 };
 // TODO@JG: non-virtual version of AnyGenerator (lightweight handle to underlying shared generator, with same
 // generator interface. for now, use smart ptr to concrete generator and deref it).

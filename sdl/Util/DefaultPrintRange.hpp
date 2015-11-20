@@ -29,23 +29,29 @@ namespace Util {
 template <class Range, class Enable = void>
 struct PrintAsRange {
 #ifdef _MSC_VER
-# pragma warning(disable:4180)
+#pragma warning(disable : 4180)
 #endif
   template <class O>
-  static void print(O &o, Range const& r) { o << r; }
+  static void print(O& o, Range const& r) {
+    o << r;
+  }
 };
 
 template <>
 struct PrintAsRange<std::string, void> {
   template <class O>
-  static void print(O &o, std::string const& r) { o << r; }
+  static void print(O& o, std::string const& r) {
+    o << r;
+  }
 };
 
 template <class Range>
 struct PrintAsRange<Range, typename VoidIf<typename Range::const_iterator>::type> {
   typedef void type;
   template <class O>
-  static void print(O &o, Range const& r) { printRange(o, r); }
+  static void print(O& o, Range const& r) {
+    printRange(o, r);
+  }
 };
 
 

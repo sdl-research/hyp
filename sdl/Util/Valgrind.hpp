@@ -19,12 +19,12 @@
 #pragma once
 
 #ifndef SDL_VALGRIND
-# ifdef NDEBUG
-//release:
-# define SDL_VALGRIND 0
-# else
-# define SDL_VALGRIND 1
-# endif
+#ifdef NDEBUG
+// release:
+#define SDL_VALGRIND 0
+#else
+#define SDL_VALGRIND 1
+#endif
 #endif
 
 // if you see a redefinition warning, you should include this header first.

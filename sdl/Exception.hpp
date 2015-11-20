@@ -94,6 +94,7 @@ VERBOSE_EXCEPTION_DECLARE(UnknownModuleTypeException)
 VERBOSE_EXCEPTION_DECLARE(TrainableCapitalizerModuleException)
 VERBOSE_EXCEPTION_DECLARE(LowerCaserModuleException)
 
+
 }
 
 #endif

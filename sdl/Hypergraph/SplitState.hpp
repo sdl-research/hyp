@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    used by CharDetokModule - modify lexical labeled states' tokens
+    used by CharDetokModule-modify lexical labeled states' tokens
 */
 
 #ifndef HYP__SPLITSTATE_HPP

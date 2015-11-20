@@ -32,14 +32,14 @@ namespace Hypergraph {
    that the code can be compiled into object files (explicit template
    instantiation, see http://stackoverflow.com/a/555349/60628):
  */
-INSTANTIATE_WEIGHT_TYPES( ViterbiWeight )
-INSTANTIATE_WEIGHT_TYPES( LogWeight )
-INSTANTIATE_WEIGHT_TYPES( FeatureWeight )
+INSTANTIATE_WEIGHT_TYPES(ViterbiWeight)
+INSTANTIATE_WEIGHT_TYPES(LogWeight)
+INSTANTIATE_WEIGHT_TYPES(FeatureWeight)
 #if SDL_FLOAT == 32
-typedef FeatureWeightTpl<double, std::map<FeatureId, double> > DFeatureWeight;
-INSTANTIATE_WEIGHT_TYPES( DFeatureWeight)
+typedef FeatureWeightTpl<double, std::map<FeatureId, double>> DFeatureWeight;
+INSTANTIATE_WEIGHT_TYPES(DFeatureWeight)
 #endif
-INSTANTIATE_WEIGHT_TYPES( ExpectationWeight )
+INSTANTIATE_WEIGHT_TYPES(ExpectationWeight)
 
 #undef INSTANTIATE_WEIGHT_TYPES
 

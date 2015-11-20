@@ -11,7 +11,7 @@
 /** \file
 
     throw OSException exceptions for C API calls that use global errno. (usually
-    the fn returns -1 - only then should you call Util::throw_errno()
+    the fn returns -1-only then should you call Util::throw_errno()
 
     or use
 
@@ -59,8 +59,7 @@ inline void throwErrno(String const& callname, char const* logname = "sdl.Util.e
 }
 
 template <class Exception, class String>
-inline void throwIfErrno(int throwIfMinus1, String const& callname,
-                         char const* logname = "sdl.Util.errno") {
+inline void throwIfErrno(int throwIfMinus1, String const& callname, char const* logname = "sdl.Util.errno") {
   if (throwIfMinus1 == -1) throwErrno<Exception>(callname, logname);
 }
 

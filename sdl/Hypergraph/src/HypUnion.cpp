@@ -19,9 +19,7 @@ namespace Hypergraph {
 
 struct HypUnion : TransformMain<HypUnion> {
 
-  HypUnion() : TransformMain<HypUnion>("Union", USAGE_HypUnion) {
-    configureInputs();
-  }
+  HypUnion() : TransformMain<HypUnion>("Union", USAGE_HypUnion) { configureInputs(); }
 
   Properties properties(int i) const {  // 0 is out, 1 is cfg, 2 and on are all FSMs
     return kDefaultProperties | kStoreFirstTailOutArcs | kStoreInArcs;
@@ -40,8 +38,10 @@ struct HypUnion : TransformMain<HypUnion> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Union)
+
+
+

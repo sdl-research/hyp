@@ -19,7 +19,8 @@
 
 #include <boost/functional/hash.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 /**
    compare pointer-likes by their pointed-to contents.
@@ -53,12 +54,8 @@ template <class T>
 struct NonNullPointeeHash : boost::hash<T> {
   typedef std::size_t result_type;
 
-  result_type operator()(T *p) const {
-    return boost::hash<T>()(*p);
-  }
-  result_type operator()(T const* p) const {
-    return boost::hash<T>()(*p);
-  }
+  result_type operator()(T* p) const { return boost::hash<T>()(*p); }
+  result_type operator()(T const* p) const { return boost::hash<T>()(*p); }
   template <class Ptr>
   result_type operator()(Ptr const& p) const {
     return boost::hash<T>()(*p);
@@ -69,7 +66,7 @@ struct NonNullPointeeHashValue {
   typedef std::size_t result_type;
 
   template <class T>
-  result_type operator()(T *p) const {
+  result_type operator()(T* p) const {
     return hash_value(*p);
   }
   template <class T>

@@ -76,7 +76,7 @@
   encoding of FSA vs FST etc ... but the tradeoff would be more complicated
   access and more virtual dispatch.
 
-  Many non-orthogonal helper methods in IHypergraph - some aid efficiency, but
+  Many non-orthogonal helper methods in IHypergraph-some aid efficiency, but
   it's a lot too swallow.
 
 */
@@ -370,7 +370,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
 
 /// forArcs(v) -  call v(a) for all Arc *a, exactly once for each a
 
-/// forArcsAllowRepeats - v(a) 1 or more times per Arc *a
+/// forArcsAllowRepeats-v(a) 1 or more times per Arc *a
 #include <sdl/Hypergraph/src/IHypergraphForArcs.ipp>
 
   WeightCount countArcs() const {
@@ -439,7 +439,7 @@ struct IHypergraph : HypergraphBase, private boost::noncopyable {
   virtual ConstOutArcsGenerator outArcsConst(StateId state) const {
     assert(storesOutArcs());
     SDL_THROW_LOG(Hypergraph, UnimplementedException,
-                  "outArcsConst");  // TODO - generator iterating over arc ids
+                  "outArcsConst");  // TODO-generator iterating over arc ids
   }
 
   /* appropriate only if the added arcs were made with new Arc(...) and
@@ -549,10 +549,12 @@ template <class Arc>
 void print(std::ostream& out, Arc const* arc, IHypergraph<Arc> const& hg) {
   printArc(out, arc, hg);
 }
-
-
-}}
+}
+}
 
 #include <sdl/Hypergraph/src/IHypergraph.ipp>
+
+
+
 
 #endif

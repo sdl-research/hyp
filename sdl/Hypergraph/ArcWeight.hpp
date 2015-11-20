@@ -25,15 +25,18 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 template <class Wt>
 struct ArcWeight {
   typedef Wt Weight;
   template <class Arc>
-  Wt const& operator()(Arc *a) const { return a->weight(); }
+  Wt const& operator()(Arc* a) const {
+    return a->weight();
+  }
   template <class Arc>
-  void timesBy(Arc *a, Wt &w) const {
+  void timesBy(Arc* a, Wt& w) const {
     Hypergraph::timesBy(a->weight(), w);
   }
 };
@@ -42,51 +45,48 @@ template <class Wt>
 struct OneArcWeight {
   typedef Wt Weight;
   template <class Arc>
-  Weight operator()(Arc *) const { return Weight::one(); }
-  template <class Arc>
-  void timesBy(Arc *a, Wt &w) const {
+  Weight operator()(Arc*) const {
+    return Weight::one();
   }
+  template <class Arc>
+  void timesBy(Arc* a, Wt& w) const {}
 };
 
 template <class Wt>
 struct ZeroArcWeight {
   typedef Wt Weight;
   template <class Arc>
-  Weight operator()(Arc *) const { return Weight::zero(); }
+  Weight operator()(Arc*) const {
+    return Weight::zero();
+  }
   template <class Arc>
-  void timesBy(Arc *a, Wt &w) const {
+  void timesBy(Arc* a, Wt& w) const {
     Hypergraph::setZero(w);
   }
 };
 
-template<class Wt>
+template <class Wt>
 struct StateToWeight {
   typedef Wt Weight;
   virtual ~StateToWeight() {}
   virtual Weight operator()(StateId s) const = 0;
-  void timesByState(StateId s, Weight &w) const {
-    Hypergraph::timesBy((*this)(s), w);
-  }
+  void timesByState(StateId s, Weight& w) const { Hypergraph::timesBy((*this)(s), w); }
 };
 
-// to pass an abstract StateToWeight (unknown concrete type) by value as a StateWtFn. Pimpl may be shared_ptr<StateToWeight<Wt> *> instead
-template <class Wt, class Pimpl = StateToWeight<Wt> *>
+// to pass an abstract StateToWeight (unknown concrete type) by value as a StateWtFn. Pimpl may be
+// shared_ptr<StateToWeight<Wt> *> instead
+template <class Wt, class Pimpl = StateToWeight<Wt>*>
 struct CallStateToWeight {
   typedef Wt Weight;
   Pimpl p;
-  Weight operator()(StateId s) const {
-    return (*p)(s);
-  }
-  void timesByState(StateId s, Weight &w) const {
-    p->timesByState(s, w);
-  }
+  Weight operator()(StateId s) const { return (*p)(s); }
+  void timesByState(StateId s, Weight& w) const { p->timesByState(s, w); }
 
   CallStateToWeight() : p() {}
   template <class Ptr>
   CallStateToWeight(Ptr const& ptr)
       : p(ptr) {}
-  CallStateToWeight(CallStateToWeight const& o)
-      : p(o.p) {}
+  CallStateToWeight(CallStateToWeight const& o) : p(o.p) {}
 };
 
 
@@ -95,82 +95,90 @@ struct CallStateToWeight {
 */
 template <class WtFn, class Wt = typename WtFn::Weight>
 struct RefWtFn {
-  WtFn *pimpl;
+  WtFn* pimpl;
   typedef Wt Weight;
   template <class Arc>
-  Wt operator()(Arc *a) const { return (*pimpl)(a); }
+  Wt operator()(Arc* a) const {
+    return (*pimpl)(a);
+  }
 };
 
 template <class WtFn>
-RefWtFn<WtFn> refWtFn(WtFn &wf) {
+RefWtFn<WtFn> refWtFn(WtFn& wf) {
   return RefWtFn<WtFn>(wf);
 }
 
 template <class WtFn>
-RefWtFn<WtFn> refWtFnCref(WtFn &wf) {
+RefWtFn<WtFn> refWtFnCref(WtFn& wf) {
   return RefWtFn<WtFn>(wf);
 }
 
 /**
-   CRTP caching of an ArcWeight fn ; friendlier constructor forwarding. note: you won't get caching unless you access through a CachedArcWeight ref/ptr.
+   CRTP caching of an ArcWeight fn ; friendlier constructor forwarding. note: you won't get caching unless you
+   access through a CachedArcWeight ref/ptr.
 
-   "frozen" means it's an error to call on any arc that wasn't already evaluated earlier (e.g. with populate(hg))
+   "frozen" means it's an error to call on any arc that wasn't already evaluated earlier (e.g. with
+   populate(hg))
 */
 template <class Impl, class Wt = typename Impl::Weight>
-struct CacheArcWeight
-{
+struct CacheArcWeight {
   Impl const& impl() const { return *static_cast<Impl const*>(this); }
-  Impl & impl() { return *static_cast<Impl *>(this); }
+  Impl& impl() { return *static_cast<Impl*>(this); }
   typedef Wt Weight;
   Pool::object_pool<Wt> wtPool;
-  typedef typename boost::remove_reference<Wt>::type * CachedWt;
+  typedef typename boost::remove_reference<Wt>::type* CachedWt;
   unordered_map<intptr_t, CachedWt> cache;
   template <class Arc>
-  Wt const& operator()(Arc *a) {
-    CachedWt *pw;
-    if (Util::update(cache, (intptr_t)a, pw))
-      return *(*pw = wtPool.construct(impl()(a)));
+  Wt const& operator()(Arc* a) {
+    CachedWt* pw;
+    if (Util::update(cache, (intptr_t)a, pw)) return *(*pw = wtPool.construct(impl()(a)));
     return **pw;
   };
   typedef CacheArcWeight<Impl, Wt> Self;
   typedef shared_ptr<Self> SharedPtr;
-  SharedPtr sharedPtr() {
-    return static_pointer_cast<Self>(make_shared<Impl>(impl()));
-  }
+  SharedPtr sharedPtr() { return static_pointer_cast<Self>(make_shared<Impl>(impl())); }
   struct Shared {
     typedef Wt Weight;
     SharedPtr p;
     template <class Arc>
-    Wt const& operator()(Arc *a) const {
+    Wt const& operator()(Arc* a) const {
       return (*p)(a);
     }
   };
   struct Ptr {
     typedef Wt Weight;
-    Self *p;
+    Self* p;
     template <class Arc>
-    Wt const& operator()(Arc *a) const {
+    Wt const& operator()(Arc* a) const {
       return (*p)(a);
     }
   };
-  Ptr ptr() { Ptr r; r.p = this; return r; }
+  Ptr ptr() {
+    Ptr r;
+    r.p = this;
+    return r;
+  }
   /**
      use this fn object if you already visited all the arcs that it will be used for to fill cache
   */
   struct FrozenPtr {
     typedef Wt Weight;
-    Self *p;
+    Self* p;
     template <class Arc>
-    Wt const& operator()(Arc *a) const {
+    Wt const& operator()(Arc* a) const {
       return *p->cache.find((intptr_t)a)->second;
     }
   };
-  Ptr frozenPtr() { FrozenPtr r; r.p = this; return r; }
+  Ptr frozenPtr() {
+    FrozenPtr r;
+    r.p = this;
+    return r;
+  }
   struct FrozenShared {
     typedef Wt Weight;
     SharedPtr p;
     template <class Arc>
-    Wt const& operator()(Arc *a) const {
+    Wt const& operator()(Arc* a) const {
       return *p->cache.find((intptr_t)a)->second;
     }
   };
@@ -193,14 +201,18 @@ template <class Wt>
 struct OneStateWeight {
   typedef Wt Weight;
   Weight operator()(StateId) const { return Weight::one(); }
-  template <class Weight> void timesByState(StateId, Weight &) const {}
+  template <class Weight>
+  void timesByState(StateId, Weight&) const {}
 };
 
 template <class Wt>
 struct ZeroStateWeight {
   typedef Wt Weight;
   Weight operator()(StateId) const { return Weight::zero(); }
-  template <class Weight> void timesByState(StateId, Weight & w) const { w = Weight::zero(); }
+  template <class Weight>
+  void timesByState(StateId, Weight& w) const {
+    w = Weight::zero();
+  }
 };
 
 /**
@@ -215,26 +227,22 @@ struct StateWeightsCached : StateWtFn {
   typedef Wt Weight;
   StateId axiomsStart;
   typedef boost::ptr_vector<Wt> Weights;
-  Weights weights; // [0] = state axiomsStart
-  bool isAxiom(StateId s) const { return s>=axiomsStart; }
-  StateId weightsIndex(StateId s) { return s-axiomsStart; }
-  Wt & axiomWt(StateId s) {
+  Weights weights;  // [0] = state axiomsStart
+  bool isAxiom(StateId s) const { return s >= axiomsStart; }
+  StateId weightsIndex(StateId s) { return s - axiomsStart; }
+  Wt& axiomWt(StateId s) {
     assert(isAxiom(s));
-    StateId i = s-axiomsStart;
-    if (weights.is_null(i))
-      return weights[i] = StateWtFn::operator()(i);
+    StateId i = s - axiomsStart;
+    if (weights.is_null(i)) return weights[i] = StateWtFn::operator()(i);
     return weights[i];
   }
   Wt operator()(StateId s) { return isAxiom(s) ? axiomWt(s) : Wt::one(); }
-  void timesByState(StateId s, Weight &w) {
-    if (isAxiom())
-      timesBy(axiomWt(s), w);
+  void timesByState(StateId s, Weight& w) {
+    if (isAxiom()) timesBy(axiomWt(s), w);
   }
   StateWeightsCached() : axiomsStart() {}
   StateWeightsCached(StateId axiomsStart, StateId axiomsEnd)
-      : axiomsStart(axiomsStart)
-      , weights(axiomsEnd-axiomsStart)
-  {}
+      : axiomsStart(axiomsStart), weights(axiomsEnd-axiomsStart) {}
   void init(StateId axiomsStart_, StateId axiomsEnd) {
     axiomsStart = axiomsStart_;
     weights.clear();
@@ -252,21 +260,21 @@ template <class Wt, class StateWtFn = OneStateWeight<Wt>, class ArcWtFn = ArcWei
 struct AxiomArcWeightImpl : StateWtFn, ArcWtFn {
   typedef Wt Weight;
   template <class Arc>
-  Wt operator()(Arc *a) const {
+  Wt operator()(Arc* a) const {
     Wt const& arcw = ArcWtFn::operator()(a);
     Wt w(arcOnRight ? Wt::one() : arcw);
     StateIdContainer const& tails = a->tails();
-    for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i!=e; ++i)
+    for (StateIdContainer::const_iterator i = tails.begin(), e = tails.end(); i != e; ++i)
       StateWtFn::timesByState(*i, w);
-    if (arcOnRight)
-      timesBy(arcw, w);
+    if (arcOnRight) timesBy(arcw, w);
     return w;
   }
   template <class Arc>
-  void timesBy(Arc *a, Wt &w) const {
+  void timesBy(Arc* a, Wt& w) const {
     Hypergraph::timesBy(operator()(a), w);
   }
 };
+
 
 }}
 

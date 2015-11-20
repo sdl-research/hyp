@@ -61,16 +61,16 @@ struct ArcBase SDL_OBJECT_TRACK_BASE(ArcBase) {
   }
 
   /// move, copy. in case object tracking interferes w/ defaults
-  ArcBase(ArcBase && o) = default;
-  ArcBase& operator=(ArcBase && o) = default;
+  ArcBase(ArcBase&& o) = default;
+  ArcBase& operator=(ArcBase&& o) = default;
   ArcBase(ArcBase const& o) = default;
   ArcBase& operator=(ArcBase const& o) = default;
 
-  friend inline std::ostream& operator<<(std::ostream & out, ArcBase const& self) {
+  friend inline std::ostream& operator<<(std::ostream& out, ArcBase const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream & out) const {
+  void print(std::ostream& out) const {
     out << head_ << " <-";
     for (StateIdContainer::const_iterator i = tails_.begin(), e = tails_.end(); i != e; ++i) out << ' ' << *i;
   }
@@ -84,9 +84,7 @@ struct ArcBase SDL_OBJECT_TRACK_BASE(ArcBase) {
 
   bool isFsmArc() const { return tails_.size() == 2; }
 
-  bool isFsmFrom(StateId tail0) const {
-    return !tails_.empty() && tails_[0] == tail0;
-  }
+  bool isFsmFrom(StateId tail0) const { return !tails_.empty() && tails_[0] == tail0; }
 
   StateId fsmSrc() const {
     assert(isFsmArc());
@@ -205,10 +203,10 @@ template <class ArcsContainer>
 struct AppendArcs {
   ArcsContainer& arcs;
   AppendArcs(ArcsContainer& arcs) : arcs(arcs) {}
-  void operator()(ArcBase* arc) const { arcs.push_back(static_cast<typename ArcsContainer::value_type>(arc)); }
-  void operator=(ArcBase* arc) const {
-    operator()(arc);
+  void operator()(ArcBase* arc) const {
+    arcs.push_back(static_cast<typename ArcsContainer::value_type>(arc));
   }
+  void operator=(ArcBase* arc) const { operator()(arc); }
   AppendArcs const& operator*() const { return *this; }
   AppendArcs const& operator++() const { return *this; }
   AppendArcs const& operator++(int) const { return *this; }

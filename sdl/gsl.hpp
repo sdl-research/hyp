@@ -22,7 +22,7 @@
 
 namespace sdl {
 
-//using namespace gsl;
+// using namespace gsl;
 
 /// span<T> is like (T*, size_t). .data() and .size()
 using gsl::span;
@@ -30,18 +30,19 @@ using gsl::span;
 /// string_span<> is span<char> (default template arg char)
 using gsl::string_span;
 
-///cstring_span<> is span<char const>
+/// cstring_span<> is span<char const>
 using gsl::cstring_span;
 
-/// get a cstring_span from a char const* (if you construct directly from compile time string constant then you get the trailing '0' included in size).
+/// get a cstring_span from a char const* (if you construct directly from compile time string constant then
+/// you get the trailing '0' included in size).
 using gsl::ensure_z;
 
 /// std::string from string_span: to_string(cstring_span<>) (ADL)
 
-/// owner<T> - move assign to transfer
+/// owner<T>-move assign to transfer
 using gsl::owner;
 
-/// not_null<T> - like T* but can't be 0
+/// not_null<T>-like T* but can't be 0
 using gsl::not_null;
 }
 
@@ -49,6 +50,7 @@ namespace graehl {
 
 template <class T>
 struct is_nonstring_container<gsl::span<T>, void> : std::true_type {};
+
 
 }
 

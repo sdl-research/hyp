@@ -22,7 +22,8 @@
 #include <sdl/Types.hpp>
 #include <graehl/shared/math_constants.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 SdlFloat constexpr ln10 = (SdlFloat)M_LN10;
 SdlFloat constexpr ln10inv = (SdlFloat)M_LOG10E;

@@ -70,7 +70,7 @@ struct IsOne<W, typename W::HasIsOne> {
 };
 
 // note that weights are required to return correct W::one() and W::zero() even during static init (we relax
-// this for CompositeWeight - you're not allowed to have CompositeWeight of CompositeWeight). so this is ok.
+// this for CompositeWeight-you're not allowed to have CompositeWeight of CompositeWeight). so this is ok.
 template <class W, class E>
 W IsZero<W, E>::kZero(W::zero());
 

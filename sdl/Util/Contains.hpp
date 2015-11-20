@@ -94,8 +94,7 @@ bool containsStarting(Substr const& substr, Container const& container,
   typedef typename Container::size_type Size;
   if (container.size() < containerStartingIndex + (Size)substr.size()) return false;
   typename Container::const_iterator i = container.begin() + containerStartingIndex;
-  for (typename Substr::const_iterator subi = substr.begin(), subend = substr.end(); subi != subend;
-       ++subi, ++i)
+  for (typename Substr::const_iterator subi = substr.begin(), subend = substr.end(); subi != subend; ++subi, ++i)
     if (*subi != *i) return false;
   return true;
 }

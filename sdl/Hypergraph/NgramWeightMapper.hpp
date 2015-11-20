@@ -30,15 +30,13 @@ namespace Hypergraph {
    For use in MapHypergraph; sets all weights be of type
    NgramWeight, to keep track of ngram spans.
 */
-template<class SourceArc>
+template <class SourceArc>
 struct NgramWeightMapper {
 
   typedef NgramWeightTpl<typename SourceArc::Weight> Tarweight;
   typedef ArcTpl<Tarweight> TargetArc;
 
-  NgramWeightMapper(IHypergraph<SourceArc> const& hg,
-                    std::size_t maxlen)
-      : hg_(hg), maxlen_(maxlen) {}
+  NgramWeightMapper(IHypergraph<SourceArc> const& hg, std::size_t maxlen) : hg_(hg), maxlen_(maxlen) {}
 
   TargetArc* operator()(SourceArc const* sourceArc) const {
     assert(sourceArc->isFsmArc());
@@ -51,10 +49,8 @@ struct NgramWeightMapper {
     Sym inputLabel = hg_.inputLabel(labelStateId);
     if (inputLabel == EPSILON::ID) {
       targetArc->setWeight(Tarweight::one());
-    }
-    else {
-      targetArc->setWeight(
-          Tarweight(inputLabel, maxlen_, sourceArc->weight()));
+    } else {
+      targetArc->setWeight(Tarweight(inputLabel, maxlen_, sourceArc->weight()));
     }
 
     return targetArc;
@@ -62,7 +58,6 @@ struct NgramWeightMapper {
 
   IHypergraph<SourceArc> const& hg_;
   std::size_t maxlen_;
-
 };
 
 

@@ -48,7 +48,7 @@ namespace sdl {
 namespace Config {
 
 /**
-   not O(n) like YAML - we know our maps are keyed by string
+   not O(n) like YAML-we know our maps are keyed by string
 */
 
 typedef std::map<std::string, ConfigNode> MapIndexBase;
@@ -111,8 +111,7 @@ ConfigNode copy(ConfigNode const& in, bool deep) {
           addKeyVal(copy, i->first, childNotParent(i->second, in));
       break;
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << printer(in, oneline) << " => "
-                                                   << printer(copy, oneline));
+  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << printer(in, oneline) << " => " << printer(copy, oneline));
   return copy;
 }
 
@@ -148,9 +147,8 @@ ConfigNode copyRemovingKey(ConfigNode const& in, std::string const& removeKey, b
       }
       break;
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copyRemovingKey " << removeKey << " from "
-                                                              << printer(in, oneline) << " => "
-                                                              << printer(copy, oneline));
+  SDL_TRACE(Configure.YAMLConfigProcessor, "copyRemovingKey " << removeKey << " from " << printer(in, oneline)
+                                                              << " => " << printer(copy, oneline));
   return copy;
 }
 
@@ -187,8 +185,8 @@ ConfigNode copy(ConfigNode const& in, bool deep, YAMLConfigProcessor const& proc
         }
       break;
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << proc.path() << ": " << printer(in, oneline)
-                                                   << " => " << printer(copy, oneline));
+  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << proc.path() << ": " << printer(in, oneline) << " => "
+                                                   << printer(copy, oneline));
   return copy;
 }
 
@@ -211,8 +209,7 @@ namespace {
    If the input path is a relative path, prepends the prefix. If the path is absolute, its a No-Op.
    returns the path as boost::filesystem::path instance.
  */
-inline boost::filesystem::path addPrefixToPath(std::string const& path,
-                                               boost::filesystem::path const& fsPrefix) {
+inline boost::filesystem::path addPrefixToPath(std::string const& path, boost::filesystem::path const& fsPrefix) {
   boost::filesystem::path fsPath(path);
   if (!fsPath.is_absolute()) fsPath = fsPrefix / path;
   return fsPath;
@@ -322,8 +319,7 @@ inline bool hasPathSuffix(std::string const& key) {
     return false;
 }
 
-ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in,
-                                             boost::filesystem::path const& fsPrefix) const {
+ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in, boost::filesystem::path const& fsPrefix) const {
   if (!in.IsMap())
     return in;
   else {
@@ -347,8 +343,7 @@ ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in,
           for (YAML::const_iterator iSeq = val.begin(), end = val.end(); iSeq != end; ++iSeq) {
             std::string const& origPath = iSeq->Scalar();
             std::string const& newPath = addPrefixToPathString(origPath, fsPrefix);
-            SDL_DEBUG(Configure.YAMLConfigProcessor, "Changing original path: " << origPath
-                                                                                << " to: " << newPath);
+            SDL_DEBUG(Configure.YAMLConfigProcessor, "Changing original path: " << origPath << " to: " << newPath);
             outSequence.push_back(newPath);
           }
           addKeyVal(out, key, outSequence, *this);
@@ -477,8 +472,7 @@ inline void addBasisElement(BasisNodes& basisNodes, ConfigNode const& inBasis,
     basisNodes.push_back(inBasis);
   } else
     SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
-                  "Syntax error! Value for 'basis' can not be Null!!" << '\n' << "path: [ " << proc.path()
-                                                                      << " ]\n"
+                  "Syntax error! Value for 'basis' can not be Null!!" << '\n' << "path: [ " << proc.path() << " ]\n"
                                                                       << "File: " << proc.getFilePath());
 }
 
@@ -497,8 +491,7 @@ inline void addBasisElement(BasisNodes& basisNodes, ConfigNode const& inBasis,
 
       //TODO: should not be a YAMLConfigProcessor member but rather a free fn
    */
-ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in,
-                                            boost::filesystem::path const& fsPrefix) const {
+ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in, boost::filesystem::path const& fsPrefix) const {
   if (!in.IsMap())
     return in;
   else {
@@ -673,8 +666,7 @@ ConfigNode YAMLConfigProcessor::processReplaceNodes(ConfigNode const& in) {
       }
     }
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "Done replacing: [ " << path() << " ] => "
-                                                                << printer(out, oneline));
+  SDL_TRACE(Configure.YAMLConfigProcessor, "Done replacing: [ " << path() << " ] => " << printer(out, oneline));
   return out;
 }
 

@@ -61,8 +61,8 @@ namespace Util {
 
 
 struct ILeakCheck {
-  virtual void init(char const* classname = "Object", bool enableCheck = true,
-                    bool nonGlobalSoYouCanLog = true) {}
+  virtual void init(char const* classname = "Object", bool enableCheck = true, bool nonGlobalSoYouCanLog = true) {
+  }
   virtual void print(std::ostream& o) const {}
   virtual void start() {}
   virtual void finish() {}

@@ -27,66 +27,54 @@
 
 /*
 
-  This enables optional line-by-line string input, where each line is interpreted as a sequence of labels and converted into a little hypergraph, right? It's a good workaround for now, since we don't have the one-hypergraph-per-line format yet. Util::Once we have that, we can just use the existing HgConvertStrings binary to do this conversion, and the user can pipe his text lines through that.
+  This enables optional line-by-line string input, where each line is interpreted as a sequence of labels and
+  converted into a little hypergraph, right? It's a good workaround for now, since we don't have the
+  one-hypergraph-per-line format yet. Util::Once we have that, we can just use the existing HgConvertStrings
+  binary to do this conversion, and the user can pipe his text lines through that.
 */
 
 namespace sdl {
 namespace Hypergraph {
 
-struct InputHypergraphs : LineToHypergraph
-{
+struct InputHypergraphs : LineToHypergraph {
   bool multiple;
   bool lines;
-  void setLine()
-  {
-    lines = true;
-  }
-  void setLines()
-  {
+  void setLine() { lines = true; }
+  void setLines() {
     multiple = true;
     setLine();
   }
 
   Util::Input in;
   bool inArg;
-  InputHypergraphs()
-      : inArg()
-      , lineno()
-  {
-    defaults();
-  }
+  InputHypergraphs() : inArg(), lineno() { defaults(); }
 
   std::size_t lineno;
 
   void defaults() {
-    lines = false; // allows override by StatisticalTokenizer bin
+    lines = false;  // allows override by StatisticalTokenizer bin
     Config::inits(this);
   }
 
-  static char const* caption()
-  {
-    return "Input Hypergraphs: optionally convert sentences (token strings) one per line to input hypergraphs";
+  static char const* caption() {
+    return "Input Hypergraphs: optionally convert sentences (token strings) one per line to input "
+           "hypergraphs";
   }
   static inline std::string usage() {
-    return ParseTokensOptions::usage()
-        +" optionally converting input to single-string hypergraphs";
+    return ParseTokensOptions::usage() + " optionally converting input to single-string hypergraphs";
   }
   template <class Config>
-  void configure(Config &c)
-  {
+  void configure(Config& c) {
     LineToHypergraph::configure(c);
     c.is("Input Hypergraphs");
     c(caption());
     if (inArg)
-      c("input-hypergraphs-file", &in).init(Util::stdinInput())
-          ("input lines or hypergraph from this file");
-    c("multiple-input-hgs", &multiple).init(true)
-        ("allow multiple consecutive inputs");
-    c("lines", &lines).defaulted()
-        ("plain text input lines converted to hg (instead of a single hypergraph file)");
+      c("input-hypergraphs-file", &in).init(Util::stdinInput())("input lines or hypergraph from this file");
+    c("multiple-input-hgs", &multiple).init(true)("allow multiple consecutive inputs");
+    c("lines", &lines)
+        .defaulted()("plain text input lines converted to hg (instead of a single hypergraph file)");
   }
-  void setIn(Util::InputStream const& newIn)
-  {
+  void setIn(Util::InputStream const& newIn) {
     in.init(newIn);
     lineno = 0;
   }
@@ -94,35 +82,31 @@ struct InputHypergraphs : LineToHypergraph
       parse the next input into hg. if lines, the input is a sequence of
       tokens (otherwise it's a text-format HG); if multiple-input-hgs, then the
       entire in stream is consumed line by line (TODO: support some convention
-      for parsing a sequence of text-format HGs - none exists yet).
+      for parsing a sequence of text-format HGs-none exists yet).
      *
 
       \return true if there was another hg, false if there are no more
    */
   template <class A>
-  bool nextHypergraph(IMutableHypergraph<A> *phg)
-  {
-    IMutableHypergraph<A> &hg = *phg;
+  bool nextHypergraph(IMutableHypergraph<A>* phg) {
+    IMutableHypergraph<A>& hg = *phg;
     assert(hg.getVocabulary());
     if (!in) return false;
     ++lineno;
     if (lines) {
       std::string line;
-      if (!getlineNormalized(*in, line))
-        return false;
+      if (!getlineNormalized(*in, line)) return false;
       LineToHypergraph::toHypergraph(line, phg, lineno);
       return true;
     } else {
-      if (lineno>1)
-        return false;
+      if (lineno > 1) return false;
       hg.clear();
       parseText(*in, in.name, &hg, nfc);
       return true;
     }
   }
-  bool single() const
-  {
-    return !multiple || !lines; //TODO: change to && once we support sequence of consecutive hgs on input
+  bool single() const {
+    return !multiple || !lines;  // TODO: change to && once we support sequence of consecutive hgs on input
   }
 };
 

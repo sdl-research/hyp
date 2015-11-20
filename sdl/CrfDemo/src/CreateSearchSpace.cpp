@@ -36,4 +36,6 @@ Optimization::ICreateSearchSpace<Optimization::Arc>* load(Resources::ResourceMan
                                                           ConfigNode const& yamlConfig, bool b) {
   return new CrfDemo::CreateSearchSpace<Optimization::Arc>(yamlConfig);
 }
+
+
 }

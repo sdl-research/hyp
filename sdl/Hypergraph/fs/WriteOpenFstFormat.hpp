@@ -42,7 +42,8 @@ std::ostream& writeOpenFstFormat(std::ostream& out, IHypergraph<Arc> const& hg) 
   typedef WriteOpenFstFormatHelper::ArcWriter<Arc> Writer;
   Writer writer(out, *hp);
   StateId st = hp->start();
-  if (st == kNoState) SDL_THROW_LOG(Hypergraph, InvalidInputException, "WriteOpenFstFormat needs start state");
+  if (st == kNoState)
+    SDL_THROW_LOG(Hypergraph, InvalidInputException, "WriteOpenFstFormat needs start state");
   hp->forArcsOutFirstTail(st, writer);
   for (StateId s = 0; s < st; ++s) hp->forArcsOutFirstTail(s, writer);
   for (StateId s = st + 1, N = hp->size(); s < N; ++s) hp->forArcsOutFirstTail(s, writer);

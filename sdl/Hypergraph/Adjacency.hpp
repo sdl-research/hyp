@@ -24,7 +24,9 @@ inline ArcId countInArcs(HypergraphBase const& h, StateId s) {
   if (h.storesInArcs()) return h.numInArcs(s);
   ArcId n = 0;
   // TODO: test
-  h.forArcs([&n, s](ArcBase const* a) { if (a->head_ == s) ++n; });
+  h.forArcs([&n, s](ArcBase const* a) {
+    if (a->head_ == s) ++n;
+  });
   return n;
 }
 
@@ -33,7 +35,9 @@ inline ArcId countOutArcs(HypergraphBase const& h, StateId s) {
   if (h.storesOutArcs()) return h.numOutArcs(s);
   // TODO: test
   ArcId n = 0;
-  h.forArcs([&n, s](ArcBase const* a) { if (!a->tails_.empty() && a->tails_[0] == s) ++n; });
+  h.forArcs([&n, s](ArcBase const* a) {
+    if (!a->tails_.empty() && a->tails_[0] == s) ++n;
+  });
   return n;
 }
 

@@ -20,14 +20,14 @@
 #pragma once
 
 #if defined(SDL_32)
-# define SDL_SIZE_IS_UINT32 1
+#define SDL_SIZE_IS_UINT32 1
 #endif
 
 #ifndef SDL_SIZE_IS_UINT32
 #if defined(_WIN32) && !defined(_WIN64)
-# define SDL_SIZE_IS_UINT32 1
+#define SDL_SIZE_IS_UINT32 1
 #else
-# define SDL_SIZE_IS_UINT32 0
+#define SDL_SIZE_IS_UINT32 0
 #endif
 #endif
 
@@ -35,8 +35,7 @@ namespace sdl {
 namespace Util {
 
 #if SDL_SIZE_IS_UINT32
-struct UnsignedNotSize
-{
+struct UnsignedNotSize {
   unsigned i;
   UnsignedNotSize(unsigned i) : i(i) {}
   operator unsigned&() { return i; }
@@ -45,6 +44,7 @@ struct UnsignedNotSize
 #else
 typedef unsigned UnsignedNotSize;
 #endif
+
 
 }}
 

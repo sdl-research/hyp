@@ -86,6 +86,7 @@ bool isGraphArcImpl(HG const& hg, ArcBase const& a, bool& fsm, bool& oneLexical)
   return true;
 }
 
+
 }}}
 
 #endif

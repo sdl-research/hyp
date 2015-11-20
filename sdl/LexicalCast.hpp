@@ -29,12 +29,12 @@
 #pragma once
 
 #ifndef BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
-# define BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
+#define BOOST_LEXICAL_CAST_ASSUME_C_LOCALE
 // use, effectively, atoi, itoa - http://accu.org/index.php/journals/1375
 
-# ifdef BOOST_LEXICAL_CAST_INCLUDED
-#  warning for better performance and fewer maybe-uninitialized warnings, please include xmt/LexicalCast.hpp before any other headers that include boost/lexical_cast.hpp
-# endif
+#ifdef BOOST_LEXICAL_CAST_INCLUDED
+#warning for better performance and fewer maybe-uninitialized warnings, please include xmt/LexicalCast.hpp before any other headers that include boost/lexical_cast.hpp
+#endif
 #endif
 
 #include <graehl/shared/warning_compiler.h>
@@ -49,6 +49,7 @@ GCC_DIAG_ON(maybe-uninitialized)
 namespace sdl {
 
 using boost::lexical_cast;
+
 
 }
 

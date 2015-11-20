@@ -10,7 +10,7 @@
 // limitations under the License.
 /** \file
 
-    pair of StateId - shared between phrase and syntax decoders, and DecoderOutput,
+    pair of StateId-shared between phrase and syntax decoders, and DecoderOutput,
     DecodersShared.
 
 */
@@ -34,7 +34,7 @@ namespace Hypergraph {
 /** span is a pair of state [left, right] in a hypergraph
  */
 struct Span : boost::totally_ordered1<Span> {
-  void set(std::string const& str, char hyphen='-') {
+  void set(std::string const& str, char hyphen = '-') {
     std::string::size_type hyphenPos = str.find(hyphen);
     if (hyphenPos == std::string::npos)
       setNull();
@@ -45,7 +45,7 @@ struct Span : boost::totally_ordered1<Span> {
     }
   }
 
-  void set(char const* s, char const* end, char hyphen='-') {
+  void set(char const* s, char const* end, char hyphen = '-') {
     char const* m = std::find(s, end, hyphen);
     if (m == end)
       setNull();
@@ -55,19 +55,15 @@ struct Span : boost::totally_ordered1<Span> {
     }
   }
 
-  std::string str(char hyphen='-') const {
+  std::string str(char hyphen = '-') const {
     Util::StringBuilder b;
     write(b, hyphen);
     return std::string(b.begin(), b.end());
   }
 
-  void write(Util::StringBuilder &b, char hyphen='-') const {
-    b(left)(hyphen)(right);
-  }
+  void write(Util::StringBuilder& b, char hyphen = '-') const { b(left)(hyphen)(right); }
 
-  void setNull() {
-    left = right = kNoState;
-  }
+  void setNull() { left = right = kNoState; }
 
   StateId left;
   StateId right;
@@ -110,8 +106,7 @@ struct Span : boost::totally_ordered1<Span> {
   }
 
   bool smaller(Span const& other) const {
-    if (other.left == kNoState)
-      return true;
+    if (other.left == kNoState) return true;
     return size() < other.size();
   }
 
@@ -140,7 +135,7 @@ struct Span : boost::totally_ordered1<Span> {
     return h;
     // return Util::mixedbits(*reinterpret_cast<uint64 const*>(&span));
   }
-  //SDL_MOVE_COPY_DEFAULT(Span)
+  // SDL_MOVE_COPY_DEFAULT(Span)
 };
 
 struct NullSpan : Span {
@@ -166,6 +161,7 @@ inline void setSpan(Span& span, StateId left, StateId right) {
 inline bool collides(Span const& x, Span const& y) {
   return y.right > x.left && x.right > y.left;
 }
+
 
 }}
 

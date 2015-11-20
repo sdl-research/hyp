@@ -59,9 +59,7 @@ struct PushWeights : SimpleTransform<PushWeights, Transform::Inplace, false> {
     return "Modify Arc Weights (real-valued costs), optionally (in order 1-5):";
   }
 
-  Properties inputProperties() const {
-    return inAddProps();
-  }
+  Properties inputProperties() const { return inAddProps(); }
   void validate() {}
   bool splitOnWhitespaceDefault() { return true; }
 
@@ -142,7 +140,7 @@ struct PushCostsToStart {
     assert(tail < N);
     // we want the new outsides to be as small as possible without going
     // negative. TODO: prove correct for cyclic graphs
-    cost += outside0[head] - (tail != start ? outside0[tail] : 0);
+    cost += outside0[head]-(tail != start ? outside0[tail] : 0);
   }
 };
 

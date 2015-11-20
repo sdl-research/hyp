@@ -27,16 +27,12 @@ namespace impl {
 
 template <class Arc>
 struct ArcDeleter {
-  void operator()(ArcBase *x) const {
-    delete (Arc*)x;
-  }
+  void operator()(ArcBase* x) const { delete (Arc*)x; }
 };
 
 template <class Arc>
 struct ArcWeightSetOne {
-  void operator()(ArcBase *x) const {
-    setOne(static_cast<Arc*>(x)->weight_);
-  }
+  void operator()(ArcBase* x) const { setOne(static_cast<Arc*>(x)->weight_); }
 };
 
 

@@ -61,14 +61,14 @@ class BasicVocabularyImpl {
 
   void initVariables() {
     if (type_ == (SymbolType)kVariable && !freezeEndIndex_) {
-      //TODO: could just declare variables unprintable, or print without => str
+      // TODO: could just declare variables unprintable, or print without => str
       freezeEndIndex_ = kNumXnVariables;
-      assert(kNumXnVariables <= 1 + ('Z' - '0'));
+      assert(kNumXnVariables <= 1 + ('Z'-'0'));
       char buf[2] = {'x', 0};
       cstring_span<> key(buf, 2);
-      char &c = buf[1];
+      char& c = buf[1];
       c = '0';
-      for (unsigned i = 0 ; i < kNumXnVariables; ++i) {
+      for (unsigned i = 0; i < kNumXnVariables; ++i) {
         assert(c - '0' == i);
         SymInt index = symbols_.index(key);
         assert(index == i);
@@ -79,8 +79,7 @@ class BasicVocabularyImpl {
   }
 
   void clearVariables() {
-    if (type_ == (SymbolType)kVariable && freezeEndIndex_)
-      reset();
+    if (type_ == (SymbolType)kVariable && freezeEndIndex_) reset();
   }
 
   void init(SymbolType type, SymInt offset = 0) {
@@ -111,8 +110,8 @@ class BasicVocabularyImpl {
   void clearSinceFreeze() {
     assert(freezeEndIndex_ <= symbols_.size());
     SDL_INFO(evict.Vocabulary,
-             "Shrinking " << (SymbolType)type_ << " vocabulary from " << symbols_.size() << " to " << freezeEndIndex_
-                          << " symbols (these " << (symbols_.size() - freezeEndIndex_)
+             "Shrinking " << (SymbolType)type_ << " vocabulary from " << symbols_.size() << " to "
+                          << freezeEndIndex_ << " symbols (these " << (symbols_.size() - freezeEndIndex_)
                           << " removed symbols should all be novel words seen in inputs recently processed - "
                              "if not, call IVocabulary::freeze() to keep your permanent symbols permanent");
     symbols_.shrink(freezeEndIndex_);
@@ -128,7 +127,7 @@ class BasicVocabularyImpl {
   void load(Iterator i, Iterator end, SymbolType type) {
     reset();
     assert(type == type_);
-    symbols_.reserve(end - i);
+    symbols_.reserve(end-i);
     for (; i != end; ++i) addEntry(i->first, i->second);
     doneLoading();
   }
@@ -192,13 +191,11 @@ class BasicVocabularyImpl {
     SymInt const oldsz = size();
     SymInt const i = symbols_.index(word);
     if (size() == oldsz || i >= maxLstSize_)
-      throw std::out_of_range("BasicVocab::addSymbolMustBeNew - string was not new");
+      throw std::out_of_range("BasicVocab::addSymbolMustBeNew-string was not new");
     return symForIndex(i);
   }
 
-  Sym addSymbolMustBeNew(Slice word) {
-    return addSymbolMustBeNew(std::string(word.first, word.second));
-  }
+  Sym addSymbolMustBeNew(Slice word) { return addSymbolMustBeNew(std::string(word.first, word.second)); }
 
   Sym addSymbolMustBeNew(cstring_span<> word) {
     return addSymbolMustBeNew(std::string(word.data(), word.size()));
@@ -231,9 +228,7 @@ class BasicVocabularyImpl {
     return i == kNullIndex ? NoSymbol : symForIndex(i);
   }
 
-  bool boundsSym(Sym sym) const {
-    return sym.index() < offset_ + symbols_.size();
-  }
+  bool boundsSym(Sym sym) const { return sym.index() < offset_ + symbols_.size(); }
 
   bool containsSym(Sym sym) const {
     assert(sym.type() == type_);

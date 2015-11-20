@@ -28,8 +28,8 @@
 namespace sdl {
 namespace Util {
 
-std::string const& requireExists(
-    std::string const& path);  // throw exception unless file exists. otherwise identity
+std::string const&
+requireExists(std::string const& path);  // throw exception unless file exists. otherwise identity
 
 /**
    Tries to find existing file or directory; if absolute, identity. else

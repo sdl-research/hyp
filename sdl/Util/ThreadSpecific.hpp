@@ -131,7 +131,7 @@ struct ThreadSpecificInt : boost::noncopyable {
 #else
     impl::set_tss_data(this, boost::shared_ptr<impl::tss_cleanup_function>(), (void*)static_cast<PtrInt>(i),
                        false);
-    // Boost (pre- 1.52) bug on Windows: must past pointer to do-nothing tss_cleanup_function instead of nullptr
+// Boost (pre- 1.52) bug on Windows: must past pointer to do-nothing tss_cleanup_function instead of nullptr
 #endif
   }
   typedef ThreadSpecificInt<Int> Self;

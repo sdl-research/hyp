@@ -20,9 +20,12 @@
 
 #include <sdl/Exception.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
-void throwInvalidInputException(std::istream &in, std::string const& error="", std::size_t itemNumber = 0, const char *item="line");
+void throwInvalidInputException(std::istream& in, std::string const& error = "", std::size_t itemNumber = 0,
+                                const char* item = "line");
+
 
 }}
 

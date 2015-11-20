@@ -39,8 +39,10 @@ struct HypPrune : TransformMain<HypPrune> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Prune)
+
+
+

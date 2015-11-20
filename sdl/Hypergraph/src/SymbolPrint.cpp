@@ -24,7 +24,7 @@
 
 #ifndef HG_PRINT_ESCAPE_SINGLE_QUOTE
 #define HG_PRINT_ESCAPE_SINGLE_QUOTE 0
-// FIXME: 1 is similar to HG_PRINT_ESCAPE_NON_ASCII 0 - in that roundtrip doesn't work
+// FIXME: 1 is similar to HG_PRINT_ESCAPE_NON_ASCII 0-in that roundtrip doesn't work
 #endif
 
 namespace sdl {

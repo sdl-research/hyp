@@ -87,7 +87,7 @@ typedef uint32 TailId;
 
 struct ArcBase;
 
-typedef ArcBase *ArcHandle;
+typedef ArcBase* ArcHandle;
 
 #if SDL_64BIT_STATE_ID
 typedef uint64 StateId;
@@ -138,7 +138,7 @@ static_assert(sizeof(StateSet::size_type) >= sizeof(StateId), "StateSet must hol
 
 static constexpr ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
 static constexpr StateId kNoState = boost::integer_traits<StateId>::const_max;
-static constexpr StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max - 1;
+static constexpr StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max-1;
 
 using ::set_null;
 
@@ -156,6 +156,7 @@ using sdl::SparseFeatureEntry;
 typedef unordered_map<StateId, StateId> StateIdMap;
 
 typedef SdlFloat Distance;
+
 
 }}
 

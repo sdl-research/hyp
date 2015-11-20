@@ -85,12 +85,10 @@ struct HypergraphMainBase : graehl::main, HypergraphMainOpt, Util::Inputs {
     return pVoc;
   }
 
-  void init() {
-    graehl::main::init();
-  }
+  void init() { graehl::main::init(); }
 
   HypergraphMainBase(std::string const& n, std::string const& usage, std::string const& ver = "v1",
-                    bool multiple = true, HypergraphMainOpt const& opt = HypergraphMainOpt())
+                     bool multiple = true, HypergraphMainOpt const& opt = HypergraphMainOpt())
       : Util::Inputs(multiple)
       , graehl::main(n, usage, ver, false, opt.random, false)
       , HypergraphMainOpt(opt)

@@ -29,6 +29,7 @@ class IInput {
   virtual ~IInput() {}
 };
 
+
 }}
 
 #endif

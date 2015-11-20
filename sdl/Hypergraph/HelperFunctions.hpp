@@ -28,10 +28,10 @@
 namespace sdl {
 namespace Hypergraph {
 
-template<class Arc>
-IMutableHypergraph<Arc>*
-constructHypergraphFromString(std::string const&,
-                              IVocabularyPtr const& pVoc = Vocabulary::createDefaultVocab());
+template <class Arc>
+IMutableHypergraph<Arc>* constructHypergraphFromString(std::string const&, IVocabularyPtr const& pVoc
+                                                                           = Vocabulary::createDefaultVocab());
+
 
 }}
 

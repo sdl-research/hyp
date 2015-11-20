@@ -34,13 +34,14 @@ namespace Hypergraph {
 template <class FloatT, class MapT, class SumT>
 void FeatureWeightTpl<FloatT, MapT, SumT>::set(std::string const& str) {
   namespace qi = boost::spirit::qi;
-  std::pair<FloatT, boost::optional<std::map<typename MapT::key_type, FloatT> > > weightProxy;
+  std::pair<FloatT, boost::optional<std::map<typename MapT::key_type, FloatT>>> weightProxy;
   weightProxy.first = 0;
-  //TODO: avoid proxy (copy)
-  bool const ok = qi::phrase_parse(str.begin(), str.end(),
-                             // val[key=val, key=val, ...] where the map part is optional:
-                             qi::double_ >> ('[' >> ((qi::int_ >> '=' >> qi::double_) % ',') >> ']') | qi::eps,
-                             qi::space, weightProxy);
+  // TODO: avoid proxy (copy)
+  bool const ok
+      = qi::phrase_parse(str.begin(), str.end(),
+                         // val[key=val, key=val, ...] where the map part is optional:
+                         qi::double_ >> ('[' >> ((qi::int_ >> '=' >> qi::double_) % ',') >> ']') | qi::eps,
+                         qi::space, weightProxy);
   if (!ok)
     SDL_THROW_LOG(Hypergraph.FeatureWeightTpl, InvalidInputException, "Could not parse '" << str << "'");
   this->value_ = weightProxy.first;

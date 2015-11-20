@@ -19,11 +19,13 @@
 
 #include <graehl/shared/nibble_array.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 typedef unsigned DfsColor;
 enum { kFresh, kOpened, kQueuedOrClosed };
 typedef graehl::nibble_array<2, DfsColor> DfsColorArray;
+
 
 }}
 

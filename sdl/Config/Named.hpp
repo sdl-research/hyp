@@ -25,7 +25,7 @@
   static char const* staticType() { return s; } \
   virtual char const* type() const { return staticType(); }
 
-#define SDL_STATIC_TYPE_IS(s)                  \
+#define SDL_STATIC_TYPE_IS(s)                   \
   static char const* staticType() { return s; } \
   static char const* type() { return staticType(); }
 

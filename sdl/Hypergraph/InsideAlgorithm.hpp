@@ -167,9 +167,8 @@ void insideAlgorithmMaybeAxioms(bool includingAxioms, IHypergraph<Arc> const& hg
 }
 
 template <class Arc, class StateWtFn, class ArcWtFn, class Distances>
-void insideAlgorithmIncludingAxioms(IHypergraph<Arc> const& hg, Distances* pDistances,
-                                    StateWtFn const& stateWtFn, ArcWtFn const& arcWtFn,
-                                    StateId maxNotTerminal = (StateId)-1) {
+void insideAlgorithmIncludingAxioms(IHypergraph<Arc> const& hg, Distances* pDistances, StateWtFn const& stateWtFn,
+                                    ArcWtFn const& arcWtFn, StateId maxNotTerminal = (StateId)-1) {
   insideAlgorithmMaybeAxioms(true, hg, pDistances, stateWtFn, arcWtFn, maxNotTerminal);
 }
 

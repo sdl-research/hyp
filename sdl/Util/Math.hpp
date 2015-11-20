@@ -49,7 +49,7 @@ inline bool floatEqual(FloatT d1, FloatT d2, FloatT epsilon = 1e-7) {
   return graehl::within_epsilon_or_ieee_apart(d1, d2, epsilon);
   /// this will scale gracefully down toward 0 or toward +inf: anything really close will
   /// compare equal, even if epsilon is too small e.g. cost=1000 and
-  /// epsilon=1e-5 - this would be a relative error of only 1e-8
+  /// epsilon=1e-5-this would be a relative error of only 1e-8
 }
 
 template <class FloatT, class FloatT2>
@@ -120,7 +120,7 @@ struct OtherFloat<double> {
 
 template <class T>
 T signbit(T x) {
-  return x & (1 << (sizeof(T) * 8 - 1));
+  return x & (1 << (sizeof(T) * 8-1));
 }
 
 

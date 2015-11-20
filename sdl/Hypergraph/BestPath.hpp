@@ -398,7 +398,7 @@ struct BestPathOptions : graehl::BestTreeOptions {
     c("acyclic-max-back-edges", &acyclicMaxBackEdges)
         .init(0)(
             "accept acyclic best-path result if there are this many or fewer cycle-causing back edges - the "
-            "(n-)best paths are potentially wrong if this is > 0 - see INFO messages "
+            "(n-)best paths are potentially wrong if this is > 0-see INFO messages "
             "sdl.Hypergraph.BestPath.acyclic for reports that this might be happening.");
     c("allow-rereach", &allow_rereach)
         .init(1000000)
@@ -1026,7 +1026,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
           assert(ld);
           // TODO: simplify code by recursion? going reverse order? right now we're going left->right and
           // modifying previous?
-          for (unsigned i = 1; i < N - 1;
+          for (unsigned i = 1; i < N-1;
                ++i) {  // introduce new internal nodes with appropriate inside costs
             StateId prev = tails[i - 1], r = tails[i];
             w = path_traits::retract(w, mu[prev]);  // exclude the part from previous outside left child
@@ -1043,7 +1043,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
           }
           // TODO: test on N>2 tails (some CFG)
           // update vertex forest
-          StateId r = tails[N - 1];
+          StateId r = tails[N-1];
           d->children[0] = ld;
           d->children[1] = dv[r];
           fh.add(d, lf, &fv[r]);
@@ -1067,8 +1067,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
         Weight const& w = d->weight<Weight>();
         SdlFloat deriv_cost = w.value_;
         if (!graehl::cost_path_traits<SdlFloat>::close_enough(cost, deriv_cost)) {
-          SDL_WARN(Hypergraph.BestPath, (n + 1) << "-best cost=" << cost
-                                                << " != derivation cost=" << deriv_cost);
+          SDL_WARN(Hypergraph.BestPath, (n + 1) << "-best cost=" << cost << " != derivation cost=" << deriv_cost);
           SDL_DEBUG(Hypergraph.BestPath, (n + 1) << "-best cost=" << cost
                                                  << " does not match derivation.weight() cost=" << deriv_cost
                                                  << " deriv=" << printer(d, hg));
@@ -1110,7 +1109,8 @@ struct BestPath : TransformBase<Transform::Inplace> {
                      << acyclic.back_edges_ << " cycle-causing back edges during topological sort. "
                                                "For greater speed in this case, set acyclic: false or else "
                                                "(risking 1-best inaccuracy) increase the configured "
-                                               "acyclic-max-back-edges: " << opt.acyclicMaxBackEdges);
+                                               "acyclic-max-back-edges: "
+                     << opt.acyclicMaxBackEdges);
         acyclic.resetPi();  // so we can use !acyclic case in visit_nbest
         return false;
       }
@@ -1263,7 +1263,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
       return visit_nbestFilter(1, v, noFilter(), throwEmptySetException, 0, onlyBestPathIf1best);
     }
 
-    // if there's a best path, return preecessor property map (best ArcHandle - untyped Arc *) per head
+    // if there's a best path, return preecessor property map (best ArcHandle-untyped Arc *) per head
     Pi predecessors() { return best(true) ? pi : Pi(); }
 
     struct SaveLastVisitor {
@@ -1367,8 +1367,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
                           IHypergraph<Arc> const& hg, bool throwEmptySetException) const {
     Compute<Arc> cb(opt, hg);
     NbestId nVisited = 0;
-    DerivationPtr r
-        = cb.visit_nbest(nbest, popt.pathOutNbestVisitor(out, hg), throwEmptySetException, &nVisited);
+    DerivationPtr r = cb.visit_nbest(nbest, popt.pathOutNbestVisitor(out, hg), throwEmptySetException, &nVisited);
     popt.pad(out, nVisited, nbest.maxnbest());
     return r;
   }
@@ -1401,8 +1400,7 @@ struct NbestPathOptions : NbestPlusTies, BestPathOptions {
   /// return number of best visited. reminder: visitor returns false if you want nbest visiting to stop before
   /// nbest
   template <class Arc, class Visitor>
-  NbestId visit_nbest(IHypergraph<Arc> const& hg, Visitor const& visitor,
-                      bool throwEmptySetException = false) const {
+  NbestId visit_nbest(IHypergraph<Arc> const& hg, Visitor const& visitor, bool throwEmptySetException = false) const {
     return BestPath(*this).visit_nbest(visitor, *this, hg, throwEmptySetException);
   }
 };
@@ -1442,8 +1440,7 @@ struct NbestHypergraphOptions : NbestPathOptions {
   struct AcceptToNbestHg {
     typedef typename Arc::Weight Weight;
 
-    AcceptToNbestHg(IHypergraph<Arc> const& in, IMutableHypergraph<Arc>& out,
-                    NbestHypergraphOptions const& outOpt)
+    AcceptToNbestHg(IHypergraph<Arc> const& in, IMutableHypergraph<Arc>& out, NbestHypergraphOptions const& outOpt)
         : in(in)
         , out(dynamic_cast<MutableHypergraph<Arc>&>(out))  // TODO: why does this cast help?
         , outOpt(outOpt)
@@ -1581,15 +1578,14 @@ struct BestPathOutToOptions : NbestHypergraphOptions, PathOutOptions {
     PathOutOptions::configure(c);
     NbestHypergraphOptions::configure(c);
     c("out-file-prefix", &outFilePrefix)(Util::Output::help() + " for best-path output lines").init("-0");
-    c("add-newline", &addNewline)("add blank line after the nbest lines - useful if ids aren't used.")
-        .init(false);
+    c("add-newline", &addNewline)("add blank line after the nbest lines - useful if ids aren't used.").init(false);
   }
 
   bool enabledPerId() const { return !outFilePrefix.empty() && outFilePrefix != "-0"; }
 
   template <class Arc>
   NbestId outputForId(IHypergraph<Arc> const& hg, std::string const& id = "",
-                      shared_ptr<IHypergraph<Arc> >* pOutNbestHg = 0, bool throwEmptySetException = false) {
+                      shared_ptr<IHypergraph<Arc>>* pOutNbestHg = 0, bool throwEmptySetException = false) {
     bool perid = enabledPerId();
     bool nbesthg = nbestHypergraph && pOutNbestHg;
     NbestId nVisited = 0;
@@ -1676,7 +1672,7 @@ struct MaybeBestPathOutOptions : BestPathOutToOptions {
     if (enable)
       outputForId(hg, o, id);
     else if (nbestHypergraph) {
-      shared_ptr<IHypergraph<Arc> > nbestHg;
+      shared_ptr<IHypergraph<Arc>> nbestHg;
       outputForId(hg, id, &nbestHg);
       o << *nbestHg;
     } else
@@ -1914,10 +1910,10 @@ DerivationPtr visitNbest(V const& v, NbestPlusTies n, IHypergraph<Arc> const& hg
 }
 
 template <class Arc>
-std::vector<Derivation::DerivAndWeight<Arc> > getNbest(NbestId n, IHypergraph<Arc> const& hg,
-                                                       BestPathOptions const& opt = BestPathOptions(),
-                                                       bool throwEmptySetException = false) {
-  std::vector<Derivation::DerivAndWeight<Arc> > derivs;
+std::vector<Derivation::DerivAndWeight<Arc>> getNbest(NbestId n, IHypergraph<Arc> const& hg,
+                                                      BestPathOptions const& opt = BestPathOptions(),
+                                                      bool throwEmptySetException = false) {
+  std::vector<Derivation::DerivAndWeight<Arc>> derivs;
   derivs.reserve(n);
   visitNbest(HoldNbestDerivAndWeights<Arc>(derivs), n, hg, opt, throwEmptySetException);
   return derivs;
@@ -1927,7 +1923,7 @@ template <class Arc>
 Derivation::DerivAndWeight<Arc> get1best(IHypergraph<Arc> const& hg,
                                          BestPathOptions const& opt = BestPathOptions(),
                                          bool throwEmptySetException = false) {
-  std::vector<Derivation::DerivAndWeight<Arc> > derivs;
+  std::vector<Derivation::DerivAndWeight<Arc>> derivs;
   visitNbest(HoldNbestDerivAndWeights<Arc>(derivs), 1, hg, opt, throwEmptySetException);
   return derivs.front();
 }

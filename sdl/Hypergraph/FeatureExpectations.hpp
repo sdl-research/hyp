@@ -75,7 +75,7 @@ struct AccumulateExpectedValuesFct {
      Accumulates feature expectations found on a feature
      weight arc. (Gets called with *expectation* feature weights.)
   */
-  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, Expectation> > const* arc) const {
+  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, Expectation>> const* arc) const {
     FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_;
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
@@ -87,7 +87,7 @@ struct AccumulateExpectedValuesFct {
      Accumulates feature expectations found on a feature
      weight arc. (Gets called with *viterbi* feature weights.)
   */
-  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, TakeMin> > const* arc) const {
+  void operator()(ArcTpl<FeatureWeightTpl<FloatT, Map, TakeMin>> const* arc) const {
     FloatT posteriorArcWeight = computeInsideTimesOutside(arc).value_ + arc->weight_.value_;
     // unlike Expectation, which already includes this factor in the feature values
     SDL_DEBUG(Hypergraph.FeatureExpectations, "Accumulate feature expectations for "
@@ -95,7 +95,7 @@ struct AccumulateExpectedValuesFct {
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
     for (MapValueType const& idValue : arc->weight_)
-      updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight - log(idValue.second));
+      updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight-log(idValue.second));
     // times prob (which was in linear space, not -log,  because of TakeMin aka FeatureWeight)
     if (Util::isDebugBuild()) printMapInfo(*pResultMap_);
   }
@@ -112,7 +112,6 @@ struct AccumulateExpectedValuesFct {
     }
     return result;
   }
-
 };
 
 
@@ -153,7 +152,9 @@ typename Arc::Weight::FloatT computeFeatureExpectations(IHypergraph<Arc> const& 
 
   // Normalize and remove neglog of feature expectations:
   typedef typename Arc::Weight::Map::value_type ValT;
-  for (ValT& val : *pResultMap) { val.second = exp(-val.second + pathsSum.value_); }
+  for (ValT& val : *pResultMap) {
+    val.second = exp(-val.second + pathsSum.value_);
+  }
   if (Util::isDebugBuild()) printMapInfo(*pResultMap);
 
   return pathsSum.value_;

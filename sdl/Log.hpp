@@ -35,6 +35,7 @@ std::string const kPerformanceLogPrefix(SDL_LOG_PREFIX_STR "Performance.");
 std::string const kPerformancePerLogPrefix(SDL_LOG_PREFIX_STR "PerformancePer.");
 }
 
+
 }
 
 #endif

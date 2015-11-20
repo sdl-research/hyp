@@ -26,7 +26,8 @@
 #include <graehl/shared/priority_queue.hpp>
 #include <graehl/shared/property.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 using graehl::d_ary_heap_indirect;
 /**
@@ -41,6 +42,7 @@ using graehl::priority_queue;
 using graehl::identity_distance;
 using graehl::FirstPmap;
 using graehl::SecondPmap;
+
 
 }}
 

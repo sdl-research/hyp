@@ -21,11 +21,12 @@
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/String.hpp>
 
-namespace sdl { namespace Vocabulary {
+namespace sdl {
+namespace Vocabulary {
 
 std::string const kGlueAffix("__LW_AT__");
 
-inline void removeGlueAffix(std::string &token) {
+inline void removeGlueAffix(std::string& token) {
   Util::stripSuffix(token, kGlueAffix);
   Util::stripPrefix(token, kGlueAffix);
 }
@@ -35,9 +36,9 @@ inline std::string removeGlueAffixCopy(std::string token) {
   return token;
 }
 
-//TODO (for MaltDependencyParser): in-place removeglueaffix on space-split word
-//substrings (alternative: make string from hg with a token-by-token transform
-//fn)
+// TODO (for MaltDependencyParser): in-place removeglueaffix on space-split word
+// substrings (alternative: make string from hg with a token-by-token transform
+// fn)
 
 
 }}

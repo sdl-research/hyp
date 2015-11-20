@@ -284,7 +284,9 @@ struct ArcInBest {
       if (Util::lsb(ah)) return;  // already marked subtree
       put(pi, s, Util::withLsb(ah));
       A* a = (A*)ah;
-      for (StateId tail : a->tails()) { markFromGoal(tail); }
+      for (StateId tail : a->tails()) {
+        markFromGoal(tail);
+      }
     } else if (inarcs && phg->hasLexicalLabel(s)) {
       for (ArcId aid : phg->inArcIds(s)) {
         A* arc = phg->inArc(s, aid);
@@ -314,9 +316,7 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
       : opt(opt) {}
   PruneToBest(PruneToBest const& o) = delete;
 
-  bool needs(IHypergraph<A>& hg) const {
-    return needsRestrict(hg);
-  }
+  bool needs(IHypergraph<A>& hg) const { return needsRestrict(hg); }
 
   bool needsRestrict(IHypergraph<A>& hg) const {
     if (opt.skipAlreadySingle && hg.isMutable() && hasTrivialBestPath(hg, hg.final(), hg.start())) {

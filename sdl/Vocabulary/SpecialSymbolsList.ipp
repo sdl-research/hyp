@@ -117,7 +117,8 @@
 //////////////////////////////
 
 // These are used by the decoders: They do not move any words or
-// phrases into the block or out of the block. BLOCK_START and CONSTRAINT_SUBSTITUTE get SDL_NUM_BLOCKS symbols <xmt-blockN> and <xmt-entityN> starting at N=0 (up to N = SDL_NUM_BLOCKS-1)
+// phrases into the block or out of the block. BLOCK_START and CONSTRAINT_SUBSTITUTE get SDL_NUM_BLOCKS
+// symbols <xmt-blockN> and <xmt-entityN> starting at N=0 (up to N = SDL_NUM_BLOCKS-1)
 
 #define SDL_SPECIAL_SYMBOL_NAME BLOCK_END
 #define SDL_SPECIAL_SYMBOL_TEXT "/xmt-block"
@@ -132,8 +133,10 @@
 #define SDL_SPECIAL_SYMBOL_TEXT "xmt-entity"
 #include SDL_SPECIAL_SYMBOL_INC
 
-// CONSTRAINT_SUBSTITUTE and BLOCK_START are actually a range of symbols, each one which prints as the same string
-// //TODO: preprocessor iteration or similar to give each one a numeric id suffix for clarity and round-trip hg io
+// CONSTRAINT_SUBSTITUTE and BLOCK_START are actually a range of symbols, each one which prints as the same
+// string
+// //TODO: preprocessor iteration or similar to give each one a numeric id suffix for clarity and round-trip
+// hg io
 
 // Do NOT define additional special symbols here at the
 // end. Additional special symbols must be defined BEFORE the block

@@ -15,7 +15,7 @@
 namespace sdl {
 namespace Optimization {
 
-template<class Map>
+template <class Map>
 void loadFeatureWeightsFile(std::string const& filename, Map* pMap) {
   SDL_INFO(Optimization, "Loading feature weights from '" << filename << "'");
   Util::Input input(filename);
@@ -34,6 +34,7 @@ void loadFeatureWeightsFile(std::string const& filename, Map* pMap) {
   }
   SDL_INFO(Optimization, "Loaded " << (linenum - 1) << " feature weights from '" << filename << "'");
 }
+
 
 }}
 

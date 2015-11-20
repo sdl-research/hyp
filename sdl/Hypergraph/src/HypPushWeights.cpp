@@ -17,9 +17,7 @@ namespace Hypergraph {
 
 struct HypPushWeights : TransformMain<HypPushWeights> {  // CRTP
   typedef TransformMain<HypPushWeights> Base;
-  HypPushWeights() : Base(PushWeights::type(), PushWeights::caption()) {
-    this->configureProperties = true;
-  }
+  HypPushWeights() : Base(PushWeights::type(), PushWeights::caption()) { this->configureProperties = true; }
   void declare_configurable() { this->configurable(&x); }
 
   Properties properties(int i) const { return this->properties_else(x.inAddProps()); }
@@ -31,8 +29,10 @@ struct HypPushWeights : TransformMain<HypPushWeights> {  // CRTP
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(PushWeights)
+
+
+

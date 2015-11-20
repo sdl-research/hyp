@@ -23,11 +23,12 @@
 #include <cstdlib>
 #include <sdl/Util/Hash.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 template <class Array>
 void bzeroArray(Array const& a) {
-  std::memset(&a[0], 0, sizeof(a[0])*a.size());
+  std::memset(&a[0], 0, sizeof(a[0]) * a.size());
 }
 
 
@@ -38,8 +39,7 @@ void bzeroArray(Array const& a) {
    all 0 bits.
 */
 template <class T, std::size_t NT>
-struct ZeroInitializedArray
-{
+struct ZeroInitializedArray {
   enum { N = NT };
   T space[NT];
 
@@ -51,24 +51,20 @@ struct ZeroInitializedArray
   static inline std::size_t bytes() { return NT * sizeof(T); }
 
 
-  T *begin() {
-    return space;
-  }
-  T *end() {
-    return space+N;
-  }
-  T const* begin() const {
-    return space;
-  }
-  T const* end() const {
-    return space+N;
+  T* begin() { return space; }
+  T* end() { return space + N; }
+  T const* begin() const { return space; }
+  T const* end() const { return space + N; }
+
+  template <class I>
+  T& operator[](I i) {
+    return space[i];
   }
 
   template <class I>
-  T &operator[](I i) { return space[i]; }
-
-  template <class I>
-  T const& operator[](I i) const { return space[i]; }
+  T const& operator[](I i) const {
+    return space[i];
+  }
 
   operator T*() { return space; }
   operator T const*() const { return space; }
@@ -84,55 +80,38 @@ struct ZeroInitializedArray
     return true;
   }
 
-  void clear() {
-    zero();
-  }
+  void clear() { zero(); }
 
-  friend inline std::ostream& operator<<(std::ostream &out, ZeroInitializedArray const& self) {
+  friend inline std::ostream& operator<<(std::ostream& out, ZeroInitializedArray const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream &out, bool sparse = true) const {
+  void print(std::ostream& out, bool sparse = true) const {
     out << "[";
     for (std::size_t i = 0; i < N; ++i) {
-      if (!sparse || space[i])
-        out<<' '<<i<<'='<<space[i];
+      if (!sparse || space[i]) out << ' ' << i << '=' << space[i];
     }
     out << " ]";
   }
 
-  int cmp(ZeroInitializedArray const& o) const {
-    return std::memcmp(space, o.space, sizeof(space));
-  }
-  bool operator==(ZeroInitializedArray const& o) const {
-    return cmp(o) == 0;
-  }
-  bool operator < (ZeroInitializedArray const& o) const {
-    return cmp(o) < 0;
-  }
+  int cmp(ZeroInitializedArray const& o) const { return std::memcmp(space, o.space, sizeof(space)); }
+  bool operator==(ZeroInitializedArray const& o) const { return cmp(o) == 0; }
+  bool operator<(ZeroInitializedArray const& o) const { return cmp(o) < 0; }
 
-  friend inline std::size_t hash_value(ZeroInitializedArray const& self) {
-    return self.hash();
-  }
-  std::size_t hash(std::size_t seed = 0) const {
-    return MurmurHash64(begin(), bytes(), seed);
-  }
+  friend inline std::size_t hash_value(ZeroInitializedArray const& self) { return self.hash(); }
+  std::size_t hash(std::size_t seed = 0) const { return MurmurHash64(begin(), bytes(), seed); }
 
   /// for MinusOneInitializedArray
-  void setMinusOne() {
-    std::memset(space, -1, sizeof(space));
-  }
+  void setMinusOne() { std::memset(space, -1, sizeof(space)); }
 
   ZeroInitializedArray() { zero(); }
   explicit ZeroInitializedArray(bool) { setMinusOne(); }
-  ZeroInitializedArray(ZeroInitializedArray &&)=default;
-  ZeroInitializedArray& operator=(ZeroInitializedArray &&)=default;
-  ZeroInitializedArray(ZeroInitializedArray const&)=default;
-  ZeroInitializedArray& operator=(ZeroInitializedArray const&)=default;
-  friend inline void swap(ZeroInitializedArray & x1, ZeroInitializedArray & x2) {
-    x1.swap(x2);
-  }
-  void swap(ZeroInitializedArray &o) {
+  ZeroInitializedArray(ZeroInitializedArray&&) = default;
+  ZeroInitializedArray& operator=(ZeroInitializedArray&&) = default;
+  ZeroInitializedArray(ZeroInitializedArray const&) = default;
+  ZeroInitializedArray& operator=(ZeroInitializedArray const&) = default;
+  friend inline void swap(ZeroInitializedArray& x1, ZeroInitializedArray& x2) { x1.swap(x2); }
+  void swap(ZeroInitializedArray& o) {
     ZeroInitializedArray tmp;
     tmp = o;
     o = *this;
@@ -142,8 +121,7 @@ struct ZeroInitializedArray
 
 /// all 1 bits
 template <class T, std::size_t N>
-struct MinusOneInitializedArray : ZeroInitializedArray<T, N>
-{
+struct MinusOneInitializedArray : ZeroInitializedArray<T, N> {
   MinusOneInitializedArray() : ZeroInitializedArray<T, N>(true) {}
 };
 
@@ -151,27 +129,24 @@ struct MinusOneInitializedArray : ZeroInitializedArray<T, N>
    for pod only (memset/memcpy).
 */
 template <class T, class UserAllocator = Pool::default_user_allocator_new_delete>
-struct ZeroInitializedHeapArray
-{
+struct ZeroInitializedHeapArray {
   typedef T* const_iterator;
   typedef T* iterator;
   typedef T value_type;
 
-  T *space;
+  T* space;
   std::size_t N;
 
   bool empty() const { return !N; }
   std::size_t size() const { return N; }
   std::size_t bytes() const { return N * sizeof(T); }
 
-  T *begin() const {
-    return space;
-  }
-  T *end() const {
-    return space+N;
-  }
+  T* begin() const { return space; }
+  T* end() const { return space + N; }
   template <class I>
-  T &operator[](I i) const { return space[i]; }
+  T& operator[](I i) const {
+    return space[i];
+  }
   operator T*() const { return space; }
 
   /**
@@ -194,9 +169,7 @@ struct ZeroInitializedHeapArray
 
   ZeroInitializedHeapArray(std::size_t NT) { init(NT); }
 
-  ZeroInitializedHeapArray(ZeroInitializedHeapArray const& other) {
-    copyImpl(other);
-  }
+  ZeroInitializedHeapArray(ZeroInitializedHeapArray const& other) { copyImpl(other); }
   ZeroInitializedHeapArray& operator=(ZeroInitializedHeapArray const& other) {
     free();
     copyImpl(other);
@@ -208,12 +181,12 @@ struct ZeroInitializedHeapArray
     memcpy_from(other.space);
   }
 
-  ZeroInitializedHeapArray(ZeroInitializedHeapArray &&o) {
+  ZeroInitializedHeapArray(ZeroInitializedHeapArray&& o) {
     space = o.space;
     N = o.N;
     o.space = 0;
   }
-  ZeroInitializedHeapArray& operator=(ZeroInitializedHeapArray &&o) {
+  ZeroInitializedHeapArray& operator=(ZeroInitializedHeapArray&& o) {
     assert(this != &o);
     free();
     space = o.space;
@@ -222,13 +195,9 @@ struct ZeroInitializedHeapArray
     return *this;
   }
 
-  ~ZeroInitializedHeapArray() {
-    free();
-  }
+  ~ZeroInitializedHeapArray() { free(); }
 
-  void memcpy_from(void const* from) {
-    std::memcpy(space, from, bytes());
-  }
+  void memcpy_from(void const* from) { std::memcpy(space, from, bytes()); }
 
   void clear() {
     free();
@@ -241,8 +210,7 @@ struct ZeroInitializedHeapArray
   }
 
   void zero() {
-    if (space)
-      std::memset(space, 0, bytes());
+    if (space) std::memset(space, 0, bytes());
   }
 
   void reinit(std::size_t NT) {
@@ -254,66 +222,53 @@ struct ZeroInitializedHeapArray
   }
 
   int cmp(ZeroInitializedHeapArray const& o) const {
-    return N == o.N ? std::memcmp(space, o.space, bytes()) :
-        N < o.N ? -1 : 1;
+    return N == o.N ? std::memcmp(space, o.space, bytes()) : N < o.N ? -1 : 1;
   }
-  bool operator==(ZeroInitializedHeapArray const& o) const {
-    return cmp(o) == 0;
-  }
-  bool operator < (ZeroInitializedHeapArray const& o) const {
-    return cmp(o) < 0;
-  }
-  friend inline std::size_t hash_value(ZeroInitializedHeapArray const& self) {
-    return self.hash();
-  }
-  std::size_t hash(std::size_t seed = 0) const {
-    return MurmurHash64(begin(), bytes(), seed + N);
-  }
+  bool operator==(ZeroInitializedHeapArray const& o) const { return cmp(o) == 0; }
+  bool operator<(ZeroInitializedHeapArray const& o) const { return cmp(o) < 0; }
+  friend inline std::size_t hash_value(ZeroInitializedHeapArray const& self) { return self.hash(); }
+  std::size_t hash(std::size_t seed = 0) const { return MurmurHash64(begin(), bytes(), seed + N); }
 
-  void swapSameSize(ZeroInitializedHeapArray &o) {
-    T *tmp = o.space;o.space = space;space = tmp;
+  void swapSameSize(ZeroInitializedHeapArray& o) {
+    T* tmp = o.space;
+    o.space = space;
+    space = tmp;
   }
-  friend inline void swap(ZeroInitializedHeapArray & x1, ZeroInitializedHeapArray & x2) {
-    x1.swap(x2);
-  }
-  void swap(ZeroInitializedHeapArray &o) {
-    std::size_t tmp = N; o.N = N; N = tmp;
+  friend inline void swap(ZeroInitializedHeapArray& x1, ZeroInitializedHeapArray& x2) { x1.swap(x2); }
+  void swap(ZeroInitializedHeapArray& o) {
+    std::size_t tmp = N;
+    o.N = N;
+    N = tmp;
     swapSameSize(o);
   }
 
  private:
-  void free()
-  {
-    UserAllocator::free((char*)space);
-  }
+  void free() { UserAllocator::free((char*)space); }
 };
 
 /// uncopyable (but can swap/move). can't == < or zero without passing in size from outside
 template <class T, class UserAllocator = Pool::default_user_allocator_new_delete>
-struct UnsizedArray
-{
+struct UnsizedArray {
   typedef T* const_iterator;
   typedef T* iterator;
   typedef T value_type;
 
-  T *space;
+  T* space;
 
   bool empty() const { return !space; }
 
-  T *begin() const {
-    return space;
-  }
+  T* begin() const { return space; }
 
   template <class I>
-  T &operator[](I i) const { return space[i]; }
+  T& operator[](I i) const {
+    return space[i];
+  }
   operator T*() const { return space; }
 
   /**
      init() methods may not be called except on default constructed array (i.e. doesn't free previous).
   */
-  void init() {
-    space = 0;
-  }
+  void init() { space = 0; }
 
   /**
      don't call unless you free() or clear() first.
@@ -327,26 +282,18 @@ struct UnsizedArray
 
   explicit UnsizedArray(std::size_t N) { init(N); }
 
-  ~UnsizedArray() {
-    free();
-  }
+  ~UnsizedArray() { free(); }
 
-  void memcpy_from(void const* from, unsigned N) {
-    std::memcpy(space, from, N * sizeof(T));
-  }
+  void memcpy_from(void const* from, unsigned N) { std::memcpy(space, from, N * sizeof(T)); }
 
   void clear() {
     free();
     init();
   }
 
-  void alloc_unconstructed(std::size_t N) {
-    space = (T*)UserAllocator::malloc(N * sizeof(T));
-  }
+  void alloc_unconstructed(std::size_t N) { space = (T*)UserAllocator::malloc(N * sizeof(T)); }
 
-  void zero(std::size_t N) {
-    std::memset(space, 0, N * sizeof(T));
-  }
+  void zero(std::size_t N) { std::memset(space, 0, N * sizeof(T)); }
 
   void reinit(std::size_t N) {
     free();
@@ -354,32 +301,29 @@ struct UnsizedArray
     zero(N);
   }
 
-  void swapSameSize(UnsizedArray &o) {
-    T *tmp = o.space;o.space = space;space = tmp;
+  void swapSameSize(UnsizedArray& o) {
+    T* tmp = o.space;
+    o.space = space;
+    space = tmp;
   }
-  friend inline void swap(UnsizedArray & x1, UnsizedArray & x2) {
-    x1.swapSameSize(x2);
-  }
+  friend inline void swap(UnsizedArray& x1, UnsizedArray& x2) { x1.swapSameSize(x2); }
 
-  UnsizedArray(UnsizedArray &&o) {
+  UnsizedArray(UnsizedArray&& o) {
     space = o.space;
     o.space = 0;
   }
-  UnsizedArray& operator=(UnsizedArray &&o) {
+  UnsizedArray& operator=(UnsizedArray&& o) {
     assert(this != &o);
     free();
     space = o.space;
     o.space = 0;
     return *this;
   }
-  UnsizedArray(UnsizedArray const&o) = delete;
-  UnsizedArray& operator=(UnsizedArray const&o) = delete;
+  UnsizedArray(UnsizedArray const& o) = delete;
+  UnsizedArray& operator=(UnsizedArray const& o) = delete;
 
-private:
-  void free()
-  {
-    UserAllocator::free((char*)space);
-  }
+ private:
+  void free() { UserAllocator::free((char*)space); }
 };
 
 

@@ -66,7 +66,9 @@ struct FeaturesVisitor<Weight, typename Weight::IsFeatureWeight> {
   template <class Visitor>
   static inline void visit(Weight const& weight, Visitor& visitor) {
     typedef typename Weight::value_type value_type;
-    for (value_type aPair : weight) { visitor(aPair.first, aPair.second); }
+    for (value_type aPair : weight) {
+      visitor(aPair.first, aPair.second);
+    }
   }
   static inline void setFeatures(Weight& w, shared_ptr<Features>& f) { w.setFeatures(std::move(f)); }
   static inline void setFeatures(Weight& w, shared_ptr<Features> const& f) { w.setFeatures(f); }

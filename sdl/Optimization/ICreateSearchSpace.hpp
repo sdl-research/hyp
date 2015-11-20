@@ -38,11 +38,10 @@ enum { kIsXmtModule = false, kIsOptimize = true };
    TrainableCapitalizer) and the optimize their task-specific feature
    weights using the OptimizationProcedure.
  */
-template<class Arc>
+template <class Arc>
 class ICreateSearchSpace {
 
  public:
-
   virtual ~ICreateSearchSpace() {}
 
   /**
@@ -60,16 +59,14 @@ class ICreateSearchSpace {
      featureWeights are added to the arc value (dotproduct values) - should not be
      provided for training; just test/decode.
    */
-  virtual Hypergraph::IMutableHypergraph<Arc>*
-  getUnclampedHypergraph(IInput const& observedInput) = 0;
+  virtual Hypergraph::IMutableHypergraph<Arc>* getUnclampedHypergraph(IInput const& observedInput) = 0;
 
   /**
       Creates the task-specific training data (will load files
       and create one unclamped/clamped hypergraph pair per training
       example).
    */
-  virtual shared_ptr< IFeatureHypergraphPairs<Arc> >
-  getFeatureHypergraphPairs() const = 0;
+  virtual shared_ptr<IFeatureHypergraphPairs<Arc>> getFeatureHypergraphPairs() const = 0;
 
   virtual std::size_t getNumFeatures() = 0;
 
@@ -91,6 +88,7 @@ class ICreateSearchSpace {
 
   virtual std::string getName() const = 0;
 };
+
 
 }}
 

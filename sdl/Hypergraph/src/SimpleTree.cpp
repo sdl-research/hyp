@@ -68,7 +68,7 @@ bool isSimpleTree(bool& interiorStatesFirst, HypergraphBase const& hg, StateId& 
   if (f == kNoState) return false;
   StateId maxInterior = 0;
   if (!isSimpleTreeRec(hg, f, maxInterior, numInterior)) return false;
-  interiorStatesFirst = maxInterior == numInterior - 1;
+  interiorStatesFirst = maxInterior == numInterior-1;
   return true;
 }
 

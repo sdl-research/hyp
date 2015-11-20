@@ -23,13 +23,14 @@ namespace Hypergraph {
 struct HypergraphBase;
 
 /// result has explicit (input,input) for (input)-only labels
-void invertForceLabelPair(HypergraphBase &);
+void invertForceLabelPair(HypergraphBase&);
 
 /// do nothing if labels are all (input)-only, else invertForceLabelPair (semantically
 /// both are equivalent until you later chang einput label)
-void invert(HypergraphBase &);
+void invert(HypergraphBase&);
 
 bool needsInvert(HypergraphBase const& hg);
+
 
 }}
 

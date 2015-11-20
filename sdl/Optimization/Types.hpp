@@ -19,10 +19,12 @@
 
 #include <sdl/Hypergraph/Types.hpp>
 
-namespace sdl { namespace Optimization {
+namespace sdl {
+namespace Optimization {
 
 typedef std::size_t TrainingDataIndex;
 typedef Hypergraph::FeatureId FeatureId;
+
 
 }}
 

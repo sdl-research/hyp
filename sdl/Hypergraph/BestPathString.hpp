@@ -46,8 +46,7 @@ unsigned const kReserveForBestPathString = 500;
 
 
 template <class Arc>
-void appendBestPathStringForDeriv(Util::StringBuilder& out, DerivationPtr const& deriv,
-                                  IHypergraph<Arc> const& hg,
+void appendBestPathStringForDeriv(Util::StringBuilder& out, DerivationPtr const& deriv, IHypergraph<Arc> const& hg,
                                   DerivationStringOptions const& opts = DerivationStringOptions(kUnquoted),
                                   bool printWeight = false) {
   if (printWeight) out(deriv->weightForArc<Arc>())(' ');
@@ -336,8 +335,7 @@ struct AcceptStringVisitor : public boost::static_visitor<> {
     assert(voc);
     assert(deriv);
     Syms tokens;  // TODO: unnecessary copy - visit
-    symsFromDerivAppend(tokens, deriv, static_cast<IHypergraph<ArcTpl<Weight> > const&>(*hgBase),
-                        options.hgString);
+    symsFromDerivAppend(tokens, deriv, static_cast<IHypergraph<ArcTpl<Weight>> const&>(*hgBase), options.hgString);
     if (symsRewrite) symsRewrite(tokens, voc);
     if (!options.detok) {
       if (!skipOriginalSym || !(tokens.size() == 1 && tokens[0] == skipOriginalSym))

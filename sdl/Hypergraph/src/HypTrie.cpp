@@ -55,8 +55,10 @@ struct HypTrie : HypergraphMainBase {
 
   StringUnionFromWordList stringUnionFromWordList;
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Trie)
+
+
+

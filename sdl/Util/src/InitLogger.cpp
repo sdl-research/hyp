@@ -68,7 +68,7 @@ void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerO
   if (opts.removeAppenders) g_pStatsDBLogger->removeAllAppenders();
   log4cxx::LogString logStrLayout;
   std::string layout(opts.patternLayout);
-  if (layout.empty()) layout = (opts.multiThread ? "%-4t %-5p %c{2} - %m%n" : "%-5p %c{2} - %m%n");
+  if (layout.empty()) layout = (opts.multiThread ? "%-4t %-5p %c{2}-%m%n" : "%-5p %c{2}-%m%n");
   log4cxx::helpers::Transcoder::decode(layout, logStrLayout);
   log4cxx::PatternLayout* pLayout = new log4cxx::PatternLayout(logStrLayout);
   if (!opts.file.empty()) {
@@ -81,8 +81,7 @@ void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerO
     g_pStatsDBLogger->addAppender(pAppender);
   }
   if (opts.console) {
-    g_pStatsDBLogger->addAppender(
-        new log4cxx::ConsoleAppender(pLayout, log4cxx::ConsoleAppender::getSystemErr()));
+    g_pStatsDBLogger->addAppender(new log4cxx::ConsoleAppender(pLayout, log4cxx::ConsoleAppender::getSystemErr()));
   }
   g_pStatsDBLogger->setLevel(level);
   if (opts.verbose)
@@ -106,8 +105,7 @@ void initLogger(std::string const& appname, Util::InitLoggerOptions opts) {
   // defaultLocale();
 }
 
-void initLoggerConsole(char const* name, LogLevel level) {
-}
+void initLoggerConsole(char const* name, LogLevel level) {}
 
 #endif  // end ifndef NLOG
 

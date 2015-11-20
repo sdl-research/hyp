@@ -26,8 +26,10 @@ struct HypConvertCharsToTokens : TransformMain<HypConvertCharsToTokens> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(ConvertCharsToTokens)
+
+
+

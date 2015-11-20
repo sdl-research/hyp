@@ -55,8 +55,7 @@ struct Output : OutputStream {
 
 namespace boost {
 namespace program_options {
-inline void validate(boost::any& v, std::vector<std::string> const& values, sdl::Util::Output* target_type,
-                     int) {
+inline void validate(boost::any& v, std::vector<std::string> const& values, sdl::Util::Output* target_type, int) {
   v = boost::any(sdl::Util::Output(graehl::get_single_arg(v, values)));
 }
 

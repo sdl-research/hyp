@@ -130,8 +130,7 @@ inline boost::iterator_range<typename String::const_iterator> chomped(String con
 }
 
 template <class String, class Space>
-inline boost::iterator_range<typename String::const_iterator> endTrimmedOf(String const& str,
-                                                                           Space const& space) {
+inline boost::iterator_range<typename String::const_iterator> endTrimmedOf(String const& str, Space const& space) {
   typename String::const_iterator begin = str.begin();
   return trimEndOf(begin, chompEnd(begin, str.end()), space);
 }

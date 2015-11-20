@@ -22,24 +22,15 @@
 namespace sdl {
 namespace Util {
 
-struct DoubleQuoteEsc : public EscapeChars
-{
-  DoubleQuoteEsc()
-  {
-    add()
-        ('\a', "\\a")('\b', "\\b")('\f', "\\f")('\n', "\\n")
-        ('\r', "\\r")('\t', "\\t")('\v', "\\v")('\\', "\\\\")
-        ('"', "\\\"");
+struct DoubleQuoteEsc : public EscapeChars {
+  DoubleQuoteEsc() {
+    add()('\a', "\\a")('\b', "\\b")('\f', "\\f")('\n', "\\n")('\r', "\\r")('\t', "\\t")('\v', "\\v")(
+        '\\', "\\\\")('"', "\\\"");
   }
 };
 
-struct SingleQuoteEsc : public EscapeChars
-{
-  SingleQuoteEsc()
-  {
-    add()
-        ('\'',"\\'")('\\',"\\\\");
-  }
+struct SingleQuoteEsc : public EscapeChars {
+  SingleQuoteEsc() { add()('\'', "\\'")('\\', "\\\\"); }
 };
 
 

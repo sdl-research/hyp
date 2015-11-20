@@ -30,16 +30,14 @@ namespace Util {
 
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> Graph;
-//typedef boost::graph_traits<Graph>::vertices_size_type GraphSize;
+// typedef boost::graph_traits<Graph>::vertices_size_type GraphSize;
 typedef Graph::vertices_size_type GraphSize;
 
 typedef boost::default_color_type GraphColor;
-inline GraphColor unvisitedColor()
-{
+inline GraphColor unvisitedColor() {
   return boost::color_traits<GraphColor>::white();
 }
-inline GraphColor visitedColor()
-{
+inline GraphColor visitedColor() {
   return boost::color_traits<GraphColor>::black();
 }
 
@@ -48,15 +46,13 @@ typedef boost::iterator_property_map<VertexColors::iterator, boost::identity_pro
 
 
 template <class Graph, class Colormap>
-void dfsColorMap(Graph const&g, Colormap const& c, typename boost::graph_traits<Graph>::vertex_descriptor from)
-{
+void dfsColorMap(Graph const& g, Colormap const& c, typename boost::graph_traits<Graph>::vertex_descriptor from) {
   boost::depth_first_visit(g, from, boost::default_dfs_visitor(), c);
 }
 
-inline void dfsColor(Graph const&g, VertexColors &c, std::size_t from)
-{
+inline void dfsColor(Graph const& g, VertexColors& c, std::size_t from) {
   c.clear();
-  c.resize(boost::num_vertices(g), unvisitedColor()); // white: yet to be discovered
+  c.resize(boost::num_vertices(g), unvisitedColor());  // white: yet to be discovered
   VertexColorMap cm(c.begin());
   dfsColorMap(g, cm, from);
 }

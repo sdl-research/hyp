@@ -24,19 +24,16 @@
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/HypergraphBase.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 struct GraphInArcs {
-  ArcBase *getArc(HypergraphBase const& hg, StateId s, ArcId a) const {
-    return hg.inArc(s, a);
-  }
+  ArcBase* getArc(HypergraphBase const& hg, StateId s, ArcId a) const { return hg.inArc(s, a); }
   template <class Arc>
-  Arc *getArc(IHypergraph<Arc> const& hg, StateId s, ArcId a) const {
+  Arc* getArc(IHypergraph<Arc> const& hg, StateId s, ArcId a) const {
     return hg.inArc(s, a);
   }
-  ArcId getNumArcs(HypergraphBase const& hg, StateId s) const {
-    return hg.numInArcs(s);
-  }
+  ArcId getNumArcs(HypergraphBase const& hg, StateId s) const { return hg.numInArcs(s); }
   template <class Arc>
   static inline StateId from(Arc const* a) {
     return a->head();
@@ -46,25 +43,17 @@ struct GraphInArcs {
     assert(a->tails().size());
     return a->tails()[0];
   }
-  static inline StateId from(HypergraphBase const& hg) {
-    return hg.final();
-  }
-  static inline StateId to(HypergraphBase const& hg) {
-    return hg.start();
-  }
+  static inline StateId from(HypergraphBase const& hg) { return hg.final(); }
+  static inline StateId to(HypergraphBase const& hg) { return hg.start(); }
 };
 
 struct GraphOutArcs {
-  ArcBase *getArc(HypergraphBase const& hg, StateId s, ArcId a) const {
-    return hg.outArc(s, a);
-  }
+  ArcBase* getArc(HypergraphBase const& hg, StateId s, ArcId a) const { return hg.outArc(s, a); }
   template <class Arc>
-  Arc *getArc(IHypergraph<Arc> const& hg, StateId s, ArcId a) const {
+  Arc* getArc(IHypergraph<Arc> const& hg, StateId s, ArcId a) const {
     return hg.outArc(s, a);
   }
-  ArcId getNumArcs(HypergraphBase const& hg, StateId s) const {
-    return hg.numOutArcs(s);
-  }
+  ArcId getNumArcs(HypergraphBase const& hg, StateId s) const { return hg.numOutArcs(s); }
   template <class Arc>
   static inline StateId from(Arc const* a) {
     assert(a->tails().size());
@@ -74,12 +63,8 @@ struct GraphOutArcs {
   static inline StateId to(Arc const* a) {
     return a->head();
   }
-  static inline StateId from(HypergraphBase const& hg) {
-    return hg.start();
-  }
-  static inline StateId to(HypergraphBase const& hg) {
-    return hg.final();
-  }
+  static inline StateId from(HypergraphBase const& hg) { return hg.start(); }
+  static inline StateId to(HypergraphBase const& hg) { return hg.final(); }
 };
 
 struct GraphFirstTailOutArcsCached : GraphOutArcs {
@@ -88,18 +73,12 @@ struct GraphFirstTailOutArcsCached : GraphOutArcs {
   AdjsPtr adjs;
   StateId const nadjs;
   GraphFirstTailOutArcsCached(HypergraphBase const& hg)
-      : adjs(hg.getFirstTailOutArcs())
-      , nadjs(adjs->size())
-  {}
-  ArcBase *getArc(HypergraphBase const& hg, StateId s, ArcId a) const {
-    return (*adjs)[s][a];
-  }
-  ArcId getNumArcs(HypergraphBase const& hg, StateId s) const {
-    return s < nadjs ? (*adjs)[s].size() : 0;
-  }
+      : adjs(hg.getFirstTailOutArcs()), nadjs(adjs->size()) {}
+  ArcBase* getArc(HypergraphBase const& hg, StateId s, ArcId a) const { return (*adjs)[s][a]; }
+  ArcId getNumArcs(HypergraphBase const& hg, StateId s) const { return s < nadjs ? (*adjs)[s].size() : 0; }
 };
 
-inline Sym firstGraphLabel(HypergraphBase const& hg, ArcBase *a) {
+inline Sym firstGraphLabel(HypergraphBase const& hg, ArcBase* a) {
   StateIdContainer const& tails = a->tails_;
   return tails.size() > 1 ? hg.inputLabel(tails[1]) : NoSymbol;
 }

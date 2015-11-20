@@ -96,28 +96,34 @@ struct LbfgsOptimizerOptions {
         "computation results of previous m iterations to approximate the inverse hessian matrix of the "
         "current iteration. This parameter controls the size of the limited memories (corrections). The "
         "default value is 6. Values less than 3 are not recommended. Large values will result in excessive "
-        "computing time.)").init(m);
+        "computing time.)")
+        .init(m);
     config("xtol", &xtol)(
         "From liblbfgs: The machine precision for floating-point values. This parameter must be a positive "
         "value set by a client program to estimate the machine precision. The line search routine will "
         "terminate with the status code (LBFGSERR_ROUNDING_ERROR) if the relative width of the interval of "
-        "uncertainty is less than this parameter.").init(xtol);
+        "uncertainty is less than this parameter.")
+        .init(xtol);
     config("epsilon", &epsilon)(
         "From liblbfgs: Epsilon for convergence test. This parameter determines the accuracy with which the "
         "solution is to be found. A minimization terminates when ||g|| < epsilon * max(1, ||x||), where "
-        "||.|| denotes the Euclidean (L2) norm. The default value is 1e-5.").init(epsilon);
+        "||.|| denotes the Euclidean (L2) norm. The default value is 1e-5.")
+        .init(epsilon);
     config("ftol", &ftol)(
         "From liblbfgs: A parameter to control the accuracy of the line search routine. The default value is "
-        "1e-4. This parameter should be greater than zero and smaller than 0.5.").init(ftol);
+        "1e-4. This parameter should be greater than zero and smaller than 0.5.")
+        .init(ftol);
     config("gtol", &gtol)(
         "From liblbfgs: A parameter to control the accuracy of the line search routine. The default value is "
         "0.9. If the function and gradient evaluations are inexpensive with respect to the cost of the "
         "iteration (which is sometimes the case when solving very large problems) it may be advantageous to "
         "set this parameter to a small value. A typical small value is 0.1. This parameter shuold be greater "
-        "than the ftol parameter (1e-4) and smaller than 1.0.").init(gtol);
+        "than the ftol parameter (1e-4) and smaller than 1.0.")
+        .init(gtol);
     config("orthantwise-c", &orthantwiseC)(
         "Coefficient for the L1 norm of variables (0 means no L1). Note that L2 is handled separately by the "
-        "optimization procedure, see option 'variance' there.").init(orthantwiseC);
+        "optimization procedure, see option 'variance' there.")
+        .init(orthantwiseC);
     config("linesearch", &linesearch)("L-BFGS line search method").init(linesearch);
     config("max-step", &max_step)("L-BFGS max step").init(max_step);
   }
@@ -171,9 +177,9 @@ class LbfgsOptimizer {
     lbfgsfloatval_t fx;
 
     if (lbfgsOptions_.orthantwise_c) {
-      //TODO: test
+      // TODO: test
       lbfgsOptions_.orthantwise_start = 0;
-      lbfgsOptions_.orthantwise_end = numParams - 1;
+      lbfgsOptions_.orthantwise_end = numParams-1;
       lbfgsOptions_.linesearch = kBacktracking;  // required for L1
       SDL_INFO(Optimization, "L-BFGS L1 regularization enabled with C="
                                  << lbfgsOptions_.orthantwise_c
@@ -184,8 +190,7 @@ class LbfgsOptimizer {
     // Run L-BFGS optimization; this will invoke the callback
     // functions evaluate() and progress() when necessary:
     ret = lbfgs((int)numParams, x, &fx, evaluate, progress, (void*)pObjFct_, &lbfgsOptions_);
-    SDL_INFO(Optimization, "L-BFGS optimization terminated with status code "
-                               << ret << ", function value " << fx);
+    SDL_INFO(Optimization, "L-BFGS optimization terminated with status code " << ret << ", function value " << fx);
     return ret;
   }
 

@@ -42,6 +42,7 @@
    for changes when we upgrade boost
 
 */
+// clang-format off
 
 #ifndef SDL_UTIL__DYNAMIC_BITSET_HPP
 #define SDL_UTIL__DYNAMIC_BITSET_HPP
@@ -359,7 +360,7 @@ public:
         else {
             highest_block_() |= (*first << r);
             do {
-                Block b = *first >> (bits_per_block - r);
+                Block b = *first >> (bits_per_block-r);
                 ++first;
                 bits_.push_back(b | (first==last? 0 : *first << r));
             } while (first != last);
@@ -593,7 +594,7 @@ BOOST_DYNAMIC_BITSET_PRIVATE:
             std::reverse(bs.bits_.begin(), bs.bits_.end());
             const block_width_type offs = bit_index(n);
             if (offs)
-                bs >>= (bits_per_block - offs);
+                bs >>= (bits_per_block-offs);
             bs.resize(n); // doesn't enlarge, so can't throw
             assert(bs.check_invariants_());
         }
@@ -602,7 +603,7 @@ BOOST_DYNAMIC_BITSET_PRIVATE:
             if (mask == 0) {
                 bs.append(Block(0));
                 current = &bs.highest_block_();
-                mask = Block(1) << (bits_per_block - 1);
+                mask = Block(1) << (bits_per_block-1);
             }
 
             if(value)
@@ -815,7 +816,7 @@ resize(size_type num_bits, bool value) // strong guarantee
         assert(old_num_blocks >= 1 && old_num_blocks <= bits_.size());
 
         // Set them.
-        bits_[old_num_blocks - 1] |= (v << extra_bits);
+        bits_[old_num_blocks-1] |= (v << extra_bits);
     }
 
   }
@@ -854,7 +855,7 @@ append(Block value) // strong guarantee
         bits_.push_back(value);
     }
     else {
-        bits_.push_back(value >> (bits_per_block - r));
+        bits_.push_back(value >> (bits_per_block-r));
         bits_[bits_.size() - 2] |= (value << r); // bits_.size() >= 2
     }
 
@@ -931,7 +932,7 @@ dynamic_bitset<Block, Allocator>::operator<<=(size_type n)
 
         if (r != 0) {
 
-            block_width_type const rs = bits_per_block - r;
+            block_width_type const rs = bits_per_block-r;
 
             for (size_type i = last-div; i>0; --i) {
                 b[i+div] = (b[i] << r) | (b[i-1] >> rs);
@@ -980,7 +981,7 @@ dynamic_bitset<B, A> & dynamic_bitset<B, A>::operator>>=(size_type n) {
 
         if (r != 0) {
 
-            block_width_type const ls = bits_per_block - r;
+            block_width_type const ls = bits_per_block-r;
 
             for (size_type i = div; i < last; ++i) {
                 b[i-div] = (b[i] >> r) | (b[i+1]  << ls);
@@ -1228,7 +1229,7 @@ void to_string_helper(const dynamic_bitset<B, A> & b, stringT & s,
 
     for (size_type i = 0; i < len; ++i) {
         if (b.unchecked_test_(i))
-            Tr::assign(s[len - 1 - i], one);
+            Tr::assign(s[len-1-i], one);
 
     }
 
@@ -1279,7 +1280,7 @@ to_ulong() const
 
   // Check for overflows. This may be a performance burden on very
   // large bitsets but is required by the specification, sorry
-  if (find_next(ulong_width - 1) != npos)
+  if (find_next(ulong_width-1) != npos)
     throw std::overflow_error("boost::dynamic_bitset::to_ulong overflow");
 
 
@@ -1290,7 +1291,7 @@ to_ulong() const
   const size_type maximum_size =
             (std::min)(num_bits_, static_cast<size_type>(ulong_width));
 
-  const size_type last_block = block_index( maximum_size - 1 );
+  const size_type last_block = block_index( maximum_size-1 );
 
   assert((last_block * bits_per_block) < static_cast<size_type>(ulong_width));
 
@@ -1489,7 +1490,7 @@ dynamic_bitset<Block, Allocator>::rfind_next(size_type pos) const
 
   // mask out bits after pos
   const Block after = bits_[blk] & ( ~Block(0) >> ind );
-  return after ? blk * bits_per_block + boost::integer_log2(after) : do_rfind_from_(blk - 1);
+  return after ? blk * bits_per_block + boost::integer_log2(after) : do_rfind_from_(blk-1);
 }
 
 

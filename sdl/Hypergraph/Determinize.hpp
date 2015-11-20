@@ -28,7 +28,7 @@
 
     (from
    http://www.google.com/url?sa=t&rct=j&q=ufa%20unambiguous%20automata&source=web&cd=10&sqi=2&ved=0CEwQFjAJ&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.7.667%26rep%3Drep1%26type%3Dps&ei=r1SgTojiJ4PMhAevusStBQ&usg=AFQjCNH4B_nsqJFlng0y0zh0pmBQMkO2pQ
-   - an NFA that requires 2^n-1 states as a PNA - note: their NFA allows multiple starting states)
+   - an NFA that requires 2^n-1 states as a PNA-note: their NFA allows multiple starting states)
 
     ambiguity of string: # of accepting runs ; max ambig of str of len n is nondecreasing with n
     UFA: ambig=0 or 1
@@ -547,7 +547,7 @@ void assertCanDeterminize(IHypergraph<Arc> const& i, DeterminizeFlags flags) {
   nd.flags = flags;
   if (i.anyInputLabel(nd)) {
     SDL_THROW_LOG(Hypergraph, InvalidInputException,
-                  "Can't determinize all special symbols yet - just EPSILON and RHO - try treating them as "
+                  "Can't determinize all special symbols yet - just EPSILON and RHO-try treating them as "
                   "normal letters with flags DETERMINIZE_PHI_NORMAL | DETERMINIZE_SIGMA_NORMAL");
   }
   if (!i.unweighted())
@@ -656,8 +656,7 @@ IHypergraph<A> const& determinized(IHypergraph<A> const& i, shared_ptr<IHypergra
 }
 
 template <class A>
-shared_ptr<IHypergraph<A> const> determinized(IHypergraph<A> const& i,
-                                              DeterminizeFlags flags = DETERMINIZE_INPUT,
+shared_ptr<IHypergraph<A> const> determinized(IHypergraph<A> const& i, DeterminizeFlags flags = DETERMINIZE_INPUT,
                                               Properties newOn = kFsmOutProperties,
                                               Properties newOff = kStoreInArcs) {
   shared_ptr<IHypergraph<A> const> p = ptrNoDelete(i);

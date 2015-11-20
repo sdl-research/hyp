@@ -84,8 +84,9 @@ struct IHypergraphsIteratorTpl {
                                               shared_ptr<IFeaturesPerInputPosition> feats
                                               = shared_ptr<IFeaturesPerInputPosition>());
 };
+}
 
 
-}}
+}
 
 #endif

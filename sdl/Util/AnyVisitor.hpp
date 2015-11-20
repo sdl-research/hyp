@@ -110,4 +110,7 @@ struct AnyVisitor {
 #define ANY_VISITOR_MEMBER(Objtype, obj, member, arg) \
   (sdl::Util::AnyVisitor<arg>(obj, &sdl::Util::AnyVisitor<arg>::MemberFn<Objtype>::call<&Objtype::member>))
 
+
+
+
 #endif

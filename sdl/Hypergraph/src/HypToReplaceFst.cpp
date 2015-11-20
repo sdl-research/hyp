@@ -137,7 +137,7 @@ struct HypToReplaceFst {
       fstName += ".std-fst";
 
       // Convert to OpenFst ReplaceFst:
-      Util::AutoDelete<fst::Fst<FArc> > result(sdl::Hypergraph::toReplaceFst<FArc>(hg, syms));
+      Util::AutoDelete<fst::Fst<FArc>> result(sdl::Hypergraph::toReplaceFst<FArc>(hg, syms));
 
       fst::VectorFst<FArc> minimized;
 
@@ -184,8 +184,10 @@ struct HypToReplaceFst {
     return EXIT_SUCCESS;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(ToReplaceFst)
+
+
+

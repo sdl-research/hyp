@@ -306,8 +306,7 @@ struct EarleyParser {
     std::size_t operator()(ItemAndMatchedArcs* obj) const { return obj->hashCode; }
   };
 
-  typedef unordered_set<ItemAndMatchedArcs*, ItemAndMatchedArcsHashFct, Util::NonNullPointeeEqualExpensive>
-      ItemAndMatchedArcsSet;
+  typedef unordered_set<ItemAndMatchedArcs*, ItemAndMatchedArcsHashFct, Util::NonNullPointeeEqualExpensive> ItemAndMatchedArcsSet;
   IHypergraph<A> const& fst_;
   IHypergraph<A> const& cfg_;
 
@@ -344,7 +343,7 @@ struct EarleyParser {
   std::set<Item*> finalItems_;
 
   typedef std::pair<Item*, Item*> BackPointer;
-  struct BackPointerHash  {
+  struct BackPointerHash {
     static constexpr std::size_t ceil_log2_size = graehl::ceil_log2_const(sizeof(Item));
     std::size_t operator()(BackPointer bp) const {
       return (((std::size_t)bp.first << 12) ^ (std::size_t)bp.second ^ (std::size_t)bp.first) >> ceil_log2_size;
@@ -474,10 +473,9 @@ struct EarleyParser {
     // Only attach a found eps after scanning something else (low in
     // the tree), not after some nonterminal
     if (item->dotPos > 0) {
-      StateId mostRecentlyCompleted = item->arc->getTail(item->dotPos - 1);
+      StateId mostRecentlyCompleted = item->arc->getTail(item->dotPos-1);
       bool mostRecentlyCompletedWasLexical = cfg_.outputLabel(mostRecentlyCompleted).isTerminal();
-      if ((!mostRecentlyCompletedWasLexical && !item->lastWasPhiOrEps)
-          && mostRecentlyCompleted != cfg_.start()) {
+      if ((!mostRecentlyCompletedWasLexical && !item->lastWasPhiOrEps) && mostRecentlyCompleted != cfg_.start()) {
         return;
       }
     } else if (item->dotPos == 0 && item->arc->getTail(0) == cfg_.start()) {
@@ -823,9 +821,9 @@ template <class Arc>
 void EarleyParser<Arc>::createResultArcs1(ItemAndMatchedArcs* itemAndMatchedArcs, StateId head,
                                           ArcVecPerDotPosPtr matchedArcs, StateIdContainer const& tails,
                                           Weight w, ItemAndMatchedArcsSet* alreadyExpanded) {
-  SDL_TRACE(Hypergraph.Compose, "createResultArcs1 for head=" << head
-                                    << ", tails=" << printer(tails)
-                                    << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
+  SDL_TRACE(Hypergraph.Compose,
+            "createResultArcs1 for head=" << head << ", tails=" << printer(tails)
+                                          << ", matchedArcs.size()=" << itemAndMatchedArcs->stateIds->size());
   using namespace Util;
   typename ItemAndMatchedArcsSet::const_iterator foundItem = alreadyExpanded->find(itemAndMatchedArcs);
   if (foundItem != alreadyExpanded->end()) {

@@ -21,7 +21,8 @@
 #include <sdl/Exception.hpp>
 #include <sdl/Util/LogHelper.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 
 /**
@@ -29,7 +30,7 @@ namespace sdl { namespace Util {
    else seek to beginning (if rewind) and \return false. if that seek fails,
    throw.
 */
-inline bool fileStartsWith(std::ifstream &f, std::string const& prefix, bool rewind) {
+inline bool fileStartsWith(std::ifstream& f, std::string const& prefix, bool rewind) {
   f.seekg(0, std::ios::beg);
   using std::string;
   string::size_type const sz = prefix.size();
@@ -40,16 +41,17 @@ inline bool fileStartsWith(std::ifstream &f, std::string const& prefix, bool rew
     f.clear();
   if (rewind) {
     if (!f.seekg(0, std::ios::beg))
-      SDL_THROW_LOG(Util.fileStartsWith, FileException, "couldn't rewind to start of file without header: " << prefix);
+      SDL_THROW_LOG(Util.fileStartsWith, FileException,
+                    "couldn't rewind to start of file without header: " << prefix);
   }
   return false;
 }
 
-inline bool isFile(std::istream &in) {
-  return dynamic_cast<std::ifstream *>(&in);
+inline bool isFile(std::istream& in) {
+  return dynamic_cast<std::ifstream*>(&in);
 }
 
-inline void readFileContentsNonseekable(std::istream &in, std::string& content) {
+inline void readFileContentsNonseekable(std::istream& in, std::string& content) {
   std::ostringstream ostrm;
   ostrm << in.rdbuf();
   content = ostrm.str();
@@ -58,19 +60,19 @@ inline void readFileContentsNonseekable(std::istream &in, std::string& content) 
 /**
    set out = contents of f starting at byte startAtByte.
 */
-inline void readFileContentsSeekTo(std::ifstream &f, std::string &out, std::size_t startAtByte = 0, std::size_t minSize = 0) {
+inline void readFileContentsSeekTo(std::ifstream& f, std::string& out, std::size_t startAtByte = 0,
+                                   std::size_t minSize = 0) {
   f.seekg(0, std::ios::end);
-  if (!f)
-    SDL_THROW_LOG(File, FileException, "can't advance unencrypted file to get size");
+  if (!f) SDL_THROW_LOG(File, FileException, "can't advance unencrypted file to get size");
 
   std::size_t fileSize = f.tellg();
-  std::size_t sz = fileSize - startAtByte;
+  std::size_t sz = fileSize-startAtByte;
   if (startAtByte > fileSize || sz < minSize)
-    SDL_THROW_LOG(File, FileFormatException,
-                  "file not big enough - expected " << minSize << " bytes or more after " << startAtByte << " header");
+    SDL_THROW_LOG(File, FileFormatException, "file not big enough - expected "
+                                                 << minSize << " bytes or more after " << startAtByte
+                                                 << " header");
   f.seekg(startAtByte, std::ios::beg);
-  if (!f)
-    SDL_THROW_LOG(File, FileException, "can't rewind file to " << startAtByte);
+  if (!f) SDL_THROW_LOG(File, FileException, "can't rewind file to " << startAtByte);
   out.resize(sz);
   if (!f.read(arrayBegin(out), sz))
     SDL_THROW_LOG(File, FileException, "can't read remaining " << sz << " bytes of file");
@@ -79,13 +81,13 @@ inline void readFileContentsSeekTo(std::ifstream &f, std::string &out, std::size
 /**
    set out = contents of f (first seeking to beginning if f is a file stream)
 */
-inline void readFileContents(std::istream& in, std::string& content)
-{
+inline void readFileContents(std::istream& in, std::string& content) {
   if (isFile(in))
     readFileContentsSeekTo(static_cast<std::ifstream&>(in), content, 0);
   else
     Util::readFileContentsNonseekable(in, content);
 }
+
 
 }}
 

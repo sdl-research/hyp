@@ -109,8 +109,7 @@ void readWordList(std::istream& in, WeightedStrings<W>& ws, WordListOptions cons
           if (!opt.counts) break;
           SDL_THROW_LOG(TrieWordList, TrieWordListException,
                         "reading word list: got count "
-                            << c << " but no word (looking for whitespace separated tokens on line " << i
-                            << ")");
+                            << c << " but no word (looking for whitespace separated tokens on line " << i << ")");
         }
         ws.openString();
         graehl::split_noquote(tok, [&ws](std::string const& s) {
@@ -126,8 +125,7 @@ void readWordList(std::istream& in, WeightedStrings<W>& ws, WordListOptions cons
     } else if ((in.bad() || in.fail()) && !in.eof())
       Util::throwInvalidInputException(in, "Couldn't read count (double) for TrieWordList", i);
   }
-  SDL_TRACE(Hypergraph.WordList,
-            "utf8 char strings: " << printer(ws.strings, Util::stateRange(ws.voc)));  // ws
+  SDL_TRACE(Hypergraph.WordList, "utf8 char strings: " << printer(ws.strings, Util::stateRange(ws.voc)));  // ws
   if (unweighted)
     ws.doneAdding();
   else {

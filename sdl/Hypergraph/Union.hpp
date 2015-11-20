@@ -149,8 +149,8 @@ void hgUnion(IHypergraph<Arc> const& sourceHg, IMutableHypergraph<Arc>* pTargetH
    if !graphOut, add explicit <eps>
  */
 template <class Arc>
-shared_ptr<Hypergraph::IMutableHypergraph<Arc> >
-graphMultiUnion(std::vector<shared_ptr<IMutableHypergraph<Arc> > >& graphs, bool graphOutput = true) {
+shared_ptr<Hypergraph::IMutableHypergraph<Arc>>
+graphMultiUnion(std::vector<shared_ptr<IMutableHypergraph<Arc>>>& graphs, bool graphOutput = true) {
   typedef IMutableHypergraph<Arc> Hg;
   typedef shared_ptr<Hg> HgPtr;
 

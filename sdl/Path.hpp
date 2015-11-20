@@ -19,10 +19,10 @@
 
 #include <sdl/LexicalCast.hpp>
 #ifndef BOOST_FILESYSTEM_NO_DEPRECATED
-# define BOOST_FILESYSTEM_NO_DEPRECATED
+#define BOOST_FILESYSTEM_NO_DEPRECATED
 #endif
 #ifndef BOOST_FILESYSTEM_VERSION
-# define BOOST_FILESYSTEM_VERSION 3
+#define BOOST_FILESYSTEM_VERSION 3
 #endif
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -31,20 +31,17 @@
 namespace boost {
 namespace filesystem {
 
-//for configure ADL:
-inline std::string type_string(path &)
-{
+// for configure ADL:
+inline std::string type_string(path&) {
   return "filesystem path";
 }
-inline std::string to_string_impl(path const& val)
-{
+inline std::string to_string_impl(path const& val) {
   return val.string();
 }
 
 inline void string_to_impl(std::string const& val, path& out) {
   out = path(val);
 }
-
 }
 }
 
@@ -54,9 +51,8 @@ namespace sdl {
 
 typedef boost::filesystem::path Path;
 
-inline Path & extendPathFrom(Path const& base, Path &relative) {
-  if (!relative.is_absolute())
-    relative = base / relative;
+inline Path& extendPathFrom(Path const& base, Path& relative) {
+  if (!relative.is_absolute()) relative = base / relative;
   return relative;
 }
 
@@ -76,8 +72,8 @@ inline bool removeFile(Path const& path) {
 
 inline bool removeFile(std::string const& path) {
   return remove(Path(path));
-}
 
-}
+
+}}
 
 #endif

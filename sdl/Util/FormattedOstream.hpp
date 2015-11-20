@@ -117,8 +117,8 @@ class FormattedOstreamIterator : public std::iterator<std::output_iterator_tag, 
 template <class Chars>
 unsigned printFormatted(std::ostream& out, Chars const& content, unsigned startColumn,
                         std::string const& hangingIndent = "  ", unsigned endColumn = 80) {
-  unsigned hangColumns = (unsigned)(endColumn - hangingIndent.size());
-  FormattedOstreamIterator format(out, hangingIndent, hangColumns, endColumn - startColumn);
+  unsigned hangColumns = (unsigned)(endColumn-hangingIndent.size());
+  FormattedOstreamIterator format(out, hangingIndent, hangColumns, endColumn-startColumn);
   for (typename Chars::const_iterator i = content.begin(), e = content.end(); i != e; ++i) format = *i;
   // format=std::copy(content.begin(), content.end(), format);
   if (format.getLine()) startColumn = (unsigned)hangingIndent.size();

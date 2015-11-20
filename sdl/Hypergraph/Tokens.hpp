@@ -87,7 +87,7 @@ struct Tokens {
 
   void insert(Sym symId, FeatureId featId) {
     assert(ids.contains(featId));
-    FeatureId const index = featId - ids.begin;
+    FeatureId const index = featId-ids.begin;
     symbols.set_grow(index, symId, NoSymbol);
   }
 

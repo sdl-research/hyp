@@ -29,8 +29,10 @@ struct HypReweight : TransformMain<HypReweight> {
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Reweight)
+
+
+

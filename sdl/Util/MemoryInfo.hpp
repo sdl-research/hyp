@@ -36,7 +36,6 @@ double physicalMemoryGB();
 
 class MemoryInfo {
  public:
-
   // Singleton
   MemoryInfo();
   MemoryInfo(MemoryInfo const&);
@@ -44,7 +43,7 @@ class MemoryInfo {
   static MemoryInfo instance_;
   static MemoryInfo& instance() { return instance_; };
 
-  std::size_t size(); // TODO: change type?
+  std::size_t size();  // TODO: change type?
   double sizeInMB();
   double sizeInGB();
 
@@ -54,8 +53,8 @@ class MemoryInfo {
 
   char memoryFilename[buflen];
   std::string getColumn(std::string const& s, unsigned columnNumber);
-
 };
+
 
 }}
 

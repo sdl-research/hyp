@@ -20,6 +20,7 @@ struct IVocabulary;
 
 typedef shared_ptr<IVocabulary> IVocabularyPtr;
 
+
 }
 
 #endif

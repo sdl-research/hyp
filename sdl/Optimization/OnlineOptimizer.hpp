@@ -121,9 +121,9 @@ struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
     prevGradsSquared_[index] += value * value;
     FloatT const absAvgGrad = std::abs(prevGrads_[index]) / timeStep_;
     if (absAvgGrad > l1Strength_) {
-      FloatT const rate = Util::sgn(prevGrads_[index])
-                          * (timeStep_ * eta_ / std::sqrt(prevGradsSquared_[index]));
-      this->params_[index] = rate * (l1Strength_ - absAvgGrad);
+      FloatT const rate
+          = Util::sgn(prevGrads_[index]) * (timeStep_ * eta_ / std::sqrt(prevGradsSquared_[index]));
+      this->params_[index] = rate * (l1Strength_-absAvgGrad);
     } else
       this->params_[index] = 0.0f;
   }
@@ -183,16 +183,14 @@ class OnlineOptimizer {
     bool useAdagrad = opts_.learningRateOptions.method == kAdagrad;
     bool useAdagradL1 = opts_.learningRateOptions.adagradL1Strength > 0.0f;
 
-    unique_ptr<ParameterUpdate<FloatT> > update;
+    unique_ptr<ParameterUpdate<FloatT>> update;
     if (useAdagrad) {
       // TODO: test
       if (useAdagradL1)
-        update.reset(new AdagradL1ParameterUpdate<FloatT>(params, numParams,
-                                                          opts_.learningRateOptions.adagradRate,
+        update.reset(new AdagradL1ParameterUpdate<FloatT>(params, numParams, opts_.learningRateOptions.adagradRate,
                                                           opts_.learningRateOptions.adagradL1Strength));
       else
-        update.reset(
-            new AdagradParameterUpdate<FloatT>(params, numParams, opts_.learningRateOptions.adagradRate));
+        update.reset(new AdagradParameterUpdate<FloatT>(params, numParams, opts_.learningRateOptions.adagradRate));
     } else
       update.reset(new ParameterUpdate<FloatT>(params, numParams));
 

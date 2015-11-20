@@ -35,12 +35,13 @@
 #pragma once
 
 #ifdef SDL_MUTABLE_STRING_DATA
-# define GRAEHL_MUTABLE_STRING_DATA SDL_MUTABLE_STRING_DATA
+#define GRAEHL_MUTABLE_STRING_DATA SDL_MUTABLE_STRING_DATA
 #endif
 
 #include <graehl/shared/snprintf.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 
 /**
@@ -60,6 +61,7 @@ using graehl::Sprintf;
    a copy. this implicitly converts to (is a) std::string
 */
 typedef graehl::SprintfStr SprintfStr;
+
 
 }}
 

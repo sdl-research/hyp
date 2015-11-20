@@ -138,7 +138,7 @@ struct HashPointer {
 
 inline uint64 rotateRight(uint64 h, int shift) {
   assert(shift && shift < 64 && shift > -64);
-  return (h >> shift) | (h << (64 - shift));
+  return (h >> shift) | (h << (64-shift));
 }
 
 inline uint64 hashFloat(double v) {
@@ -157,7 +157,7 @@ inline uint64 combinedHash(uint64 seed, uint64 hashed) {
   return seed ^ (hashed + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 }
 
-inline void combineHash(uint64 &seed, uint64 hashed) {
+inline void combineHash(uint64& seed, uint64 hashed) {
   seed ^= (hashed + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 }
 

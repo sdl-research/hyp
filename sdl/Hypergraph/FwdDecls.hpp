@@ -13,14 +13,17 @@
 #pragma once
 
 
-
 namespace sdl {
 namespace Hypergraph {
 
 struct HypergraphBase;
-template<class Arc> struct IHypergraph;
-template<class Arc> struct IMutableHypergraph;
-template<class Arc> struct MutableHypergraph;
+template <class Arc>
+struct IHypergraph;
+template <class Arc>
+struct IMutableHypergraph;
+template <class Arc>
+struct MutableHypergraph;
+
 
 }}
 

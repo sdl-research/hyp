@@ -144,7 +144,7 @@ class NgramWeightTpl {
 
   // TODO: we could use a sorted single vector of bytes for the keys, and a parallel vector of weights, if
   // profiling justifies more speedup. or drop shared ptrs per markus' review which was a 20% speedup
-  typedef std::map<NgramPtr, Weight, Util::LessByValue<Ngram> > NgramPtrMap;
+  typedef std::map<NgramPtr, Weight, Util::LessByValue<Ngram>> NgramPtrMap;
   typedef typename NgramPtrMap::value_type value_type;
   typedef typename NgramPtrMap::const_iterator const_iterator;
   typedef typename NgramPtrMap::iterator iterator;
@@ -290,6 +290,7 @@ class NgramWeightTpl {
   template <class W2>
   friend NgramWeightTpl<W2> times(NgramWeightTpl<W2> const& w1, NgramWeightTpl<W2> const& w2);
   Position maxlen_;
+
  public:
   bool zero_;
 };
@@ -337,7 +338,7 @@ inline NgramWeightTpl<W> times(NgramWeightTpl<W> const& w1, NgramWeightTpl<W> co
     for (Iter i2 = w2.begin(), e2 = w2.end(); i2 != e2; ++i2) {
       NgramPtrAndWeight const& p2 = *i2;
       Ngram const& ngram2 = *p2.first;
-      std::size_t const len2 =ngram2.size();
+      std::size_t const len2 = ngram2.size();
       assert(!Vocabulary::countBlockSymbols(ngram2));
       assert(len2 == Vocabulary::countRuleSrcSymbols(ngram2));
       assert(len2 <= w2.getMaxLen());
@@ -405,8 +406,9 @@ std::ostream& operator<<(std::ostream& out, NgramWeightTpl<W> const& w) {
   out << ")";
   return out;
 }
+}
 
 
-}}
+}
 
 #endif

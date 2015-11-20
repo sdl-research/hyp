@@ -35,8 +35,8 @@ inline bool isDebugBuild() {
   return false;
 #endif
 }
-
-}}
+}
+}
 
 
 /**
@@ -45,11 +45,14 @@ inline bool isDebugBuild() {
    expression has no commas - otherwise use '#if SDL_IS_DEBUG_BUILD'.
 */
 #ifdef NDEBUG
-# define SDL_DEBUG_BUILD(x)
-# define SDL_IS_DEBUG_BUILD 0
+#define SDL_DEBUG_BUILD(x)
+#define SDL_IS_DEBUG_BUILD 0
 #else
-# define SDL_DEBUG_BUILD(x) x
-# define SDL_IS_DEBUG_BUILD 1
+#define SDL_DEBUG_BUILD(x) x
+#define SDL_IS_DEBUG_BUILD 1
 #endif
+
+
+
 
 #endif

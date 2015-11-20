@@ -86,6 +86,7 @@ inline unsigned getNumBytes(Type val) {
   }
 }
 
+
 }
 
 #endif

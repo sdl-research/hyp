@@ -17,19 +17,19 @@
 #define MINMAX_JG201331_HPP
 #pragma once
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 template <class Optimum>
-void maxEq(Optimum &optimum, Optimum const& candidate) {
-  if (optimum < candidate)
-    optimum = candidate;
+void maxEq(Optimum& optimum, Optimum const& candidate) {
+  if (optimum < candidate) optimum = candidate;
 }
 
 template <class Optimum>
-void minEq(Optimum &optimum, Optimum const& candidate) {
-  if (candidate < optimum)
-    optimum = candidate;
+void minEq(Optimum& optimum, Optimum const& candidate) {
+  if (candidate < optimum) optimum = candidate;
 }
+
 
 }}
 

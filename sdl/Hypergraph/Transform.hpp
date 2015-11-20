@@ -101,11 +101,11 @@
    struct T : TransformBase;
 
    struct TM : TransformBase, TransformMainBase<TM> // bad: would have to restate overriding TransformBase
-   methods in TM - conflicts from two superclasses - fix: could do impl().transform().x instead of impl().x or
+   methods in TM-conflicts from two superclasses - fix: could do impl().transform().x instead of impl().x or
    in TM typedef TransformBase Transform;
 
    struct TM : TransformBase, TransformMainBase<TransformBase> // does static_cast in TMB succeeed?
-   struct TM : TransformBase, TransformMainBase<TM, TransformBase> // two static_cast - would definitely work
+   struct TM : TransformBase, TransformMainBase<TM, TransformBase> // two static_cast-would definitely work
 
 */
 
@@ -175,7 +175,7 @@ bool emptyInToOut(IHypergraph<Arc> const& hg, IMutableHypergraph<Arc>* presult_h
 }
 
 template <class Arc>
-bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IMutableHypergraph<Arc> >& presult_hg) {
+bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IMutableHypergraph<Arc>>& presult_hg) {
   if (hg.prunedEmpty()) {
     presult_hg.reset(newEmptySameVocabulary(hg));
     return true;
@@ -184,7 +184,7 @@ bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IMutableHypergraph<Arc>
 }
 
 template <class Arc, class OutputArc>
-bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IHypergraph<OutputArc> >& presult_hg) {
+bool emptyInToOut(IHypergraph<Arc> const& hg, shared_ptr<IHypergraph<OutputArc>>& presult_hg) {
   if (hg.prunedEmpty()) {
     presult_hg.reset(newEmptyHg<OutputArc>(hg.getVocabulary()));
     return true;
@@ -294,17 +294,17 @@ void inout(IHypergraph<A> const& i, IMutableHypergraph<A>* o, Transform const& t
 
 
 template <class A>
-void clone(shared_ptr<IHypergraph<A> >& phg) {
+void clone(shared_ptr<IHypergraph<A>>& phg) {
   phg.reset(new MutableHypergraph<A>(*phg));
 }
 
 template <class A>
-shared_ptr<IHypergraph<A> > clone(IHypergraph<A> const& inhg) {
-  return shared_ptr<IHypergraph<A> >(new MutableHypergraph<A>(inhg));
+shared_ptr<IHypergraph<A>> clone(IHypergraph<A> const& inhg) {
+  return shared_ptr<IHypergraph<A>>(new MutableHypergraph<A>(inhg));
 }
 
 template <class A>
-bool copyIfSame(shared_ptr<IHypergraph<A> >& pl, IHypergraph<A> const& r) {
+bool copyIfSame(shared_ptr<IHypergraph<A>>& pl, IHypergraph<A> const& r) {
   if (pl.get() == &r) {
     clone(pl);
     return true;
@@ -337,13 +337,13 @@ bool inplace(shared_ptr<IHypergraph<A> const>& cpi, Transform const& t) {
 
 // note: non-const pointer may still not actually be mutable - will check isMutable()
 template <class Transform, class A>
-bool inplace(shared_ptr<IMutableHypergraph<A> >& pi, Transform const& t) {
+bool inplace(shared_ptr<IMutableHypergraph<A>>& pi, Transform const& t) {
   return inplace(*pi, t);
 }
 
 // return false iff !t.needs(*pi), modify pi
 template <class Transform, class A>
-bool inplace(shared_ptr<IHypergraph<A> >& pi, Transform const& t) {
+bool inplace(shared_ptr<IHypergraph<A>>& pi, Transform const& t) {
   typedef IHypergraph<A> Hg;
   if (pi->isMutable()) {
     typedef IMutableHypergraph<A> MHg;
@@ -402,9 +402,9 @@ MutableHypergraph<A>* transformedNewNeeds(IHypergraph<A> const& hg, Transform co
    \return hg transformed by t. always returns a new hg even if !t.needs(hg).
 */
 template <class Transform, class A>
-shared_ptr<IHypergraph<A> > transformedCopy(IHypergraph<A> const& hg, Transform const& t,
-                                            IVocabularyPtr pVoc = IVocabularyPtr()) {
-  return shared_ptr<IHypergraph<A> >(transformedNew(hg, t, pVoc));
+shared_ptr<IHypergraph<A>> transformedCopy(IHypergraph<A> const& hg, Transform const& t,
+                                           IVocabularyPtr pVoc = IVocabularyPtr()) {
+  return shared_ptr<IHypergraph<A>>(transformedNew(hg, t, pVoc));
 }
 
 /**
@@ -423,14 +423,14 @@ shared_ptr<IHypergraph<A> const> transformed(IHypergraph<A> const& hg, Transform
    !t.needs(hg)
 */
 template <class Transform, class A>
-shared_ptr<IHypergraph<A> > transformedMaybeInplace(IHypergraph<A>& hg, Transform const& t,
-                                                    IVocabularyPtr pVoc = IVocabularyPtr()) {
+shared_ptr<IHypergraph<A>> transformedMaybeInplace(IHypergraph<A>& hg, Transform const& t,
+                                                   IVocabularyPtr pVoc = IVocabularyPtr()) {
   if (!t.needs(hg)) return ptrNoDelete(hg);
   if (t.Inplace && hg.isMutable()) {
     t.inplace(static_cast<IMutableHypergraph<A>&>(hg));
     return ptrNoDelete(hg);
   }
-  return shared_ptr<IHypergraph<A> >(transformedNewNeeds(hg, t, pVoc));
+  return shared_ptr<IHypergraph<A>>(transformedNewNeeds(hg, t, pVoc));
 }
 
 Properties const NewOutAddProps = kStoreInArcs;
@@ -490,8 +490,7 @@ struct TransformBase : PrepareArcType {
     if (!defaultVocab.empty()) {
       IVocabularyPtr& voc = pVoc.get();
       if (!voc) {
-        SDL_DEBUG(Hypergraph.Transform.loadResourcesThread, "using resource 'vocabulary: " << defaultVocab
-                                                                                           << "'");
+        SDL_DEBUG(Hypergraph.Transform.loadResourcesThread, "using resource 'vocabulary: " << defaultVocab << "'");
         mgr.maybeGetResource(defaultVocab, voc);
         if (!voc) {
           SDL_WARN(Hypergraph.Transform.loadResourcesThread,
@@ -523,9 +522,9 @@ struct TransformBase : PrepareArcType {
     SDL_DEBUG(Transform, "transform input hg vocabulary @ " << hgVoc.get() << " should match vocabulary @"
                                                             << trVoc.get());
     if (trVoc && trVoc != hgVoc)
-      SDL_THROW_LOG(Hypergraph.Transform, ConfigException, "vocabulary resource '"
-                                                           << defaultVocab
-                                                           << "' didn't match input hypergraph's vocabulary");
+      SDL_THROW_LOG(Hypergraph.Transform, ConfigException,
+                    "vocabulary resource '" << defaultVocab
+                                            << "' didn't match input hypergraph's vocabulary");
     return hgVoc;
   }
 
@@ -543,7 +542,8 @@ struct TransformBase : PrepareArcType {
   // create new symbols
   IVocabularyPtr const& getVocab(IVocabularyPtr const& defaultVoc) const {
     IVocabularyPtr& voc = pVoc.get();
-    if (!voc) voc = defaultVoc;    assert(voc);
+    if (!voc) voc = defaultVoc;
+    assert(voc);
     return voc;
   }
 
@@ -668,8 +668,9 @@ struct OptionalInplaceTransform : TransformBase<Transform::Inplace> {
     opt.inout(h, o);
   }
 };
+}
 
 
-}}
+}
 
 #endif

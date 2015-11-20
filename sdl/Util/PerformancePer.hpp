@@ -78,7 +78,7 @@ struct PerformancePer {
 
   PerformancePer() : nInputs() {}
 
-  /** Constructor - default name applies only if opt.name empty. */
+  /** Constructor-default name applies only if opt.name empty. */
   explicit PerformancePer(PerformancePerOptions const& opt_, std::string const& defaultName = "Performance")
       : nInputs() {
     init(opt_, defaultName);

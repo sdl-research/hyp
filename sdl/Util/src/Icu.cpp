@@ -145,7 +145,7 @@ unsigned toIcuReplacing(UnicodeString& ustr, icu::StringPiece utf8) {
   int32 actualSize, replaced;
   u_strFromUTF8WithSub(out, bytes, &actualSize, utf8.data(), bytes, 0xFFFD, &replaced, &status);
   if (!U_SUCCESS(status)) {
-    //TODO: test
+    // TODO: test
     ustr.releaseBuffer(0);
     return kIcuErrorInReplacing;
   } else {

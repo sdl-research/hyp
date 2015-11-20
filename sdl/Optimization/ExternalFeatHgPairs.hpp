@@ -22,7 +22,7 @@
 namespace sdl {
 namespace Optimization {
 
-template<class ArcT>
+template <class ArcT>
 class ExternalFeatHgPairs : public IFeatureHypergraphPairs<ArcT> {
  public:
   typedef ArcT Arc;
@@ -37,25 +37,16 @@ class ExternalFeatHgPairs : public IFeatureHypergraphPairs<ArcT> {
 
   void push_back(value_type const&);
 
-  void setFeatureWeights(FloatT const* featWeights,
+  void setFeatureWeights(FloatT const* featWeights, FeatureId numParams);
+
+  void setFeatureWeights(TrainingDataIndex begin, TrainingDataIndex end, FloatT const* featWeights,
                          FeatureId numParams);
 
-  void setFeatureWeights(TrainingDataIndex begin,
-                         TrainingDataIndex end,
-                         FloatT const* featWeights,
-                         FeatureId numParams);
+  std::size_t size() const { return size_; }
 
-  std::size_t size() const {
-    return size_;
-  }
+  FeatureId getNumFeatures() { return numParams_; }
 
-  FeatureId getNumFeatures() {
-    return numParams_;
-  }
-
-  void setNumFeatures(FeatureId n) {
-    numParams_ = n;
-  }
+  void setNumFeatures(FeatureId n) { numParams_ = n; }
 
  private:
   TrainingDataIndex size_;
@@ -64,6 +55,7 @@ class ExternalFeatHgPairs : public IFeatureHypergraphPairs<ArcT> {
   FeatureId numParams_;
   std::mutex mutex_;
 };
+
 
 }}
 

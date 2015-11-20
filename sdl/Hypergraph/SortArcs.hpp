@@ -138,8 +138,8 @@ void sortInArcsFirstLexical(IMutableHypergraph<Arc>& hg) {
 }
 
 template <class Arc>
-std::pair<Arc const* const*, Arc const* const*> findLexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head,
-                                                        Sym firstLexical) {
+std::pair<Arc const* const*, Arc const* const*> findLexSortedInArcs(IMutableHypergraph<Arc> const& hg,
+                                                                    StateId head, Sym firstLexical) {
   ArcsContainer* a = hg.maybeInArcs(head);
   assert(a);
   return std::equal_range(a->begin(), a->end(), firstLexical, FirstLexicalAscending<Arc>(hg));
@@ -159,11 +159,13 @@ inline ArcBase const* const* findNonlexSortedInArcsBegin(HypergraphBase const& h
 }
 
 template <class Arc>
-std::pair<Arc const* const*, Arc const* const*> findNonlexSortedInArcs(IMutableHypergraph<Arc> const& hg, StateId head) {
+std::pair<Arc const* const*, Arc const* const*> findNonlexSortedInArcs(IMutableHypergraph<Arc> const& hg,
+                                                                       StateId head) {
   // FirstLexicalAscending puts @NoSymbol position (-1) so at end
   ArcsContainer* a = hg.maybeInArcs(head);
   assert(a);
-  return std::pair<Arc const* const*, Arc const* const*>((Arc const* const*)findNonlexSortedInArcsBegin(hg, *a), a->end());
+  return std::pair<Arc const* const*, Arc const* const*>((Arc const* const*)findNonlexSortedInArcsBegin(hg, *a),
+                                                         a->end());
 }
 
 

@@ -51,14 +51,16 @@ struct Matrix {
 
   // default copy, move, assign, etc
 
-  friend inline void swap(Matrix & x1, Matrix & x2) {
-    x1.swap(x2);
-  }
+  friend inline void swap(Matrix& x1, Matrix& x2) { x1.swap(x2); }
 
-  void swap(Matrix &o) {
+  void swap(Matrix& o) {
     size_type t;
-    t = o.rows_; o.rows_ = rows_; rows_ = t;
-    t = o.cols_; o.cols_ = cols_; cols_ = t;
+    t = o.rows_;
+    o.rows_ = rows_;
+    rows_ = t;
+    t = o.cols_;
+    o.cols_ = cols_;
+    cols_ = t;
     container_.swap(o.container_);
   }
 
@@ -69,7 +71,7 @@ struct Matrix {
       size_type const stride = cols_ + 1;
       T* a = arrayBegin(container_);
       a[0] = onDiag;
-      // e.g. square N*N: (stride=N+1)*(N-1) = N^2 - 1 = size - 1
+      // e.g. square N*N: (stride=N+1)*(N-1) = N^2-1 = size - 1
       for (size_type i = stride, toofar = stride * N; i < toofar; i += stride) a[i] = onDiag;
     }
   }
@@ -90,7 +92,7 @@ struct Matrix {
 
   T& operator()(size_type row, size_type col) { return container_[cols_ * row + col]; }
 
-  T const& operator()(size_type row, size_type col) const { return const_cast<Matrix<T>&>(*this)(row, col); }
+  T const& operator()(size_type row, size_type col) const { return const_cast<Matrix<T>&> (*this)(row, col); }
 
   Dimensions size() const { return Dimensions(rows_, cols_); }
 

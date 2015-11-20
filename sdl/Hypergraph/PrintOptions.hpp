@@ -30,6 +30,7 @@ SDL_ENUM(SymbolTypes, 2, (AllSymbolTypes, Lexical_Only))
 SDL_ENUM(SymbolEpsilonSkip, 2, (Keep_Epsilon, Skip_Epsilon))
 SDL_ENUM(SymbolBlockSkip, 2, (Keep_Block, Skip_Block))
 
+
 }}
 
 #endif

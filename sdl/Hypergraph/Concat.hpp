@@ -19,7 +19,7 @@
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/Adjacency.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
-#include <sdl/Hypergraph/Union.hpp> // for merging two hgs' states
+#include <sdl/Hypergraph/Union.hpp>  // for merging two hgs' states
 #include <sdl/Hypergraph/HypergraphCopy.hpp>
 #include <sdl/SharedPtr.hpp>
 
@@ -36,7 +36,7 @@ struct ConcatOptions {
       , cfgFinalLabel(true)
       , checkEmptyRight(false)
       , defaultFinalLabel("ConcatFinal")
-  // TODO: kCanonicalLex - requires modifying StateIdTranslation
+  // TODO: kCanonicalLex-requires modifying StateIdTranslation
   {}
 
   static char const* caption() { return "Concatenate (CFG or FSM)"; }
@@ -54,7 +54,7 @@ struct ConcatOptions {
   }
 };
 
-// concat of yields of crossprod A x B - note: if either empty, so is result
+// concat of yields of crossprod A x B-note: if either empty, so is result
 template <class A>
 struct Concat : TransformBase<Transform::Inplace, 0> {
   static char const* type() { return "Concat"; }

@@ -74,7 +74,7 @@ struct Elapsed {
 
   /** difference. for elapsed from current usage */
   Elapsed operator-(Elapsed const& start) const {
-    return Elapsed(sec - start.sec, wallSec - start.wallSec, peakBytes, peakBytes - start.peakBytes);
+    return Elapsed(sec-start.sec, wallSec-start.wallSec, peakBytes, peakBytes-start.peakBytes);
   }
 
   Elapsed(double sec, double wallSec, double peakBytes = 0, double deltaBytes = 0)
@@ -148,8 +148,7 @@ struct Performance : boost::noncopyable {
     init(name, prefix, level);
   }
   /** log to prefix - name. */
-  Performance(std::string const& name, std::string const& prefix = "sdl.Performance",
-              LogLevel level = kLogInfo) {
+  Performance(std::string const& name, std::string const& prefix = "sdl.Performance", LogLevel level = kLogInfo) {
     init(name, prefix, level);
   }
   /** StringConsumer is a function accepting a string argument. name is unused for now */
@@ -170,13 +169,10 @@ struct Performance : boost::noncopyable {
 
   /** log usage now, without preventing logging at destructor */
   void report() {
-    if (stringConsumer)
-      stringConsumer("(FINISHED) "+elapsed().str());
+    if (stringConsumer) stringConsumer("(FINISHED) " + elapsed().str());
   }
 
-  std::string str() const {
-    return elapsed().str();
-  }
+  std::string str() const { return elapsed().str(); }
 
   std::string release() {
     reported = true;
@@ -185,8 +181,7 @@ struct Performance : boost::noncopyable {
 
   /** log usage now, and don't log again at destructor */
   void finalReport() {
-    if (latch(reported))
-      report();
+    if (latch(reported)) report();
   }
 
   bool disableReport() { return latch(reported); }

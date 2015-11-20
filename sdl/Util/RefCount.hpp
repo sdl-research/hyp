@@ -31,7 +31,7 @@
 
 // it would only be appropriate to set this to 0 for a single-threaded program
 #ifndef SDL_USE_ATOMIC_COUNT
-# define SDL_USE_ATOMIC_COUNT 1
+#define SDL_USE_ATOMIC_COUNT 1
 #endif
 
 #if SDL_USE_ATOMIC_COUNT
@@ -67,6 +67,7 @@ using graehl::intrusive_copy_on_write;
 using graehl::intrusive_make_unique;
 using graehl::intrusive_make_valid_unique;
 using graehl::shared_from_intrusive;
+
 
 }}
 

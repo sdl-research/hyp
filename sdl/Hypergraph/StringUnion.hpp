@@ -225,7 +225,7 @@ struct BuildStringUnion {
       // follow existing trie links
       ArcId nOut = hg.numOutArcs(s);
       if (nOut) {
-        Arc const& a = *hg.outArc(s, nOut - 1);
+        Arc const& a = *hg.outArc(s, nOut-1);
         if (hg.inputLabel(a.fsmSymbolState()) == w[i]) {
           s = a.head();
           continue;

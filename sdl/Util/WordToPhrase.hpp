@@ -50,7 +50,7 @@ namespace Util {
 
 /// removal of duplicates if for your WordToPhrase transform to
 /// perform. include-original, the TransformLabelsOptions member, can inform
-/// PreventDuplicateOptions+WordToPhrase - you don't want to prevent the
+/// PreventDuplicateOptions+WordToPhrase-you don't want to prevent the
 /// original if the arc is being dropped!
 struct PreventDuplicateOptions {
   PreventDuplicateOptions() : preventDuplicateOriginal(true) {}
@@ -158,7 +158,7 @@ struct IWordToPhrase : Evictable {
 
   /// for Hypergraph/TransformLabels
   bool operator()(std::string& utf8) const {
-    //TODO: test
+    // TODO: test
     assert(!mayInsertOrDelete());
     Util::AcceptSingleCheck single(utf8);
     single.require();
@@ -346,8 +346,9 @@ struct IWideStringToPhrase : IWordToPhrase {
     return wstringToPhrase(ToWideString(word), phrase);
   }
 };
+}
 
 
-}}
+}
 
 #endif

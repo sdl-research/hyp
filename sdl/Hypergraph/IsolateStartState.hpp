@@ -115,10 +115,12 @@ struct IsolateStartState : TransformBase<Transform::Inplace>, IsolateStartStateO
     }
   }
 };
-
-
-}}
+}
+}
 
 #include <graehl/shared/warning_pop.h>
+
+
+
 
 #endif

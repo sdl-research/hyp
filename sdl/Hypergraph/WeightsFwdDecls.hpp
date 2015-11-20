@@ -67,13 +67,13 @@ template <class Weight>
 struct WeightIdempotentPlus : NotIdempotent {};
 
 template <class F>
-struct WeightIdempotentPlus<ViterbiWeightTpl<F> > : IsIdempotent {};
+struct WeightIdempotentPlus<ViterbiWeightTpl<F>> : IsIdempotent {};
 
 template <>
 struct WeightIdempotentPlus<BooleanWeight> : IsIdempotent {};
 
 template <class FloatT, class MapT>
-struct WeightIdempotentPlus<FeatureWeightTpl<FloatT, MapT, TakeMin> > : IsIdempotent {};
+struct WeightIdempotentPlus<FeatureWeightTpl<FloatT, MapT, TakeMin>> : IsIdempotent {};
 
 // TODO: figure out whether any others are idempotent-plus
 
@@ -130,11 +130,9 @@ FeatureWeightTpl<FloatT, MapT, Expectation> divide(FeatureWeightTpl<FloatT, MapT
                                                    FeatureWeightTpl<FloatT, MapT, Expectation> const& w2);
 
 template <class W1, class W2, class W3>
-CompositeWeight<W1, W2, W3> plus(CompositeWeight<W1, W2, W3> const&,
-                                         CompositeWeight<W1, W2, W3> const&);
+CompositeWeight<W1, W2, W3> plus(CompositeWeight<W1, W2, W3> const&, CompositeWeight<W1, W2, W3> const&);
 template <class W1, class W2, class W3>
-CompositeWeight<W1, W2, W3> times(CompositeWeight<W1, W2, W3> const&,
-                                          CompositeWeight<W1, W2, W3> const&);
+CompositeWeight<W1, W2, W3> times(CompositeWeight<W1, W2, W3> const&, CompositeWeight<W1, W2, W3> const&);
 
 // less is recommended by markus for use in best-path algs (graehl's solution
 // was to invent a specializable traits class in HypergraphTraits.hpp, akin to

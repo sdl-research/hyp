@@ -37,11 +37,13 @@
 
 #include <graehl/shared/threadlocal.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 using graehl::SaveLocal;
 using graehl::SetLocal;
 using graehl::ThreadLocalSingleton;
+
 
 }}
 

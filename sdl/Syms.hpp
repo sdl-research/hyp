@@ -30,13 +30,13 @@
 #include <sdl/IVocabulary.hpp>
 #include <sdl/IVocabulary-fwd.hpp>
 #include <sdl/Util/PrintRange.hpp>
-#include <sdl/gsl.hpp> // span
+#include <sdl/gsl.hpp>  // span
 
 namespace sdl {
 
 typedef SymInt SymsIndex;
 typedef Sym const* Psym;
-typedef gsl::span<Sym const> SymSlice; //TODO: add support for faster <=> Syms
+typedef gsl::span<Sym const> SymSlice;  // TODO: add support for faster <=> Syms
 
 /// Syms is smaller than vector for up to kInlineSyms. if >3 then this wastes
 /// some space for 0-2 item Syms. overall this was about 2% faster than vector
@@ -181,5 +181,8 @@ inline void print(std::ostream& out, sdl::Syms const& phrase, std::shared_ptr<sd
 }
 
 BOOST_CLASS_IMPLEMENTATION(sdl::Syms, object_serializable)
+
+
+
 
 #endif

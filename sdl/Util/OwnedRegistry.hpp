@@ -19,7 +19,8 @@
 
 #include <sdl/Util/Unordered.hpp>
 
-namespace sdl { namespace Util {
+namespace sdl {
+namespace Util {
 
 
 /**
@@ -76,7 +77,6 @@ class Registry {
   ~Registry() { destroy(); }
 
  private:
-
   struct DeleteAny {
     template <class Ptr>
     void operator()(Ptr p) const {

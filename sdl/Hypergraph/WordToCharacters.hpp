@@ -90,12 +90,11 @@ struct WordToCharacters {
         ++i;
       }
       SDL_DEBUG(WordToCharacters, "for input state "
-                << s << " with input label: " << printer(wordsym, vocab_)
-                << ": replaced => label: " << printer(hg_->inputLabel(s), vocab_));
+                                      << s << " with input label: " << printer(wordsym, vocab_)
+                                      << ": replaced => label: " << printer(hg_->inputLabel(s), vocab_));
       for (; i != end; ++i) *to++ = hg_->addState(vocab_->addTerminal(*i));
       assert(to == insertStates.begin() + ninsert);
-      SDL_DEBUG(WordToCharacters, "for input state " << s
-                                                     << " with input label: " << printer(wordsym, vocab_)
+      SDL_DEBUG(WordToCharacters, "for input state " << s << " with input label: " << printer(wordsym, vocab_)
                                                      << ": output: " << printer(insertStates, hg_));
     }
   }
@@ -115,7 +114,7 @@ struct WordToCharacters {
           StateId symstate = *j;
           if (++j == jend) {
             addArcLater_(new Arc(HeadAndTail(), lastHead, tail, symstate));
-            return; // only one lexical sym expanded per arc (recall input is graph + one lexical per tail)
+            return;  // only one lexical sym expanded per arc (recall input is graph + one lexical per tail)
           } else {
             StateId const head = hg_->addState();
             addArcLater_(new Arc(HeadAndTail(), head, tail, symstate));

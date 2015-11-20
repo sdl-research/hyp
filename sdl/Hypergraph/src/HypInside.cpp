@@ -62,7 +62,7 @@ void printDistances(IHypergraph<Arc> const& hg, bool allPairs, bool dag, StateId
     assert(partBoundary <= n);
     Util::Matrix<Weight> D(partBoundary, partBoundary, Weight::zero());
     if (dag) {
-      AllPairsSortedDag<IHypergraph<Arc> > compute(hg, D);
+      AllPairsSortedDag<IHypergraph<Arc>> compute(hg, D);
       for (StateId i = 0; i < n; ++i) {  // state in input
         StateId topi = stateRemap.existingState(i);  // actual state in hg, modified by topo sort
         if (topi == kNoState || topi >= partBoundary) continue;
@@ -89,7 +89,9 @@ void printDistances(IHypergraph<Arc> const& hg, bool allPairs, bool dag, StateId
     boost::ptr_vector<Weight> weights;
     insideAlgorithm(hg, &weights);
     std::size_t i = 0;
-    for (Weight w : weights) { std::cout << i++ << '\t' << w << '\n'; }
+    for (Weight w : weights) {
+      std::cout << i++ << '\t' << w << '\n';
+    }
   }
 }
 
@@ -177,7 +179,7 @@ struct HypInside {
 
       typedef ViterbiWeightTpl<float> Viterbi;
       if (arcType == "log") {
-        typedef ArcTpl<LogWeightTpl<float> > Arc;
+        typedef ArcTpl<LogWeightTpl<float>> Arc;
         process<Arc>(file, ngramMax, allPairs, dag);
         // TODO: test all but log
       } else if (arcType == "viterbi") {
@@ -200,8 +202,10 @@ struct HypInside {
     return EXIT_SUCCESS;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Inside)
+
+
+

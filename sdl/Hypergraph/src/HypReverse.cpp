@@ -24,8 +24,10 @@ struct HypReverse : TransformMain<HypReverse> {  // note base class CRTP (google
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Reverse)
+
+
+

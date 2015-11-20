@@ -20,7 +20,7 @@
 namespace sdl {
 namespace Optimization {
 
-template
-class ExternalFeatHgPairs<Optimization::Arc>;
+template class ExternalFeatHgPairs<Optimization::Arc>;
+
 
 }}

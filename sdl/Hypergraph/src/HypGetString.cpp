@@ -28,8 +28,10 @@ struct HypGetString : TransformMain<HypGetString> {  // note base class CRTP (go
     return true;
   }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(GetString)
+
+
+

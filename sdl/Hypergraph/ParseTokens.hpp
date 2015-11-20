@@ -31,24 +31,17 @@ namespace Hypergraph {
 
 typedef std::vector<std::string> Strings;
 
-struct Utf8CharTokens { // each char is a token
-  void parse(std::string const& line, Strings &words) const
-  {
-    Util::toUtf8Chs(line, words);
-  }
+struct Utf8CharTokens {  // each char is a token
+  void parse(std::string const& line, Strings& words) const { Util::toUtf8Chs(line, words); }
 };
 
 /// skips empty tokens
 struct SpaceSepTokens {  // unquoted, separated only by space chars
-  void parse(std::string const& line, Strings &words) const
-  {
-    Util::splitSpaces(words, line);
-  }
+  void parse(std::string const& line, Strings& words) const { Util::splitSpaces(words, line); }
 };
 
 struct QuotedTokens {  // according to ArcParser grammar for lexical tokens
-  void parse(std::string const& line, Strings &words) const
-  {
+  void parse(std::string const& line, Strings& words) const {
     SDL_THROW_LOG(Util.ParseTokens, UnimplementedException,
                   "TODO: QuotedTokens::parse needs ArcParse boost::qi grammar");
   }
@@ -56,8 +49,7 @@ struct QuotedTokens {  // according to ArcParser grammar for lexical tokens
 
 enum TokenType { kUtf8CharTokens, kSpaceSepTokens, kQuotedTokens };
 
-struct ParseTokensOptions : Util::LineOptions
-{
+struct ParseTokensOptions : Util::LineOptions {
   enum { kWords = false, kCharacters = true };
   bool characterBased, quoted;
   ParseTokensOptions(bool characters = false, bool trimWs = true) {
@@ -72,53 +64,51 @@ struct ParseTokensOptions : Util::LineOptions
     Config::inits(this);
   }
   template <class Config>
-  void configure(Config &config)
-  {
+  void configure(Config& config) {
     Util::LineOptions::configure(config);
     config(usage());
-    config("chars", &characterBased)('c').defaulted()
-        ("(utf8) character tokens instead of space-separated (quoted?) strings");
-    config("quoted", &quoted)('q').init(false)
-        ("parse quoted tokens (else just space-separated, unquoted strings)");
+    config("chars", &characterBased)('c')
+        .defaulted()("(utf8) character tokens instead of space-separated (quoted?) strings");
+    config("quoted", &quoted)('q')
+        .init(false)("parse quoted tokens (else just space-separated, unquoted strings)");
   }
-  static inline std::string usage() {
-    return "parse text lines into tokens";
-  }
-  TokenType tokenType() const
-  {
-    return characterBased ? kUtf8CharTokens :
-        quoted ? kQuotedTokens : kSpaceSepTokens;
+  static inline std::string usage() { return "parse text lines into tokens"; }
+  TokenType tokenType() const {
+    return characterBased ? kUtf8CharTokens : quoted ? kQuotedTokens : kSpaceSepTokens;
   }
 };
 
 ParseTokensOptions const kCharsHg(true, false);
 
-// we just return the sequence, rather than providing an output iterator or Generator. don't expect to operate on any long seqs yet. also, input is always a string (in future, template on iterator incl input iter)
+// we just return the sequence, rather than providing an output iterator or Generator. don't expect to operate
+// on any long seqs yet. also, input is always a string (in future, template on iterator incl input iter)
 
 template <class Tokenize>
-Strings parseTokens(std::string const& line, Tokenize const& t)
-{
+Strings parseTokens(std::string const& line, Tokenize const& t) {
   Strings ret;
   t.parse(line, ret);
   return ret;
 }
 
-inline Strings parseTokens(std::string const& line, TokenType tokenType)
-{
-  switch(tokenType) {
-    case kUtf8CharTokens: return parseTokens(line, Utf8CharTokens());
-    case kSpaceSepTokens: return parseTokens(line, SpaceSepTokens());
-    case kQuotedTokens: return parseTokens(line, QuotedTokens());
-    default: SDL_THROW(BadTypeConstantException, tokenType);
+inline Strings parseTokens(std::string const& line, TokenType tokenType) {
+  switch (tokenType) {
+    case kUtf8CharTokens:
+      return parseTokens(line, Utf8CharTokens());
+    case kSpaceSepTokens:
+      return parseTokens(line, SpaceSepTokens());
+    case kQuotedTokens:
+      return parseTokens(line, QuotedTokens());
+    default:
+      SDL_THROW(BadTypeConstantException, tokenType);
   }
 };
 
-inline Strings parseTokens(std::string line, ParseTokensOptions const& opt = ParseTokensOptions())
-{
+inline Strings parseTokens(std::string line, ParseTokensOptions const& opt = ParseTokensOptions()) {
   TokenType const tokenType = opt.tokenType();
   opt.normalize(line);
   return parseTokens(line, tokenType);
 };
+
 
 }}
 

@@ -27,17 +27,17 @@ std::size_t nextLogSeq() {
 
 bool gFinishedLogging
 #if __GNUC__
-__attribute__ ((used))
+    __attribute__((used))
 #endif
-= false;
+    = false;
 
 void finishLogging() {
   gFinishedLogging = true;
 }
 
-WithInitLogging::WithInitLogging(char const* name, LogLevel level)
-{
+WithInitLogging::WithInitLogging(char const* name, LogLevel level) {
   initLoggerConsole(name, level);
 }
+
 
 }}

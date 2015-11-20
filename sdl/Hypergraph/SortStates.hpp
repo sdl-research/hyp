@@ -43,7 +43,7 @@ enum SortOrder {
   kSortOrderBegin = kTerminalFirst
 };
 
-// TODO: provide topo sort of reverse for Fsm - then we don't need in arcs
+// TODO: provide topo sort of reverse for Fsm-then we don't need in arcs
 struct SortStatesOptions {
   bool topological() const { return sortOrder == kTopSort; }
   SortOrder sortOrder;
@@ -96,7 +96,7 @@ struct SortStatesMapping : public StateIdMapping {
       nextLex = 0;
       nextRest = nlex;
     } else {
-      nextLex = N - nlex;
+      nextLex = N-nlex;
       nextRest = 0;
     }
   }
@@ -201,7 +201,7 @@ inline StateId findBoundaryBetweenNotAndIsTerminal(HypergraphBase const& hg) {
    \return whether states aren't yet sorted per sortOrder. quick check for
    kTopSort, else only check if stable == true.
 
-   \param[out] partBoundary - if states are already sorted then this is the
+   \param[out] partBoundary-if states are already sorted then this is the
    boundary between the two types of states.
 */
 template <class Arc>
@@ -234,8 +234,7 @@ struct TopNontermOrder : IStatesVisitor {
   StateIdTranslation* pDestState;  // either adds states (inout) or reassign states (inplace)
   IHypergraph<A> const* ph;
   TopNontermOrder() {}
-  TopNontermOrder(IHypergraph<A> const& hg, StateIdTranslation* pDestState_, bool reverseTopSort,
-                  bool canonLex) {
+  TopNontermOrder(IHypergraph<A> const& hg, StateIdTranslation* pDestState_, bool reverseTopSort, bool canonLex) {
     set(hg, pDestState_, reverseTopSort);
   }
 
@@ -307,7 +306,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
               lexs[nlex++] = s;
             else
               x.stateFor(s);
-          partBoundary = N - nlex;
+          partBoundary = N-nlex;
           assert(partBoundary == x.size());
           for (StateId i = 0; i < nlex; ++i) {
             StateId s = lexs[i];
@@ -382,7 +381,7 @@ bool trySortStates(IHypergraph<A> const& hg, bool modifyIfPossible = true) {
     return true;
   else if (modifyIfPossible && hg.isMutable()) {
     SortStates<A> ss;
-    ss.inplace(static_cast<IMutableHypergraph<A> &>(const_cast<IHypergraph<A> &>(hg)));
+    ss.inplace(static_cast<IMutableHypergraph<A>&>(const_cast<IHypergraph<A>&>(hg)));
     return true;
   } else
     return false;

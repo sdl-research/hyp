@@ -708,9 +708,8 @@ void applyYaml(ConfigNode const& yamlRoot, Val* pRootVal, char const* component 
 
   if (trace) {
     // TODO: fix gcc warning: ‘<anonymous>’ may be used uninitialized in this function:
-    LOG_TRACE_NAMESTR(kLogPrefix + component, "before store for " << component << ":\n"
-                                                                  << printEffective(*pRootVal, component)
-                                                                  << "\n");
+    LOG_TRACE_NAMESTR(kLogPrefix + component,
+                      "before store for " << component << ":\n" << printEffective(*pRootVal, component) << "\n");
   }
 
   configureYaml(configure::store_config(), yamlRoot, pRootVal, component);

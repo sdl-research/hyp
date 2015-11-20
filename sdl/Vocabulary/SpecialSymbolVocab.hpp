@@ -50,13 +50,9 @@ class SpecialSymbolVocab {
   bool containsSym(Sym id) const;
 
   Sym sym(std::string const& symbol) const { return vocab->sym(symbol); }
-  Sym sym(cstring_span<>symbol) const { return vocab->sym(symbol); }
-  bool contains(cstring_span<>symbol) const {
-    return vocab->contains(symbol);
-  }
-  bool contains(std::string const& symbol) const {
-    return vocab->contains(symbol);
-  }
+  Sym sym(cstring_span<> symbol) const { return vocab->sym(symbol); }
+  bool contains(cstring_span<> symbol) const { return vocab->contains(symbol); }
+  bool contains(std::string const& symbol) const { return vocab->contains(symbol); }
 
   void accept(IVocabularyVisitor& visitor) { vocab->accept(visitor); }
 

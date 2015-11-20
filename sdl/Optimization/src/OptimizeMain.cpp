@@ -112,8 +112,7 @@ int main(int ac, char* av[]) {
     po::variables_map varMap;
     po::parsed_options parsed = po::command_line_parser(ac, av).options(options).allow_unregistered().run();
     po::store(parsed, varMap);
-    std::vector<std::string> unrecognizedArgs(
-        (po::collect_unrecognized(parsed.options, po::include_positional)));
+    std::vector<std::string> unrecognizedArgs((po::collect_unrecognized(parsed.options, po::include_positional)));
     po::notify(varMap);
 
     if (varMap.count("search-dir")) {
@@ -200,8 +199,8 @@ int main(int ac, char* av[]) {
                                                    << searchSpaceSectionName << "' in " << configFile);
     }
 
-    void* obj = ((void* (*)(Resources::ResourceManager&, ConfigNode&, bool))(loadFct))(
-        resourceManager, node, Optimization::kIsOptimize);
+    void* obj = ((void* (*)(Resources::ResourceManager&, ConfigNode&, bool))(loadFct))(resourceManager, node,
+                                                                                       Optimization::kIsOptimize);
     typedef Optimization::ICreateSearchSpace<Optimization::Arc> SearchSpace;
     shared_ptr<SearchSpace> searchSpace(reinterpret_cast<SearchSpace*>(obj));
     SDL_INFO(Optimization, "Loaded search space '" << searchSpace->getName() << "'");

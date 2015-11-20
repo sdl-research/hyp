@@ -131,10 +131,12 @@ std::pair<fst::ReplaceFst<FstArc>*, fst::SymbolTable*> toReplaceFst(IHypergraph<
   fst::ReplaceFst<FstArc>* result = toReplaceFst<FstArc>(hg, syms);
   return std::make_pair(result, syms);
 }
-
-
-}}
+}
+}
 
 #endif  // if HAVE_OPENFST
+
+
+
 
 #endif

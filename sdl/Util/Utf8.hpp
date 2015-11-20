@@ -146,7 +146,7 @@ SDL_ENUM(BadUtf8HandlerType, 3, (Unsafe_Ignore, Remove, Replace));
 
 Unicode const kMinWindows1252Unicode = 0x0080;
 Unicode const kMaxWindows1252Unicode = 0x009f;
-Unicode const kNWindows1252Unicode = 1 + kMaxWindows1252Unicode - kMinWindows1252Unicode;
+Unicode const kNWindows1252Unicode = 1 + kMaxWindows1252Unicode-kMinWindows1252Unicode;
 /* these all take 2-byte utf8 to 2- or 3-byte utf8 so it's not safe to transform utf8 inplace*/
 extern Unicode gWindows1252ToUnicode[kNWindows1252Unicode];
 
@@ -156,11 +156,11 @@ inline bool isControlInWindows1252Range(Unicode c) {
 }
 
 inline Unicode translateWindows1252(Unicode c) {
-  return isControlInWindows1252Range(c) ? gWindows1252ToUnicode[c - kMinWindows1252Unicode] : 0;
+  return isControlInWindows1252Range(c) ? gWindows1252ToUnicode[c-kMinWindows1252Unicode] : 0;
 }
 
 inline void remapWindows1252(Unicode& c) {
-  if (isControlInWindows1252Range(c)) c = gWindows1252ToUnicode[c - kMinWindows1252Unicode];
+  if (isControlInWindows1252Range(c)) c = gWindows1252ToUnicode[c-kMinWindows1252Unicode];
 }
 
 /// return whether c is a nonprintable ascii char except for ' ' '\n' '\t'. (\r and others return true)
@@ -280,7 +280,7 @@ struct FixUnicode {
             "to post-removal unicode ids");
     config("convert-windows-1252", &convertWindows1252)
         .defaulted()(
-            "Interpret Unicode range U+0080 - U+009F control characters as encoded Windows 1252 characters "
+            "Interpret Unicode range U+0080-U+009F control characters as encoded Windows 1252 characters "
             "and convert to correct Unicode equivalents (this option has precedence over removal of control "
             "characters). If someone uses control characters for their intended purpose (unlikely) or for "
             "another font/codepage (somewhat likely) you will get some gibberish");
@@ -393,7 +393,7 @@ struct FixUnicode {
 
   template <class Pchar>
   void normalize(Pchar i, Pchar end, std::string& out, bool alreadyValidUtf8) const {
-    sizeOutputImpl(end - i, out);
+    sizeOutputImpl(end-i, out);
     std::string::iterator begin = out.begin(), o = begin;
     Encoder toutf8(o);
     utf8To(i, end, toutf8, alreadyValidUtf8);
@@ -566,9 +566,8 @@ struct FixedUtf8 : boost::noncopyable {
 
      where x may be inout.
   */
-  void moveTo(std::string &out) {
-    if (&out != fixed)
-      out = std::move(*fixed);
+  void moveTo(std::string& out) {
+    if (&out != fixed) out = std::move(*fixed);
   }
 
   /**
@@ -820,7 +819,7 @@ void toUnicodes(ByteRange const& b, UnicodeCharContainer& ucs) {
 */
 struct ToUnicodes : Unicodes {
   explicit ToUnicodes(std::string const& utf8) : Unicodes(utf8.size()) { toUnicodesShrink(utf8, *this); }
-  explicit ToUnicodes(Slice const& slice) : Unicodes(slice.second - slice.first) {
+  explicit ToUnicodes(Slice const& slice) : Unicodes(slice.second-slice.first) {
     toUnicodesShrink(slice, *this);
   }
   explicit ToUnicodes(std::wstring const& word)
@@ -845,22 +844,22 @@ struct FromUnicodes : std::string {
     toUtf8vShrink(word.begin(), word.end(), *this);
   }
   explicit FromUnicodes(UnicodeSlice const& slice)
-      : std::string(bytesForUtf(slice.second - slice.first), '\0') {
+      : std::string(bytesForUtf(slice.second-slice.first), '\0') {
     toUtf8vShrink(slice.first, slice.second, *this);
   }
-  FromUnicodes(Punicode begin, Punicode end) : std::string(bytesForUtf(end - begin), '\0') {
+  FromUnicodes(Punicode begin, Punicode end) : std::string(bytesForUtf(end-begin), '\0') {
     toUtf8vShrink(begin, end, *this);
   }
   FromUnicodes(Unicodes::const_iterator begin, Unicodes::const_iterator end)
-      : std::string(bytesForUtf(end - begin), '\0') {
+      : std::string(bytesForUtf(end-begin), '\0') {
     toUtf8vShrink(begin, end, *this);
   }
   FromUnicodes(String32::const_iterator begin, String32::const_iterator end)
-      : std::string(bytesForUtf(end - begin), '\0') {
+      : std::string(bytesForUtf(end-begin), '\0') {
     toUtf8vShrink(begin, end, *this);
   }
 #if SDL_UNICODE_IS_WCHAR
-  explicit FromUnicodes(WideSlice const& slice) : std::string(bytesForUtf(slice.second - slice.first), '\0') {
+  explicit FromUnicodes(WideSlice const& slice) : std::string(bytesForUtf(slice.second-slice.first), '\0') {
     toUtf8vShrink(slice.first, slice.second, *this);
   }
 #endif
@@ -896,7 +895,7 @@ StringsOutIter toUtf8Chs(ByteIter i, ByteIter const& e, StringsOutIter const& o,
   return out.o;
 }
 
-// toUtf8Chs - vector<char> (utf8 enc) -> vector<string> (unicode chars in utf8)
+// toUtf8Chs-vector<char> (utf8 enc) -> vector<string> (unicode chars in utf8)
 template <class Strs, class BytesRange>
 void toUtf8Chs(BytesRange const& b, Strs& ucs, FixUnicode const& fix = FixUnicode()) {
   toUtf8Chs(boost::begin(b), boost::end(b), std::back_inserter(ucs), fix);
@@ -988,7 +987,7 @@ inline bool byteContinuesUtf8Char(unsigned char b) {
 
 /**
 
-   \return number of codepoints in bytes [begin, end) if it's valid utf8 - much faster than
+   \return number of codepoints in bytes [begin, end) if it's valid utf8-much faster than
    iterating over codepoints.
 
    if it's a substring of valid utf8, returns number of codepoint-intitial
@@ -1052,7 +1051,7 @@ inline std::size_t utf8length(char const* begin, char const* end) {
 }
 
 /**
-   \return number of codepoints in str if str is valid utf8 - much faster than
+   \return number of codepoints in str if str is valid utf8-much faster than
    iterating over codepoints.
 */
 inline std::size_t utf8length(std::string const& str) {
@@ -1061,7 +1060,7 @@ inline std::size_t utf8length(std::string const& str) {
 }
 
 /**
-   \return number of codepoints in str if str is valid utf8 - much faster than
+   \return number of codepoints in str if str is valid utf8-much faster than
    iterating over codepoints.
 */
 inline std::size_t utf8length(std::vector<char> const& str) {

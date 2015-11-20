@@ -106,8 +106,7 @@ struct StateNamesSymbolTable : public IVocabularySymbolTable {
   Syms ssym;
 
   template <class A>
-  explicit StateNamesSymbolTable(IHypergraph<A> const& h, LabelType labelType = kInput,
-                                 bool allowLexical = false)
+  explicit StateNamesSymbolTable(IHypergraph<A> const& h, LabelType labelType = kInput, bool allowLexical = false)
       : IVocabularySymbolTable(h.getVocabulary()), ssym(h.size(), NoSymbol) {
     for (StateId s = 0, ns = ssym.size(); s != ns; ++s) {
       Sym i = h.label(s, labelType);
@@ -136,8 +135,7 @@ struct ToOpenFst : boost::noncopyable {
 
   void operator()(Arc const* a) const {
     LabelPair io = h.labelPair(a->fsmSymbolState());
-    fst.AddArc(a->fsmSrc(),
-               FstArc(input(io).id(), output(io).id(), FWeight(a->weight().getValue()), a->head()));
+    fst.AddArc(a->fsmSrc(), FstArc(input(io).id(), output(io).id(), FWeight(a->weight().getValue()), a->head()));
   }
 
   ToOpenFst(IHypergraph<Arc> const& h, bool useStatenames = false) : h(h), syms(h.getVocabulary()) {
@@ -163,10 +161,12 @@ struct ToOpenFst : boost::noncopyable {
 
   fst::SymbolTable const* stateNames() const { return pssyms.get(); }
 };
-
-
-}}
+}
+}
 
 #endif
+
+
+
 
 #endif

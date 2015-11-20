@@ -49,7 +49,7 @@ struct InsertWeightsVisitor {
   ~InsertWeightsVisitor() {}
 
   void operator()(ArcBase* a) const {
-    Arc *arc = (Arc*)a;
+    Arc* arc = (Arc*)a;
     FloatT weightVal = 0.0;
     Weight& w = arc->weight();
     FeatMap const& map = w.features();
@@ -80,7 +80,7 @@ struct InsertSparseWeightsVisitor {
   InsertSparseWeightsVisitor(Map const& featureWeights) : featWeightsMap_(featureWeights) {}
 
   void operator()(ArcBase* a) const {
-    Arc *arc = (Arc*)a;
+    Arc* arc = (Arc*)a;
     FloatT weightVal(0.0);
     Map const& map = arc->weight_.features();
     for (typename Map::const_iterator i = map.begin(), end = map.end(); i != end; ++i) {

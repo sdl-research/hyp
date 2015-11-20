@@ -67,7 +67,9 @@ class FlatStringHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
   }
 
   virtual IHypergraph<Arc>* value() {
-    if (pHg_ == NULL && done_ == false) { next(); }
+    if (pHg_ == NULL && done_ == false) {
+      next();
+    }
     return static_cast<IHypergraph<Arc>*>(pHg_);
   }
 
@@ -140,9 +142,9 @@ void readArcsUntil(std::istream& in, ParsedArcs& arcs, bool requireNfc) {
 }
 
 template <class Arc>
-IHypergraphsIteratorTpl<Arc>* IHypergraphsIteratorTpl<Arc>::create(
-    std::istream& in, InputHgType inputType, shared_ptr<IPerThreadVocabulary> const& pVoc,
-    shared_ptr<IFeaturesPerInputPosition> feats) {
+IHypergraphsIteratorTpl<Arc>* IHypergraphsIteratorTpl<Arc>::create(std::istream& in, InputHgType inputType,
+                                                                   shared_ptr<IPerThreadVocabulary> const& pVoc,
+                                                                   shared_ptr<IFeaturesPerInputPosition> feats) {
   if (inputType == kFlatStringsHg)
     return new FlatStringHypergraphsIterator<Arc>(in, pVoc, feats);
   else if (inputType == kDashesSeparatedHg)

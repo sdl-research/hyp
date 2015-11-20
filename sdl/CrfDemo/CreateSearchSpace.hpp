@@ -221,8 +221,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2)("_")(sym3).str();
   }
 
-  std::string createFeatureName(std::string const& prefix, std::string const& sym1,
-                                std::string const& sym2) const {
+  std::string createFeatureName(std::string const& prefix, std::string const& sym1, std::string const& sym2) const {
     return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2).str();
   }
 
@@ -261,7 +260,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       model->addState();
     }
     model->setStart(0);
-    StateId finalState = numStates - 1;
+    StateId finalState = numStates-1;
     model->setFinal(finalState);
 
     for (StateId s = 0; s < finalState; ++s) {
@@ -495,8 +494,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
     }
 
     result->setFinal(sent.words.size());
-    IMutableHypergraph<Arc>* composed
-        = new MutableHypergraph<Arc>(kCanonicalLex | kStoreOutArcs | kStoreInArcs);
+    IMutableHypergraph<Arc>* composed = new MutableHypergraph<Arc>(kCanonicalLex | kStoreOutArcs | kStoreInArcs);
 
     if (opts_.fstCompose) {
       ComposeTransformOptions cOpt;
@@ -528,8 +526,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
     typedef CreateSearchSpace<A> Outer;
     ProcessTrainingExampleRange(ProcessTrainingExampleRange const&) = delete;
-    ProcessTrainingExampleRange(Outer& o, std::size_t begin, std::size_t end,
-                                std::vector<Sentence> const& sents,
+    ProcessTrainingExampleRange(Outer& o, std::size_t begin, std::size_t end, std::vector<Sentence> const& sents,
                                 Hypergraph::IHypergraph<A> const& transitionModel,
                                 typename Outer::Pairs& trainingExamples, bool doLogProgress)
         : outer_(o)
@@ -547,9 +544,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         outer_.processTrainingSentence(sents_[i], transitionModel_, trainingExamples_);
 
         if (doLogProgress_) {
-          std::size_t blockSize = (end_ - begin_) / 10.0f;
+          std::size_t blockSize = (end_-begin_) / 10.0f;
           if (blockSize && (i - begin_ + 1) % blockSize == 0) {
-            SDL_INFO(CrfDemo, (((i - begin_ + 1.0f) / (end_ - begin_)) * 100.0f) << "% processed");
+            SDL_INFO(CrfDemo, (((i - begin_ + 1.0f) / (end_-begin_)) * 100.0f) << "% processed");
           }
         }
       }
@@ -628,7 +625,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       ProcessTrainingExampleRange* update;
       for (std::size_t i = 0; i < numProducerThreads; ++i) {
         TrainingDataIndex begin = i * blockSize;
-        TrainingDataIndex end = (i == numProducerThreads - 1) ? size : (i + 1) * blockSize;
+        TrainingDataIndex end = (i == numProducerThreads-1) ? size : (i + 1) * blockSize;
         producers.push_back(update = new ProcessTrainingExampleRange(*this, begin, end, sents,
                                                                      *transitionModel, *pairs_, i == 0));
         producer_threads.create_thread(std::ref(*update));

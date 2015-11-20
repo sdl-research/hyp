@@ -29,8 +29,7 @@ namespace Hypergraph {
 typedef std::vector<StateId> ReverseOrder;
 
 template <class Arc>
-void reverseTopologicalOutArcsGraph(IHypergraph<Arc> const& hg, StateId s, StateId*& out, char* color,
-                                    StateId N) {
+void reverseTopologicalOutArcsGraph(IHypergraph<Arc> const& hg, StateId s, StateId*& out, char* color, StateId N) {
   StateIdContainer adj;
   hg.outAdjStates(s, adj);
   for (StateIdContainer::const_iterator i = adj.begin(), e = adj.end(); i != e; ++i) {

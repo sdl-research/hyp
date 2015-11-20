@@ -219,14 +219,12 @@ inline void append(Collection& collection, ForwardIter const& begin, ForwardIter
 }
 
 template <class V, unsigned MaxInline, class Size, class ForwardIter>
-inline void addAll(small_vector<V, MaxInline, Size>& sequence, ForwardIter const& begin,
-                   ForwardIter const& end) {
+inline void addAll(small_vector<V, MaxInline, Size>& sequence, ForwardIter const& begin, ForwardIter const& end) {
   sequence.append(begin, end);
 }
 
 template <class V, unsigned MaxInline, class Size, class ForwardIter>
-inline void append(small_vector<V, MaxInline, Size>& sequence, ForwardIter const& begin,
-                   ForwardIter const& end) {
+inline void append(small_vector<V, MaxInline, Size>& sequence, ForwardIter const& begin, ForwardIter const& end) {
   sequence.append(begin, end);
 }
 
@@ -466,7 +464,7 @@ Val& atExpandPtr(boost::ptr_vector<Val>& ptrVec, Index i) {
   return ptrVec[i];
 }
 
-/// Val should be nullable<T> - then returns T&
+/// Val should be nullable<T>-then returns T&
 template <class Nullable, class Index, class Zero>
 typename Nullable::type& atExpandPtrNullable(boost::ptr_vector<Nullable>& ptrVec, Index i) {
   if (i < ptrVec.size()) return ptrVec[i];

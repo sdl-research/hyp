@@ -28,8 +28,10 @@ struct HypDraw : TransformMain<HypDraw> {
   }
   bool printFinal() const { return false; }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(Draw)
+
+
+

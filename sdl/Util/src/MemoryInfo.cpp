@@ -150,4 +150,5 @@ std::string MemoryInfo::getColumn(std::string const& s, unsigned columnNumber) {
 }
 
 
+
 }}

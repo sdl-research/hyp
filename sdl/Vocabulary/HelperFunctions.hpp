@@ -65,7 +65,7 @@ void removeBlockSymbols(Syms const& ngram, Syms& result);
 
 SymsIndex countBlockSymbols(Syms const& ngram);
 
-//TODO: can rule out variables/NT if we think that will ever happen
+// TODO: can rule out variables/NT if we think that will ever happen
 inline bool isRuleSrcSymbol(Sym sym) {
   return sym && sym.id_ && !Vocabulary::isBlockSymbolOrJumpWall(sym);
 }

@@ -14,7 +14,7 @@ namespace sdl {
 namespace Hypergraph {
 
 Syms& symsFromStatesAppend(Syms& result, StateString const& ss, HypergraphBase const& hg,
-                                  WhichSymbolOptions const& opt) {
+                           WhichSymbolOptions const& opt) {
   for (StateString::const_iterator i = ss.begin(), e = ss.end(); i != e; ++i) {
     Sym sym = hg.label(*i, opt.labelType);
     if (sym && opt.shows(sym)) result.push_back(sym);
@@ -37,12 +37,13 @@ struct AppendSymsFromStates {
 }
 
 Syms& symsFromDerivAppend(Syms& syms, DerivationPtr const& pDerivation, HypergraphBase const& hg,
-                                 WhichSymbolOptions const& opt) {
+                          WhichSymbolOptions const& opt) {
   if (pDerivation) {
     AppendSymsFromStates append(syms, hg, opt);
     pDerivation->appendStates(append, hg.final(), opt.leafOnly);
   }
   return syms;
 }
+
 
 }}

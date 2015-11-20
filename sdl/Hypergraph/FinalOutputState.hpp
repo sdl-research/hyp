@@ -30,7 +30,9 @@ struct FinalOutputState {
   TokenSpans* inputTokenSpans_;
   unsigned* numInputTokensBeforeFinalOutput_;
 };
+}
 
-}}
+
+}
 
 #endif

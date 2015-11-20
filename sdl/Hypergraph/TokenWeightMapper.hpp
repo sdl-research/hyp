@@ -34,7 +34,7 @@ namespace Hypergraph {
    content is separately determined by the tails of the arc (each tail
    contains its own span, which spans a token).
  */
-template<class FromArc>
+template <class FromArc>
 struct SetTokenWeightMapper {
   typedef typename FromArc::Weight Weight;
   typedef TokenWeightTpl<Weight> TokenWeight;

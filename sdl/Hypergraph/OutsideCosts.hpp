@@ -98,8 +98,7 @@ void outsideCosts(IHypergraph<Arc> const& hg, SdlFloat* outside, InsideCost cons
           SDL_TRACE(OutsideCosts, "pruned " << c << " >= " << onlyCostsBelow);
         }
       }
-    nexta:
-      ;
+    nexta:;
     }
     if (q.empty()) break;
   }

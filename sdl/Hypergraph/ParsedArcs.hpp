@@ -22,7 +22,8 @@
 
 #include <vector>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 namespace ParserUtil {
 struct Arc;
@@ -32,6 +33,7 @@ typedef ParserUtil::Arc ParsedArc;
 
 /// will leak if you don't call parseText(ParsedArcs ...)
 typedef std::vector<ParsedArc*> ParsedArcs;
+
 
 }}
 

@@ -28,7 +28,7 @@ namespace Util {
    \return true if key is new (i.e., was not in the set before)
 */
 template <class Set>
-bool insertIsNew(Set &set, typename Set::key_type const& key) {
+bool insertIsNew(Set& set, typename Set::key_type const& key) {
   return set.insert(key).second;
 }
 

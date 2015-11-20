@@ -50,12 +50,10 @@ using graehl::Farmhash;
 /// unordered_* are node pointer based (chaining on collision) hash tables and
 /// if there are resizes should outperform for heavy non-moveable keys/values
 /// after many insertions
-template <class Key, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
-          class Alloc = std::allocator<Key>>
+template <class Key, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>, class Alloc = std::allocator<Key>>
 using unordered_set = std::unordered_set<Key, Hash, Equal, Alloc>;
 
-template <class Key, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
-          class Alloc = std::allocator<Key>>
+template <class Key, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>, class Alloc = std::allocator<Key>>
 using unordered_multiset = std::unordered_multiset<Key, Hash, Equal, Alloc>;
 
 template <class Key, class Val, class Hash = boost::hash<Key>, class Equal = std::equal_to<Key>,
@@ -71,8 +69,7 @@ using unordered_multimap = std::unordered_multimap<Key, Val, Hash, Equal, Alloc>
 template <class Key, class Hash = Farmhash, class Equal = std::equal_to<Key>, class Alloc = std::allocator<Key>>
 using farm_unordered_set = std::unordered_set<Key, Hash, Equal, Alloc>;
 
-template <class Key, class Val, class Hash = Farmhash, class Equal = std::equal_to<Key>,
-          class Alloc = std::allocator<Key>>
+template <class Key, class Val, class Hash = Farmhash, class Equal = std::equal_to<Key>, class Alloc = std::allocator<Key>>
 using farm_unordered_map = std::unordered_map<Key, Val, Hash, Equal, Alloc>;
 
 // TODO: benchmark std vs boost unordered_* or just use google dense_hash below:
@@ -125,8 +122,7 @@ std::pair<typename Keyed::iterator, bool> try_emplace(Keyed& self, typename Keye
 }
 
 template <class Keyed, class... Args>
-std::pair<typename Keyed::iterator, bool> try_emplace(Keyed& self, typename Keyed::key_type&& k,
-                                                      Args&&... args) {
+std::pair<typename Keyed::iterator, bool> try_emplace(Keyed& self, typename Keyed::key_type&& k, Args&&... args) {
   typedef typename Keyed::mapped_type M;
   std::pair<typename Keyed::iterator, bool> r = self.insert(typename Keyed::value_type(std::move(k), M()));
   if (r.second) {
@@ -340,10 +336,12 @@ void visitUnordered(Unordered& unordered, Visitor const& v) {
     for (typename Unordered::const_local_iterator i = unordered.cbegin(b), end = unordered.cend(b); i != end;)
       v(*i);
 }
-
-
-}}
+}
+}
 
 #include <graehl/shared/warning_pop.h>
+
+
+
 
 #endif

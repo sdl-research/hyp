@@ -194,14 +194,13 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
       LOG4CXX_ERROR(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " << expression) \
   } while (0)
 
-#define LOG_FATAL_NAMESTR(loggerName, expression)                                                \
-  do {                                                                                           \
-    if (sdl::Util::gFinishedLogging)                                                             \
-      throw std::runtime_error("fatal error - can't log cause because logging has ended");       \
-    else {                                                                                       \
-      LOG4CXX_FATAL(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " \
-                                                                     << expression);             \
-    }                                                                                            \
+#define LOG_FATAL_NAMESTR(loggerName, expression)                                                                \
+  do {                                                                                                           \
+    if (sdl::Util::gFinishedLogging)                                                                             \
+      throw std::runtime_error("fatal error - can't log cause because logging has ended");                       \
+    else {                                                                                                       \
+      LOG4CXX_FATAL(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " << expression); \
+    }                                                                                                            \
   } while (0)
 
 #endif  // SDL_SUPPRESS_SOURCE_LOCATION
@@ -346,5 +345,8 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 #else
 #define SDL_DEBUG_IF(cond, name, msg)
 #endif
+
+
+
 
 #endif

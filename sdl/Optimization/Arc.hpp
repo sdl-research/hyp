@@ -28,10 +28,10 @@ namespace Optimization {
 // online optimization instead of L-BFGS.
 typedef lbfgsfloatval_t FloatT;
 
-typedef Hypergraph::FeatureWeightTpl<FloatT,
-                                     std::map<Hypergraph::FeatureId, FloatT> > Weight;
+typedef Hypergraph::FeatureWeightTpl<FloatT, std::map<Hypergraph::FeatureId, FloatT>> Weight;
 
 typedef Hypergraph::ArcTpl<Weight> Arc;
+
 
 }}
 

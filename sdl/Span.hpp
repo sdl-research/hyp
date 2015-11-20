@@ -55,51 +55,38 @@ inline std::string substring(char const* str, TokenSpan span) {
 }
 
 
-/// for n tokens, n+1 positions (starting unicode char index). the last is string end (size). deletions of input chars must then be represented by empty token
+/// for n tokens, n+1 positions (starting unicode char index). the last is string end (size). deletions of
+/// input chars must then be represented by empty token
 template <class Token>
 struct MonotoneAlignedToken {
   Token token;
   Position begin;
-  TokenSpan span(Position end) const {
-    return TokenSpan(begin, end);
-  }
+  TokenSpan span(Position end) const { return TokenSpan(begin, end); }
 };
 
 template <class Token>
 struct AlignedToken : MonotoneAlignedToken<Token> {
   AlignedToken() {}
-  AlignedToken(MonotoneAlignedToken<Token> const &token, Position end)
-      : MonotoneAlignedToken<Token>(token)
-      , end(end)
-  {}
+  AlignedToken(MonotoneAlignedToken<Token> const& token, Position end)
+      : MonotoneAlignedToken<Token>(token), end(end) {}
   Position end;
-  TokenSpan span() const {
-    return TokenSpan(this->begin, end);
-  }
+  TokenSpan span() const { return TokenSpan(this->begin, end); }
 };
 
 /// for n tokens, n+1 positions (starting unicode char index). the last is string end (size)
 template <class Token>
-struct MonotoneAlignedTokens : std::vector<MonotoneAlignedToken<Token> > {
-  typedef std::vector<MonotoneAlignedToken<Token> > Base;
+struct MonotoneAlignedTokens : std::vector<MonotoneAlignedToken<Token>> {
+  typedef std::vector<MonotoneAlignedToken<Token>> Base;
   typedef typename Base::const_iterator const_iterator;
   shared_ptr<std::string> pinput;
 
-  Slice inputSlice(const_iterator i) const {
-    return toSlice(*pinput, span(i));
-  }
+  Slice inputSlice(const_iterator i) const { return toSlice(*pinput, span(i)); }
 
-  std::string input(const_iterator i) const {
-    return substring(*pinput, span(i));
-  }
+  std::string input(const_iterator i) const { return substring(*pinput, span(i)); }
 
-  TokenSpan span(const_iterator i) const {
-    return i->span((i + 1)->begin);
-  }
+  TokenSpan span(const_iterator i) const { return i->span((i + 1)->begin); }
 
-  AlignedToken<Token> aligned(const_iterator i) const {
-    return AlignedToken<Token>(*i, (i + 1)->begin);
-  }
+  AlignedToken<Token> aligned(const_iterator i) const { return AlignedToken<Token>(*i, (i + 1)->begin); }
 
   AlignedToken<Token> aligned(Position i) const { return aligned(this->begin() + i); }
   TokenSpan span(Position i) const { return span(this->begin() + i); }
@@ -116,18 +103,17 @@ inline bool nullTokenSpan(TokenSpan const& span) {
   return span.first == kNullPosition;
 }
 
-inline void setNullTokenSpan(TokenSpan &span) {
+inline void setNullTokenSpan(TokenSpan& span) {
   span.first = kNullPosition;
 }
 
-inline void setMinTokenSpan(TokenSpan &span) {
+inline void setMinTokenSpan(TokenSpan& span) {
   span.first = kNullPosition;
   span.second = 0;
 }
 
 inline TokenSpan spanOrEmpty(TokenSpan span) {
-  if (nullTokenSpan(span))
-    span.first = span.second = (Position)0;
+  if (nullTokenSpan(span)) span.first = span.second = (Position)0;
   return span;
 }
 
@@ -135,48 +121,42 @@ inline Position len(TokenSpan span) {
   return span.second - span.first;
 }
 
-inline void growSpanRight(TokenSpan &span, Position i) {
-  if (i >= span.second)
-    span.second = i;
+inline void growSpanRight(TokenSpan& span, Position i) {
+  if (i >= span.second) span.second = i;
 }
 
-inline void growSpanLeft(TokenSpan &span, Position i) {
-  if (i < span.first)
-    span.first = i;
+inline void growSpanLeft(TokenSpan& span, Position i) {
+  if (i < span.first) span.first = i;
 }
 
 /**
    faster than span = TokenSpan(left, right),
    and simpler than span.left = left; span.right = right;
 */
-inline void setSpan(TokenSpan &span, Position left, Position right) {
+inline void setSpan(TokenSpan& span, Position left, Position right) {
   span.first = left;
   span.second = right;
 }
 
-inline void growSpanRight(TokenSpan &span, TokenSpan const& cover) {
+inline void growSpanRight(TokenSpan& span, TokenSpan const& cover) {
   growSpanRight(span, cover.second);
 }
 
-inline void growSpanLeft(TokenSpan &span, TokenSpan const& cover) {
+inline void growSpanLeft(TokenSpan& span, TokenSpan const& cover) {
   growSpanLeft(span, cover.first);
 }
 
-inline void growSpan(TokenSpan &span, Position i) {
-  if (i < span.first)
-    span.first = i;
-  if (i >= span.second)
-    span.second = i + 1;
+inline void growSpan(TokenSpan& span, Position i) {
+  if (i < span.first) span.first = i;
+  if (i >= span.second) span.second = i + 1;
 }
 
-inline void growSpan(TokenSpan &span, TokenSpan const& grow) {
-  if (grow.first < span.first)
-    span.first = grow.first;
-  if (grow.second > span.second)
-    span.second = grow.second;
+inline void growSpan(TokenSpan& span, TokenSpan const& grow) {
+  if (grow.first < span.first) span.first = grow.first;
+  if (grow.second > span.second) span.second = grow.second;
 }
 
-inline void shift(TokenSpan &span, Position add) {
+inline void shift(TokenSpan& span, Position add) {
   span.first += add;
   span.second += add;
 }
@@ -200,22 +180,17 @@ inline bool contains(TokenSpan const& container, Position p) {
 typedef std::vector<TokenSpan> TokenSpans;
 
 struct PrintSpan : TokenSpan {
-  PrintSpan(TokenSpan const& span)
-      : TokenSpan(span)
-  {}
-  PrintSpan(Position l, Position r)
-      : TokenSpan(l, r)
-  {}
-  friend inline std::ostream& operator<<(std::ostream &out, PrintSpan const& self) {
+  PrintSpan(TokenSpan const& span) : TokenSpan(span) {}
+  PrintSpan(Position l, Position r) : TokenSpan(l, r) {}
+  friend inline std::ostream& operator<<(std::ostream& out, PrintSpan const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream &out) const {
-    out << '[' << first << ',' << second << ')';
-  }
+  void print(std::ostream& out) const { out << '[' << first << ',' << second << ')'; }
 };
 
 typedef std::vector<std::string> Tokens;
+
 
 }
 

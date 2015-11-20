@@ -88,7 +88,7 @@
 
 
     note: in understanding the code below, recall that M1 is an InputFst and M2
-    is a MatchFst - that is, types or variable names beginning with "input" do
+    is a MatchFst-that is, types or variable names beginning with "input" do
     not refer to the input label (which is given by labelPair.first) but rather
     to a state, arc, or label of M1.
 
@@ -211,7 +211,7 @@ struct FilterBase {
 
 /**
    a filter is a modification to the simple cross product of states (q1, q2) for
-   M1*M2 - instead we have (q1, f, q2), where the filter state can prevent
+   M1*M2-instead we have (q1, f, q2), where the filter state can prevent
    ambiguous paths involving epsilon, or even combine an M1 arc i1:<eps> with an
    M2 arc <eps>:o2 to produce a result i1:o1 directly. NoEpsilonFilter is a dummy
    filter (so you'll get ambiguous paths)
@@ -592,8 +592,7 @@ struct ComposeFst : TimesFn {
     }
 
     bool initSigma() {
-      if (match->whichSpecials.test(SIGMA::id)
-          && (matchedArcs = match->arcsMatchingInput(matchSrc, SIGMA::ID))) {
+      if (match->whichSpecials.test(SIGMA::id) && (matchedArcs = match->arcsMatchingInput(matchSrc, SIGMA::ID))) {
         midSigma = true;
         return true;
       } else
@@ -820,7 +819,7 @@ void composeWithEpsilonFilterImpl(InHg const& inHg, MatchHg& matchHg, IMutableHy
    Filter is an epsilon filter type
 
    to allow duplicates is to use a simpler filter state that doesn't rigorously sequence alternative a:*e* in
-   inHg and *e*:b in matchHg - this would be harmful in case of Log/Expectation weight because the number of
+   inHg and *e*:b in matchHg-this would be harmful in case of Log/Expectation weight because the number of
    paths is higher than it should be, but might be faster for Viterbi/Feature weight (with no harm done).
 */
 template <class Filter, class Arc1, class MatchHg, class ArcOut>
@@ -857,8 +856,8 @@ void compose(InHg& inHg, MatchHg& matchHg, IMutableHypergraph<ArcOut>* outHg, Fs
   WhichFstComposeSpecials which = matchHg.whichInputFstComposeSpecials();
   SDL_DEBUG(Hypergraph.compose, which);
   if (opt.allowDuplicatesEffective())
-    composeWithEpsilonFilter<typename AllowDuplicateFilter<typename InHg::Arc::Weight>::type>(
-        inHg, matchHg, outHg, opt, which);
+    composeWithEpsilonFilter<typename AllowDuplicateFilter<typename InHg::Arc::Weight>::type>(inHg, matchHg,
+                                                                                              outHg, opt, which);
   else if (opt.epsilonMatchingFilter)
     composeWithEpsilonFilter<EpsilonCombine>(inHg, matchHg, outHg, opt, which);
   else

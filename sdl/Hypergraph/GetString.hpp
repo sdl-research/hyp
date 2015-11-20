@@ -40,10 +40,10 @@ namespace sdl {
 namespace Hypergraph {
 
 Syms& symsFromStatesAppend(Syms& result, StateString const& ss, HypergraphBase const& hg,
-                                  WhichSymbolOptions const& opt = WhichSymbolOptions());
+                           WhichSymbolOptions const& opt = WhichSymbolOptions());
 
 Syms& symsFromDerivAppend(Syms& syms, DerivationPtr const& pDerivation, HypergraphBase const& hg,
-                                 WhichSymbolOptions const& opt = WhichSymbolOptions());
+                          WhichSymbolOptions const& opt = WhichSymbolOptions());
 /// Syms: vector<Sym>
 inline Syms symsFromStates(StateString const& ss, HypergraphBase const& hg,
                            DerivationStringOptions const& opt = DerivationStringOptions()) {

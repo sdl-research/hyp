@@ -35,7 +35,7 @@ struct AcceptSingle : IAcceptString {
 };
 
 struct AcceptSingleCheck : IAcceptString {
-  //TODO: test
+  // TODO: test
   char const* type() const { return "AcceptSingleCheck"; }
 
   std::string& out;

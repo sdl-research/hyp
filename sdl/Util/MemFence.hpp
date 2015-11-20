@@ -57,7 +57,7 @@
 #define MEMFENCE_JG_2013_12_04_HPP
 #pragma once
 
-# ifdef _MSC_VER
+#ifdef _MSC_VER
 #include <intrin.h>
 // see also _mm_mfence
 
@@ -75,7 +75,7 @@
    can substitute for either.
 */
 
-# define SDL_MEM_FENCE() _ReadWriteBarrier()
+#define SDL_MEM_FENCE() _ReadWriteBarrier()
 
 /**
    (*) Read (or load) memory barriers. implies
@@ -91,7 +91,7 @@
    [!] Note that read barriers should normally be paired with write barriers
 */
 
-# define SDL_LOAD_FENCE() _ReadBarrier()
+#define SDL_LOAD_FENCE() _ReadBarrier()
 
 /**
 
@@ -111,16 +111,16 @@
 
    [!] Note that write barriers should normally be paired with read barriers
 */
-# define SDL_STORE_FENCE() _WriteBarrier()
+#define SDL_STORE_FENCE() _WriteBarrier()
 
-#elif (defined(__i386__ ) || defined(__x64__))
-# define SDL_MEM_FENCE() asm volatile("mfence":::"memory")
-# define SDL_LOAD_FENCE() asm volatile("lfence":::"memory")
-# define SDL_STORE_FENCE() asm volatile("sfence":::"memory")
+#elif(defined(__i386__) || defined(__x64__))
+#define SDL_MEM_FENCE() asm volatile("mfence" ::: "memory")
+#define SDL_LOAD_FENCE() asm volatile("lfence" ::: "memory")
+#define SDL_STORE_FENCE() asm volatile("sfence" ::: "memory")
 #else
-# define SDL_MEM_FENCE() __sync_synchronize()
-# define SDL_LOAD_FENCE SDL_MEM_FENCE
-# define SDL_STORE_FENCE SDL_MEM_FENCE
+#define SDL_MEM_FENCE() __sync_synchronize()
+#define SDL_LOAD_FENCE SDL_MEM_FENCE
+#define SDL_STORE_FENCE SDL_MEM_FENCE
 #endif
 
 #endif

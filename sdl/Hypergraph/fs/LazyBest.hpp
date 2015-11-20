@@ -68,9 +68,9 @@ struct LazyBestOptions {
     config("best-first lazy fst best-path search");
     config("expand-more-arcs", &expandMoreArcs)
         .verbose()(
-             "to counter for slightly not-best-first-sorted arcs, estimate the cost of the next arc as the "
-             "last arc less "
-             "this margin. if this is INF then every arc of a state will be expanded when it's reached")
+            "to counter for slightly not-best-first-sorted arcs, estimate the cost of the next arc as the "
+            "last arc less "
+            "this margin. if this is INF then every arc of a state will be expanded when it's reached")
         .init(0);
     config("remove-epsilon", &removeEpsilon)
         .init(true)("possibly remove some epsilon transitions in the result (if prune-to-nbest: 1)");
@@ -84,7 +84,6 @@ struct LazyBestOptions {
     config("annotations", &annotations).init(false)("(not enabled in this build; must be false)").verbose();
 #endif
   }
-
 };
 
 
@@ -109,7 +108,7 @@ struct LazyBestOptions {
 */
 
 
-template <class Fst, class DistanceFn = DistanceForFstArc<typename Fst::Weight> >
+template <class Fst, class DistanceFn = DistanceForFstArc<typename Fst::Weight>>
 struct LazyBest : DistanceFn {
   typedef DistanceFn DistanceF;
   typedef typename DistanceF::result_type Distance;
@@ -118,7 +117,7 @@ struct LazyBest : DistanceFn {
   typedef typename Fst::Arc FstArc;
   typedef typename Fst::Arcs FstArcs;
   typedef Path<FstArc> FstPath;
-  typedef Path<FstArcNoState<Weight> > FstPathNoState;
+  typedef Path<FstArcNoState<Weight>> FstPathNoState;
 
 
   typedef std::size_t QueueIndex;
@@ -279,15 +278,16 @@ struct LazyBest : DistanceFn {
         FstArc const& arc
             = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
         Distance distance = from.distance + arc.getDistance();
-        from.estimateSuccessor(distance - opt.expandMoreArcs);
+        from.estimateSuccessor(distance-opt.expandMoreArcs);
         queue.adjust_top();  // note: moving items around in queue doesn't invalidate the pointed-to Best
 
         // check for new state or improvement in distance to existing
         std::pair<typename Bests::iterator, bool> iNew = bests.insert((Best*)&arc);
 
         if (iNew.second) {  // didn't exist before.
-          BestP bestForDst = bestsPool.construct(
-              arc, fst.heuristic(arc.dst));  // construct full object to reside in set/queue
+          BestP bestForDst
+              = bestsPool.construct(arc,
+                                    fst.heuristic(arc.dst));  // construct full object to reside in set/queue
           bestForDst->initDistance(distance);
           bestForDst->init(fst, &from);
           const_cast<BestP&>(*iNew.first) = bestForDst;  // same key/hash/equal so ok
@@ -394,7 +394,7 @@ bool lazyBestToHg(Fst& fst, IMutableHypergraph<Arc>& outHg, LazyBestOptions cons
   outHg.setVocabulary(fst.getVocabulary());
   typedef typename Fst::Arc FstArc;
   typedef typename Fst::Weight Weight;
-  Path<FstArcNoState<Weight> > path;
+  Path<FstArcNoState<Weight>> path;
   LazyBest<Fst> lazyBest(fst, path, opt);
   //  SDL_DEBUG(Hypergraph.fs.LazyBest, print(path, outHg.getVocabulary()));
   std::size_t nWords

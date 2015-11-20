@@ -361,7 +361,7 @@ inline LocalePtr getLocalePtr(std::string const& icuLanguageName = "en",
 
 struct IcuLocaleConfig {
   LocalePtr locale_;
-  operator Locale const& () const { return *locale_; }
+  operator Locale const&() const { return *locale_; }
   Locale const& locale() const { return *locale_; }
   std::string language, country;
   friend inline std::string to_string_impl(IcuLocaleConfig const& x) { return x.to_string_impl(); }
@@ -383,7 +383,8 @@ struct IcuLocaleConfig {
     c.is("ICU locale");
     c("language", &language)(
         "ICU language 2-3 letter ISO code, or language_country e.g. en_US. empty means icu (OS?) default. "
-        "valid choices: " + icuLanguagesList());
+        "valid choices: "
+        + icuLanguagesList());
     c("country", &country)("ICU country 2 letter ISO code. may be empty. valid choices: " + icuCountriesList());
     // TODO: region? script? probably unnecessary for our LPs
   }
@@ -418,8 +419,9 @@ std::string platformPathString(std::vector<std::string> const& dirs);
 inline void globalIcuData(std::vector<std::string> const& dirnames) {
   globalIcuData(platformPathString(dirnames));
 }
+}
 
 
-}}
+}
 
 #endif

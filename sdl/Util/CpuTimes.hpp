@@ -55,8 +55,7 @@ Nanoseconds const kNanosecondMsb = ~kNanosecondLsbs;
 */
 inline Nanoseconds elapsed(Nanoseconds finish, Nanoseconds start) {
   Nanoseconds r = finish - start;
-  if (r & kNanosecondMsb)
-    r -= kNanosecondMsb;
+  if (r & kNanosecondMsb) r -= kNanosecondMsb;
   assert((r & kNanosecondLsbs) == r);
   // correct for overflow - our server may run indefinitely but no request
   // should take more than 8 giga-seconds
@@ -75,11 +74,15 @@ enum CpuTimeType { kWall, kUser, kSystem, knCpuTimeTypes };
 */
 inline Nanoseconds nanoseconds(CpuTimes const& times, CpuTimeType type = kWall) {
   assert(type < knCpuTimeTypes);
-  switch(type) {
-    case kWall: return times.wall;
-    case kUser: return times.user;
-    case kSystem: return times.system;
-    default: return -1; // impossible
+  switch (type) {
+    case kWall:
+      return times.wall;
+    case kUser:
+      return times.user;
+    case kSystem:
+      return times.system;
+    default:
+      return -1;  // impossible
   }
 }
 

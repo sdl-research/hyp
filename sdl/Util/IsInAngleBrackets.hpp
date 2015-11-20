@@ -17,13 +17,11 @@
 namespace sdl {
 namespace Util {
 
-inline
-bool isInAngleBrackets(std::string const& str) {
+inline bool isInAngleBrackets(std::string const& str) {
   std::string::size_type len = str.length();
-  return len > 2
-      && str[0] == '<'
-      && str[len - 1] == '>';
+  return len > 2 && str[0] == '<' && str[len - 1] == '>';
 }
+
 
 }}
 

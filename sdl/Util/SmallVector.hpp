@@ -39,8 +39,9 @@ enum { kSmallVectorInlinePointers = 2 };
 namespace Util {
 
 using graehl::small_vector;
+}
 
 
-}}
+}
 
 #endif

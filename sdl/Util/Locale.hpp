@@ -92,7 +92,7 @@ struct DefaultLocaleFastCout
 #if SDL_USE_FAST_COUT
     : graehl::use_fast_cout
 #endif
-      {
+{
   DefaultLocaleFastCout(std::size_t bufSize = 256 * 1024, bool noBufferForTerminal = true)
 #if SDL_USE_FAST_COUT
       : graehl::use_fast_cout(bufSize, noBufferForTerminal)

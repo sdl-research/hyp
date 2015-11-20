@@ -35,6 +35,7 @@ namespace Hypergraph {
 
 struct WeightBase {};
 
+
 }}
 
 #endif

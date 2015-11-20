@@ -312,9 +312,9 @@ struct StringToTokens : NormalizeUtf8 {
   }
 
   template <class Accept>
-  void acceptImpl(std::string line, Accept const& accept, Constraints &c) const {
+  void acceptImpl(std::string line, Accept const& accept, Constraints& c) const {
     if (constraintsIndexUnicodes(c)) {
-      NormalizeUtf8::normalizeNfc(line, c); //TODO: track # of codepoints changed and update c
+      NormalizeUtf8::normalizeNfc(line, c);  // TODO: track # of codepoints changed and update c
       acceptValidUtf8(line, accept);
     } else
       acceptImpl(std::move(line), accept);
@@ -331,17 +331,15 @@ struct StringToTokens : NormalizeUtf8 {
   }
 
   /// used by StringToStringModule StringToHgHelper for string->hg. TODO: use AlignedChars for nfc norm
-  void accept(std::string line, IAcceptString const& accept) const {
-    acceptImpl(std::move(line), accept);
-  }
+  void accept(std::string line, IAcceptString const& accept) const { acceptImpl(std::move(line), accept); }
 
-  void accept(std::string line, IAcceptString const& accept, Constraints &c) const {
-    NormalizeUtf8::normalizeNfc(line, c); //TODO: track # of codepoints changed and update c
+  void accept(std::string line, IAcceptString const& accept, Constraints& c) const {
+    NormalizeUtf8::normalizeNfc(line, c);  // TODO: track # of codepoints changed and update c
     acceptValidUtf8(line, accept);
   }
 
   void split(std::string const& line, Tokens& tokens) const {
-    // faster than using IAcceptString - this is a common operation
+    // faster than using IAcceptString-this is a common operation
     acceptImpl(line, PushBackWithSpan(tokens));
   }
 

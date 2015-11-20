@@ -20,7 +20,7 @@
 
 #include <sdl/Util/Add.hpp>
 #include <sdl/Util/Contains.hpp>
-#include <sdl/Util/BitSet.hpp> // for contains(bitset, index)
+#include <sdl/Util/BitSet.hpp>  // for contains(bitset, index)
 
 namespace sdl {
 namespace Util {
@@ -29,16 +29,15 @@ namespace Util {
 
     \param falseToTrue becomes true after the call
 */
-inline bool latch(bool &falseToTrue)
-{
+inline bool latch(bool& falseToTrue) {
   if (falseToTrue) return false;
-  falseToTrue=true;
+  falseToTrue = true;
   return true;
 }
 
-//TODO: specialization for std::set, unordered_set, etc?
+// TODO: specialization for std::set, unordered_set, etc?
 template <class Set, class K>
-bool latch(Set &s, K const& k) {
+bool latch(Set& s, K const& k) {
   if (!Util::contains(s, k)) {
     add(s, k);
     return true;
@@ -47,14 +46,13 @@ bool latch(Set &s, K const& k) {
 }
 
 template <class Set, class I>
-void latchAny(bool &anyadded, Set &s, I i, I const& end) {
-  for (;i!=end;++i)
-    if (latch(s,*i))
-      anyadded=true;
+void latchAny(bool& anyadded, Set& s, I i, I const& end) {
+  for (; i != end; ++i)
+    if (latch(s, *i)) anyadded = true;
 }
 
 template <class Set, class I>
-void latchAny(bool &anyadded, Set &s, I const& i) {
+void latchAny(bool& anyadded, Set& s, I const& i) {
   latchAny(anyadded, s, i.begin(), i.end());
 }
 
@@ -66,7 +64,7 @@ struct DupCount {
   std::size_t get() const { return ndup; }
   template <class K>
   bool test(K const& k) const {
-    return Util::contains(s, k); //test(s, k);
+    return Util::contains(s, k);  // test(s, k);
   }
   template <class K>
   void operator()(K const& k) {
@@ -76,8 +74,8 @@ struct DupCount {
 
 template <class Set>
 struct removeDupF {
-  Set &s;
-  removeDupF(Set &s) : s(s) {}
+  Set& s;
+  removeDupF(Set& s) : s(s) {}
   removeDupF(removeDupF const& o) : s(o.s) {}
   template <class K>
   bool operator()(K const& k) const {
@@ -86,7 +84,9 @@ struct removeDupF {
 };
 
 template <class Set>
-removeDupF<Set> removeDup(Set &s) { return removeDupF<Set>(s); }
+removeDupF<Set> removeDup(Set& s) {
+  return removeDupF<Set>(s);
+}
 
 
 }}

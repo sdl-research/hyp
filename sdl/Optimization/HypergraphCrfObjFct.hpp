@@ -97,8 +97,7 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
       else
         SDL_TRACE(Optimize.unclamped, "Unclamped:\n" << *pHgUnconstrained);
       Map featExpectationsUnconstrained;
-      FloatT pathSumUnconstrained
-          = computeFeatureExpectations(*pHgUnconstrained, &featExpectationsUnconstrained);
+      FloatT pathSumUnconstrained = computeFeatureExpectations(*pHgUnconstrained, &featExpectationsUnconstrained);
 
       // The gradients are the constrained minus the unconstrained
       // feature expectations:
@@ -106,11 +105,11 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
            it != featExpectationsUnconstrained.end(); ++it) {
         // OK because the constrained feat expectations are guaranteed
         // to be a subset of the unconstrained feat expectations:
-        updates.update(it->first, featExpectationsConstrained[it->first] - it->second);
+        updates.update(it->first, featExpectationsConstrained[it->first]-it->second);
       }
 
       SDL_TRACE(Optimization, "observed: " << pathSumConstrained << ", unobserved: " << pathSumUnconstrained);
-      fctValDelta += (pathSumConstrained - pathSumUnconstrained);
+      fctValDelta += (pathSumConstrained-pathSumUnconstrained);
     }
 
     return fctValDelta;

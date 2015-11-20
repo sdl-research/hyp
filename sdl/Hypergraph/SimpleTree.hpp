@@ -23,32 +23,33 @@
 #pragma once
 
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/SortStates.hpp> //TODO: in-place HypergraphBase-only SortStates.
+#include <sdl/Hypergraph/SortStates.hpp>  //TODO: in-place HypergraphBase-only SortStates.
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 bool isTree(HypergraphBase const& hg, StateId root);
 
 bool isTree(HypergraphBase const& hg);
 
 /// may force inarcs. post: \return isTree(hg)
-bool forceTree(HypergraphBase & hg);
+bool forceTree(HypergraphBase& hg);
 
 
 /// post: numInterior = # of interior tree nodes if \return true, and
 /// interiorStatesFirst iff the interior states are number 0...numInterior-1
-bool isSimpleTree(bool &interiorStatesFirst, HypergraphBase const& hg, StateId &numInterior);
+bool isSimpleTree(bool& interiorStatesFirst, HypergraphBase const& hg, StateId& numInterior);
 
 /// may force inarcs and reorder states. post: \return isSimpleTree(hg),
 /// numInterior, forceInterorStatesFirst and forceInterorStatesFirst is forced
 /// to what you specified
 template <class A>
-bool forceSimpleTree(bool forceInterorStatesFirst, IHypergraph<A> & hg, StateId &numInterior) {
+bool forceSimpleTree(bool forceInterorStatesFirst, IHypergraph<A>& hg, StateId& numInterior) {
   bool interiorStatesFirst;
   if (!isSimpleTree(interiorStatesFirst, hg, numInterior)) return false;
   if (!forceInterorStatesFirst) return true;
   if (!hg.isMutable()) return false;
-  sortStates(static_cast<IMutableHypergraph<A> &>(hg), SortStatesOptions(kTerminalLast));
+  sortStates(static_cast<IMutableHypergraph<A>&>(hg), SortStatesOptions(kTerminalLast));
   return true;
 }
 

@@ -69,7 +69,11 @@ struct SaveFst {
   bool projectOutput;
   bool annotations_;
   SaveFst(Fst& fst, Hg& out, SaveFstOptions const& opt)
-      : fst(fst), out(out), projectOutput(opt.projectOutput), annotations_(opt.annotations), stateMap(opt.reserveStates) {
+      : fst(fst)
+      , out(out)
+      , projectOutput(opt.projectOutput)
+      , annotations_(opt.annotations)
+      , stateMap(opt.reserveStates) {
     State empty;
     ::adl::adl_set_null(empty);
     Util::setEmptyKey(stateMap, empty);
@@ -126,8 +130,7 @@ struct SaveFst {
    save whole fst.
 */
 template <class Fst>
-void saveFstComplete(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >& outHg,
-                     SaveFstOptions const& opt) {
+void saveFstComplete(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight>>& outHg, SaveFstOptions const& opt) {
   SaveFst<Fst> save(fst, outHg, opt);
   if (opt.projectOutput) outHg.projectOutput();
 }
@@ -136,7 +139,7 @@ void saveFstComplete(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >
    save fst after wrapping with LazyBest if requested in options.
 */
 template <class Fst>
-void saveFst(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight> >& outHg, SaveFstOptions const& opt) {
+void saveFst(Fst& fst, IMutableHypergraph<ArcTpl<typename Fst::Weight>>& outHg, SaveFstOptions const& opt) {
   if (opt.usingLazyBest()) {
     outHg.setEmpty();
     lazyBestToHg(fst, outHg, opt);

@@ -20,36 +20,27 @@
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Util/Delete.hpp>
 
-namespace sdl { namespace Hypergraph {
+namespace sdl {
+namespace Hypergraph {
 
 template <class Arc>
 struct DeferAddArcs : Util::AutoDeleteAll<Arc> {
   typedef Util::AutoDeleteAll<Arc> Base;
-  IMutableHypergraph<Arc> &hg;
-  DeferAddArcs(IMutableHypergraph<Arc> &hg)
-      : hg(hg)
-  {
-    this->reserve(hg.size() * 2);
-  }
-  void operator()(Arc *arc) const {
-    const_cast<DeferAddArcs*>(this)->push_back(new Arc(*arc));
-  }
+  IMutableHypergraph<Arc>& hg;
+  DeferAddArcs(IMutableHypergraph<Arc>& hg) : hg(hg) { this->reserve(hg.size() * 2); }
+  void operator()(Arc* arc) const { const_cast<DeferAddArcs*>(this)->push_back(new Arc(*arc)); }
   void finish() {
     typename Base::iterator i = this->begin(), e = this->end();
     try {
-      for ( ; i!=e; ++i)
-        hg.addArc((Arc*)*i);
+      for (; i != e; ++i) hg.addArc((Arc*)*i);
     } catch (...) {
-      for (; i!=e; ++i)
-        delete (Arc*)*i;
+      for (; i != e; ++i) delete (Arc*)*i;
       this->releaseAll();
       throw;
     }
     this->releaseAll();
   }
-  ~DeferAddArcs() {
-    finish();
-  }
+  ~DeferAddArcs() { finish(); }
 };
 
 

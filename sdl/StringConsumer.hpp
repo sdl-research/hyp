@@ -21,27 +21,24 @@
 
 namespace sdl {
 
-typedef graehl::string_consumer StringConsumer; // sdl::function(string) without newline
-typedef graehl::warn_consumer StringOut; // StringConsumer c=StringOut(cerr, "PREFIX: ");
-typedef graehl::ignore StringIgnore; // StringConsumer c=StringIgnore();
+typedef graehl::string_consumer StringConsumer;  // sdl::function(string) without newline
+typedef graehl::warn_consumer StringOut;  // StringConsumer c=StringOut(cerr, "PREFIX: ");
+typedef graehl::ignore StringIgnore;  // StringConsumer c=StringIgnore();
 
 /// can cast or assign to StringConsumer
 template <class StringConsumerImpl>
 struct StringConsumerRef {
-  StringConsumerImpl *impl;
-  StringConsumerRef(StringConsumerImpl &impl)
-      : impl(&impl)
-  {}
-  void operator()(std::string const& str) const {
-    (*impl)(str);
-  }
+  StringConsumerImpl* impl;
+  StringConsumerRef(StringConsumerImpl& impl) : impl(&impl) {}
+  void operator()(std::string const& str) const { (*impl)(str); }
 };
 
 /// can cast or assign to StringConsumer
 template <class T>
-StringConsumerRef<T> stringConsumerRef(T &x) {
+StringConsumerRef<T> stringConsumerRef(T& x) {
   return StringConsumerRef<T>(x);
 }
+
 
 }
 

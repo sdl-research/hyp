@@ -197,7 +197,7 @@ struct HypergraphBase : Resource {
   virtual StateId exactSizeForHeads() const { return maxNotTerminalState() + 1; }
 
   /**
-     \return hg is an Fsm - Graph with each arc having exactly 2 tails
+     \return hg is an Fsm-Graph with each arc having exactly 2 tails
 
      this may run an expensive check O(n), but the next calls w/o changing an IMutableHypergraph will be O(1).
   */
@@ -241,8 +241,7 @@ struct HypergraphBase : Resource {
 
   virtual WhichFstComposeSpecials whichInputFstComposeSpecials() const {
     WhichFstComposeSpecials r;
-    for (StateIdInterval states(possiblyInputTerminalLabeledStates()); states.first < states.second;
-         ++states.first)
+    for (StateIdInterval states(possiblyInputTerminalLabeledStates()); states.first < states.second; ++states.first)
       r.check(inputLabel(states.first));
     return r;
   }
@@ -315,7 +314,7 @@ struct HypergraphBase : Resource {
 
   /**
      \return first tail's lexical input label symbol - NoSymbol if none. - used
-     by Tokens.hpp - so at most one lexical tail per arc can
+     by Tokens.hpp-so at most one lexical tail per arc can
      have (specific) alignment information, because the FeatureWeight is common
      to the arc (we don't have axiom leaf state weights)
   */
@@ -693,7 +692,7 @@ struct HypergraphBase : Resource {
 
   virtual bool isFsmCheck() const = 0;
 
-  /// for detail::isGraphArcImpl - compare to more efficient MutableHypergraphLabels impl
+  /// for detail::isGraphArcImpl-compare to more efficient MutableHypergraphLabels impl
   Sym inputLabelImpl(StateId s) const { return inputLabel(s); }
 
   /// \return assuming state s has an explicit input label of some sort
@@ -837,8 +836,10 @@ struct HypergraphBase : Resource {
   Labels copyOfLabels(bool outputLabels = false) {
     MaybeLabels labels = maybeLabels();
     Labels const* from = outputLabels ? labels.second : labels.first;
-    if (from) return *from;
-    else return Labels();
+    if (from)
+      return *from;
+    else
+      return Labels();
   }
 
 

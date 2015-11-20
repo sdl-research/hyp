@@ -47,7 +47,7 @@ inline void printHgAsMosesLattice(IHypergraph<Arc> const& hg) {
     std::cout << '(';
     for (ArcId aid : hg_sort->outArcIds(s)) {
       Arc* arc = hg_sort->outArc(s, aid);
-      int step = (int)arc->head_ - (int)s;
+      int step = (int)arc->head_-(int)s;
       if (step < 0) {
         SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error,
                       "Illegal lattice input that cant be ordered");

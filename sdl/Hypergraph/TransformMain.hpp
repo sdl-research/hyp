@@ -174,7 +174,8 @@ struct TransformMainBase : HypergraphMainBase {
         .verbose(ambig);
     // TODO: use SDL_ENUM for arcType
     if (configureProperties)
-      c("properties", &hg_properties)('p')("optional hypergraph properties suggestion (in-arcs,out-arcs,etc)");
+      c("properties",
+        &hg_properties)('p')("optional hypergraph properties suggestion (in-arcs,out-arcs,etc)");
     if (firstInputFileHasMultipleHgs && multifile)
       c("reload", &reloadOnMultiple)(
           "for each of the inputs, re-read the rest of the transducers again each time (saves memory) if "
@@ -236,9 +237,8 @@ struct TransformMain : TransformMainBase {
     optInputs.setChars();
   }
   TransformMain(std::string const& n, std::string const& usage, std::string const& ver = "v1")
-      : TransformMainBase(n, usage, ver, impl().has2(), HypergraphMainOpt(CRTP::randomSeed()),
-                          CRTP::semirings(), CRTP::bestOutput(), CRTP::defaultSemiring(),
-                          CRTP::nbestHypergraphDefault())
+      : TransformMainBase(n, usage, ver, impl().has2(), HypergraphMainOpt(CRTP::randomSeed()), CRTP::semirings(),
+                          CRTP::bestOutput(), CRTP::defaultSemiring(), CRTP::nbestHypergraphDefault())
       , inputOptDesc(InputHypergraphs::caption()) {
     TransformMainBase::firstInputFileHasMultipleHgs = true;
     reloadOnMultiple = (CRTP::reloadInputs() == kReloadInputs);
@@ -263,11 +263,11 @@ struct TransformMain : TransformMainBase {
     bool r;
     switch ((unsigned)arcType) {
       case kViterbiSemiring:
-        r = runWeight<ViterbiWeightTpl<SdlFloat> >();
+        r = runWeight<ViterbiWeightTpl<SdlFloat>>();
         break;
 #if SDL_TRANSFORM_MAIN_LOG_WEIGHT
       case kLogSemiring:
-        r = runWeight<LogWeightTpl<SdlFloat> >();
+        r = runWeight<LogWeightTpl<SdlFloat>>();
         break;
 #endif
 #if SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT
@@ -294,12 +294,12 @@ struct TransformMain : TransformMainBase {
 
   // if has_*input_transform (can override directly):
   template <class Arc>
-  bool inputTransformInplaceP(shared_ptr<IMutableHypergraph<Arc> >& h,
+  bool inputTransformInplaceP(shared_ptr<IMutableHypergraph<Arc>>& h,
                               unsigned n) {  // from n=1...#input files.
     if (impl().has_inplace_input_transform) return impl().inputTransformInplace(*h, n);
-    shared_ptr<IMutableHypergraph<Arc> > i = h;
+    shared_ptr<IMutableHypergraph<Arc>> i = h;
     assert(n);
-    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(inputProperties(n - 1));
+    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(inputProperties(n-1));
     h.reset(m);
     return impl().inputTransform((IHypergraph<Arc> const&)*i, m, n);
   }
@@ -319,9 +319,9 @@ struct TransformMain : TransformMainBase {
 
   // if has_*transform1, override either this or one of below
   template <class Arc>
-  bool transform1InplaceP(shared_ptr<IMutableHypergraph<Arc> >& h) {
+  bool transform1InplaceP(shared_ptr<IMutableHypergraph<Arc>>& h) {
     if (impl().has_inplace_transform1) return impl().transform1Inplace(*h);
-    shared_ptr<IMutableHypergraph<Arc> > i = h;
+    shared_ptr<IMutableHypergraph<Arc>> i = h;
     MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(outputProperties());
     h.reset(m);
     return impl().transform1((IHypergraph<Arc> const&)*i, m);
@@ -343,9 +343,9 @@ struct TransformMain : TransformMainBase {
   // First ptr is taken as result for reduction/fold of N Hgs to
   // 1. please don't meaningfully modify i2.
   template <class Arc>
-  bool transform2InplaceP(shared_ptr<IMutableHypergraph<Arc> >& io, shared_ptr<IMutableHypergraph<Arc> >& i2) {
+  bool transform2InplaceP(shared_ptr<IMutableHypergraph<Arc>>& io, shared_ptr<IMutableHypergraph<Arc>>& i2) {
     if (impl().has_inplace_transform2) return impl().transform2Inplace(*io, *i2);
-    shared_ptr<IMutableHypergraph<Arc> > i = io;
+    shared_ptr<IMutableHypergraph<Arc>> i = io;
     io.reset(new MutableHypergraph<Arc>(outputProperties()));
     io->setVocabulary(this->vocab());
     return impl().transform2pp(i, i2, io.get());
@@ -367,9 +367,9 @@ struct TransformMain : TransformMainBase {
   // else:
 
   template <class Arc>
-  bool transform2pp(shared_ptr<IMutableHypergraph<Arc> >& i, shared_ptr<IMutableHypergraph<Arc> >& i2,
+  bool transform2pp(shared_ptr<IMutableHypergraph<Arc>>& i, shared_ptr<IMutableHypergraph<Arc>>& i2,
                     IMutableHypergraph<Arc>* o) {
-    // can update 1st or 2nd arg to point to new Hg - although you should be satisfied if you specified
+    // can update 1st or 2nd arg to point to new Hg-although you should be satisfied if you specified
     // properties() already
     return impl().transform2mm(*i, *i2, o);
   }
@@ -415,7 +415,7 @@ struct TransformMain : TransformMainBase {
   struct Cascade {
     typedef ArcTpl<Weight> Arc;
     typedef MutableHypergraph<Arc> H;
-    typedef shared_ptr<IMutableHypergraph<Arc> > Hp;
+    typedef shared_ptr<IMutableHypergraph<Arc>> Hp;
     typedef std::vector<Hp> Hps;
     TransformMain& main;
 
@@ -507,7 +507,7 @@ struct TransformMain : TransformMainBase {
 
     Cascade<Weight> cascade(*this);
 
-    typedef shared_ptr<IMutableHypergraph<Arc> > Hp;
+    typedef shared_ptr<IMutableHypergraph<Arc>> Hp;
     Hp& h = cascade.cascade[0];
     bool allok = true;
     unsigned ninputs = 0;

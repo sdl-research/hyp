@@ -19,7 +19,7 @@
 
 #if HAVE_OPENFST
 
-#include <sdl/Util/IcuHeaders.hpp> // we need this included before openfst includes it.
+#include <sdl/Util/IcuHeaders.hpp>  // we need this included before openfst includes it.
 
 #include <graehl/shared/warning_push.h>
 
@@ -42,6 +42,6 @@ CLANG_DIAG_IGNORE(mismatched-tags)
 
 #include <graehl/shared/warning_pop.h>
 
-#endif // HAVE_OPENFST
+#endif  // HAVE_OPENFST
 
 #endif

@@ -213,8 +213,7 @@ typename std::enable_if<is_non_peekable<Gen>::value, std::size_t>::type appendGe
 }
 
 template <class Gen, class Visit>
-typename std::enable_if<is_non_peekable<Gen>::value, std::size_t>::type visitGenerate(Gen& gen,
-                                                                                      Visit const& visit,
+typename std::enable_if<is_non_peekable<Gen>::value, std::size_t>::type visitGenerate(Gen& gen, Visit const& visit,
                                                                                       std::size_t max) {
   UTIL_DBG_MSG(12, "non-peekable visit(max)");
   std::size_t n = 0;

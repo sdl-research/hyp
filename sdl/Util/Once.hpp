@@ -110,10 +110,12 @@ struct CheckOnce : Once {
                                                                            << " was seen more than once");
   }
 };
-
-
-}}
+}
+}
 
 #include <graehl/shared/warning_pop.h>
+
+
+
 
 #endif

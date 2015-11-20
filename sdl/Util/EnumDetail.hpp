@@ -118,84 +118,84 @@ inline std::string simplifedEnumName(std::string str) {
 /**
    generates impl in enum's namespace
 **/
-#define SDL_DETAIL_ENUM_TYPE_INFO(name, elems, nameList)                                                      \
-  enum name { BOOST_PP_LIST_ENUM(elems), kn##name };                                                          \
-  inline std::string emit(name val) {                                                                         \
-    std::string str;                                                                                          \
-    switch (val) {                                                                                            \
-      BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_EMIT_TO_STRING_CASE, nameList, elems)                               \
-      default:                                                                                                \
-        SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);                    \
-    };                                                                                                        \
-    sdl::Util::canonicalizeEnumName(str);                                                                     \
-    return str;                                                                                               \
-  }                                                                                                           \
-  inline std::string emitCased(name val) {                                                                    \
-    switch (val) {                                                                                            \
-      BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_emitCased, nameList, elems)                                         \
-      default:                                                                                                \
-        SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);                    \
-    };                                                                                                        \
-  }                                                                                                           \
-  struct name##Names {                                                                                        \
-    std::string canonical[kn##name + 1];                                                                      \
-    std::string cased[kn##name + 1];                                                                          \
-    std::string simplified[kn##name + 1];                                                                     \
-    name##Names() {                                                                                           \
-      for (unsigned i = 0; i < kn##name; ++i) {                                                               \
-        canonical[i] = simplified[i] = emit((name)i);                                                         \
-        sdl::Util::removeHyphens(simplified[i]);                                                              \
-        cased[i] = emitCased((name)i);                                                                        \
-      }                                                                                                       \
-      canonical[kn##name] = cased[kn##name] = simplified[kn##name] = "unspecified";                           \
-    }                                                                                                         \
-    std::string const& operator[](unsigned i) const { return cased[i]; }                                      \
-    name operator[](std::string str) const {                                                                  \
-      if (str == "false" || str == "n") return (name)0;                                                       \
-      if (kn##name > 1 && (str == "true" || str == "y")) return (name)1;                                      \
-      sdl::Util::simplifyEnumName(str);                                                                       \
-      unsigned i = 0;                                                                                         \
-      for (; i < kn##name; ++i)                                                                               \
-        if (str == simplified[i]) return (name)i;                                                             \
-      return (name)i;                                                                                         \
-    }                                                                                                         \
-  };                                                                                                          \
-  namespace {                                                                                                 \
-  name##Names kNames##name;                                                                                   \
-  }                                                                                                           \
-  SDL_DETAIL_GET_VALUE_EXACT_STRING_TO_ENUM(name, elems, nameList)                                            \
-  SDL_DETAIL_ENUM_ALLOWED_VALUES(name, nameList)                                                              \
-  inline void string_to_impl(std::string const& str, name& out) {                                             \
-    out = kNames##name[str];                                                                                  \
-    if (out == kn##name)                                                                                      \
-      SDL_THROW_LOG(Enum, ::sdl::ConfigException,                                                             \
-                    "Invalid " #name " enum: " << str << " - should be one of " << allowed_values(out));      \
-  }                                                                                                           \
-  inline name getValue(name, std::string const& val) { return kNames##name[val]; }                            \
-  inline std::string type_string(name const& in) {                                                            \
-    return std::string(BOOST_PP_STRINGIZE(name)) + std::string(": ") + allowed_values(in);                    \
-  }                                                                                                           \
-  inline std::string example_value(name const& in) { return BOOST_PP_LIST_AT(nameList, 0); }                  \
-  inline bool contains(name, std::string const& str) { return kNames##name[str] != kn##name; }                \
-  inline std::string const& getString(name val) {                                                             \
-    assert((int)val >= 0 && val <= kn##name);                                                                 \
-    return kNames##name.canonical[val];                                                                       \
-  }                                                                                                           \
-  inline bool valid(name val) { return (int)val >= 0 && val < kn##name; }                                     \
-  inline void assertValid(name val) {                                                                         \
-    if (!valid(val)) SDL_THROW_LOG(Enum, ::sdl::IndexException, #name " value out of range: " << (int)val);   \
-  }                                                                                                           \
-  inline std::string const& to_string_impl(name val) { return getString(val); }                               \
-  inline std::string const& casedString(name val) {                                                           \
-    assertValid(val);                                                                                         \
-    return kNames##name.cased[val];                                                                           \
-  }                                                                                                           \
-  inline std::istream& operator>>(std::istream& in, name& val) {                                              \
-    std::string str;                                                                                          \
-    in >> str;                                                                                                \
-    string_to_impl(str, val);                                                                                 \
-    return in;                                                                                                \
-  }                                                                                                           \
+#define SDL_DETAIL_ENUM_TYPE_INFO(name, elems, nameList)                                                    \
+  enum name { BOOST_PP_LIST_ENUM(elems), kn##name };                                                        \
+  inline std::string emit(name val) {                                                                       \
+    std::string str;                                                                                        \
+    switch (val) {                                                                                          \
+      BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_EMIT_TO_STRING_CASE, nameList, elems)                             \
+      default:                                                                                              \
+        SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);                  \
+    };                                                                                                      \
+    sdl::Util::canonicalizeEnumName(str);                                                                   \
+    return str;                                                                                             \
+  }                                                                                                         \
+  inline std::string emitCased(name val) {                                                                  \
+    switch (val) {                                                                                          \
+      BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_emitCased, nameList, elems)                                       \
+      default:                                                                                              \
+        SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);                  \
+    };                                                                                                      \
+  }                                                                                                         \
+  struct name##Names {                                                                                      \
+    std::string canonical[kn##name + 1];                                                                    \
+    std::string cased[kn##name + 1];                                                                        \
+    std::string simplified[kn##name + 1];                                                                   \
+    name##Names() {                                                                                         \
+      for (unsigned i = 0; i < kn##name; ++i) {                                                             \
+        canonical[i] = simplified[i] = emit((name)i);                                                       \
+        sdl::Util::removeHyphens(simplified[i]);                                                            \
+        cased[i] = emitCased((name)i);                                                                      \
+      }                                                                                                     \
+      canonical[kn##name] = cased[kn##name] = simplified[kn##name] = "unspecified";                         \
+    }                                                                                                       \
+    std::string const& operator[](unsigned i) const { return cased[i]; }                                    \
+    name operator[](std::string str) const {                                                                \
+      if (str == "false" || str == "n") return (name)0;                                                     \
+      if (kn##name > 1 && (str == "true" || str == "y")) return (name)1;                                    \
+      sdl::Util::simplifyEnumName(str);                                                                     \
+      unsigned i = 0;                                                                                       \
+      for (; i < kn##name; ++i)                                                                             \
+        if (str == simplified[i]) return (name)i;                                                           \
+      return (name)i;                                                                                       \
+    }                                                                                                       \
+  };                                                                                                        \
+  namespace {                                                                                               \
+  name##Names kNames##name;                                                                                 \
+  }                                                                                                         \
+  SDL_DETAIL_GET_VALUE_EXACT_STRING_TO_ENUM(name, elems, nameList)                                          \
+  SDL_DETAIL_ENUM_ALLOWED_VALUES(name, nameList)                                                            \
+  inline void string_to_impl(std::string const& str, name& out) {                                           \
+    out = kNames##name[str];                                                                                \
+    if (out == kn##name)                                                                                    \
+      SDL_THROW_LOG(Enum, ::sdl::ConfigException,                                                           \
+                    "Invalid " #name " enum: " << str << " - should be one of " << allowed_values(out));    \
+  }                                                                                                         \
+  inline name getValue(name, std::string const& val) { return kNames##name[val]; }                          \
+  inline std::string type_string(name const& in) {                                                          \
+    return std::string(BOOST_PP_STRINGIZE(name)) + std::string(": ") + allowed_values(in);                  \
+  }                                                                                                         \
+  inline std::string example_value(name const& in) { return BOOST_PP_LIST_AT(nameList, 0); }                \
+  inline bool contains(name, std::string const& str) { return kNames##name[str] != kn##name; }              \
+  inline std::string const& getString(name val) {                                                           \
+    assert((int)val >= 0 && val <= kn##name);                                                               \
+    return kNames##name.canonical[val];                                                                     \
+  }                                                                                                         \
+  inline bool valid(name val) { return (int)val >= 0 && val < kn##name; }                                   \
+  inline void assertValid(name val) {                                                                       \
+    if (!valid(val)) SDL_THROW_LOG(Enum, ::sdl::IndexException, #name " value out of range: " << (int)val); \
+  }                                                                                                         \
+  inline std::string const& to_string_impl(name val) { return getString(val); }                             \
+  inline std::string const& casedString(name val) {                                                         \
+    assertValid(val);                                                                                       \
+    return kNames##name.cased[val];                                                                         \
+  }                                                                                                         \
+  inline std::istream& operator>>(std::istream& in, name& val) {                                            \
+    std::string str;                                                                                        \
+    in >> str;                                                                                              \
+    string_to_impl(str, val);                                                                               \
+    return in;                                                                                              \
+  }                                                                                                         \
   inline std::ostream& operator<<(std::ostream& out, name val) { return out << to_string_impl(val); }
 
 // end SDL_DETAIL_ENUM_TYPE_INFO
@@ -206,5 +206,8 @@ inline std::string simplifedEnumName(std::string str) {
    prepends k to each Enum name per coding standards.
 **/
 #define SDL_DETAIL_ENUM_PREPEND_k(d, data, elem) BOOST_PP_CAT(data, elem)
+
+
+
 
 #endif

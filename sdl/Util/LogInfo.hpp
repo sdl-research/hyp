@@ -30,7 +30,7 @@ namespace Util {
 struct LogInfo {
   explicit LogInfo(std::string const& logname) : logname(logname) {}
   std::string logname;  // TODO: save log4cxx object? for now, let logging cfg change and we reflect that
-                        // always. this is used for infos only so perf. shouldn't matter. would use:
+  // always. this is used for infos only so perf. shouldn't matter. would use:
   //  LoggerPtr plog;
   void operator()(std::string const& msg) const {
 #ifdef NLOG
@@ -75,7 +75,7 @@ struct LogAtLevel {
     plevel = levelptr;
   }
   std::string logname;  // TODO: save log4cxx object? for now, let logging cfg change and we reflect that
-                        // always. this is used for warnings only so perf. shouldn't matter. would use:
+  // always. this is used for warnings only so perf. shouldn't matter. would use:
   LoggerPtr plog;
   LogLevelPtr plevel;
   void operator()(std::string const& msg) const {
@@ -88,8 +88,7 @@ struct LogAtLevel {
 };
 
 inline StringConsumer logAtLevel(std::string const& module, std::string const& level,
-                                 std::string const& prefix = SDL_LOG_PREFIX_STR,
-                                 LogLevel fallback = kLogInfo) {
+                                 std::string const& prefix = SDL_LOG_PREFIX_STR, LogLevel fallback = kLogInfo) {
   return LogAtLevel(prefix + module, level, fallback);
 }
 

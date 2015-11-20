@@ -48,8 +48,7 @@ void writeLabel(Util::StringBuilder& out, std::string const& label, SymbolQuotat
 inline void writeLabel(std::ostream& out, Sym sym, IVocabulary const& voc, SymbolQuotation quote = kQuoted) {
   writeLabel(out, voc.str(sym), sym.isLexical() ? quote : kUnquoted);
 }
-inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const& voc,
-                       SymbolQuotation quote = kQuoted) {
+inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const& voc, SymbolQuotation quote = kQuoted) {
   writeLabel(out, voc.str(sym), sym.isLexical() ? quote : kUnquoted);
 }
 
@@ -60,8 +59,7 @@ inline void writeLabel(std::ostream& out, Sym sym, IVocabulary const* voc, Symbo
   else
     writeLabel(out, sym);
 }
-inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const* voc,
-                       SymbolQuotation quote = kQuoted) {
+inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabulary const* voc, SymbolQuotation quote = kQuoted) {
   if (voc && voc->containsSym(sym))
     writeLabel(out, sym, *voc, quote);
   else
@@ -85,7 +83,7 @@ void print(std::ostream& o, Sym sym, IHypergraph<Arc> const& hg, SymbolQuotation
 
 }  // ns
 
-/* these are in NS sdl so they can be found by adl_print - Sym is sdl::Sym, IVocabulary is sdl::IVocabulary */
+/* these are in NS sdl so they can be found by adl_print-Sym is sdl::Sym, IVocabulary is sdl::IVocabulary */
 inline void print(std::ostream& o, Sym sym, IVocabulary const& voc, Hypergraph::SymbolQuotation quote) {
 
   Hypergraph::writeLabel(o, sym, voc, quote);
@@ -98,17 +96,14 @@ inline void print(Util::StringBuilder& o, Sym sym, IVocabulary const& voc, Hyper
 inline void print(std::ostream& o, Sym sym, IVocabularyPtr const& pVoc, Hypergraph::SymbolQuotation quote) {
   Hypergraph::writeLabel(o, sym, pVoc, quote);
 }
-inline void print(Util::StringBuilder& o, Sym sym, IVocabularyPtr const& pVoc,
-                  Hypergraph::SymbolQuotation quote) {
+inline void print(Util::StringBuilder& o, Sym sym, IVocabularyPtr const& pVoc, Hypergraph::SymbolQuotation quote) {
   Hypergraph::writeLabel(o, sym, pVoc, quote);
 }
 
-inline void print(std::ostream& o, Sym s, IVocabulary const* voc,
-                  Hypergraph::SymbolQuotation quote) {
+inline void print(std::ostream& o, Sym s, IVocabulary const* voc, Hypergraph::SymbolQuotation quote) {
   print(o, s, *voc, quote);
 }
-inline void print(Util::StringBuilder& o, Sym s, IVocabulary const* voc,
-                  Hypergraph::SymbolQuotation quote) {
+inline void print(Util::StringBuilder& o, Sym s, IVocabulary const* voc, Hypergraph::SymbolQuotation quote) {
   print(o, s, *voc, quote);
 }
 
@@ -205,9 +200,8 @@ inline void print(std::ostream& o, Syms const& s, IVocabularyPtr const& voc, cha
 inline void print(Util::StringBuilder& o, Syms const& s, IVocabularyPtr const& voc, char const* space,
                   Hypergraph::SymbolQuotation quote = Hypergraph::kQuoted) {
   print(o, s, *voc, space, quote);
-}
 
 
-}
+}}
 
 #endif

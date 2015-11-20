@@ -107,9 +107,7 @@ struct InitLoggerOptions {
     c("log-init-details", &verbose)("verbose initialization info").init(true).verbose();
     c("remove-appenders", &removeAppenders)("remove existing log4cxx appenders first").init(false).verbose();
     c("overwrite-file", &overwriteFile)("overwrite existing output file [log-path]").init(true).verbose();
-    c("multithread-layout", &multiThread)("use multithreaded log layout (show thread id")
-        .init(false)
-        .verbose();
+    c("multithread-layout", &multiThread)("use multithreaded log layout (show thread id").init(false).verbose();
   }
 
   template <class O>

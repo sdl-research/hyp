@@ -24,13 +24,12 @@ namespace Hypergraph {
    This can be specialized for other weights, see BlockWeight,
    for example.
  */
-template<class FromW, class ToW>
+template <class FromW, class ToW>
 struct WeightConverter {
   typedef ToW Weight;
-  WeightConverter(FromW const& from, ToW& to) {
-    to = ToW(from.getValue());
-  }
+  WeightConverter(FromW const& from, ToW& to) { to = ToW(from.getValue()); }
 };
+
 
 }}
 

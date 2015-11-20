@@ -89,8 +89,9 @@ T maxDefined(T val1OrUndef, T val2OrUndef) {
 }
 
 using sdl::FloatConstants;
+}
 
 
-}}
+}
 
 #endif

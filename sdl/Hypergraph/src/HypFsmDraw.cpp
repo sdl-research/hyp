@@ -41,8 +41,10 @@ struct HypFsmDraw : TransformMain<HypFsmDraw> {
   }
   void validate_parameters_more() { dopt.validate(); }
 };
-
-
-}}
+}
+}
 
 HYPERGRAPH_NAMED_MAIN(FsmDraw)
+
+
+

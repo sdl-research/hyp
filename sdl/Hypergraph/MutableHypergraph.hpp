@@ -345,7 +345,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
       deleteOutArcsImpl(s);
     } else
       deleteInArcsImpl(s);
-    if (s == numStates_ - 1) numStates_ = s;
+    if (s == numStates_-1) numStates_ = s;
   }
 
   enum { kAdjLinearSearchLimit = 16 };
@@ -929,7 +929,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
   }
 
   /// no resize needed / removes ability to modify hg while holding maybeOutArcs
-  /// ref (see addArc - resizes indices as needed)
+  /// ref (see addArc-resizes indices as needed)
   void resizeArcsForStates(StateId size) {
     if (this->properties_ & kStoreInArcs) inArcsPerState_.resize(size);
     if (storesOutArcsImpl()) outArcsPerState_.resize(size);
@@ -1455,7 +1455,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
 };
 
 template <class Arc>
-void setEmptyHg(shared_ptr<IHypergraph<Arc> > &hg) {
+void setEmptyHg(shared_ptr<IHypergraph<Arc>>& hg) {
   hg.reset(new MutableHypergraph<Arc>);
   assert(hg->prunedEmpty());
 }

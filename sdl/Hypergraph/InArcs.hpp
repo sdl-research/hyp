@@ -223,8 +223,7 @@ struct ComputeStateOrder {
   StateOrder& order;
   Util::DfsColorArray color;
   StateId nBackEdges, maxBackEdges, nStates;
-  ComputeStateOrder(StateOrder& order, HypergraphBase const& hg, StateId nStates,
-                    StateId maxBackEdges = kNoState)
+  ComputeStateOrder(StateOrder& order, HypergraphBase const& hg, StateId nStates, StateId maxBackEdges = kNoState)
       : hg(hg), order(order), color(nStates), maxBackEdges(maxBackEdges), nBackEdges(), nStates(nStates) {
     assert(hg.isGraph());
   }
@@ -247,7 +246,8 @@ struct ComputeStateOrder {
       StateId const to = context.to(arc);
       Util::DfsColor const prevColor = color.test_set_if_false(to, Util::kOpened);
       assert((prevColor == Util::kFresh) == !prevColor);
-      //SDL_TRACE(Hypergraph.InArcs, "dfs color for " << to << " was " << prevColor << " now is " << color[to]);
+      // SDL_TRACE(Hypergraph.InArcs, "dfs color for " << to << " was " << prevColor << " now is " <<
+      // color[to]);
       if (!prevColor) {
         assert(color[to] == Util::kOpened);
         SDL_TRACE(Hypergraph.InArcs, "visiting fresh edge " << from << " => " << to << " via " << *arc);
@@ -313,8 +313,7 @@ struct InArcs : AdjacentArcsBase<kMustStoreNatively> {
     if (hasNative())
       Hypergraph::visitInArcs(visit, head, hg, isMutable);
     else if (head < adj.size())
-      for (ArcsContainer::const_iterator a = adj[head].begin(), ae = adj[head].end(); a != ae;
-           ++a)
+      for (ArcsContainer::const_iterator a = adj[head].begin(), ae = adj[head].end(); a != ae; ++a)
         visit.accept(*a, head);
   }
 

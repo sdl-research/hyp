@@ -22,11 +22,11 @@
 namespace sdl {
 namespace Hypergraph {
 
-ArcParser::ArcParser()
-    : pImpl_(new Impl()) {}
+ArcParser::ArcParser() : pImpl_(new Impl()) {}
 
 ParserUtil::Arc* ArcParser::parse(std::string const& str) const {
   return pImpl_->parse(str);
 }
+
 
 }}

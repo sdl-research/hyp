@@ -68,8 +68,9 @@ struct EscapeChars {
     for (Escs::const_iterator i = escs.begin(), e = escs.end(); i != e; ++i) karma.add(i->first, i->second);
   }
 };
+}
 
 
-}}
+}
 
 #endif

@@ -46,33 +46,36 @@ class Node;
            test-path: [../a.in, b.in, c.in]
          }
    *
-      - If longMap is set to false & multiLine to true the { are not printed and the output is more concise and readable.
+      - If longMap is set to false & multiLine to true the { are not printed and the output is more concise
+   and readable.
         example:
          foo:
            bar: buz
            hello: world!
         test-path: [../a.in, b.in, c.in]
    *
-      - If called with longMap set to true & multiLine to false, the entire YAML node is printed on a single line,
+      - If called with longMap set to true & multiLine to false, the entire YAML node is printed on a single
+   line,
         e.g:
          { foo: { bar: buz, hello: world! }, test-path: [../a.in, b.in, c.in] }
    *
-      - If called with longMap & multiLine set to false, longMap gets reset to true as this is invalid config. and the
+      - If called with longMap & multiLine set to false, longMap gets reset to true as this is invalid config.
+   and the
         output is same as above.
  */
-std::string to_string(Node const& in, bool longMap = true, bool newLine = false, std::string const& indent="");
+std::string to_string(Node const& in, bool longMap = true, bool newLine = false,
+                      std::string const& indent = "");
 
 /**
    dest=parse(str) - parses str as yaml Node (without the Config.hpp transformations).
 */
 void string_to_impl(std::string const& str, Node& dest);
-
-
 }
 
 namespace sdl {
 
-typedef YAML::Node ConfigNode; // these should be passed by value. they're handles. but is there copy on write?
+typedef YAML::Node
+    ConfigNode;  // these should be passed by value. they're handles. but is there copy on write?
 class YamlConfigurable;
 typedef shared_ptr<YamlConfigurable> YamlConfigurablePtr;
 
@@ -84,11 +87,11 @@ struct YamlConfigurableEffective {
       : configurable(configurable), verbosity(verbosity) {}
   YamlConfigurableEffective(YamlConfigurable const* configurable, int verbosity = 0)
       : configurable(*configurable), verbosity(verbosity) {}
-  friend inline std::ostream& operator<<(std::ostream &out, YamlConfigurableEffective const& self) {
+  friend inline std::ostream& operator<<(std::ostream& out, YamlConfigurableEffective const& self) {
     self.print(out);
     return out;
   }
-  void print(std::ostream &out) const;
+  void print(std::ostream& out) const;
 };
 
 
