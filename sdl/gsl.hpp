@@ -18,6 +18,7 @@
 #define GSL_GRAEHL_2015_10_24_HPP
 #pragma once
 
+#include <graehl/shared/is_container.hpp>
 #include <gsl.h>
 
 namespace sdl {

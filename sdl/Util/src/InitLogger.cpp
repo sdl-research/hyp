@@ -68,7 +68,7 @@ void initLogger(std::string const& appname, LogLevelPtr level, Util::InitLoggerO
   if (opts.removeAppenders) g_pStatsDBLogger->removeAllAppenders();
   log4cxx::LogString logStrLayout;
   std::string layout(opts.patternLayout);
-  if (layout.empty()) layout = (opts.multiThread ? "%-4t %-5p %c{2}-%m%n" : "%-5p %c{2}-%m%n");
+  if (layout.empty()) layout = (opts.multiThread ? "%-4t %-5p %c{2} - %m%n" : "%-5p %c{2} - %m%n");
   log4cxx::helpers::Transcoder::decode(layout, logStrLayout);
   log4cxx::PatternLayout* pLayout = new log4cxx::PatternLayout(logStrLayout);
   if (!opts.file.empty()) {

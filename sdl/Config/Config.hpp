@@ -247,7 +247,7 @@ struct YamlConfigurable {
 
   void setType(std::string const& type) { type_ = type; }
   void setCategory(std::string const& category) { category_ = category; }
-  void setName(std::string const& name) { name_ = name; }
+  void setName(std::string const& name) { if (name_.empty()) name_ = name; }
   template <class Config>
   void configure(Config& config) {}
 
