@@ -387,7 +387,7 @@ struct file_arg {
   void set(Stream& s, std::string const& filename = "", bool destroy = no_delete_after,
            std::string const& fail_msg = "invalid stream") {
     clear();
-    if (!s) throw_fail(filename, fail_msg);
+    if (s.bad()) throw_fail(filename, fail_msg);
     if (destroy)
       pointer.reset(&s);
     else

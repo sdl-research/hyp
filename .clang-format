@@ -54,5 +54,4 @@ SpaceBeforeAssignmentOperators: true
 ContinuationIndentWidth: 4
 CommentPragmas:  '^}}}?'
 SpaceBeforeParens: ControlStatements
-ForEachMacros:   [ forall, foreach, Q_FOREACH, BOOST_FOREACH ]
 ...

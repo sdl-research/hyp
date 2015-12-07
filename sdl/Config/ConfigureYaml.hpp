@@ -377,6 +377,7 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
   /** called by configure::conf_expr. */
   template <class Val>
   bool init_tree(configure::help_config help, Val* pval, Conf const& conf) const {
+    if (this->too_verbose(conf)) return false;
     return Base::init_tree(help, pval, conf);
   }
 
