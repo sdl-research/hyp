@@ -23,6 +23,8 @@
 
 namespace sdl {
 
+typedef char const* Pchar;
+
 // using namespace gsl;
 
 /// span<T> is like (T*, size_t). .data() and .size()

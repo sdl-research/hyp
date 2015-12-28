@@ -101,20 +101,23 @@ class BasicVocabularyImpl {
   */
   void freeze() { freezeEndIndex_ = size(); }
 
-  std::size_t countSinceFreeze() const { return symbols_.size() - freezeEndIndex_; }
+  SymInt countSinceFreeze() const { return size() - freezeEndIndex_; }
 
   /**
      remove all addSymbol since last freeze (if no freeze, then all of them
      except whatever was permanent on vocab creation e.g. from grammar db).
   */
   void clearSinceFreeze() {
-    assert(freezeEndIndex_ <= symbols_.size());
-    SDL_INFO(evict.Vocabulary,
-             "Shrinking " << (SymbolType)type_ << " vocabulary from " << symbols_.size() << " to "
-                          << freezeEndIndex_ << " symbols (these " << (symbols_.size() - freezeEndIndex_)
-                          << " removed symbols should all be novel words seen in inputs recently processed - "
-                             "if not, call IVocabulary::freeze() to keep your permanent symbols permanent");
-    symbols_.shrink(freezeEndIndex_);
+    SymInt sz = size();
+    assert(freezeEndIndex_ <= sz);
+    if (sz != freezeEndIndex_) {
+      SDL_INFO(evict.Vocabulary,
+               "Shrinking " << (SymbolType)type_ << " vocabulary from " << sz << " to "
+               << freezeEndIndex_ << " symbols (these " << (sz - freezeEndIndex_)
+               << " removed symbols should all be novel words seen in inputs recently processed - "
+               "if not, call IVocabulary::freeze() to keep your permanent symbols permanent");
+      symbols_.shrink(freezeEndIndex_);
+    }
   }
 
   /**

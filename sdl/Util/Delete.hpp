@@ -114,6 +114,15 @@ struct AutoFree {
     init(std::malloc(mallocBytes));
     return p_;
   }
+  void realloc(std::size_t buffersz) {
+    void* p2 = p_;
+    p_ = (void*)std::realloc(p2, buffersz);
+    if (!p_) {
+      std::free(p2);
+      throw std::bad_alloc();
+    }
+  }
+
   void init(void* malloced) { p_ = malloced; }
   void initCopying(void* data, std::size_t n) { std::memcpy(malloc(n), data, n); }
   void set(void* malloced) {

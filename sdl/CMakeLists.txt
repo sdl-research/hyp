@@ -230,6 +230,10 @@ endif()
 set(UTF8_ROOT "${SDL_SHARED_EXTERNALS_PATH}/utf8")
 set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.1")
 set(YAML_CPP_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/yaml-cpp-0.5.1")
+
+set(PCRE2_ROOT "${SDL_EXTERNALS_PATH}/libraries/pcre2-10.10")
+
+
 if(UNIX)
   set(BZIP2_ROOT "${SDL_EXTERNALS_PATH}/libraries/bzip2")
 endif()
@@ -372,59 +376,54 @@ if(USING_GCC)
   if(GCC_VERSION VERSION_LESS 5.0)
     message(FATAL_ERROR "${PROJECT_NAME} requires g++ 5 or greater (you have '${CMAKE_CXX_COMPILER}', version=${GCC_VERSION}.")
   else ()
+    message(STATUS "have gcc 5.0 or higher")
     set(SDL_HAVE_GCC_4_7 1)
-    message(STATUS "have gcc 4.7 or higher")
-    if(NOT GCC_VERSION VERSION_LESS 4.8)
-      message(STATUS "have gcc 4.8 or higher")
-      set(SDL_HAVE_GCC_4_8 1)
+    set(SDL_HAVE_GCC_4_8 1)
+    set(SDL_HAVE_GCC_5 1)
 
-      if(LINUX)
-        sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 0)
-      else()
-        sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 1)
-      endif()
-      #add_definitions(-Wextra) # enable only temporarily, since it's too much - see http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-      add_definitions(-fmax-errors=3) # quit after this many
-      #add_definitions(-Werror) #TODO: boost 1.49 breaks this - see SpellChecker.cpp (boost thread interruption point)
-      add_definitions(-Wno-unused-local-typedefs)
-      #TODO: 1.49 lexical_cast false-positives this and we can't push/pop around lexical_cast.hpp because error occurs where value is used. but it's a valuable warning. so we should upgrade boost then reenable this
-      add_definitions(-Wno-error=maybe-uninitialized)
-      add_definitions(-Wno-type-limits)
-      add_definitions(-Wno-maybe-uninitialized)
-    endif()
-    if(GCC_VERSION VERSION_LESS 4.9)
-      add_definitions("-fno-tree-vectorize") # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53533
+    if(LINUX)
+      sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 0)
     else()
-      set(SDL_HAVE_GCC_4_9 1)
-      # -static-libstdc++ (can't because tbb-4.3.1 is .so only)
+      sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 1)
+    endif()
+    #add_definitions(-Wextra) # enable only temporarily, since it's too much - see http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+    add_definitions(-fmax-errors=2) # quit after this many
+    #add_definitions(-Werror) #TODO: boost 1.49 breaks this - see SpellChecker.cpp (boost thread interruption point)
+    add_definitions(-Wno-unused-local-typedefs)
+    add_definitions(-Werror)
+    #TODO: 1.49 lexical_cast false-positives this and we can't push/pop around lexical_cast.hpp because error occurs where value is used. but it's a valuable warning. so we should upgrade boost then reenable this
+    add_definitions(-Wno-error=maybe-uninitialized)
+    add_definitions(-Wno-type-limits)
+    add_definitions(-Wno-maybe-uninitialized)
+    set(SDL_HAVE_GCC_4_9 1)
+    # -static-libstdc++ (can't because tbb-4.3.1 is .so only)
 
-      # sdl_exe_linker_flags("-static-libgcc") # (fails log4cxx)
+    # sdl_exe_linker_flags("-static-libgcc") # (fails log4cxx)
 
-      if (APPLE)
-        if(GCC_VERSION VERSION_GREATER 5.0)
-          # mac build isn't well supported currently (external lib builds weren't
-          # maintained for it), and it seems like `brew install boost` and `brew
-          # install gcc-5` don't understand _GLIBCXX_USE_CXX11_ABI, so likely a
-          # manual build of all libs is needed
-          include_directories(/usr/local/include/c++/5.1.0)
-          sdl_enable_cpp11()
-          sdl_exe_linker_flags("-static-libgcc")
-          sdl_exe_linker_flags("-static-libstdc++")
-          #-static
-          # in case you want to quiet ld 'different visibility settings' warnings (makes exe larger?):
-          # add_definitions("-fvisibility=hidden")
-          # add_definitions("-fvisibility-inlines-hidden")
-        endif()
-      else()
-        sdl_linker_flags("-lstdc++ -lm -fwhole-program")
+    if (APPLE)
+      if(GCC_VERSION VERSION_GREATER 5.0)
+        # mac build isn't well supported currently (external lib builds weren't
+        # maintained for it), and it seems like `brew install boost` and `brew
+        # install gcc-5` don't understand _GLIBCXX_USE_CXX11_ABI, so likely a
+        # manual build of all libs is needed
+        include_directories(/usr/local/include/c++/5.1.0)
         sdl_enable_cpp11()
-      endif()
-      #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs
-      sdl_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
-      if(OPEN_SOURCE_RELEASE)
         sdl_exe_linker_flags("-static-libgcc")
-      else()
+        sdl_exe_linker_flags("-static-libstdc++")
+        #-static
+        # in case you want to quiet ld 'different visibility settings' warnings (makes exe larger?):
+        # add_definitions("-fvisibility=hidden")
+        # add_definitions("-fvisibility-inlines-hidden")
       endif()
+    else()
+      sdl_linker_flags("-lstdc++ -lm -fwhole-program")
+      sdl_enable_cpp11()
+    endif()
+    #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs
+    sdl_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
+    if(OPEN_SOURCE_RELEASE)
+      sdl_exe_linker_flags("-static-libgcc")
+    else()
     endif()
   endif()
 elseif(USING_CLANG)
@@ -871,6 +870,14 @@ find_package(YamlCpp)
 message(STATUS "yaml-cpp library: ${YAML_CPP_LIBRARY}")
 message(STATUS "yaml-cpp include directory: ${YAML_CPP_INCLUDE_DIR}")
 
+find_package(PCRE2)
+message(STATUS "PCRE2 library: ${PCRE2_LIBRARY}")
+message(STATUS "PCRE2 include directory: ${PCRE2_INCLUDE_DIR}")
+
+if(WIN32)
+  add_definitions(-DPCRE2_STATIC=1)
+endif()
+
 find_package(ZLIB)
 MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
 sdl_quiet_compiled_setting(HAVE_ZLIB 1)
@@ -925,6 +932,9 @@ find_package(UTF8)
 # - "All" -- builds both libraries and links to the xmtShell and related binaries statically
 if(NOT DEFINED SDL_LIB_TYPE OR SDL_LIB_TYPE STREQUAL "Shared")
   set(SDL_LIB "xmt_shared")
+  if (WIN32)
+    sdl_compiled_setting(xmt_shared_EXPORTS 1)
+  endif()
 else()
   set(SDL_LIB "sdl_static")
 endif()
@@ -984,6 +994,7 @@ set(INDIRECT_UTIL_LIB_DEPENDENCIES
   ${INDIRECT_Vocabulary_LIB_DEPENDENCIES}
   Vocabulary
   ${BZIP2_LIBRARIES}
+  ${PCRE2_LIBRARY}
   )
 
 if (WIN32)
@@ -1017,6 +1028,7 @@ macro(sdl_util_includes)
   sdl_base_includes()
   include_directories(${ICU_INCLUDE_DIR})
   include_directories(${YAML_CPP_INCLUDE_DIR})
+  include_directories(${PCRE2_INCLUDE_DIR})
   include_directories(${TBB_INCLUDE_DIR})
   include_directories(${ZEROMQ_INCLUDE_DIR})
 endmacro()

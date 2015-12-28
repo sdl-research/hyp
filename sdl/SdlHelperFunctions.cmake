@@ -221,38 +221,76 @@ function(sdl_add_executable EXECUTABLE_NAME SOURCE_DIR)
   source_group("Template Definitions" FILES ${TEMPLATE_IMPLS})
   add_executable(${EXECUTABLE_NAME} ${ALL_SOURCE_FILES})
   sdl_msvc_links(${EXECUTABLE_NAME})
-endfunction(sdl_add_executable)
+endfunction()
+
 
 function(sdl_add_test_executable EXECUTABLE_NAME SOURCE_DIR)
   aux_source_directory("${SOURCE_DIR}/test" LW_PROJECT_TEST_FILES)
   file(GLOB_RECURSE TEST_INCS "test/*.hpp")
   add_executable(${EXECUTABLE_NAME} ${LW_PROJECT_TEST_FILES} ${TEST_INCS})
   #sdl_msvc_links(${EXECUTABLE_NAME})
-endfunction(sdl_add_test_executable)
+endfunction()
 
-# macro so we can grab sdl_UTEST_DIR var later ? seems to work as function.
-function(sdl_add_unit_test PROJECT_NAME TEST_EXE SUB_UNIT_TEST_NAME)
-  add_test(${PROJECT_NAME}-${SUB_UNIT_TEST_NAME} ${TEST_EXE} --catch_system_errors --detect_memory_leaks --log_level=test_suite --run_test=${SUB_UNIT_TEST_NAME} --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
-endfunction(sdl_add_unit_test)
+
+set(SDL_UNIT_TEST_FORMAT "--log_format=XML --log_level=warning --color-output=no")
 
 function(sdl_add_unit_tests PROJECT_NAME TEST_EXE)
-  add_test(${PROJECT_NAME} ${TEST_EXE} --catch_system_errors --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
-endfunction(sdl_add_unit_tests)
+  add_test(${PROJECT_NAME} ${TEST_EXE} --catch_system_errors ${SDL_UNIT_TEST_FORMAT} --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-testlog.xml)
+endfunction()
+
 
 function(sdl_unit_tests_executable EXECUTABLE_NAME SOURCE_DIR)
   sdl_add_test_executable(${EXECUTABLE_NAME} ${SOURCE_DIR})
   sdl_add_unit_tests(${EXECUTABLE_NAME}-all ${EXECUTABLE_NAME})
-endfunction(sdl_unit_tests_executable)
+endfunction()
 
-#TODO: smilar/redundant to sdl_project_test(s): sdl_unit_tests(${LINK_DEPENDENCIES} ${PROJECT_NAME})
+## this is the simplest way to add unit tests (where there's a single test/TestProjectName.cpp and a PROJECT_NAME lib)
+macro(sdl_project_test)
+  # Unit tests:
+  set(PROJECT_TEST_NAME "Test${PROJECT_NAME}")
+  sdl_add_test_executable(${PROJECT_TEST_NAME} ${PROJECT_SOURCE_DIR})
+  target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME} ${ARGN} ${LINK_DEPENDENCIES} ${SDL_BOOST_TEST_LIBRARIES})
+  sdl_add_unit_tests(${PROJECT_NAME} ${PROJECT_TEST_NAME})
+  enable_testing()
+endmacro()
+
+## when there are multiple test/Test*.cpp
+macro(sdl_project_tests)
+  sdl_tests(${PROJECT_NAME} ${ARGN})
+endmacro(sdl_project_tests)
+
+## like sdl_project_test but doesn't add PROJECT_NAME to link deps (for header only libs)
 macro(sdl_unit_tests)
   set(PROJECT_TEST_NAME "Test${PROJECT_NAME}")
   sdl_unit_tests_executable(${PROJECT_TEST_NAME} ${PROJECT_SOURCE_DIR})
-  #message(STATUS "sdl_unit_tests: Test${PROJECT_NAME} unit tests ${PROJECT_TEST_NAME} ${PROJECT_SOURCE_DIR}: libs = ${ARGN} (+SDL_BOOST_TEST_LIBRARIES)")
-  target_link_libraries(${PROJECT_TEST_NAME} ${ARGN} ${SDL_BOOST_TEST_LIBRARIES})
+  target_link_libraries(${PROJECT_TEST_NAME} ${ARGN} ${LINK_DEPENDENCIES} ${SDL_BOOST_TEST_LIBRARIES})
+  sdl_add_unit_tests(${PROJECT_NAME} ${PROJECT_TEST_NAME})
   enable_testing()
-endmacro(sdl_unit_tests)
+endmacro()
 
+macro(sdl_tests)
+  aux_source_directory("${PROJECT_SOURCE_DIR}/test" LW_PROJECT_TEST_FILES)
+  file(GLOB_RECURSE TEST_INCS "test/*.hpp")
+  set(PROJECT_TEST_NAME "Test${PROJECT_NAME}")
+
+  enable_testing()
+
+  foreach(tsrc ${LW_PROJECT_TEST_FILES})
+    GET_FILENAME_COMPONENT(texe ${tsrc} NAME)
+    STRING(REGEX REPLACE ".cpp$" "" texe ${texe})
+    STRING(REGEX REPLACE "^Test" "" tname ${texe})
+    add_executable(${texe} ${tsrc} ${TEST_INCS} ${PROJECT_SOURCE_DIR})
+    target_link_libraries(${texe} ${SDL_BOOST_TEST_LIBRARIES} ${LINK_DEPENDENCIES} ${UTIL_LIBRARIES} ${ARGN})
+    if(1)
+      add_test(${PROJECT_NAME}-${tname} ${texe} "--catch_system_errors --detect_memory_leaks ${SDL_UNIT_TEST_FORMAT} --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-${tname}.xml")
+     else()
+       add_test(${PROJECT_NAME}-${tname} ${texe} "--catch_system_errors --detect_memory_leaks  --run_test=${tname} ${SDL_UNIT_TEST_FORMAT --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-${tname}.xml")
+     endif()
+    # sdl_msvc_links(${PROJECT_NAME}-${tname})
+  endforeach(tsrc)
+  #sdl_msvc_links(${PROJECT_TEST_NAME})
+  #Set Project & TestProject properties.
+endmacro()
 
 macro(sdl_msvc_links NAME)
   if (WIN32)
@@ -310,42 +348,6 @@ macro(sdl_libpath LIB)
   message(STATUS "sdl_libpath ${LIB} = ${RPATHDIR}")
   sdl_rpath(${RPATHDIR})
 endmacro(sdl_libpath)
-
-## this is the simplest way to add unit tests (where there's a single test/TestProjectName.cpp)
-macro(sdl_project_test)
-  # Unit tests:
-  set(PROJECT_TEST_NAME "Test${PROJECT_NAME}")
-  sdl_add_test_executable(${PROJECT_TEST_NAME} ${PROJECT_SOURCE_DIR})
-  target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME} ${LINK_DEPENDENCIES} ${SDL_BOOST_TEST_LIBRARIES})
-  enable_testing()
-  sdl_add_unit_tests(${PROJECT_NAME} ${PROJECT_TEST_NAME} ${ARGN})
-endmacro(sdl_project_test)
-
-macro(sdl_tests)
-  aux_source_directory("${PROJECT_SOURCE_DIR}/test" LW_PROJECT_TEST_FILES)
-  file(GLOB_RECURSE TEST_INCS "test/*.hpp")
-  set(PROJECT_TEST_NAME "Test${PROJECT_NAME}")
-
-  enable_testing()
-
-  foreach(tsrc ${LW_PROJECT_TEST_FILES})
-    GET_FILENAME_COMPONENT(texe ${tsrc} NAME)
-    STRING(REGEX REPLACE ".cpp$" "" texe ${texe})
-    STRING(REGEX REPLACE "^Test" "" tname ${texe})
-    add_executable(${texe} ${tsrc} ${TEST_INCS} ${PROJECT_SOURCE_DIR})
-    target_link_libraries(${texe} ${SDL_BOOST_TEST_LIBRARIES} ${LINK_DEPENDENCIES} ${UTIL_LIBRARIES} ${ARGN})
-    #TODO: use sdl_add_unit_test macro?
-    add_test(${PROJECT_NAME}-${tname} ${texe} "--catch_system_errors --detect_memory_leaks --log_level=test_suite --log_format=XML --log_sink=${sdl_UTEST_DIR}/${PROJECT_NAME}-${tname}.xml")
-    # sdl_msvc_links(${PROJECT_NAME}-${tname})
-  endforeach(tsrc)
-  #sdl_msvc_links(${PROJECT_TEST_NAME})
-  #Set Project & TestProject properties.
-endmacro(sdl_tests)
-
-## when there are multiple test/Test*.cpp
-macro(sdl_project_tests)
-  sdl_tests(${PROJECT_NAME} ${ARGN})
-endmacro(sdl_project_tests)
 
 function(sdl_maven_project TARGET_NAME BINARY_DIR)
   set(work_dir ${BINARY_DIR}/target)

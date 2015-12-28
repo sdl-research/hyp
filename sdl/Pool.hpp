@@ -10,7 +10,10 @@
 // limitations under the License.
 /** \file
 
-    Pool pool(allocsz); pool.free(pool.malloc())
+    ChunkPool pool(allocsz); pool.free(pool.malloc())
+
+    object_pool<T> tpool; // will call destructors for all objs that weren't already freed
+    T *x = tpool.construct(...); tpool.destroy(x); // free x early
 */
 
 #ifndef POOL_GRAEHL_2015_10_21_HPP

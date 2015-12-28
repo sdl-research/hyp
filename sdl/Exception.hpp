@@ -94,7 +94,10 @@ VERBOSE_EXCEPTION_DECLARE(UnknownModuleTypeException)
 VERBOSE_EXCEPTION_DECLARE(TrainableCapitalizerModuleException)
 VERBOSE_EXCEPTION_DECLARE(LowerCaserModuleException)
 
-
+VERBOSE_EXCEPTION_DECLARE(PcreRegexException)
+VERBOSE_EXCEPTION_DECLARE(PcreRegexMatchDataTooSmallException)
+VERBOSE_EXCEPTION_DECLARE(UDIRuleException)
+VERBOSE_EXCEPTION_DECLARE(UDIRuleSetException)
 }
 
 #endif
