@@ -14,8 +14,8 @@
   NoSymbol, are epsilon).
 */
 
-#include <sdl/Hypergraph/HypergraphBase.hpp>
 #include <sdl/Hypergraph/EpsilonStates.hpp>
+#include <sdl/Hypergraph/HypergraphBase.hpp>
 
 namespace sdl {
 namespace Hypergraph {

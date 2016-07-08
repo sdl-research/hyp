@@ -18,19 +18,18 @@
 #pragma once
 
 #if HAVE_OPENFST
-#include <sdl/Hypergraph/UseOpenFst.hpp>
 #include <sdl/Hypergraph/ToOpenFst.hpp>
 #include <sdl/Hypergraph/ToReplaceFst.hpp>
+#include <sdl/Hypergraph/UseOpenFst.hpp>
 #include <fst/script/draw.h>
 #include <fst/script/print.h>
 #include <fst/script/prune.h>
 #endif
 
 #include <sdl/Hypergraph/HypergraphDrawer.hpp>
-#include <graehl/shared/fileargs.hpp>
-
-#include <sdl/Util/Constants.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Util/Constants.hpp>
+#include <graehl/shared/fileargs.hpp>
 #include <graehl/shared/is_null.hpp>
 
 namespace sdl {

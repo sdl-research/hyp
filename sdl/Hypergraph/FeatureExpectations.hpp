@@ -18,22 +18,20 @@
 #define HYP__HYPERGRAPH_FEATUREEXPECTATIONS_HPP
 #pragma once
 
-#include <cassert>
-#include <cmath>
-#include <boost/ptr_container/ptr_vector.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/CastHypergraph.hpp>
 #include <sdl/Hypergraph/FeatureWeightTpl.hpp>
-#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/OutsideAlgorithm.hpp>
-#include <sdl/Hypergraph/CastHypergraph.hpp>
-
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
+#include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/LogMath.hpp>
 #include <sdl/Util/Map.hpp>
-#include <sdl/Util/IsDebugBuild.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <cassert>
+#include <cmath>
 
 namespace sdl {
 namespace Hypergraph {
@@ -95,7 +93,7 @@ struct AccumulateExpectedValuesFct {
     typedef typename Map::value_type MapValueType;
     Util::NeglogPlusFct<FloatT> logPlusBy;
     for (MapValueType const& idValue : arc->weight_)
-      updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight-log(idValue.second));
+      updateBy(logPlusBy, *pResultMap_, idValue.first, posteriorArcWeight - log(idValue.second));
     // times prob (which was in linear space, not -log,  because of TakeMin aka FeatureWeight)
     if (Util::isDebugBuild()) printMapInfo(*pResultMap_);
   }

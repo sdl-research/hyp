@@ -114,10 +114,10 @@
 
 /// as always for macros expanding an argument twice, use fn calls
 /// bit_rotate_left64 etc if arg x is not a simple value (e.g. side effects)
-#define GRAEHL_ROTL32(x, shift) ((x) << shift) | ((x) >> (32-shift))
-#define GRAEHL_ROTL64(x, shift) ((x) << shift) | ((x) >> (64-shift))
-#define GRAEHL_ROTR32(x, shift) ((x) >> shift) | ((x) << (32-shift))
-#define GRAEHL_ROTR64(x, shift) ((x) >> shift) | ((x) << (64-shift))
+#define GRAEHL_ROTL32(x, shift) ((x) << shift) | ((x) >> (32 - shift))
+#define GRAEHL_ROTL64(x, shift) ((x) << shift) | ((x) >> (64 - shift))
+#define GRAEHL_ROTR32(x, shift) ((x) >> shift) | ((x) << (32 - shift))
+#define GRAEHL_ROTR64(x, shift) ((x) >> shift) | ((x) << (64 - shift))
 #define GRAEHL_BIG_CONSTANT(x) (x##LLU)
 #endif
 
@@ -135,8 +135,8 @@
 #endif
 
 #include <cassert>
-#include <limits>
 #include <cstring>
+#include <limits>
 
 namespace graehl {
 
@@ -163,7 +163,7 @@ using boost::uint64_t;
 #endif
 
 
-GRAEHL_FORCE_INLINE uint32_t fetch_uint32(const char* p) {
+GRAEHL_FORCE_INLINE uint32_t fetch_uint32(char const* p) {
 #if GRAEHL_FETCH_UNALIGNED_MEMCPY
   uint32_t x;
   std::memcpy(&x, p, sizeof(x));
@@ -173,7 +173,7 @@ GRAEHL_FORCE_INLINE uint32_t fetch_uint32(const char* p) {
 #endif
 }
 
-GRAEHL_FORCE_INLINE uint64_t fetch_uint64(const char* p) {
+GRAEHL_FORCE_INLINE uint64_t fetch_uint64(char const* p) {
 #if GRAEHL_FETCH_UNALIGNED_MEMCPY
   uint64_t x;
   std::memcpy(&x, p, sizeof(x));
@@ -213,7 +213,7 @@ inline uint32_t next_power_of_2(uint32_t x) {
   if (!x) return 1;
 #ifndef HAVE_BUILTIN_CLZ
   assert(sizeof(x) == sizeof(unsigned));
-  return 1u << (32-__builtin_clz(x-1));
+  return 1u << (32 - __builtin_clz(x - 1));
 #else
   assert(x <= (1 << 30));
   --x;
@@ -233,7 +233,7 @@ inline uint64_t next_power_of_2(uint64_t x) {
   if (!x) return 1;
 #if HAVE_BUILTIN_CLZ
   assert(sizeof(x) == sizeof(unsigned long));
-  return 1u << (64-__builtin_clzl(x-1));
+  return (uint64_t)1 << (64 - __builtin_clzl(x - 1));
 #else
   assert(x <= (1ULL << 60));
   --x;
@@ -252,8 +252,8 @@ inline uint64_t next_power_of_2(uint64_t x) {
 #if GRAEHL_CPP11
 /// slow but pure functional for constexpr. defaulted parameter is for impl only
 inline constexpr uint64_t ceil_log2_const(uint64_t x, bool exact = true) {
-  return (x == 0) ? (1 / x) : (x == 1) ? (exact ? 0 : 1)
-                                       : 1 + ceil_log2_const(x >> 1, ((x & 1) == 1) ? false : exact);
+  return (x == 0) ? (1 / x)
+                  : (x == 1) ? (exact ? 0 : 1) : 1 + ceil_log2_const(x >> 1, ((x & 1) == 1) ? false : exact);
 }
 
 #if 0
@@ -310,7 +310,7 @@ struct signed_for_int {
     typedef ut unsigned_t;                                                                              \
     typedef it signed_t;                                                                                \
     typedef t original_t;                                                                               \
-    enum { toa_bufsize = 3 + std::numeric_limits<t>::digits10, toa_bufsize_minus_1 = toa_bufsize-1 }; \
+    enum { toa_bufsize = 3 + std::numeric_limits<t>::digits10, toa_bufsize_minus_1 = toa_bufsize - 1 }; \
   };
 
 // toa_bufsize will hold enough chars for a c string converting to sign, digits (for both signed and unsigned

@@ -32,10 +32,18 @@
 #define HYP__HYPERGRAPH_TOKEN_WEIGHT_HPP
 #pragma once
 
-#include <sdl/IntTypes.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/Compare.hpp>
+#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/PrintRange.hpp>
-
+#include <sdl/IVocabulary-fwd.hpp>
+#include <sdl/IntTypes.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
+#include <boost/ptr_container/ptr_set.hpp>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -44,19 +52,6 @@
 #include <map>
 #include <utility>
 #include <vector>
-
-#include <boost/cstdint.hpp>
-#include <boost/ptr_container/ptr_set.hpp>
-#include <boost/iterator/indirect_iterator.hpp>
-
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Compare.hpp>
-
-#include <sdl/IVocabulary-fwd.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
 
 namespace sdl {
 namespace Hypergraph {

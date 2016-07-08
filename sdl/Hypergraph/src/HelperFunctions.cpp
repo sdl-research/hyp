@@ -9,12 +9,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-#include <sstream>
-
+#include <sdl/Hypergraph/ArcParserFct.hpp>
 #include <sdl/Hypergraph/HelperFunctions.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sstream>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {

@@ -18,14 +18,15 @@
 #define TOKENS_JG2013130_HPP
 #pragma once
 
-#include <vector>
-#include <sdl/Syms.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Util/Add.hpp>
-#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/FeatureIdRange.hpp>
-#include <sdl/Span.hpp>
 #include <sdl/Hypergraph/FeatureWeightUtil.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/Add.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Span.hpp>
+#include <sdl/Syms.hpp>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -87,7 +88,7 @@ struct Tokens {
 
   void insert(Sym symId, FeatureId featId) {
     assert(ids.contains(featId));
-    FeatureId const index = featId-ids.begin;
+    FeatureId const index = featId - ids.begin;
     symbols.set_grow(index, symId, NoSymbol);
   }
 

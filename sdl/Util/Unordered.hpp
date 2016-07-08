@@ -27,21 +27,20 @@
 #include <graehl/shared/warning_push.h>
 GCC_DIAG_IGNORE(maybe-uninitialized)
 
-#include <boost/functional/hash/hash.hpp>
-#include <unordered_set>
-#include <unordered_map>
-#include <sparsehash/dense_hash_map>
-#include <sparsehash/dense_hash_set>
-
-#include <iterator>
-#include <cstdlib>
-#include <cstddef>
 #include <sdl/Util/Compare.hpp>
 #include <sdl/Util/Contains.hpp>
-#include <sdl/Util/Map.hpp>
-#include <cmath>
 #include <sdl/Util/HashValue.hpp>
+#include <sdl/Util/Map.hpp>
+#include <boost/functional/hash/hash.hpp>
 #include <graehl/shared/farmhash.hpp>
+#include <sparsehash/dense_hash_map>
+#include <sparsehash/dense_hash_set>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <iterator>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace sdl {
 
@@ -340,8 +339,6 @@ void visitUnordered(Unordered& unordered, Visitor const& v) {
 }
 
 #include <graehl/shared/warning_pop.h>
-
-
 
 
 #endif

@@ -12,16 +12,14 @@
  * @file Hypergraph demo C++ code
  */
 
-#include <iostream>
-#include <stdexcept>
-
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
+#include <sdl/Hypergraph/HelperFunctions.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/InsideAlgorithm.hpp>
-#include <sdl/Hypergraph/HelperFunctions.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <iostream>
+#include <stdexcept>
 
 using namespace sdl;
 using namespace sdl::Hypergraph;

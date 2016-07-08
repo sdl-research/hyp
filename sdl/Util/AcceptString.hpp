@@ -24,16 +24,16 @@
 #define ACCEPTSTRING_JG_2013_12_05_HPP
 #pragma once
 
+#include <sdl/Config/Named.hpp>
+#include <sdl/Util/Fields.hpp>
+#include <sdl/Util/IcuUtil.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <sdl/Features.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Span.hpp>
+#include <sdl/Syms.hpp>
 #include <string>
 #include <vector>
-#include <sdl/Util/Fields.hpp>
-#include <sdl/Features.hpp>
-#include <sdl/Span.hpp>
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Syms.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Util/IcuUtil.hpp>
-#include <sdl/Config/Named.hpp>
 
 namespace sdl {
 namespace Util {

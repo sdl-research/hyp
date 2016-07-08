@@ -44,7 +44,6 @@
 #endif
 
 #include <sdl/SharedPtr.hpp>
-
 #include <graehl/shared/intrusive_refcount.hpp>
 
 namespace sdl {

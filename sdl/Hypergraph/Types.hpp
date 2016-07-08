@@ -17,19 +17,17 @@
 #define HYP__HYPERGRAPH_TYPES_HPP
 #pragma once
 
-#include <utility>
-#include <cstddef>
-#include <vector>
-#include <limits>
-#include <iostream>
-#include <map>
-#include <cassert>
-
-#include <sdl/Types.hpp>
-
-#include <sdl/Features.hpp>
 #include <sdl/Util/BitSet.hpp>
+#include <sdl/Features.hpp>
+#include <sdl/Types.hpp>
 #include <boost/static_assert.hpp>
+#include <cassert>
+#include <cstddef>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <utility>
+#include <vector>
 
 #ifndef SDL_64BIT_FEATURE_ID
 #define SDL_64BIT_FEATURE_ID 0
@@ -53,8 +51,8 @@
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
-#include <boost/config.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <boost/config.hpp>
 #include <boost/integer_traits.hpp>
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -65,12 +63,11 @@
 #pragma warning(pop)
 #endif
 
-#include <boost/range/iterator_range.hpp>
-
-#include <sdl/Syms.hpp>
-#include <sdl/IVocabulary-fwd.hpp>
 #include <sdl/Util/SmallVector.hpp>
 #include <sdl/Util/Unordered.hpp>
+#include <sdl/IVocabulary-fwd.hpp>
+#include <sdl/Syms.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <graehl/shared/is_null.hpp>
 
 namespace sdl {
@@ -138,7 +135,7 @@ static_assert(sizeof(StateSet::size_type) >= sizeof(StateId), "StateSet must hol
 
 static constexpr ArcId kNoArc = boost::integer_traits<ArcId>::const_max;
 static constexpr StateId kNoState = boost::integer_traits<StateId>::const_max;
-static constexpr StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max-1;
+static constexpr StateId kImpossibleNotNoState = boost::integer_traits<StateId>::const_max - 1;
 
 using ::set_null;
 

@@ -8,20 +8,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <sdl/Util/Debug.hpp>
+#include <sdl/Util/DefaultPrintRange.hpp>
+#include <sdl/Util/FindFile.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <boost/filesystem/operations.hpp>  // exists
 #include <algorithm>
 #include <fstream>
 #include <istream>
 #include <iterator>
 #include <stdexcept>
 #include <string>
-
-#include <boost/filesystem/operations.hpp>  // exists
-
-#include <sdl/Util/Debug.hpp>
-#include <sdl/Util/FindFile.hpp>
-#include <sdl/Util/LogHelper.hpp>
-
-#include <sdl/Util/DefaultPrintRange.hpp>
 
 namespace sdl {
 namespace Util {
@@ -120,8 +117,6 @@ void SearchDirs::appendParent(std::string const& fileInParent) {
   UTIL_DBG_MSG(1, "SearchDirs: appending dirname(" << fileInParent << ") = " << parent);
   append(parent);
 }
-
-// SearchDirs findFile;
 
 
 }}

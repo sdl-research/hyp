@@ -1,7 +1,7 @@
 unset(LBFGS_INCLUDE_DIR CACHE)
-find_path(LBFGS_INCLUDE_DIR lbfgs.h ${LBFGS_ROOT}/include NO_DEFAULT_PATH)
+sdl_find_path(LBFGS_INCLUDE_DIR lbfgs.h ${LBFGS_ROOT}/include)
 unset(LBFGS_LIB CACHE)
-find_library(LBFGS_LIB NAMES lbfgs PATHS ${LBFGS_ROOT}/lib NO_DEFAULT_PATH)
+sdl_find_library(LBFGS_LIB NAMES lbfgs PATHS ${LBFGS_ROOT}/lib)
 
 if (LBFGS_INCLUDE_DIR)
   SET(LBFGS_FOUND 1)

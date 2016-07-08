@@ -28,18 +28,14 @@
 #pragma once
 
 #if HAVE_OPENFST
-#include <sdl/Hypergraph/UseOpenFst.hpp>
-#include <sdl/LexicalCast.hpp>
-
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-
-
+#include <sdl/Hypergraph/UseOpenFst.hpp>
 #include <sdl/Util/LogHelper.hpp>
-
-#include <utility>
+#include <sdl/LexicalCast.hpp>
 #include <queue>
 #include <set>
+#include <utility>
 
 namespace sdl {
 namespace Hypergraph {
@@ -50,9 +46,7 @@ namespace Hypergraph {
 */
 template <class FstArc, class HgArc>
 fst::ReplaceFst<FstArc>* toReplaceFst(IHypergraph<HgArc> const& hg, fst::SymbolTable* fsyms) {
-  if (!hg.storesInArcs()) {
-    SDL_THROW_LOG(Hypergraph.ToReplaceFst, std::runtime_error, "Needs incoming arcs");
-  }
+  if (!hg.storesInArcs()) SDL_THROW_LOG(Hypergraph.ToReplaceFst, std::runtime_error, "Needs incoming arcs");
   std::queue<StateId> queue;
   std::set<StateId> onQueue;
 
@@ -135,8 +129,6 @@ std::pair<fst::ReplaceFst<FstArc>*, fst::SymbolTable*> toReplaceFst(IHypergraph<
 }
 
 #endif  // if HAVE_OPENFST
-
-
 
 
 #endif

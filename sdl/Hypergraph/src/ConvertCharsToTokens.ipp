@@ -16,30 +16,26 @@
     \author Markus Dreyer, Jonathan Graehl
 */
 
-#include <set>
-#include <vector>
-#include <algorithm>
-
-#include <sdl/Exception.hpp>
-#include <sdl/Sym.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-
-
-#include <sdl/Util/LogHelper.hpp>
-
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/TokenWeight.hpp>
-#include <sdl/Hypergraph/TokenWeightMapper.hpp>
+#include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/MapHypergraph.hpp>
 #include <sdl/Hypergraph/StatesTraversal.hpp>
-#include <sdl/Hypergraph/InsideAlgorithm.hpp>
-#include <sdl/Util/StringBuilder.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <sdl/Hypergraph/TokenWeight.hpp>
+#include <sdl/Hypergraph/TokenWeightMapper.hpp>
 #include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Util/String.hpp>
 #include <sdl/Vocabulary/Glue.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/String.hpp>
+#include <sdl/Util/StringBuilder.hpp>
+#include <sdl/Exception.hpp>
+#include <sdl/Sym.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <algorithm>
+#include <set>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -448,7 +444,7 @@ class AssignTokenWeight : public StateToWeight<TW> {
   IHypergraph<Arc> const& hg_;
   IVocabulary* invoc_;
   IVocabularyPtr outvoc_;  // output voc
-  const std::string glueSymbol_;
+  std::string const glueSymbol_;
   const std::size_t glueSymbolLen_;
 };
 }

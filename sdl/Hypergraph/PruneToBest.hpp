@@ -26,12 +26,12 @@
 
 
 #include <sdl/Hypergraph/BestPath.hpp>
+#include <sdl/Hypergraph/OutsideCosts.hpp>
 #include <sdl/Hypergraph/Prune.hpp>
-#include <sdl/Util/PointerWithFlag.hpp>
 #include <sdl/Hypergraph/PruneEpsilon.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Util/Delete.hpp>
-#include <sdl/Hypergraph/OutsideCosts.hpp>
+#include <sdl/Util/PointerWithFlag.hpp>
 #include <sdl/Util/TopK.hpp>
 
 namespace sdl {
@@ -98,13 +98,11 @@ struct PruneToBestOptions : PruneToNbestOptions, PruneOptions, BestPathOptions {
   static char const* type() { return "PruneToBest"; }
   PruneToBestOptions(unsigned defaultNbest = 1) : PruneToNbestOptions(defaultNbest) { init(); }
   template <class Opt>
-  PruneToBestOptions(unsigned defaultNbest, Opt const& opt)
-      : PruneToNbestOptions(defaultNbest, opt) {
+  PruneToBestOptions(unsigned defaultNbest, Opt const& opt) : PruneToNbestOptions(defaultNbest, opt) {
     init();
   }
   template <class Opt>
-  PruneToBestOptions(Opt const& opt, bool, bool)
-      : PruneToNbestOptions(opt) {
+  PruneToBestOptions(Opt const& opt, bool, bool) : PruneToNbestOptions(opt) {
     init();
   }
 
@@ -312,8 +310,7 @@ struct PruneToBest : RestrictPrepare<PruneToBest<A>, A> {
   }
 
   template <class Opt>
-  PruneToBest(Opt const& opt)
-      : opt(opt) {}
+  PruneToBest(Opt const& opt) : opt(opt) {}
   PruneToBest(PruneToBest const& o) = delete;
 
   bool needs(IHypergraph<A>& hg) const { return needsRestrict(hg); }

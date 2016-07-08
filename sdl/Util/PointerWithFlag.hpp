@@ -25,9 +25,9 @@
 #pragma once
 
 
-#include <stdint.h>  // intptr_t is here until C++11
-#include <climits>
 #include <cassert>
+#include <climits>
+#include <stdint.h>  // intptr_t is here until C++11
 
 namespace sdl {
 namespace Util {

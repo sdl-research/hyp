@@ -12,8 +12,8 @@
 #define HYP__HYPERGRAPH_WRITEOPENFSTFORMAT_HPP
 #pragma once
 
-#include <ostream>
 #include <sdl/Hypergraph/IHypergraph.hpp>
+#include <ostream>
 
 namespace sdl {
 namespace Hypergraph {
@@ -26,8 +26,9 @@ struct ArcWriter {
 
   void operator()(Arc const* arc) const {
     LabelPair l = hg_.getFsmLabelPair(*arc);
-    out_ << arc->getTail(0) << " " << arc->head() << " " << hg_.getVocabulary()->str(input(l)) << " "
-         << hg_.getVocabulary()->str(output(l)) << " " << arc->weight() << '\n';
+    IVocabulary& voc = *hg_.vocab();
+    out_ << arc->getTail(0) << " " << arc->head() << " " << voc.str(input(l)) << " " << voc.str(output(l))
+         << " " << arc->weight() << '\n';
   }
 
   std::ostream& out_;

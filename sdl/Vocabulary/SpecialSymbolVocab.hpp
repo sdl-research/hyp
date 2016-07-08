@@ -32,14 +32,7 @@ namespace Vocabulary {
 */
 class SpecialSymbolVocab {
  public:
-  explicit SpecialSymbolVocab() { init(); }
-
-  /**
-     idempotent, but should be called before threads start. this happens in
-     static initialization (in initializing the SpecialSymbolsList.ipp constant
-     symbols)
-  */
-  void init();
+  static SpecialSymbolVocab& getInstance();
 
   virtual ~SpecialSymbolVocab();
 
@@ -58,23 +51,37 @@ class SpecialSymbolVocab {
 
   unsigned size() const { return vocab->size(); }
 
-  static SpecialSymbolVocab gInstance_;
+  // Disallowed because singleton:
+  SpecialSymbolVocab(SpecialSymbolVocab const&) = delete;  // Copy construct
+  SpecialSymbolVocab(SpecialSymbolVocab&&) = delete;  // Move construct
+  SpecialSymbolVocab& operator=(SpecialSymbolVocab const&) = delete;  // Copy assign
+  SpecialSymbolVocab& operator=(SpecialSymbolVocab&&) = delete;  // Move assign
 
  private:
+  // Singleton: make constructor private
+  explicit SpecialSymbolVocab();
+
   typedef BasicVocabularyImpl* BasicVocabPtr;
   // pimpl for safe static init (single threaded at this point) - note
   // specialSymbolsForceInit WILL be called in static init or else bad things.
-  BasicVocabPtr vocab;
+  BasicVocabPtr vocab = NULL;
 };
 
 /// may be used after static initialization
 // extern SpecialSymbolVocab specialSymbols;
 inline SpecialSymbolVocab& specialSymbols() {
-  return SpecialSymbolVocab::gInstance_;
+  return SpecialSymbolVocab::getInstance();
 }
 
 /// to be used during static initialization
+#define SDL_SPECIAL_SYMBOL_FORCE_INIT_CPP 1
+#if SDL_SPECIAL_SYMBOL_FORCE_INIT_CPP
 SpecialSymbolVocab& specialSymbolsForceInit();
+#else
+inline SpecialSymbolVocab& specialSymbolsForceInit() {
+  return SpecialSymbolVocab::getInstance();
+}
+#endif
 
 
 }}

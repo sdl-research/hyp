@@ -21,9 +21,9 @@
 #define UNINITIALIZEDARRAY_JG_2013_07_09_HPP
 #pragma once
 
-#include <memory>
-#include <cstdlib>
 #include <sdl/Pool/pool.hpp>
+#include <cstdlib>
+#include <memory>
 
 namespace sdl {
 namespace Util {

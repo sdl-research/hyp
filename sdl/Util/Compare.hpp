@@ -17,9 +17,9 @@
 #define SDL_UTIL_COMPARE_H
 #pragma once
 
-#include <cstring>
 #include <sdl/SharedPtr.hpp>
 #include <cstdint>
+#include <cstring>
 
 namespace sdl {
 namespace Util {

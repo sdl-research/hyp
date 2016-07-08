@@ -30,6 +30,3 @@ struct HypComplement : TransformMain<HypComplement> {  // note base class CRTP (
 }
 
 HYPERGRAPH_NAMED_MAIN(Complement)
-
-
-

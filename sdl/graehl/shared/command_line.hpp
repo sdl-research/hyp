@@ -21,8 +21,8 @@
 #define GRAEHL__SHARED__COMMAND_LINE_HPP
 #pragma once
 
-#include <graehl/shared/word_spacer.hpp>
 #include <graehl/shared/shell_escape.hpp>
+#include <graehl/shared/word_spacer.hpp>
 #include <sstream>
 #include <vector>
 
@@ -34,7 +34,7 @@
 namespace graehl {
 
 template <class O, class Argv>
-O& print_command_line(O& out, int argc, Argv const& argv, const char* header = "### COMMAND LINE:\n") {
+O& print_command_line(O& out, int argc, Argv const& argv, char const* header = "### COMMAND LINE:\n") {
   if (header) out << header;
   graehl::word_spacer_c<' '> sep;
   for (int i = 0; i < argc; ++i) {
@@ -47,7 +47,7 @@ O& print_command_line(O& out, int argc, Argv const& argv, const char* header = "
 
 
 template <class Argv>
-inline std::string get_command_line(int argc, Argv const& argv, const char* header = "COMMAND LINE:\n") {
+inline std::string get_command_line(int argc, Argv const& argv, char const* header = "COMMAND LINE:\n") {
   std::ostringstream os;
   print_command_line(os, argc, argv, header);
   return os.str();

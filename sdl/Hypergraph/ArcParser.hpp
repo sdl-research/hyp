@@ -12,11 +12,9 @@
 #define HYP__HYPERGRAPH_ARCPARSER_HPP
 #pragma once
 
-#include <string>
-
-#include <sdl/SharedPtr.hpp>
-
 #include <sdl/Hypergraph/ParserUtil.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {

@@ -24,7 +24,6 @@
 #define STRINGBUILDER_JG2012711_HPP
 #pragma once
 
-#include <graehl/shared/string_to.hpp>
 #include <graehl/shared/string_builder.hpp>
 
 namespace sdl {

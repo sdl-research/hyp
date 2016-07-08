@@ -20,11 +20,10 @@
 #define PRIORITYQUEUE_JG20121222_HPP
 #pragma once
 
-#include <vector>
-
 #include <graehl/shared/d_ary_heap.hpp>
 #include <graehl/shared/priority_queue.hpp>
 #include <graehl/shared/property.hpp>
+#include <vector>
 
 namespace sdl {
 namespace Util {

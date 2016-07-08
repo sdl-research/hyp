@@ -20,8 +20,8 @@
 #define POOL_GRAEHL_2015_10_21_HPP
 #pragma once
 
-#include <sdl/Pool-fwd.hpp>
 #include <sdl/Pool/pool.hpp>
+#include <sdl/Pool-fwd.hpp>
 #include <utility>
 
 namespace sdl {
@@ -81,8 +81,7 @@ struct Destroy {
 template <class T>
 struct Constructed : Destroy<T> {
   template <class... Args>
-  Constructed(T* p = 0, Args&&... args)
-      : Destroy<T>() {
+  Constructed(T* p = 0, Args&&... args) : Destroy<T>() {
     new (p) T(std::forward<Args>(args)...);
     this->p_ = p;  // exception safety for T ctor
   }
@@ -119,8 +118,7 @@ struct PoolDelete {
 template <class T>
 struct PoolConstructed : PoolDelete<T> {
   template <class... Args>
-  PoolConstructed(ChunkPool& pool, Args&&... args)
-      : PoolDelete<T>(pool) {
+  PoolConstructed(ChunkPool& pool, Args&&... args) : PoolDelete<T>(pool) {
     assert(pool.get_requested_size() == sizeof(T));
     T* p = pool.malloc();
     new (p) T(std::forward<Args>(args)...);

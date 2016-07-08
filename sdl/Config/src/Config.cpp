@@ -8,21 +8,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <fstream>
-#include <streambuf>
-#include <string>
-
-
-#include <graehl/shared/split.hpp>
-#include <graehl/shared/from_strings.hpp>
 #include <sdl/Config/Config.hpp>
 #include <sdl/Config/YAMLConfigProcessor.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Warn.hpp>
 #include <sdl/Exception.hpp>
+#include <graehl/shared/from_strings.hpp>
+#include <graehl/shared/split.hpp>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <streambuf>
+#include <string>
 #if SDL_ENCRYPT
 #include <sdl/Encrypt/Encrypt.hpp>
 #endif
@@ -75,9 +73,9 @@ void YamlConfigurable::apply(ConfigNode const& configNode, bool showEffective, i
 }
 
 void YamlConfigurable::logEffective(int verbosity) const {
-  LOG_INFO_NAMESTR(SDL_LOG_PREFIX_STR + logname(), "effective configuration for "
-                                                       << *this << "\n "
-                                                       << YamlConfigurableEffective(*this, verbosity));
+  RELEASE_LOG_DEBUG_NAMESTR(SDL_LOG_PREFIX_STR + logname(), "effective configuration for "
+                                                                << *this << "\n "
+                                                                << YamlConfigurableEffective(*this, verbosity));
   logEffectiveOnce_.finishNonAtomic();
 }
 

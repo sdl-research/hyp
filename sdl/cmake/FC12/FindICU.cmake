@@ -15,67 +15,67 @@
 
 # Look for the header file.
 unset(ICU_INCLUDE_DIR CACHE)
-find_path(
+sdl_find_path(
   ICU_INCLUDE_DIR
   NAMES unicode/utypes.h
   PATHS ${ICU_ROOT}/include
   DOC "Include directory for the ICU library"
-  NO_DEFAULT_PATH)
+  )
 
 # Look for the library.
 unset(ICU_LIBRARY CACHE)
-find_library(
+sdl_find_library(
   ICU_LIBRARY
   NAMES icuuc
   PATHS ${ICU_ROOT}/lib
   DOC "Libraries to link against for the common parts of ICU"
-  NO_DEFAULT_PATH)
+  )
 set(ICU_LIBRARY optimized ${ICU_LIBRARY} debug ${ICU_LIBRARY})
 
 unset(ICUIO_LIBRARY CACHE)
-find_library(
+sdl_find_library(
   ICUIO_LIBRARY
   NAMES icuio
   PATHS ${ICU_ROOT}/lib
   DOC "Libraries to link against for I/O facilities in ICU"
-  NO_DEFAULT_PATH)
+  )
 set(ICUIO_LIBRARY optimized ${ICUIO_LIBRARY} debug ${ICUIO_LIBRARY})
 
 unset(ICULE_LIBRARY CACHE)
-find_library(
+sdl_find_library(
   ICULE_LIBRARY
   NAMES icule
   PATHS ${ICU_ROOT}/lib
   DOC "Libraries to link against for ICU"
-  NO_DEFAULT_PATH)
+  )
 set(ICULE_LIBRARY optimized ${ICULE_LIBRARY} debug ${ICULE_LIBRARY})
 
 unset(ICULX_LIBRARY CACHE)
-find_library(
+sdl_find_library(
   ICULX_LIBRARY
   NAMES iculx
   PATHS ${ICU_ROOT}/lib
   DOC "Libraries to link against for ICU"
-  NO_DEFAULT_PATH)
+  )
 set(ICULX_LIBRARY optimized ${ICULX_LIBRARY} debug ${ICULX_LIBRARY})
 
 unset(ICUTU_LIBRARY CACHE)
-find_library(
+sdl_find_library(
   ICUTU_LIBRARY
   NAMES icutu
   PATHS ${ICU_ROOT}/lib
   DOC "Libraries to link against for ICU"
-  NO_DEFAULT_PATH)
+  )
 set(ICUTU_LIBRARY optimized ${ICUTU_LIBRARY} debug ${ICUTU_LIBRARY})
 
 IF(WIN32)
   unset(ICUIN_LIBRARY CACHE)
-  find_library(
+  sdl_find_library(
     ICUIN_LIBRARY
     NAMES icuin
     PATHS ${ICU_ROOT}/lib
     DOC "Libraries to link against for ICU"
-    NO_DEFAULT_PATH)
+    )
   mark_as_advanced(ICUIN_LIBRARY)
 ENDIF()
 
@@ -88,21 +88,21 @@ mark_as_advanced(ICUTU_LIBRARY)
 
 IF(NOT WIN32)
   unset(ICU_I18N_LIBRARY CACHE)
-  find_library(
+  sdl_find_library(
     ICU_I18N_LIBRARY
     NAMES icui18n
     PATHS ${ICU_ROOT}/lib
     DOC "Libraries to link against for ICU internationalization"
-    NO_DEFAULT_PATH)
+    )
   set(ICU_I18N_LIBRARY optimized ${ICU_I18N_LIBRARY} debug ${ICU_I18N_LIBRARY})
 
   unset(ICUDATA_LIBRARY CACHE)
-  find_library(
+  sdl_find_library(
     ICUDATA_LIBRARY
     NAMES icudata
     PATHS ${ICU_ROOT}/lib
     DOC "Libraries to link against for data structures in ICU"
-    NO_DEFAULT_PATH)
+    )
   set(ICUDATA_LIBRARY optimized ${ICUDATA_LIBRARY} debug ${ICUDATA_LIBRARY})
   mark_as_advanced(ICUDATA_LIBRARY)
   mark_as_advanced(ICU_I18N_LIBRARY)

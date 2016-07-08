@@ -10,9 +10,9 @@
 // limitations under the License.
 #define USAGE_HypDraw "Print graphviz (dot) equivalent of hypergraph."
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/HypergraphDrawer.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -32,6 +32,3 @@ struct HypDraw : TransformMain<HypDraw> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Draw)
-
-
-

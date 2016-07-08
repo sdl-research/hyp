@@ -23,14 +23,14 @@
 #define SYMIDS_JG_2013_04_26_HPP
 #pragma once
 
+#include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/SmallVector.hpp>
+#include <sdl/IVocabulary-fwd.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Sym.hpp>
+#include <sdl/gsl.hpp>  // span
 #include <cstdio>
 #include <vector>
-#include <sdl/Sym.hpp>
-#include <sdl/Util/SmallVector.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/IVocabulary-fwd.hpp>
-#include <sdl/Util/PrintRange.hpp>
-#include <sdl/gsl.hpp>  // span
 
 namespace sdl {
 
@@ -181,8 +181,6 @@ inline void print(std::ostream& out, sdl::Syms const& phrase, std::shared_ptr<sd
 }
 
 BOOST_CLASS_IMPLEMENTATION(sdl::Syms, object_serializable)
-
-
 
 
 #endif

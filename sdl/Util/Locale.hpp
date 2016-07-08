@@ -35,9 +35,9 @@
 #endif
 #endif
 
+#include <graehl/shared/stream_util.hpp>
 #include <locale>
 #include <locale.h>
-#include <graehl/shared/stream_util.hpp>
 #if SDL_BOOST_LOCALE
 #include <boost/locale/util.hpp>
 #endif

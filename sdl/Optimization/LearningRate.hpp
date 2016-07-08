@@ -21,10 +21,10 @@
 #define SDL_OPTIMIZATION_LEARNINGRATE_HPP_
 #pragma once
 
-#include <cmath>
 #include <sdl/Util/Enum.hpp>
-#include <sdl/Types.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <sdl/Types.hpp>
+#include <cmath>
 
 namespace sdl {
 namespace Optimization {

@@ -17,20 +17,19 @@
 #define SDL_UTIL__ADD_HPP
 #pragma once
 
-#include <utility>
-#include <vector>
-#include <deque>
-#include <list>
-#include <algorithm>
-#include <boost/range/begin.hpp>
-#include <boost/range/end.hpp>
-#include <boost/range/size.hpp>
-#include <boost/range/distance.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-
 #include <sdl/Util/SmallVector.hpp>
 #include <sdl/Array.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/range/begin.hpp>
+#include <boost/range/distance.hpp>
+#include <boost/range/end.hpp>
+#include <boost/range/size.hpp>
+#include <algorithm>
+#include <deque>
+#include <list>
+#include <utility>
+#include <vector>
 
 namespace sdl {
 namespace Util {
@@ -73,28 +72,28 @@ inline AppendSequence& concatRangesAppend(Range1 const& r1, Range2 const& r2, Ap
 }
 
 template <class C, class Val>
-inline void add(C& collection, Val const& v) {
-  collection.insert(v);
+inline void add(C& collection, Val&& v) {
+  collection.insert(std::forward<Val>(v));
 }
 
 template <class V, class Alloc, class Val>
-inline void add(std::vector<V, Alloc>& c, Val const& v) {
-  c.push_back(v);
+inline void add(std::vector<V, Alloc>& c, Val&& v) {
+  c.push_back(std::forward<Val>(v));
 }
 
 template <class V, unsigned MaxInline, class Size, class Val>
-inline void add(small_vector<V, MaxInline, Size>& c, Val const& v) {
-  c.push_back(v);
+inline void add(small_vector<V, MaxInline, Size>& c, Val&& v) {
+  c.push_back(std::forward<Val>(v));
 }
 
 template <class V, class Alloc, class Val>
-inline void add(std::deque<V, Alloc>& c, Val const& v) {
-  c.push_back(v);
+inline void add(std::deque<V, Alloc>& c, Val&& v) {
+  c.push_back(std::forward<Val>(v));
 }
 
 template <class V, class Alloc, class Val>
-inline void add(std::list<V, Alloc>& c, Val const& v) {
-  c.push_back(v);
+inline void add(std::list<V, Alloc>& c, Val&& v) {
+  c.push_back(std::forward<Val>(v));
 }
 
 template <class Vec>
@@ -123,15 +122,15 @@ struct Adder {
 
   Self const& operator*() const { return *this; }
   Self const& operator++() const { return *this; }
-  Self const& operator++(int) const { return *this; }
+  Self const& operator++(int)const { return *this; }
   typedef typename AddTo::value_type argument_type;
   template <class Val>
-  void operator()(Val const& val) const {
-    add(addTo, val);
+  void operator()(Val&& val) const {
+    add(addTo, std::forward<Val>(val));
   }
   template <class Val>
-  void operator=(Val const& val) const {
-    add(addTo, val);
+  void operator=(Val&& val) const {
+    add(addTo, std::forward<Val>(val));
   }
 };
 
@@ -234,8 +233,8 @@ inline void append(small_vector<V, MaxInline, Size>& sequence, Range const& r) {
 }
 
 template <class V, unsigned MaxInline, class Size>
-inline void addFront(small_vector<V, MaxInline, Size>& sequence, V const& v) {
-  sequence.push_front(v);
+inline void addFront(small_vector<V, MaxInline, Size>& sequence, V&& v) {
+  sequence.push_front(std::forward<V>(v));
 }
 
 template <class Sequence, class Size>
@@ -318,8 +317,8 @@ inline void appendLen(Collection& c, RandomAccessIter begin, std::size_t len) {
 }
 
 template <class Collection, class Val>
-inline void addFront(Collection& c, Val const& v) {
-  c.insert(c.begin(), v);
+inline void addFront(Collection& c, Val&& v) {
+  c.insert(c.begin(), std::forward<Val>(v));
 }
 
 template <class Collection>
@@ -328,18 +327,18 @@ inline void popFront(Collection& c) {
 }
 
 template <class V, class A, class V2>
-inline void addFront(std::deque<V, A>& c, V2 const& v) {
-  c.push_front(v);
+inline void addFront(std::deque<V, A>& c, V2&& v) {
+  c.push_front(std::forward<V2>(v));
 }
 
 template <class V, class A, class V2>
-inline void addFront(std::list<V, A>& c, V2 const& v) {
-  c.push_front(v);
+inline void addFront(std::list<V, A>& c, V2&& v) {
+  c.push_front(std::forward<V2>(v));
 }
 
 template <class V, class A, class V2>
-inline void addFront(std::vector<V, A>& c, V2 const& v) {
-  c.insert(c.begin(), v);
+inline void addFront(std::vector<V, A>& c, V2&& v) {
+  c.insert(c.begin(), std::forward<V2>(v));
 }
 
 

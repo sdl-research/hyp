@@ -17,6 +17,8 @@
 #define SEP_JG_2015_05_16_HPP
 #pragma once
 
+#include <iostream>
+
 namespace sdl {
 namespace Util {
 

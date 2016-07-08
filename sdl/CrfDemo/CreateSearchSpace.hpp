@@ -12,35 +12,33 @@
 #define SDL_SIMPLECRF_CREATESEARCHSPACE_HPP
 #pragma once
 
-#include <string>
-#include <set>
-#include <sstream>
-#include <boost/functional/hash.hpp>
-#include <thread>
-#include <mutex>
-
-#include <sdl/Util/Input.hpp>
-
-#include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Config/ConfigureYaml.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Hypergraph/Compose.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/StringToHypergraph.hpp>
-#include <sdl/Hypergraph/Compose.hpp>
 #include <sdl/Hypergraph/SortArcs.hpp>
 #include <sdl/Hypergraph/SortStates.hpp>
+#include <sdl/Hypergraph/StringToHypergraph.hpp>
+#include <sdl/Optimization/ExternalFeatHgPairs.hpp>
+#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
 #include <sdl/Optimization/ICreateSearchSpace.hpp>
 #include <sdl/Optimization/IInput.hpp>
-#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
-#include <sdl/Optimization/ExternalFeatHgPairs.hpp>
 #include <sdl/Optimization/Types.hpp>
-#include <sdl/Util/Unordered.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/Input.hpp>
 #include <sdl/Util/Sleep.hpp>
+#include <sdl/Util/StringBuilder.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <boost/functional/hash.hpp>
 #include <graehl/shared/thread_group.hpp>
 #include <functional>
+#include <mutex>
+#include <set>
+#include <sstream>
+#include <string>
+#include <thread>
 
 namespace sdl {
 namespace CrfDemo {
@@ -210,8 +208,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
 
   std::string createFeatureName(std::string const& prefix, Sym sym1, Sym sym2, Sym sym3) const {
     if (opts_.meaningfulFeatureNames)
-      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym1))("_")(pVoc_->str(sym2))("_")(pVoc_->str(sym3))
-          .str();
+      return Util::StringBuilder(prefix)("_")(pVoc_->str(sym1))("_")(pVoc_->str(sym2))("_")(pVoc_->str(sym3)).str();
     else
       return Util::StringBuilder(prefix)("_")(sym1)("_")(sym2)("_")(sym3).str();
   }
@@ -260,7 +257,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       model->addState();
     }
     model->setStart(0);
-    StateId finalState = numStates-1;
+    StateId finalState = numStates - 1;
     model->setFinal(finalState);
 
     for (StateId s = 0; s < finalState; ++s) {
@@ -544,9 +541,9 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
         outer_.processTrainingSentence(sents_[i], transitionModel_, trainingExamples_);
 
         if (doLogProgress_) {
-          std::size_t blockSize = (end_-begin_) / 10.0f;
+          std::size_t blockSize = (end_ - begin_) / 10.0f;
           if (blockSize && (i - begin_ + 1) % blockSize == 0) {
-            SDL_INFO(CrfDemo, (((i - begin_ + 1.0f) / (end_-begin_)) * 100.0f) << "% processed");
+            SDL_INFO(CrfDemo, (((i - begin_ + 1.0f) / (end_ - begin_)) * 100.0f) << "% processed");
           }
         }
       }
@@ -598,12 +595,13 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       }
     }
 
-    Hypergraph::IHypergraph<Arc>* transitionModel
-        = opts_.transitionModel == kUnigram
-              ? createUnigramModel()
-              : opts_.transitionModel == kBigram ? createBigramModel() : opts_.transitionModel == kHierarchical
-                                                                             ? createHierarchicalModel()
-                                                                             : createBihierarchicalModel();
+    Hypergraph::IHypergraph<Arc>* transitionModel = opts_.transitionModel == kUnigram
+                                                        ? createUnigramModel()
+                                                        : opts_.transitionModel == kBigram
+                                                              ? createBigramModel()
+                                                              : opts_.transitionModel == kHierarchical
+                                                                    ? createHierarchicalModel()
+                                                                    : createBihierarchicalModel();
     SDL_INFO(CrfDemo, "Extracting features");
 
     if (opts_.numThreads < 2) {
@@ -625,7 +623,7 @@ class CreateSearchSpace : public Optimization::ICreateSearchSpace<A> {
       ProcessTrainingExampleRange* update;
       for (std::size_t i = 0; i < numProducerThreads; ++i) {
         TrainingDataIndex begin = i * blockSize;
-        TrainingDataIndex end = (i == numProducerThreads-1) ? size : (i + 1) * blockSize;
+        TrainingDataIndex end = (i == numProducerThreads - 1) ? size : (i + 1) * blockSize;
         producers.push_back(update = new ProcessTrainingExampleRange(*this, begin, end, sents,
                                                                      *transitionModel, *pairs_, i == 0));
         producer_threads.create_thread(std::ref(*update));

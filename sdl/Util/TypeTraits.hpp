@@ -19,8 +19,8 @@
 #pragma once
 
 #include <graehl/shared/cpp11.hpp>
-#include <type_traits>
 #include <iostream>
+#include <type_traits>
 
 namespace sdl {
 
@@ -106,14 +106,14 @@ template <class A, class B>
 using disable_if_same_or_derived = enable_if_t<!std::is_base_of<A, decay_t<B>>::value>;
 
 /// usage: (see has_hash_value) callable_name<T, int(float, int)>
-#define SDL_CALLABLE_MEMBER_NAME(name, member)                                                                         \
-  template <class C, class F, class = void>                                                                            \
-  struct callable_##name : public std::false_type {};                                                                  \
-  template <class C, class R, class... A>                                                                              \
-  struct callable_##name<C, R(A...), typename std::enable_if<std::is_same<R, void>::value                              \
-                                                             || std::is_convertible<decltype(std::declval<C>().member( \
-                                                                                        std::declval<A>()...)),        \
-                                                                                    R>::value>::type>                  \
+#define SDL_CALLABLE_MEMBER_NAME(name, member)                                                                                    \
+  template <class C, class F, class = void>                                                                                       \
+  struct callable_##name : public std::false_type {};                                                                             \
+  template <class C, class R, class... A>                                                                                         \
+  struct callable_##name<C, R(A...),                                                                                              \
+                         typename std::enable_if<std::is_same<R, void>::value                                                     \
+                                                 || std::is_convertible<decltype(std::declval<C>().member(std::declval<A>()...)), \
+                                                                        R>::value>::type>                                         \
       : public std::true_type {};
 #define SDL_CALLABLE_MEMBER(name) SDL_CALLABLE_MEMBER_NAME(name, name)
 

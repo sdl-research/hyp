@@ -17,51 +17,45 @@
 #define HYP__HYPERGRAPH_COMPOSE_HPP
 #pragma once
 
-#include <utility>
-#include <vector>
-#include <map>
-#include <queue>
-#include <algorithm>
-#include <utility>
-#include <boost/range/algorithm/lower_bound.hpp>
-#include <boost/unordered_set.hpp>
-#include <tuple>
-
-#include <vector>
-#include <map>
-#include <queue>
-#include <algorithm>
-#include <utility>
-#include <boost/range/algorithm/lower_bound.hpp>
-#include <boost/unordered_set.hpp>
-
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-
-#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
+#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sdl/Hypergraph/Assert.hpp>
+#include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/FeatureWeightUtil.hpp>
+#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
+#include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Properties.hpp>
-#include <sdl/Hypergraph/HypergraphWriter.hpp>
-#include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Hypergraph/SortArcs.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
-#include <sdl/Hypergraph/fs/Compose.hpp>
-#include <sdl/Hypergraph/FeatureWeightUtil.hpp>
-
-#include <sdl/Util/Compare.hpp>
-#include <sdl/Util/Input.hpp>
-
-
-#include <sdl/Util/ThreadSpecific.hpp>
-#include <sdl/Util/Hash.hpp>
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/NonNullPointee.hpp>
-#include <sdl/Util/IsDebugBuild.hpp>
-#include <sdl/Util/PrintRange.hpp>
-#include <sdl/Hypergraph/Assert.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
+#include <sdl/Hypergraph/fs/Compose.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/Compare.hpp>
+#include <sdl/Util/Hash.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/IsDebugBuild.hpp>
+#include <sdl/Util/NonNullPointee.hpp>
+#include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/ThreadSpecific.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <boost/range/algorithm/lower_bound.hpp>
+#include <boost/range/algorithm/lower_bound.hpp>
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_set.hpp>
+#include <algorithm>
+#include <algorithm>
+#include <map>
+#include <map>
+#include <queue>
+#include <queue>
+#include <tuple>
+#include <utility>
+#include <utility>
+#include <utility>
+#include <vector>
+#include <vector>
 
 #ifndef SDL_HASH_COMPOSE_ITEM
 #define SDL_HASH_COMPOSE_ITEM 0
@@ -71,11 +65,11 @@
 #endif
 
 #if SDL_HASH_COMPOSE_ITEM
-#include <sdl/Util/OwnedRegistry.hpp>
 #include <sdl/Hypergraph/LabelPair.hpp>
 #include <sdl/Util/Map.hpp>
-#include <graehl/shared/int_types.hpp>
+#include <sdl/Util/OwnedRegistry.hpp>
 #include <sdl/Util/PointerSet.hpp>
+#include <graehl/shared/int_types.hpp>
 #endif
 
 namespace sdl {
@@ -473,7 +467,7 @@ struct EarleyParser {
     // Only attach a found eps after scanning something else (low in
     // the tree), not after some nonterminal
     if (item->dotPos > 0) {
-      StateId mostRecentlyCompleted = item->arc->getTail(item->dotPos-1);
+      StateId mostRecentlyCompleted = item->arc->getTail(item->dotPos - 1);
       bool mostRecentlyCompletedWasLexical = cfg_.outputLabel(mostRecentlyCompleted).isTerminal();
       if ((!mostRecentlyCompletedWasLexical && !item->lastWasPhiOrEps) && mostRecentlyCompleted != cfg_.start()) {
         return;
@@ -771,7 +765,7 @@ template <class A>
 StateId EarleyParser<A>::addLexicalState(LabelPair label) {
   StateId* s;
   if (Util::update(resultLabelPairToStateId_, label, s))
-    return * s = result_->addState(label);
+    return *s = result_->addState(label);
   else
     return *s;
 }

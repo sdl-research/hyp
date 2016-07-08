@@ -20,10 +20,10 @@
 #define GRAEHL_SHARED__ESCAPE3
 #pragma once
 
+#include <graehl/shared/atoi_fast.hpp>
+#include <graehl/shared/string_builder.hpp>
 #include <cassert>
 #include <string>
-#include <graehl/shared/string_to.hpp>
-#include <graehl/shared/atoi_fast.hpp>
 
 namespace graehl {
 
@@ -92,7 +92,7 @@ struct Escape3 : string_builder {
 struct Escape3Exception : std::exception {
   Escape3Exception() {}
   ~Escape3Exception() throw() {}
-  const char* what() const throw() {
+  char const* what() const throw() {
     return "Unescape3 expected two hex digits or backslash following backslash";
   }
 };

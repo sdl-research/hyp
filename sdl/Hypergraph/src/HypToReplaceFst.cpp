@@ -8,43 +8,36 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <sdl/Util/IcuHeaders.hpp>
+#ifndef NDEBUG
+#include <sdl/Hypergraph/HypergraphWriter.hpp>
+#endif
+#include <sdl/Hypergraph/Arc.hpp>
+#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sdl/Hypergraph/HypergraphMain.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/ToReplaceFst.hpp>
 #include <sdl/Hypergraph/UseOpenFst.hpp>
-
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Util/Delete.hpp>
+#include <sdl/Util/IcuHeaders.hpp>
+#include <sdl/Util/InitLogger.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Output.hpp>
+#include <sdl/Util/ProgramOptions.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <fst/determinize.h>
+#include <fst/fst.h>
+#include <fst/minimize.h>
+#include <fst/project.h>
+#include <fst/replace.h>
+#include <fst/rmepsilon.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-
-#include <sdl/Hypergraph/Arc.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/ToReplaceFst.hpp>
-
-#ifndef NDEBUG
-#include <sdl/Hypergraph/HypergraphWriter.hpp>
-#endif
-
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/InitLogger.hpp>
-
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/ProgramOptions.hpp>
-
-#include <fst/fst.h>
-#include <fst/replace.h>
-#include <fst/rmepsilon.h>
-#include <fst/determinize.h>
-#include <fst/minimize.h>
-#include <fst/project.h>
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/Output.hpp>
-#include <sdl/Hypergraph/HypergraphMain.hpp>
-#include <sdl/Util/Delete.hpp>
 
 
 namespace sdl {
@@ -188,6 +181,3 @@ struct HypToReplaceFst {
 }
 
 HYPERGRAPH_NAMED_MAIN(ToReplaceFst)
-
-
-

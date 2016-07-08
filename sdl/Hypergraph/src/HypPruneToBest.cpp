@@ -10,8 +10,8 @@
 // limitations under the License.
 #define USAGE_HypPruneToBest "replace hypergraph with just the nbest paths"
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/PruneToBest.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -42,6 +42,3 @@ struct HypPruneToBest : TransformMain<HypPruneToBest> {
 }
 
 HYPERGRAPH_NAMED_MAIN(PruneToBest)
-
-
-

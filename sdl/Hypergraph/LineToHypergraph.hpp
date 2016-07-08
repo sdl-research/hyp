@@ -17,12 +17,12 @@
 #define HYP__HG_LINE_TO_HYPERGRAPH_HPP
 #pragma once
 
-#include <sdl/LexicalCast.hpp>
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/StringToHypergraph.hpp>
-#include <sdl/Hypergraph/ParseTokens.hpp>
 #include <sdl/Config/Init.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/ParseTokens.hpp>
+#include <sdl/Hypergraph/StringToHypergraph.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <sdl/LexicalCast.hpp>
 
 
 namespace sdl {

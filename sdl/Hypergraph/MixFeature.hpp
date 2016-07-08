@@ -22,13 +22,13 @@
 #define HYP__MIXFEATURE_JG2012323_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Hypergraph/FeatureWeight.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
+#include <sdl/Hypergraph/FeatureWeight.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <boost/optional.hpp>
-#include <graehl/shared/is_null.hpp>
 #include <graehl/shared/int_types.hpp>
+#include <graehl/shared/is_null.hpp>
 
 // TODO: feature-name->id dictionary and feature weights abstraction, set id via name
 

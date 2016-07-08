@@ -18,11 +18,12 @@
     //TODO: make these inline
     */
 
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/src/IsGraphArc.ipp>
-#include <sdl/Hypergraph/SymbolPrint.hpp>
-#include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/ContainsEmptyString.hpp>
+#include <sdl/Hypergraph/HypergraphWriter.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
+#include <sdl/Hypergraph/src/IsGraphArc.ipp>
+#include <sdl/Util/InputSize.hpp>
 #include <sdl/Util/Once.hpp>
 #include <sdl/Util/PointerSet.hpp>
 #include <algorithm>
@@ -395,6 +396,14 @@ void HypergraphBase::addStateId(StateId state, LabelPair l) {
 
 bool HypergraphBase::containsEmptyString() const {
   return Hypergraph::containsEmptyString(*this);
+}
+
+InputSizeAmount sizeAmount(HypergraphBase const& hg) {
+  return (InputSizeAmount)hg.size();
+}
+
+std::string sizeUnits(HypergraphBase const&) {
+  return "state";
 }
 
 

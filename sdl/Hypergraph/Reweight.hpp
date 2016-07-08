@@ -17,15 +17,15 @@
 #define HYP__HG_REWEIGHT_HPP
 #pragma once
 
+#include <sdl/Hypergraph/FeatureWeightUtil.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/IsFeatureWeight.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Hypergraph/FeatureWeightUtil.hpp>
-#include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/IsFeatureWeight.hpp>
-#include <graehl/shared/normalize_range.hpp>
 #include <sdl/Util/Random.hpp>
 #include <graehl/shared/is_null.hpp>
+#include <graehl/shared/normalize_range.hpp>
 #include <graehl/shared/prefix_option.hpp>
 
 namespace sdl {

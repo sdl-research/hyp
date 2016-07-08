@@ -24,7 +24,7 @@ namespace sdl {
 namespace Util {
 
 void throwInvalidInputException(std::istream& in, std::string const& error = "", std::size_t itemNumber = 0,
-                                const char* item = "line");
+                                char const* item = "line");
 
 
 }}

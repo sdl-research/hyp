@@ -17,42 +17,34 @@
 
    TODO: test coverage.
  */
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <stdexcept>
-#include <string>
-#include <sdl/LexicalCast.hpp>
-
-#include <sdl/SharedPtr.hpp>
-#include <boost/optional.hpp>
-#include <sdl/Util/ProgramOptions.hpp>
-
-#include <sdl/Util/Locale.hpp>
-#include <sdl/Util/QuickExit.hpp>
-
-#include <sdl/Util/Performance.hpp>
 #include <sdl/Optimization/MockResourceManager.hpp>
-
+#include <sdl/Config/Config.hpp>
+#include <sdl/Config/ConfigureYaml.hpp>
+#include <sdl/Optimization/Exception.hpp>
+#include <sdl/Optimization/LoadCss.hpp>
+#include <sdl/Optimization/OptimizationProcedure.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Util/Enum.hpp>
 #include <sdl/Util/FindFile.hpp>
 #include <sdl/Util/InitLogger.hpp>
-#include <sdl/Util/LoadLibrary.hpp>
-#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/InitLoggerFromConfig.hpp>
-
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
-#include <sdl/Optimization/Exception.hpp>
-#include <sdl/Optimization/ICreateSearchSpace.hpp>
-#include <sdl/Optimization/Arc.hpp>
-#include <sdl/Optimization/OptimizationProcedure.hpp>
-
-#include <sdl/Config/Config.hpp>
-#include <sdl/Config/ConfigureYaml.hpp>
+#include <sdl/Util/IsDebugBuild.hpp>
+#include <sdl/Util/LoadLibrary.hpp>
+#include <sdl/Util/Locale.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Performance.hpp>
+#include <sdl/Util/ProgramOptions.hpp>
+#include <sdl/Util/QuickExit.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/optional.hpp>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace po = boost::program_options;
 
@@ -60,27 +52,34 @@ sdl::Util::DeclareSingleThreadProgram single(true);
 
 sdl::Util::DefaultLocaleFastCout initCout;
 
-std::string getLibraryName(std::string const& stem) {
-#if defined _WIN64 || defined _WIN32
-  return stem + "-shared.dll";
-#elif defined(__APPLE__)
-  return "lib" + stem + "-shared.dylib";
-#else
-  return "lib" + stem + "-shared.so";
+std::string getLibraryName(std::string const& name) {
+  std::string stem(name);
+  stem += "-shared";
+#if SDL_IS_DEBUG_BUILD
+  stem += "_debug";
 #endif
+#if defined _WIN64 || defined _WIN32
+  stem += ".dll";
+  return stem;
+#elif defined(__APPLE__)
+  stem += ".dylib";
+#else
+  stem += ".so";
+#endif
+  return "libsdl-" + stem;
 }
 
 int main(int ac, char* av[]) {
-  sdl::Util::FinishLoggingAfterScope endLogging;
 
   using namespace sdl;
   using namespace sdl::Util;
 
   try {
+    sdl::Util::FinishLoggingAfterScope endLogging;
     po::options_description generic("Command line options");
 
     std::string configFile;
-    std::string modelName, searchSpaceSectionName, optimizeSectionName;
+    std::string modelName, libModel, searchSpaceSectionName, optimizeSectionName;
     bool help;
     bool checkIntersection;
     bool checkGradients;
@@ -88,12 +87,14 @@ int main(int ac, char* av[]) {
     bool testMode;
     sdl::AddOption opt(generic);
 
-    opt("config,c", po::value(&configFile)->default_value("./SDLConfig.yml"),
+    opt("config,c", po::value(&configFile)->default_value("./XMTConfig.yml"),
         "SDL config file that describes the DB");
     opt("search-dir,I", po::value<std::vector<std::string>>(), "Directories where config files are searched");
     opt("log-config", po::value(&logConfigFile), "optional log4cxx xml config file");
-    opt("model", po::value(&modelName)->default_value("SimpleCrf"),
+    opt("model", po::value(&modelName)->default_value("CrfDemo"),
         "Name of the model (specifies shared library to load)");
+    opt("libmodel", po::value(&libModel)->default_value(""),
+        "Optional exact path of model shared library e.g. /lib/libNE.so (instead of 'model' option)");
     opt("search-space", po::value(&searchSpaceSectionName)->default_value("search-space"),
         "Name of the YAML section that configures the search space");
     opt("optimize", po::value(&optimizeSectionName)->default_value("optimize"),
@@ -124,13 +125,14 @@ int main(int ac, char* av[]) {
     if (help) {
       std::cout << generic << '\n';
       Optimization::OptimizationProcedureOptions config;
-      std::cout << '\n' << "The YAML config file must contain a module of type 'OptimizationProcedure'\n"
+      std::cout << '\n'
+                << "The YAML config file must contain a module of type 'OptimizationProcedure'\n"
                 << "with the following options:\n\n";
       Config::showHelp(std::cout, &config);
-      Util::quickExit(0);
+      return Util::normalExit(0);
     }
 
-    SDL_INFO(Optimization.OptimizeMain, "Float type: " << getSdlFloatName());
+    Resources::ResourceManager& resourceManager = Resources::mockResourceManager;
 
     // Load YAML config file and construct SDL instance (in order to
     // get a ResourceManager)
@@ -169,40 +171,34 @@ int main(int ac, char* av[]) {
 
     Optimization::OptimizationProcedureOptions optProcConfig;
     ConfigNode optimizeNode = configNode[optimizeSectionName];
-    if (optimizeNode) {
+    if (optimizeNode)
       Config::applyYaml(optimizeNode, &optProcConfig);
-    } else if (!testMode) {
+    else if (!testMode)
       SDL_THROW_LOG(Optimize, ConfigException, "Could not find config section called '"
                                                    << optimizeSectionName << "' in " << configFile);
-    }
-    Resources::ResourceManager& resourceManager = Resources::mockResourceManager;
+
 
     optProcConfig.testMode = testMode;
     if (!weightsPath.empty()) {
       optProcConfig.weightsPath = weightsPath;
     }
 
-    std::string libName(getLibraryName(varMap["model"].as<std::string>()));
+    std::string libName = libModel.empty() ? getLibraryName(modelName) : libModel;
     Util::LoadedLib myLib = NULL;
-    if (!(myLib = Util::loadLib((libName).c_str()))) {
-      SDL_THROW_LOG(Optimization, IOException, "Could not load shared lib");
-    }
+    if (!(myLib = Util::loadLib(libName.c_str())))
+      SDL_THROW_LOG(Optimization, IOException, "Could not load shared lib " << libName);
 
     void* loadFct = NULL;
-    if (!(loadFct = Util::loadProc(myLib, "load"))) {
+    if (!(loadFct = Util::loadProc(myLib, "loadCss")))
       SDL_THROW_LOG(Optimization, IOException, "Could not use 'load' function from " << libName);
-    }
 
     ConfigNode node = configNode[searchSpaceSectionName];
-    if (!node) {
+    if (!node)
       SDL_THROW_LOG(Optimize, ConfigException, "Could not find config section called '"
                                                    << searchSpaceSectionName << "' in " << configFile);
-    }
 
-    void* obj = ((void* (*)(Resources::ResourceManager&, ConfigNode&, bool))(loadFct))(resourceManager, node,
-                                                                                       Optimization::kIsOptimize);
-    typedef Optimization::ICreateSearchSpace<Optimization::Arc> SearchSpace;
-    shared_ptr<SearchSpace> searchSpace(reinterpret_cast<SearchSpace*>(obj));
+    shared_ptr<Optimization::CreateSearchSpace> searchSpace{
+        ((Optimization::LoadCssFn)loadFct)(resourceManager, node, Optimization::kIsOptimize)};
     SDL_INFO(Optimization, "Loaded search space '" << searchSpace->getName() << "'");
 
     Optimization::OptimizationProcedure optimizer(searchSpace, optProcConfig);
@@ -214,13 +210,9 @@ int main(int ac, char* av[]) {
       optimizer.setCheckGradients(checkGradients);
       optimizer.optimize();
     }
-
   } catch (std::exception const& e) {
     std::cerr << e.what() << '\n';
     Util::quickExit(1);
   }
   Util::quickExit(0);
-  // helps w/ undiagnosed shared-object-related static destruction double-free bug (by skipping static
-  // destructors)
-  return 0;  // unreachable
 }

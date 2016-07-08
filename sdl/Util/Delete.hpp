@@ -18,15 +18,15 @@
 #define DELETE_JG_2013_04_23_HPP
 #pragma once
 
+#include <sdl/Pool/poolfwd.hpp>
+#include <sdl/Util/SizeIsUnsigned.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
+#include <memory>
 #include <new>
 #include <vector>
-#include <sdl/Util/SizeIsUnsigned.hpp>
-#include <memory>
-#include <cstring>
-#include <sdl/Pool/poolfwd.hpp>
 
 namespace sdl {
 namespace Util {
@@ -81,8 +81,7 @@ struct AutoFree {
   explicit AutoFree(void* p) : p_(p) {}
   explicit AutoFree(void const* p) : p_((void*)p) {}
   template <class Data>
-  AutoFree(Data*& a, unsigned n)
-      : p_(a = (Data*)std::malloc(n * sizeof(Data))) {}
+  AutoFree(Data*& a, unsigned n) : p_(a = (Data*)std::malloc(n * sizeof(Data))) {}
   AutoFree(AutoFree&& o) {
     p_ = o.p_;
     o.p_ = 0;
@@ -274,6 +273,11 @@ struct AutoDeleteAll : std::vector<T*> {
   AutoDeleteAll(AutoDeleteAll const&) = delete;
 };
 
+template <class T, class Val>
+void add(AutoDeleteAll<T>& c, Val&& v) {
+  c.push_back(std::forward<Val>(v));
+}
+
 template <class T>
 struct DestroyAll : std::vector<T*> {
   typedef std::vector<T*> Base;
@@ -308,7 +312,13 @@ struct AutoDeleteArray {
     p_ = new T[n];
     std::uninitialized_fill(p_, p_ + n, x);
   }
-  void reset(T* array) { p_ = array; }
+  void clear() {
+    if (p_) delete[] p_;
+  }
+  void reset(T* array) {
+    clear();
+    p_ = array;
+  }
   AutoDeleteArray(T* p = 0) : p_(p) {}
   explicit AutoDeleteArray(std::size_t n) : p_(new T[n]()) {}
   AutoDeleteArray(std::size_t n, T const& x) { init(n, x); }

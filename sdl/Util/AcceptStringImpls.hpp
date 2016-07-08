@@ -17,10 +17,10 @@
 #define ACCEPTSTRINGIMPLS_JG_2013_12_15_HPP
 #pragma once
 
-#include <sdl/Util/AcceptString.hpp>
-#include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Vocabulary/ToSymbols.hpp>
+#include <sdl/Util/AcceptString.hpp>
 #include <sdl/Util/Add.hpp>
+#include <sdl/Util/StringBuilder.hpp>
 
 namespace sdl {
 namespace Util {
@@ -144,8 +144,7 @@ struct AppendSym : IAcceptString {
   IVocabulary& vocabulary() const { return *addSymbol.pVoc; }
 
   template <class AddSymbolConstruct>
-  AppendSym(Syms& syms, AddSymbolConstruct const& addSymbol)
-      : syms(syms), addSymbol(addSymbol) {}
+  AppendSym(Syms& syms, AddSymbolConstruct const& addSymbol) : syms(syms), addSymbol(addSymbol) {}
 
   void operator()(Sym sym) const { syms.push_back(sym); }
 

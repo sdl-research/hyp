@@ -19,10 +19,10 @@
 #define SDL_UTIL_MATRIX_HPP
 #pragma once
 
-#include <vector>
-#include <algorithm>
 #include <sdl/Util/Debug.hpp>
 #include <sdl/Array.hpp>
+#include <algorithm>
+#include <vector>
 
 namespace sdl {
 namespace Util {
@@ -92,7 +92,7 @@ struct Matrix {
 
   T& operator()(size_type row, size_type col) { return container_[cols_ * row + col]; }
 
-  T const& operator()(size_type row, size_type col) const { return const_cast<Matrix<T>&> (*this)(row, col); }
+  T const& operator()(size_type row, size_type col) const { return const_cast<Matrix<T>&>(*this)(row, col); }
 
   Dimensions size() const { return Dimensions(rows_, cols_); }
 

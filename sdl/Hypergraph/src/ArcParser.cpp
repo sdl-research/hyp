@@ -13,10 +13,9 @@
    boost isalpha_ assertion. CM-207
 */
 
-#include <sdl/Hypergraph/ParserUtil.hpp>
 #include <sdl/Hypergraph/ArcParser.hpp>
 #include <sdl/Hypergraph/ArcParserImpl.hpp>
-
+#include <sdl/Hypergraph/ParserUtil.hpp>
 #include <string>
 
 namespace sdl {

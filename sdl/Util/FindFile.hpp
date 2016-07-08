@@ -17,13 +17,13 @@
 #define SDL_UTIL_FINDFILE_HPP
 #pragma once
 
-#include <string>
-#include <deque>
-#include <vector>
-#include <functional>
-#include <sdl/SharedPtr.hpp>
 #include <sdl/Util/Add.hpp>
 #include <sdl/Util/DefaultPrintRange.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <deque>
+#include <functional>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Util {

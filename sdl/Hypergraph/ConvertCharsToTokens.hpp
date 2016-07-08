@@ -21,9 +21,9 @@
 #pragma once
 
 
+#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -67,8 +67,6 @@ struct ConvertCharsToTokens : SimpleTransform<ConvertCharsToTokens, Transform::I
 }
 
 #include <sdl/Hypergraph/src/ConvertCharsToTokens.ipp>
-
-
 
 
 #endif

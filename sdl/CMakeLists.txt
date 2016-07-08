@@ -1,21 +1,105 @@
 cmake_minimum_required(VERSION 3.1)
 project (sdl)
-
 include(SdlHelperFunctions.cmake)
 
-if(DEFINED ENV{SDL_EXTERNALS_PATH})
+
+option(SDL_REPLACE_MALLOC "instead of libc's, use custom malloc/free (maybe tbb, tc, je); tc fragments heap eventually (as of 2011); tbb might also be wasteful" ON)
+option(SDL_PREFER_JEMALLOC "prefer jemalloc over tbbmalloc (supposed to converge to lower memory use in long running threads but just seems slower and more RAM-wasteful in initial tests)" OFF)
+# jemalloc is supposedly less memory hungry if you have a fixed number of worker threads. but preliminary tests show it's much slower for an xmt shell (multi or single thread) decoding workload AND keeps more memory resident, compared to regular linux libc malloc or TBB malloc (and TBB is 5-10% faster)
+#http://highscalability.com/blog/2015/3/17/in-memory-computing-at-aerospike-scale-when-to-choose-and-ho.html
+# https://blog.pavlov.net/2008/03/11/firefox-3-memory-usage/
+# 'firefox's automated tests on Windows Vista showed a 22% drop in memory usage when we turned jemalloc on.'
+# perhaps needs more testing (different jemalloc versions / build options?)
+option(GCC_ASAN "in debug build, use -fno-omit-frame-pointer -fsanitize=address" ON)
+option(SDL_DEVELOPMENT_NDEBUG "suppress release build assertions even for SDL_BUILD_TYPE=Development (Production always disables)" ON)
+
+if ((${SDL_REPLACE_MALLOC} AND NOT ${SDL_PREFER_JEMALLOC}) OR ${GCC_ASAN})
+  #eigen autodetect is impossible when we replace malloc using dylib. supposedly on 64-bit jemalloc is 16-byte aligned for allocations larger than 8 bytes. TBBmalloc segfault in Testxnn release build.
+  sdl_compiled_setting(EIGEN_MALLOC_ALREADY_ALIGNED 0)
+endif()
+
+# should catch more bugs in assignment (if you're careful to explicitly
+# size/resize) - but causes Testxnn failure:
+# sdl_compiled_setting(EIGEN_NO_AUTOMATIC_RESIZING 1)
+
+# or cmake -DCMAKE_BUILD_TYPE=Debug
+
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+    "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
+    FORCE)
+endif()
+
+
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+  set(SDL_DEBUG 1)
+  set(SDL_RELEASE 0)
+  sdl_quiet_compiled_setting(SDL_MEMSTATS 0) # detailed malloc pool info if run without tbb
+else()
+  set(SDL_DEBUG 0)
+  set(SDL_RELEASE 1)
+endif()
+
+
+if (WIN32)
+  set(SDL_ALL_SHARED OFF)
+  #TODO: would require many dll exports added. also when used in Optimization
+  #error can't lnk Optimization.lib (possibly empty exports set?)
+endif()
+
+if (SDL_ETS_BUILD)
+  set(SDL_NEW_BOOST 0)
+  if (SDL_DEBUG)
+    set(SDL_ALL_SHARED OFF)
+  else()
+    set(SDL_ALL_SHARED OFF)
+  endif()
+else()
+  if (SDL_DEBUG)
+    set(SDL_ALL_SHARED OFF)
+    #TODO: separate xnn lib broke 'ON' (caffe linking - caffe is static lib
+    # only) layer_factory.hpp:69] Check failed: registry.count(type) == 0 (1
+    # vs. 0) Layer type Convolution already registered.
+  else()
+    set(SDL_ALL_SHARED OFF)
+  endif()
+endif()
+
+show(SDL_ALL_SHARED)
+
+if ((SDL_DEBUG AND GCC_ASAN) OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithoutTbbmalloc")
+  set(SDL_REPLACE_MALLOC OFF)
+endif()
+
+if (SDL_REPLACE_MALLOC AND NOT WIN32)
+  # avoid optimizations that might conflict with malloc replacement:
+  add_definitions(-fno-builtin-malloc)
+  add_definitions(-fno-builtin-calloc)
+  add_definitions(-fno-builtin-realloc)
+  add_definitions(-fno-builtin-free)
+endif()
+
+
+if (DEFINED ENV{SDL_EXTERNALS_PATH})
   set(SDL_EXTERNALS_PATH $ENV{SDL_EXTERNALS_PATH})
 else()
   message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_PATH")
 endif()
 string(REPLACE "\\" "/" SDL_EXTERNALS_PATH ${SDL_EXTERNALS_PATH})
 
-# or cmake -DCMAKE_BUILD_TYPE=Debug
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel RelWithoutTbbmalloc."
-    FORCE)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Shared")
+if(WIN32)
+  set(SDL_OS_NAME "Windows")
+elseif(APPLE)
+  set(SDL_OS_NAME "FC12")
+elseif(ANDROID)
+  set(SDL_OS_NAME "Android")
+elseif(UNIX)
+  set(SDL_OS_NAME "FC12")
 endif()
+show(SDL_OS_NAME)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/${SDL_OS_NAME}")
+show(CMAKE_MODULE_PATH)
 
 if(SDL_BUILD_TYPE MATCHES "Development")
   set(SDL_PRODUCTION 0)
@@ -31,7 +115,14 @@ else()
   set(SDL_RELEASE_BUILD 0)
 endif()
 
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+  sdl_compiled_setting(SDL_IS_DEBUG_BUILD 1)
+else()
+  sdl_compiled_setting(SDL_IS_DEBUG_BUILD 0)
+endif()
+
+show(CMAKE_BUILD_TYPE)
+show(SDL_RELEASE_BUILD)
 
 if(NOT DEFINED SDL_DEBUG_SYMBOLS)
   if (SDL_PRODUCTION)
@@ -46,18 +137,6 @@ if(NOT DEFINED SDL_DEBUG_SYMBOLS)
 endif()
 message(STATUS "SDL_DEBUG_SYMBOLS: ${SDL_DEBUG_SYMBOLS}")
 
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Shared")
-if(WIN32)
-  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Windows")
-elseif(APPLE)
-  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/FC12")
-elseif(ANDROID)
-  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Android")
-elseif(UNIX)
-  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/FC12")
-endif()
-message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-
 if(DEFINED SDL_EXTERNALS_PATH)
   set(SDL_SHARED_EXTERNALS_PATH "${SDL_EXTERNALS_PATH}/../Shared/cpp")
   message(STATUS "SDL_EXTERNALS_PATH=${SDL_EXTERNALS_PATH}")
@@ -65,13 +144,37 @@ else()
   message(FATAL_ERROR "Please set environment variable SDL_EXTERNALS_PATH")
 endif()
 
+if (SDL_ALL_SHARED)
+  if (WIN32)
+    message(WARNING "WIN32: no SDL_ALL_SHARED support (yet)")
+  endif()
+  set(SDL_SHARED "SHARED")
+  set(SDL_STATIC_LINK 0)
+  if (UNIX)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".so;.a")
+  endif()
+else()
+  add_definitions(-DSDL_STATIC_LINK=1)
+  set(SDL_SHARED "")
+  set(SDL_STATIC_LINK 1)
+  if (UNIX)
+    #set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
+    #if you do this you need to be careful about link order: depending libs first e.g. log4cxx before apr-util
+  endif()
+endif()
+
 option(OPEN_SOURCE_RELEASE "hyp open-source release" ON)
 
 
+
+if (OPEN_SOURCE_RELEASE)
+  add_definitions(-Wno-nonnull-compare)
+endif()
 if (SDL_RELEASE_BUILD)
   add_definitions(-DEIGEN_NO_DEBUG)
 else()
-  add_definitions(-DEIGEN_NO_DEBUG)
+  #TODO: remove or if(SDL_PRODUCTION)
+  #add_definitions(-DEIGEN_NO_DEBUG)
 endif()
 
 # Use cmake -DSDL_FLOAT=32 or -DSDL_FLOAT=64
@@ -93,13 +196,11 @@ endif()
 add_definitions(-DBOOST_LEXICAL_CAST_ASSUME_C_LOCALE)
 add_definitions(-DU_HAVE_STD_STRING)
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
-  set(SDL_DEBUG 1)
-  set(SDL_RELEASE 0)
-  sdl_quiet_compiled_setting(SDL_MEMSTATS 0) # detailed malloc pool info if run without tbb
+if (SDL_DEBUG)
+  #slower but find leaks:
+  sdl_compiled_setting(SDL_PREFER_QUICK_EXIT 0)
 else()
-  set(SDL_DEBUG 0)
-  set(SDL_RELEASE 1)
+  sdl_compiled_setting(SDL_PREFER_QUICK_EXIT 1)
 endif()
 
 if(SDL_DEBUG)
@@ -125,6 +226,8 @@ if(APPLE)
 endif()
 if(WIN32)
   message(STATUS "The target system is WINDOWS.")
+  #TODO: scrupulously use debug-build (/MDd) vs release-build (/MD) externals libraries
+  add_definitions(-D_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH)
   if(CMAKE_VERSION VERSION_GREATER "2.8.11")
     CMAKE_POLICY(SET CMP0022 OLD)
     ### you're supposed to set only one of LINK_INTERFACE_LIBRARIES and INTERFACE_LINK_LIBRARIES for each target, but we weren't so careful
@@ -165,6 +268,9 @@ sdl_enable_debug_info()
 
 if(UNIX)
   if(NOT CMAKE_COMPILER_IS_CLANGXX)
+    sdl_linker_flags(-rdynamic)
+    # http://stackoverflow.com/questions/19373061/what-happens-to-global-and-static-variables-in-a-shared-library-when-it-is-dynam
+
     #sdl_linker_flags(-shared-libgcc)
 
     ## supposedly shared-libgcc is required if you want to catch exceptions across
@@ -172,6 +278,12 @@ if(UNIX)
     ## triggering abort(). however, other documentation online suggests that this
     ## is a bogus practice and leads to a false sense of 'everything works fine'
     ## when running on a different linux than you built on.
+
+    ### see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58909
+    if(NOT APPLE)
+      sdl_exe_linker_flags("-pthread -Wl,--whole-archive -lpthread -Wl,--no-whole-archive")
+    endif()
+    add_definitions("-pthread")
   endif()
   if(SDL_GPROF)
     add_definitions("-pg")
@@ -200,8 +312,13 @@ endif()
 
 set(sdl_STAGE_PREFIX ${CMAKE_BINARY_DIR}/stage) #this is the stage/installation dir
 
+find_package(Git)
+if(GIT_FOUND)
+  message("git found: ${GIT_EXECUTABLE}")
+else()
+  set(GIT_EXECUTABLE "git")
+endif()
 include(GetGitRevisionDescription)
-
 
 add_definitions(-DHAVE_CXX_STDHEADERS -DBOOST_ALL_NO_LIB -DTIXML_USE_TICPP)
 
@@ -227,11 +344,10 @@ if(NOT ANDROID)
 endif()
 
 
+set(JEMALLOC_ROOT "${SDL_EXTERNALS_PATH}/libraries/jemalloc")
 set(UTF8_ROOT "${SDL_SHARED_EXTERNALS_PATH}/utf8")
 set(YAML_CPP_ROOT "${SDL_EXTERNALS_PATH}/libraries/yaml-cpp-0.5.1")
 set(YAML_CPP_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/yaml-cpp-0.5.1")
-
-set(PCRE2_ROOT "${SDL_EXTERNALS_PATH}/libraries/pcre2-10.10")
 
 
 if(UNIX)
@@ -247,6 +363,7 @@ endif()
 
 set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.4.0")
 set(TBB_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/tbb-4.4.0")
+
 
 if(UNIX AND NOT APPLE)
   # Apache Portable Runtime (used by Log4cxx)
@@ -310,14 +427,14 @@ if(WIN32)
   # -DCRT_NO_DEPRECATE # could be used to get builtin vsnprintf if we want to try that
 
   # Set Boost options
-  set(SDL_BOOST_MINOR 59)
+  set(SDL_BOOST_MINOR 61)
   set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
   set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
   set(Boost_COMPILER "-vc140")
   set(Boost_NO_SYSTEM_PATHS 1)
-#  set(Boost_USE_STATIC_LIBS ON) # Enable if statically linking to boost
-    add_definitions(-DBOOST_ALL_DYN_LINK) # Disable if statically linking to boost
+  #  set(Boost_USE_STATIC_LIBS ON) # Enable if statically linking to boost
+  add_definitions(-DBOOST_ALL_DYN_LINK) # Disable if statically linking to boost
 
   set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
   set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.8")
@@ -373,6 +490,15 @@ if(USING_GCC)
   add_definitions("-Wno-deprecated") # FC12/libraries/svmtool++/include/svmtool/tagger.h
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
   message(STATUS "found gcc version ${GCC_VERSION}")
+  if(GCC_VERSION VERSION_LESS 6.0)
+  else()
+    message(STATUS "have gcc 6: ${GCCVERSION}")
+    set(SDL_HAVE_GCC_6 1)
+    if (BOOST_MINOR VERSION_LESS 61)
+      add_definitions(-Wno-placement-new)
+      add_definitions(-Wno-address)
+    endif()
+  endif()
   if(GCC_VERSION VERSION_LESS 5.0)
     message(FATAL_ERROR "${PROJECT_NAME} requires g++ 5 or greater (you have '${CMAKE_CXX_COMPILER}', version=${GCC_VERSION}.")
   else ()
@@ -380,6 +506,7 @@ if(USING_GCC)
     set(SDL_HAVE_GCC_4_7 1)
     set(SDL_HAVE_GCC_4_8 1)
     set(SDL_HAVE_GCC_5 1)
+    set(SDL_HAVE_GCC_6 1)
 
     if(LINUX)
       sdl_quiet_compiled_setting(UINT64_DIFFERENT_FROM_SIZE_T 0)
@@ -402,14 +529,9 @@ if(USING_GCC)
 
     if (APPLE)
       if(GCC_VERSION VERSION_GREATER 5.0)
-        # mac build isn't well supported currently (external lib builds weren't
-        # maintained for it), and it seems like `brew install boost` and `brew
-        # install gcc-5` don't understand _GLIBCXX_USE_CXX11_ABI, so likely a
-        # manual build of all libs is needed
-        include_directories(/usr/local/include/c++/5.1.0)
+        # mac build does not use _GLIBCXX_USE_CXX11_ABI - see sdl_enable_cpp11 in SdlHelperFunctions:
         sdl_enable_cpp11()
-        sdl_exe_linker_flags("-static-libgcc")
-        sdl_exe_linker_flags("-static-libstdc++")
+
         #-static
         # in case you want to quiet ld 'different visibility settings' warnings (makes exe larger?):
         # add_definitions("-fvisibility=hidden")
@@ -419,8 +541,7 @@ if(USING_GCC)
       sdl_linker_flags("-lstdc++ -lm -fwhole-program")
       sdl_enable_cpp11()
     endif()
-    #TODO: change to C++11 ABI once we have rebuilt all relevant (C++) libs
-    sdl_compiled_setting(_GLIBCXX_USE_CXX11_ABI 0)
+
     if(OPEN_SOURCE_RELEASE)
       sdl_exe_linker_flags("-static-libgcc")
     else()
@@ -506,12 +627,12 @@ if(CMAKE_COMPILER_IS_CLANGXX)
   add_definitions("-Wno-c++11-extensions -fshow-column -fshow-source-location -fcaret-diagnostics -fdiagnostics-fixit-info -fdiagnostics-parseable-fixits -fdiagnostics-print-source-range-info -fdiagnostics-show-option")
   if(USE_CLANG_ANALYZER)
     add_definitions("-Xanalyzer -analyzer-disable-checker=core.NullDereference")
-    message(INFO "using clang (static) analyzer, which might slow compilation - disable USE_CLANG_ANALYZER cmake option if you want full speed")
+    message(STATUS "using clang (static) analyzer, which might slow compilation - disable USE_CLANG_ANALYZER cmake option if you want full speed")
   endif()
   if (USE_CLANG_SANITIZE)
     add_definitions("-fno-omit-frame-pointer -O1 -fno-optimize-sibling-calls")
-    message(INFO "using clang sanitize, which might have significant (2-3x) runtime overhead - disable USE_CLANG_SANITIZE cmake option if you want full speed")
-    message(INFO "using clang sanitizes: ${SDL_CLANG_SANITIZES}")
+    message(STATUS "using clang sanitize, which might have significant (2-3x) runtime overhead - disable USE_CLANG_SANITIZE cmake option if you want full speed")
+    message(STATUS "using clang sanitizes: ${SDL_CLANG_SANITIZES}")
     add_definitions("${SDL_CLANG_SANITIZES}")
     add_definitions("${SDL_CLANG_COVERAGE_ARG}")
     #${SDL_CLANG_SANITIZES}
@@ -536,7 +657,7 @@ if(CMAKE_COMPILER_IS_CLANGXX)
   else()
     sdl_clang_stdlib(stdc)
   endif()
-else()
+elseif(UNIX)
   set(SDL_PTHREAD_LIB pthread)
   set(SDL_PTHREAD_ARG -pthread)
 endif()
@@ -604,9 +725,23 @@ if(UNIX)
   if (NOT USING_CLANG)
     set(SDL_TESTED_RELEASE_OPTIMIZATIONS "${SDL_TESTED_RELEASE_OPTIMIZATIONS} ${SDL_NO_CLANG_OPTIMIZATIONS}")
     if (SDL_HAVE_GCC_4_8)
+      add_definitions("-DUSE_LATEST_MEMCPY")
       #set(SDL_O3 "-Ofast") # adds only -ffinite-math-only but breaks some release-mode unit tests on nan
       set(SDL_O3_ADDL "-fcx-limited-range -funsafe-math-optimizations")
       set(SDL_O3 "-O3 --param allow-store-data-races=1 ${SDL_O3_ADDL}")
+      if (GCC_ASAN)
+        message(STATUS "GCC_ASAN=${GCC_ASAN} (if debug build)")
+        if (NOT SDL_RELEASE_BUILD)
+          #TODO: gold --detect-odr-violations
+          #TODO: -Wdouble-promotion, -fstack-usage, -Og, -fno-delete-null-pointer-checks, -falign-functions
+          message(STATUS "-fsanitize=address (debug build!)")
+          # -shared-libasan is the default w/ gcc
+          add_definitions("-fno-omit-frame-pointer -fsanitize=address -fPIC -fno-common")
+          #     Do not treat global variable in C as common variables (allows ASan to instrument them) (-fno-common)
+          sdl_linker_flags("-fsanitize=address")
+          #add_definitions(-D_GLIBCXX_DEBUG) # you can only link code compiled with debug mode and code compiled without debug mode if no instantiation of a container (vector string etc) is passed between the two translation units - probably no good for externals
+        endif()
+      endif()
     endif()
   endif()
   #-fmerge-all-constants violates separate C++ address for each constant but that's fine by us
@@ -618,7 +753,11 @@ if(UNIX)
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     set(SDL_RELEASE_OPTIMIZATIONS "-fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
   else()
-    set(SDL_RELEASE_OPTIMIZATIONS "-fno-keep-static-consts -fmerge-all-constants -DNDEBUG -DEIGEN_NO_DEBUG -falign-functions=${SDL_ALIGN_LOOPS_ETC_TO} -falign-loops=${SDL_ALIGN_LOOPS_ETC_TO} -falign-jumps=${SDL_ALIGN_LOOPS_ETC_TO} -falign-labels=1 -fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
+    set(SDL_NDEBUG)
+    if (SDL_PRODUCTION OR SDL_DEVELOPMENT_NDEBUG)
+      set(SDL_NDEBUG "-DNDEBUG")
+    endif()
+    set(SDL_RELEASE_OPTIMIZATIONS "-fno-keep-static-consts -fmerge-all-constants ${SDL_NDEBUG}  -falign-functions=${SDL_ALIGN_LOOPS_ETC_TO} -falign-loops=${SDL_ALIGN_LOOPS_ETC_TO} -falign-jumps=${SDL_ALIGN_LOOPS_ETC_TO} -falign-labels=1 -fomit-frame-pointer ${SDL_TESTED_RELEASE_OPTIMIZATIONS}")
   endif()
   #align-labels=1 is good because you need to avoid noop cost.
   if (NOT SDL_DEBUG_SYMBOLS)
@@ -628,11 +767,11 @@ if(UNIX)
       # https://gcc.gnu.org/wiki/LinkTimeOptimizationFAQ (/usr/bin/ar segfault via /local/gcc/bin/gcc-ar)
       sdl_linker_flags("-flto")
       add_definitions("-flto")
-      MESSAGE(INFO "Release build with !SDL_DEBUG_SYMBOLS - trying -flto (link time optimization")
+      message(STATUS "Release build with !SDL_DEBUG_SYMBOLS - trying -flto (link time optimization")
     endif()
   endif()
 
-  set(CMAKE_CXX_FLAGS_DEBUG "${SDL_Og} ${SDL_DEBUG_INFO_GCC_ARG} ${SDL_CFLAGS_ALL} ${SDL_UNSAFE_MATH}")
+  set(CMAKE_CXX_FLAGS_DEBUG "${SDL_Og} ${SDL_DEBUG_INFO_GCC_ARG} -fvar-tracking-assignments ${SDL_CFLAGS_ALL} ${SDL_UNSAFE_MATH}")
 
   set(CMAKE_CXX_FLAGS_RELEASE "${SDL_O3} ${SDL_CFLAGS_ALL} -Wuninitialized ${SDL_RELEASE_OPTIMIZATIONS} ${SDL_UNSAFE_MATH}")
 
@@ -649,8 +788,15 @@ if(UNIX)
 
   if(LINUX)
     set(Boost_NO_SYSTEM_PATHS 1)
-    set(SDL_BOOST_MINOR 59)
-    set(Boost_COMPILER "-gcc51")
+    if (SDL_NEW_BOOST)
+      message(STATUS "new boost 1.60")
+      set(SDL_BOOST_MINOR 60)
+      set(Boost_COMPILER "-gcc")
+    else()
+      message(STATUS "old boost 1.59")
+      set(SDL_BOOST_MINOR 59)
+      set(Boost_COMPILER "-gcc51")
+    endif()
     set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
     set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
     set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
@@ -660,6 +806,69 @@ if(UNIX)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
     set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
 
+
+    # set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-ng")
+    #TODO: might be necessary to rebuild all libs with zlib-ng e.g. LmConfig::load
+    # failed for
+    # kenlm(/local/graehl/xmt/RegressionTests/xmt/AraEng/../MosesModel/model/europarl.srilm.gz
+    # N=3): util/read_compressed.cc:167 in util::{anonymous}::GZip::GZip(const
+    # void*, std::size_t) threw GZException because `0 !=
+    # inflateInit2_((&stream_), (32 + 15), "1.2.3", sizeof(z_stream))'.
+
+  endif()
+
+  if(ANDROID)
+    sdl_exe_linker_flags(-static)
+    set(Boost_FIND_VERSION 1.49)
+    set(Boost_ADDITIONAL_VERSIONS "1.49" "1.49.0")
+    set(Boost_NO_SYSTEM_PATHS 1)
+    set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost-1.49.0")
+    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_COMPILER "-gcc")
+
+    set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
+    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
+    set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/lib) # always use release for Android
+    set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.3")
+    set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-49.1.2")
+    set(DB_ROOT_PATH "${SDL_EXTERNALS_PATH}/libraries/db-5.3.21")
+
+    # Android uses different yaml and tbb versions:
+    set(TBB_ROOT "${SDL_EXTERNALS_PATH}/libraries/tbb-4.1/")
+  endif()
+
+
+  if(APPLE)
+    set(APPLE_USE_LOCAL_ICU 1)
+    if(APPLE_USE_LOCAL_ICU)
+      set(ICU_ROOT "/usr/local/opt/icu4c")
+    else()
+      set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-5.4")
+    endif()
+
+    sdl_noexist_fallback(LOG4CXX_ROOT /usr/local)
+    find_path(FOUND_LOG4CXX_ROOT log4cxx/logger.h PATHS ${LOG4CXX_ROOT}/include)
+    if(NOT FOUND_LOG4CXX_ROOT)
+      message(ERROR "Could not find log4cxx installation. Please install it system-wide or specify location with -DLOG4CXX_ROOT")
+    endif()
+    set(LOG4CXX_ROOT ${FOUND_LOG4CXX_ROOT}/..)
+    show(LOG4CXX_ROOT)
+    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
+    show(LOG4CXX_LIB_DIR)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+
+    set(Boost_USE_MULTITHREADED 1)
+    set(SDL_BOOST_MINOR 61)
+    set(Boost_NO_SYSTEM_PATHS 0)
+    set(BOOST_ROOT "/usr/local")
+    set(BOOST_LIBRARYDIR "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0/lib")
+    set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}")
+    show(Boost_FIND_VERSION)
+    set(Boost_COMPILER "")
+    if(OPEN_SOURCE_RELEASE)
+      set(Boost_USE_STATIC_LIBS ON)
+    endif()
 
     if(CMAKE_COMPILER_IS_GNUCXX)
       #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
@@ -691,12 +900,12 @@ MARK_AS_ADVANCED(
 
 if(ANDROID)
   add_definitions(-DNLOG)
-  MESSAGE(STATUS "Disabling logging for Android")
+  message(STATUS "Disabling logging for Android")
 endif()
 
 # Suppress warnings/errors for Production builds
 if(SDL_SUPPRESS_IGNORABLE_WARNINGS)
-  MESSAGE(STATUS "SDL_SUPPRESS_IGNORABLE_WARNINGS: Suppressing ignorable warnings and errors log messages")
+  message(STATUS "SDL_SUPPRESS_IGNORABLE_WARNINGS: Suppressing ignorable warnings and errors log messages")
   sdl_compiled_setting(SDL_SUPPRESS_IGNORABLE_WARNINGS 1)
 else()
   sdl_compiled_setting(SDL_SUPPRESS_IGNORABLE_WARNINGS 0)
@@ -704,7 +913,7 @@ endif()
 
 # CA-7791 Suppress source code locations in log messages; used when building in release mode for external customers
 if(SDL_SUPPRESS_SOURCE_LOCATION)
-  MESSAGE(STATUS "SDL_SUPPRESS_SOURCE_LOCATION: Suppressing source code location in log messages")
+  message(STATUS "SDL_SUPPRESS_SOURCE_LOCATION: Suppressing source code location in log messages")
   sdl_compiled_setting(SDL_SUPPRESS_SOURCE_LOCATION 1)
 endif()
 
@@ -724,6 +933,7 @@ if (SDL_DEBUG_SYMBOLS)
           set(SDL_CLANG_PROFILE "--profile")
           add_definitions("${SDL_CLANG_PROFILE}")
           sdl_exe_linker_flags("${SDL_CLANG_PROFILE}")
+
           #          sdl_exe_linker_flags("-lprofile_rt")
         else()
           add_definitions("--coverage")
@@ -752,19 +962,33 @@ if(CMAKE_COMPILER_IS_GNUXX)
 endif()
 
 find_package(ICU)
-MESSAGE(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
+message(STATUS "ICU Libraries: ${ICU_LIBRARIES}")
 if(WIN32)
-  set(LINK_DEPENDENCIES ${LINK_DEPENDENCIES} ${ICU_LIBRARIES})
+  list(APPEND LINK_DEPENDENCIES ${ICU_LIBRARIES})
 endif()
 sdl_quiet_compiled_setting(HAVE_ICU 1)
 
 find_package(TBB)
-MESSAGE(STATUS "TBB Library: ${TBB_LIBRARY}")
-MESSAGE(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo" OR ${CMAKE_BUILD_TYPE} MATCHES "RelWithoutTbbmalloc")
+message(STATUS "TBB Library: ${TBB_LIBRARY}")
+message(STATUS "TBB Include Directories: ${TBB_INCLUDE_DIR}")
+if(${SDL_REPLACE_MALLOC})
+  if (NOT APPLE)
+    set(SDL_MALLOC_LIBRARY ${TBBMALLOC_LIBRARY})
+  endif()
+  if (SDL_PREFER_JEMALLOC)
+    show(JEMALLOC_ROOT)
+    find_package(Jemalloc)
+    show(JEMALLOC_FOUND)
+    if(JEMALLOC_FOUND)
+      set(SDL_MALLOC_LIBRARY ${JEMALLOC_LIBRARY})
+    endif()
+  endif()
+  status("using SDL_MALLOC_LIBRARY ${SDL_MALLOC_LIBRARY}")
+else()
+  set(SDL_MALLOC_LIBRARY)
   unset(TBBMALLOC_LIBRARY CACHE)
   set(TBBMALLOC_LIBRARY)
-  MESSAGE(STATUS "Disabling TBB malloc: TBB_LIBRARY=${TBB_LIBRARY} TBBMALLOC_LIBRARY=${TBBMALLOC_LIBRARY}")
+  message(STATUS "Disabling TBB/JE malloc: TBB_LIBRARY=${TBB_LIBRARY} SDL_MALLOC_LIBRARY=${SDL_MALLOC_LIBRARY}")
 endif()
 
 
@@ -792,7 +1016,7 @@ if(NOT ANDROID)
 endif()
 
 if(WIN32)
-#  list(APPEND boost_libs exception) # Enable if statically linking to boost
+  #  list(APPEND boost_libs exception) # Enable if statically linking to boost
   list(APPEND boost_libs zlib) # Disable if statically linking to boost
 endif()
 
@@ -802,7 +1026,7 @@ set(boost_libs_shared ${boost_libs})
 message(STATUS "looking for Boost version ${Boost_FIND_VERSION} compiler ${Boost_COMPILER}")
 find_package(Boost ${Boost_FIND_VERSION} REQUIRED COMPONENTS ${boost_libs})
 
-MESSAGE(STATUS "SDL_BOOST_MINOR ${SDL_BOOST_MINOR} Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS}")
+message(STATUS "SDL_BOOST_MINOR ${SDL_BOOST_MINOR} Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS}")
 
 #if 1, attempt to use unit_test_framework dylib, but provide our own main()
 set(SDL_TRY_QUICK_EXIT_UNIT_TEST 1)
@@ -829,7 +1053,7 @@ elseif(SDL_TRY_QUICK_EXIT_UNIT_TEST)
     add_definitions(-DBOOST_TEST_DYN_LINK)
   else()
     add_definitions(-DBOOST_TEST_DYN_LINK)
-    MESSAGE(STATUS "BOOST_TEST_DYN_LINK")
+    message(STATUS "BOOST_TEST_DYN_LINK")
   endif()
 else()
   set(SDL_UNIT_TEST_MAIN 0)
@@ -847,46 +1071,40 @@ else()
       set(BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC ${Boost_LIBRARY_DIRS}/libboost_unit_test_framework${Boost_COMPILER}-mt-1_${SDL_BOOST_MINOR}.a)
     endif()
   endif()
-  MESSAGE(STATUS "Boost unit test framework: ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC}")
+  message(STATUS "Boost unit test framework: ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC}")
 
   #see http://www.boost.org/doc/libs/1_57_0/libs/test/doc/html/utf/compilation.html#utf.flag.alt-init-api
   set_target_properties(boost_unit_test_framework PROPERTIES IMPORTED_LOCATION ${BOOST_UNIT_TEST_FRAMEWORK_LIB_STATIC})
 endif()
 
 
-MESSAGE(STATUS "unit testing: SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN} ... SDL_TRY_UNIT_TEST_DYN_LINK ${SDL_TRY_UNIT_TEST_DYN_LINK}")
+message(STATUS "unit testing: SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN} ... SDL_TRY_UNIT_TEST_DYN_LINK ${SDL_TRY_UNIT_TEST_DYN_LINK}")
 sdl_quiet_compiled_setting(SDL_UNIT_TEST_MAIN ${SDL_UNIT_TEST_MAIN})
 
-MESSAGE(STATUS "Boost Include Directories: ${Boost_INCLUDE_DIRS}")
-MESSAGE(STATUS "Boost Library Directories: ${Boost_LIBRARY_DIRS}")
+message(STATUS "Boost Include Directories: ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost Library Directories: ${Boost_LIBRARY_DIRS}")
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "Boost libraries not found")
 endif()
 
-sdl_rpath(${Boost_LIBRARY_DIRS})
+sdl_rpath("${Boost_LIBRARY_DIRS}")
 
 find_package(YamlCpp)
 message(STATUS "yaml-cpp library: ${YAML_CPP_LIBRARY}")
 message(STATUS "yaml-cpp include directory: ${YAML_CPP_INCLUDE_DIR}")
 
-find_package(PCRE2)
-message(STATUS "PCRE2 library: ${PCRE2_LIBRARY}")
-message(STATUS "PCRE2 include directory: ${PCRE2_INCLUDE_DIR}")
 
-if(WIN32)
-  add_definitions(-DPCRE2_STATIC=1)
-endif()
 
 find_package(ZLIB)
-MESSAGE(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
+message(STATUS "ZLib Found: ${ZLIB_LIBRARIES}")
 sdl_quiet_compiled_setting(HAVE_ZLIB 1)
 
 
 if(NOT ANDROID)
   find_package (Log4CXX)
-  MESSAGE(STATUS "log4cxx Libraries: ${LOG4CXX_LIBRARIES}")
-  MESSAGE(STATUS "log4cxx Include Directories: ${LOG4CXX_INCLUDE_DIR}")
+  message(STATUS "log4cxx Libraries: ${LOG4CXX_LIBRARIES}")
+  message(STATUS "log4cxx Include Directories: ${LOG4CXX_INCLUDE_DIR}")
 endif()
 
 
@@ -903,8 +1121,8 @@ if(NOT DEFINED LBFGS_ROOT)
   endif()
 endif()
 find_package(Lbfgs)
-MESSAGE(STATUS "libLBFGS Libraries: ${LBFGS_LIB}")
-MESSAGE(STATUS "libLBFGS Include Directories: ${LBFGS_INCLUDE_DIR}")
+message(STATUS "libLBFGS Libraries: ${LBFGS_LIB}")
+message(STATUS "libLBFGS Include Directories: ${LBFGS_INCLUDE_DIR}")
 
 if(WIN32)
   # Windows linker problem: OpenFst constant kNoSymbol is defined in
@@ -939,6 +1157,11 @@ else()
   set(SDL_LIB "sdl_static")
 endif()
 
+if(SDL_LIB STREQUAL "xmt_shared" OR SDL_LIB_TYPE STREQUAL "All")
+  set(HAVE_XMT_SHARED_LIB 1)
+else()
+  set(HAVE_XMT_SHARED_LIB 0)
+endif()
 if(BUILD_KENLM)
   add_subdirectory(${SDL_EXTERNALS_SOURCE_PATH}/KenLM ${CMAKE_CURRENT_BINARY_DIR}/KenLM)
 endif()
@@ -960,30 +1183,33 @@ if(NOT ANDROID)
 
   # for clang static analyzer
   set(CTEST_CUSTOM_WARNING_EXCEPTION
-".*warning: 'type' overrides a member function but is not marked 'override' [-Winconsistent-missing-override].*"
-".*small_vector.hpp.*warning: Call to 'malloc' has an allocation size of 0 bytes.*"
-".*stl_uninitialized.h:.*warning: Forming reference to null pointer.*"
-".*stl_vector.h:.* warning: Returning null reference.*"
-"warning: Value stored to 'yymsg' is never read"
-"warning: Value stored to 'yytoken' is never read"
-)
+    ".*warning: 'type' overrides a member function but is not marked 'override' [-Winconsistent-missing-override].*"
+    ".*small_vector.hpp.*warning: Call to 'malloc' has an allocation size of 0 bytes.*"
+    ".*stl_uninitialized.h:.*warning: Forming reference to null pointer.*"
+    ".*stl_vector.h:.* warning: Returning null reference.*"
+    "warning: Value stored to 'yymsg' is never read"
+    "warning: Value stored to 'yytoken' is never read"
+    )
 
 endif()
 
-
-set(UTIL_LIBRARY_NAME sdl_util)
+set(UTIL_LIBRARY_NAME Util)
 
 set(INDIRECT_Vocabulary_LIB_DEPENDENCIES
-  ${TBB_LIBRARY}
   ${YAML_CPP_LIBRARY}
-  ${APR_LIBRARY}
-  ${APR_UTIL_LIBRARY}
-  ${LOG4CXX_LIBRARIES}
-  ${ICU_LIBRARY}
+  ${ICU_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${GCC5_LIBRARIES}
+  ${LOG4CXX_LIBRARIES}
+  ${APR_UTIL_LIBRARY}
+  ${APR_LIBRARY}
+  ${SDL_MALLOC_LIBRARY}
+  ${GCC5_LIBRARIES} # for asan
   )
+
+if (NOT APPLE)
+  list(APPEND INDIRECT_Vocabulary_LIB_DEPENDENCIES ${TBB_LIBRARY})
+endif()
 
 
 if (LINUX)
@@ -992,13 +1218,16 @@ endif()
 
 set(INDIRECT_UTIL_LIB_DEPENDENCIES
   ${INDIRECT_Vocabulary_LIB_DEPENDENCIES}
-  Vocabulary
   ${BZIP2_LIBRARIES}
-  ${PCRE2_LIBRARY}
   )
+
 
 if (WIN32)
   list(APPEND INDIRECT_UTIL_LIB_DEPENDENCIES psapi.lib)
+endif()
+
+if (UNIX)
+  list(APPEND INDIRECT_UTIL_LIB_DEPENDENCIES dl)
 endif()
 
 if(ZLIB_FOUND)
@@ -1010,7 +1239,7 @@ endif()
 
 # Util and prereqs - used by most projects (except a few that might
 # use Util header-only)
-set(UTIL_LIBRARIES ${UTIL_LIBRARY_NAME} ${INDIRECT_UTIL_LIB_DEPENDENCIES})
+set(UTIL_LIBRARIES Util ${INDIRECT_UTIL_LIB_DEPENDENCIES})
 
 macro(sdl_base_includes)
   #header only:
@@ -1028,9 +1257,8 @@ macro(sdl_util_includes)
   sdl_base_includes()
   include_directories(${ICU_INCLUDE_DIR})
   include_directories(${YAML_CPP_INCLUDE_DIR})
-  include_directories(${PCRE2_INCLUDE_DIR})
-  include_directories(${TBB_INCLUDE_DIR})
   include_directories(${ZEROMQ_INCLUDE_DIR})
+  include_directories(${TBB_INCLUDE_DIR})
 endmacro()
 
 
@@ -1052,7 +1280,7 @@ sdl_finish_cflags()
 # Add subdirectories and find their unit test executables.
 
 if(OPEN_SOURCE_RELEASE)
-  MESSAGE(STATUS "OPEN_SOURCE_RELEASE: setting defines")
+  message(STATUS "OPEN_SOURCE_RELEASE: setting defines")
   sdl_compiled_setting(HYP_OPEN_SOURCE_RELEASE 1) #necessary
   sdl_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 0) # 0 => better performance (but you may be interested in using them - see code)
 
@@ -1069,7 +1297,7 @@ if(OPEN_SOURCE_RELEASE)
 else()
   sdl_quiet_compiled_setting(SDL_HYPERGRAPH_FS_ANNOTATIONS 1)
   if(SDL_DEVELOPMENT)
-    MESSAGE(STATUS "!OPEN_SOURCE_RELEASE AND SDL_DEVELOPMENT: SDL_ASSERT_THREAD_SPECIFIC")
+    message(STATUS "!OPEN_SOURCE_RELEASE AND SDL_DEVELOPMENT: SDL_ASSERT_THREAD_SPECIFIC")
     # if not set, then enabled for debug only:
     sdl_quiet_compiled_setting(SDL_ASSERT_THREAD_SPECIFIC 1)
   endif()
@@ -1106,7 +1334,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/CMakeConfig.in"
   "${PROJECT_SOURCE_DIR}/CMakeConfig.hpp")
 
-MESSAGE(STATUS "Unit test (check only) executables: ${testExecutables}")
+message(STATUS "Unit test (check only) executables: ${testExecutables}")
 
 # Add custom target "check" that builds unit test executables and runs
 # unit tests:

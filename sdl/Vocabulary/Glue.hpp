@@ -24,7 +24,7 @@
 namespace sdl {
 namespace Vocabulary {
 
-std::string const kGlueAffix("__LW_AT__");
+static std::string const kGlueAffix("__LW_AT__");
 
 inline void removeGlueAffix(std::string& token) {
   Util::stripSuffix(token, kGlueAffix);

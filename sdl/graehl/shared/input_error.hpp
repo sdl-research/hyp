@@ -25,9 +25,9 @@
 
 #include <cstddef>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sstream>
 
 namespace graehl {
 
@@ -54,10 +54,8 @@ template <class C>
 inline C scrunch_char(C c, char with = '/') {
   switch (c) {
     case '\n':
-    case '\t':
-      return with;
-    default:
-      return c;
+    case '\t': return with;
+    default: return c;
   }
 }
 
@@ -130,7 +128,7 @@ inline std::streamoff show_error_context(std::basic_istream<Ic, It>& in, std::ba
 
 template <class Exception, class Ic, class It>
 void throw_input_exception(std::basic_istream<Ic, It>& in, std::string const& error = "",
-                           const char* item = "input", std::size_t number = 0) {
+                           char const* item = "input", std::size_t number = 0) {
   std::ostringstream err;
   err << "Error reading";
   if (item) err << ' ' << item << " # " << number;
@@ -145,7 +143,7 @@ void throw_input_exception(std::basic_istream<Ic, It>& in, std::string const& er
 
 template <class Ic, class It>
 void throw_input_error(std::basic_istream<Ic, It>& in, std::string const& error = "",
-                       const char* item = "input", std::size_t number = 0) {
+                       char const* item = "input", std::size_t number = 0) {
   throw_input_exception<std::runtime_error>(in, error, item, number);
 }
 

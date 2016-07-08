@@ -85,9 +85,8 @@
 // std::invalid_argument
 #include <exception>
 // std::max
-#include <algorithm>
-
 #include <Pool/poolfwd.hpp>
+#include <algorithm>
 
 // std::numeric_limits
 #include <boost/limits.hpp>
@@ -103,12 +102,12 @@
 #include <boost/assert.hpp>
 
 #ifdef BOOST_POOL_INSTRUMENT
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #endif
 #ifdef BOOST_POOL_VALGRIND
-#include <set>
 #include <valgrind/memcheck.h>
+#include <set>
 #endif
 
 #ifdef BOOST_NO_STDC_NAMESPACE
@@ -264,7 +263,7 @@ The member function valid can be used to test for validity.
     return sz;
   }
   size_type element_size() const {  //! \returns size of element pointer area.
-    return static_cast<size_type>(sz-sizeof(size_type)
+    return static_cast<size_type>(sz - sizeof(size_type)
                                   - ::boost::math::static_lcm<sizeof(size_type), sizeof(void*)>::value);
   }
 
@@ -454,7 +453,7 @@ class pool : protected simple_segregated_storage<typename UserAllocator::size_ty
     // when required.  This works provided all alignments are powers of two.
     size_type s = (std::max)(requested_size, min_alloc_size);
     size_type rem = s % min_align;
-    if (rem) s += min_align-rem;
+    if (rem) s += min_align - rem;
     BOOST_ASSERT(s >= min_alloc_size);
     BOOST_ASSERT(s % min_align == 0);
     return s;
@@ -478,7 +477,7 @@ class pool : protected simple_segregated_storage<typename UserAllocator::size_ty
      we want to grab at most bytes_from_allocator from allocator. set start/next size accordingly.
   */
   void target_alloc_size(size_type bytes_from_allocator) {
-    size_type const block_max = bytes_from_allocator-POD_overhead;
+    size_type const block_max = bytes_from_allocator - POD_overhead;
     size_type const alloc = alloc_size();
     if (alloc < block_max)
       start_size = next_size = block_max / alloc;
@@ -853,7 +852,7 @@ void* pool<UserAllocator>::malloc_need_resize() {  //! No memory in any of our s
 
 template <typename UserAllocator>
 void* pool<UserAllocator>::ordered_malloc_need_resize() {  //! No memory in any of our storages; make a new
-                                                           //! storage,
+  //! storage,
   //! \returns pointer to new chunk.
   size_type partition_size = alloc_size();
   size_type POD_size = next_size * partition_size + POD_overhead;
@@ -1076,8 +1075,6 @@ class pool {
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
-
-
 
 
 #endif

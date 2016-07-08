@@ -17,13 +17,12 @@
 #define HYP__IMUTABLEHYPERGRAPH_HPP
 #pragma once
 
-#include <algorithm>
-
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/StateIdTranslation.hpp>
 #include <sdl/Hypergraph/SortArcs.hpp>
-#include <sdl/Util/IteratorGenerator.hpp>
+#include <sdl/Hypergraph/StateIdTranslation.hpp>
 #include <sdl/Hypergraph/Visit.hpp>
+#include <sdl/Util/IteratorGenerator.hpp>
+#include <algorithm>
 
 namespace sdl {
 namespace Hypergraph {
@@ -152,7 +151,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
   StateId maxNotTerminalState() const override {
-    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_-1
+    return (this->properties() & kSortedStates) ? sortedStatesNumNotTerminal_ - 1
                                                 : this->maxNotTerminalStateImpl();
   }
 
@@ -352,7 +351,7 @@ struct IMutableHypergraph : IHypergraph<A> {
   }
 
   void forceOnlyProperties(Properties properties) {
-    forceProperties(properties, kAllProperties-properties);
+    forceProperties(properties, kAllProperties - properties);
   }
   void forceProperties(Properties properties, bool on = true) {
     if (on)
@@ -695,6 +694,16 @@ inline void forceInArcsOnly(HypergraphBase& hg) {
     } else
       SDL_THROW_LOG(Hypergraph.forceInArcs, ConfigException, "input hg doesn't have inarcs");
   }
+}
+
+template <class Arc>
+unique_ptr<IMutableHypergraph<Arc>> clone(IHypergraph<Arc> const& hg) {
+  return unique_ptr<IMutableHypergraph<Arc>>(dynamic_cast<IMutableHypergraph<Arc>*>(hg.clone()));
+}
+
+template <class Arc>
+unique_ptr<IMutableHypergraph<Arc>> clone(IMutableHypergraph<Arc> const& hg) {
+  return unique_ptr<IMutableHypergraph<Arc>>(hg.clone());
 }
 
 

@@ -23,11 +23,11 @@
 #define HYP__HYPERGRAPH__EQUAL_HPP
 #pragma once
 
+#include <sdl/Hypergraph/Assert.hpp>
 #include <sdl/Hypergraph/Determinize.hpp>
 #include <sdl/Hypergraph/Difference.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Assert.hpp>
 
 namespace sdl {
 namespace Hypergraph {

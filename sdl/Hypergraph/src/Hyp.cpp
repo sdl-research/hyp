@@ -19,43 +19,43 @@
 #ifndef SDL_MINIMAL_HYP_MAIN
 #define SDL_MINIMAL_HYP_MAIN 0
 #endif
+#if !SDL_MINIMAL_HYP_MAIN
+#if HAVE_OPENFST
+#include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
+#endif
+#include <sdl/Hypergraph/src/HypComplement.cpp>
+#include <sdl/Hypergraph/src/HypConcat.cpp>
+#include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
+#include <sdl/Hypergraph/src/HypConvertStrings.cpp>
+#include <sdl/Hypergraph/src/HypDeterminize.cpp>
+#include <sdl/Hypergraph/src/HypDraw.cpp>
+#include <sdl/Hypergraph/src/HypFsmDraw.cpp>
+#include <sdl/Hypergraph/src/HypGetString.cpp>
+#include <sdl/Hypergraph/src/HypInvert.cpp>
+#include <sdl/Hypergraph/src/HypIsolateStart.cpp>
+#include <sdl/Hypergraph/src/HypProject.cpp>
+#include <sdl/Hypergraph/src/HypPrune.cpp>
+#include <sdl/Hypergraph/src/HypReverse.cpp>
+#include <sdl/Hypergraph/src/HypReweight.cpp>
+#include <sdl/Hypergraph/src/HypReweightBest.cpp>
+#include <sdl/Hypergraph/src/HypSamplePath.cpp>
+#include <sdl/Hypergraph/src/HypSubUnion.cpp>
+#include <sdl/Hypergraph/src/HypToMosesLattice.cpp>
+#include <sdl/Hypergraph/src/HypToOpenFstText.cpp>
+#include <sdl/Hypergraph/src/HypTrie.cpp>
+#include <sdl/Hypergraph/src/HypUnion.cpp>
+#include <sdl/Hypergraph/src/HypWordToCharacters.cpp>
+#endif
 #define SDL_TRANSFORM_MAIN_LOG_WEIGHT 1
 #define SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT 1
 #include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/src/HypBest.cpp>
 #include <sdl/Hypergraph/src/HypCompose.cpp>
-#include <sdl/Hypergraph/src/HypInside.cpp>
 #include <sdl/Hypergraph/src/HypEmpty.cpp>
+#include <sdl/Hypergraph/src/HypInside.cpp>
 #include <sdl/Hypergraph/src/HypPruneToBest.cpp>
 #include <sdl/Hypergraph/src/HypPushWeights.cpp>
 #include <sdl/Util/QuickExit.hpp>
-#if !SDL_MINIMAL_HYP_MAIN
-#if HAVE_OPENFST
-#include <sdl/Hypergraph/src/HypToReplaceFst.cpp>
-#endif
-#include <sdl/Hypergraph/src/HypWordToCharacters.cpp>
-#include <sdl/Hypergraph/src/HypReweightBest.cpp>
-#include <sdl/Hypergraph/src/HypConvertCharsToTokens.cpp>
-#include <sdl/Hypergraph/src/HypComplement.cpp>
-#include <sdl/Hypergraph/src/HypInvert.cpp>
-#include <sdl/Hypergraph/src/HypIsolateStart.cpp>
-#include <sdl/Hypergraph/src/HypDeterminize.cpp>
-#include <sdl/Hypergraph/src/HypPrune.cpp>
-#include <sdl/Hypergraph/src/HypSamplePath.cpp>
-#include <sdl/Hypergraph/src/HypUnion.cpp>
-#include <sdl/Hypergraph/src/HypSubUnion.cpp>
-#include <sdl/Hypergraph/src/HypConcat.cpp>
-#include <sdl/Hypergraph/src/HypReverse.cpp>
-#include <sdl/Hypergraph/src/HypReweight.cpp>
-#include <sdl/Hypergraph/src/HypToMosesLattice.cpp>
-#include <sdl/Hypergraph/src/HypConvertStrings.cpp>
-#include <sdl/Hypergraph/src/HypDraw.cpp>
-#include <sdl/Hypergraph/src/HypFsmDraw.cpp>
-#include <sdl/Hypergraph/src/HypToOpenFstText.cpp>
-#include <sdl/Hypergraph/src/HypGetString.cpp>
-#include <sdl/Hypergraph/src/HypTrie.cpp>
-#include <sdl/Hypergraph/src/HypProject.cpp>
-#endif
 
 #if SDL_FIX_LOCALE
 sdl::Util::DefaultLocaleFastCout initCout;
@@ -83,6 +83,5 @@ sdl::Util::DefaultLocaleFastCout initCout;
 
 int main(int argc, char* argv[]) {
   int exitcode = graehl::run_named_main(argc, argv);
-  sdl::Util::quickExit(exitcode);
-  return exitcode;
+  return sdl::Util::normalExit(exitcode);
 }

@@ -19,8 +19,8 @@
 #define SPECIALSYMBOLSTEMPLATE_HPP_
 #pragma once
 
-#include <sdl/Sym.hpp>
 #include <sdl/Vocabulary/SpecialSymbolVocab.hpp>
+#include <sdl/Sym.hpp>
 
 namespace sdl {
 namespace Vocabulary {

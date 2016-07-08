@@ -28,7 +28,7 @@ struct DeferAddArcs : Util::AutoDeleteAll<Arc> {
   typedef Util::AutoDeleteAll<Arc> Base;
   IMutableHypergraph<Arc>& hg;
   DeferAddArcs(IMutableHypergraph<Arc>& hg) : hg(hg) { this->reserve(hg.size() * 2); }
-  void operator()(Arc* arc) const { const_cast<DeferAddArcs*>(this)->push_back(new Arc(*arc)); }
+  void operator()(Arc* arc) const { const_cast<DeferAddArcs*>(this)->push_back(arc); }
   void finish() {
     typename Base::iterator i = this->begin(), e = this->end();
     try {

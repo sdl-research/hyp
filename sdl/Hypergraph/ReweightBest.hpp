@@ -28,8 +28,8 @@
 #pragma once
 
 
-#include <sdl/Hypergraph/Reweight.hpp>
 #include <sdl/Hypergraph/BestPath.hpp>
+#include <sdl/Hypergraph/Reweight.hpp>
 
 namespace sdl {
 namespace Hypergraph {

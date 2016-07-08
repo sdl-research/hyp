@@ -25,19 +25,18 @@
 #define SDL_OPTIMIZATION_FEATUREHYPERGRAPHPAIRS_HPP
 #pragma once
 
-#include <utility>
-#include <fstream>
-#include <vector>
-#include <boost/filesystem.hpp>
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/Sleep.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Assert.hpp>
-#include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/ArcVisitors.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Optimization/IOriginalFeatureIds.hpp>
 #include <sdl/Optimization/Types.hpp>
+#include <sdl/Util/Assert.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Sleep.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <utility>
+#include <vector>
 
 namespace sdl {
 namespace Optimization {
@@ -123,7 +122,7 @@ class InMemoryFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
    */
   InMemoryFeatureHypergraphPairs(VectorPtr const& pPairs) : pPairs_(pPairs), numParams_(0) {}
 
-  value_type operator[](TrainingDataIndex index)override {
+  value_type operator[](TrainingDataIndex index) override {
     SDL_ASSERT_MSG(pPairs_->size() >= index, "index out of bounds");
     return (*pPairs_)[index];
   }
@@ -207,7 +206,7 @@ class WriteFeatureHypergraphPairs : public IFeatureHypergraphPairs<ArcT> {
     ++size_;
   }
 
-  value_type operator[](TrainingDataIndex index)override { return value_type(); }
+  value_type operator[](TrainingDataIndex index) override { return value_type(); }
 
   void finish() override {
     bfs::path p(dir_ / bfs::path("size.txt"));

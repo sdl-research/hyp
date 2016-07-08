@@ -17,12 +17,12 @@
 #define SDL_UTIL_FORMATTEDOSTREAM_HPP
 #pragma once
 
+#include <sdl/SharedPtr.hpp>
 #include <cctype>
 #include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <sdl/SharedPtr.hpp>
 
 namespace sdl {
 namespace Util {
@@ -35,7 +35,7 @@ namespace Util {
    Example usage:
 
    \code
-   const std::string text(
+   std::string const text(
       "Friends, Romans, countrymen, lend me your ears; I come to bury Caesar, "
       " not to praise him.  The evil that men do lives after them; The good "
       "is oft interred with their bones; So let it be with Caesar. ReallyLong"
@@ -117,8 +117,8 @@ class FormattedOstreamIterator : public std::iterator<std::output_iterator_tag, 
 template <class Chars>
 unsigned printFormatted(std::ostream& out, Chars const& content, unsigned startColumn,
                         std::string const& hangingIndent = "  ", unsigned endColumn = 80) {
-  unsigned hangColumns = (unsigned)(endColumn-hangingIndent.size());
-  FormattedOstreamIterator format(out, hangingIndent, hangColumns, endColumn-startColumn);
+  unsigned hangColumns = (unsigned)(endColumn - hangingIndent.size());
+  FormattedOstreamIterator format(out, hangingIndent, hangColumns, endColumn - startColumn);
   for (typename Chars::const_iterator i = content.begin(), e = content.end(); i != e; ++i) format = *i;
   // format=std::copy(content.begin(), content.end(), format);
   if (format.getLine()) startColumn = (unsigned)hangingIndent.size();

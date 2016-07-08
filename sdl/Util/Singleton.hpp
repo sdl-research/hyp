@@ -46,9 +46,9 @@
 #endif
 
 #if !SDL_STATIC_LOCAL_INIT_ATOMIC
-#include <stdexcept>
-#include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
+#include <boost/thread/thread.hpp>
+#include <stdexcept>
 #endif
 
 #ifndef SDL_FREE_SINGLETON
@@ -144,7 +144,7 @@ struct Singleton {
   }
   static boost::once_flag once;
   static volatile T* pSingleton;  // NOTE: tried to use scoped_ptr but realized that the ctor might be called
-                                  // after another static initializer has used it! bare pointer is safe.
+  // after another static initializer has used it! bare pointer is safe.
   static FreeSingleton freeSingleton;  // call singleton destructor if needed, on static destruction
   static std::string constructExceptionWhat;
   static bool constructException;

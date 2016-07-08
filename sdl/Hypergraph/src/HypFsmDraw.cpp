@@ -11,9 +11,9 @@
 #define USAGE_HypFsmDraw() \
   "Print graphviz (dot) equivalent of hypergraph unless --out=-0 " USAGE_HypFsmDrawFST
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
-#include <sdl/Hypergraph/OpenFstDraw.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
+#include <sdl/Hypergraph/OpenFstDraw.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -45,6 +45,3 @@ struct HypFsmDraw : TransformMain<HypFsmDraw> {
 }
 
 HYPERGRAPH_NAMED_MAIN(FsmDraw)
-
-
-

@@ -17,14 +17,14 @@
 #define SDL_CONTAINS_JEG20111026_HPP
 #pragma once
 
-#include <algorithm>
-#include <string>
-#include <vector>
-#include <list>
-#include <deque>
-#include <map>
 #include <sdl/Util/SmallVector.hpp>
 #include <sdl/Util/SortedMap.hpp>
+#include <algorithm>
+#include <deque>
+#include <list>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Util {

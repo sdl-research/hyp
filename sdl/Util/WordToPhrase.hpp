@@ -24,21 +24,20 @@
 #define WORDTOPHRASE_JG_2013_12_03_HPP
 #pragma once
 
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/AcceptString.hpp>
-
-#include <sdl/Util/Fields.hpp>
-#include <sdl/Syms.hpp>
-#include <sdl/Types.hpp>
 #include <sdl/Config/Named.hpp>
-#include <sdl/Util/Utf8.hpp>
+#include <sdl/Util/AcceptString.hpp>
+#include <sdl/Util/AcceptStringImpls.hpp>
+#include <sdl/Util/Delete.hpp>
+#include <sdl/Util/Fields.hpp>
 #include <sdl/Util/IcuUtil.hpp>
-#include <sdl/IVocabulary.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Utf8.hpp>
 #include <sdl/Util/WordFilter.hpp>
 #include <sdl/Evictable.hpp>
-#include <sdl/Util/Delete.hpp>
+#include <sdl/IVocabulary.hpp>
 #include <sdl/Span.hpp>
-#include <sdl/Util/AcceptStringImpls.hpp>
+#include <sdl/Syms.hpp>
+#include <sdl/Types.hpp>
 
 namespace sdl {
 

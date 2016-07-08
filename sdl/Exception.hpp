@@ -27,8 +27,8 @@
 #define SDL_BASE_EXCEPTION_HPP
 #pragma once
 
-#include <exception>
 #include <graehl/shared/verbose_exception.hpp>
+#include <exception>
 
 #define SDL_THROW0(n) VTHROW_A(n)
 #define SDL_THROW(n, why) VTHROW_A_1(n, why)
@@ -98,6 +98,8 @@ VERBOSE_EXCEPTION_DECLARE(PcreRegexException)
 VERBOSE_EXCEPTION_DECLARE(PcreRegexMatchDataTooSmallException)
 VERBOSE_EXCEPTION_DECLARE(UDIRuleException)
 VERBOSE_EXCEPTION_DECLARE(UDIRuleSetException)
+
+
 }
 
 #endif

@@ -15,25 +15,37 @@ namespace Util {
 
 #ifdef _WIN32
 
-LoadedLib loadLib(const char* name) {
+LoadedLib loadLib(char const* name, bool destructors) {
   return ::LoadLibrary(name);
 }
 void unloadLib(LoadedLib aLib) {
   ::FreeLibrary(aLib);
 }
-void* loadProc(LoadedLib aLib, const char* name) {
+void* loadProc(LoadedLib aLib, char const* name) {
   return ::GetProcAddress(aLib, name);
 }
 
 #else
 
-LoadedLib loadLib(const char* name) {
-  return ::dlopen(name, RTLD_LAZY);
+LoadedLib loadLib(char const* name, bool destructors) {
+  return ::dlopen(name,
+//                  RTLD_NODELETE |
+#ifdef NDEBUG
+                  // RTLD_LAZY
+                  RTLD_NOW | RTLD_GLOBAL
+#else
+                  // TODO: lazy should be fine. debugging asan
+                  RTLD_NOW | RTLD_GLOBAL
+//| RTLD_DEEPBIND
+//
+//| RTLD_GLOBAL
+#endif
+                  );
 }
 void unloadLib(LoadedLib aLib) {
   ::dlclose(aLib);
 }
-void* loadProc(LoadedLib aLib, const char* name) {
+void* loadProc(LoadedLib aLib, char const* name) {
   return ::dlsym(aLib, name);
 }
 

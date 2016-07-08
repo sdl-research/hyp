@@ -23,8 +23,8 @@
 #define PTRGENERATOR_JG20121228_HPP
 #pragma once
 
-#include <sdl/Util/RemovePointer.hpp>
 #include <sdl/Util/Generator.hpp>
+#include <sdl/Util/RemovePointer.hpp>
 
 namespace sdl {
 namespace Util {

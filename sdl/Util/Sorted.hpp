@@ -18,15 +18,15 @@
 #define SORTED_JG2012119_HPP
 #pragma once
 
-#include <algorithm>
-#include <vector>
-#include <list>
-#include <utility>
 #include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Util/VoidIf.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
 #include <boost/range/size.hpp>
+#include <algorithm>
+#include <list>
+#include <utility>
+#include <vector>
 
 namespace sdl {
 namespace Util {

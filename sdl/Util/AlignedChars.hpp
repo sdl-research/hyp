@@ -27,15 +27,14 @@
 #define ALIGNEDCHARS_JG_2015_02_11_HPP
 #pragma once
 
-#include <sdl/Span.hpp>
-#include <sdl/Types.hpp>
-#include <sdl/Array.hpp>
+#include <sdl/Util/Delete.hpp>
 #include <sdl/Util/IcuHeaders.hpp>
+#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/Delete.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Array.hpp>
+#include <sdl/Span.hpp>
+#include <sdl/Types.hpp>
 
 namespace sdl {
 namespace Util {
@@ -241,8 +240,7 @@ struct CharsFromUtf8 : CharsFromUtf8Impl, IAlignedChars {
   Unicode nextWithSpan(TokenSpan& span) override { return Impl::nextWithSpan(span); }
   CharsFromUtf8() {}
   template <class T>
-  explicit CharsFromUtf8(T const& t)
-      : Impl(t) {}
+  explicit CharsFromUtf8(T const& t) : Impl(t) {}
 };
 
 /// nonvirtual CharsFromUnicodes
@@ -401,7 +399,7 @@ template <class Utf8String, class OutUtf8String>
 inline void alignedNormalize(Utf8String const& str, IcuNormalizer2Ptr normalizer, OutUtf8String& out,
                              TokenSpans* spans = 0, FixUnicode const& fixutf8 = FixUnicode()) {
   CharsFromUtf8Impl chars(str, fixutf8);
-  IcuNormalizeUtf8ByChunks norm(chars, gNfc);
+  IcuNormalizeUtf8ByChunks norm(chars, getNfc());
   if (spans) {
     TakeUtf8<OutUtf8String> take(&out, spans);
     norm.takeAllWithSpan(take);

@@ -13,32 +13,26 @@
     TODO: test coverage.
 */
 
-#include <vector>
-#include <iomanip>
-#include <string>
-#include <stdexcept>
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Equal.hpp>
-
-
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/ArcVisitors.hpp>
+#include <sdl/Hypergraph/BestPathString.hpp>
 #include <sdl/Hypergraph/Compose.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
-#include <sdl/Hypergraph/ArcVisitors.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
-#include <sdl/Hypergraph/BestPathString.hpp>
-
-#include <sdl/Optimization/OptimizationProcedure.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Optimization/Exception.hpp>
-#include <sdl/Optimization/LoadFeatureWeights.hpp>
 #include <sdl/Optimization/IOriginalFeatureIds.hpp>
-
-#include <graehl/shared/percent.hpp>
+#include <sdl/Optimization/LoadFeatureWeights.hpp>
+#include <sdl/Optimization/OptimizationProcedure.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Util/Delete.hpp>
+#include <sdl/Util/Equal.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <graehl/shared/percent.hpp>
+#include <iomanip>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Optimization {
@@ -128,7 +122,7 @@ bool checkGradients(IObjectiveFunction<FloatT>& objFct, FloatT* params, const Fe
 
     // 4. Check that the scaled function value difference is the same
     // as the provided gradient:
-    FloatT wantGradient = (fctValAfter-fctValBefore) / kGradientCheckEpsilon;
+    FloatT wantGradient = (fctValAfter - fctValBefore) / kGradientCheckEpsilon;
     if (!Util::floatEqual(wantGradient, gradients[i], tolerance)) {
       SDL_WARN(Optimization.OptimizationProcedure, std::setprecision(12)
                                                        << "Gradient for feature " << i << " is "

@@ -108,8 +108,7 @@ struct AnyGeneratorImplBase : IGenerator<V, T>, GeneratorBase<AnyGeneratorImplBa
   AnyGeneratorImplBase(GenImpl const& g) : g(g) {}
   AnyGeneratorImplBase() : g() {}
   template <class C1, class C2>
-  AnyGeneratorImplBase(C1 const& c1, C2 const& c2)
-      : g(c1, c2) {}
+  AnyGeneratorImplBase(C1 const& c1, C2 const& c2) : g(c1, c2) {}
   GenImpl& impl() { return g; }
   GenImpl const& impl() const { return g; }
   GenImpl g;
@@ -140,8 +139,7 @@ struct AnyGeneratorImpl : AnyGeneratorImplBase<G, V, T> {
   AnyGeneratorImpl() : AnyGeneratorImplBase<G, V, T>() {}
   AnyGeneratorImpl(G const& g) : AnyGeneratorImplBase<G, V, T>(g) {}
   template <class C1, class C2>
-  AnyGeneratorImpl(C1 const& c1, C2 const& c2)
-      : AnyGeneratorImplBase<G, V, T>(c1, c2) {}
+  AnyGeneratorImpl(C1 const& c1, C2 const& c2) : AnyGeneratorImplBase<G, V, T>(c1, c2) {}
 };
 
 template <class G, class V>
@@ -149,8 +147,7 @@ struct AnyGeneratorImpl<G, V, PeekableT> : AnyGeneratorImplBase<G, V, PeekableT>
   AnyGeneratorImpl() : AnyGeneratorImplBase<G, V, PeekableT>() {}
   AnyGeneratorImpl(G const& g) : AnyGeneratorImplBase<G, V, PeekableT>(g) {}
   template <class C1, class C2>
-  AnyGeneratorImpl(C1 const& c1, C2 const& c2)
-      : AnyGeneratorImplBase<G, V, PeekableT>(c1, c2) {}
+  AnyGeneratorImpl(C1 const& c1, C2 const& c2) : AnyGeneratorImplBase<G, V, PeekableT>(c1, c2) {}
   virtual void pop() { AnyGeneratorImplBase<G, V, PeekableT>::g.pop(); }
   virtual V peek() const { return AnyGeneratorImplBase<G, V, PeekableT>::g.peek(); }
 };
@@ -210,8 +207,7 @@ struct AnyGenerator : AnyGeneratorBase<Value>, GeneratorBase<AnyGenerator<Value,
   AnyGenerator() {}
   AnyGenerator(AnyGenerator const& o) : Base((Base const&)o) {}
   template <class Generator>
-  AnyGenerator(Generator const& g)
-      : Base(new AnyGeneratorImpl<Generator, Value, Tag>(g)) {}
+  AnyGenerator(Generator const& g) : Base(new AnyGeneratorImpl<Generator, Value, Tag>(g)) {}
   Interface* getBase() const { return (Interface*)Base::pimpl.get(); }
 };
 
@@ -230,8 +226,7 @@ struct AnyGenerator<Value, PeekableT> : AnyGeneratorBase<Value>,
   AnyGenerator(AnyGenerator const& o) : Base((Base const&)o) {}
   AnyGenerator(typename Base::IGenPtr const& p) : Base(p) {}
   template <class Imp>  // Imp = Impl<GeneratorImpl>::type
-  AnyGenerator(Imp* newPimpl)
-      : Base(static_cast<IGeneratorBase<Value>*>(newPimpl)) {}
+  AnyGenerator(Imp* newPimpl) : Base(static_cast<IGeneratorBase<Value>*>(newPimpl)) {}
   template <class Generator>
   AnyGenerator(Generator const& g)
       : Base(static_cast<IGeneratorBase<Value>*>(new AnyGeneratorImpl<Generator, Value, PeekableT>(g))) {}

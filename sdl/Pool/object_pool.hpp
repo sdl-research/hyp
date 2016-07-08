@@ -14,7 +14,8 @@
 
    (actually O(lg n) amortized; free list is sorted on ~object_pool, but only if you freed individual items)
 
-   see https://github.com/graehl/boost/tree/object_pool-constant-time-free for a version that overwrites the (unmaintained) boost::object_pool
+   see https://github.com/graehl/boost/tree/object_pool-constant-time-free for a version that overwrites the
+   (unmaintained) boost::object_pool
 
    ---
 
@@ -398,5 +399,8 @@ bool object_pool<T, UserAllocator>::purge_memory()
 #ifdef __BORLANDC__
 # pragma option pop
 #endif
+
+
+
 
 #endif

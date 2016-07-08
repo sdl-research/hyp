@@ -12,25 +12,20 @@
   "Convert a single line to an FSA accepting its words, (or if -c, unicode chars). If multiple lines, NULL " \
   "byte separates outputs"
 #define TRANSFORM_MAIN
-#include <sdl/Hypergraph/HypergraphMain.hpp>
-#include <sdl/Hypergraph/LineToHypergraph.hpp>
-
-#include <sdl/Util/PrintRange.hpp>
 #include <sdl/Hypergraph/Arc.hpp>
 #include <sdl/Hypergraph/ArcParserFct.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/HypergraphMain.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/LineToHypergraph.hpp>
-
-#include <sdl/IVocabulary.hpp>
-
+#include <sdl/Hypergraph/LineToHypergraph.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
-
 #include <sdl/Util/Input.hpp>
-
-#include <sdl/Util/ProgramOptions.hpp>
 #include <sdl/Util/Nfc.hpp>
+#include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/ProgramOptions.hpp>
+#include <sdl/IVocabulary.hpp>
 
 
 namespace sdl {
@@ -68,6 +63,3 @@ struct HypConvertStrings : HypergraphMainBase {
 }
 
 HYPERGRAPH_NAMED_MAIN(ConvertStrings)
-
-
-

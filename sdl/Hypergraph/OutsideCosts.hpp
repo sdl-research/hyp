@@ -20,9 +20,9 @@
 #pragma once
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <graehl/shared/priority_queue.hpp>
-#include <sdl/Util/MinMax.hpp>
 #include <sdl/Util/BitSet.hpp>
+#include <sdl/Util/MinMax.hpp>
+#include <graehl/shared/priority_queue.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -12,11 +12,11 @@
 #define HYP__HYPERGRAPH_FEATUREWEIGHTUTIL_HPP
 #pragma once
 
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/DotProduct.hpp>
-#include <sdl/Util/Contains.hpp>
-
 #include <sdl/Hypergraph/IsFeatureWeight.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/Contains.hpp>
+#include <sdl/Util/DotProduct.hpp>
+#include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -12,6 +12,9 @@
 #define SDL_OPTIMIZATION_LOADFEATUREWEIGHTS_HPP
 #pragma once
 
+#include <sdl/Util/Input.hpp>
+#include <string>
+
 namespace sdl {
 namespace Optimization {
 

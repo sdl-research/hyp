@@ -20,8 +20,8 @@
 
 #include <sdl/Hypergraph/Arc.hpp>
 #include <sdl/Hypergraph/TokenWeight.hpp>
-#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
 namespace Hypergraph {

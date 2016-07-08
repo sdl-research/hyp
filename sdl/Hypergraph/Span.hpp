@@ -19,14 +19,14 @@
 #define HYPERGRAPH__SPAN_JG_2013_06_28_HPP
 #pragma once
 
-#include <cassert>
-#include <algorithm>
 #include <sdl/Hypergraph/Types.hpp>
-#include <boost/operators.hpp>
-#include <sdl/Util/Hash.hpp>
-#include <utility>
 #include <sdl/Util/CastSubstring.hpp>
+#include <sdl/Util/Hash.hpp>
 #include <sdl/Util/StringBuilder.hpp>
+#include <boost/operators.hpp>
+#include <algorithm>
+#include <cassert>
+#include <utility>
 
 namespace sdl {
 namespace Hypergraph {

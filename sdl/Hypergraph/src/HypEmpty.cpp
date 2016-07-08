@@ -12,9 +12,9 @@
   "Print EMPTY if input hypergraph is empty (can't reach final state from start and lexical leaves); " \
   "otherwise print NONEMPTY"
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
-#include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Config/Init.hpp>
+#include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -71,6 +71,3 @@ struct HypEmpty : TransformMain<HypEmpty> {  // note base class CRTP (google it)
 }
 
 HYPERGRAPH_NAMED_MAIN(Empty)
-
-
-

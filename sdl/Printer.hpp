@@ -30,9 +30,9 @@
 #define SDL_UTIL_PRINT_HPP
 #pragma once
 
-#include <iostream>
 #include <sdl/Util/StringBuilder.hpp>
 #include <graehl/shared/adl_print.hpp>
+#include <iostream>
 
 namespace sdl {
 using graehl::Printer;

@@ -17,11 +17,10 @@
 #define SDL_RESIDENTVOCABULARY_H_
 #pragma once
 
+#include <sdl/Vocabulary/BasicVocabularyImpl.hpp>
+#include <sdl/Util/LeakCheck.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Sym.hpp>
-#include <sdl/Vocabulary/BasicVocabularyImpl.hpp>
-
-#include <sdl/Util/LeakCheck.hpp>
 
 namespace sdl {
 namespace Vocabulary {
@@ -171,14 +170,10 @@ struct ResidentVocabulary final : IVocabulary {
 
   BasicVocabularyImpl& getVocab(SymbolType type) {
     switch (type) {
-      case kTerminal:
-        return vocabTerminal;
-      case kNonterminal:
-        return vocabNonterminal;
-      case kVariable:
-        return vocabVariable;
-      default:
-        SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid type '" << type << "'");
+      case kTerminal: return vocabTerminal;
+      case kNonterminal: return vocabNonterminal;
+      case kVariable: return vocabVariable;
+      default: SDL_THROW_LOG(ResidentVocabulary, InvalidSymType, "Invalid type '" << type << "'");
     }
   }
   BasicVocabularyImpl const& getVocab(SymbolType type) const {

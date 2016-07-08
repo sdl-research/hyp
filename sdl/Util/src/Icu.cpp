@@ -9,9 +9,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <sdl/Util/Icu.hpp>
-#include <graehl/shared/from_strings.hpp>
-#include <boost/range/iterator_range.hpp>
 #include <sdl/IntTypes.hpp>
+#include <boost/range/iterator_range.hpp>
+#include <graehl/shared/from_strings.hpp>
 
 namespace sdl {
 namespace Util {
@@ -63,16 +63,16 @@ Iter findEndNull(Iter p) {
   return p;
 }
 template <class Iter>
-std::string showArrayNullTerminated(Iter begin, const char* sep = ", ") {
+std::string showArrayNullTerminated(Iter begin, char const* sep = ", ") {
   return graehl::range_to_string(boost::make_iterator_range(begin, findEndNull(begin)), sep);
 }
 }
 
-std::string icuLanguagesList(const char* sep) {
+std::string icuLanguagesList(char const* sep) {
   return showArrayNullTerminated(Locale::getISOLanguages(), sep);
 }
 
-std::string icuCountriesList(const char* sep) {
+std::string icuCountriesList(char const* sep) {
   return showArrayNullTerminated(Locale::getISOCountries(), sep);
 }
 

@@ -22,17 +22,15 @@
 
 // TODO: use HypergraphCopy and StateIdTranslation
 
-#include <map>
-
-#include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Hypergraph/Arc.hpp>
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-
-#include <sdl/Util/Map.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Unordered.hpp>
 #include <sdl/Hypergraph/Assert.hpp>
+#include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Map.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <map>
 
 namespace sdl {
 namespace Hypergraph {

@@ -18,12 +18,13 @@
 #define HYP__HYPERGRAPH_COPY_BASIC_HPP
 #pragma once
 
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Hypergraph/FwdDecls.hpp>
+#include <sdl/Hypergraph/ArcBase.hpp>
 #include <sdl/Hypergraph/Exception.hpp>
+#include <sdl/Hypergraph/FwdDecls.hpp>
 #include <sdl/Hypergraph/Properties.hpp>
-#include <boost/pointer_cast.hpp>
+#include <sdl/Util/LogHelper.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <boost/pointer_cast.hpp>
 
 namespace sdl {
 namespace Hypergraph {

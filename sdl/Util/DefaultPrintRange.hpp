@@ -19,9 +19,9 @@
 #define DEFAULTPRINTRANGE_JG2012117_HPP
 #pragma once
 
-#include <string>
-#include <sdl/Printer.hpp>
 #include <sdl/Util/PrintRange.hpp>
+#include <sdl/Printer.hpp>
+#include <string>
 
 namespace sdl {
 namespace Util {

@@ -22,13 +22,13 @@
 #pragma once
 
 
+#include <sdl/Hypergraph/Exception.hpp>
+#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/StateIdTranslation.hpp>
-#include <sdl/Hypergraph/Exception.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Util/Once.hpp>
-#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 
 
 namespace sdl {

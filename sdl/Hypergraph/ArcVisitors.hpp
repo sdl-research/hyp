@@ -19,13 +19,11 @@
 #define HYP__HYPERGRAPH_ARCVISITORS_HPP
 #pragma once
 
-#include <boost/unordered_map.hpp>
-#include <boost/noncopyable.hpp>
-
-
+#include <sdl/Hypergraph/FeatureIdRange.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Exception.hpp>
-#include <sdl/Hypergraph/FeatureIdRange.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace sdl {
 namespace Hypergraph {

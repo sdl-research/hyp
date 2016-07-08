@@ -17,8 +17,8 @@
 #define ARRAYSTREAM_JG20121120_HPP
 #pragma once
 
-#include <graehl/shared/array_stream.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <graehl/shared/array_stream.hpp>
 
 namespace sdl {
 namespace Util {

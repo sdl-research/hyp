@@ -17,14 +17,14 @@
 #define SAVEFST_JG2013122_HPP
 #pragma once
 
-#include <sdl/Hypergraph/fs/LazyBest.hpp>
-#include <sdl/Hypergraph/fs/Fst.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Project.hpp>
 #include <sdl/Hypergraph/PruneToBest.hpp>
-#include <graehl/shared/is_null.hpp>
-#include <graehl/shared/hex_int.hpp>
+#include <sdl/Hypergraph/fs/Fst.hpp>
+#include <sdl/Hypergraph/fs/LazyBest.hpp>
 #include <sdl/Util/Unordered.hpp>
+#include <graehl/shared/hex_int.hpp>
+#include <graehl/shared/is_null.hpp>
 
 namespace sdl {
 namespace Hypergraph {

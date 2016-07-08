@@ -18,17 +18,17 @@
 #define HYP__HG_WORDTOCHARACTER
 #pragma once
 
-#include <vector>
-#include <sdl/Syms.hpp>
-#include <sdl/Exception.hpp>
-#include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Util/Once.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/IntSet.hpp>
-#include <sdl/SharedPtr.hpp>
-#include <boost/cstdint.hpp>
 #include <sdl/Hypergraph/DeferAddArcs.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Util/IntSet.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Once.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <sdl/Exception.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <sdl/Syms.hpp>
+#include <boost/cstdint.hpp>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -126,7 +126,7 @@ struct WordToCharacters {
   }
 
   WordToCharacters(IMutableHypergraph<Arc>* h, Sym tokenPrefixSym = NoSymbol)
-      : hg_(h), addArcLater_(*hg_), vocab_(hg_->vocab()), fixUnicode_(false), tokenPrefixSym_(tokenPrefixSym) {
+      : hg_(h), addArcLater_(*h), vocab_(h->vocab()), fixUnicode_(false), tokenPrefixSym_(tokenPrefixSym) {
     if (!hg_->isGraph())
       SDL_THROW_LOG(Hypergraph.WordToCharacters, ConfigException,
                     "wordToCharacters() doesn't support cfg (only fsm):\n " << hg_);

@@ -18,8 +18,8 @@
 #pragma once
 
 #include <sdl/Util/Valgrind.hpp>
-#include <graehl/shared/stable_vector.hpp>
 #include <sdl/Sym.hpp>
+#include <graehl/shared/stable_vector.hpp>
 #include <string>
 
 namespace sdl {

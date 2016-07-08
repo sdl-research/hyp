@@ -17,10 +17,10 @@
 #define PRINTSYMS_JG_2015_06_18_HPP
 #pragma once
 
-#include <sdl/Syms.hpp>
-#include <sdl/IVocabulary.hpp>
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/StringBuilder.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Syms.hpp>
 
 namespace sdl {
 namespace Vocabulary {
@@ -87,6 +87,7 @@ struct PrintSyms {
   Syms const& syms;
   IVocabulary const* voc;
   explicit PrintSyms(Syms const& syms, IVocabulary const* voc = 0) : syms(syms), voc(voc) {}
+  PrintSyms(Syms const& syms, IVocabularyPtr const& voc) : syms(syms), voc(voc.get()) {}
   PrintSyms(Syms const& syms, IVocabulary const& voc) : syms(syms), voc(&voc) {}
   friend inline std::ostream& operator<<(std::ostream& out, PrintSyms const& self) {
     self.print(out);

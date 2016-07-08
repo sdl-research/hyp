@@ -19,20 +19,20 @@
 #define SDL_IVOCABULARY_HPP
 #pragma once
 
-#include <sdl/IVocabulary-fwd.hpp>
-#include <string>
-#include <ostream>
-#include <stdexcept>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Sym.hpp>  // std::string, Sym
+#include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Exception.hpp>
-#include <sdl/Resource.hpp>
-#include <sdl/Types.hpp>
 #include <sdl/Util/ThreadSpecific.hpp>
 #include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/IsDebugBuild.hpp>
+#include <sdl/Exception.hpp>
+#include <sdl/IVocabulary-fwd.hpp>
+#include <sdl/Resource.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <sdl/Sym.hpp>  // std::string, Sym
+#include <sdl/Types.hpp>
 #include <sdl/gsl.hpp>
+#include <ostream>
+#include <stdexcept>
+#include <string>
 
 
 namespace sdl {
@@ -46,7 +46,7 @@ inline bool validToken(std::string const& str) {
   return str.find_first_of(" \t\n") == std::string::npos;
 }
 
-std::string const kUnnamedVocabulary(("unnamed-vocabulary"));
+static std::string const kUnnamedVocabulary = "unnamed-vocabulary";
 
 /**
    processes (id, string) pairs of a Vocabulary.
@@ -89,14 +89,14 @@ struct IVocabulary : Resource {
   Sym add(Slice field, SymbolType symType) {
     return addImpl(cstring_span<>(field.first, field.second), symType);
   }
-  Sym addTerminal(Slice field) { return addTerminal(cstring_span<>(field.first, field.second)); }
 
   Sym add(Unicode c, SymbolType symType) { return addImpl(Util::utf8s(c), symType); }
 
   Sym sym(Sym symOther, IVocabulary const& otherVocab) const {
     assert(symOther);
-    return symOther.isSpecial() ? symOther : this == &otherVocab ? symOther : symImpl(otherVocab.str(symOther),
-                                                                                      symOther.type());
+    return symOther.isSpecial()
+               ? symOther
+               : this == &otherVocab ? symOther : symImpl(otherVocab.str(symOther), symOther.type());
   }
 
   Sym symFromOther(Sym symOther, IVocabulary const& otherVocab) const {
@@ -107,8 +107,9 @@ struct IVocabulary : Resource {
   /// return same string in our vocabulary. pre: symOther is not NoSymbol
   Sym add(Sym symOther, IVocabulary const& otherVocab) {
     assert(symOther);
-    return symOther.isSpecial() ? symOther : this == &otherVocab ? symOther : addImpl(otherVocab.str(symOther),
-                                                                                      symOther.type());
+    return symOther.isSpecial()
+               ? symOther
+               : this == &otherVocab ? symOther : addImpl(otherVocab.str(symOther), symOther.type());
   }
 
   Sym addFromOther(Sym symOther, IVocabulary const& otherVocab) {
@@ -202,6 +203,7 @@ struct IVocabulary : Resource {
   /// add(word, kTerminal) but should be faster
   virtual Sym addTerminal(std::string const& word) = 0;
   virtual Sym addTerminal(cstring_span<> word) = 0;
+  Sym addTerminal(Slice field) { return addTerminal(cstring_span<>(field.first, field.second)); }
 
   /// sym(word, kTerminal), but should be faster
   virtual Sym terminal(std::string const& word) const = 0;
@@ -239,7 +241,6 @@ struct IVocabulary : Resource {
 
   bool containsSym(Sym sym) const {
     return sym.isSpecial() ? containsSymSpecial(sym) : containsSymImpl(sym);
-    ;
   }
 
   bool contains(std::string const& word, SymbolType symType) const {
@@ -325,12 +326,8 @@ struct IVocabulary : Resource {
   virtual bool containsImpl(cstring_span<> str, SymbolType symType) const = 0;
 };
 
-namespace {
-std::string const kNoVocabularyName("No-Vocabulary");
-}
-
 inline std::string vocabName(IVocabulary const* voc) {
-  return voc ? voc->getName() : kNoVocabularyName;
+  return voc ? voc->getName() : std::string("No-Vocabulary");
 }
 
 struct IPerThreadVocabulary {

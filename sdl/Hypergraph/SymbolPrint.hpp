@@ -19,20 +19,18 @@
 #define HYP__HYPERGRAPH_SYMBOLPRINT_HPP
 #pragma once
 
-#include <string>
-
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Syms.hpp>
-#include <sdl/Util/SizeIsUnsigned.hpp>
-#include <sdl/Hypergraph/LabelPair.hpp>
-#include <sdl/Printer.hpp>
-#include <sdl/Util/PrintRange.hpp>
-
-#include <sdl/Util/Enum.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Hypergraph/PrintOptions.hpp>
-#include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Hypergraph/FwdDecls.hpp>
+#include <sdl/Hypergraph/LabelPair.hpp>
+#include <sdl/Hypergraph/PrintOptions.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Util/Enum.hpp>
+#include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/SizeIsUnsigned.hpp>
+#include <sdl/Util/StringBuilder.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Printer.hpp>
+#include <sdl/Syms.hpp>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {
@@ -77,7 +75,6 @@ inline void writeLabel(Util::StringBuilder& out, Sym sym, IVocabularyPtr const& 
 
 template <class Arc>
 void print(std::ostream& o, Sym sym, IHypergraph<Arc> const& hg, SymbolQuotation quote = kQuoted) {
-
   Hypergraph::writeLabel(o, sym, hg.getVocabulary(), quote);
 }
 
@@ -85,11 +82,9 @@ void print(std::ostream& o, Sym sym, IHypergraph<Arc> const& hg, SymbolQuotation
 
 /* these are in NS sdl so they can be found by adl_print-Sym is sdl::Sym, IVocabulary is sdl::IVocabulary */
 inline void print(std::ostream& o, Sym sym, IVocabulary const& voc, Hypergraph::SymbolQuotation quote) {
-
   Hypergraph::writeLabel(o, sym, voc, quote);
 }
 inline void print(Util::StringBuilder& o, Sym sym, IVocabulary const& voc, Hypergraph::SymbolQuotation quote) {
-
   Hypergraph::writeLabel(o, sym, voc, quote);
 }
 

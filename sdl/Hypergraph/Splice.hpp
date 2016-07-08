@@ -28,14 +28,14 @@
 #pragma once
 
 
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/LexicalOrEpsilon.hpp>
-#include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Adjacency.hpp>
+#include <sdl/Hypergraph/HypergraphCopy.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/LexicalOrEpsilon.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Hypergraph/HypergraphCopy.hpp>
+#include <sdl/Util/LogHelper.hpp>
 
 namespace sdl {
 namespace Hypergraph {

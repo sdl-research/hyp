@@ -18,8 +18,8 @@
 #define ONCEFLAG_LW2012425_HPP
 #pragma once
 
-#include <sdl/Util/MemFence.hpp>
 #include <sdl/Util/Flag.hpp>
+#include <sdl/Util/MemFence.hpp>
 #include <mutex>
 
 namespace sdl {

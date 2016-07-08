@@ -19,8 +19,8 @@
 #define HYPERGRAPH_PRINT__JG_2013_06_13_HPP
 #pragma once
 
-#include <sdl/Sym.hpp>
 #include <sdl/Util/Enum.hpp>
+#include <sdl/Sym.hpp>
 
 namespace sdl {
 namespace Hypergraph {

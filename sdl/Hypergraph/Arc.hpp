@@ -30,19 +30,17 @@
 */
 
 #include <sdl/Hypergraph/ArcBase.hpp>
-
-#include <sdl/Util/SmallVector.hpp>
-#include <sdl/Util/ZeroInitializedArray.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/Hash.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
-
-#include <cstring>
-#include <vector>
-#include <iostream>
-#include <cassert>
+#include <sdl/Util/SmallVector.hpp>
+#include <sdl/Util/ZeroInitializedArray.hpp>
 #include <algorithm>
+#include <cassert>
+#include <cstring>
 #include <functional>
+#include <iostream>
+#include <vector>
 
 
 namespace sdl {
@@ -195,8 +193,7 @@ struct ArcTpl : ArcBase {
   }
 
   template <class Weight>
-  ArcTpl(HeadAndWeight, StateId head, Weight&& weight, StateId tail)
-      : ArcBase(tail), weight_(weight) {
+  ArcTpl(HeadAndWeight, StateId head, Weight&& weight, StateId tail) : ArcBase(tail), weight_(weight) {
     head_ = head;
   }
 
@@ -232,6 +229,8 @@ struct ArcTpl : ArcBase {
       : ArcBase(arc.tails_, fromTail, replacementTail), weight_(arc.weight_) {
     head_ = arc.head_;
   }
+
+  ArcTpl(ArcBase const& arc, Weight const& weight) : ArcBase(arc), weight_(weight) {}
 
   /**
      for Derivation: more efficiently copy weight while remapping states
@@ -399,8 +398,7 @@ class ArcWithDataTpl : public ArcTpl<W> {
       : Base(from, label, w, to), data_(), deleter_() {}
 
   template <class Cost>
-  ArcWithDataTpl(StateId head, Cost const& w, StateId tail)
-      : Base(head, w, tail), data_(), deleter_() {}
+  ArcWithDataTpl(StateId head, Cost const& w, StateId tail) : Base(head, w, tail), data_(), deleter_() {}
 
   virtual ~ArcWithDataTpl() {
     if (deleter_ && data_) deleter_->dispose(data_);
@@ -455,7 +453,8 @@ class ArcWithDataTpl : public ArcTpl<W> {
   bool isDataEmpty() const { return data_ == NULL; }
 
   /// move
-  ArcWithDataTpl(ArcWithDataTpl&& o) noexcept : Base(static_cast<Base&&>(o)), data_(o.data_), deleter_(o.deleter_) {
+  ArcWithDataTpl(ArcWithDataTpl&& o) noexcept
+      : Base(static_cast<Base&&>(o)), data_(o.data_), deleter_(o.deleter_) {
     o.deleter_ = 0;
   }
   ArcWithDataTpl& operator=(ArcWithDataTpl&& o) noexcept {

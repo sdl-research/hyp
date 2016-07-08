@@ -21,11 +21,11 @@
 #define FILTER_FILE_STREAM_JG_2015_01_06_HPP
 #pragma once
 
-#include <boost/iostreams/traits.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <stdexcept>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/traits.hpp>
 #include <fstream>
+#include <stdexcept>
 
 namespace graehl {
 
@@ -89,15 +89,13 @@ inline void throw_filter_file_stream_open(char const* name) {
    typename Access = public_ >
    class filtering_stream;
  */
-template <class Filter, class Mode = boost::iostreams::input_seekable,
-          class Stream = typename fstream_for_mode<Mode>::stream_type>
+template <class Filter, class Mode = boost::iostreams::input_seekable, class Stream = typename fstream_for_mode<Mode>::stream_type>
 struct filter_file_streambuf : boost::iostreams::filtering_streambuf<Mode> {
   typedef boost::iostreams::filtering_streambuf<Mode> Base;
   Stream file_;
 
   filter_file_streambuf() {}
-  filter_file_streambuf(const char* name,
-                        std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default)
+  filter_file_streambuf(char const* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default)
       : file_(name, mode | std::ios_base::binary) {
     opened(name);
   }
@@ -108,7 +106,7 @@ struct filter_file_streambuf : boost::iostreams::filtering_streambuf<Mode> {
 
   bool is_open() { return file_.is_open(); }
 
-  void open(const char* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default) {
+  void open(char const* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default) {
     file_.open(name, mode | std::ios_base::binary);
     opened(name);
   }
@@ -128,14 +126,13 @@ struct filter_file_streambuf : boost::iostreams::filtering_streambuf<Mode> {
   }
 };
 
-template <class Filter, class Mode = boost::iostreams::input_seekable,
-          class Stream = typename fstream_for_mode<Mode>::stream_type>
+template <class Filter, class Mode = boost::iostreams::input_seekable, class Stream = typename fstream_for_mode<Mode>::stream_type>
 struct filter_file_stream : boost::iostreams::filtering_stream<Mode> {
   typedef boost::iostreams::filtering_stream<Mode> Base;
   Stream file_;
 
   filter_file_stream() {}
-  filter_file_stream(const char* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default)
+  filter_file_stream(char const* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default)
       : file_(name, mode | std::ios_base::binary) {
     opened(name);
   }
@@ -146,7 +143,7 @@ struct filter_file_stream : boost::iostreams::filtering_stream<Mode> {
 
   bool is_open() { return file_.is_open(); }
 
-  void open(const char* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default) {
+  void open(char const* name, std::ios_base::openmode mode = fstream_for_mode<Mode>::ios_mode_default) {
     file_.open(name, mode | std::ios_base::binary);
     opened(name);
   }

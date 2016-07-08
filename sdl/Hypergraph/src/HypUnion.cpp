@@ -42,6 +42,3 @@ struct HypUnion : TransformMain<HypUnion> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Union)
-
-
-

@@ -21,15 +21,11 @@
 
 #include <sdl/LexicalCast.hpp>
 
-#include <graehl/shared/warning_compiler.h>
-#if HAVE_GCC_4_6
 #include <graehl/shared/warning_push.h>
 GCC_DIAG_IGNORE(delete-non-virtual-dtor)
-#endif
 #include <boost/program_options.hpp>
-#if HAVE_GCC_4_6
+
 #include <graehl/shared/warning_pop.h>
-#endif
 
 namespace sdl {
 

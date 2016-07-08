@@ -16,21 +16,19 @@ char const* usage
     = "measure performance of compose (excluding file input): HypSpeedTest fst1 fst2 [1|0 (prune-to-nbest)] "
       "[N=100 repetitions]";
 
-#include <time.h>
-#include <iostream>
-#include <stdexcept>
-
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
+#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sdl/Hypergraph/BestPath.hpp>
+#include <sdl/Hypergraph/HelperFunctions.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/HelperFunctions.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
-#include <sdl/Hypergraph/fs/Compose.hpp>
 #include <sdl/Hypergraph/SortArcs.hpp>
-#include <sdl/Hypergraph/BestPath.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/fs/Compose.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <graehl/shared/monotonic_time.hpp>
+#include <iostream>
+#include <stdexcept>
+#include <time.h>
 
 using namespace sdl;
 using namespace sdl::Hypergraph;

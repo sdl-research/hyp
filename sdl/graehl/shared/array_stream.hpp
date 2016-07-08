@@ -29,15 +29,15 @@
 #define GRAEHL_SHARED__ARRAY_STREAM_HPP
 #pragma once
 
-#include <streambuf>
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iostream>
 #include <ostream>
+#include <stdexcept>
+#include <streambuf>
 #include <string>
 #include <utility>
-#include <iostream>
-#include <algorithm>
-#include <cstddef>
-#include <stdexcept>
-#include <cassert>
 
 namespace graehl {
 
@@ -77,7 +77,7 @@ inline void copy_written(VecBytes* vec, std::basic_streambuf<cT, cT_Traits>& buf
   }
 }
 
-template <class cT, class cT_Traits = std::char_traits<cT> >
+template <class cT, class cT_Traits = std::char_traits<cT>>
 class basic_array_streambuf : public std::basic_streambuf<cT, cT_Traits> {
  public:
   typedef cT_Traits traits;
@@ -101,8 +101,7 @@ class basic_array_streambuf : public std::basic_streambuf<cT, cT_Traits> {
     o << "]";
   }
   template <class Ch, class Tr>
-  friend std::basic_ostream<Ch, Tr>& operator<<(std::basic_ostream<Ch, Tr>& o,
-                                                basic_array_streambuf const& self) {
+  friend std::basic_ostream<Ch, Tr>& operator<<(std::basic_ostream<Ch, Tr>& o, basic_array_streambuf const& self) {
     self.print(o);
     return o;
   }
@@ -244,8 +243,7 @@ class basic_array_streambuf : public std::basic_streambuf<cT, cT_Traits> {
     // else ios_base::beg
     return seekpos(pos, which);
   }
-  virtual pos_type seekpos(pos_type pos,
-                           std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) {
+  virtual pos_type seekpos(pos_type pos, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) {
     if (which & std::ios_base::out) set_ppos(pos);
     if (which & std::ios_base::in) set_gpos(pos);
     return pos;
@@ -311,7 +309,7 @@ class basic_array_streambuf : public std::basic_streambuf<cT, cT_Traits> {
 typedef basic_array_streambuf<char> array_streambuf;
 typedef basic_array_streambuf<wchar_t> warray_streambuf;
 
-template <class cT, class traits = std::char_traits<cT> >
+template <class cT, class traits = std::char_traits<cT>>
 class basic_array_stream : public std::basic_iostream<cT, traits> {
   typedef std::basic_iostream<cT, traits> base;
   typedef basic_array_streambuf<cT, traits> Sbuf;
@@ -338,8 +336,7 @@ class basic_array_stream : public std::basic_iostream<cT, traits> {
     base::rdbuf(&sbuf_);
   }
   template <class C>
-  explicit basic_array_stream(C const& c)
-      : base(&sbuf_) {
+  explicit basic_array_stream(C const& c) : base(&sbuf_) {
     set_array(c);
     base::rdbuf(&sbuf_);
   }
@@ -396,7 +393,7 @@ void TEST_check_array_stream(C& i1) {
   std::string const TESTARRAYSTR1("eruojdcv53341");
   std::string const TESTARRAYSTR2("0asd");
   std::string const TESTARRAYSTR(" " + TESTARRAYSTR1 + "\n " + TESTARRAYSTR2 + "\t");
-  const char* tarrs = TESTARRAYSTR.c_str();
+  char const* tarrs = TESTARRAYSTR.c_str();
   i1.set_array(tarrs, TESTARRAYSTR.size());
   string tstr = tarrs;
   unsigned slen = (unsigned)tstr.length();
@@ -488,8 +485,6 @@ BOOST_AUTO_TEST_CASE(TEST_array_stream) {
 }  // ns
 #endif
 // TEST
-
-
 
 
 #endif

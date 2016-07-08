@@ -24,12 +24,12 @@
 #define SDL_UTIL_TRIM_HPP
 #pragma once
 
-#include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <sdl/Types.hpp>
 #include <sdl/Util/IsChar.hpp>
+#include <sdl/Types.hpp>
+#include <algorithm>
+#include <cctype>
+#include <functional>
+#include <string>
 
 namespace sdl {
 namespace Util {

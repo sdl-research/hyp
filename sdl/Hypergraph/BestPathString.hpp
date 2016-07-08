@@ -18,17 +18,17 @@
 #define HYP__BESTPATHSTRING_JG201254_HPP
 #pragma once
 
-#include <sdl/LexicalCast.hpp>
+#include <sdl/Config/Init.hpp>
 #include <sdl/Hypergraph/BestPath.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
-#include <boost/variant/static_visitor.hpp>
-#include <functional>
+#include <sdl/Util/AcceptString.hpp>
+#include <sdl/Util/Equal.hpp>
+#include <sdl/Util/SpaceToken.hpp>
 #include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Util/WordToPhrase.hpp>
-#include <sdl/Config/Init.hpp>
-#include <sdl/Util/AcceptString.hpp>
-#include <sdl/Util/SpaceToken.hpp>
-#include <sdl/Util/Equal.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <functional>
 
 namespace sdl {
 namespace Hypergraph {

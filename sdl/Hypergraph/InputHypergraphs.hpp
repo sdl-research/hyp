@@ -17,13 +17,13 @@
 #define HYP__HG_INPUT_HYPERGRAPHS_HPP
 #pragma once
 
-#include <sdl/Hypergraph/LineToHypergraph.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
-#include <graehl/shared/fileargs.hpp>
 #include <sdl/Config/Init.hpp>
-#include <sdl/Util/Nfc.hpp>
-#include <sdl/Util/LineOptions.hpp>
+#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sdl/Hypergraph/LineToHypergraph.hpp>
 #include <sdl/Util/Input.hpp>
+#include <sdl/Util/LineOptions.hpp>
+#include <sdl/Util/Nfc.hpp>
+#include <graehl/shared/fileargs.hpp>
 
 /*
 

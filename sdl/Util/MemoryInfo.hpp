@@ -36,12 +36,16 @@ double physicalMemoryGB();
 
 class MemoryInfo {
  public:
-  // Singleton
-  MemoryInfo();
-  MemoryInfo(MemoryInfo const&);
+  static MemoryInfo& instance() {
+    static MemoryInfo instance_;
+    return instance_;
+  };
 
-  static MemoryInfo instance_;
-  static MemoryInfo& instance() { return instance_; };
+  // Disallowed because singleton:
+  MemoryInfo(MemoryInfo const&) = delete;  // Copy construct
+  MemoryInfo(MemoryInfo&&) = delete;  // Move construct
+  MemoryInfo& operator=(MemoryInfo const&) = delete;  // Copy assign
+  MemoryInfo& operator=(MemoryInfo&&) = delete;  // Move assign
 
   std::size_t size();  // TODO: change type?
   double sizeInMB();
@@ -53,6 +57,9 @@ class MemoryInfo {
 
   char memoryFilename[buflen];
   std::string getColumn(std::string const& s, unsigned columnNumber);
+
+  // Private because Singleton
+  MemoryInfo();
 };
 
 

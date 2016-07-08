@@ -13,9 +13,9 @@
     instantiation of ExternalFeatHgPairs<Optimization::Arc>
 */
 
+#include <sdl/Optimization/Arc.hpp>
 #include <sdl/Optimization/ExternalFeatHgPairs.hpp>
 #include <sdl/Optimization/src/ExternalFeatHgPairs.ipp>
-#include <sdl/Optimization/Arc.hpp>
 
 namespace sdl {
 namespace Optimization {

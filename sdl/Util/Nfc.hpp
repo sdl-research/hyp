@@ -21,8 +21,8 @@
 #define NFC_JG_2014_01_14_HPP
 #pragma once
 
-#include <string>
 #include <sdl/Util/Icu.hpp>
+#include <string>
 
 namespace sdl {
 

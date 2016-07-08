@@ -19,6 +19,7 @@
 #pragma once
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
 
 
 namespace sdl {
@@ -81,11 +82,10 @@ bool writeStateLabel(std::ostream& out, Hypergraph::StateId stateId, Sym symId, 
     out << stateId;
   } else {
     std::string const& sym = pVoc->str(symId);
-    if (symId.isTerminal() && !symId.isSpecial()) {
+    if (symId.isTerminal() && !symId.isSpecial())
       out << "\\\"" << sym << "\\\"";
-    } else {
+    else
       out << dotify(sym);
-    }
   }
   return true;
 }

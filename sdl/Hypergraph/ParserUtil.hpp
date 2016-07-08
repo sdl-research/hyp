@@ -17,10 +17,10 @@
 #define HYP__HYPERGRAPH_PARSERUTIL_HPP
 #pragma once
 
-#include <string>
-#include <vector>
 #include <sdl/Hypergraph/Types.hpp>
 #include <boost/optional.hpp>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -52,8 +52,8 @@ struct State {
   bool isInputSymbolLexical;
   bool isOutputSymbolLexical;
 
-  static const StateId kStart = kNoState-1;
-  static const StateId kFinal = kNoState-2;
+  static const StateId kStart = kNoState - 1;
+  static const StateId kFinal = kNoState - 2;
 
   bool hasId() const { return id != kNoState && id != kStart && id != kFinal; }
 

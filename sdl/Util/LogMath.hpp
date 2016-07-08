@@ -222,8 +222,7 @@ inline Float neglogSubFrom1(Float b) {
   if (b >= 0)
     return -log1plus(-std::exp(-b));
   else {
-    SDL_THROW_LOG(Hypergraph, LogNegativeException,
-                  "Cannot represent negative result in log space: 1-exp()");
+    SDL_THROW_LOG(Hypergraph, LogNegativeException, "Cannot represent negative result in log space: 1-exp()");
   }
   return b;
 }

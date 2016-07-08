@@ -35,13 +35,13 @@
 #define WIN32_NAN
 #define GRAEHL_ISNAN(x) (_isnan(x) != 0)
 #else
-#if defined(__FAST_MATH__) || !GRAEHL_CPP11 || defined(ANDROID)
-// gcc 4.x -ffast-math breaks std::isnan - revisit for 5.1?
-#include <stdint.h>
+#if !GRAEHL_CPP11 || defined(ANDROID)
+// defined(__FAST_MATH__) || // gcc 4.x -ffast-math breaks std::isnan - revisit for 5.1?
 #include <math.h>
+#include <stdint.h>
 #define GRAEHL_ISNAN(x) ::isnan(x)  // in stlport, only c99 version of isnan is available
 #undef isnan
-#if !defined(__linux__)
+#if !defined(__linux__) && !(defined(__APPLE__) && __GNUC__ >= 6)
 inline bool isnan(float f) {
   typedef unsigned u32;
   union {
@@ -97,11 +97,7 @@ inline bool is_nan(T x) {
 
 template <class T>
 inline bool is_posinf(T x) {
-#if GRAEHL_HAVE_STD_ISINF
-  return std::isinf(x);
-#else
   return x == std::numeric_limits<T>::infinity();
-#endif
 }
 
 template <class T>

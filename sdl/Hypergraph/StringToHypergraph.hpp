@@ -18,40 +18,35 @@
 #define HYP__HYPERGRAPH_STRINGTOHYPERGRAPH_HPP
 #pragma once
 
-#include <string>
-#include <vector>
+#include <sdl/Hypergraph/FeatureWeightUtil.hpp>
+#include <sdl/Hypergraph/FeaturesPerInputPosition.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/IsFeatureWeight.hpp>
+#include <sdl/Hypergraph/MixFeature.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Tokens.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <sdl/Exception.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/noncopyable.hpp>
 #include <cstddef>
 #include <stdexcept>
-#include <boost/noncopyable.hpp>
-
-#include <sdl/SharedPtr.hpp>
-#include <sdl/LexicalCast.hpp>
-#include <sdl/Exception.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/FeatureWeightUtil.hpp>
-#include <sdl/Hypergraph/IsFeatureWeight.hpp>
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Hypergraph/Tokens.hpp>
-#include <sdl/Hypergraph/FeaturesPerInputPosition.hpp>
-#include <sdl/Hypergraph/MixFeature.hpp>
-
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-
-#include <sdl/Util/Utf8.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
 
+
 /**
    Options for StringToHypergraph function; the inputFeatures
    object will be deleted on destruction.
- */
-struct StringToHypergraphOptions {
 
+struct UnkOptions {
   Sym terminalMaybeUnk(IVocabulary* pVoc, std::string const& token) const {
     if (doAddUnknownSymbols)
       return pVoc->addTerminal(token);
@@ -60,22 +55,17 @@ struct StringToHypergraphOptions {
       return sym ? sym : UNK::ID;
     }
   }
+  bool doAddUnknownSymbols = true;
+};
 
-  StringToHypergraphOptions() : doAddUnknownSymbols(true), inputFeatures(new NoFeatures()) {}
+ */
+struct StringToHypergraphOptions {
+  StringToHypergraphOptions() : inputFeatures(new NoFeatures()) {}
 
-  StringToHypergraphOptions(IFeaturesPerInputPosition* newInputFeatures)
-      : doAddUnknownSymbols(true), inputFeatures(newInputFeatures) {}
+  StringToHypergraphOptions(IFeaturesPerInputPosition* newInputFeatures) : inputFeatures(newInputFeatures) {}
 
   explicit StringToHypergraphOptions(Hypergraph::TokensPtr const& tokens, IFeaturesPerInputPosition* feats)
-      : doAddUnknownSymbols(true), tokens(tokens), inputFeatures(feats) {}
-
-  /*
-  void setOneFeaturePerInputPosition() {
-    return inputFeatures.reset(new OneFeaturePerInputPosition());
-  }
-  */
-
-  bool doAddUnknownSymbols;
+      : tokens(tokens), inputFeatures(feats) {}
 
   Hypergraph::TokensPtr tokens;
 
@@ -99,6 +89,14 @@ struct TokenWeights {
   }
 };
 
+struct SymsFromStrings {
+  IVocabulary* voc;
+  span<std::string const> strings;
+
+  SymsFromStrings(IVocabulary* voc, span<std::string const> const& strings) : voc(voc), strings(strings) {}
+  Sym operator[](Position i) const { return voc->addTerminal(strings[i]); }
+  Position size() const { return strings.size(); }
+};
 
 /**
    Converts a vector of strings, inputTokens to a flat-line hypergraph. Gives all
@@ -107,13 +105,11 @@ struct TokenWeights {
 
    \return number of tokens
  */
-template <class Arc, class Strings>
-Position stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHgResult,
-                            StringToHypergraphOptions const& opts = StringToHypergraphOptions(),
-                            TokenWeights const& inputWeights = TokenWeights()) {
-  IVocabularyPtr const& pVoc = pHgResult->getVocabulary();
-  if (!pVoc) SDL_THROW_LOG(Hypergraph, InvalidInputException, "pHgResult hypergraph must contain vocabulary");
-  for (std::size_t i = 0, numNonlexicalStates = inputTokens.size() + 1; i < numNonlexicalStates; ++i)
+template <class Arc, class Syms>
+Position symsToHypergraph(Syms const& inputTokens, IMutableHypergraph<Arc>* pHgResult,
+                          StringToHypergraphOptions const& opts = StringToHypergraphOptions(),
+                          TokenWeights const& inputWeights = TokenWeights()) {
+  for (Position i = 0, numNonlexicalStates = inputTokens.size() + 1; i < numNonlexicalStates; ++i)
     pHgResult->addState();
   pHgResult->setStart(0);
   StateId prevState = 0;
@@ -121,10 +117,8 @@ Position stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>*
   typedef typename Arc::Weight Weight;
   typedef FeatureInsertFct<Weight> FI;
   Position i = 0, n = inputTokens.size();
-  for (; i != n; ++i) {
-    std::string const& token = inputTokens[i];
-    SDL_TRACE(Hypergraph.StringToHypergraph, i << ": " << token);
-    const Sym sym = opts.terminalMaybeUnk(pVoc.get(), token);
+  for (; i < n; ++i) {
+    const Sym sym = inputTokens[i];
     const StateId nextState = prevState + 1;
     Arc* pArc = new Arc(nextState, Tails(prevState, pHgResult->addState(sym)));
     Weight& weight = pArc->weight();
@@ -139,6 +133,13 @@ Position stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>*
   }
   pHgResult->setFinal(prevState);
   return n;
+}
+
+template <class Arc, class Strings>
+Position stringToHypergraph(Strings const& inputTokens, IMutableHypergraph<Arc>* pHgResult,
+                            StringToHypergraphOptions const& opts = StringToHypergraphOptions(),
+                            TokenWeights const& inputWeights = TokenWeights()) {
+  return symsToHypergraph(SymsFromStrings(pHgResult->vocab(), inputTokens), pHgResult, opts, inputWeights);
 }
 
 /**
@@ -157,30 +158,39 @@ Position stringToHypergraph(std::string const& utf8string, IMutableHypergraph<Ar
 /**
    Creates a flat-line FST from two strings.
  */
-template <class Arc, class Strings>
-void stringPairToFst(Strings const& inputTokens, std::vector<std::string> const& outputTokens,
-                     IMutableHypergraph<Arc>* pHgResult,
-                     StringToHypergraphOptions const& opts = StringToHypergraphOptions()) {
-  if (inputTokens.size() != outputTokens.size()) {
+template <class Arc, class Syms, class SymsOut>
+void symsPairToFst(Syms const& inputTokens, SymsOut const& outputTokens, IMutableHypergraph<Arc>* pHgResult,
+                   StringToHypergraphOptions const& opts = StringToHypergraphOptions()) {
+  Position N = outputTokens.size();
+  if (inputTokens.size() != N)
     SDL_THROW_LOG(Hypergraph.stringPairToFst, IndexException,
                   "The two strings must have same number of words");
-  }
 
   // 1. Create simple FSA from input tokens:
-  stringToHypergraph(inputTokens, pHgResult, opts);
+  symsToHypergraph(inputTokens, pHgResult, opts);
 
-  // 2. Insert output tokens:
-  IVocabularyPtr pVoc = pHgResult->getVocabulary();
-  std::vector<std::string>::const_iterator it = outputTokens.begin();
-  StateId stateId = pHgResult->start();
+// 2. Insert output tokens:
+#ifndef NDEBUG
   const StateId finalId = pHgResult->final();
-  while (stateId != finalId) {
+#endif
+  StateId stateId = pHgResult->start();
+  for (Position i = 0; i < N; ++i) {
     Arc* arc = pHgResult->outArc(stateId, 0);
-    const Sym sym = opts.terminalMaybeUnk(pVoc.get(), *it);
-    setFsmOutputLabel(pHgResult, *arc, sym);
-    ++it;
+    assert(arc);
+    setFsmOutputLabel(pHgResult, *arc, outputTokens[i]);
     stateId = arc->head();
   }
+#ifndef NDEBUG
+  assert(stateId == finalId);
+#endif
+}
+
+template <class Arc, class Strings, class StringsOut>
+void stringPairToFst(Strings const& inputTokens, StringsOut const& outputTokens,
+                     IMutableHypergraph<Arc>* pHgResult,
+                     StringToHypergraphOptions const& opts = StringToHypergraphOptions()) {
+  IVocabulary* voc = pHgResult->vocab();
+  symsPairToFst(SymsFromStrings(voc, inputTokens), SymsFromStrings(voc, outputTokens), pHgResult, opts);
 }
 
 

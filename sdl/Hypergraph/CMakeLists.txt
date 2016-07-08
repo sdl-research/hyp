@@ -18,21 +18,21 @@ foreach(item ${HYP_SOURCES})
 endforeach()
 message(STATUS "Hypergraph lib sources: ${LIB_SOURCES}")
 
-list(APPEND LINK_DEPENDENCIES ${LOG4CXX_LIBRARIES} ${UTIL_LIBRARIES})
+set(LINK_DEPENDENCIES Vocabulary ${UTIL_LIBRARIES})
 if(NOT WIN32)
-  set(LINK_DEPENDENCIES dl)
+  #list(APPEND LINK_DEPENDENCIES dl)
 endif()
-set(transform_DEPENDENCIES )
 
 add_library(${PROJECT_NAME} ${LIB_SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LINK_DEPENDENCIES})
 
-sdl_quiet_compiled_setting(GRAEHL_NAMED_SINGLE_MAIN 0) #mandatory
+sdl_quiet_compiled_setting(GRAEHL_NAMED_SINGLE_MAIN 0)
 
 # 1 builds fewer tools (just Best Compose Inside Empty)
 sdl_quiet_compiled_setting(SDL_MINIMAL_HYP_MAIN 0)
 
 # Hyp.cpp includes all the other Hyp*.cpp sources now (single executable w/ argv[0] or argv[1] dispatch)
-sdl_add_executable(hyp ${PROJECT_SOURCE_DIR} INCLUDE_ONLY src/Hyp.cpp)
-#TODO: UTIL_LIBRARY_NAME is already in LINK_DEPENDENCIES
-target_link_libraries(hyp ${PROJECT_NAME} ${LINK_DEPENDENCIES} Hypergraph ${UTIL_LIBRARY_NAME})
+sdl_add_exe(hyp src/Hyp.cpp)
+
+show(LINK_DEPENDENCIES)
+target_link_libraries(hyp ${PROJECT_NAME} ${LINK_DEPENDENCIES})

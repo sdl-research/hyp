@@ -20,28 +20,29 @@
 #define SDL_UTIL_ENUMDETAIL_HPP_
 #pragma once
 
-#include <stdexcept>
-#include <algorithm>
-#include <cassert>
-
-#include <boost/preprocessor/list/at.hpp>
-#include <boost/preprocessor/list/enum.hpp>
-#include <boost/preprocessor/tuple/to_list.hpp>
-#include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/list/transform.hpp>
-#include <boost/preprocessor/stringize.hpp>
-#include <boost/preprocessor/list/for_each_i.hpp>
-#include <boost/preprocessor/seq/for_each_i.hpp>
-#include <boost/preprocessor/control/if.hpp>
+#include <sdl/Util/AsciiCase.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/strcasecmp.hpp>
+#include <sdl/Exception.hpp>
 
 #include <graehl/shared/warning_compiler.h>
 #include <graehl/shared/warning_push.h>
+
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/control/if.hpp>
+#include <boost/preprocessor/list/at.hpp>
+#include <boost/preprocessor/list/enum.hpp>
+#include <boost/preprocessor/list/for_each_i.hpp>
+#include <boost/preprocessor/list/transform.hpp>
+#include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/tuple/to_list.hpp>
+
 #include <graehl/shared/warning_pop.h>
 
-#include <sdl/Util/strcasecmp.hpp>
-#include <sdl/Util/AsciiCase.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Exception.hpp>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
 
 namespace sdl {
 namespace Util {
@@ -83,9 +84,7 @@ inline std::string simplifedEnumName(std::string str) {
     break;
 
 #define SDL_DETAIL_emitCased(r, data, i, elem) \
-  case elem:                                   \
-    return BOOST_PP_LIST_AT(data, i);          \
-    break;
+  case elem: return BOOST_PP_LIST_AT(data, i); break;
 
 /**
    generates the if/else if statements in
@@ -118,14 +117,13 @@ inline std::string simplifedEnumName(std::string str) {
 /**
    generates impl in enum's namespace
 **/
-#define SDL_DETAIL_ENUM_TYPE_INFO(name, elems, nameList)                                                    \
+#define SDL_DETAIL_ENUM_TYPE_INFO(name, elems, nameList, nameslinkage)                                      \
   enum name { BOOST_PP_LIST_ENUM(elems), kn##name };                                                        \
   inline std::string emit(name val) {                                                                       \
     std::string str;                                                                                        \
     switch (val) {                                                                                          \
       BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_EMIT_TO_STRING_CASE, nameList, elems)                             \
-      default:                                                                                              \
-        SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);                  \
+      default: SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);           \
     };                                                                                                      \
     sdl::Util::canonicalizeEnumName(str);                                                                   \
     return str;                                                                                             \
@@ -133,8 +131,7 @@ inline std::string simplifedEnumName(std::string str) {
   inline std::string emitCased(name val) {                                                                  \
     switch (val) {                                                                                          \
       BOOST_PP_LIST_FOR_EACH_I(SDL_DETAIL_emitCased, nameList, elems)                                       \
-      default:                                                                                              \
-        SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);                  \
+      default: SDL_THROW_LOG(Enum, sdl::IndexException, "Enum value out of range: " << (int)val);           \
     };                                                                                                      \
   }                                                                                                         \
   struct name##Names {                                                                                      \
@@ -160,9 +157,7 @@ inline std::string simplifedEnumName(std::string str) {
       return (name)i;                                                                                       \
     }                                                                                                       \
   };                                                                                                        \
-  namespace {                                                                                               \
-  name##Names kNames##name;                                                                                 \
-  }                                                                                                         \
+  nameslinkage name##Names kNames##name;                                                                    \
   SDL_DETAIL_GET_VALUE_EXACT_STRING_TO_ENUM(name, elems, nameList)                                          \
   SDL_DETAIL_ENUM_ALLOWED_VALUES(name, nameList)                                                            \
   inline void string_to_impl(std::string const& str, name& out) {                                           \
@@ -198,7 +193,9 @@ inline std::string simplifedEnumName(std::string str) {
   }                                                                                                         \
   inline std::ostream& operator<<(std::ostream& out, name val) { return out << to_string_impl(val); }
 
-// end SDL_DETAIL_ENUM_TYPE_INFO
+
+//__declspec(selectany) https://msdn.microsoft.com/en-us/library/5tkz6s71.aspx
+#define SDL_DETAIL_NAME_ENUM(name) name##Names kNames##name
 
 #define SDL_DETAIL_TOSTRING(d, data, elem) BOOST_PP_STRINGIZE(elem)
 
@@ -206,8 +203,6 @@ inline std::string simplifedEnumName(std::string str) {
    prepends k to each Enum name per coding standards.
 **/
 #define SDL_DETAIL_ENUM_PREPEND_k(d, data, elem) BOOST_PP_CAT(data, elem)
-
-
 
 
 #endif

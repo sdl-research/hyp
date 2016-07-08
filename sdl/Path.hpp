@@ -24,8 +24,8 @@
 #ifndef BOOST_FILESYSTEM_VERSION
 #define BOOST_FILESYSTEM_VERSION 3
 #endif
-#include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <graehl/shared/leaf_configurable.hpp>
 
 namespace boost {

@@ -28,11 +28,11 @@
 #define SPLIT_JG2013118_HPP
 #pragma once
 
+#include <sdl/Util/Chomp.hpp>
+#include <sdl/Util/IsChar.hpp>
+#include <sdl/Util/Trim.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>  // is_any_of, is_from_range
-#include <sdl/Util/Chomp.hpp>
-#include <sdl/Util/Trim.hpp>
-#include <sdl/Util/IsChar.hpp>
 
 namespace sdl {
 namespace Util {

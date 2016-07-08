@@ -17,10 +17,10 @@
 #define SDL_CONFIG_FWD_HPP
 #pragma once
 
+#include <sdl/SharedPtr.hpp>
+#include <iostream>
 #include <map>
 #include <string>
-#include <iostream>
-#include <sdl/SharedPtr.hpp>
 
 /**
    these to/from string methods need to be found by ADL on YAML::Node.

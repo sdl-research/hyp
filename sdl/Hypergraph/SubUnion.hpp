@@ -18,22 +18,18 @@
 #define HYP__HYPERGRAPH_SUBUNION_HPP
 #pragma once
 
-#include <sdl/IVocabulary.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Union.hpp>
-
-#include <sdl/Util/Constants.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/CartesianProduct.hpp>
-
-#include <tuple>
-
-#include <map>
-#include <vector>
-#include <stack>
 #include <sdl/Hypergraph/Span.hpp>
+#include <sdl/Hypergraph/Union.hpp>
+#include <sdl/Util/CartesianProduct.hpp>
+#include <sdl/Util/Constants.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <map>
+#include <stack>
+#include <tuple>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {

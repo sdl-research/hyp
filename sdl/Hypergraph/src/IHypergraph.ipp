@@ -8,9 +8,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <sdl/Hypergraph/ContainsEmptyString.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/Visit.hpp>
-#include <sdl/Hypergraph/ContainsEmptyString.hpp>
 
 // templated IHypergraph functions
 
@@ -78,7 +78,7 @@ struct CheckGraph {
 // note: a graph missing either start or final state has no derivations (but is still a graph)
 template <class Arc>
 bool IHypergraph<Arc>::isGraphCheck(bool& fsm, bool& oneLexical) const {
-  bool const mustBeCfg = start() == kNoState && final() != kNoState;
+  bool const mustBeCfg = start() == kNoState&& final() != kNoState;
   // above check: because we require that kStart == kNoState iff the cfg is
   // empty, whenever kFsm or kGraph are set. but some CFG may accidentally be
   // left-recursive, so we don't wish to prune them if they have a final state.

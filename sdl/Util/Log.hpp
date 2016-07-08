@@ -24,11 +24,11 @@
 #endif
 
 #ifndef ANDROID
-#include <log4cxx/logger.h>
 #include <log4cxx/fileappender.h>
-#include <log4cxx/xml/domconfigurator.h>
-#include <log4cxx/patternlayout.h>
 #include <log4cxx/helpers/transcoder.h>
+#include <log4cxx/logger.h>
+#include <log4cxx/patternlayout.h>
+#include <log4cxx/xml/domconfigurator.h>
 #endif
 
 #if defined(_MSC_VER)

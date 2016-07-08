@@ -23,8 +23,8 @@
 #define HYPERGRAPH__ACYCLIC_BEST_JG_2013_06_10_HPP
 #pragma once
 
-#include <sdl/Hypergraph/InArcs.hpp>
 #include <sdl/Hypergraph/HypergraphTraits.hpp>
+#include <sdl/Hypergraph/InArcs.hpp>
 // traits abstraction that essentially is just telling us to add getValue() in
 // the ViterbiWeight sense when we compute best paths. used in honor of
 // BestPath.hpp. in theory it's more configurable.
@@ -188,7 +188,8 @@ struct AcyclicBest {
     SDL_DEBUG(Hypergraph.AcyclicBest, "acyclic best: " << back_edges_ << " back edges  - max allowed is "
                                                        << maxBackEdges);
     SDL_TRACE(Hypergraph.AcyclicBest, "reverse acyclic order: " << printer(orderReverse, Util::singleline())
-                                                                << " for hg:\n" << hg);
+                                                                << " for hg:\n"
+                                                                << hg);
     if (back_edges_ > maxBackEdges) return;
     if (orderReverse.empty()) return;
 

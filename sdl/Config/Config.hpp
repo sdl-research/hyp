@@ -21,20 +21,22 @@
 #pragma warning(push)
 #pragma warning(disable : 4146)
 #endif
-#include <yaml-cpp/node/node.h>
 #include <yaml-cpp/node/impl.h>
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/node/convert.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/OnceFlag.hpp>
 #include <sdl/Util/StableVector.hpp>
 #include <sdl/Config-fwd.hpp>
 #include <sdl/Path.hpp>
-#include <iostream>
 #include <sdl/StringConsumer.hpp>
-#include <sdl/Util/OnceFlag.hpp>
-#include <sdl/Util/LogHelper.hpp>
+#include <iostream>
 
+#if !__APPLE__
 namespace YAML {
 template <>
 struct convert<Node> {
@@ -45,6 +47,7 @@ struct convert<Node> {
   }
 };
 }
+#endif
 
 // since ConfigNode is a typedef, it would only be found by ADL in the yaml namespace
 inline bool is_null(sdl::ConfigNode const& node) {
@@ -214,7 +217,7 @@ struct YamlConfigurable {
 
   /** init, store, validate.
 
-      \param logEffective-show effective config as a single LOG_INFO message
+      \param logEffective-show effective config as a single LOG_DEBUG message
 
       \param effectiveVerbosity (if logEffective)
   */
@@ -247,7 +250,9 @@ struct YamlConfigurable {
 
   void setType(std::string const& type) { type_ = type; }
   void setCategory(std::string const& category) { category_ = category; }
-  void setName(std::string const& name) { if (name_.empty()) name_ = name; }
+  void setName(std::string const& name) {
+    if (name_.empty()) name_ = name;
+  }
   template <class Config>
   void configure(Config& config) {}
 

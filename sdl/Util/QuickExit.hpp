@@ -10,19 +10,25 @@
 // limitations under the License.
 /** \file
 
-    std::quick_exit
+    std::quick_exit or normal return rc; from main()
 */
 
 #ifndef QUICKEXIT_JG_2014_12_16_HPP
 #define QUICKEXIT_JG_2014_12_16_HPP
 #pragma once
 
+#ifndef SDL_PREFER_QUICK_EXIT
+#define SDL_PREFER_QUICK_EXIT 0
+#endif
+
+#include <cstdlib>
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32)) && !defined(__CYGWIN__)
 #include <stdlib.h>
 #else
 #include <unistd.h>
 #endif
 #include <iostream>
+#include <utility>
 
 namespace sdl {
 namespace Util {
@@ -35,11 +41,46 @@ namespace Util {
     we flush cout/cerr for you. if you were using cstdio (or fstream etc)
     instead you have to close/flush that yourself
 */
-inline void quickExit(int rc = 0) {
+[[noreturn]] inline void quickExit(int rc = 0) {
   std::cout.flush();
   std::cerr.flush();
   using namespace std;
-  std::quick_exit(rc);
+#if __APPLE__
+  //TODO: std::quick_exit not found gcc-6.1 -std=c++14
+  std::exit(rc);
+#else
+  std::quick_exit(rc);  // linux: _exit(rc)
+#endif
+}
+
+[[noreturn]] inline void quickAbort(int rc = 1) {
+  quickExit(rc);
+}
+
+
+/** usage: from int main():
+
+    return normalExit(rc);
+
+*/
+inline int normalExit(int rc = 0) {
+#if SDL_PREFER_QUICK_EXIT
+  quickExit(rc);
+#endif
+  /* we were calling std::exit; however, this lead to double calling of .so destructors because of exit():
+
+     #1  0x00007fffdc93ee69 in __run_exit_handlers () from /lib64/libc.so.6
+
+     and libxmt_shared.so unload destruction:
+
+#1  0x00007fffdc93f1da in __cxa_finalize () from /lib64/libc.so.6
+#2  0x00007fffe4815e46 in __do_global_dtors_aux () from /home/graehl/x/Debug/xmt/lib/libxmt_shared_debug.so
+
+ for example extern global defined once in libsdl-Db.so of sdl::BdbIndexTypeNames::~BdbIndexTypeNames()
+
+ therefore in your main() you should return normalExit(rc);
+  */
+  return rc;
 }
 
 

@@ -17,11 +17,11 @@
 #define HYP__HYPERGRAPH__DIFFERENCE_HPP
 #pragma once
 
-#include <sdl/Hypergraph/SortArcs.hpp>
-#include <sdl/Hypergraph/Compose.hpp>
-#include <sdl/Hypergraph/fs/Complement.hpp>
-#include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Hypergraph/Assert.hpp>
+#include <sdl/Hypergraph/Compose.hpp>
+#include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/SortArcs.hpp>
+#include <sdl/Hypergraph/fs/Complement.hpp>
 
 namespace sdl {
 namespace Hypergraph {

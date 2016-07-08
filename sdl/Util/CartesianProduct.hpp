@@ -18,9 +18,9 @@
 #pragma once
 
 
-#include <vector>
 #include <iostream>
 #include <iterator>
+#include <vector>
 
 namespace sdl {
 namespace Util {

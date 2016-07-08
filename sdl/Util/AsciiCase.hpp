@@ -55,12 +55,12 @@ inline bool isAsciiAlpha(char c) {
 }
 
 inline char asciiUpcase(char c) {
-  if (c >= 'a' && c <= 'z') c += ('A'-'a');
+  if (c >= 'a' && c <= 'z') c += ('A' - 'a');
   return c;
 }
 
 inline char asciiDowncase(char c) {
-  if (c >= 'A' && c <= 'Z') c -= ('A'-'a');
+  if (c >= 'A' && c <= 'Z') c -= ('A' - 'a');
   return c;
 }
 
@@ -78,12 +78,12 @@ struct AsciiDowncaseChar {
 
 
 inline std::string& inplaceAsciiAllUpcase(std::string& s) {
-  std::transform(s.begin(), s.end(), s.begin(), AsciiUpcaseChar());
+  for (char& c : s) c = asciiUpcase(c);
   return s;
 }
 
 inline std::string& inplaceAsciiAllDowncase(std::string& s) {
-  std::transform(s.begin(), s.end(), s.begin(), AsciiDowncaseChar());
+  for (char& c : s) c = asciiDowncase(c);
   return s;
 }
 
@@ -98,13 +98,11 @@ inline std::string& inplaceAsciiFirstDowncase(std::string& s) {
 }
 
 inline std::string asciiAllUpcase(std::string s) {
-  std::transform(s.begin(), s.end(), s.begin(), AsciiUpcaseChar());
-  return s;
+  return inplaceAsciiAllUpcase(s);
 }
 
 inline std::string asciiAllDowncase(std::string s) {
-  std::transform(s.begin(), s.end(), s.begin(), AsciiDowncaseChar());
-  return s;
+  return inplaceAsciiAllDowncase(s);
 }
 
 inline std::string asciiFirstUpcase(std::string s) {

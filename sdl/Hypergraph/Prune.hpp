@@ -20,8 +20,8 @@
 #define HYP__HYPERGRAPH_PRUNE_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Restrict.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/Restrict.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 
 namespace sdl {

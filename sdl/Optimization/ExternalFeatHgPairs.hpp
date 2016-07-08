@@ -12,12 +12,11 @@
 #define SDL_OPTIMIZATION_EXTERNALFEATHGPAIRS_HPP
 #pragma once
 
-#include <string>
-#include <mutex>
-
-#include <sdl/SharedPtr.hpp>
-#include <sdl/IVocabulary.hpp>
 #include <sdl/Optimization/FeatureHypergraphPairs.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <mutex>
+#include <string>
 
 namespace sdl {
 namespace Optimization {

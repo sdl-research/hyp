@@ -12,12 +12,12 @@
 #define SDL_UTIL_INPUTSIZE_JG2012730_HPP
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <memory>
-#include <sdl/Util/Plural.hpp>
 #include <sdl/Util/ParseSize.hpp>
+#include <sdl/Util/Plural.hpp>
 #include <graehl/shared/size_mega.hpp>
+#include <iostream>
+#include <memory>
+#include <string>
 
 namespace sdl {
 typedef graehl::size_metric InputSizeAmount;
@@ -72,12 +72,9 @@ inline sdl::InputSizeAmount adl_sizeAmount(V const& v) {
 namespace sdl {
 
 namespace Hypergraph {
-template <class A>
-class IHypergraph;
-template <class A>
-InputSizeAmount sizeAmount(IHypergraph<A> const&);
-template <class A>
-std::string sizeUnits(IHypergraph<A> const&);
+struct HypergraphBase;
+InputSizeAmount sizeAmount(HypergraphBase const&);
+std::string sizeUnits(HypergraphBase const&);
 }
 
 namespace Util {
@@ -96,11 +93,11 @@ namespace Util {
     simplify initialization of an InputSize object from a Val.
 */
 struct InputSize {
-  InputSize(InputSizeAmount amount = 0., std::string const& units = std::string())
-      : amount(amount), units(units) {}
-  InputSize(InputSize const& o) : amount(o.amount), units(o.units) {}
   InputSizeAmount amount;
   std::string units;
+  InputSize(InputSizeAmount amount = 0.) : amount(amount) {}
+  InputSize(InputSizeAmount amount, std::string const& units) : amount(amount), units(units) {}
+  InputSize(InputSize const& o) = default;
   InputSize& operator+=(InputSize const& o) {
     if (empty()) units = o.units;
     assert(o.units == units);

@@ -23,13 +23,12 @@
 
 #include <graehl/shared/warning_push.h>
 
-GCC_DIAG_IGNORE(uninitialized)
+GCC6_DIAG_IGNORE(misleading-indentation)
 
-#if HAVE_GCC_4_8
+GCC_DIAG_IGNORE(uninitialized)
 GCC_DIAG_IGNORE(maybe-uninitialized)
 GCC_DIAG_IGNORE(unused-local-typedefs)
 GCC_DIAG_IGNORE(unused-but-set-variable)
-#endif
 
 CLANG_DIAG_IGNORE(mismatched-tags)
 

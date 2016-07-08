@@ -59,6 +59,3 @@ struct HypTrie : HypergraphMainBase {
 }
 
 HYPERGRAPH_NAMED_MAIN(Trie)
-
-
-

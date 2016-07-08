@@ -17,19 +17,18 @@
 #define ICU_JG201276_HPP
 #pragma once
 
+#include <sdl/Util/Delete.hpp>
 #include <sdl/Util/IcuHeaders.hpp>
-#include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/String32.hpp>
+#include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Util/Utf8.hpp>
 #include <sdl/Exception.hpp>
-
-#include <vector>
+#include <sdl/Types.hpp>
 #include <boost/optional.hpp>
 #include <locale>
+#include <vector>
 #include <locale.h>
-#include <sdl/Util/Delete.hpp>
-#include <sdl/Types.hpp>
 
 namespace sdl {
 
@@ -69,7 +68,18 @@ typedef IcuNormalizer2 const* IcuNormalizer2Ptr;
 
    these may be used only after static init
  */
+#if 0
 extern IcuNormalizer2Ptr gNfc, gNfkc, gNfd, gNfkd;
+inline IcuNormalizer2Ptr getNfc() { return gNfc; }
+inline IcuNormalizer2Ptr getNfkc() { return gNfkc; }
+inline IcuNormalizer2Ptr getNfd() { return gNfd; }
+inline IcuNormalizer2Ptr getNfkd() { return gNfkd; }
+#else
+IcuNormalizer2Ptr getNfc();
+IcuNormalizer2Ptr getNfkc();
+IcuNormalizer2Ptr getNfd();
+IcuNormalizer2Ptr getNfkd();
+#endif
 
 /// not ok for s == out. does NOT assign to out if s is already normalized.
 bool maybeIcuNormalize(icu::UnicodeString const& s, icu::UnicodeString& out, IcuNormalizer2Ptr normalize);
@@ -291,7 +301,7 @@ inline bool maybeIcuNormalizeWarn(icu::UnicodeString const& s, icu::UnicodeStrin
 inline UnicodeString const& maybeNormalizedToNfc(UnicodeString const& s, UnicodeString& buf, bool& wasNfc,
                                                  bool warnIfNotNfc = false, bool K = false) {
 
-  return maybeIcuNormalizeWarn(s, buf, K ? gNfkc : gNfc, warnIfNotNfc) ? buf : s;
+  return maybeIcuNormalizeWarn(s, buf, K ? getNfkc() : getNfc(), warnIfNotNfc) ? buf : s;
 }
 
 inline UnicodeString maybeNormalizedToNfc(icu::UnicodeString const& s, bool& wasNfc,
@@ -329,8 +339,8 @@ std::string parseErrorString(UParseError const& e);  /// ICU lacks a strerror-li
 
 VERBOSE_EXCEPTION_DECLARE(IcuException)
 
-std::string icuLanguagesList(const char* sep = ", ");
-std::string icuCountriesList(const char* sep = ", ");
+std::string icuLanguagesList(char const* sep = ", ");
+std::string icuCountriesList(char const* sep = ", ");
 
 inline std::string localeName(Locale const& locale) {
   UnicodeString r;

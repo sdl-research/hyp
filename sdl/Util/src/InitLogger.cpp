@@ -14,23 +14,22 @@
 #endif
 #include <sdl/Util/Locale.hpp>
 #ifndef NLOG
-#include <log4cxx/logger.h>
-#include <log4cxx/fileappender.h>
 #include <log4cxx/consoleappender.h>
-#include <log4cxx/xml/domconfigurator.h>
-#include <log4cxx/patternlayout.h>
+#include <log4cxx/fileappender.h>
 #include <log4cxx/helpers/transcoder.h>
+#include <log4cxx/logger.h>
+#include <log4cxx/patternlayout.h>
+#include <log4cxx/xml/domconfigurator.h>
 #endif
-#include <sdl/Util/InitLogger.hpp>
 #include <sdl/Util/FindFile.hpp>
+#include <sdl/Util/InitLogger.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
 
-#include <iostream>
-
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <iostream>
 
 #if SDL_LOG_SEQUENCE_NUMBER
 #include <sdl/Util/RefCount.hpp>

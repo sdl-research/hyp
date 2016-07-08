@@ -88,8 +88,7 @@ struct DotProductResult : DotProductCombine<Result> {
   Result result;
   DotProductResult() : result(Base::zero()) {}
   template <class Map, class Map2>
-  DotProductResult(Map const& map, Map2 const& map2)
-      : result(Base::zero()) {
+  DotProductResult(Map const& map, Map2 const& map2) : result(Base::zero()) {
     intersectValues(map, map2, *this);
   }
   template <class A, class B>

@@ -62,24 +62,24 @@
 
 #include <graehl/shared/cpp11.hpp>
 #if GRAEHL_CMDLINE_MAIN_USE_CONFIGURE
-#include <graehl/shared/configure_program_options.hpp>
 #include <graehl/shared/configurable.hpp>
+#include <graehl/shared/configure_program_options.hpp>
 #endif
 
 #include <graehl/shared/assign_traits.hpp>
-#include <graehl/shared/program_options.hpp>
-#include <graehl/shared/itoa.hpp>
 #include <graehl/shared/command_line.hpp>
 #include <graehl/shared/fileargs.hpp>
-#include <graehl/shared/teestream.hpp>
-#include <graehl/shared/string_to.hpp>
+#include <graehl/shared/itoa.hpp>
+#include <graehl/shared/program_options.hpp>
 #include <graehl/shared/random.hpp>
+#include <graehl/shared/string_to.hpp>
+#include <graehl/shared/teestream.hpp>
 
 #if GRAEHL_DEBUGPRINT
 #include <graehl/shared/debugprint.hpp>
 #endif
-#include <iostream>
 #include <graehl/shared/int_types.hpp>
+#include <iostream>
 
 #define INT_MAIN(main_class)         \
   int main(int argc, char* argv[]) { \
@@ -416,8 +416,8 @@ struct main {
     if (opt.add_help) c("help", &help)('h').flag()("show usage/documentation").verbose();
 
     if (opt.add_quiet)
-      c("quiet", &quiet)('q')
-          .flag()("use log only for warnings - e.g. no banner of command line options used");
+      c("quiet", &quiet)('q').flag()(
+          "use log only for warnings - e.g. no banner of command line options used");
 
     if (opt.add_verbose)
       c("verbose",
@@ -432,10 +432,10 @@ struct main {
         c(GRAEHL_IN_FILE, &in_file)('i')(opt.input_help()).eg("infile.gz").positional(opt.positional_in);
 
     if (opt.add_out_file) {
+      c("output", &out_file).alias();
       c("out", &out_file)('o')
           .positional(opt.positional_out)("Output here (instead of STDOUT)")
           .eg("outfile.gz");
-      c("output", &out_file).alias();
     }
 
     if (opt.add_config_file)
@@ -596,7 +596,7 @@ struct main {
   int parse_args(int argc, char** argv) {
     std::string const v = "-v";
     if (opt.add_verbose)
-      for (int i = argc - 2; i; --i)
+      for (int i = argc - 2; i > 0; --i)
         if (argv[i] == v) {
           verbose = atoi_nows(argv[i + 1]);
           break;
@@ -650,8 +650,9 @@ struct main {
       }
 #endif
     } catch (std::exception& e) {
-      std::cerr << "ERROR: " << e.what() << "\n while parsing " << opt.name << " options:\n" << cmdline_str
-                << "\n\n" << argv[0] << " -h\n for help\n\n";
+      std::cerr << "ERROR: " << e.what() << "\n while parsing " << opt.name << " options:\n"
+                << cmdline_str << "\n\n"
+                << argv[0] << " -h\n for help\n\n";
       throw;
     }
     return true;
@@ -717,8 +718,6 @@ int main(int argc, char** argv) {
   return sample_m.run_main(argc, argv);
 }
 #endif
-
-
 
 
 #endif

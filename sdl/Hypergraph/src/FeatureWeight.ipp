@@ -16,16 +16,14 @@
     http://boost-spirit.com/home/articles/qi-example/parsing-a-list-of-key-value-pairs-using-spirit-qi
 */
 
-#include <map>
-#include <string>
-#include <utility>
-#include <stdexcept>
-
 #include <sdl/Hypergraph/FeatureWeight.hpp>
 #include <sdl/Util/LogHelper.hpp>
-
-#include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/std_pair.hpp>  // crucial
+#include <boost/spirit/include/qi.hpp>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <utility>
 #include <utility>
 
 namespace sdl {

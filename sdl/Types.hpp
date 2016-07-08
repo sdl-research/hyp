@@ -21,23 +21,23 @@
 #pragma once
 
 
-#if defined(__GNUC__) && defined(__LP64__) /* only under 64 bit gcc */
+#if !defined(__APPLE__) && defined(__linux__) && defined(__GNUC__) && defined(__LP64__) && !defined(USE_LATEST_MEMCPY)
+/* only under 64 bit gcc */
 __asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
 // http://www.win.tue.nl/~aeb/linux/misc/gcc-semibug.html
 #endif
 
+#include <sdl/Array.hpp>
 #include <sdl/Function.hpp>
-
-#include <string>
-#include <map>
-#include <vector>
-#include <iostream>
-#include <cstring>
 #include <sdl/IntTypes.hpp>
 #include <sdl/LexicalCast.hpp>
-#include <sdl/Array.hpp>
 #include <sdl/Position.hpp>
 #include <algorithm>
+#include <cstring>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 // Default precision of floating point values is 32-bit (float).
 #ifndef SDL_FLOAT
@@ -101,8 +101,10 @@ inline Slice toSlice(std::string const& str, std::size_t begin, std::size_t end)
   return Slice(data + begin, data + end);
 }
 
-typedef uint32 Unicode;  // a unicode codepoint (character, not necessarily a single glyph, e.g. roman numeral
-// three (looks like iii) is a single codepoint
+typedef uint32
+    Unicode;  // a unicode codepoint -- not necessarily a single character (grapheme), e.g. Spanish letter ñ
+// is one grapheme, but can be represented by two codepoints, one for base letter 'n' and one for the
+// combining tilde.
 typedef Unicode const* Punicode;
 typedef std::pair<Punicode, Punicode> UnicodeSlice;
 typedef std::vector<Unicode> Unicodes;

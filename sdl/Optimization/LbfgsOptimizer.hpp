@@ -20,16 +20,14 @@
 #define SDL_OPTIMIZATION_LBFGSOPTIMIZER_HPP
 #pragma once
 
-#include <cassert>
-#include <cstdio>
-#include <map>
-#include <string>
-#include <iomanip>
-
-#include <lbfgs.h>
-
 #include <sdl/Optimization/ObjectiveFunction.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <cassert>
+#include <cstdio>
+#include <iomanip>
+#include <map>
+#include <string>
+#include <lbfgs.h>
 
 namespace sdl {
 namespace Optimization {
@@ -179,7 +177,7 @@ class LbfgsOptimizer {
     if (lbfgsOptions_.orthantwise_c) {
       // TODO: test
       lbfgsOptions_.orthantwise_start = 0;
-      lbfgsOptions_.orthantwise_end = numParams-1;
+      lbfgsOptions_.orthantwise_end = numParams - 1;
       lbfgsOptions_.linesearch = kBacktracking;  // required for L1
       SDL_INFO(Optimization, "L-BFGS L1 regularization enabled with C="
                                  << lbfgsOptions_.orthantwise_c

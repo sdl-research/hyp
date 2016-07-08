@@ -26,14 +26,13 @@
 #define HYPERGRAPH_CFG_REVERSE_HPP
 #pragma once
 
-#include <algorithm>
-#include <utility>
+#include <sdl/Hypergraph/DeferAddArcs.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/DeferAddArcs.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
-
 #include <sdl/SharedPtr.hpp>
+#include <algorithm>
+#include <utility>
 
 
 namespace sdl {

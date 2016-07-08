@@ -36,12 +36,12 @@
 #define FLATTENGENERATORS_JG20121222_HPP
 #pragma once
 
-#include <sdl/Util/Generator.hpp>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Util/RefCount.hpp>
-#include <sdl/Util/PriorityQueue.hpp>
-#include <boost/property_map/property_map.hpp>
 #include <sdl/Pool/object_pool.hpp>
+#include <sdl/Util/Generator.hpp>
+#include <sdl/Util/PriorityQueue.hpp>
+#include <sdl/Util/RefCount.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/property_map/property_map.hpp>
 
 namespace sdl {
 namespace Util {

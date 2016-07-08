@@ -8,30 +8,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include <sdl/Hypergraph/Arc.hpp>
 #include <sdl/Hypergraph/ArcParserFct.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/fs/WriteOpenFstFormat.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #ifndef NDEBUG
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
 #endif
 
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/Locale.hpp>
-
-#include <sdl/Util/ProgramOptions.hpp>
-#include <sdl/Util/Input.hpp>
 #include <sdl/Hypergraph/HypergraphMain.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/Locale.hpp>
+#include <sdl/Util/ProgramOptions.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -102,6 +98,3 @@ struct HypToOpenFstText {
 }
 
 HYPERGRAPH_NAMED_MAIN(ToOpenFstText)
-
-
-

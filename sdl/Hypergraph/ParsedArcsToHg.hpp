@@ -17,8 +17,8 @@
 #define PARSEDARCSTOHG_JG_2014_01_14_HPP
 #pragma once
 
-#include <sdl/Hypergraph/ParsedArcs.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/ParsedArcs.hpp>
 #include <sdl/Util/Unordered.hpp>
 
 namespace sdl {

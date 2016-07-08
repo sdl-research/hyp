@@ -32,8 +32,8 @@
 #define OPERATEON_JG2012927_HPP
 #pragma once
 
-#include <sdl/Util/Enum.hpp>
 #include <sdl/Config/Init.hpp>
+#include <sdl/Util/Enum.hpp>
 
 namespace sdl {
 namespace Hypergraph {

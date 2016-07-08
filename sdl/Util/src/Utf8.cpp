@@ -25,13 +25,15 @@
 */
 
 #include <sdl/Util/IcuHeaders.hpp>
-#include <unicode/uchar.h>  //u_iscntrl u_isspace
 #include <sdl/Util/String32.hpp>
 #include <sdl/Util/Utf8.hpp>
+#include <unicode/uchar.h>  //u_iscntrl u_isspace
 #include <utility>
 
 namespace sdl {
 namespace Util {
+
+SDL_NAME_ENUM(BadUtf8HandlerType);
 
 std::string& fixUtf8(std::string& string) {
   if (validUtf8(string))

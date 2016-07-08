@@ -17,11 +17,11 @@
    #include <sdl/Hypergraph/src/InstantiateWeightTypes.ipp>
 */
 
-#include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
 #include <sdl/Hypergraph/FeatureWeight.hpp>
 #include <sdl/Hypergraph/TokenWeight.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
 
 namespace sdl {
 namespace Hypergraph {

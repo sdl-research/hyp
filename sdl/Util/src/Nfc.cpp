@@ -9,8 +9,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include <sdl/Util/Nfc.hpp>
-#include <sdl/IntTypes.hpp>
 #include <sdl/Util/Utf8.hpp>
+#include <sdl/IntTypes.hpp>
 
 namespace sdl {
 namespace Util {
@@ -48,28 +48,42 @@ std::string normalizedToNfc(std::string const& s, bool K) {
 
 UErrorCode nfcErr = U_ZERO_ERROR;
 
-char const* const kIcuNfc("nfc");
-char const* const kIcuNfkc("nfkc");
+char const* const kIcuNfc = "nfc";
+char const* const kIcuNfkc = "nfkc";
 
 typedef icu::Normalizer2 IcuNormalizer;
+#if 0
 #if U_ICU_VERSION_MAJOR_NUM < 49
-icu::Normalizer2 const* gNfc = icu::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_COMPOSE, nfcErr);
-icu::Normalizer2 const* gNfkc = icu::Normalizer2::getInstance(NULL, kIcuNfkc, UNORM2_COMPOSE, nfcErr);
-icu::Normalizer2 const* gNfd = icu::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_DECOMPOSE, nfcErr);
-icu::Normalizer2 const* gNfkd = icu::Normalizer2::getInstance(NULL, kIcuNfkc, UNORM2_DECOMPOSE, nfcErr);
+IcuNormalizer2Ptr gNfc = icu::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_COMPOSE, nfcErr);
+IcuNormalizer2Ptr gNfkc = icu::Normalizer2::getInstance(NULL, kIcuNfkc, UNORM2_COMPOSE, nfcErr);
+IcuNormalizer2Ptr gNfd = icu::Normalizer2::getInstance(NULL, kIcuNfc, UNORM2_DECOMPOSE, nfcErr);
+IcuNormalizer2Ptr gNfkd = icu::Normalizer2::getInstance(NULL, kIcuNfkc, UNORM2_DECOMPOSE, nfcErr);
 #else
-icu::Normalizer2 const* gNfc = icu::Normalizer2::getNFCInstance(nfcErr);
-icu::Normalizer2 const* gNfkc = icu::Normalizer2::getNFKCInstance(nfcErr);
-icu::Normalizer2 const* gNfd = icu::Normalizer2::getNFDInstance(nfcErr);
-icu::Normalizer2 const* gNfkd = icu::Normalizer2::getNFKDInstance(nfcErr);
+IcuNormalizer2Ptr gNfc = icu::Normalizer2::getNFCInstance(nfcErr);
+IcuNormalizer2Ptr gNfkc = icu::Normalizer2::getNFKCInstance(nfcErr);
+IcuNormalizer2Ptr gNfd = icu::Normalizer2::getNFDInstance(nfcErr);
+IcuNormalizer2Ptr gNfkd = icu::Normalizer2::getNFKDInstance(nfcErr);
 #endif
-
+#else
+IcuNormalizer2Ptr getNfc() {
+  return icu::Normalizer2::getNFCInstance(nfcErr);
+}
+IcuNormalizer2Ptr getNfkc() {
+  return icu::Normalizer2::getNFKCInstance(nfcErr);
+}
+IcuNormalizer2Ptr getNfd() {
+  return icu::Normalizer2::getNFDInstance(nfcErr);
+}
+IcuNormalizer2Ptr getNfkd() {
+  return icu::Normalizer2::getNFKDInstance(nfcErr);
+}
+#endif
 
 bool isNfc(UnicodeString const& s, bool K) {
   using namespace icu;
   UErrorCode err = U_ZERO_ERROR;
   assert(U_SUCCESS(err));
-  bool const r = (K ? gNfkc : gNfc)->isNormalized(s, err);
+  bool const r = (K ? getNfkc() : getNfc())->isNormalized(s, err);
   assert(U_SUCCESS(err));
   return r;
 }
@@ -85,7 +99,7 @@ bool maybeNormalizeToNfc(Slice utf8, std::string& buf, bool warnIfNotNfc, bool w
   // TODO: library that does this without going -> UnicodeString
   UErrorCode err = U_ZERO_ERROR;
 
-  IcuNormalizer2Ptr norm = K ? gNfkc : gNfc;
+  IcuNormalizer2Ptr norm = K ? getNfkc() : getNfc();
 
   UnicodeString u;
   // ICU doc says: Illegal input is replaced with U+FFFD. therefore we need not use FixedUtf8

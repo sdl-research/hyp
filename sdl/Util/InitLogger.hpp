@@ -27,13 +27,13 @@
 #define SDL_UTIL_INITLOGGER_HPP_
 #pragma once
 
-#include <sdl/LexicalCast.hpp>
-#include <string>
-#include <sdl/Util/LogLevel.hpp>
-#include <sdl/Util/Log.hpp>
 #include <sdl/Util/Locale.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <sdl/Util/Log.hpp>
+#include <sdl/Util/LogLevel.hpp>
+#include <sdl/LexicalCast.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <string>
 
 namespace sdl {
 namespace Util {

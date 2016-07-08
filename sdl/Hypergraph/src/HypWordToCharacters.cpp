@@ -43,6 +43,3 @@ struct HypWordToCharacters : TransformMain<HypWordToCharacters> {
 }
 
 HYPERGRAPH_NAMED_MAIN(WordToCharacters)
-
-
-

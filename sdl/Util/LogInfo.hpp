@@ -17,9 +17,9 @@
 #define LOGINFO_JG2012813_HPP
 #pragma once
 
+#include <sdl/Util/LogLevel.hpp>
 #include <sdl/Log.hpp>
 #include <sdl/StringConsumer.hpp>
-#include <sdl/Util/LogLevel.hpp>
 #ifndef NLOG
 #include <log4cxx/logger.h>
 #endif

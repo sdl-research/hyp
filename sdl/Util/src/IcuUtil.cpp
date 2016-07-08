@@ -8,24 +8,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <iostream>
-
 #include <sdl/Util/IcuUtil.hpp>
 #include <sdl/Util/Utf8.hpp>
+#include <iostream>
 
 #include <graehl/shared/warning_push.h>
-#if HAVE_GCC_4_4
 GCC_DIAG_IGNORE(unused-but-set-variable)
-#endif
-#include <unicode/unistr.h>
-#include <unicode/schriter.h>
+
 #include <unicode/brkiter.h>
-#include <unicode/uchar.h>
 #include <unicode/chariter.h>
+#include <unicode/schriter.h>
+#include <unicode/uchar.h>
+#include <unicode/unistr.h>
+
 #include <graehl/shared/warning_pop.h>
+
+#include <sdl/Util/IcuCase.hpp>
+#include <sdl/Util/IcuIsCase.hpp>
 
 namespace sdl {
 namespace Util {
+
+SDL_NAME_ENUM(IcuCase);
+SDL_NAME_ENUM(IcuIsCase);
 
 bool TokenizerBaseImpl::findNextNonSpace() {
   using namespace icu;

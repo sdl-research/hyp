@@ -36,12 +36,12 @@
 #define PUSHWEIGHTS_JG2013220_HPP
 #pragma once
 
-#include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/OutsideCosts.hpp>
+#include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/InsideCosts.hpp>
+#include <sdl/Hypergraph/OutsideCosts.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 #include <graehl/shared/nan.hpp>
 
 namespace sdl {
@@ -123,7 +123,7 @@ struct PushCostsToStart {
       return;
     }
     outside0 = outside;
-    assert(graehl::is_inf(*outside0));
+    assert(graehl::is_posinf(*outside0));
     outsideCosts(hg, outside0, inside, N, (float)HUGE_VAL, false);
     assert(start < N);
     outside0[start] = inside[final];
@@ -140,7 +140,7 @@ struct PushCostsToStart {
     assert(tail < N);
     // we want the new outsides to be as small as possible without going
     // negative. TODO: prove correct for cyclic graphs
-    cost += outside0[head]-(tail != start ? outside0[tail] : 0);
+    cost += outside0[head] - (tail != start ? outside0[tail] : 0);
   }
 };
 

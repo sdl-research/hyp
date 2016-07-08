@@ -23,10 +23,10 @@
 #define SDL_UTIL_CONSTANTS_HPP
 #pragma once
 
-#include <limits>
-#include <cstddef>
-#include <utility>
 #include <algorithm>
+#include <cstddef>
+#include <limits>
+#include <utility>
 
 namespace sdl {
 

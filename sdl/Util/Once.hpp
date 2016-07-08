@@ -20,9 +20,9 @@
 
 #include <graehl/shared/warning_push.h>
 GCC_DIAG_IGNORE(maybe-uninitialized)
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/PointerSet.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/PointerSet.hpp>
+#include <sdl/Util/Unordered.hpp>
 
 namespace sdl {
 namespace Util {
@@ -114,8 +114,6 @@ struct CheckOnce : Once {
 }
 
 #include <graehl/shared/warning_pop.h>
-
-
 
 
 #endif

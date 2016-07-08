@@ -44,14 +44,15 @@
 #endif
 
 
-#include <cmath>  // also needed for boost/random :( (pow)
+#include <graehl/shared/os.hpp>
+#include <graehl/shared/shared_ptr.hpp>
+#include <boost/optional.hpp>
 #include <algorithm>  // min for boost/random
+#include <cmath>  // also needed for boost/random :( (pow)
+#include <ctime>
 
 #include <graehl/shared/warning_push.h>
-#if HAVE_GCC_DIAG_OFF
 GCC_DIAG_IGNORE(attributes)
-#endif
-
 
 #if GRAEHL_USE_RANDOM_DEVICE
 #include <boost/random/random_device.hpp>
@@ -65,10 +66,9 @@ GCC_DIAG_IGNORE(attributes)
 //#include <boost/random.hpp>
 //#include <boost/random/generate_canonical.hpp>
 //#include <boost/random/seed_seq.hpp>
-#include <boost/random/random_number_generator.hpp>
-
-#include <boost/random/uniform_01.hpp>
 #include <boost/random/lagged_fibonacci.hpp>
+#include <boost/random/random_number_generator.hpp>
+#include <boost/random/uniform_01.hpp>
 #include <boost/random/variate_generator.hpp>
 #endif
 
@@ -78,11 +78,6 @@ GCC_DIAG_IGNORE(attributes)
 #include <cstdlib>
 #endif
 
-#include <graehl/shared/shared_ptr.hpp>
-#include <boost/optional.hpp>
-
-#include <ctime>
-#include <graehl/shared/os.hpp>
 
 #ifdef GRAEHL_TEST
 #include <graehl/shared/test.hpp>
@@ -149,7 +144,12 @@ typedef boost::variate_generator<random_generator, uniform_01_dist> random_01_ge
 #endif
 
 
+#if !defined(GRAEHL__NO_G_RANDOM01)
+
 #if !GRAEHL_GLOBAL_RANDOM_USE_STD
+/**
+   global (thread-unsafe).
+*/
 #if (!defined(GRAEHL__NO_RANDOM_MAIN) && defined(GRAEHL__SINGLE_MAIN)) || defined(GRAEHL__RANDOM_MAIN)
 namespace {
 // random_generator g_random_gen(default_random_seed());
@@ -180,10 +180,8 @@ inline double random01()  // returns uniform random number on [0..1)
 #endif
 }
 
-/**
-   global (thread-unsafe).
-*/
 #include <graehl/shared/random.ipp>
+#endif
 
 struct set_random_pos_fraction {
   template <class C>

@@ -19,11 +19,12 @@
 #define SDL_CHOMP_JG2012125_HPP
 #pragma once
 
-#include <string>
-#include <boost/range/iterator_range.hpp>
-#include <sdl/StringConsumer.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <sdl/StringConsumer.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <algorithm>
+#include <iostream>
+#include <string>
 
 namespace sdl {
 namespace Util {
@@ -55,6 +56,15 @@ inline std::string& chomp(std::string& str) {
   return str;
 }
 
+/**
+   when str was already std::getline it has no trailing '\n'
+*/
+inline std::string& chompGetline(std::string& str) {
+  std::string::size_type sz = str.size();
+  if (sz && str[sz - 1] == '\r') eraseLastChar(str);
+  return str;
+}
+
 template <class CharIter>
 inline CharIter chompEnd(CharIter begin, CharIter i) {
   if (i == begin) return i;
@@ -62,13 +72,23 @@ inline CharIter chompEnd(CharIter begin, CharIter i) {
     // TODO: test
     if (i != begin && i[-1] == '\r') --i;
     return i;
-  }
-  return ++i;
+  } else
+    return ++i;
 }
 
 template <class String>
 inline typename String::const_iterator chompEnd(String const& str) {
   return chompEnd(str.begin(), str.end());
+}
+
+template <class CharIter>
+inline unsigned chompLen(CharIter begin, unsigned len) {
+  if (!len) return len;
+  if (begin[--len] == '\n') {
+    if (len && begin[len - 1] == '\r') --len;
+    return len;
+  } else
+    return len + 1;
 }
 
 template <class CharIter, class Space>
@@ -128,6 +148,7 @@ template <class String>
 inline boost::iterator_range<typename String::const_iterator> chomped(String const& str) {
   return boost::iterator_range<typename String::const_iterator>(str.begin(), chompEnd(str));
 }
+
 
 template <class String, class Space>
 inline boost::iterator_range<typename String::const_iterator> endTrimmedOf(String const& str, Space const& space) {

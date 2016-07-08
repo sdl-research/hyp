@@ -26,7 +26,6 @@
 #include <sdl/Vocabulary/SpecialSymbolsTemplate.hpp>
 #include <sdl/Exception.hpp>
 #include <sdl/Sym.hpp>
-
 #include <boost/preprocessor/arithmetic/inc.hpp>
 #include <boost/preprocessor/slot/slot.hpp>
 
@@ -38,9 +37,11 @@
 
 namespace sdl {
 
+
 /// causes instantiation of SpecialSymbolsTemplate classes in order, so we can
 /// fill the SpecialSymbolVoc. putting this in .cpp won't work for some reason.
 struct SpecialSymbolsOrder {
+  volatile unsigned dummy = 0;
   SpecialSymbolsOrder() {
 #undef SDL_SPECIAL_SYMBOL_INC
 #define SDL_SPECIAL_SYMBOL_INC "src/OrderSpecialSymbol.ipp"
@@ -52,6 +53,12 @@ struct SpecialSymbolsOrder {
 SymInt const SDL_NUM_BLOCKS = 10000;
 
 namespace Vocabulary {
+
+void initSpecialSymbols()
+#ifndef _MSC_VER
+    __attribute__((constructor))
+#endif
+    ;
 
 inline bool isFstComposeSpecial(Sym sym) {
   return sym <= RHO::ID;

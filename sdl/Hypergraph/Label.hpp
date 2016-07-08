@@ -19,9 +19,9 @@
 #define HYP__HYPERGRAPH__LABEL_HPP
 #pragma once
 
+#include <sdl/Hypergraph/LabelPair.hpp>
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Hypergraph/LabelPair.hpp>
 #include <sdl/Util/Enum.hpp>
 
 namespace sdl {

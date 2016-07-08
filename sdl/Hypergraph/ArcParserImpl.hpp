@@ -21,26 +21,21 @@
 #define HYP__HYPERGRAPH_ARCPARSER_IMPL_HPP
 #pragma once
 
+#include <sdl/Hypergraph/ParserUtil.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/Delete.hpp>
+#include <sdl/Util/QuoteEsc.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/include/io.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <cstring>
 #include <iostream>
 #include <string>
-
-#include <boost/spirit/include/qi.hpp>
-
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/include/io.hpp>
-
-#include <sdl/Hypergraph/ParserUtil.hpp>
-
-#include <sdl/Hypergraph/SymbolPrint.hpp>
-#include <sdl/Util/QuoteEsc.hpp>
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Util/Delete.hpp>
 
 namespace ParserUtil = sdl::Hypergraph::ParserUtil;
 
@@ -77,7 +72,7 @@ struct DoubleQuotedEscapedString : qi::grammar<InputIterator, std::string()> {
     Util::DoubleQuoteEsc e;
     e.toQi(escChar);
 
-    startRule = quote >> *(escChar | "\\x" >> qi::hex | (qi::char_-quote)) >> quote;
+    startRule = quote >> *(escChar | "\\x" >> qi::hex | (qi::char_ - quote)) >> quote;
   }
 
   qi::rule<InputIterator, std::string()> startRule;
@@ -90,7 +85,7 @@ struct SingleQuotedString : qi::grammar<InputIterator, std::string()> {
   SingleQuotedString() : SingleQuotedString::base_type(startRule), quote("'") {
     Util::SingleQuoteEsc e;
     e.toQi(escQuote);
-    startRule = quote >> *(escQuote | (qi::char_-quote)) >> quote;
+    startRule = quote >> *(escQuote | (qi::char_ - quote)) >> quote;
   }
 
   qi::rule<InputIterator, std::string()> startRule;
@@ -122,8 +117,7 @@ struct ArcParserImpl : qi::grammar<Iterator, ParserUtil::Arc(), ascii::space_typ
 };
 
 template <class Iterator>
-ArcParserImpl<Iterator>::ArcParserImpl()
-    : ArcParserImpl<Iterator>::base_type(start) {
+ArcParserImpl<Iterator>::ArcParserImpl() : ArcParserImpl<Iterator>::base_type(start) {
 
   using qi::char_;
   using qi::int_;

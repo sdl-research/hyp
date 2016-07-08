@@ -23,11 +23,11 @@
 #define HYP__INARCS_JG_2013_06_10_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/DfsColor.hpp>
 #include <sdl/Util/SmallVector.hpp>
 #include <sdl/Array.hpp>
-#include <sdl/Util/DfsColor.hpp>
 
 namespace sdl {
 namespace Hypergraph {

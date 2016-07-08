@@ -26,8 +26,9 @@ namespace Util {
    whitespace in tokens, so we may 'escape' them w/ kEscSpace
 */
 namespace {
-std::string const kSpace = " ";
-std::string const kEscSpace("_space_");
+std::string const kEmptyStr;
+std::string const kSpace(1, ' ');
+std::string const kEscSpace = "_space_";
 }
 
 struct SpaceTokenOptions {

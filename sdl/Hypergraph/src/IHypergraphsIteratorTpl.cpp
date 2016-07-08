@@ -13,25 +13,23 @@
     TODO: test (used in Optimizer?).
 */
 
-#include <iostream>
-#include <vector>
-#include <istream>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
-#include <sdl/Hypergraph/StringToHypergraph.hpp>
-#include <sdl/Hypergraph/SortStates.hpp>
-#include <sdl/Hypergraph/HelperFunctions.hpp>
 #include <sdl/Hypergraph/ArcParserFct.hpp>
 #include <sdl/Hypergraph/FeaturesPerInputPosition.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Split.hpp>
-#include <sdl/Util/Nfc.hpp>
+#include <sdl/Hypergraph/HelperFunctions.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/SortStates.hpp>
+#include <sdl/Hypergraph/StringToHypergraph.hpp>
 #include <sdl/Util/Enum.hpp>
 #include <sdl/Util/LineOptions.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/NormalizeUtf8.hpp>
+#include <sdl/Util/Split.hpp>
+#include <iostream>
+#include <istream>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -44,7 +42,6 @@ class FlatStringHypergraphsIterator : public IHypergraphsIteratorTpl<Arc> {
   FlatStringHypergraphsIterator(std::istream& in, shared_ptr<IPerThreadVocabulary> const& perThreadVocab,
                                 shared_ptr<IFeaturesPerInputPosition> feats)
       : in_(in), pHg_(NULL), perThreadVocab_(perThreadVocab), done_(false), hgProp_(kStoreOutArcs) {
-    toHypergraphOpt.doAddUnknownSymbols = true;
     toHypergraphOpt.inputFeatures = feats;
   }
 

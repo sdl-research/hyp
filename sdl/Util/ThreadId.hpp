@@ -100,6 +100,11 @@ inline bool isStackAddress(void const* ptr) {
 #endif
 }
 
+#define SDL_DEBUG_THREAD_ALWAYS(name, x) \
+  SDL_DEBUG_ALWAYS(name, "thread:" << sdl::Util::threadId() << ": " << x)
+#define SDL_DEBUG_THREAD(name, x) SDL_DEBUG(name, "thread:" << sdl::Util::threadId() << ": " << x)
+#define SDL_TRACE_THREAD(name, x) SDL_TRACE(name, "thread:" << sdl::Util::threadId() << ": " << x)
+
 
 }}
 

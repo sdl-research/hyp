@@ -18,11 +18,11 @@
 #define UTIL__INDEXED_STRINGS__JG_2014_03_04_HPP
 #pragma once
 
-#include <graehl/shared/indexed.hpp>
-#include <sdl/Sym.hpp>
-#include <vector>
-#include <string>
 #include <sdl/Util/StableVector.hpp>
+#include <sdl/Sym.hpp>
+#include <graehl/shared/indexed.hpp>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Util {

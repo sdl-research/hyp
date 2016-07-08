@@ -17,20 +17,20 @@
 #define SDL_UTIL_EQUAL_HPP
 #pragma once
 
-#include <cmath>
-#include <set>
+#include <sdl/Util/AsciiCase.hpp>
+#include <sdl/Util/Chomp.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Math.hpp>
+#include <sdl/Util/PrintRange.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <graehl/shared/split.hpp>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <iterator>
+#include <set>
 #include <type_traits>
 #include <utility>
-#include <sdl/LexicalCast.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/PrintRange.hpp>
-#include <sdl/Util/AsciiCase.hpp>
-#include <sdl/Util/Math.hpp>
-#include <sdl/Util/Chomp.hpp>
-#include <graehl/shared/split.hpp>
 
 namespace sdl {
 namespace Util {
@@ -154,8 +154,9 @@ inline bool LinesUnorderedEqualIgnoringIntegers(std::string i1, std::string i2, 
   bool ok = LinesUnorderedEqual(str1, str2, sortWords, name1, name2, warn, ignoreBlankLines);
   if (!ok)
     SDL_WARN(Util.Equal, "not exactly equal even after integer replacement and ignoring line order: [(test)\n"
-                             << str1 << "\n  !=  \n" << str2 << "\n (reference)]:\n\n" << i1
-                             << "\n (original test).");
+                             << str1 << "\n  !=  \n"
+                             << str2 << "\n (reference)]:\n\n"
+                             << i1 << "\n (original test).");
   else
     SDL_WARN(Util.Equal, " OK-Equal after integer replacement.");
   return ok;

@@ -10,8 +10,8 @@
 // limitations under the License.
 #define USAGE_HypReverse "Reverse strings in language (todo: support cfg)"
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Reverse.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -28,6 +28,3 @@ struct HypReverse : TransformMain<HypReverse> {  // note base class CRTP (google
 }
 
 HYPERGRAPH_NAMED_MAIN(Reverse)
-
-
-

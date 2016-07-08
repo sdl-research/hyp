@@ -17,9 +17,9 @@
 #define LWUTIL_QI_KARMA_SYMBOLS_HPP
 #pragma once
 
+#include <graehl/shared/escape3.hpp>
 #include <utility>
 #include <vector>
-#include <graehl/shared/escape3.hpp>
 
 namespace sdl {
 
@@ -31,20 +31,19 @@ Escape3 escapeLimited(A a, B b) {
   return Escape3(a, b, kLimitLogChars);
 }
 
-std::string const kNullDbtStr("[NULL]");
+char const* const kNullDbtStr = "[NULL]";
 
 template <class Dbt>
 Escape3 escapeLimited(Dbt* dbt) {
   // TODO: test
-  return dbt ? Escape3(dbt->get_data(), dbt->get_size(), kLimitLogChars)
-             : Escape3(kNullDbtStr.data(), kNullDbtStr.size());
+  return dbt ? Escape3(dbt->get_data(), dbt->get_size(), kLimitLogChars) : Escape3(kNullDbtStr, 6);
 }
 
 template <class Dbt>
 Escape3 escapeLimitedLen(Dbt* dbt) {
   // TODO: test
   return dbt ? Escape3(dbt->get_data(), dbt->get_size(), kLimitLogChars, true)
-             : Escape3(kNullDbtStr.data(), kNullDbtStr.size(), kLimitLogChars, true);
+             : Escape3(kNullDbtStr, 6, kLimitLogChars, true);
 }
 
 namespace Util {

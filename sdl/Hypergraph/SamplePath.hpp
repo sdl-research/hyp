@@ -18,18 +18,15 @@
 #define HYP__HYPERGRAPH_SAMPLE_PATH_HPP
 #pragma once
 
-#include <ctime>
-#include <cstdlib>
-#include <queue>
-
 #include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/InsideAlgorithm.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/InsideAlgorithm.hpp>
-
 #include <sdl/Util/LogHelper.hpp>
-
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <cstdlib>
+#include <ctime>
+#include <queue>
 
 namespace sdl {
 namespace Hypergraph {

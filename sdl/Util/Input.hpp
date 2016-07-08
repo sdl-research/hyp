@@ -20,15 +20,15 @@
 #pragma once
 
 
-#include <vector>
-#include <boost/any.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/SharedPtr.hpp>
 #include <sdl/Util/ArrayStream.hpp>
+#include <sdl/Util/Fileargs.hpp>
+#include <sdl/Util/Flag.hpp>
+#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/String.hpp>
 #include <sdl/Util/StringBuilder.hpp>
-#include <sdl/Util/Flag.hpp>
-#include <sdl/Util/Fileargs.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/any.hpp>
+#include <vector>
 
 namespace sdl {
 namespace Util {

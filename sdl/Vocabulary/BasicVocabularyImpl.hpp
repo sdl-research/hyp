@@ -18,15 +18,14 @@
 #define VOCABULARY__BASICVOCABULARYIMPL_H_
 #pragma once
 
-#include <string>
+#include <sdl/Util/Constants.hpp>
+#include <sdl/Util/IndexedStrings.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Map.hpp>
 #include <sdl/Util/Unordered.hpp>
 #include <sdl/IVocabulary.hpp>
-#include <sdl/Util/Constants.hpp>
-#include <sdl/Util/LogHelper.hpp>
-
-#include <sdl/Util/Map.hpp>
-#include <sdl/Util/IndexedStrings.hpp>
 #include <sdl/Sym.hpp>
+#include <string>
 
 namespace sdl {
 namespace Vocabulary {
@@ -63,7 +62,7 @@ class BasicVocabularyImpl {
     if (type_ == (SymbolType)kVariable && !freezeEndIndex_) {
       // TODO: could just declare variables unprintable, or print without => str
       freezeEndIndex_ = kNumXnVariables;
-      assert(kNumXnVariables <= 1 + ('Z'-'0'));
+      assert(kNumXnVariables <= 1 + ('Z' - '0'));
       char buf[2] = {'x', 0};
       cstring_span<> key(buf, 2);
       char& c = buf[1];
@@ -112,10 +111,11 @@ class BasicVocabularyImpl {
     assert(freezeEndIndex_ <= sz);
     if (sz != freezeEndIndex_) {
       SDL_INFO(evict.Vocabulary,
-               "Shrinking " << (SymbolType)type_ << " vocabulary from " << sz << " to "
-               << freezeEndIndex_ << " symbols (these " << (sz - freezeEndIndex_)
-               << " removed symbols should all be novel words seen in inputs recently processed - "
-               "if not, call IVocabulary::freeze() to keep your permanent symbols permanent");
+               "Shrinking "
+                   << (SymbolType)type_ << " vocabulary from " << sz << " to " << freezeEndIndex_
+                   << " symbols (these " << (sz - freezeEndIndex_)
+                   << " removed symbols should all be novel words seen in inputs recently processed - "
+                      "if not, call IVocabulary::freeze() to keep your permanent symbols permanent");
       symbols_.shrink(freezeEndIndex_);
     }
   }
@@ -130,7 +130,7 @@ class BasicVocabularyImpl {
   void load(Iterator i, Iterator end, SymbolType type) {
     reset();
     assert(type == type_);
-    symbols_.reserve(end-i);
+    symbols_.reserve(end - i);
     for (; i != end; ++i) addEntry(i->first, i->second);
     doneLoading();
   }

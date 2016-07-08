@@ -17,14 +17,13 @@
 #define SDL_VOCABULARY_HELPERFUNCTIONS_HPP
 #pragma once
 
-#include <ostream>
-
-#include <sdl/IVocabulary.hpp>
+#include <sdl/Vocabulary/PrintSyms.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Vocabulary/ToTerminals.hpp>
 #include <sdl/Util/ObjectCount.hpp>
 #include <sdl/Util/ThreadId.hpp>
-#include <sdl/Vocabulary/PrintSyms.hpp>
-#include <sdl/Vocabulary/ToTerminals.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <ostream>
 
 namespace sdl {
 namespace Vocabulary {
@@ -75,6 +74,11 @@ inline SymsIndex countRuleSrcSymbols(Syms const& ngram) {
   for (Syms::const_iterator i = ngram.begin(), e = ngram.end(); i != e; ++i)
     r += Vocabulary::isRuleSrcSymbol(*i);
   return r;
+}
+
+inline void appendLexical(std::vector<std::string>& lexicals, Syms const& ngram, IVocabulary const& voc) {
+  for (Sym sym : ngram)
+    if (sym.isLexical()) lexicals.push_back(voc.str(sym));
 }
 
 

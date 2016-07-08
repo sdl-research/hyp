@@ -12,19 +12,18 @@
 #define SDL_OPTIMIZATION_ONLINEOPTIMIZER_HPP
 #pragma once
 
+#include <sdl/Optimization/LearningRate.hpp>
+#include <sdl/Optimization/ObjectiveFunction.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Math.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cstdlib>
-#include <algorithm>
-#include <cmath>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Math.hpp>
-#include <sdl/Optimization/ObjectiveFunction.hpp>
-#include <sdl/Optimization/LearningRate.hpp>
 
 namespace sdl {
 namespace Optimization {
@@ -49,7 +48,7 @@ class ParameterUpdate : public IUpdate<FloatT> {
   ParameterUpdate(FloatT* params, FeatureId numParams)
       : params_(params)
       , rate_(1.0)
-#if SDL_IS_DEBUG_BUILD
+#ifndef NDEBUG
       , numParams_(numParams)
 #endif
   {
@@ -67,7 +66,9 @@ class ParameterUpdate : public IUpdate<FloatT> {
  protected:
   FloatT* params_;
   FloatT rate_;
-  SDL_DEBUG_BUILD(FeatureId const numParams_);
+#ifndef NDEBUG
+  FeatureId const numParams_;
+#endif
 };
 
 template <class FloatT>
@@ -123,7 +124,7 @@ struct AdagradL1ParameterUpdate : public ParameterUpdate<FloatT> {
     if (absAvgGrad > l1Strength_) {
       FloatT const rate
           = Util::sgn(prevGrads_[index]) * (timeStep_ * eta_ / std::sqrt(prevGradsSquared_[index]));
-      this->params_[index] = rate * (l1Strength_-absAvgGrad);
+      this->params_[index] = rate * (l1Strength_ - absAvgGrad);
     } else
       this->params_[index] = 0.0f;
   }
@@ -197,7 +198,7 @@ class OnlineOptimizer {
     // Iterate over all training examples opts_.numEpochs times:
     std::size_t cntSteps = 0;
     for (std::size_t epoch = 0; epoch < opts_.numEpochs; ++epoch) {
-      std::random_shuffle(randomOrder.begin(), randomOrder.end());
+      std::random_shuffle(randomOrder.begin(), randomOrder.end());  // TODO: use std::shuffle
       objFct.initFunctionValue();
       for (std::size_t i = 0; i < numExamples; ++i, ++cntSteps) {
         objFct.setFeatureWeights(i, i + 1, params, numParams);

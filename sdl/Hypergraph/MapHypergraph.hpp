@@ -17,13 +17,11 @@
 #define HYP__HYPERGRAPH_MAPHYPERGRAPH_HPP
 #pragma once
 
-#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/ConvertWeight.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Util/LogHelper.hpp>
-
-
-#include <utility>  // make_pair
 #include <sdl/Util/Unordered.hpp>
+#include <utility>  // make_pair
 
 namespace sdl {
 namespace Hypergraph {

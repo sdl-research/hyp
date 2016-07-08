@@ -75,12 +75,9 @@ enum CpuTimeType { kWall, kUser, kSystem, knCpuTimeTypes };
 inline Nanoseconds nanoseconds(CpuTimes const& times, CpuTimeType type = kWall) {
   assert(type < knCpuTimeTypes);
   switch (type) {
-    case kWall:
-      return times.wall;
-    case kUser:
-      return times.user;
-    case kSystem:
-      return times.system;
+    case kWall: return times.wall;
+    case kUser: return times.user;
+    case kSystem: return times.system;
     default:
       return -1;  // impossible
   }

@@ -8,16 +8,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <sdl/SharedPtr.hpp>
-#include <sdl/LexicalCast.hpp>
-
 #include <sdl/Vocabulary/BasicVocabularyImpl.hpp>
 #include <sdl/Vocabulary/ResidentVocabulary.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Util/LogHelper.hpp>
-
-#include <sdl/Syms.hpp>
 #include <sdl/Util/Fields.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <sdl/Syms.hpp>
 
 namespace sdl {
 namespace Vocabulary {

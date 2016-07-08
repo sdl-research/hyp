@@ -17,8 +17,8 @@
 #define CONTAINSEMPTYSTRING_JG_2014_09_24_HPP
 #pragma once
 
-#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/GraphArcs.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/Types.hpp>
 
 namespace sdl {

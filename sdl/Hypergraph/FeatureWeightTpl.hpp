@@ -29,21 +29,18 @@
 #define HYP__HYPERGRAPH_FEATUREWEIGHT_TPL_HPP
 #pragma once
 
+#include <sdl/Hypergraph/FeatureIdRange.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
-
-#include <functional>
-#include <type_traits>
-
-#include <sdl/Util/Math.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/LogMath.hpp>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/DefaultPrintRange.hpp>
-
-#include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/FeatureIdRange.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/LogMath.hpp>
+#include <sdl/Util/Math.hpp>
 #include <sdl/Exception.hpp>
+#include <functional>
+#include <type_traits>
 
 namespace sdl {
 namespace Hypergraph {
@@ -97,7 +94,7 @@ struct Expectation {
    the non-log value (i.e., the arc weight, e.g., a probability) times
    the feature value.
 */
-template <class T, class MapT, class SumPolicy = TakeMin>
+template <class T, class MapT = std::map<FeatureId, T>, class SumPolicy = TakeMin>
 class FeatureWeightTpl : public FloatWeightTpl<T> {
  public:
   typedef T FloatT;
@@ -479,8 +476,6 @@ inline char const* weightName(FeatureWeightTpl<FloatT, MapT, SumPolicy>*) {
 }
 
 #include <sdl/Hypergraph/src/FeatureWeight.ipp>
-
-
 
 
 #endif

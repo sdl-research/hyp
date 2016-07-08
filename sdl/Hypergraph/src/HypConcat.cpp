@@ -9,8 +9,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Concat.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -49,6 +49,3 @@ struct HypConcat : TransformMain<HypConcat> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Concat)
-
-
-

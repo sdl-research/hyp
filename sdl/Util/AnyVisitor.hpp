@@ -83,11 +83,9 @@ struct AnyVisitor {
   }
   // usage: AnyVisitor(obj, &MemberFn<&Obj::memberfn>::call)
   template <class Obj>
-  AnyVisitor(Obj const& obj, AnyFnPtr anyfnp)
-      : pany(anyfnp), pobj((void*)&obj) {}
+  AnyVisitor(Obj const& obj, AnyFnPtr anyfnp) : pany(anyfnp), pobj((void*)&obj) {}
   template <class Obj>
-  AnyVisitor(Obj const* obj, AnyFnPtr anyfnp)
-      : pany(anyfnp), pobj((void*)obj) {}
+  AnyVisitor(Obj const* obj, AnyFnPtr anyfnp) : pany(anyfnp), pobj((void*)obj) {}
   AnyVisitor(AnyFnPtr anyfnp) : pany(anyfnp), pobj() {}
   // WARNING: same fn wrapped in different compilation units -> unequal address of MemberFn or free<fn>
   bool operator==(AnyVisitor const& o) const { return pany == o.pany && pobj == o.pobj; }
@@ -109,8 +107,6 @@ struct AnyVisitor {
 //#define ANY_VISITOR_FREE(arg, freefn) (sdl::Util::AnyVisitor<arg>(freefn))
 #define ANY_VISITOR_MEMBER(Objtype, obj, member, arg) \
   (sdl::Util::AnyVisitor<arg>(obj, &sdl::Util::AnyVisitor<arg>::MemberFn<Objtype>::call<&Objtype::member>))
-
-
 
 
 #endif

@@ -45,17 +45,15 @@
 #pragma warning(pop)
 #endif
 #include <sdl/Config/Config.hpp>
+#include <sdl/Util/FormattedOstream.hpp>
+#include <sdl/Util/Nfc.hpp>
+#include <sdl/Util/Unordered.hpp>
 #include <sdl/Util/Warn.hpp>
-#include <graehl/shared/configure.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <sdl/Printer.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/FormattedOstream.hpp>
-
-#include <sdl/LexicalCast.hpp>
-
-#include <sdl/Printer.hpp>
-#include <sdl/Util/Nfc.hpp>
+#include <graehl/shared/configure.hpp>
 
 namespace sdl {
 namespace Config {
@@ -511,12 +509,16 @@ struct ConfigureYaml : configure::configure_backend_base<ConfigureYaml> {
     // 2. user may prefer to have shorthand feature-weights: (end of line/indent) meaning empty map
     if (!n.IsMap()) throw ConfigException(pathname + " expected a YAML map: " + to_string(*ctx));
     conf.warn_if_deprecated();
-    pval->clear();
+    typedef configure::map_leaf_configurable<Val> ValTraits;
+    ValTraits::clear(pval);
+    unsigned npairs = 0;
     for (YAML::const_iterator i = n.begin(), e = n.end(); i != e; ++i) {
+      if (ValTraits::is_pair && npairs++)
+        throw ConfigException(pathname + " expected a single-element map (for a value of pair type)");
       YamlScalarRef keystr = i->first.Scalar();
-      typename Val::key_type key;
+      typename ValTraits::key_type key;
       graehl::string_to((std::string const&)keystr, key);
-      typename Val::mapped_type& subval = configure::append_default(*pval, key);
+      typename ValTraits::mapped_type& subval = configure::append_default(*pval, key);
       configure::conf_expr_base subconf(conf, keystr);
       ctx->pushCollectionYaml(i->second);
       configure::configure_store_init_from_base(*this, &subval, subconf);
@@ -709,21 +711,22 @@ void applyYaml(ConfigNode const& yamlRoot, Val* pRootVal, char const* component 
 
   if (trace) {
     // TODO: fix gcc warning: ‘<anonymous>’ may be used uninitialized in this function:
-    LOG_TRACE_NAMESTR(kLogPrefix + component,
-                      "before store for " << component << ":\n" << printEffective(*pRootVal, component) << "\n");
+    LOG_TRACE_NAMESTR(kLogPrefix + component, "before store for " << component << ":\n"
+                                                                  << printEffective(*pRootVal, component)
+                                                                  << "\n");
   }
 
   configureYaml(configure::store_config(), yamlRoot, pRootVal, component);
   if (trace) {
-    LOG_TRACE_NAMESTR(kLogPrefix + component,
-                      "after store for " << component << ":\n" << printEffective(*pRootVal, component) << "\n");
+    LOG_TRACE_NAMESTR(kLogPrefix + component, "after store for " << component << ":\n"
+                                                                 << printEffective(*pRootVal, component) << "\n");
   }
 
   if (validate) configure::validate_stored(pRootVal, warn);
   if (verbose)
     LOG_INFO_NAMESTR(kLogPrefix + component, "effective (YAML applied) configuration for "
-                                                 << component << ":\n" << printEffective(*pRootVal, component)
-                                                 << "\n");
+                                                 << component << ":\n"
+                                                 << printEffective(*pRootVal, component) << "\n");
 }
 
 template <class Val>

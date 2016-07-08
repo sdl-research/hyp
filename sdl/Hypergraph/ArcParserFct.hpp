@@ -17,29 +17,25 @@
 #define HYP__HYPERGRAPH_ARCPARSERFCT_HPP
 #pragma once
 
+#include <sdl/Hypergraph/ArcParser.hpp>
+#include <sdl/Hypergraph/Exception.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/LabelPair.hpp>
+#include <sdl/Hypergraph/ParsedArcsToHg.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
+#include <sdl/Util/Contains.hpp>
+#include <sdl/Util/Flag.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/NormalizeUtf8.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <cassert>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include <cassert>
-
-#include <sdl/SharedPtr.hpp>
-
-
-#include <sdl/IVocabulary.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/LabelPair.hpp>
-#include <sdl/Hypergraph/SymbolPrint.hpp>
-#include <sdl/Hypergraph/Exception.hpp>
-#include <sdl/Hypergraph/ArcParser.hpp>
-#include <sdl/Hypergraph/ParsedArcsToHg.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Contains.hpp>
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/Flag.hpp>
-#include <sdl/Util/NormalizeUtf8.hpp>
 
 namespace sdl {
 namespace Hypergraph {

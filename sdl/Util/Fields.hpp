@@ -18,12 +18,12 @@
 #pragma once
 
 #include <sdl/Util/Field.hpp>
-#include <utility>
-#include <sdl/Util/SmallVector.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <algorithm>
-#include <vector>
+#include <sdl/Util/SmallVector.hpp>
 #include <sdl/Util/Split.hpp>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
 namespace sdl {
 namespace Util {

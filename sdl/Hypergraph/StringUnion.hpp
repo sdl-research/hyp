@@ -34,15 +34,15 @@
 
 */
 
+#include <sdl/Hypergraph/Adjacency.hpp>
+#include <sdl/Hypergraph/Label.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Splice.hpp>
+#include <sdl/Hypergraph/StringToHypergraph.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
 #include <sdl/Hypergraph/WeightedStrings.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/StringToHypergraph.hpp>
-#include <sdl/Hypergraph/Label.hpp>
-#include <sdl/Hypergraph/SymbolPrint.hpp>
-#include <sdl/Hypergraph/Splice.hpp>
 #include <sdl/Util/Sorted.hpp>
-#include <sdl/Hypergraph/Adjacency.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -157,10 +157,8 @@ struct StringUnionOptions {
         .defaulted();
     c('e')("end-string", &endString)("also output this token after each recognized word. empty means epsilon")
         .defaulted();
-    c('E')("input-end-string", &endStringInput)("input token expected after words. empty means epsilon")
-        .defaulted();
-    c('B')("input-begin-string", &beginStringInput)("input token expected before words. empty means epsilon")
-        .defaulted();
+    c('E')("input-end-string", &endStringInput)("input token expected after words. empty means epsilon").defaulted();
+    c('B')("input-begin-string", &beginStringInput)("input token expected before words. empty means epsilon").defaulted();
     c('p')("push-weights", &push_weights)(
         "push weights as early toward start as possible before forming loop if any (TODO: implement)")
         .defaulted()
@@ -225,7 +223,7 @@ struct BuildStringUnion {
       // follow existing trie links
       ArcId nOut = hg.numOutArcs(s);
       if (nOut) {
-        Arc const& a = *hg.outArc(s, nOut-1);
+        Arc const& a = *hg.outArc(s, nOut - 1);
         if (hg.inputLabel(a.fsmSymbolState()) == w[i]) {
           s = a.head();
           continue;

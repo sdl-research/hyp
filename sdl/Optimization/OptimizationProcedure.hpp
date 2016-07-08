@@ -23,27 +23,23 @@
 #define SDL_OPTIMIZATION_OPTIMIZATIONPROCEDURE_HPP
 #pragma once
 
-#include <string>
-#include <vector>
-#include <map>
-#include <stdexcept>
-
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/StringToTokens.hpp>
-
+#include <sdl/Hypergraph/ArcVisitors.hpp>
 #include <sdl/Hypergraph/FeatureWeight.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/StringToHypergraph.hpp>
-#include <sdl/Hypergraph/ArcVisitors.hpp>
-
+#include <sdl/Optimization/Arc.hpp>
 #include <sdl/Optimization/HypergraphCrfObjFct.hpp>
+#include <sdl/Optimization/ICreateSearchSpace.hpp>
 #include <sdl/Optimization/LbfgsOptimizer.hpp>
 #include <sdl/Optimization/OnlineOptimizer.hpp>
-#include <sdl/Optimization/ICreateSearchSpace.hpp>
-#include <sdl/Optimization/Arc.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/StringToTokens.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace sdl {
 namespace Optimization {
@@ -70,8 +66,7 @@ struct OptimizationProcedureOptions {
     config("test-mode", &testMode)(
         "Test mode? In test mode, we don't optimize, but read the weights and get the best path")
         .init(false);
-    config("test-mode-output-hypergraph", &testModeOutputHypergraph)("Prints hypergraph output (test mode)")
-        .init(false);
+    config("test-mode-output-hypergraph", &testModeOutputHypergraph)("Prints hypergraph output (test mode)").init(false);
     config("test-mode-detailed-output",
            &testModeDetailed)("Will produce detailed info for 1-best (alignment, features, scores) ")
         .init(false);

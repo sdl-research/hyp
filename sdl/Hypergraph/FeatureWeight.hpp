@@ -17,11 +17,11 @@
 #define HYP__HYPERGRAPH_FEATUREWEIGHT_HPP
 #pragma once
 
-#include <map>
-#include <string>
-#include <stdexcept>
 #include <sdl/Hypergraph/FeatureWeightTpl.hpp>
 #include <sdl/Hypergraph/Types.hpp>
+#include <map>
+#include <stdexcept>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {

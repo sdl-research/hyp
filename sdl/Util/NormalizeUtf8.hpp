@@ -17,9 +17,10 @@
 #define NORMALIZEUTF8_JG_2014_02_15_HPP
 #pragma once
 
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/Chomp.hpp>
+#include <sdl/Util/Nfc.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <iostream>
 
 namespace sdl {
 namespace Util {
@@ -57,6 +58,7 @@ struct NormalizeUtf8 : NfcOptions, FixUnicode {
       return false;
   }
 };
+
 
 template <class StringConsumer>
 inline std::size_t visitChompedLines(std::istream& in, StringConsumer const& consumer,

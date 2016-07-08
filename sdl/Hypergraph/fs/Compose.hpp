@@ -100,26 +100,25 @@
 #define COMPOSE_JG20121225_HPP
 #pragma once
 
+#include <sdl/Hypergraph/Exception.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/MixFeature.hpp>
+#include <sdl/Hypergraph/SortArcs.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
 #include <sdl/Hypergraph/fs/Fst.hpp>
 #include <sdl/Hypergraph/fs/LazyBest.hpp>
-#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
-#include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/Exception.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Hypergraph/SortArcs.hpp>
-#include <sdl/Util/RefCount.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Valgrind.hpp>
-
-#include <sdl/Util/FlattenGenerators.hpp>
-#include <sdl/Util/SharedGenerator.hpp>
-#include <sdl/Hypergraph/MixFeature.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/mpl/and.hpp>
-#include <type_traits>
-#include <algorithm>
 #include <sdl/Hypergraph/fs/SaveFst.hpp>
+#include <sdl/Util/FlattenGenerators.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/RefCount.hpp>
+#include <sdl/Util/SharedGenerator.hpp>
+#include <sdl/Util/Valgrind.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/mpl/and.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <algorithm>
+#include <type_traits>
 
 
 namespace sdl {

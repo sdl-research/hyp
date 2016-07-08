@@ -19,8 +19,8 @@
 #pragma once
 
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/StringUnion.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/WordList.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/SharedPtr.hpp>

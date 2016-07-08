@@ -13,19 +13,18 @@
     TODO: test coverage.
 */
 
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <mutex>
-
+#include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
+#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <boost/filesystem.hpp>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
+#include <fstream>
+#include <mutex>
+#include <sstream>
+#include <string>
 
 namespace sdl {
 namespace Optimization {

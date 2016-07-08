@@ -18,23 +18,25 @@
 #define RESOURCE_JG_2013_11_14_HPP
 #pragma once
 
+#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Evictable.hpp>
 #include <sdl/SharedPtr.hpp>
-#include <sdl/Util/LogHelper.hpp>
 #if SDL_ASSERT_THREAD_SPECIFIC
 #include <sdl/Util/AssertThreadSpecific.hpp>
 #endif
+#include <sdl/Util/IsDebugBuild.hpp>
 #include <sdl/Util/LeakCheck.hpp>
 
-#include <sdl/Util/IsDebugBuild.hpp>
-
 namespace sdl {
+
+struct IVocabulary;
 
 #ifndef SDL_SHOW_RESOURCE_DESTRUCTOR_CERR
 #define SDL_SHOW_RESOURCE_DESTRUCTOR_CERR 0
 #endif
 
 struct Resource : Evictable, Util::IAddLeakChecks {
+  virtual void clearThreadSpecificEphemera() {}
 /// subclasses will have (via ResourceTraits.hpp or otherwise):
 // static char const* getTypeName();
 /// (not defined here to force compiler errors if missing)
@@ -72,6 +74,14 @@ struct Resource : Evictable, Util::IAddLeakChecks {
   virtual void initProcessPhase(InitProcessPhase phase) override {
     if (phase == kPhase0) initProcess();
   }
+
+  virtual char const* resourceType() const {
+    return resourceType_.empty() ? name().c_str() : resourceType_.c_str();
+  }
+
+  virtual shared_ptr<IVocabulary> getVocabulary() const { return shared_ptr<IVocabulary>(); }
+
+  std::string resourceType_;
 
  protected:
   /// no need to override if you override initProcessPhase

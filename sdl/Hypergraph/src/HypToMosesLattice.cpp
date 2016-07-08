@@ -8,22 +8,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <sdl/LexicalCast.hpp>
-#include <sdl/Util/InitLoggerFromConfig.hpp>
-
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/Locale.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/HypergraphMain.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/IHypergraphsIteratorTpl.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/PrintHgAsMosesLattice.hpp>
 #include <sdl/Hypergraph/Properties.hpp>
-
-#include <sdl/SharedPtr.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Util/InitLoggerFromConfig.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/Locale.hpp>
 #include <sdl/Util/ProgramOptions.hpp>
-
+#include <sdl/LexicalCast.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <log4cxx/xml/domconfigurator.h>
 
 namespace sdl {
@@ -37,9 +34,7 @@ struct HypToMosesLattice {
     po::options_description generic("Generic options");
     sdl::AddOption opt(generic);
     opt("help,h", "produce help message");
-    opt("input-file,i",
-        "input file in plain text, hypergraphs are separated "
-        "by \"-----\"");
+    opt("input-file,i", "input file with plain text hypergraphs separated by \"-----\" lines");
     opt("log-config", po::value(&logConfigFile), "log4cxx config file");
     po::positional_options_description p;
     p.add("input-file", 1);
@@ -56,7 +51,7 @@ struct HypToMosesLattice {
       std::string const& file = vm["input-file"].as<std::string>();
       input.init(file);
     }
-    // TODO: configurable logging
+
     Util::initLoggerFromConfig(logConfigFile, "HypToMosesLattice", Util::kLogInfo);
     IVocabularyPtr pVoc = Vocabulary::createDefaultVocab();
     std::istream& instream = input.getStream();
@@ -78,6 +73,3 @@ struct HypToMosesLattice {
 }
 
 HYPERGRAPH_NAMED_MAIN(ToMosesLattice)
-
-
-

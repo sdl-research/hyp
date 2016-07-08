@@ -29,18 +29,18 @@
 
 #define GRAEHL_CMDLINE_MAIN_USE_CONFIGURE HG_MAIN_USE_CONFIGURE
 
-#include <sdl/Util/ProgramOptions.hpp>
-#include <sdl/LexicalCast.hpp>
-#include <graehl/shared/random.hpp>
-#include <graehl/shared/cmdline_main.hpp>
-#include <graehl/shared/assign_traits.hpp>
-#include <sdl/Util/InitLogger.hpp>
-#include <sdl/IVocabulary.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Util/FindFile.hpp>
-#include <sdl/Util/Locale.hpp>
-#include <graehl/shared/named_main.hpp>
+#include <sdl/Util/InitLogger.hpp>
 #include <sdl/Util/Input.hpp>
+#include <sdl/Util/Locale.hpp>
+#include <sdl/Util/ProgramOptions.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <graehl/shared/assign_traits.hpp>
+#include <graehl/shared/cmdline_main.hpp>
+#include <graehl/shared/named_main.hpp>
+#include <graehl/shared/random.hpp>
 
 namespace sdl {
 namespace Hypergraph {

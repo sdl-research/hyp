@@ -20,13 +20,12 @@
 #define SDL_OPTIMIZATION_ICREATESEARCHSPACE_HPP
 #pragma once
 
-#include <string>
-#include <sdl/SharedPtr.hpp>
-
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Optimization/FeatureHypergraphPairs.hpp>
 #include <sdl/Optimization/IInput.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <string>
 
 namespace sdl {
 namespace Optimization {

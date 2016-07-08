@@ -17,9 +17,9 @@
 #define DERIVATIONSTRINGOPTIONS_JG_2014_07_29_HPP
 #pragma once
 
-#include <sdl/Hypergraph/PrintOptions.hpp>
-#include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Config/Init.hpp>
+#include <sdl/Hypergraph/Label.hpp>
+#include <sdl/Hypergraph/PrintOptions.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/Enum.hpp>
 

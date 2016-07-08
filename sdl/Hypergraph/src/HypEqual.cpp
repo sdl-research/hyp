@@ -39,6 +39,3 @@ struct HypEqual : TransformMain<HypEqual> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Equal)
-
-
-

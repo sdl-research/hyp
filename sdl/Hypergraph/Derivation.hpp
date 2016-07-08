@@ -28,29 +28,25 @@
 
 // see also GetString for methods that transform derivations/yields to strings
 
-#include <stack>
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Hypergraph/HypergraphWriter.hpp>
+#include <sdl/Hypergraph/DerivationStringOptions.hpp>
 #include <sdl/Hypergraph/Exception.hpp>
-#include <sdl/Hypergraph/StateIdTranslation.hpp>
 #include <sdl/Hypergraph/HypergraphCopy.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Util/RefCount.hpp>
-
+#include <sdl/Hypergraph/StateIdTranslation.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Util/Add.hpp>
+#include <sdl/Util/Enum.hpp>
 #include <sdl/Util/PointerWithFlag.hpp>
-
+#include <sdl/Util/RefCount.hpp>
+#include <boost/get_pointer.hpp>
+#include <boost/range/algorithm/transform.hpp>
 #include <graehl/shared/nary_tree.hpp>
 #include <graehl/shared/word_spacer.hpp>
-
-#include <boost/range/algorithm/transform.hpp>
-#include <boost/get_pointer.hpp>
-
 #include <functional>
-#include <sdl/Util/Enum.hpp>
-#include <sdl/Hypergraph/DerivationStringOptions.hpp>
+#include <stack>
 
 namespace sdl {
 namespace Hypergraph {

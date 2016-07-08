@@ -18,6 +18,7 @@
 #define SDL_UTIL_LOGHELPER_HPP
 #pragma once
 
+#include <sdl/Util/QuickExit.hpp>
 #include <sdl/Exception.hpp>
 
 #define SDL_EMPTY_STATEMENT() \
@@ -32,6 +33,7 @@
 #define SDL_DEBUG_CERR(a, b)                         \
   do {                                               \
     std::cerr << "\nsdl." << #a << " " << b << '\n'; \
+    std::cerr.flush();                               \
   } while (0)
 #endif
 
@@ -43,9 +45,10 @@
 #endif
 #endif
 
-#include <sdl/Log.hpp>
-#include <cstddef>
 #include <sdl/Util/LogLevel.hpp>
+#include <sdl/Log.hpp>
+#include <cassert>
+#include <cstddef>
 
 #if SDL_LOG_SEQUENCE_NUMBER
 /// for setting debugger breakpoints
@@ -61,6 +64,23 @@ extern std::size_t gLogSeqXmt;
 
 namespace sdl {
 namespace Util {
+
+struct DebugStaticInit {
+  unsigned n = 0;
+  char const* module;
+  DebugStaticInit(char const* module = "Util") : module(module) {
+    assert(!n);
+    ++n;
+    // SDL_DEBUG_CERR(DebugStaticInit, module << " static init");
+  }
+  ~DebugStaticInit() {
+    // SDL_DEBUG_CERR(DebugStaticInit, module << " static destroy");
+    assert(n);
+    --n;
+    assert(!n);
+  }
+  static DebugStaticInit gDebugStaticInit;
+};
 
 #if SDL_LOG_SEQUENCE_NUMBER
 std::size_t nextLogSeq();
@@ -112,13 +132,13 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 #include <sstream>
 
-#define RELEASE_LOG_DEBUG_NAMESTR(loggerName, expression)                                               \
-  do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
+#define RELEASE_LOG_DEBUG_NAMESTR(loggerName, expression)                                                \
+  do {                                                                                                   \
+    if (!sdl::Util::gFinishedLogging) LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
-#define RELEASE_LOG_TRACE_NAMESTR(loggerName, expression)                                               \
-  do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
+#define RELEASE_LOG_TRACE_NAMESTR(loggerName, expression)                                                \
+  do {                                                                                                   \
+    if (!sdl::Util::gFinishedLogging) LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
 
 // Enable trace & debug statements if in Debug mode, or if explicitly allowed
@@ -126,15 +146,15 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 // the LOG4CXX_ macros unfortunately only enclose in {} and not do {} while (0), so we must:
 
-#define LOG_DEBUG_NAMESTR(loggerName, expression)                     \
-  do {                                                                \
-    LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression) \
+#define LOG_DEBUG_NAMESTR(loggerName, expression)                      \
+  do {                                                                 \
+    LOG4CXX_DEBUG(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
 
 #if !defined(NDEBUG) || defined(SDL_ENABLE_TRACE_LOGGING)
-#define LOG_TRACE_NAMESTR(loggerName, expression)                     \
-  do {                                                                \
-    LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression) \
+#define LOG_TRACE_NAMESTR(loggerName, expression)                      \
+  do {                                                                 \
+    LOG4CXX_TRACE(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
 #else
 #define LOG_TRACE_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()
@@ -147,28 +167,28 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 #endif  // NDEBUG
 
-#define LOG_LEVEL_NAMESTR(loggerNameSuffix, logLevel, expression)               \
-  do {                                                                          \
-    if (!sdl::Util::gFinishedLogging)                                           \
-      LOG4CXX_LOG(log4cxx::Logger::getLogger(loggerName), logLevel, expression) \
+#define LOG_LEVEL_NAMESTR(loggerNameSuffix, logLevel, expression)                \
+  do {                                                                           \
+    if (!sdl::Util::gFinishedLogging)                                            \
+      LOG4CXX_LOG(log4cxx::Logger::getLogger(loggerName), logLevel, expression); \
   } while (0)
 
-#define LOG_INFO_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                 \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_INFO(log4cxx::Logger::getLogger(loggerName), expression) \
+#define LOG_INFO_NAMESTR(loggerName, expression)                                                        \
+  do {                                                                                                  \
+    if (!sdl::Util::gFinishedLogging) LOG4CXX_INFO(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
 
 #ifdef SDL_SUPPRESS_SOURCE_LOCATION  // Used with release mode for external releases: Hide source locations in
 // log messages
 
-#define LOG_WARN_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                 \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_WARN(log4cxx::Logger::getLogger(loggerName), expression) \
+#define LOG_WARN_NAMESTR(loggerName, expression)                                                        \
+  do {                                                                                                  \
+    if (!sdl::Util::gFinishedLogging) LOG4CXX_WARN(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
 
-#define LOG_ERROR_NAMESTR(loggerName, expression)                                                       \
-  do {                                                                                                  \
-    if (!sdl::Util::gFinishedLogging) LOG4CXX_ERROR(log4cxx::Logger::getLogger(loggerName), expression) \
+#define LOG_ERROR_NAMESTR(loggerName, expression)                                                        \
+  do {                                                                                                   \
+    if (!sdl::Util::gFinishedLogging) LOG4CXX_ERROR(log4cxx::Logger::getLogger(loggerName), expression); \
   } while (0)
 
 #define LOG_FATAL_NAMESTR(loggerName, expression)                                          \
@@ -182,16 +202,16 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 #else  // Don't SDL_SUPPRESS_SOURCE_LOCATION // Debug or Release mode for internal company use
 
-#define LOG_WARN_NAMESTR(loggerName, expression)                                                               \
-  do {                                                                                                         \
-    if (!sdl::Util::gFinishedLogging)                                                                          \
-      LOG4CXX_WARN(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " << expression) \
-  } while (0)
-
-#define LOG_ERROR_NAMESTR(loggerName, expression)                                                               \
+#define LOG_WARN_NAMESTR(loggerName, expression)                                                                \
   do {                                                                                                          \
     if (!sdl::Util::gFinishedLogging)                                                                           \
-      LOG4CXX_ERROR(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " << expression) \
+      LOG4CXX_WARN(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " << expression); \
+  } while (0)
+
+#define LOG_ERROR_NAMESTR(loggerName, expression)                                                                \
+  do {                                                                                                           \
+    if (!sdl::Util::gFinishedLogging)                                                                            \
+      LOG4CXX_ERROR(log4cxx::Logger::getLogger(loggerName), __FILE__ << ": " << __LINE__ << ": " << expression); \
   } while (0)
 
 #define LOG_FATAL_NAMESTR(loggerName, expression)                                                                \
@@ -220,8 +240,8 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 
 #else  // NLOG is defined:
 
-#include <string>
 #include <sdl/Exception.hpp>  // some standard exception types for SDL_THROW_LOG etc
+#include <string>
 
 #define LOG_ENABLED(x)
 #define LOG_DEBUG(loggerName, expression) SDL_EMPTY_STATEMENT()
@@ -229,7 +249,7 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 #define LOG_WARN(loggerName, expression) SDL_EMPTY_STATEMENT()
 #define LOG_TRACE(loggerName, expression) SDL_EMPTY_STATEMENT()
 #define LOG_ERROR(loggerName, expression) SDL_EMPTY_STATEMENT()
-#define LOG_EXCEPTION_NAMESTR(loggerName, expression, exception) (void) exception
+#define LOG_EXCEPTION_NAMESTR(loggerName, expression, exception) (void)exception
 #define LOG_FATAL(loggerName, expression) SDL_EMPTY_STATEMENT()
 #define RELEASE_LOG_TRACE_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()
 #define RELEASE_LOG_DEBUG_NAMESTR(loggerName, expression) SDL_EMPTY_STATEMENT()
@@ -332,7 +352,7 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 #define LOG_RETHROW_NAMESTR(loggerName, expression, exception)             \
   do {                                                                     \
     LOG_ERROR_NAMESTR(loggerName, expression << ": " << exception.what()); \
-    (void) exception;                                                      \
+    (void)exception;                                                       \
     throw;                                                                 \
   } while (0)
 
@@ -346,7 +366,12 @@ static Util::LogSeq const gseq = {};  // usage: SDL_TRACE(blah, gseq << blah) an
 #define SDL_DEBUG_IF(cond, name, msg)
 #endif
 
-
-
+/// _exit (without throwing exception) after logging error msg. in case you
+/// can't throw exceptions across shared lib boundaries and don't want a segfault
+#define SDL_ABORT(name, msg) \
+  do {                       \
+    SDL_ERROR(name, msg);    \
+    sdl::Util::quickAbort(); \
+  } while (0);
 
 #endif

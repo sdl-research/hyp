@@ -12,7 +12,8 @@
 
     following https://github.com/graehl/boost/blob/dynamic_bitset/boost/dynamic_bitset/dynamic_bitset.hpp
 
-   why: we need a fast way to find the msb for PhraseDecoder, and boost's dynamic_bitset gives no efficient block access
+   why: we need a fast way to find the msb for PhraseDecoder, and boost's dynamic_bitset gives no efficient
+   block access
 
 
    but modified to include this comment and change include guard and namespace
@@ -68,7 +69,6 @@
 #include <algorithm>
 #include <vector>
 #include <climits>      // for CHAR_BIT
-
 #include <boost/dynamic_bitset/config.hpp>
 
 #ifndef BOOST_NO_STD_LOCALE
@@ -1981,5 +1981,8 @@ bool dynamic_bitset<Block, Allocator>::check_invariants_() const
 
 
 #undef BOOST_BITSET_CHAR
+
+
+
 
 #endif

@@ -17,9 +17,9 @@
 #define HYP__HYPERGRAPH_PROPERTIES_HPP
 #pragma once
 
+#include <sdl/Util/PrintRange.hpp>
 #include <sdl/IntTypes.hpp>
 #include <boost/cstdint.hpp>
-#include <sdl/Util/PrintRange.hpp>
 #include <graehl/shared/configure_named_bits.hpp>
 
 namespace sdl {
@@ -132,7 +132,7 @@ const PropertiesInt kConstraintEnds = 0x4000ULL;
 const PropertiesInt kGraphInlineInputLabels = 0x8000ULL;
 
 const PropertiesInt kPropertyEnd = kConstraintEnds << 1;
-const PropertiesInt kAllProperties = kPropertyEnd-1;
+const PropertiesInt kAllProperties = kPropertyEnd - 1;
 
 const PropertiesInt kAnyConstraints = kConstraintEnds | kConstraintStarts;
 

@@ -17,16 +17,15 @@
 #define HYP__SPLITSTATE_HPP
 #pragma once
 
-#include <boost/array.hpp>
-
-#include <sdl/Sym.hpp>
-#include <sdl/Util/Utf8Pred.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/StatesTraversal.hpp>
-#include <sdl/Util/String.hpp>
 #include <sdl/Hypergraph/InArcs.hpp>
+#include <sdl/Hypergraph/StatesTraversal.hpp>
 #include <sdl/Vocabulary/Glue.hpp>
+#include <sdl/Util/String.hpp>
+#include <sdl/Util/Utf8Pred.hpp>
+#include <sdl/Sym.hpp>
+#include <boost/array.hpp>
 
 namespace sdl {
 namespace Hypergraph {

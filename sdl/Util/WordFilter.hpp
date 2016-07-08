@@ -20,8 +20,8 @@
 #define WORDFILTER_JG_2013_12_16_HPP
 #pragma once
 
-#include <sdl/Types.hpp>
 #include <sdl/Util/Utf8.hpp>
+#include <sdl/Types.hpp>
 
 
 namespace sdl {

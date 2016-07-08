@@ -9,8 +9,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // Include both .cpp and .hpp here:
-#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/HelperFunctions.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/src/HelperFunctions.cpp>
 
 // Add all functions from HelperFunctions.hpp here:

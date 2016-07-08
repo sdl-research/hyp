@@ -1,6 +1,6 @@
 project (Vocabulary)
 
-sdl_base_includes()
+sdl_util_includes()
 
 file(GLOB LIB_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} ${LIB_SOURCES})

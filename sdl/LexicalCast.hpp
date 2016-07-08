@@ -37,14 +37,10 @@
 #endif
 #endif
 
-#include <graehl/shared/warning_compiler.h>
-#if HAVE_GCC_4_6
-GCC_DIAG_OFF(maybe-uninitialized)
-#endif
+#include <graehl/shared/warning_push.h>
+GCC_DIAG_IGNORE(maybe-uninitialized)
 #include <boost/lexical_cast.hpp>
-#if HAVE_GCC_4_6
-GCC_DIAG_ON(maybe-uninitialized)
-#endif
+#include <graehl/shared/warning_pop.h>
 
 namespace sdl {
 

@@ -26,16 +26,16 @@
 
 
 #include <sdl/Util/Contains.hpp>
-#include <sdl/Exception.hpp>
-#include <sdl/Util/SortedMap.hpp>
 #include <sdl/Util/Sorted.hpp>
-#include <sdl/SharedPtr.hpp>
+#include <sdl/Util/SortedMap.hpp>
 #include <sdl/Util/String.hpp>
 #include <sdl/Util/VoidIf.hpp>
-#include <utility>
-#include <stdexcept>
+#include <sdl/Exception.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <algorithm>
+#include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 namespace sdl {
 namespace Util {
@@ -456,6 +456,26 @@ FirstAscendingVs<Key> firstAscendingVs(Key const& key) {
 template <class Ordered, class T>
 typename Ordered::const_iterator lowerBoundFirst(Ordered const& sequence, T const& value) {
   return std::lower_bound(sequence.begin(), sequence.end(), value, FirstAscendingVs<T>());
+}
+
+template <class Map>
+struct PrintKeys {
+  Map const& map;
+  PrintKeys(Map const& map) : map(map) {}
+  friend inline std::ostream& operator<<(std::ostream& out, PrintKeys const& self) {
+    self.print(out);
+    return out;
+  }
+  void print(std::ostream& out) const {
+    out << "{keys:";
+    for (auto const& kv : map) out << " " << kv.first;
+    out << "}";
+  }
+};
+
+template <class Map>
+inline PrintKeys<Map> printKeys(Map const& map) {
+  return PrintKeys<Map>(map);
 }
 
 

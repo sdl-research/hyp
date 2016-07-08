@@ -19,11 +19,11 @@
 #define LINEOPTIONS_JG_2013_12_16_HPP
 #pragma once
 
+#include <sdl/Util/Chomp.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/Nfc.hpp>
 #include <sdl/Util/NormalizeUtf8.hpp>
 #include <sdl/Util/Trim.hpp>
-#include <sdl/Util/Nfc.hpp>
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/Chomp.hpp>
 
 namespace sdl {
 namespace Util {

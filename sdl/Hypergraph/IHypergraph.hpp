@@ -118,33 +118,27 @@
   from label.
 */
 
-#include <stdexcept>
-#include <cstddef>
-#include <cassert>
-
-#include <sdl/Hypergraph/Properties.hpp>
-#include <sdl/Hypergraph/HypergraphImpl.hpp>
 #include <sdl/Hypergraph/Exception.hpp>
-
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/Constants.hpp>
-#include <sdl/Util/Once.hpp>
-#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Hypergraph/HypergraphBase.hpp>
+#include <sdl/Hypergraph/HypergraphImpl.hpp>
+#include <sdl/Hypergraph/OperateOn.hpp>
+#include <sdl/Hypergraph/Properties.hpp>
+#include <sdl/Hypergraph/fs/Annotations.hpp>
 #include <sdl/Util/AnyGenerator.hpp>
-
-
+#include <sdl/Util/Constants.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Once.hpp>
+#include <sdl/Util/SmallVector.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <sdl/Array.hpp>
 #include <sdl/SharedPtr.hpp>
-#include <boost/range/size.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
-#include <sdl/Util/SmallVector.hpp>
-
-#include <sdl/Hypergraph/OperateOn.hpp>
-
 #include <boost/range/algorithm/max_element.hpp>
-#include <sdl/Array.hpp>
-#include <sdl/Hypergraph/HypergraphBase.hpp>
-#include <sdl/Hypergraph/fs/Annotations.hpp>
+#include <boost/range/size.hpp>
+#include <cassert>
+#include <cstddef>
+#include <stdexcept>
 
 namespace sdl {
 namespace Hypergraph {
@@ -553,8 +547,6 @@ void print(std::ostream& out, Arc const* arc, IHypergraph<Arc> const& hg) {
 }
 
 #include <sdl/Hypergraph/src/IHypergraph.ipp>
-
-
 
 
 #endif

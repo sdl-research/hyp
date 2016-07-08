@@ -23,13 +23,13 @@
 #define SDL_TOKENS_HPP_20131022
 #pragma once
 
+#include <sdl/Position.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <sdl/Types.hpp>
-#include <sdl/Position.hpp>
-#include <vector>
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace sdl {
 

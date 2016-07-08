@@ -24,8 +24,8 @@
 */
 
 #include <sdl/Util/AlignedChars.hpp>
-#include <sdl/Util/IcuHeaders.hpp>
 #include <sdl/Util/Icu.hpp>
+#include <sdl/Util/IcuHeaders.hpp>
 
 namespace sdl {
 namespace Util {

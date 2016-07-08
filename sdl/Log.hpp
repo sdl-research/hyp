@@ -26,13 +26,13 @@ namespace sdl {
 
 namespace {
 /// used for everything in xmt/... code
-std::string const kLogPrefix(SDL_LOG_PREFIX_STR);
+static std::string const kLogPrefix(SDL_LOG_PREFIX_STR);
 
 /// used for process summary (peak rss, vmsize) and time elapsed
-std::string const kPerformanceLogPrefix(SDL_LOG_PREFIX_STR "Performance.");
+static std::string const kPerformanceLogPrefix(SDL_LOG_PREFIX_STR "Performance.");
 
 /// used for input size (# words, time per word, etc.) logging
-std::string const kPerformancePerLogPrefix(SDL_LOG_PREFIX_STR "PerformancePer.");
+static std::string const kPerformancePerLogPrefix(SDL_LOG_PREFIX_STR "PerformancePer.");
 }
 
 

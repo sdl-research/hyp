@@ -20,18 +20,14 @@
 // TODO: Make our Hypergraph derive from OpenFst class instead of copying?
 
 #if HAVE_OPENFST
+#include <sdl/Hypergraph/HypergraphWriter.hpp>  //dbg print
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/UseOpenFst.hpp>
+#include <sdl/Exception.hpp>
 #include <sdl/LexicalCast.hpp>
-
+#include <fst/script/fst-class.h>
 #include <fst/symbol-table.h>
 #include <fst/vector-fst.h>
-#include <fst/script/fst-class.h>
-
-
-#include <sdl/Exception.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/HypergraphWriter.hpp>  //dbg print
 
 namespace sdl {
 namespace Hypergraph {
@@ -84,7 +80,7 @@ struct IVocabularySymbolTable : public fst::SymbolTable {  // unfortunate: this 
     SDL_THROW0(UnimplementedException);
     return 0;
   }
-  virtual int64 Find(const char* symbol) const override {
+  virtual int64 Find(char const* symbol) const override {
     SDL_THROW0(UnimplementedException);
     return 0;
   }
@@ -165,8 +161,6 @@ struct ToOpenFst : boost::noncopyable {
 }
 
 #endif
-
-
 
 
 #endif

@@ -19,14 +19,14 @@
 #pragma once
 
 
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <graehl/shared/hypergraph.hpp>
-#include <graehl/shared/containers.hpp>
-#include <boost/property_map/property_map.hpp>
-#include <graehl/shared/epsilon.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Util/PointerHash.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <graehl/shared/containers.hpp>
+#include <graehl/shared/epsilon.hpp>
+#include <graehl/shared/hypergraph.hpp>
 
 namespace sdl {
 namespace Hypergraph {

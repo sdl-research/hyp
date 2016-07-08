@@ -18,10 +18,10 @@
 #pragma once
 
 
-#include <memory>
 #include <sdl/Pool/pool.hpp>
-#include <cstdlib>
 #include <sdl/Util/Hash.hpp>
+#include <cstdlib>
+#include <memory>
 
 namespace sdl {
 namespace Util {

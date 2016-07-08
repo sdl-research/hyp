@@ -27,15 +27,15 @@
 #define LAZYBEST_JG2013123_HPP
 #pragma once
 
+#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Hypergraph/fs/Fst.hpp>
 #include <sdl/Hypergraph/fs/Path.hpp>
-#include <sdl/Util/PriorityQueue.hpp>
-#include <boost/property_map/property_map.hpp>
 #include <sdl/Pool/object_pool.hpp>
-#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/NonNullPointee.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/NonNullPointee.hpp>
+#include <sdl/Util/PriorityQueue.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <boost/property_map/property_map.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -213,7 +213,8 @@ struct LazyBest : DistanceFn {
   typedef std::less<Distance> BetterDistance;
   typedef std::vector<BestP> QueueVector;
   typedef Util::d_ary_heap_indirect<BestP, 4, BestDistancePropertyMap, BestIndexPropertyMap, BetterDistance,
-                                    QueueVector, QueueIndex, Util::NonNullPointeeEqual> Queue;
+                                    QueueVector, QueueIndex, Util::NonNullPointeeEqual>
+      Queue;
   Queue queue;
 
   // at most one Expand active for a state in Queue, enforced by best map.
@@ -278,7 +279,7 @@ struct LazyBest : DistanceFn {
         FstArc const& arc
             = from.arcs();  // FstArc is a base class for Best; unordered_set only looks at that part
         Distance distance = from.distance + arc.getDistance();
-        from.estimateSuccessor(distance-opt.expandMoreArcs);
+        from.estimateSuccessor(distance - opt.expandMoreArcs);
         queue.adjust_top();  // note: moving items around in queue doesn't invalidate the pointed-to Best
 
         // check for new state or improvement in distance to existing

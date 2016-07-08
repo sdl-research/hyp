@@ -8,12 +8,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <sdl/Util/Equal.hpp>
-#include <boost/regex.hpp>
-#include <sdl/Util/Split.hpp>
-#include <graehl/shared/split.hpp>
 #include <sdl/Util/Add.hpp>
+#include <sdl/Util/Equal.hpp>
 #include <sdl/Util/Sorted.hpp>
+#include <sdl/Util/Split.hpp>
+#include <boost/regex.hpp>
+#include <graehl/shared/split.hpp>
 
 namespace sdl {
 namespace Util {
@@ -56,12 +56,14 @@ bool StringsUnorderedEqual(Strings lines1, Strings lines2, bool sortWords, char 
   StringsSet lines1Set, lines2Set;
   normalizeLines(lines1, lines1Set, sortWords, ignoreBlankLines);
   normalizeLines(lines2, lines2Set, sortWords, ignoreBlankLines);
-#define SDL_ORIGINAL_ORDER_MSG()                                                                       \
-  "original " << name1 << ": {[\n" << printer(lines1, multiLineNoBrace()) << "\n]} original " << name2 \
-              << ": {[\n" << printer(lines2, multiLineNoBrace()) << "]}"
+#define SDL_ORIGINAL_ORDER_MSG()                                                              \
+  "original " << name1 << ": {[\n"                                                            \
+              << printer(lines1, multiLineNoBrace()) << "\n]} original " << name2 << ": {[\n" \
+              << printer(lines2, multiLineNoBrace()) << "]}"
 #define SDL_EQUAL_MSG()                                                                                       \
   "NOT (unordered) EQUAL:\n "                                                                                 \
-      << name1 << ": {[(\n" << printer(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {("          \
+      << name1 << ": {[(\n"                                                                                   \
+      << printer(lines1Set, multiLineNoBrace()) << "\n)]} " << name2 << ": {("                                \
       << printer(lines2Set, multiLine()) << ")}\n\n difference " << name1 << " - " << name2 << ": {"          \
       << printer(difference(lines1Set, lines2Set), multiLine()) << "} difference " << name2 << " - " << name1 \
       << ": {" << printer(difference(lines2Set, lines1Set), multiLine()) << "\n}" << SDL_ORIGINAL_ORDER_MSG()

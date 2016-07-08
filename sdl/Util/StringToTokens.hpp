@@ -22,18 +22,18 @@
 #define STRINGTOTOKENS_JG20121015_HPP
 #pragma once
 
-#include <vector>
-#include <set>
-#include <algorithm>
-
-#include <sdl/Span.hpp>
-#include <sdl/Util/IcuUtil.hpp>
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/Set.hpp>
 #include <sdl/Util/AcceptString.hpp>
 #include <sdl/Util/AcceptStringImpls.hpp>
-#include <sdl/Util/NormalizeUtf8.hpp>
 #include <sdl/Util/AlignedChars.hpp>
+#include <sdl/Util/IcuUtil.hpp>
+#include <sdl/Util/NormalizeUtf8.hpp>
+#include <sdl/Util/Set.hpp>
+#include <sdl/Util/SpaceToken.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <sdl/Span.hpp>
+#include <algorithm>
+#include <set>
+#include <vector>
 
 namespace sdl {
 namespace Util {
@@ -58,8 +58,6 @@ inline void utf8ToCharPos(std::string const& str, IAcceptString const& accept, N
   if (!str.empty())
     utf8ToCharPos(arrayBegin(str), arrayEnd(str), accept, fix, normalizeConsecutiveWhitespace);
 }
-
-std::string const kSpaceUtf8(" ");
 
 // TODO: move more impl to cpp
 
@@ -95,7 +93,7 @@ void utf8ToCharPosImpl(Pchar i, Pchar end, Accept const& accept, FixUnicode cons
         if (space) {
           if (!lastWasSpace) spaceStart = pos;
         } else {
-          if (!firstWord && lastWasSpace) accept(kSpaceUtf8, TokenSpan(spaceStart, pos));
+          if (!firstWord && lastWasSpace) accept(kSpace, TokenSpan(spaceStart, pos));
           acceptUnicode(accept, c, pos);
           firstWord = false;
         }

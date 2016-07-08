@@ -17,13 +17,11 @@
 #define SDL_UTIL__FILE_JG_2014_02_12_HPP
 #pragma once
 
-#include <fstream>
 #include <sdl/Exception.hpp>
-#include <sdl/Util/LogHelper.hpp>
+#include <fstream>
 
 namespace sdl {
 namespace Util {
-
 
 /**
    seek f to position len(prefix) and \return true file starts with 'prefix',
@@ -41,8 +39,7 @@ inline bool fileStartsWith(std::ifstream& f, std::string const& prefix, bool rew
     f.clear();
   if (rewind) {
     if (!f.seekg(0, std::ios::beg))
-      SDL_THROW_LOG(Util.fileStartsWith, FileException,
-                    "couldn't rewind to start of file without header: " << prefix);
+      throw FileException("couldn't rewind to start of file (after not finding a header)");
   }
   return false;
 }
@@ -63,19 +60,15 @@ inline void readFileContentsNonseekable(std::istream& in, std::string& content) 
 inline void readFileContentsSeekTo(std::ifstream& f, std::string& out, std::size_t startAtByte = 0,
                                    std::size_t minSize = 0) {
   f.seekg(0, std::ios::end);
-  if (!f) SDL_THROW_LOG(File, FileException, "can't advance unencrypted file to get size");
+  if (!f) throw FileException("can't advance unencrypted file to get size");
 
   std::size_t fileSize = f.tellg();
-  std::size_t sz = fileSize-startAtByte;
-  if (startAtByte > fileSize || sz < minSize)
-    SDL_THROW_LOG(File, FileFormatException, "file not big enough - expected "
-                                                 << minSize << " bytes or more after " << startAtByte
-                                                 << " header");
+  std::size_t sz = fileSize - startAtByte;
+  if (startAtByte > fileSize || sz < minSize) throw FileException("file not big enough");
   f.seekg(startAtByte, std::ios::beg);
-  if (!f) SDL_THROW_LOG(File, FileException, "can't rewind file to " << startAtByte);
+  if (!f) throw FileException("can't rewind file");
   out.resize(sz);
-  if (!f.read(arrayBegin(out), sz))
-    SDL_THROW_LOG(File, FileException, "can't read remaining " << sz << " bytes of file");
+  if (!f.read((char*)&*out.begin(), sz)) throw FileException("can't read remaining bytes of file");
 }
 
 /**

@@ -18,9 +18,9 @@
 #pragma once
 
 #include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <boost/functional/hash.hpp>
 #include <utility>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
 
 namespace sdl {
 namespace Hypergraph {

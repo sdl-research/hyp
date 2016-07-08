@@ -19,8 +19,8 @@
 
 #include <graehl/shared/warning_push.h>
 GCC_DIAG_IGNORE(maybe-uninitialized)
-#include <sdl/Util/Once.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
+#include <sdl/Util/Once.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -119,8 +119,6 @@ struct IsolateStartState : TransformBase<Transform::Inplace>, IsolateStartStateO
 }
 
 #include <graehl/shared/warning_pop.h>
-
-
 
 
 #endif

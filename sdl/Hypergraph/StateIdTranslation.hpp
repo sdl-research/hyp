@@ -63,13 +63,12 @@
 #define STATEIDTRANSLATION_LW20111212_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/FwdDecls.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Unordered.hpp>
-
-#include <graehl/shared/os.hpp>
 #include <boost/noncopyable.hpp>
+#include <graehl/shared/os.hpp>
 
 namespace sdl {
 namespace Hypergraph {

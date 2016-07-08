@@ -17,8 +17,8 @@
 #define TOTERMINALS_JG_2015_06_18_HPP
 #pragma once
 
-#include <sdl/Syms.hpp>
 #include <sdl/IVocabulary.hpp>
+#include <sdl/Syms.hpp>
 
 namespace sdl {
 namespace Vocabulary {

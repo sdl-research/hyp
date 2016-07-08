@@ -31,8 +31,8 @@
 
 #define SDL_DYNAMIC_TYPE(s) SDL_DYNAMIC_TYPE_IS(#s)
 
-#include <string>
 #include <sdl/gsl.hpp>
+#include <string>
 
 namespace sdl {
 namespace Config {
@@ -59,8 +59,12 @@ struct Named : UnspecifiedCategoryAndType {
 
 struct INamed {
   INamed() : name_() {}
-  virtual void setName(cstring_span<> name) { if (name_.empty()) name_.assign(name.data(), name.size()); }
-  virtual void setName(std::string const& name) { if (name_.empty()) name_ = name; }
+  virtual void setName(cstring_span<> name) {
+    if (name_.empty()) name_.assign(name.data(), name.size());
+  }
+  virtual void setName(std::string const& name) {
+    if (name_.empty()) name_ = name;
+  }
   virtual std::string name() const { return name_; }
   virtual char const* nameC() const { return name_.c_str(); }
   virtual std::string usage() const { return "?"; }

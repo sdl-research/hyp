@@ -23,14 +23,22 @@
 namespace sdl {
 namespace Util {
 
+inline char const* pluralSuffix(std::string const& singular) {
+  assert(!singular.empty());
+  return singular.back() == 's' ? "es" : "s";
+}
+
 inline std::string plural(std::string const& singular) {
-  std::string::size_type len = singular.size();
-  if (len && singular[len - 1] == 's') return singular + "es";
-  return singular + "s";
+  return singular + pluralSuffix(singular);
 }
 
 template <class Quantity>
 std::string unitForQuantity(Quantity const& n, std::string const& singularUnit) {
+  return n == 1 ? singularUnit : plural(singularUnit);
+}
+
+template <class Quantity>
+char const* unitSuffixForQuantity(Quantity const& n, std::string const& singularUnit) {
   return n == 1 ? singularUnit : plural(singularUnit);
 }
 

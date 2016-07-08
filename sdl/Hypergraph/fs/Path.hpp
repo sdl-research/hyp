@@ -17,12 +17,11 @@
 #define PATH_JG2013_03_05_HPP
 #pragma once
 
-#include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Hypergraph/IsFeatureWeight.hpp>
-
-#include <sdl/Util/RemovePointer.hpp>
-#include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
+#include <sdl/Hypergraph/IsFeatureWeight.hpp>
+#include <sdl/Hypergraph/Label.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Util/RemovePointer.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -31,9 +31,9 @@
 #define SHAREDPTR_JG20121217_HPP
 #pragma once
 
+#include <sdl/Function.hpp>
 #include <iostream>
 #include <memory>
-#include <sdl/Function.hpp>
 
 namespace sdl {
 
@@ -187,6 +187,19 @@ struct TakeSharedPtr : shared_ptr<Val> {
   TakeSharedPtr(Val* p) : Base(p) {}
   TakeSharedPtr(Base const& p) : Base(p) {}
   TakeSharedPtr(Val& val) : Base(val, DoNothing()) {}
+};
+
+template <class Ptr>
+struct GetPtr {
+  template <class Val>
+  static Ptr get(shared_ptr<Val> const& p) {
+    return p.get();
+  }
+};
+
+template <class Val>
+struct GetPtr<shared_ptr<Val>> {
+  static shared_ptr<Val> const& get(shared_ptr<Val> const& p) { return p; }
 };
 
 

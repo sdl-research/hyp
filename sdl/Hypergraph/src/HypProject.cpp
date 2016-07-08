@@ -11,8 +11,8 @@
 #define USAGE_HypProject \
   "turn FST into FSA by setting input/output labels of FST both to output(default) or input"
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Project.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -39,6 +39,3 @@ struct HypProject : TransformMain<HypProject> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Project)
-
-
-

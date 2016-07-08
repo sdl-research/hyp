@@ -27,11 +27,11 @@ typedef HMODULE LoadedLib;
 typedef void* LoadedLib;
 #endif
 
-LoadedLib loadLib(const char* name);
+LoadedLib loadLib(char const* name, bool destructors = true);
 
 void unloadLib(LoadedLib aLib);
 
-void* loadProc(LoadedLib aLib, const char* name);
+void* loadProc(LoadedLib aLib, char const* name);
 
 
 }}

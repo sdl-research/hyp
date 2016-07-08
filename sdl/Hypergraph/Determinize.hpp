@@ -73,19 +73,19 @@
 #define HYPERGRAPH_DETERMINIZE_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Util/DefaultPrintRange.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Util/ShrinkVector.hpp>
-#include <sdl/Util/Latch.hpp>
-#include <sdl/Util/Compare.hpp>
-#include <sdl/Util/Sorted.hpp>
-#include <sdl/Pool/object_pool.hpp>
 #include <sdl/Hypergraph/Graph.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Util/Unordered.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/OperateOn.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
+#include <sdl/Pool/object_pool.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/Compare.hpp>
+#include <sdl/Util/DefaultPrintRange.hpp>
+#include <sdl/Util/Latch.hpp>
+#include <sdl/Util/ShrinkVector.hpp>
+#include <sdl/Util/Sorted.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <sdl/SharedPtr.hpp>
 
 /// 1 => use sorted vector rather than unordered map. but then needs work for >1 thread.
 #define SDL_DETERMINIZE_SORT 0

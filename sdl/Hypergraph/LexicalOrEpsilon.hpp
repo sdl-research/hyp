@@ -12,8 +12,8 @@
 #define EMPTYSTRINGEPSILON_LW2012420_HPP
 #pragma once
 
-#include <sdl/IVocabulary.hpp>
 #include <sdl/Util/IsInAngleBrackets.hpp>
+#include <sdl/IVocabulary.hpp>
 
 namespace sdl {
 namespace Hypergraph {

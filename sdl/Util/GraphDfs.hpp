@@ -18,10 +18,9 @@
 #define SDL_UTIL_GRAPH_DFS_HPP
 #pragma once
 
-#include <boost/graph/graph_traits.hpp>
-
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/graph_traits.hpp>
 #include <boost/graph/properties.hpp>
 #include <graehl/shared/property_factory.hpp>
 

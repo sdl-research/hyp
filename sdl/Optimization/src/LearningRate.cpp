@@ -8,11 +8,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <sdl/SharedPtr.hpp>
+#include <sdl/Optimization/LbfgsOptimizer.hpp>
 #include <sdl/Optimization/LearningRate.hpp>
+#include <sdl/Optimization/OptimizationProcedure.hpp>
+#include <sdl/SharedPtr.hpp>
 
 namespace sdl {
 namespace Optimization {
+
+SDL_NAME_ENUM(LearningRateType);
+SDL_NAME_ENUM(LbfgsLineSearchType);
+SDL_NAME_ENUM(OptimizationMethod);
 
 shared_ptr<ILearningRate> makeLearningRate(std::size_t numUpdates, LearningRateOptions& opts) {
   if (opts.method == kConstant) {

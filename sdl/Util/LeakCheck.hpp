@@ -20,12 +20,12 @@
 #define LEAKCHECK_JG_2014_03_13_HPP
 #pragma once
 
-#include <iostream>
 #include <sdl/Util/ThreadId.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <iostream>
 #if SDL_OBJECT_COUNT
-#include <sdl/Util/ObjectCount.hpp>
 #include <sdl/Util/GenSym.hpp>
+#include <sdl/Util/ObjectCount.hpp>
 #endif
 
 #ifndef SDL_SUPPRESS_IGNORABLE_WARNINGS

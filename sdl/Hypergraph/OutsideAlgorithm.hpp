@@ -25,16 +25,15 @@
 #define HYP__HYPERGRAPH_OUTSIDE_ALGORITHM_HPP
 #pragma once
 
-#include <vector>
-#include <cassert>
-#include <sdl/Util/Add.hpp>
-
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/StatesTraversal.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Util/Add.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <cassert>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {

@@ -26,8 +26,8 @@
 // try to cache zero and one values for CompositeWeight)
 #endif
 
-#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
 #include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
 #include <cmath>
 
 namespace sdl {

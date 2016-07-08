@@ -23,12 +23,12 @@
 #define HYPERGRAPH_SORTSTATES_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Restrict.hpp>
-#include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/StatesTraversal.hpp>
-#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
-#include <sdl/Hypergraph/Visit.hpp>
 #include <sdl/Config/Validate.hpp>
+#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
+#include <sdl/Hypergraph/Restrict.hpp>
+#include <sdl/Hypergraph/StatesTraversal.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
+#include <sdl/Hypergraph/Visit.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -96,7 +96,7 @@ struct SortStatesMapping : public StateIdMapping {
       nextLex = 0;
       nextRest = nlex;
     } else {
-      nextLex = N-nlex;
+      nextLex = N - nlex;
       nextRest = 0;
     }
   }
@@ -213,12 +213,10 @@ inline bool unsortedStates(IHypergraph<Arc> const& hg, SortOrder sortOrder, Stat
   }
   if (stable)  // checking for already sorted is not worth the time, unless stable sorting was requested
     switch (sortOrder) {
-      case kTerminalFirst:
-        return (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
+      case kTerminalFirst: return (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
       case kTopSort:
         return !isTopoSort(hg) || (partBoundary = findBoundaryBetweenNotAndIsTerminal(hg)) == kNoState;
-      default:
-        partBoundary = kNoState;
+      default: partBoundary = kNoState;
     }
   // stable sort is only supported for topo sort and lexical-first
   return true;
@@ -306,7 +304,7 @@ struct SortStates : public RestrictPrepare<SortStates<A>, A> {
               lexs[nlex++] = s;
             else
               x.stateFor(s);
-          partBoundary = N-nlex;
+          partBoundary = N - nlex;
           assert(partBoundary == x.size());
           for (StateId i = 0; i < nlex; ++i) {
             StateId s = lexs[i];

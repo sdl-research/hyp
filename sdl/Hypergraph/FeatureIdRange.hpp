@@ -17,10 +17,9 @@
 #define FEATUREIDRANGE_JG2013130_HPP
 #pragma once
 
-#include <iostream>
-
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <iostream>
 
 namespace sdl {
 namespace Hypergraph {

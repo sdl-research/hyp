@@ -17,14 +17,13 @@
 #define GRAEHL__RANDOM_MAIN
 
 #include <sdl/Util/Input.hpp>
-#include <graehl/shared/random.hpp>
 #include <sdl/Util/LineOptions.hpp>
-#include <sdl/Util/File.hpp>
+#include <sdl/Util/Random.hpp>
 
 #if SDL_ENCRYPT
 #include <sdl/Encrypt/Encrypt.hpp>
-#include <sdl/Util/File.hpp>
 #endif
+#include <sdl/Util/File.hpp>
 
 namespace sdl {
 namespace Util {

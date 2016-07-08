@@ -18,14 +18,14 @@
 #define SDL_EVICTABLE__JG_2013_11_14_HPP
 #pragma once
 
-#include <cassert>
-#include <vector>
-#include <mutex>
-#include <sdl/Util/ThreadSpecific.hpp>
+#include <sdl/Config/Named.hpp>
 #include <sdl/Util/Flag.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/MemFence.hpp>
-#include <sdl/Config/Named.hpp>
+#include <sdl/Util/ThreadSpecific.hpp>
+#include <cassert>
+#include <mutex>
+#include <vector>
 
 namespace sdl {
 
@@ -147,7 +147,7 @@ struct Evictable : Config::INamed {
   bool processInitDone(InitProcessPhase phase) const { return processInitDone_[phase].get(); }
 
   bool processInitDone() const {
-    return processInitDone_[0].get() && processInitDone_[knInitProcessPhase-1].get();
+    return processInitDone_[0].get() && processInitDone_[knInitProcessPhase - 1].get();
   }
 
   Evictable() {}

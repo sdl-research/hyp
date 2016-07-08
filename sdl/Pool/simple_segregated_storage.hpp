@@ -35,7 +35,6 @@
 
 // std::greater
 #include <functional>
-
 #include <Pool/poolfwd.hpp>
 
 #ifdef BOOST_MSVC
@@ -456,5 +455,8 @@ void simple_segregated_storage<SizeType>::split(void *list, void **listA, void *
 #ifdef BOOST_MSVC
 #pragma warning(pop)
 #endif
+
+
+
 
 #endif

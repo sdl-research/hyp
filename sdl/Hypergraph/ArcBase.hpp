@@ -17,16 +17,16 @@
 #define ARCBASE_GRAEHL_2015_08_13_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Hypergraph/FwdDecls.hpp>
+#include <sdl/Hypergraph/Label.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/ObjectCount.hpp>
 #include <boost/functional/hash.hpp>
-#include <cassert>
-#include <cstring>
-#include <cstdlib>
-#include <iostream>
 #include <algorithm>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 
 namespace sdl {
 namespace Hypergraph {
@@ -134,8 +134,10 @@ struct ArcBase SDL_OBJECT_TRACK_BASE(ArcBase) {
     return static_cast<ArcTpl<Weight> const*>(this)->weight_;
   }
 
-  // (unsafe?) weight_.value_ assuming Cost value_ is first member of weight
+  /// weight_.value_ assuming Cost value_ is first member of weight and a float
+  /// (i.e. won't hold in Optimize which uses double-precision)
   Cost cost() const;
+  Cost& cost();
 
   /// would prefer *not* to have this but it's asking a lot to ask coders to
   /// never delete an ArcBase. (and ArcTpl/ArcWithData anyway already have
@@ -155,6 +157,10 @@ struct ArcWithCostFirstWeight : ArcBase {
 
 inline Cost ArcBase::cost() const {
   return reinterpret_cast<ArcWithCostFirstWeight const*>(this)->value_;
+}
+
+inline Cost& ArcBase::cost() {
+  return reinterpret_cast<ArcWithCostFirstWeight*>(this)->value_;
 }
 
 // reference to arc's tails valid only as long as arc isn't modified. equal/hash of an Arc ignoring weight
@@ -209,7 +215,7 @@ struct AppendArcs {
   void operator=(ArcBase* arc) const { operator()(arc); }
   AppendArcs const& operator*() const { return *this; }
   AppendArcs const& operator++() const { return *this; }
-  AppendArcs const& operator++(int) const { return *this; }
+  AppendArcs const& operator++(int)const { return *this; }
 };
 
 template <class ArcsContainer>

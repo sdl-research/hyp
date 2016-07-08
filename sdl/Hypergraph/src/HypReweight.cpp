@@ -9,8 +9,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Reweight.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -33,6 +33,3 @@ struct HypReweight : TransformMain<HypReweight> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Reweight)
-
-
-

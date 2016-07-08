@@ -11,8 +11,8 @@
 #define SDL_TRANSFORM_MAIN_LOG_WEIGHT 1
 #define SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT 1
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Compose.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -57,6 +57,3 @@ struct HypCompose : TransformMain<HypCompose> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Compose)
-
-
-

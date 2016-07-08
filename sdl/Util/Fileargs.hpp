@@ -17,9 +17,9 @@
 #define FILEARGS_GRAEHL_2015_11_03_HPP
 #pragma once
 
-#include <string>
 #include <graehl/shared/fileargs.hpp>
 #include <graehl/shared/string_match.hpp>
+#include <string>
 
 namespace sdl {
 namespace Util {
@@ -36,6 +36,8 @@ using graehl::stdout_filename;
 using graehl::stderr_filename;
 using graehl::null_filename;
 
+namespace {
+
 std::string const kFileForIdHelp((graehl::file_arg_usage() + "; if empty, nothing; otherwise, for each "
                                                              "segment id filename.gz -> filename.id.gz or "
                                                              "filename -> filename.id"));
@@ -48,6 +50,7 @@ std::string const kNullFilenameStr((kNullFilename));
 std::string const kGzSuffix(".gz");
 std::string const kPipePrefix("/proc/self/fd/");
 std::string const kPipePrefix2("/dev/fd/");
+}
 
 inline bool isNullFilename(std::string const& path) {
   return path == kNullFilenameStr;

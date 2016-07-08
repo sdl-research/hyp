@@ -17,11 +17,11 @@
 #define SDL_UTIL_MATH_HPP_
 #pragma once
 
-#include <cstring>
-#include <cassert>
 #include <sdl/Util/Constants.hpp>
-#include <graehl/shared/epsilon.hpp>
 #include <sdl/IntTypes.hpp>
+#include <graehl/shared/epsilon.hpp>
+#include <cassert>
+#include <cstring>
 
 namespace sdl {
 namespace Util {
@@ -120,7 +120,7 @@ struct OtherFloat<double> {
 
 template <class T>
 T signbit(T x) {
-  return x & (1 << (sizeof(T) * 8-1));
+  return x & (1 << (sizeof(T) * 8 - 1));
 }
 
 

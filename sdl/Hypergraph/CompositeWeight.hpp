@@ -25,8 +25,8 @@
 #pragma once
 
 #include <sdl/Hypergraph/WeightUtil.hpp>
-#include <ostream>
 #include <sdl/Util/LogHelper.hpp>
+#include <ostream>
 
 namespace sdl {
 namespace Hypergraph {

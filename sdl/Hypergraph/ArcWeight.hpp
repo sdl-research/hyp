@@ -18,9 +18,11 @@
 #define ARCWEIGHT_JG20121029_HPP
 #pragma once
 
-#include <sdl/Util/Unordered.hpp>
 #include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Pool/object_pool.hpp>
+#include <sdl/Util/Unordered.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/type_traits/remove_reference.hpp>
@@ -84,8 +86,7 @@ struct CallStateToWeight {
 
   CallStateToWeight() : p() {}
   template <class Ptr>
-  CallStateToWeight(Ptr const& ptr)
-      : p(ptr) {}
+  CallStateToWeight(Ptr const& ptr) : p(ptr) {}
   CallStateToWeight(CallStateToWeight const& o) : p(o.p) {}
 };
 
@@ -242,11 +243,11 @@ struct StateWeightsCached : StateWtFn {
   }
   StateWeightsCached() : axiomsStart() {}
   StateWeightsCached(StateId axiomsStart, StateId axiomsEnd)
-      : axiomsStart(axiomsStart), weights(axiomsEnd-axiomsStart) {}
+      : axiomsStart(axiomsStart), weights(axiomsEnd - axiomsStart) {}
   void init(StateId axiomsStart_, StateId axiomsEnd) {
     axiomsStart = axiomsStart_;
     weights.clear();
-    weights.resize(axiomsEnd-axiomsStart);
+    weights.resize(axiomsEnd - axiomsStart);
   }
 };
 

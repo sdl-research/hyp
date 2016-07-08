@@ -10,8 +10,8 @@
 // limitations under the License.
 #define USAGE_HypInvert "Invert (swap) lexical ('input' 'output') state labels of hypergraph."
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Invert.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -31,6 +31,3 @@ struct HypInvert : TransformMain<HypInvert> {  // note base class CRTP (google i
 }
 
 HYPERGRAPH_NAMED_MAIN(Invert)
-
-
-

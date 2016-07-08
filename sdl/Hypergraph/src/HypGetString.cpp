@@ -11,8 +11,8 @@
 #define USAGE_HypGetString \
   "get the single string found by taking the first edge into each node starting from final (TOP)"
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -32,6 +32,3 @@ struct HypGetString : TransformMain<HypGetString> {  // note base class CRTP (go
 }
 
 HYPERGRAPH_NAMED_MAIN(GetString)
-
-
-

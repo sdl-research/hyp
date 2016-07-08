@@ -17,11 +17,11 @@
 #define HYP__HYPERGRAPH_NGRAMWEIGHTMAPPER_HPP
 #pragma once
 
-#include <cstddef>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/Arc.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/NgramWeight.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <cstddef>
 
 namespace sdl {
 namespace Hypergraph {

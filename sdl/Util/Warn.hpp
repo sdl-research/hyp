@@ -17,8 +17,8 @@
 #define WARN_JG2012615_HPP
 #pragma once
 
-#include <sdl/StringConsumer.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <sdl/StringConsumer.hpp>
 #ifndef NLOG
 #include <log4cxx/logger.h>
 #endif
@@ -29,7 +29,7 @@ namespace Util {
 struct LogWarning {
   explicit LogWarning(std::string const& logname) : logname(logname) {}
   std::string logname;  // TODO: save log4cxx object? for now, let logging cfg change and we reflect that
-                        // always. this is used for warnings only so perf. shouldn't matter. would use:
+  // always. this is used for warnings only so perf. shouldn't matter. would use:
   //  LoggerPtr plog;
   void operator()(std::string const& msg) const {
 #ifdef NLOG

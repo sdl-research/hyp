@@ -18,9 +18,9 @@
 #define COUNTOBJECTS_JG_2014_03_03_HPP
 #pragma once
 
-#include <cassert>
-#include <sdl/Util/RefCount.hpp>
 #include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/RefCount.hpp>
+#include <cassert>
 
 #ifndef SDL_OBJECT_COUNT
 #if SDL_MEMSTATS

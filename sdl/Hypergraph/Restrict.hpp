@@ -20,8 +20,8 @@
 #define HYPERGRAPH_RESTRICT_HPP
 #pragma once
 
-#include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/HypergraphCopy.hpp>
+#include <sdl/Hypergraph/IMutableHypergraph.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
 
 namespace sdl {

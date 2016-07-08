@@ -17,9 +17,9 @@
 #define SDL_VOCABULARY__TO_SYMBOLS
 #pragma once
 
-#include <boost/range/algorithm/transform.hpp>
 #include <sdl/IVocabulary.hpp>
 #include <sdl/Syms.hpp>
+#include <boost/range/algorithm/transform.hpp>
 
 namespace sdl {
 

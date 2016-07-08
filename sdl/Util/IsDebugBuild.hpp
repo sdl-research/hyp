@@ -29,11 +29,7 @@ namespace Util {
    it's safe to call this in code that is frequently executed.
 */
 inline bool isDebugBuild() {
-#ifndef NDEBUG
-  return true;
-#else
-  return false;
-#endif
+  return SDL_IS_DEBUG_BUILD;
 }
 }
 }
@@ -44,15 +40,13 @@ inline bool isDebugBuild() {
    isDebugBuild won't suffice. use SDL_DEBUG_BUILD(expr) as long as your
    expression has no commas - otherwise use '#if SDL_IS_DEBUG_BUILD'.
 */
-#ifdef NDEBUG
+#if !SDL_IS_DEBUG_BUILD
 #define SDL_DEBUG_BUILD(x)
 #define SDL_IS_DEBUG_BUILD 0
 #else
 #define SDL_DEBUG_BUILD(x) x
 #define SDL_IS_DEBUG_BUILD 1
 #endif
-
-
 
 
 #endif

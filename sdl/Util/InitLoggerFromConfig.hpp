@@ -17,8 +17,8 @@
 #define INITLOGGERFROMCONFIG_JG_2014_11_15_HPP
 #pragma once
 
-#include <sdl/Util/InitLogger.hpp>
 #include <sdl/Util/FindFile.hpp>
+#include <sdl/Util/InitLogger.hpp>
 #include <log4cxx/xml/domconfigurator.h>
 
 namespace sdl {

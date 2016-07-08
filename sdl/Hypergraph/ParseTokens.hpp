@@ -17,14 +17,14 @@
 #define HYP__HYPERGRAPH_PARSE_TOKENS_HPP
 #pragma once
 
-#include <sstream>
-#include <vector>
-#include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Exception.hpp>
 #include <sdl/Config/Init.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/LineOptions.hpp>
 #include <sdl/Util/Split.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <sdl/Exception.hpp>
+#include <sstream>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -67,10 +67,10 @@ struct ParseTokensOptions : Util::LineOptions {
   void configure(Config& config) {
     Util::LineOptions::configure(config);
     config(usage());
-    config("chars", &characterBased)('c')
-        .defaulted()("(utf8) character tokens instead of space-separated (quoted?) strings");
-    config("quoted", &quoted)('q')
-        .init(false)("parse quoted tokens (else just space-separated, unquoted strings)");
+    config("chars", &characterBased)('c').defaulted()(
+        "(utf8) character tokens instead of space-separated (quoted?) strings");
+    config("quoted", &quoted)('q').init(false)(
+        "parse quoted tokens (else just space-separated, unquoted strings)");
   }
   static inline std::string usage() { return "parse text lines into tokens"; }
   TokenType tokenType() const {
@@ -92,14 +92,10 @@ Strings parseTokens(std::string const& line, Tokenize const& t) {
 
 inline Strings parseTokens(std::string const& line, TokenType tokenType) {
   switch (tokenType) {
-    case kUtf8CharTokens:
-      return parseTokens(line, Utf8CharTokens());
-    case kSpaceSepTokens:
-      return parseTokens(line, SpaceSepTokens());
-    case kQuotedTokens:
-      return parseTokens(line, QuotedTokens());
-    default:
-      SDL_THROW(BadTypeConstantException, tokenType);
+    case kUtf8CharTokens: return parseTokens(line, Utf8CharTokens());
+    case kSpaceSepTokens: return parseTokens(line, SpaceSepTokens());
+    case kQuotedTokens: return parseTokens(line, QuotedTokens());
+    default: SDL_THROW(BadTypeConstantException, tokenType);
   }
 };
 

@@ -19,17 +19,14 @@
 #pragma once
 
 
-#include <set>
-#include <queue>
-#include <stdexcept>
-
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/Types.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-
-#include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Hypergraph/InArcs.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/ShrinkVector.hpp>
+#include <queue>
+#include <set>
+#include <stdexcept>
 
 namespace sdl {
 namespace Hypergraph {

@@ -20,8 +20,8 @@
 
 #define SDL_POINTER_SET_GOOGLE_HASH 1
 
-#include <sdl/Util/Unordered.hpp>
 #include <sdl/Util/PointerHash.hpp>
+#include <sdl/Util/Unordered.hpp>
 #include <sdl/Sym.hpp>
 
 #if defined(WIN32)

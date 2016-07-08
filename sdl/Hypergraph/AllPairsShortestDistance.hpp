@@ -17,16 +17,13 @@
 #define HYPERGRAPH_ALL_PAIRS_SHORTESTDISTANCE_HPP
 #pragma once
 
-#include <sdl/Hypergraph/WeightUtil.hpp>
-
-#include <cmath>
-
-
-#include <sdl/Util/Matrix.hpp>
+#include <sdl/Hypergraph/ArcWeight.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Util/LogHelper.hpp>
-#include <sdl/Hypergraph/ArcWeight.hpp>
+#include <sdl/Util/Matrix.hpp>
+#include <cmath>
 
 namespace sdl {
 namespace Hypergraph {

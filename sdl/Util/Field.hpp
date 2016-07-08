@@ -22,18 +22,18 @@
 #define FIELD_JG_2015_06_18_HPP
 #pragma once
 
+#include <sdl/Util/IsChar.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/StringBuilder.hpp>
 #include <sdl/Array.hpp>
 #include <sdl/Types.hpp>
-#include <sdl/Util/IsChar.hpp>
-#include <sdl/Util/StringBuilder.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <graehl/shared/atoi_fast.hpp>
+#include <sdl/gsl.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/regex_fwd.hpp>
-#include <vector>
+#include <graehl/shared/atoi_fast.hpp>
 #include <string>
-#include <sdl/gsl.hpp>
+#include <vector>
 
 namespace boost {
 template <class BidiIterator>
@@ -50,17 +50,14 @@ namespace Util {
    performance conversion to number than sdl::lexical_cast or stringstream or
    sscanf
 
-   since Slice=std::pair is officially POD in C++11 (and defacto since forever) we
-   inherit from std::pair<Pchar, Pchar>
-
-   TODO: move to Util/Field.hpp
+   Slice=std::pair is officially POD in C++11
 
    TODO: use boost::string_ref or std::experimental::string_span instead in C++11
 */
 struct Field : Slice {
   Field() {}
   Field(Pchar begin, Pchar end) : Slice(begin, end) {}
-
+  Field(cstring_span<> const& s) { *this = s; }
   Field(Slice const& o) : Slice(o) {}
   Field(Field const& o) : Slice(o) {}
   Field(char const* word) : Slice(word, word + std::strlen(word)) {}
@@ -69,8 +66,7 @@ struct Field : Slice {
   Field(boost::iterator_range<std::string::const_iterator> const& word)
       : Slice(arrayBegin(word), arrayEnd(word)) {}
   template <class Iter>
-  Field(boost::sub_match<Iter> const& word)
-      : Slice(&*word.first, &*word.second) {}
+  Field(boost::sub_match<Iter> const& word) : Slice(&*word.first, &*word.second) {}
   Field(std::string::const_iterator begin, std::string::const_iterator end) : Slice(&*begin, &*end) {}
   typedef Pchar const_iterator;
   typedef Pchar iterator;
@@ -78,6 +74,10 @@ struct Field : Slice {
   typedef char const& const_reference;
   typedef char value_type;
 
+  void operator=(cstring_span<> const& s) {
+    first = (Pchar)s.data();
+    second = first + s.size();
+  }
   Pchar begin() const { return first; }
   Pchar end() const { return second; }
 
@@ -176,15 +176,15 @@ struct Field : Slice {
   std::size_t toSize(bool requireComplete = true) const { return toUnsignedInt<std::size_t>(true); }
 
   double& toNumber(double* num, bool requireComplete = true) const {
-    return * num = toDouble(requireComplete);
+    return *num = toDouble(requireComplete);
   }
-  float& toNumber(float* num, bool requireComplete = true) const { return * num = toFloat(requireComplete); }
+  float& toNumber(float* num, bool requireComplete = true) const { return *num = toFloat(requireComplete); }
   unsigned& toNumber(unsigned* num, bool requireComplete = true) const {
-    return * num = toUnsigned(requireComplete);
+    return *num = toUnsigned(requireComplete);
   }
-  int& toNumber(int* num, bool requireComplete = true) const { return * num = toInt(requireComplete); }
+  int& toNumber(int* num, bool requireComplete = true) const { return *num = toInt(requireComplete); }
   std::size_t& toNumber(std::size_t* num, bool requireComplete = true) const {
-    return * num = toSize(requireComplete);
+    return *num = toSize(requireComplete);
   }
   void resize(std::size_t size) { second = first + size; }
 

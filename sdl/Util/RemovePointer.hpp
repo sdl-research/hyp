@@ -18,11 +18,11 @@
 #define REMOVEPOINTER_JG20121228_HPP
 #pragma once
 
-#include <type_traits>
 #include <sdl/SharedPtr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+#include <type_traits>
 
 namespace sdl {
 namespace Util {

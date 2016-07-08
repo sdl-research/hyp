@@ -26,7 +26,7 @@ namespace Util {
    return >0 if char1>char2, ==0 if char1==char2, else <0.
 */
 inline int charcmp(unsigned char1, unsigned char2) {
-  return (int)(char1-char2);
+  return (int)(char1 - char2);
 }
 
 /**

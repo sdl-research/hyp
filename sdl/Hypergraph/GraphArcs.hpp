@@ -21,8 +21,8 @@
 #define GRAPHARCS_JG_2014_05_27_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/HypergraphBase.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -20,12 +20,12 @@
 #define GRAEHL__SHARED__WORD_SPACER_HPP
 #pragma once
 
-#include <sstream>
-#include <string>
-#include <graehl/shared/print_read.hpp>
-#include <graehl/shared/shared_ptr.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
+#include <graehl/shared/print_read.hpp>
+#include <graehl/shared/shared_ptr.hpp>
+#include <sstream>
+#include <string>
 
 namespace graehl {
 /// print spaces between each word (none before or after)
@@ -49,9 +49,9 @@ struct word_spacer {
       str.push_back(space_string[0]);
   }
 
-  const char* empty() const { return space_string + 1; }
-  const char* space() const { return space_string; }
-  const char* get_string() {
+  char const* empty() const { return space_string + 1; }
+  char const* space() const { return space_string; }
+  char const* get_string() {
     if (first) {
       first = false;
       return empty();

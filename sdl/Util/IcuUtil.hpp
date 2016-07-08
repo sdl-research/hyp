@@ -20,15 +20,15 @@
 #pragma once
 
 #include <sdl/Util/Icu.hpp>
-#include <string>
-#include <unicode/chariter.h>
-#include <unicode/schriter.h>
-#include <unicode/unistr.h>
+#include <sdl/Util/String32.hpp>
+#include <sdl/Util/Utf8.hpp>
 #include <sdl/SharedPtr.hpp>
 #include <sdl/Span.hpp>
 #include <sdl/Types.hpp>
-#include <sdl/Util/String32.hpp>
-#include <sdl/Util/Utf8.hpp>
+#include <unicode/chariter.h>
+#include <unicode/schriter.h>
+#include <unicode/unistr.h>
+#include <string>
 
 #define SDL_UTF8_CPP_TOKENIZER 1
 

@@ -24,23 +24,21 @@
 #pragma once
 
 
-#include <cassert>
-#include <vector>
-#include <algorithm>
-#include <sdl/SharedPtr.hpp>
-
+#include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/HypergraphWriter.hpp>
 #include <sdl/Hypergraph/StateIdTranslation.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Add.hpp>
-#include <sdl/Util/Latch.hpp>
-
-#include <sdl/Util/ShrinkVector.hpp>
-#include <sdl/Util/Interested.hpp>
 #include <sdl/Hypergraph/src/IsGraphArc.ipp>
+#include <sdl/Util/Add.hpp>
+#include <sdl/Util/Interested.hpp>
+#include <sdl/Util/Latch.hpp>
+#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/MinMax.hpp>
+#include <sdl/Util/ShrinkVector.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <algorithm>
+#include <cassert>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -71,7 +69,8 @@ struct MutableHypergraphLabels {
 
  protected:
   typedef unordered_map<LabelPair, StateId> LabelPairState;
-  LabelPairState lstate;  // for kCanonicalLex
+  /// for kCanonicalLex. TODO: make for input/NoSymbol labels only (fsa). then instead of LabelPair, sym
+  LabelPairState lstate_;
 
   IVocabularyPtr pVocab_;
   StateId numStates_;
@@ -168,7 +167,7 @@ struct MutableHypergraphLabels {
     for (StateId s = 0, e = size(); s < e; ++s) {
       Sym i = iLabelForState[s];
       if (i.isTerminal())
-        nodup &= lstate.insert(LabelPairState::value_type(LabelPair(i, outputLabelOrElse(s, i)), s)).second;
+        nodup &= lstate_.insert(LabelPairState::value_type(LabelPair(i, outputLabelOrElse(s, i)), s)).second;
     }
     return (canonicalLexIsCanonical_ = nodup);
   }
@@ -292,7 +291,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
 
   StateId canonicalExistingStateForLabelPair(LabelPair io) override {
     assert(this->properties_ & kCanonicalLex);
-    return Util::getOrElse(lstate, io, kNoState);
+    return Util::getOrElse(lstate_, io, kNoState);
   }
 
   /** \return true iff outputLabel is NoSymbol, and so tracks the input
@@ -345,7 +344,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
       deleteOutArcsImpl(s);
     } else
       deleteInArcsImpl(s);
-    if (s == numStates_-1) numStates_ = s;
+    if (s == numStates_ - 1) numStates_ = s;
   }
 
   enum { kAdjLinearSearchLimit = 16 };
@@ -447,7 +446,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
     this->oLabelForState.swap(out);
 
     /// kCanonicalLex for lexical labels (adding states)
-    lstate.clear();  // clear while saving arcs/labels
+    lstate_.clear();  // clear while saving arcs/labels
 
     std::size_t ndel = 0;
     for (Arc* a : arcs) {
@@ -975,7 +974,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
   StateId addState(Sym input) override {
     if (!(this->properties_ & kCanonicalLex) || !input.isTerminal()) return addStateImpl(input);
     StateId* s;
-    if (Util::update(lstate, LabelPair(input, NoSymbol), s))
+    if (Util::update(lstate_, LabelPair(input, NoSymbol), s))
       return (*s = addStateImpl(input));
     else
       return *s;
@@ -996,7 +995,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
     assert(output == NoSymbol || input == output || input.isTerminal() && output.isTerminal());
     if (!(this->properties_ & kCanonicalLex)) return addStateNoCanonical(input, output);
     StateId* s;
-    if (Util::update(lstate, LabelPair(input, output), s))
+    if (Util::update(lstate_, LabelPair(input, output), s))
       return (*s = addStateNoCanonical(input, output));
     else
       return *s;
@@ -1271,6 +1270,8 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
 
   bool storesArcs() const { return this->properties_ & kStoreAnyArcs; }
 
+  void addGraphEpsilon(StateId from, StateId to) override { this->addArc(new Arc(HeadAndTail(), to, from)); }
+
   void addArc(ArcBase* arc) override {
     assert(this->storesArcs());
     notifyArcImpl();
@@ -1349,12 +1350,12 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
 
   void clearCanonicalLex() override {
     this->properties_ &= ~kCanonicalLex;
-    lstate.clear();
+    lstate_.clear();
   }
 
   void clearCanonicalLexCache() override {
     this->properties_ &= ~kCanonicalLex;
-    lstate.clear();
+    lstate_.clear();
   }
 
   bool ensureCanonicalLex() override {
@@ -1367,7 +1368,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
     if (this->properties_ & kCanonicalLex)
       return forceCanonicalLexImpl();
     else {
-      lstate.clear();
+      lstate_.clear();
       return false;
     }
   }
@@ -1440,7 +1441,7 @@ struct MutableHypergraph final : IMutableHypergraph<A>, private MutableHypergrap
   }
 
   void clearLabelImpl(Properties prop) {
-    lstate.clear();
+    lstate_.clear();
     iLabelForState.clear();
     oLabelForState.clear();
     this->properties_ = prop | kFsmProperties;

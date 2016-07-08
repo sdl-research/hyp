@@ -36,15 +36,15 @@
 */
 
 #include <sdl/Util/Enum.hpp>
-#include <sdl/IntTypes.hpp>
-#include <sdl/Util/String32.hpp>
-#include <graehl/shared/os.hpp>
 #include <sdl/Util/ShrinkVector.hpp>
+#include <sdl/Util/String32.hpp>
+#include <sdl/IntTypes.hpp>
 #include <graehl/shared/insert_to.hpp>
-#include <vector>
-#include <string>
-#include <iterator>
+#include <graehl/shared/os.hpp>
 #include <graehl/shared/warning_compiler.h>
+#include <iterator>
+#include <string>
+#include <vector>
 CLANG_DIAG_OFF(unsequenced)
 #include <utf8/checked.h>
 #include <utf8/unchecked.h>
@@ -55,16 +55,16 @@ CLANG_DIAG_ON(unsequenced)
 #else
 #define UTF8_CHECKED_NS utf8::unchecked
 #endif
-#include <boost/range/begin.hpp>
-#include <boost/range/end.hpp>
-#include <boost/range/size.hpp>
-#include <boost/range/distance.hpp>
-#include <boost/range/adaptor/transformed.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/noncopyable.hpp>
-#include <sdl/Types.hpp>
 #include <sdl/Array.hpp>
 #include <sdl/Span.hpp>
+#include <sdl/Types.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/range/begin.hpp>
+#include <boost/range/distance.hpp>
+#include <boost/range/end.hpp>
+#include <boost/range/size.hpp>
 
 
 namespace sdl {
@@ -85,13 +85,13 @@ inline bool isReplacementChar(Unicode ch) {
 }
 
 // TODO: next(x) has a C++11 ADL conflict that didn't allow using, so these forward without ambiguity:
-template <typename octet_iterator>
-Unicode next(octet_iterator& it) {
+template <class OctetIter>
+Unicode next(OctetIter& it) {
   return utf8::unchecked::next(it);
 }
 
-template <typename octet_iterator>
-Unicode next(octet_iterator& it, octet_iterator const& end) {
+template <class OctetIter>
+Unicode next(OctetIter& it, OctetIter const& end) {
 #if SDL_CHECKED_UTF8
   return utf8::next(it, end);
 #else
@@ -104,10 +104,10 @@ Unicode next(octet_iterator& it, octet_iterator const& end) {
    codepoint span unicodeSpan. will throw if [begin,end) isn't valid utf8 or
    unicodeSpan addresses past end.
 */
-template <typename octet_iterator>
-inline TokenSpan toUtf8ByteSpan(TokenSpan const& unicodeSpan, octet_iterator begin, octet_iterator end) {
+template <class OctetIter>
+inline TokenSpan toUtf8ByteSpan(TokenSpan const& unicodeSpan, OctetIter begin, OctetIter end) {
   TokenSpan r;
-  octet_iterator i = begin;
+  OctetIter i = begin;
   utf8::advance(i, unicodeSpan.first, end);
   r.first = i - begin;
   utf8::advance(i, len(unicodeSpan), end);
@@ -119,8 +119,8 @@ inline TokenSpan toUtf8ByteSpan(TokenSpan const& unicodeSpan, std::string const&
   return toUtf8ByteSpan(unicodeSpan, s.begin(), s.end());
 }
 
-template <typename octet_iterator>
-octet_iterator append(Unicode c, octet_iterator const& result) {
+template <class OctetIter>
+OctetIter append(Unicode c, OctetIter const& result) {
   return UTF8_CHECKED_NS::append(c, result);
 }
 
@@ -393,7 +393,7 @@ struct FixUnicode {
 
   template <class Pchar>
   void normalize(Pchar i, Pchar end, std::string& out, bool alreadyValidUtf8) const {
-    sizeOutputImpl(end-i, out);
+    sizeOutputImpl(end - i, out);
     std::string::iterator begin = out.begin(), o = begin;
     Encoder toutf8(o);
     utf8To(i, end, toutf8, alreadyValidUtf8);
@@ -507,8 +507,7 @@ struct DecodeUtf8Range {
   typedef Utf8::iterator<Bytes> const_iterator;
   iterator i, e;
   template <class ByteRange>
-  explicit DecodeUtf8Range(ByteRange const& r)
-      : i(boost::begin(r)), e(boost::end(r)) {}
+  explicit DecodeUtf8Range(ByteRange const& r) : i(boost::begin(r)), e(boost::end(r)) {}
   DecodeUtf8Range(iterator const& i, iterator const& e) : i(i), e(e) {}
   iterator begin() const { return i; }
   iterator end() const { return e; }
@@ -819,7 +818,7 @@ void toUnicodes(ByteRange const& b, UnicodeCharContainer& ucs) {
 */
 struct ToUnicodes : Unicodes {
   explicit ToUnicodes(std::string const& utf8) : Unicodes(utf8.size()) { toUnicodesShrink(utf8, *this); }
-  explicit ToUnicodes(Slice const& slice) : Unicodes(slice.second-slice.first) {
+  explicit ToUnicodes(Slice const& slice) : Unicodes(slice.second - slice.first) {
     toUnicodesShrink(slice, *this);
   }
   explicit ToUnicodes(std::wstring const& word)
@@ -844,22 +843,22 @@ struct FromUnicodes : std::string {
     toUtf8vShrink(word.begin(), word.end(), *this);
   }
   explicit FromUnicodes(UnicodeSlice const& slice)
-      : std::string(bytesForUtf(slice.second-slice.first), '\0') {
+      : std::string(bytesForUtf(slice.second - slice.first), '\0') {
     toUtf8vShrink(slice.first, slice.second, *this);
   }
-  FromUnicodes(Punicode begin, Punicode end) : std::string(bytesForUtf(end-begin), '\0') {
+  FromUnicodes(Punicode begin, Punicode end) : std::string(bytesForUtf(end - begin), '\0') {
     toUtf8vShrink(begin, end, *this);
   }
   FromUnicodes(Unicodes::const_iterator begin, Unicodes::const_iterator end)
-      : std::string(bytesForUtf(end-begin), '\0') {
+      : std::string(bytesForUtf(end - begin), '\0') {
     toUtf8vShrink(begin, end, *this);
   }
   FromUnicodes(String32::const_iterator begin, String32::const_iterator end)
-      : std::string(bytesForUtf(end-begin), '\0') {
+      : std::string(bytesForUtf(end - begin), '\0') {
     toUtf8vShrink(begin, end, *this);
   }
 #if SDL_UNICODE_IS_WCHAR
-  explicit FromUnicodes(WideSlice const& slice) : std::string(bytesForUtf(slice.second-slice.first), '\0') {
+  explicit FromUnicodes(WideSlice const& slice) : std::string(bytesForUtf(slice.second - slice.first), '\0') {
     toUtf8vShrink(slice.first, slice.second, *this);
   }
 #endif
@@ -927,8 +926,8 @@ unsigned lengthUtf8Chs(BytesRange const& b) {
 
 // 0x0101010101010101ull
 #define SDL_UTF8_ONEMASK ((std::size_t)(-1) / 0xFF)
-inline std::size_t strlen_utf8(const char* _s) {
-  const char* s;
+inline std::size_t strlen_utf8(char const* _s) {
+  char const* s;
   std::size_t count = 0;
   std::size_t u;
   unsigned char b;

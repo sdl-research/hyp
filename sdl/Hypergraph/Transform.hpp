@@ -113,15 +113,15 @@
 #define HYP__HG_TRANSFORM_HPP
 #pragma once
 
-#include <boost/pointer_cast.hpp>
-#include <sdl/Hypergraph/Transform-fwd.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/FinalOutputState.hpp>
 #include <sdl/Hypergraph/ForceArcs.hpp>
 #include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Transform-fwd.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <boost/pointer_cast.hpp>
 #include <boost/thread/tss.hpp>
-#include <sdl/Hypergraph/FinalOutputState.hpp>
 
 namespace sdl {
 
@@ -503,12 +503,11 @@ struct TransformBase : PrepareArcType {
   mutable boost::thread_specific_ptr<FinalOutputState> applyFinalOutput;
 
   template <class ResourceManager>
-  void loadResources(ResourceManager& mgr) const {}
-
-  template <class ResourceManager>
-  void baseLoadResources(ResourceManager& mgr) const {
-    loadResources(mgr);
+  void loadResources(ResourceManager& mgr) {
+    initProcess();
   }
+
+  virtual void initProcess() {}
 
   template <class ResourceManager>
   void baseLoadResourcesThread(ResourceManager& mgr) const {

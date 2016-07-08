@@ -19,8 +19,8 @@
 #pragma once
 
 #include <sdl/Util/Add.hpp>
-#include <sdl/Util/Contains.hpp>
 #include <sdl/Util/BitSet.hpp>  // for contains(bitset, index)
+#include <sdl/Util/Contains.hpp>
 
 namespace sdl {
 namespace Util {

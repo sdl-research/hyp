@@ -18,11 +18,10 @@
 #define HYP__HYPERGRAPH_CAST_HYPERGRAPH_HPP
 #pragma once
 
-#include <sdl/SharedPtr.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
-
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
 
 namespace sdl {
 namespace Hypergraph {

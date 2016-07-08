@@ -12,8 +12,8 @@
   "Print nothing if input hypergraph is empty (i.e., cannot reach final state from start and lexical " \
   "leaves); otherwise print input hypergraph with useless states/arcs removed"
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Prune.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -43,6 +43,3 @@ struct HypPrune : TransformMain<HypPrune> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Prune)
-
-
-

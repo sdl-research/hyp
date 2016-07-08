@@ -17,9 +17,9 @@
 #define HYP__HYPERGRAPH__EMPTY_HPP
 #pragma once
 
+#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
 #include <sdl/Hypergraph/IMutableHypergraph.hpp>
-#include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Util/BitSet.hpp>
 
 #ifndef NDEBUG

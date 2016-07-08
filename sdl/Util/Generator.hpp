@@ -138,17 +138,16 @@
 #pragma once
 
 
-#include <sdl/SharedPtr.hpp>
-#include <boost/iterator/iterator_facade.hpp>
-#include <type_traits>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/type_traits/remove_const.hpp>
-#include <boost/type_traits/add_reference.hpp>
-#include <boost/mpl/bool.hpp>
-#include <sdl/Util/RefCount.hpp>
-
 #include <sdl/Util/AnyVisitor.hpp>
 #include <sdl/Util/Debug.hpp>
+#include <sdl/Util/RefCount.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/type_traits/add_reference.hpp>
+#include <boost/type_traits/remove_const.hpp>
+#include <boost/type_traits/remove_reference.hpp>
+#include <type_traits>
 
 
 namespace sdl {
@@ -389,8 +388,7 @@ struct UnitGenerator : GeneratorTraits<UnitGenerator<Value>, Value, PeekableT> {
   typedef PeekableT Tag;
   typedef void Peekable;
   template <class X>
-  UnitGenerator(X const& result)
-      : result(result), called(false) {}
+  UnitGenerator(X const& result) : result(result), called(false) {}
   UnitGenerator() : called(true) {}  // for using as input iterator range
   Value const& peek() const { return result; }
   Value const& get() const { return result; }

@@ -8,10 +8,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <sdl/CrfDemo/CreateSearchSpace.hpp>
 #include <sdl/Optimization/Arc.hpp>
 #include <sdl/Optimization/ICreateSearchSpace.hpp>
 #include <sdl/Config-fwd.hpp>
-#include <sdl/CrfDemo/CreateSearchSpace.hpp>
 #include <sdl/IVocabulary-fwd.hpp>
 
 namespace sdl {
@@ -21,6 +21,8 @@ struct ResourceManager;
 }
 
 namespace CrfDemo {
+
+SDL_NAME_ENUM(TransitionModelType);
 
 // Explicit template instantiation
 template class CreateSearchSpace<Optimization::Arc>;
@@ -32,8 +34,8 @@ extern "C" {
 
 using namespace sdl;
 
-Optimization::ICreateSearchSpace<Optimization::Arc>* load(Resources::ResourceManager& resourceManager,
-                                                          ConfigNode const& yamlConfig, bool b) {
+Optimization::ICreateSearchSpace<Optimization::Arc>* loadCss(Resources::ResourceManager& resourceManager,
+                                                             ConfigNode const& yamlConfig, bool b) {
   return new CrfDemo::CreateSearchSpace<Optimization::Arc>(yamlConfig);
 }
 

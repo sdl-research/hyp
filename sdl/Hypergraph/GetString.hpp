@@ -17,24 +17,21 @@
 #define HYP__HYPERGRAPH__GETSTRING_HPP
 #pragma once
 
-#include <sstream>
-#include <utility>
-#include <functional>
-
+#include <sdl/Hypergraph/Derivation.hpp>
+#include <sdl/Hypergraph/DerivationStringOptions.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/PrintOptions.hpp>
+#include <sdl/Hypergraph/SplitState.hpp>
+#include <sdl/Hypergraph/SymbolPrint.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/StringBuilder.hpp>
+#include <sdl/gsl.hpp>
 #include <boost/range.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm/reverse.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Hypergraph/SymbolPrint.hpp>
-
-#include <sdl/Hypergraph/Derivation.hpp>
-#include <sdl/Hypergraph/PrintOptions.hpp>
-#include <sdl/Util/StringBuilder.hpp>
-#include <sdl/Hypergraph/SplitState.hpp>
-#include <sdl/Hypergraph/DerivationStringOptions.hpp>
-#include <sdl/gsl.hpp>
+#include <functional>
+#include <sstream>
+#include <utility>
 
 namespace sdl {
 namespace Hypergraph {

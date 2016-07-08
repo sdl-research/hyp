@@ -113,7 +113,7 @@
 */
 #define SDL_STORE_FENCE() _WriteBarrier()
 
-#elif(defined(__i386__) || defined(__x64__))
+#elif (defined(__i386__) || defined(__x64__))
 #define SDL_MEM_FENCE() asm volatile("mfence" ::: "memory")
 #define SDL_LOAD_FENCE() asm volatile("lfence" ::: "memory")
 #define SDL_STORE_FENCE() asm volatile("sfence" ::: "memory")

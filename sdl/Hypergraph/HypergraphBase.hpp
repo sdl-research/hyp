@@ -17,19 +17,19 @@
 #define IHYPERGRAPHSTATES_GRAEHL_2015_08_09_HPP
 #pragma once
 
-#include <sdl/Resource.hpp>
-#include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Hypergraph/ArcBase.hpp>
+#include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Hypergraph/Properties.hpp>
 #include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Sym.hpp>
-#include <sdl/IVocabulary.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/Util/Map.hpp>
-#include <sdl/Util/PointerSet.hpp>
-#include <sdl/Util/Once.hpp>
-#include <graehl/shared/noreturn.hpp>
 #include <sdl/Util/MaybeRef.hpp>
+#include <sdl/Util/Once.hpp>
+#include <sdl/Util/PointerSet.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Resource.hpp>
+#include <sdl/Sym.hpp>
+#include <graehl/shared/noreturn.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -254,8 +254,13 @@ struct HypergraphBase : Resource {
 
   bool isHeadState(StateId state) const { return !isAxiom(state); }
 
-  /// constant time - because final state is set to kNoState when we detect that there are no
-  // derivations. may return false even if there are no derivations.
+  /** start() == kNoState means no start state (which is not required for CFG
+   * anyway - every lexical/special-terminal leaf is an axiom) */
+
+  /** final() == kNoState means prunedEmpty() - no derivations.
+       constant time - because final state is set to kNoState when we detect that there are no
+       derivations. may return false even if there are no derivations
+  */
   bool prunedEmpty() const;
 
   virtual StateId maxLabeledState(LabelType labelType) const {
@@ -492,11 +497,6 @@ struct HypergraphBase : Resource {
         if (notTerminal) v(hg, state);
     }
   }
-
-  /** start() == kNoState means no start state (which is not required for CFG
-   * anyway - every lexical leaf is an axiom) */
-
-  /** final() == kNoState means prunedEmpty() - no derivations */
 
   bool storesArcs() const;
 
@@ -925,12 +925,6 @@ struct HypergraphBase : Resource {
     return 0;
   }
 
-  /// respects kCanonicalLex property
-  virtual StateId addState(Sym inputLabel) {
-    unimplementedMutableOnly("addState");
-    return 0;
-  }
-
   /**
      addStateId(nextStateId(), ...) is the same as addState(, ...) always.
   */
@@ -954,6 +948,13 @@ struct HypergraphBase : Resource {
 
   virtual StateId addStateId(StateId stateId, Sym inputLabel, Sym outputLabel) {
     unimplementedMutableOnly("addStateId");
+    return 0;
+  }
+
+
+  /// respects kCanonicalLex property
+  virtual StateId addState(Sym inputLabel) {
+    unimplementedMutableOnly("addState");
     return 0;
   }
 
@@ -1006,6 +1007,11 @@ struct HypergraphBase : Resource {
      should set kArcsAdded property so we can detect acyclic, fsm, etc.
   */
   virtual void addArc(ArcBase*) { unimplementedMutableOnly("addArc"); }
+
+  /**
+     add arc w/ 1 tail (from) 1 head (to) and Weight::one().
+  */
+  virtual void addGraphEpsilon(StateId from, StateId to) { unimplementedMutableOnly("addEpsilon"); }
 
   virtual bool checkValid() const;
 
@@ -1222,6 +1228,29 @@ struct PrintUnchecked {
     return out;
   }
   void print(std::ostream& out) const { hg.printUnchecked(out); }
+};
+
+
+struct CanonicalLabelState {
+  HypergraphBase* hg_;
+  hash_map<Sym, StateId> state_;
+  CanonicalLabelState(HypergraphBase* hg = 0) {
+    state_.set_empty_key(NoSymbol);
+    init(hg);
+  }
+  void init(HypergraphBase* hg) {
+    hg_ = hg;
+    if (hg) {
+      if (!hg->size()) hg->addState();
+      assert(hg->size());
+      state_.clear_no_resize();
+    }
+  }
+  StateId operator()(Sym s) {
+    StateId& r = state_[s];
+    if (!r) r = hg_->addState(s);
+    return r;
+  }
 };
 
 

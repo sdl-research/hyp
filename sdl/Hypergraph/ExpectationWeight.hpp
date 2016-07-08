@@ -89,21 +89,17 @@
 #define HYP__HYPERGRAPH_EXPECTATION_WEIGHT_HPP
 #pragma once
 
-#include <stdexcept>
-#include <string>
-#include <iostream>
-#include <cassert>
-#include <boost/static_assert.hpp>
-#include <boost/type_traits/is_same.hpp>
-
 #include <sdl/Hypergraph/FeatureWeight.hpp>
-
+#include <sdl/Hypergraph/Weight.hpp>
 #include <sdl/Util/Constants.hpp>
 #include <sdl/Util/LogHelper.hpp>
-
 #include <sdl/Util/LogMath.hpp>
-
-#include <sdl/Hypergraph/Weight.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/type_traits/is_same.hpp>
+#include <cassert>
+#include <iostream>
+#include <stdexcept>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {

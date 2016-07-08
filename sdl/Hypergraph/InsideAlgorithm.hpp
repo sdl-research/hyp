@@ -20,19 +20,17 @@
 #define HYP__HYPERGRAPH_INSIDE_ALGORITHM_HPP
 #pragma once
 
-#include <vector>
-
-#include <sdl/Hypergraph/WeightUtil.hpp>
-
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/ArcWeight.hpp>
+#include <sdl/Hypergraph/ArcWeight.hpp>
 #include <sdl/Hypergraph/HypergraphCopyBasic.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/ArcWeight.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/StatesTraversal.hpp>
-#include <sdl/Hypergraph/ArcWeight.hpp>
-#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
 #include <sdl/Util/Add.hpp>
+#include <sdl/Util/LogHelper.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <vector>
 
 namespace sdl {
 namespace Hypergraph {
@@ -146,7 +144,8 @@ void insideAlgorithmWithAxioms(IHypergraph<Arc> const& hg, Distances* pDistances
   shared_ptr<HG const> phg = ensureProperties(hg, kStoreInArcs);
 
   SDL_DEBUG(Hypergraph.InsideAlgorithm, "Start inside alg on hypergraph, setting distances for states [0,..."
-                                            << maxNotTerminal << "]:\n" << hg);
+                                            << maxNotTerminal << "]:\n"
+                                            << hg);
 
   // Traverse states in topsorted order, and compute distance for each state:
   ComputeDistanceStatesVisitor<HG, StateWtFn, ArcWtFn, Distances, IncludingAxioms> distanceComputer(

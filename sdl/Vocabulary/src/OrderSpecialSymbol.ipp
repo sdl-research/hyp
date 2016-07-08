@@ -8,7 +8,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-(void) SDL_SPECIAL_SYMBOL_NAME::ID_LINKED;
-(void) SDL_SPECIAL_SYMBOL_NAME::TOKEN;
+dummy = dummy ^ SDL_SPECIAL_SYMBOL_NAME::ID_LINKED.id_;
+(void)SDL_SPECIAL_SYMBOL_NAME::TOKEN;
 #undef SDL_SPECIAL_SYMBOL_NAME
 #undef SDL_SPECIAL_SYMBOL_TEXT

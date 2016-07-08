@@ -52,15 +52,14 @@
 #ifndef GRAEHL_IFDBG_ENABLE
 #define GRAEHL_IFDBG_ENABLE SDL_DEBUG_ENABLE
 #endif
-#include <graehl/shared/ifdbg.hpp>
 #include <graehl/shared/dbg_level.hpp>
-
+#include <graehl/shared/ifdbg.hpp>
+#include <cstdlib>  // atoi
+#include <iostream>
+#include <iostream>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
-#include <cstdlib>  // atoi
-#include <iostream>
 
 
 #define OSTR_DBG std::cerr

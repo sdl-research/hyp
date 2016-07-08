@@ -18,9 +18,9 @@
 #define HASHVALUE_GRAEHL_2015_10_16_HPP
 #pragma once
 
-#include <functional>
 #include <sdl/Util/TypeTraits.hpp>
 #include <boost/functional/hash/hash.hpp>
+#include <functional>
 
 namespace sdl {
 namespace Util {

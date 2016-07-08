@@ -18,14 +18,14 @@
 #pragma once
 
 // TODO: move impl to .cpp?
-#include <iostream>
 #include <sdl/Util/CpuTimes.hpp>
-#include <sdl/Util/LogInfo.hpp>
-#include <sdl/Util/Flag.hpp>
 #include <sdl/Util/Debug.hpp>
+#include <sdl/Util/Flag.hpp>
+#include <sdl/Util/LogInfo.hpp>
+#include <sdl/Util/LogLevel.hpp>
 #include <sdl/Log.hpp>
 #include <boost/noncopyable.hpp>
-#include <sdl/Util/LogLevel.hpp>
+#include <iostream>
 
 namespace sdl {
 namespace Util {
@@ -74,7 +74,7 @@ struct Elapsed {
 
   /** difference. for elapsed from current usage */
   Elapsed operator-(Elapsed const& start) const {
-    return Elapsed(sec-start.sec, wallSec-start.wallSec, peakBytes, peakBytes-start.peakBytes);
+    return Elapsed(sec - start.sec, wallSec - start.wallSec, peakBytes, peakBytes - start.peakBytes);
   }
 
   Elapsed(double sec, double wallSec, double peakBytes = 0, double deltaBytes = 0)

@@ -34,10 +34,10 @@
 #define SDL_UTIL__INTSET_HPP
 #pragma once
 
-#include <vector>
-#include <set>
-#include <cassert>
 #include <sdl/Util/BitSet.hpp>
+#include <cassert>
+#include <set>
+#include <vector>
 
 namespace sdl {
 namespace Util {

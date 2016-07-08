@@ -31,14 +31,9 @@ SDL_ENUM(ProjectType, 2, (Project_Input, Project_Output))
 template <class Arc>
 void project(IMutableHypergraph<Arc>* hg, ProjectType projection) {
   switch (projection) {
-    case kProject_Input:
-      hg->projectInput();
-      return;
-    case kProject_Output:
-      hg->projectOutput();
-      return;
-    default:
-      SDL_ERROR(Hypergraph.Project, "unknown projection type: " << to_string_impl(projection));
+    case kProject_Input: hg->projectInput(); return;
+    case kProject_Output: hg->projectOutput(); return;
+    default: SDL_ERROR(Hypergraph.Project, "unknown projection type: " << to_string_impl(projection));
   }
 }
 

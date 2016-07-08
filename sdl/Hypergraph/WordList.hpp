@@ -17,17 +17,16 @@
 #define HYP__WORDLIST_HPP
 #pragma once
 
-#include <iostream>
-#include <string>
+#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/WeightedStrings.hpp>
+#include <sdl/Util/InvalidInputException.hpp>
+#include <sdl/Util/LineOptions.hpp>
+#include <sdl/Util/Utf8.hpp>
+#include <boost/range/algorithm/transform.hpp>
 #include <graehl/shared/normalize_range.hpp>
 #include <graehl/shared/split_noquote.hpp>
-#include <sdl/Util/Utf8.hpp>
-#include <sdl/Util/InvalidInputException.hpp>
-#include <sdl/Hypergraph/WeightedStrings.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
-
-#include <boost/range/algorithm/transform.hpp>
-#include <sdl/Util/LineOptions.hpp>
+#include <iostream>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {
@@ -112,10 +111,12 @@ void readWordList(std::istream& in, WeightedStrings<W>& ws, WordListOptions cons
                             << c << " but no word (looking for whitespace separated tokens on line " << i << ")");
         }
         ws.openString();
-        graehl::split_noquote(tok, [&ws](std::string const& s) {
-          ws.addNonEmptyChar(s);
-          return true;
-        }, opt.wordsep);
+        graehl::split_noquote(tok,
+                              [&ws](std::string const& s) {
+                                ws.addNonEmptyChar(s);
+                                return true;
+                              },
+                              opt.wordsep);
       }
       double l = (double)ws.addedLength();
       if (l > opt.maxLength) l = opt.maxLength;

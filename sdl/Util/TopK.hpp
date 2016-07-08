@@ -18,9 +18,9 @@
 #define TOPK_JG_2015_06_04_HPP
 #pragma once
 
+#include <sdl/Util/PrintRange.hpp>
 #include <algorithm>
 #include <functional>
-#include <sdl/Util/PrintRange.hpp>
 
 namespace sdl {
 namespace Util {
@@ -30,7 +30,7 @@ void topkSorted(Vec& vec, std::size_t k, Less less = Less()) {
   std::size_t n = vec.size();
   typedef typename Vec::value_type V;
   V *begin = vec.data(), *end = begin + n, *mid = begin + k;
-  if (mid <= end) {
+  if (mid >= end) {
     std::sort(begin, end);
   } else {
     std::partial_sort(begin, mid, end);

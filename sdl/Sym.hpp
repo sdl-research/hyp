@@ -21,17 +21,17 @@
 #define SDL_SYMBOLIDENTIFIER_H_
 #pragma once
 
-#include <vector>
-#include <cstddef>
-#include <cassert>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <sdl/Exception.hpp>
 #include <sdl/IntTypes.hpp>
-#include <boost/range/detail/safe_bool.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/range/detail/safe_bool.hpp>
 #include <boost/serialization/is_bitwise_serializable.hpp>
 #include <boost/serialization/level.hpp>
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Exception.hpp>
+#include <cassert>
+#include <cstddef>
+#include <vector>
 
 namespace sdl {
 
@@ -39,7 +39,6 @@ VERBOSE_EXCEPTION_DECLARE(SymOutOfRangeException)
 VERBOSE_EXCEPTION_DECLARE(InvalidSym)
 VERBOSE_EXCEPTION_DECLARE(InvalidSymType)
 
-typedef unsigned SymInt;
 typedef SymInt BlockId;
 
 struct Sym;
@@ -110,7 +109,7 @@ enum SymbolType {
   // TODO@SK: CM-275 changing persistent/nonpersistent changes whether that bit is 0 or 1
 
   kNoSymbolType = kNoSymbol,
-  kAllSymbols = kNoSymbol-1,
+  kAllSymbols = kNoSymbol - 1,
 };
 
 /// we don't use any other types at the moment - why not simplify how the id
@@ -144,20 +143,13 @@ struct Sym {
 
   static inline char const* getTypeName(SymbolType type) {
     switch (type) {
-      case kSpecialTerminal:
-        return "Special Terminal";
-      case kVariable:
-        return "Variable";
-      case kPersistentNonterminal:
-        return "Persistent Non-terminal";
-      case kNonterminal:
-        return "Non-terminal";
-      case kPersistentTerminal:
-        return "Persistent Terminal";
-      case kTerminal:
-        return "Terminal";
-      case kAllSymbols:
-        return "All types";
+      case kSpecialTerminal: return "Special Terminal";
+      case kVariable: return "Variable";
+      case kPersistentNonterminal: return "Persistent Non-terminal";
+      case kNonterminal: return "Non-terminal";
+      case kPersistentTerminal: return "Persistent Terminal";
+      case kTerminal: return "Terminal";
+      case kAllSymbols: return "All types";
       default:
         SDL_THROW_LOG(Sym, InvalidSymType, "invalid symbol type " << type);
         return "Invalid symbol type!";
@@ -166,20 +158,13 @@ struct Sym {
 
   static inline char const* getTypeNameShort(SymbolType type) {
     switch (type) {
-      case kSpecialTerminal:
-        return "Special:";
-      case kVariable:
-        return "Variable:";
-      case kPersistentNonterminal:
-        return "Persistent-NT:";
-      case kNonterminal:
-        return "NT:";
-      case kPersistentTerminal:
-        return "Persistent:";
-      case kTerminal:
-        return ":";
-      case kAllSymbols:
-        return "All:";
+      case kSpecialTerminal: return "Special:";
+      case kVariable: return "Variable:";
+      case kPersistentNonterminal: return "Persistent-NT:";
+      case kNonterminal: return "NT:";
+      case kPersistentTerminal: return "Persistent:";
+      case kTerminal: return ":";
+      case kAllSymbols: return "All:";
       default:
         SDL_THROW_LOG(Sym, InvalidSymType, "invalid symbol type " << type);
         return "Invalid symbol type!";
@@ -209,15 +194,13 @@ struct Sym {
 
 #include <graehl/shared/warning_push.h>
   GCC_DIAG_IGNORE(uninitialized);
-#if HAVE_GCC_4_8
   GCC_DIAG_IGNORE(maybe-uninitialized);
-/* because of this (RuleBinarySerializer) gem: (doesn't understand that
- * code.decode, a virtual fn, will set SymInt x:
+  /* because of this (RuleBinarySerializer) gem: (doesn't understand that
+   * code.decode, a virtual fn, will set SymInt x:
 
-   Sym.hpp:207:17: warning: ‘x’ may be used uninitialized in this function
-     [-Wmaybe-uninitialized] id_ = index | type;
- */
-#endif
+     Sym.hpp:207:17: warning: ‘x’ may be used uninitialized in this function
+       [-Wmaybe-uninitialized] id_ = index | type;
+   */
   void set(SymInt index, SymbolType type) {
     assert(!isPersistentType(type));
     assert(index <= kSmallSizeMask || index <= kLargeSizeMask && (SymInt)type == kLargeSizeMask);
@@ -531,8 +514,6 @@ struct hash<sdl::Sym> {
 BOOST_CLASS_IMPLEMENTATION(sdl::Sym, object_serializable)
 // BOOST_CLASS_IMPLEMENTATION(sdl::Sym, primitive_type)
 BOOST_IS_BITWISE_SERIALIZABLE(sdl::Sym)
-
-
 
 
 #endif

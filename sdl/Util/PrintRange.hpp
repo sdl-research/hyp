@@ -23,16 +23,15 @@
 #define SDL_PRINTRANGE_HPP
 #pragma once
 
-#include <iostream>
-#include <map>
-
+#include <sdl/Util/Sep.hpp>
+#include <sdl/Util/TypeTraits.hpp>
+#include <sdl/Util/VoidIf.hpp>
+#include <sdl/Printer.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
-#include <sdl/Util/TypeTraits.hpp>
-#include <sdl/Util/Sep.hpp>
-#include <sdl/Printer.hpp>
-#include <sdl/Util/VoidIf.hpp>
 #include <algorithm>
+#include <iostream>
+#include <map>
 
 
 namespace sdl {
@@ -287,6 +286,28 @@ struct PrintRange : RangeSep {
   }
 };
 
+template <class Iter, class X>
+struct PrintableRangeState : RangeSep {
+  Iter begin;
+  Iter end;
+  X state;
+  PrintableRangeState(Iter begin, Iter end, X const& state, bool printIndex = false)
+      : begin(begin), end(end), state(state) {
+    index = printIndex;
+  }
+  PrintableRangeState(Iter begin, Iter end, X const& state, RangeSep const& sep)
+      : RangeSep(sep), begin(begin), end(end), state(state) {}
+  template <class Out>
+  void printImpl(Out& o) const {
+    printRangeState(o, state, begin, end, *this);
+  }
+  template <class Ch, class Tr>
+  friend std::basic_ostream<Ch, Tr>& operator<<(std::basic_ostream<Ch, Tr>& o, PrintableRangeState const& self) {
+    self.printImpl(o);
+    return o;
+  }
+};
+
 template <class Range>
 PrintRange<typename Range::const_iterator> rangePrintable(Range const& range, bool printIndex = false) {
   return PrintRange<typename Range::const_iterator>(range.begin(), range.end(), printIndex);
@@ -301,6 +322,11 @@ PrintRange<typename Range::const_iterator> multilinePrintable(Range const& range
 template <class Iter>
 PrintRange<Iter> arrayPrintable(Iter begin, unsigned n, bool printIndex = false) {
   return PrintRange<Iter>(begin, begin + n, printIndex);
+}
+
+template <class Iter, class X>
+PrintableRangeState<Iter, X const&> arrayPrintableState(Iter begin, unsigned n, X const& x) {
+  return PrintableRangeState<Iter, X const&>(begin, begin + n, x);
 }
 
 template <class Iter>
@@ -319,15 +345,15 @@ PrintRange<Val const*> printPrefix(Val const* begin, std::size_t size, std::size
   return PrintRange<Val const*>(begin, begin + std::min(size, maxPrefixSize));
 }
 
-std::string const elipsis("...");
+static std::string const kElipsis("...");
 unsigned const kColumnsDefault = 132;
 
 struct Elide : std::string {
   Elide(std::string const& in, std::size_t columns = kColumnsDefault) : std::string(in, 0, columns) {
-    std::size_t const lenElipsis = elipsis.size();
+    std::size_t const lenKElipsis = kElipsis.size();
     std::size_t const len = in.size();
-    if (len >= columns && len > lenElipsis)
-      std::copy(elipsis.begin(), elipsis.end(), begin() + columns - lenElipsis);
+    if (len >= columns && len > lenKElipsis)
+      std::copy(kElipsis.begin(), kElipsis.end(), begin() + columns - lenKElipsis);
   }
 };
 

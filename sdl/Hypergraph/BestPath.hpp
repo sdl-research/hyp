@@ -54,53 +54,52 @@
    share suffixes.
 */
 
-#include <stack>
-#include <sdl/Hypergraph/SortStates.hpp>
-#include <sdl/Hypergraph/PrintOptions.hpp>
 #include <sdl/Hypergraph/Derivation.hpp>
 #include <sdl/Hypergraph/GetString.hpp>
 #include <sdl/Hypergraph/HypergraphTraits.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
+#include <sdl/Hypergraph/PrintOptions.hpp>
 #include <sdl/Hypergraph/SamplePath.hpp>  // placeholder
+#include <sdl/Hypergraph/SortStates.hpp>
 #include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Types.hpp>
-
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Output.hpp>
 #include <sdl/Util/Performance.hpp>
-
-#include <graehl/shared/tails_up_hypergraph.hpp>  // djikstra best-first bottom-up
+#include <sdl/Types.hpp>
 #include <graehl/shared/lazy_forest_kbest.hpp>  // binary forest top-down lazy nbest
+#include <graehl/shared/tails_up_hypergraph.hpp>  // djikstra best-first bottom-up
+#include <stack>
 // TODO: even better: don't generate lazy_forest nodes for parts of Hg that are high-cost
+#include <sdl/Config/Init.hpp>
+#include <sdl/Hypergraph/AcyclicBest.hpp>
+#include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Hypergraph/Visit.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Util/Delete.hpp>
+#include <sdl/Util/UninitializedArray.hpp>
+#include <sdl/Pool.hpp>
 #include <graehl/shared/os.hpp>
 #include <graehl/shared/pool_traits.hpp>
 #include <graehl/shared/teestream.hpp>
-#include <sdl/Pool.hpp>
-#include <sdl/Hypergraph/AcyclicBest.hpp>
-#include <sdl/Config/Init.hpp>
-#include <sdl/Hypergraph/Visit.hpp>
-#include <sdl/Util/UninitializedArray.hpp>
-#include <sdl/Util/Delete.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Hypergraph/Types.hpp>
 
 namespace sdl {
 namespace Hypergraph {
 
 /// instead of nbest, nbest plus up to num-ties tied for nth place
 struct NbestPlusTies {
-  NbestId nbest, numTies;
-  NbestPlusTies(NbestId nbest = 1) : nbest(nbest), numTies() {}
+  NbestId nbest = 1, numTies = 0;
+  NbestPlusTies() = default;
+  NbestPlusTies(NbestId nbest) : nbest(nbest) {}
   operator NbestId() const { return nbest; }
   template <class Config>
   void configure(Config& config) {
-    config("nbest", &nbest)('n')
-        .defaulted()("limit hypergraph paths to this many, keeping the lowest totalcost");
+    config("num-best", &nbest).alias();
+    config("nbest", &nbest)('n').defaulted()(
+        "limit hypergraph paths to this many, keeping the lowest totalcost");
     config("num-ties", &numTies)
         .defaulted()(
             "allow this many extra same-score derivations with cost tied for the final place (if num-best > "
             "1)");
-    config("num-best", &nbest).alias();
   }
   NbestId maxnbest() { return nbest > 1 ? nbest + numTies : 1; }
   bool multiple() const { return nbest > 1; }
@@ -245,9 +244,7 @@ struct PathOutOptions : DerivationStringOptions {
     c("outyield", &outyield)('Y').init(false)(
         "print output yield string (one line) - if both inyield and outyield, input comes before output");
     c("outderiv", &outderiv)('d').init(false)("print output derivation tree (on its own line)");
-    c("empty-yield", &print_empty)('E')
-        .init(true)("if there's no path, print a weight-0 empty-string yield")
-        .init(print_empty);
+    c("empty-yield", &print_empty)('E').init(true)("if there's no path, print a weight-0 empty-string yield").init(print_empty);
     c("keep-original-stateids", &keepOriginalStateIds)
         .init(false)("true => keep original ids in --outhypergraph (may also affect --outderiv)");
     c("outhypergraph", &outHypergraph)
@@ -332,19 +329,19 @@ struct PathOutOptions : DerivationStringOptions {
 
 struct BestPathOptions : graehl::BestTreeOptions {
   typedef graehl::BestTreeOptions Base;
-  bool time1best;
-  bool topo;
-  bool dupInput;
-  bool dupOutput;
-  bool acyclic;
-  std::size_t acyclicMaxBackEdges;
+  std::size_t acyclicMaxBackEdges = 0;
+  unsigned maxPerString = 0;
+  bool time1best = false;
+  bool topo = true;
+  bool dupInput = false;
+  bool dupOutput = true;
+  bool acyclic = true;
+  bool bestfirst = true;
+  bool random = false;
   LabelType dupLabels() const {
     int f = (dupInput ? kInput : kNo_Label) | (dupOutput ? kOutput : kNo_Label);
     return (LabelType)f;
   }
-  unsigned maxPerString;
-  bool bestfirst;
-  bool random;
   static inline std::string usage() {
     return
         // TODO: implement bellman-ford
@@ -360,14 +357,11 @@ struct BestPathOptions : graehl::BestTreeOptions {
   void defaults() {
     Base::defaults();
     Config::inits(this);
-    // topo = true;
     random = false;
     throw_on_rereach_limit = false;
     validate();
   }
   static char const* caption() { return "Best-Path Computation"; }
-
-  bool single;
 
   /** YAML or command line config */
   template <class Conf>
@@ -376,27 +370,26 @@ struct BestPathOptions : graehl::BestTreeOptions {
     c("compute lowest cost derivation tree in hypergraph");
     c.is("Best path");
     c("best-first", &bestfirst)
-        .init(true)(
+        .defaulted()(
             "Knuth77 bottom-up priority queue - good for viterbi semiring only. may not terminate if "
             "negative cost cycles, controllable by rereach, throw-on-rereach, convergence. --convergence "
             "will avoid requeuing small improvements (less than cost/logprob delta) (this means the cost "
             "returned may be pessimistic, but the better subderivation is indeed recorded)");
-    c("nbest-per-string", &maxPerString)
-        .init(0)(
-            "skip duplicate (same in/out labels), ensuring a full n unique label pairs are listed if they "
-            "exist. 0 = unlimited");
-    c("per-string-input", &dupInput).init(true)("consider input labels for nbest-per-string");
-    c("per-string-output", &dupOutput).init(false)("consider output labels for nbest-per-string");
+    c("nbest-per-string", &maxPerString)(
+        "skip duplicate (same in/out labels), ensuring a full n unique label pairs are listed if they "
+        "exist. 0 = unlimited");
+    c("per-string-input", &dupInput).defaulted()("consider input labels for nbest-per-string");
+    c("per-string-output", &dupOutput).defaulted()("consider output labels for nbest-per-string");
     c("time-1best", &time1best)
-        .init(false)("report (sdl.Performance.Hypergraph.BestPath) time for computing 1best");
+        .defaulted()("report (sdl.Performance.Hypergraph.BestPath) time for computing 1best");
     c("acyclic", &acyclic)
-        .init(true)(
+        .defaulted()(
             "attempt acyclic viterbi best-path even if input is not marked as acyclic, falling back to "
             "best-first bottom-up if it turns out to have cycles - enabling this is slower if you know your "
             "hypergraph has cycles. See INFO messages sdl.Hypergraph.BestPath.acyclic to see whether this "
             "is happening.");
     c("acyclic-max-back-edges", &acyclicMaxBackEdges)
-        .init(0)(
+        .defaulted()(
             "accept acyclic best-path result if there are this many or fewer cycle-causing back edges - the "
             "(n-)best paths are potentially wrong if this is > 0-see INFO messages "
             "sdl.Hypergraph.BestPath.acyclic for reports that this might be happening.");
@@ -511,13 +504,20 @@ struct BestPath : TransformBase<Transform::Inplace> {
     typedef D* Dp;
     // for nbest: (binarized) subderivations
 
-    struct NbestKeyAccum {
-      /** this is a stateful function object used by BinaryYield for DupFilter.
-          it's called with the lexical states of a binary derivation.
+    /** this is a stateful function object used by BinaryYield for DupFilter.
+        it's called with the lexical states of a binary derivation.
 
-          \return vector of Sym for input and/or output (depending on
-          labelType, separated by -1)
-      */
+        \return vector of Sym for input and/or output (depending on
+        labelType, separated by -1)
+
+        TODO: using this is quadratic since lazy_forest_kbest checks for
+        duplicates for subderivations too (which is kinder overall - prevents
+        exponential slowdown from exponentially ambiguous single-string
+        grammar). FIX: canonicalize substrings / cache partial hashes. but in
+        most scenarios we don't even output nbests and usually we don't remove
+        duplicates, so maybe not worth effort.
+    */
+    struct NbestKeyAccum {
       HG const* phg;
       LabelType labelType;
       NbestKeyAccum() {}
@@ -543,8 +543,6 @@ struct BestPath : TransformBase<Transform::Inplace> {
         if (sym.isLexical()) str.push_back(sym);
       }
       void operator()(StateId stateId) {
-        // TODO: this could be (with much special case code) be optimized to look at state ids only for
-        // input-only hgs (memorize the epsilon stateid first), saving the hg calls
         if (labelType & kInput) appendLexical(in, phg->inputLabel(stateId));
         if (labelType & kOutput) appendLexical(out, phg->outputLabel(stateId));
       }
@@ -671,6 +669,21 @@ struct BestPath : TransformBase<Transform::Inplace> {
         }
       }
 
+      template <class VisitArc>
+      void visitArcs(VisitArc const& v) {
+        if (this == &none) return;
+        return visitArcsRec(v);
+      }
+
+      template <class VisitArc>
+      void visitArcsRec(VisitArc const& v) {
+        if (children[0]) {
+          children[0]->visitArcsRec(v);
+          if (children[1]) children[1]->visitArcsRec(v);
+        }
+        if (a) v(a);
+      }
+
       DerivationPtr derivation() const {
         if (this == &none) return 0;
         if (leaf()) return Derivation::kAxiom;
@@ -772,14 +785,10 @@ struct BestPath : TransformBase<Transform::Inplace> {
     /// this becomes even more difficult in case the 1-best was only approximate due to rereach/convergence
     /// limits and negative cost edges.
 
-    /** stateful function object used by DupFilter for nbest-duplicate-skipping. .*/
+    /** stateful function object used by DupFilter for nbest-duplicate-skipping. */
     struct BinaryYield {
-      NbestKeyAccum accum;  // note: not thread-safe. could make local and return-by-value instead of ref. in
-      // the context of lazy-nbest, this doesn't matter. i.e. this state is local to the
-      // forest node
+      NbestKeyAccum accum;
       BinaryYield() {}
-      //      BinaryYield(BinaryYield const& o) : accum(o.accum) {}
-      //      BinaryYield(NbestKeyAccum const& o) : accum(o) {}
       BinaryYield(HG const& hg, LabelType labelType) : accum(hg, labelType) {}
       typedef Syms result_type;
       result_type const& operator()(Dp dp) {
@@ -817,7 +826,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
        add a limit for # of filtered derivations and terminate early after it's
        reached
     */
-    DupFilter filter() { return DupFilter(opt.maxPerString, BinaryYield(hg, opt.dupLabels())); }
+    DupFilter filter() const { return DupFilter(opt.maxPerString, BinaryYield(hg, opt.dupLabels())); }
     typedef graehl::permissive_kbest_filter NoDuplicateFilter;
     static inline NoDuplicateFilter noFilter() { return NoDuplicateFilter(); }
 
@@ -1026,7 +1035,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
           assert(ld);
           // TODO: simplify code by recursion? going reverse order? right now we're going left->right and
           // modifying previous?
-          for (unsigned i = 1; i < N-1;
+          for (unsigned i = 1; i < N - 1;
                ++i) {  // introduce new internal nodes with appropriate inside costs
             StateId prev = tails[i - 1], r = tails[i];
             w = path_traits::retract(w, mu[prev]);  // exclude the part from previous outside left child
@@ -1043,7 +1052,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
           }
           // TODO: test on N>2 tails (some CFG)
           // update vertex forest
-          StateId r = tails[N-1];
+          StateId r = tails[N - 1];
           d->children[0] = ld;
           d->children[1] = dv[r];
           fh.add(d, lf, &fv[r]);
@@ -1058,7 +1067,7 @@ struct BestPath : TransformBase<Transform::Inplace> {
 
     template <class DerivVisitor>
     struct BinaryVisitor {
-      DerivVisitor v;
+      DerivVisitor const& v;
       HG const& hg;
       BinaryVisitor(DerivVisitor const& v, HG const& hg) : v(v), hg(hg) {}
       bool operator()(Dp b, NbestId n) const {
@@ -1246,12 +1255,18 @@ struct BestPath : TransformBase<Transform::Inplace> {
     template <class DerivVisitor>
     DerivationPtr visit_nbest(NbestPlusTies nbest, DerivVisitor const& visitor,
                               bool throwEmptySetException = false, NbestId* nVisited = 0) {
+      return visitNbestWithFilter(*this, nbest, visitor, throwEmptySetException, nVisited);
+    }
+
+    template <class FilterGen, class DerivVisitor>
+    DerivationPtr visitNbestWithFilter(FilterGen const& filterGen, NbestPlusTies nbest,
+                                       DerivVisitor const& visitor, bool throwEmpty = false,
+                                       NbestId* nVisited = 0) {
       NbestId maxn = nbest.maxnbest();
       if (opt.noFilterNeeded(nbest.nbest))
-        return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), noFilter(),
-                                 throwEmptySetException, nVisited);
+        return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), noFilter(), throwEmpty, nVisited);
       else
-        return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), filter(), throwEmptySetException,
+        return visit_nbestFilter(maxn, visitPlusTies(visitor, nbest.nbest), filterGen.filter(), throwEmpty,
                                  nVisited);
     }
 

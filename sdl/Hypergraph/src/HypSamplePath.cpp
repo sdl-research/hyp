@@ -12,8 +12,8 @@
   "Generate sample path from hypergraph. Currently, this binary only supports uniform sampling (but C++ " \
   "library allows more options)."
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/SamplePath.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -36,6 +36,3 @@ struct HypSamplePath : TransformMain<HypSamplePath> {
 }
 
 HYPERGRAPH_NAMED_MAIN(SamplePath)
-
-
-

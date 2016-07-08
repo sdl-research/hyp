@@ -17,11 +17,10 @@
 #define STRING_JG20121212_HPP
 #pragma once
 
-#include <fstream>
-#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <sdl/Util/LogHelper.hpp>
+#include <algorithm>
+#include <fstream>
 
 namespace sdl {
 namespace Util {

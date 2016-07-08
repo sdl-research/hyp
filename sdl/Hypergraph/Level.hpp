@@ -34,14 +34,14 @@
 #define LEVEL_JG201331_HPP
 #pragma once
 
-#include <algorithm>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/SortStates.hpp>
 #include <sdl/Hypergraph/Types.hpp>
-#include <sdl/Util/Unordered.hpp>
 #include <sdl/Util/Add.hpp>
 #include <sdl/Util/MinMax.hpp>
 #include <sdl/Util/ShrinkVector.hpp>
-#include <sdl/Hypergraph/SortStates.hpp>
-#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <algorithm>
 
 namespace sdl {
 namespace Hypergraph {

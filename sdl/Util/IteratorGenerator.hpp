@@ -23,11 +23,11 @@
 */
 
 #include <sdl/Util/Generator.hpp>
-#include <iterator>
-#include <utility>
+#include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
-#include <boost/iterator/transform_iterator.hpp>
+#include <iterator>
+#include <utility>
 
 namespace sdl {
 namespace Util {
@@ -44,8 +44,7 @@ struct IteratorGenerator : GeneratorBase<IteratorGenerator<Iterator, Result>, Re
   void clear() { iBegin = iEnd; }
   IteratorGenerator() : iBegin(), iEnd() {}
   template <class Range>
-  IteratorGenerator(Range const& range)
-      : iBegin(boost::begin(range)), iEnd(boost::end(range)) {}
+  IteratorGenerator(Range const& range) : iBegin(boost::begin(range)), iEnd(boost::end(range)) {}
   IteratorGenerator(IteratorGenerator const& o) : iBegin(o.iBegin), iEnd(o.iEnd) {}
   IteratorGenerator(iterator iBegin, iterator iEnd) : iBegin(iBegin), iEnd(iEnd) {}
   IteratorGenerator(std::pair<iterator, iterator> const& pairBeginEnd)

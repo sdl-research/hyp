@@ -32,6 +32,3 @@ struct HypBest : TransformMain<HypBest> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Best)
-
-
-

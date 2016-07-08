@@ -25,25 +25,22 @@
    main() (static globals). singleton lazy-init pattern not worth the overhead.
 */
 
-#include <sdl/LexicalCast.hpp>
-
-#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/Exception.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Hypergraph/WeightBase.hpp>
-
 #include <sdl/Util/Constants.hpp>
-#include <sdl/Util/Math.hpp>
-#include <sdl/Util/LogMath.hpp>
-
-#include <boost/math/special_functions/log1p.hpp>
-#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/Hash.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/LogMath.hpp>
+#include <sdl/Util/Math.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <boost/math/special_functions/log1p.hpp>
 
 #if HAVE_OPENFST
 // OpenFst weight compatability - needed for ToReplaceFst
 #define DEFINE_OPENFST_COMPAT_FUNCTIONS(name)            \
   static std::string const& Type() {                     \
-    static const std::string r(#name);                   \
+    static std::string const r(#name);                   \
     return r;                                            \
   }                                                      \
   static const Self One() { return Self::one(); }        \
@@ -64,12 +61,12 @@
   }
 
 #define SDL_DEFINE_FLOATWT_CMPS(c) \
-  SDL_DEFINE_FLOATWT_CMP(c, == )   \
-  SDL_DEFINE_FLOATWT_CMP(c, >= )   \
-  SDL_DEFINE_FLOATWT_CMP(c, <= )   \
-  SDL_DEFINE_FLOATWT_CMP(c, != )   \
-  SDL_DEFINE_FLOATWT_CMP(c, < )    \
-  SDL_DEFINE_FLOATWT_CMP(c, > )
+  SDL_DEFINE_FLOATWT_CMP(c, ==)    \
+  SDL_DEFINE_FLOATWT_CMP(c, >=)    \
+  SDL_DEFINE_FLOATWT_CMP(c, <=)    \
+  SDL_DEFINE_FLOATWT_CMP(c, !=)    \
+  SDL_DEFINE_FLOATWT_CMP(c, <)     \
+  SDL_DEFINE_FLOATWT_CMP(c, >)
 
 // TODO: #if HAVE_OPENFST and use constants appropriate for particular semiring - this is just to compile
 // HgFsmDraw
@@ -275,7 +272,7 @@ inline ViterbiWeightTpl<T> divide(ViterbiWeightTpl<T> const& w1, ViterbiWeightTp
   if (w1 == ViterbiWeightTpl<T>::zero() || w2 == ViterbiWeightTpl<T>::zero())
     // Technically can't divide by 0. but practically ok.
     return ViterbiWeightTpl<T>::zero();
-  return ViterbiWeightTpl<T>(w1.value_-w2.value_);
+  return ViterbiWeightTpl<T>(w1.value_ - w2.value_);
 }
 
 template <class T>
@@ -359,7 +356,7 @@ inline LogWeightTpl<T> divide(LogWeightTpl<T> const& w1, LogWeightTpl<T> const& 
     // Technically can't divide by zero. but practically ok.
     return LogWeightTpl<T>::zero();
   }
-  return LogWeightTpl<T>(w1.value_-w2.value_);
+  return LogWeightTpl<T>(w1.value_ - w2.value_);
 }
 
 template <class T>

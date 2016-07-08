@@ -15,11 +15,11 @@
 
 #ifndef HYP__HYPERGRAPH_HGTOLATTICE
 #define HYP__HYPERGRAPH_HGTOLATTICE
-#include <deque>
-#include <boost/unordered_map.hpp>
-#include <sdl/Util/LogHelper.hpp>
 #include <sdl/Hypergraph/MutableHypergraph.hpp>
 #include <sdl/Hypergraph/SortStates.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <boost/unordered_map.hpp>
+#include <deque>
 #pragma once
 
 
@@ -47,7 +47,7 @@ inline void printHgAsMosesLattice(IHypergraph<Arc> const& hg) {
     std::cout << '(';
     for (ArcId aid : hg_sort->outArcIds(s)) {
       Arc* arc = hg_sort->outArc(s, aid);
-      int step = (int)arc->head_-(int)s;
+      int step = (int)arc->head_ - (int)s;
       if (step < 0) {
         SDL_THROW_LOG(Hypergraph.PrintHgAsLattice, std::runtime_error,
                       "Illegal lattice input that cant be ordered");

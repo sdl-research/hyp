@@ -11,41 +11,33 @@
 #define SDL_TRANSFORM_MAIN_LOG_WEIGHT 1
 #define SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT 1
 
+#ifndef NDEBUG
+#include <sdl/Hypergraph/HypergraphWriter.hpp>
+#endif
+#include <sdl/Hypergraph/AllPairsShortestDistance.hpp>
+#include <sdl/Hypergraph/Arc.hpp>
+#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sdl/Hypergraph/ExpectationWeight.hpp>
+#include <sdl/Hypergraph/FeatureWeight.hpp>
+#include <sdl/Hypergraph/HypergraphMain.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Hypergraph/InsideAlgorithm.hpp>
+#include <sdl/Hypergraph/MapHypergraph.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/NgramWeightMapper.hpp>
+#include <sdl/Hypergraph/SortStates.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/Matrix.hpp>
+#include <sdl/Util/ProgramOptions.hpp>
+#include <sdl/IVocabulary-fwd.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-
-#include <sdl/Hypergraph/FeatureWeight.hpp>
-#include <sdl/Hypergraph/Arc.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/InsideAlgorithm.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
-
-#ifndef NDEBUG
-#include <sdl/Hypergraph/HypergraphWriter.hpp>
-#endif
-
-#include <sdl/IVocabulary-fwd.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-
-
-#include <sdl/Util/ProgramOptions.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Hypergraph/NgramWeightMapper.hpp>
-#include <sdl/Hypergraph/MapHypergraph.hpp>
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/Matrix.hpp>
-#include <sdl/Hypergraph/SortStates.hpp>
-#include <sdl/Hypergraph/AllPairsShortestDistance.hpp>
-
-#include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Hypergraph/ExpectationWeight.hpp>
-#include <sdl/Hypergraph/HypergraphMain.hpp>
 
 
 namespace sdl {
@@ -206,6 +198,3 @@ struct HypInside {
 }
 
 HYPERGRAPH_NAMED_MAIN(Inside)
-
-
-

@@ -17,6 +17,8 @@
 #define ADJACENCY_LW20111227_HPP
 #pragma once
 
+#include <sdl/Hypergraph/HypergraphBase.hpp>
+
 namespace sdl {
 namespace Hypergraph {
 

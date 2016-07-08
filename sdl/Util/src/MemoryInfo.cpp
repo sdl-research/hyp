@@ -8,23 +8,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <sdl/Exception.hpp>
+#include <sdl/Util/Debug.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/MemoryInfo.hpp>
 #include <sdl/Util/Sprintf.hpp>
-#include <iostream>
+#include <sdl/Util/ThreadSpecific.hpp>
+#include <sdl/Exception.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <sdl/Types.hpp>
+#include <boost/any.hpp>
 #include <cstddef>  // size_t
-#include <stdexcept>
-#include <map>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <iostream>
+#include <map>
 #include <sstream>
 #include <stdexcept>
-#include <sdl/LexicalCast.hpp>
-#include <boost/any.hpp>
-#include <sdl/Types.hpp>
-#include <sdl/Util/MemoryInfo.hpp>
-#include <sdl/Util/Debug.hpp>
-#include <sdl/Util/ThreadSpecific.hpp>
-#include <sdl/Util/LogHelper.hpp>
+#include <stdexcept>
 
 
 #ifdef _WIN32
@@ -43,8 +43,8 @@
 #endif
 
 #if defined(__MACH__) || defined(__FreeBSD__) || defined(__APPLE__)
-#include <sys/types.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
 #endif
 
 namespace sdl {
@@ -85,18 +85,12 @@ double physicalMemoryGB() {
   return physicalMemoryBytes() * kOneOverGB;
 }
 
-MemoryInfo::MemoryInfo(MemoryInfo const&) {
-  throw UnimplementedException("no copy - use MemoryInfo::instance().sizeInMB())");
-}
-
 /**
    TODO Make this work on non-unix platforms too
 */
 MemoryInfo::MemoryInfo() {
   C99snprintf(memoryFilename, buflen - 1, "/proc/%d/stat", getpid());
 }
-
-MemoryInfo MemoryInfo::instance_;
 
 #ifdef _WIN32
 std::size_t MemoryInfo::size() {
@@ -118,7 +112,7 @@ std::size_t MemoryInfo::size() {
     SDL_THROW_LOG(Util.MemoryInfo, FileException, "couldn't open process stat file '"
                                                       << memoryFilename << "' for memory usage");
   std::getline(memoryFileStream, line);
-  const std::string val0 = getColumn(line, 22);  // virtual memory size column
+  std::string const val0 = getColumn(line, 22);  // virtual memory size column
   if (val0.empty()) {  // TODO@MD: Fix for non-linux systems
     return 0;
   }

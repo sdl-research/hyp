@@ -12,12 +12,11 @@
 #define SDL_OPTIMIZATION_ARC_HPP
 #pragma once
 
+#include <sdl/Hypergraph/Arc.hpp>
+#include <sdl/Hypergraph/FeatureWeightTpl.hpp>
+#include <sdl/Hypergraph/Types.hpp>
 #include <map>
 #include <lbfgs.h>
-
-#include <sdl/Hypergraph/FeatureWeightTpl.hpp>
-#include <sdl/Hypergraph/Arc.hpp>
-#include <sdl/Hypergraph/Types.hpp>
 
 namespace sdl {
 namespace Optimization {
@@ -28,7 +27,7 @@ namespace Optimization {
 // online optimization instead of L-BFGS.
 typedef lbfgsfloatval_t FloatT;
 
-typedef Hypergraph::FeatureWeightTpl<FloatT, std::map<Hypergraph::FeatureId, FloatT>> Weight;
+typedef Hypergraph::FeatureWeightTpl<FloatT> Weight;
 
 typedef Hypergraph::ArcTpl<Weight> Arc;
 

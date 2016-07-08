@@ -16,15 +16,14 @@
 #define SDL_CONFIGURE__YAMLCONFIGPROCESSOR_HPP
 #pragma once
 
-#include <utility>
-#include <sstream>
-#include <map>
-#include <boost/algorithm/string.hpp>
 #include <sdl/Config/Config.hpp>
-#include <sdl/Path.hpp>
-
 #include <sdl/Util/PrintRange.hpp>
 #include <sdl/Util/StringBuilder.hpp>
+#include <sdl/Path.hpp>
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <sstream>
+#include <utility>
 
 class ProcessYAMLAccess;  // see TestProcessYAML
 
@@ -37,7 +36,8 @@ namespace Config {
    to a single config node.
  */
 struct YAMLConfigProcessor {
-  // TODO: memoize loadConfig calls for many-regextokenizers-in-one-config
+  /// memoized loadConfig - typical case: config file w/ many instances of same basis: x
+  ConfigNode loadConfigOnce(Path const& path, OptPath const& forPath = OptPath()) const;
 
   /**
       Constructor
@@ -51,7 +51,7 @@ struct YAMLConfigProcessor {
      /docs/xmt-configure-with-yaml-userdoc.md for a full description of the
      processing.
   */
-  ConfigNode process(ConfigNode const& in, boost::filesystem::path const& fsPrefix);
+  ConfigNode process(ConfigNode const& in, Path fsPrefix);
 
   /**
       Set file path, to be used for logging.
@@ -59,7 +59,7 @@ struct YAMLConfigProcessor {
 
       \param filePath, Path to the file being processed.
    */
-  void setFilePath(boost::filesystem::path const& filePath) { filePath_ = filePath; }
+  void setFilePath(Path const& filePath) { filePath_ = filePath; }
 
   /**
       Returns the path (including file-name) as a string for reporting errors.
@@ -100,7 +100,7 @@ struct YAMLConfigProcessor {
   /**
       Resolves paths for all nodes that have a key ending in '-path' substring.
    */
-  ConfigNode resolvePaths(ConfigNode const&, boost::filesystem::path const&) const;
+  ConfigNode resolvePaths(ConfigNode const&, Path const&) const;
   /**
       Merges two nodes, Part of the basis expansion.
       Overriding the values for duplicate keys in the first node with values from the second node.
@@ -116,7 +116,7 @@ struct YAMLConfigProcessor {
   typedef std::string InstanceName;
   typedef std::string Category;
   typedef std::pair<Category, ConfigNode> Instance;
-  typedef std::map<InstanceName, Instance> Instances;
+  typedef unordered_map<InstanceName, Instance> Instances;
 
  protected:
   /**
@@ -141,8 +141,10 @@ struct YAMLConfigProcessor {
       Maps are traversed and one of the above two operations are perfromed at each leaf node.
      *
    */
-  ConfigNode expandBasis(ConfigNode const&, boost::filesystem::path const&) const;
+  ConfigNode expandBasis(ConfigNode const&, Path const&) const;
 
+  void addBasisElement(std::vector<ConfigNode>& basisNodes, ConfigNode const& inBasis, Path const& fsPrefix,
+                       YAMLConfigProcessor const& proc) const;
   /**
       Handles node categories like 'resource', 'module' & 'pipeline'.
    */
@@ -173,11 +175,12 @@ struct YAMLConfigProcessor {
    */
   ConfigNode processReplaceNodes(ConfigNode const& in);
 
-  boost::filesystem::path filePath_;
+  Path filePath_;
   mutable OptPath optPath_;  // for log messages. mutable because of insanity - DFS push/pop discipline. to
-  // keep refs sane have ot use StableVector
+  // keep refs sane, OptPath uses StableVector
+  mutable unordered_map<Path, ConfigNode> loadedConfig_;
   std::size_t const optPathInitialDepth_;
-  Instances instances;
+  Instances instances_;
 };
 
 

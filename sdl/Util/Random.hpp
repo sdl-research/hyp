@@ -10,16 +10,18 @@
 // limitations under the License.
 /** \file
 
-    configuration for random seed..
+    configuration for random seed.
 */
 
 #ifndef SDL_UTIL_RANDOM_HPP_
 #define SDL_UTIL_RANDOM_HPP_
 #pragma once
 
-#include <graehl/shared/random.hpp>
-#include <sdl/Util/ThreadSpecific.hpp>
+#define GRAEHL__NO_RANDOM_MAIN
+// Random.cpp will define global random.hpp symbols
 #include <sdl/Util/ThreadLocal.hpp>
+#include <sdl/Util/ThreadSpecific.hpp>
+#include <graehl/shared/random.hpp>
 
 namespace sdl {
 namespace Util {

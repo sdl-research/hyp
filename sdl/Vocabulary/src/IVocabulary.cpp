@@ -14,18 +14,21 @@
     return the specialSymbols() BasicVocabularyImpl. then all this can go inline
 */
 
+#include <sdl/Vocabulary/BasicVocabularyImpl.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Vocabulary/VocabularyConfig.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Sym.hpp>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-#include <sdl/Util/LogHelper.hpp>
 
-#include <sdl/Sym.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Vocabulary/BasicVocabularyImpl.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
+namespace sdl {
 
-using namespace sdl;
-using namespace sdl::Vocabulary;
+SDL_NAME_ENUM(VocabularyFormat);
+
+using namespace Vocabulary;
 
 IVocabulary::IVocabulary() : threadlocal_(), nSpecials_(specialSymbols().size()) {
   setThreadSpecific();
@@ -85,4 +88,7 @@ bool IVocabulary::evictThread(Occupancy const&) {
   else
     SDL_DEBUG(evict.Vocabulary, "evictThread vocabulary " << getName() << " - no change");
   return changed;
+}
+
+
 }

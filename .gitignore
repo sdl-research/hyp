@@ -1,5 +1,5 @@
-Debug
-Release
+Debug*
+Release*
 DebugClang
 DebugLlvm
 RelWithDebInfo
@@ -32,3 +32,4 @@ hyp-tutorial.toc
 hyp-tutorial.aux
 dependency-reduced-pom.xml
 sdl/CMakeLists.txt.user
+TODO.graehl

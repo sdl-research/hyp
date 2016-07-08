@@ -18,12 +18,11 @@
 #define SDL_LWUTIL__UTF8PRED_HPP
 #pragma once
 
-#include <functional>
-#include <cstdlib>
-#include <string>
 #include <sdl/Util/Icu.hpp>
-
 #include <sdl/Util/LogHelper.hpp>
+#include <cstdlib>
+#include <functional>
+#include <string>
 
 namespace sdl {
 namespace Util {

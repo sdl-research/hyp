@@ -21,11 +21,11 @@
 #define SDL_HG_FS__FST_HPP
 #pragma once
 
-#include <boost/optional.hpp>
+#include <sdl/Hypergraph/Level.hpp>
 #include <sdl/Hypergraph/Types.hpp>
 #include <sdl/Util/GeneratorTransform.hpp>
 #include <sdl/SharedPtr.hpp>
-#include <sdl/Hypergraph/Level.hpp>
+#include <boost/optional.hpp>
 
 namespace sdl {
 namespace Hypergraph {

@@ -17,13 +17,13 @@
 #define HYP__HYPERGRAPH_HYPERGRAPHSITERATOR_HPP
 #pragma once
 
-#include <istream>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Hypergraph/Properties.hpp>
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Hypergraph/ParsedArcs.hpp>
 #include <sdl/Hypergraph/FeaturesPerInputPosition.hpp>
+#include <sdl/Hypergraph/ParsedArcs.hpp>
+#include <sdl/Hypergraph/Properties.hpp>
 #include <sdl/Util/Enum.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <istream>
 
 namespace sdl {
 

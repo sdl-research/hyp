@@ -4,13 +4,10 @@ sdl_util_includes()
 include_directories(${LBFGS_INCLUDE_DIR})
 
 set(LINK_DEPENDENCIES
-  ${LBFGS_LIB}
-  ${YAML_CPP_LIBRARY}
-  Config
-  Hypergraph
-  ${UTIL_LIBRARIES}
-  Optimization
+  Hypergraph Vocabulary Optimization
+  ${CONFIG_LIBRARIES}
+  ${YAML_CPP_LIBRARY} ${LBFGS_LIB}
   )
 
-sdl_add_library( ${PROJECT_NAME}-shared ${PROJECT_SOURCE_DIR} SHARED)
-target_link_libraries(${PROJECT_NAME}-shared ${LINK_DEPENDENCIES})
+sdl_add_lib(${PROJECT_NAME}-shared SHARED src/CreateSearchSpace.cpp)
+sdl_target_libs(${PROJECT_NAME}-shared ${LINK_DEPENDENCIES})

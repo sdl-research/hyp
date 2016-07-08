@@ -9,8 +9,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #define HG_TRANSFORM_MAIN
-#include <sdl/Hypergraph/TransformMain.hpp>
 #include <sdl/Hypergraph/Determinize.hpp>
+#include <sdl/Hypergraph/TransformMain.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -32,6 +32,3 @@ struct HypDeterminize : TransformMain<HypDeterminize> {
 }
 
 HYPERGRAPH_NAMED_MAIN(Determinize)
-
-
-

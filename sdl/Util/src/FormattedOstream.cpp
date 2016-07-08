@@ -8,15 +8,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <sdl/Util/FormattedOstream.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <cctype>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Util/FormattedOstream.hpp>
 
 namespace sdl {
 namespace Util {

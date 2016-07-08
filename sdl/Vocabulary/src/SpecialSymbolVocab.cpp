@@ -8,21 +8,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <cassert>
 #include <sdl/Vocabulary/SpecialSymbolVocab.hpp>
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
 #include <sdl/Util/String.hpp>
 #include <sdl/Util/StringBuilder.hpp>
+#include <cassert>
 
 namespace sdl {
 namespace Vocabulary {
 
-// SpecialSymbolVocab specialSymbols;
-SpecialSymbolVocab SpecialSymbolVocab::gInstance_;
-
-void SpecialSymbolVocab::init() {
-  if (!vocab) vocab = new BasicVocabularyImpl(kSpecialTerminal);
+void initSpecialSymbols() {
+  SpecialSymbolsOrder order;
 }
+
+SpecialSymbolVocab& SpecialSymbolVocab::getInstance() {
+  // thread-safe with C++11 standard
+  static SpecialSymbolVocab gInstance;
+  return gInstance;
+}
+
+SpecialSymbolVocab::SpecialSymbolVocab() : vocab(new BasicVocabularyImpl(kSpecialTerminal)) {}
 
 SpecialSymbolVocab::~SpecialSymbolVocab() {
   delete vocab;
@@ -31,10 +36,11 @@ SpecialSymbolVocab::~SpecialSymbolVocab() {
 /**
    this is to be used during static init
 */
+#if SDL_SPECIAL_SYMBOL_FORCE_INIT_CPP
 SpecialSymbolVocab& specialSymbolsForceInit() {
-  specialSymbols().init();
-  return specialSymbols();
+  return SpecialSymbolVocab::getInstance();
 }
+#endif
 
 /// can't use std::string const because SpecialSymbolList gets used to call this at static init
 char const* const kXmtBlockStr("<xmt-block>");
@@ -80,7 +86,6 @@ Sym SpecialSymbolVocab::addAssertId(std::string const& symbol, SymInt id) {
     return r;
   }
 }
-
 
 std::string const& SpecialSymbolVocab::str(Sym id) const {
   assert(id.isSpecial());

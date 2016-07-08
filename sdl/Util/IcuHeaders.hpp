@@ -53,10 +53,10 @@ unicode/utf8.h defines macros for UTF-8 with semantics parallel to the UTF-16 ma
 macros handle many cases inline, but call internal functions for complicated parts of the UTF-8 encoding form.
 For example, the following code snippet counts white space characters in a string:
 
-#include "unicode/utypes.h"
 #include "unicode/stringpiece.h"
-#include "unicode/utf8.h"
 #include "unicode/uchar.h"
+#include "unicode/utf8.h"
+#include "unicode/utypes.h"
 
 int32_t countWhiteSpace(StringPiece const& sp) {
   const char *s=sp.data();
@@ -119,29 +119,25 @@ uiter_setUTF8() creates a UCharIterator for a UTF-8 string.
 
 // all this is to avoid compile warnings about ICU headers:
 #include <graehl/shared/warning_push.h>
-#if HAVE_GCC_4_4
 GCC_DIAG_IGNORE(unused-but-set-variable)
-#endif
-#if HAVE_GCC_4_6
 GCC_DIAG_IGNORE(maybe-uninitialized)
-#endif
 
-#include <unicode/unistr.h>
-#include <unicode/ucsdet.h>
+#include <unicode/brkiter.h>
+#include <unicode/chariter.h>
+#include <unicode/errorcode.h>
+#include <unicode/locid.h>
+#include <unicode/normalizer2.h>
 #include <unicode/parseerr.h>
 #include <unicode/putil.h>
-#include <unicode/ucsdet.h>
-#include <unicode/translit.h>
-#include <unicode/errorcode.h>
-#include <unicode/utext.h>
-#include <unicode/locid.h>
-#include <unicode/utypes.h>
-#include <unicode/ustring.h>
-#include <unicode/chariter.h>
 #include <unicode/schriter.h>
-#include <unicode/brkiter.h>
-#include <unicode/normalizer2.h>
+#include <unicode/translit.h>
+#include <unicode/ucsdet.h>
+#include <unicode/ucsdet.h>
 #include <unicode/umachine.h>
+#include <unicode/unistr.h>
+#include <unicode/ustring.h>
+#include <unicode/utext.h>
+#include <unicode/utypes.h>
 
 #include <graehl/shared/warning_pop.h>
 

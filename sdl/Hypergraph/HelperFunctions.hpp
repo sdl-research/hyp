@@ -18,12 +18,11 @@
 #define HYP__HYPERGRAPH_HELPERFUNCTIONS_HPP
 #pragma once
 
-#include <string>
-#include <sdl/SharedPtr.hpp>
-
+#include <sdl/Hypergraph/FwdDecls.hpp>
 #include <sdl/Vocabulary/HelperFunctions.hpp>
 #include <sdl/IVocabulary-fwd.hpp>
-#include <sdl/Hypergraph/FwdDecls.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <string>
 
 namespace sdl {
 namespace Hypergraph {

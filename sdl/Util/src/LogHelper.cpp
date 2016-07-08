@@ -8,12 +8,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <sdl/Util/InitLogger.hpp>
 #include <sdl/Util/LogHelper.hpp>
 #include <sdl/Util/RefCount.hpp>
-#include <sdl/Util/InitLogger.hpp>
 
 namespace sdl {
 namespace Util {
+
+// DebugStaticInit DebugStaticInit::gDebugStaticInit;
 
 #if SDL_LOG_SEQUENCE_NUMBER
 static AtomicCount gAtomicLogSeqXmt(0);

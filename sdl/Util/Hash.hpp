@@ -91,17 +91,17 @@ inline uint32 mixbits32(uint32 h) {
 template <class P>
 inline uint64 pointerSignificantBits(P const* p) {
   return ((uint64)p)
-         >> (sizeof(P) < 2 ? 0 : sizeof(P) < 4 ? 1 : sizeof(P) < 8
-                                                         ? 2
-                                                         : sizeof(P) < 16
-                                                               ? 3
-                                                               : sizeof(P) < 32
-                                                                     ? 4
-                                                                     : sizeof(P) < 64
-                                                                           ? 5
-                                                                           : sizeof(P) < 128
-                                                                                 ? 6
-                                                                                 : sizeof(P) < 256 ? 7 : 8);
+         >> (sizeof(P) < 2
+                 ? 0
+                 : sizeof(P) < 4
+                       ? 1
+                       : sizeof(P) < 8
+                             ? 2
+                             : sizeof(P) < 16
+                                   ? 3
+                                   : sizeof(P) < 32
+                                         ? 4
+                                         : sizeof(P) < 64 ? 5 : sizeof(P) < 128 ? 6 : sizeof(P) < 256 ? 7 : 8);
   // no harm done if larger: you might have 1 or more trailing 0s, but 8 fewer than before
   // could use boost integer log2.
 }
@@ -138,7 +138,7 @@ struct HashPointer {
 
 inline uint64 rotateRight(uint64 h, int shift) {
   assert(shift && shift < 64 && shift > -64);
-  return (h >> shift) | (h << (64-shift));
+  return (h >> shift) | (h << (64 - shift));
 }
 
 inline uint64 hashFloat(double v) {

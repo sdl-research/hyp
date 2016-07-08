@@ -33,24 +33,22 @@
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
-#include <iterator>
-#include <memory>
-
-#include <sdl/Util/Debug.hpp>
-#include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Util/Add.hpp>
-
-#include <boost/range/begin.hpp>
-#include <boost/range/end.hpp>
-#include <boost/range/size.hpp>
-#include <boost/range/distance.hpp>
-#include <boost/range/iterator.hpp>
-#include <boost/iterator/iterator_categories.hpp>
-#include <boost/iterator/iterator_concepts.hpp>
+#include <sdl/Util/Debug.hpp>
 #include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/ShrinkVector.hpp>
 #include <sdl/Util/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/iterator/iterator_categories.hpp>
+#include <boost/iterator/iterator_concepts.hpp>
+#include <boost/range/begin.hpp>
+#include <boost/range/distance.hpp>
+#include <boost/range/end.hpp>
+#include <boost/range/iterator.hpp>
+#include <boost/range/size.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <iterator>
+#include <memory>
 
 namespace sdl {
 namespace Util {

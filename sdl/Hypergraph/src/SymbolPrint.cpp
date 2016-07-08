@@ -11,15 +11,11 @@
 #include <sdl/Hypergraph/Label.hpp>
 #include <sdl/Hypergraph/SymbolPrint.hpp>
 #include <sdl/Hypergraph/Types.hpp>
-
-#include <sdl/IVocabulary.hpp>
-#include <sdl/Sym.hpp>
-
-#include <sdl/Printer.hpp>
-#include <sdl/Util/QuoteEsc.hpp>
-
 #include <sdl/Vocabulary/SpecialSymbols.hpp>
-
+#include <sdl/Util/QuoteEsc.hpp>
+#include <sdl/IVocabulary.hpp>
+#include <sdl/Printer.hpp>
+#include <sdl/Sym.hpp>
 #include <boost/spirit/include/karma.hpp>
 
 #ifndef HG_PRINT_ESCAPE_SINGLE_QUOTE

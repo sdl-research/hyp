@@ -12,21 +12,18 @@
 #define SDL_HYPERGRAPH_CRFOBJECTIVEFUNCTION_HPP
 #pragma once
 
+#include <sdl/Hypergraph/FeatureExpectations.hpp>
+#include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
+#include <sdl/Optimization/ObjectiveFunction.hpp>
+#include <sdl/Util/Constants.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/OnceFlag.hpp>
+#include <sdl/SharedPtr.hpp>
 #include <cassert>
+#include <cmath>
 #include <list>
 #include <utility>
-#include <cmath>
-#include <sdl/SharedPtr.hpp>
-
-#include <sdl/Optimization/ObjectiveFunction.hpp>
-#include <sdl/Optimization/FeatureHypergraphPairs.hpp>
-
-#include <sdl/Hypergraph/IHypergraph.hpp>
-#include <sdl/Hypergraph/FeatureExpectations.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/Constants.hpp>
-#include <sdl/Util/Flag.hpp>
 
 namespace sdl {
 namespace Optimization {
@@ -75,12 +72,16 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
     // function value:
     FloatT fctValDelta = 0.0;
 
+    Pairs& pairs = *pHgTrainingPairs_;
     // Loop over all examples
     for (TrainingDataIndex i = begin; i < end; ++i) {
-
       bool const logFirst = i == 0 && logFirstHgOnce_.first();
+      // TODO: depending on caller including begin==0 only on one thread, may be fine with non-atomic
+      // logFirstHgOnce_
+      auto const& pair = pairs[i];
+
       // The hypergraph constrained to observed input and output
-      IHgPtr pHgConstrained((*pHgTrainingPairs_)[i].first);
+      IHgPtr pHgConstrained(pair.first);
       if (logFirst)
         SDL_DEBUG_ALWAYS(Optimize.first.clamped, "Clamped first hg:\n" << *pHgConstrained);
       else
@@ -91,7 +92,7 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
       // The "unconstrained" hypergraph, which is *not* constrained to
       // the observed output (i.e., distribution over possible outputs
       // given the input)
-      IHgPtr pHgUnconstrained((*pHgTrainingPairs_)[i].second);
+      IHgPtr pHgUnconstrained(pair.second);
       if (logFirst)
         SDL_DEBUG_ALWAYS(Optimize.first.unclamped, "Unclamped first hg:\n" << *pHgUnconstrained);
       else
@@ -105,18 +106,18 @@ class HypergraphCrfObjFct : public Optimization::DataObjectiveFunction<typename 
            it != featExpectationsUnconstrained.end(); ++it) {
         // OK because the constrained feat expectations are guaranteed
         // to be a subset of the unconstrained feat expectations:
-        updates.update(it->first, featExpectationsConstrained[it->first]-it->second);
+        updates.update(it->first, featExpectationsConstrained[it->first] - it->second);
       }
 
       SDL_TRACE(Optimization, "observed: " << pathSumConstrained << ", unobserved: " << pathSumUnconstrained);
-      fctValDelta += (pathSumConstrained-pathSumUnconstrained);
+      fctValDelta += pathSumConstrained - pathSumUnconstrained;
     }
 
     return fctValDelta;
   }
 
  private:
-  Util::Flag logFirstHgOnce_;
+  Util::OnceFlagAtomic logFirstHgOnce_;
   shared_ptr<Pairs> pHgTrainingPairs_;  /// Training data
 };
 

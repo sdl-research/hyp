@@ -16,11 +16,11 @@
 #define HYP__CONCATLW20111227_HPP
 #pragma once
 
-#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/Hypergraph/Adjacency.hpp>
 #include <sdl/Hypergraph/Empty.hpp>
-#include <sdl/Hypergraph/Union.hpp>  // for merging two hgs' states
 #include <sdl/Hypergraph/HypergraphCopy.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
+#include <sdl/Hypergraph/Union.hpp>  // for merging two hgs' states
 #include <sdl/SharedPtr.hpp>
 
 namespace sdl {

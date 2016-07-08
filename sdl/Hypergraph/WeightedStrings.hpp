@@ -20,9 +20,9 @@
 #pragma once
 
 #include <sdl/Hypergraph/LexicalOrEpsilon.hpp>
-#include <sdl/Util/Unordered.hpp>
-#include <sdl/Util/Sorted.hpp>
 #include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/Sorted.hpp>
+#include <sdl/Util/Unordered.hpp>
 #include <sdl/Sym.hpp>
 #include <boost/range/irange.hpp>
 

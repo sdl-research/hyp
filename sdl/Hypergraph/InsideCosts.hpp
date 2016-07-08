@@ -19,8 +19,8 @@
 #define INSIDECOSTS_JG_2015_06_14_HPP
 #pragma once
 
-#include <sdl/Util/Delete.hpp>
 #include <sdl/Hypergraph/IHypergraph.hpp>
+#include <sdl/Util/Delete.hpp>
 #include <sdl/Util/MinMax.hpp>
 
 namespace sdl {

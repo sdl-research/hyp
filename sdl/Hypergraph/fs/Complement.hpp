@@ -32,17 +32,14 @@
 #pragma once
 
 
-#include <graehl/shared/os.hpp>
-
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/Determinize.hpp>
-#include <sdl/Hypergraph/Transform.hpp>
-#include <sdl/Hypergraph/Empty.hpp>
 #include <sdl/Hypergraph/Assert.hpp>
-
-#include <algorithm>
-
+#include <sdl/Hypergraph/Determinize.hpp>
+#include <sdl/Hypergraph/Empty.hpp>
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Transform.hpp>
 #include <sdl/SharedPtr.hpp>
+#include <graehl/shared/os.hpp>
+#include <algorithm>
 
 namespace sdl {
 namespace Hypergraph {

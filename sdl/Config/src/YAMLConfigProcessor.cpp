@@ -33,25 +33,34 @@
 #pragma warning(pop)
 #endif
 #include <sdl/Config/YAMLConfigProcessor.hpp>
-#include <sdl/Path.hpp>
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Util/String.hpp>
-#include <sdl/Printer.hpp>
-
-#include <sdl/Util/Input.hpp>
-#include <sdl/Util/Map.hpp>
 #include <sdl/Pool/object_pool.hpp>
 #include <sdl/Util/Delete.hpp>
+#include <sdl/Util/Input.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Map.hpp>
 #include <sdl/Util/StableVector.hpp>
+#include <sdl/Util/String.hpp>
+#include <sdl/Util/StringMap.hpp>
+#include <sdl/Path.hpp>
+#include <sdl/Printer.hpp>
 
 namespace sdl {
 namespace Config {
+
+ConfigNode YAMLConfigProcessor::loadConfigOnce(Path const& path, OptPath const& forPath) const {
+  ConfigNode& loaded = loadedConfig_[path];
+  if (loaded.IsNull()) {
+    SDL_DEBUG(YAMLConfigProcessor, "loadConfigOnce - loading " << path << " for the first (and last) time");
+    loaded = loadConfig(path, forPath);
+  }
+  return loaded;  // Config::copy(loaded, false);  // TODO: shouldn't need copy.
+}
 
 /**
    not O(n) like YAML-we know our maps are keyed by string
 */
 
-typedef std::map<std::string, ConfigNode> MapIndexBase;
+typedef std::unordered_map<std::string, ConfigNode> MapIndexBase;
 
 struct MapIndex : MapIndexBase {
   MapIndex(ConfigNode const& in) {
@@ -76,7 +85,7 @@ inline void addKeyVal(ConfigNode& node, Key const& key, Val const& val, YAMLConf
 */
 inline ConfigNode const& childNotParent(ConfigNode const& child, ConfigNode const& parent) {
   if (child.is(parent))
-    SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+    SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
                   "child is same as parent: '" << child << "' with parent '" << parent << "'.");
   return child;
 }
@@ -89,11 +98,8 @@ ConfigNode copy(ConfigNode const& in, bool deep) {
   using namespace YAML;
   switch (in.Type()) {
     case NodeType::Undefined:
-    case NodeType::Null:
-      break;
-    case NodeType::Scalar:
-      copy = in.Scalar();
-      break;
+    case NodeType::Null: break;
+    case NodeType::Scalar: copy = in.Scalar(); break;
     case NodeType::Sequence:
       if (deep)
         for (const_iterator i = in.begin(), e = in.end(); i != e; ++i)
@@ -110,8 +116,10 @@ ConfigNode copy(ConfigNode const& in, bool deep) {
         for (const_iterator i = in.begin(), e = in.end(); i != e; ++i)
           addKeyVal(copy, i->first, childNotParent(i->second, in));
       break;
+    default:
+      assert(!"unknown yaml type");
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << printer(in, oneline) << " => " << printer(copy, oneline));
+  SDL_TRACE(Config.YAMLConfigProcessor, "copy " << printer(in, oneline) << " => " << printer(copy, oneline));
   return copy;
 }
 
@@ -123,11 +131,8 @@ ConfigNode copyRemovingKey(ConfigNode const& in, std::string const& removeKey, b
   ConfigNode copy;
   switch (in.Type()) {
     case NodeType::Undefined:
-    case NodeType::Null:
-      break;
-    case NodeType::Scalar:
-      copy = in.Scalar();
-      break;
+    case NodeType::Null: break;
+    case NodeType::Scalar: copy = in.Scalar(); break;
     case NodeType::Sequence:
       if (deep)
         for (const_iterator i = in.begin(), e = in.end(); i != e; ++i)
@@ -146,9 +151,11 @@ ConfigNode copyRemovingKey(ConfigNode const& in, std::string const& removeKey, b
           if (i->first.Scalar() != removeKey) addKeyVal(copy, i->first, childNotParent(i->second, in));
       }
       break;
+    default:
+      assert(!"unknown yaml type");
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copyRemovingKey " << removeKey << " from " << printer(in, oneline)
-                                                              << " => " << printer(copy, oneline));
+  SDL_TRACE(Config.YAMLConfigProcessor, "copyRemovingKey " << removeKey << " from " << printer(in, oneline)
+                                                           << " => " << printer(copy, oneline));
   return copy;
 }
 
@@ -160,11 +167,8 @@ ConfigNode copy(ConfigNode const& in, bool deep, YAMLConfigProcessor const& proc
   ConfigNode copy;
   switch (in.Type()) {
     case NodeType::Undefined:
-    case NodeType::Null:
-      break;
-    case NodeType::Scalar:
-      copy = in.Scalar();
-      break;
+    case NodeType::Null: break;
+    case NodeType::Scalar: copy = in.Scalar(); break;
     case NodeType::Sequence:
       if (deep)
         for (const_iterator i = in.begin(), e = in.end(); i != e; ++i)
@@ -184,9 +188,11 @@ ConfigNode copy(ConfigNode const& in, bool deep, YAMLConfigProcessor const& proc
           addKeyVal(copy, i->first, newRefSecond, proc);
         }
       break;
+    default:
+      assert(!"unknown yaml type");
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "copy " << proc.path() << ": " << printer(in, oneline) << " => "
-                                                   << printer(copy, oneline));
+  SDL_TRACE(Config.YAMLConfigProcessor, "copy " << proc.path() << ": " << printer(in, oneline) << " => "
+                                                << printer(copy, oneline));
   return copy;
 }
 
@@ -232,52 +238,74 @@ std::string addPrefixToPathString(std::string const& path, boost::filesystem::pa
     return path;
 }
 
-std::string const cwdString(("change-working-directory"));
+std::string const cwdString = "change-working-directory";
 
-inline boost::filesystem::path maybeChangeWorkingDirectory(ConfigNode const& in,
-                                                           boost::filesystem::path const& fsPrefixIn) {
+inline void maybeChangeWorkingDirectory(ConfigNode const& in, boost::filesystem::path& fsPrefixInOut) {
   ConfigNode const& cwd = in[cwdString];
-  if (is_null(cwd))
-    return fsPrefixIn;
-  else {
+  if (!is_null(cwd)) {
     if (!cwd.IsScalar())
-      SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+      SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
                     "change-working-directory, which is used (like 'cd dir') to resolve relative paths for a "
                     "given subtree."
                     " must have a scalar (pathname) value, and may itself be relative (in which case it's "
                     "expanded against the previous working directory");
-    SDL_INFO(Configure.YAMLConfigProcessor, "change-working-directory: " << cwd.Scalar());
-    return addPrefixToPathString(cwd.Scalar(), fsPrefixIn);
+    SDL_INFO(Config.YAMLConfigProcessor, "change-working-directory: " << cwd.Scalar());
+    fsPrefixInOut = addPrefixToPathString(cwd.Scalar(), fsPrefixInOut);
   }
 }
 
-std::string const kSkipProcessing(("skip-processing"));
-std::string const kLiterally(("literally "));
-std::string const kReplace(("replace"));
-std::string const kBasis(("basis"));
-std::string const kCategory(("category"));
-std::string const kSteps(("steps"));
+std::string const kSkipProcessing = "skip-processing";
+std::string const kLiterally = "literally ";
+std::string const kReplace = "replace";
+std::string const kBasis = "basis";
+std::string const kCategory = "category";
+std::string const kSteps = "steps";
+
+/// unfortunately yaml-cpp is slow and chinese has tens of thousands of tokenizer rules; each rule is a
+/// '{rule: blah} map instead of a scalar "blah" ... so we don't YAMLConfigProcessor::process anything bigger
+/// than this
+std::size_t constexpr kMaxSequenceSizeForProcess = 1000;
 }
 
-ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem::path const& fsPrefixIn) {
-  if (!in.IsMap())
+ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, Path fsPrefix) {
+  if (!in.IsMap()) {
+    if (in.IsSequence()) {
+      if (in.size() > kMaxSequenceSizeForProcess)
+        SDL_INFO(Configure.YAMLConfigProcessor,
+                 "skipping yaml expansion for long sequence to save time (TODO: make yaml-cpp faster): "
+                     << path() << " sequence size=" << in.size() << " > " << kMaxSequenceSizeForProcess);
+      else
+        for (YAML::const_iterator iSeq = in.begin(), end = in.end(); iSeq != end; ++iSeq) {
+          if (!iSeq->IsScalar()) {
+            ConfigNode outSequence;
+            unsigned i = 0;
+            Util::StringBuilder b;
+            for (iSeq = in.begin(); iSeq != end; ++iSeq) {
+              push(b.clear()(i++).str());
+              outSequence.push_back(process(*iSeq, fsPrefix));
+              pop();
+            }
+            return outSequence;
+          }
+        }
+    }
     return in;
-  else {
+  } else {
     ConfigNode out;
 
     if (in.size() == 1) {
       YAML::const_iterator i = in.begin();
       if (i->first.Scalar() == kSkipProcessing) {
-        SDL_TRACE(Configure.YAMLConfigProcessor, "skip-processing: " << path());
+        SDL_TRACE(Config.YAMLConfigProcessor, "skip-processing: " << path());
         return i->second;
       }
     }
 
-    boost::filesystem::path fsPrefix = maybeChangeWorkingDirectory(in, fsPrefixIn);
+    maybeChangeWorkingDirectory(in, fsPrefix);
     for (YAML::const_iterator i = in.begin(), end = in.end(); i != end; ++i) {
       std::string const& key = i->first.Scalar();
       if (key != cwdString) {
-        SDL_TRACE(Configure.YAMLConfigProcessor, "Processing: [ " << path() << ": " << key << " ]");
+        SDL_TRACE(Config.YAMLConfigProcessor, "Processing: [ " << path() << ": " << key << " ]");
         push(key);
         addKeyVal(out, key, process(childNotParent(i->second, in), fsPrefix), *this);
         pop();
@@ -287,20 +315,19 @@ ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem:
 
     ConfigNode const& expanded = expandBasis(toExpand, fsPrefix);
 
-    SDL_TRACE(Configure.YAMLConfigProcessor.basis, "basis expanded path=["
-                                                       << path() << "]: " << printer(toExpand, oneline)
-                                                       << " ... to: " << printer(expanded, oneline));
+    SDL_TRACE(Config.YAMLConfigProcessor.basis, "basis expanded path=["
+                                                    << path() << "]: " << printer(toExpand, oneline)
+                                                    << " ... to: " << printer(expanded, oneline));
 
     assert(optPath_.size() >= optPathInitialDepth_);
     bool rootLevel = optPath_.empty();  // TODO: or optPathInitialDepth_ == optPath_.size() ?
     if (rootLevel) {
       ConfigNode const& replaced = processReplaceNodes(expanded);  // TODO: rootLevel for file vs. at end?
       if (optPath_.empty()) {
-        SDL_DEBUG(Configure.YAMLConfigProcessor,
-                  "final root config file: " << printer(replaced, kMultilineBraces));
+        SDL_TRACE(Config.YAMLConfigProcessor, "final root config file: " << printer(replaced, kMultilineBraces));
       } else {
-        SDL_DEBUG(Configure.YAMLConfigProcessor,
-                  "expanded config file for " << path() << ": " << printer(replaced, kMultilineBraces));
+        SDL_TRACE(Config.YAMLConfigProcessor, "expanded config file for "
+                                                  << path() << ": " << printer(replaced, kMultilineBraces));
       }
       return replaced;
     } else
@@ -308,7 +335,7 @@ ConfigNode YAMLConfigProcessor::process(ConfigNode const& in, boost::filesystem:
   }
 }
 
-std::string const kPathSuffix("path");
+static std::string const kPathSuffix("path");
 unsigned const kLenPathSuffix = 4;
 
 inline bool hasPathSuffix(std::string const& key) {
@@ -332,27 +359,28 @@ ConfigNode YAMLConfigProcessor::resolvePaths(ConfigNode const& in, boost::filesy
           std::string const& origPath = val.Scalar();
           std::string const& newPath = addPrefixToPathString(origPath, fsPrefix);
           addKeyVal(out, key, newPath, *this);
-          SDL_TRACE(Configure.YAMLConfigProcessor, "Resolved path for [ "
-                                                       << path() << ": " << itMap->first.Scalar()
-                                                       << " ] from: " << origPath << " to: " << newPath);
+          SDL_TRACE(Config.YAMLConfigProcessor, "Resolved path for [ "
+                                                    << path() << ": " << itMap->first.Scalar()
+                                                    << " ] from: " << origPath << " to: " << newPath);
         } else if (val.IsSequence()) {
           ConfigNode outSequence;
-          SDL_TRACE(Configure.YAMLConfigProcessor, "Resolving path's for [ "
-                                                       << path() << ": " << itMap->first.Scalar() << " ]");
+          SDL_TRACE(Config.YAMLConfigProcessor, "Resolving paths for [ " << path() << ": "
+                                                                         << itMap->first.Scalar() << " ]");
 
           for (YAML::const_iterator iSeq = val.begin(), end = val.end(); iSeq != end; ++iSeq) {
             std::string const& origPath = iSeq->Scalar();
             std::string const& newPath = addPrefixToPathString(origPath, fsPrefix);
-            SDL_DEBUG(Configure.YAMLConfigProcessor, "Changing original path: " << origPath << " to: " << newPath);
+            SDL_DEBUG(Config.YAMLConfigProcessor, "Changing original path: " << origPath << " to: " << newPath);
             outSequence.push_back(newPath);
           }
           addKeyVal(out, key, outSequence, *this);
         } else
-          SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+          SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
                         "Syntax error! Value for a key 'path' or ending in '-"
-                            << kPathSuffix << "' can only be a path or a list of paths." << '\n' << "path: [ "
-                            << path() << " ]\n"
-                            << "Key: " << key << '\n' << "File: " << getFilePath());
+                            << kPathSuffix << "' can only be a path or a list of paths." << '\n'
+                            << "path: [ " << path() << " ]\n"
+                            << "Key: " << key << '\n'
+                            << "File: " << getFilePath());
       } else
         addKeyVal(out, key, val, *this);
     }
@@ -443,36 +471,36 @@ inline void childNodes(ConfigNode seq, BasisNodes& children) {
     children[o++] = static_cast<YAML::Node const&>(*i);
   for (BasisNodes::const_iterator i = children.begin(), e = children.end(); i != e; ++i) {
     if (i->is(seq))
-      SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+      SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
                     "sequence child is same as parent: '" << *i << "' with parent '" << seq << "'.");
   }
 }
 
-inline void addBasisElement(BasisNodes& basisNodes, ConfigNode const& inBasis,
-                            boost::filesystem::path const& fsPrefix, YAMLConfigProcessor const& proc) {
+void YAMLConfigProcessor::addBasisElement(BasisNodes& basisNodes, ConfigNode const& inBasis,
+                                          boost::filesystem::path const& fsPrefix,
+                                          YAMLConfigProcessor const& proc) const {
   OptPath const& optPath = proc.optPath();
   assert(!inBasis.IsSequence());
   if (inBasis.IsScalar()) {
     std::string const& basis = inBasis.Scalar();
     boost::filesystem::path fsBasis = addPrefixToPath(basis, fsPrefix);
-    SDL_INFO(Configure.YAMLConfigProcessor, "File: " << proc.getFilePath()
-                                                     << "- Loading basis file: " << fsBasis.string());
+    SDL_INFO(Config.YAMLConfigProcessor, "File: " << proc.getFilePath()
+                                                  << "- Loading basis file: " << fsBasis.string());
     try {
-      ConfigNode loaded = loadConfig(fsBasis, proc.optPath());
-      // TODO: memoize e.g. multi-regextokenizer-in-one-file
-      basisNodes.push_back(loaded);
+      basisNodes.push_back(loadConfigOnce(fsBasis, proc.optPath()));
     } catch (ConfigException& e) {
-      SDL_THROW_LOG(Configure.loadConfig, ConfigException, "Error loading YAML file: '"
-                                                               << e.what() << "'. "
-                                                               << " File: '" << proc.getFilePath()
-                                                               << "' path: [ " << proc.path() << " ]");
+      SDL_THROW_LOG(Config.loadConfig, ConfigException, "Error loading YAML file: '"
+                                                            << e.what() << "'. "
+                                                            << " File: '" << proc.getFilePath()
+                                                            << "' path: [ " << proc.path() << " ]");
     }
     // TODO: cache (only load/parse basis file once)
   } else if (inBasis.IsMap()) {
     basisNodes.push_back(inBasis);
   } else
-    SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
-                  "Syntax error! Value for 'basis' can not be Null!!" << '\n' << "path: [ " << proc.path() << " ]\n"
+    SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
+                  "Syntax error! Value for 'basis' can not be Null!!" << '\n'
+                                                                      << "path: [ " << proc.path() << " ]\n"
                                                                       << "File: " << proc.getFilePath());
 }
 
@@ -518,7 +546,7 @@ ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in, boost::filesys
         addBasisElement(basisNodes, inBasis, fsPrefix, *this);
       }
 
-      SDL_TRACE(Configure.YAMLConfigProcessor.expandBasis,
+      SDL_TRACE(Config.YAMLConfigProcessor.expandBasis,
                 "Removing node:  < [ " << path() << ": basis ] -> " << printer(inBasis, oneline) << " >");
 
       // BasisAccumulator accum(*this, fsPrefix);
@@ -537,7 +565,7 @@ ConfigNode YAMLConfigProcessor::expandBasis(ConfigNode const& in, boost::filesys
         }
 
         // accum(**i, kCopyBasisKey);
-        // SDL_TRACE(Configure.YAMLConfigProcessor.expandBasis, "merged basis; result = " <<
+        // SDL_TRACE(Config.YAMLConfigProcessor.expandBasis, "merged basis; result = " <<
         // printer(accum, oneline));
       }
 
@@ -554,11 +582,10 @@ inline std::ostream& operator<<(std::ostream& out, YAMLConfigProcessor::Instance
 void YAMLConfigProcessor::registerInstance(std::string const& name, std::string const& category,
                                            ConfigNode const& conf) {
   Instance instance(category, conf);
-  Instance* existing;
-  if (!Util::update(instances, name, instance, existing))
+  if (!instances_.insert(Instances::value_type(name, instance)).second)
     SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
-                  "Existing " << name << " " << *existing << " blocks creation of new " << name << " "
-                              << instance << " - rename one of them");
+                  "Existing " << name << " blocks creation of new " << name << " " << instance
+                              << " - rename one of them");
 }
 
 /**
@@ -587,7 +614,7 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
         if (valNode.IsSequence())
           isSteps = true;
         else if (!(valNode.IsMap() && valNode["steps"]))
-          SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+          SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
                         "Pipeline should be a sequence of steps or a map with a steps: [sequence of steps]!"
                             << " File: " << getFilePath() << ", path: [ " << path() << ": "
                             << it->first.Scalar() << " ]");
@@ -602,7 +629,7 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
       NodeType::value valType = valNode.Type();
       bool isSeq = valType == NodeType::Sequence;
       if (!(isSteps && isSeq || valType == NodeType::Map))
-        SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException,
+        SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException,
                       "Category nodes cannot be scalar - should be map or, for category pipeline, sequence "
                       "(which expands to { steps: sequence }) "
                           << " File: " << getFilePath() << ", path: [ " << path() << ": "
@@ -616,10 +643,10 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
       }
       addKeyVal(finalVal, kCategory, category, *this);
       addKeyVal(out, key, finalVal, *this);
-      SDL_TRACE(Configure.YAMLConfigProcessor, "After resolveCategories node: < [ "
-                                                   << path() << ": " << key << " ] "
-                                                   << "of category: " << category << ": "
-                                                   << printer(finalVal, oneline));
+      SDL_TRACE(Config.YAMLConfigProcessor, "After resolveCategories node: < [ "
+                                                << path() << ": " << key << " ] "
+                                                << "of category: " << category << ": "
+                                                << printer(finalVal, oneline));
     }
     return out;
   }
@@ -632,6 +659,8 @@ ConfigNode YAMLConfigProcessor::resolveCategories(ConfigNode const& in) {
 
    if lone map key is 'literally skip-processing:, replace that key by just 'skip-processing'. if lone map key
    starts with 'literally literally', replace that prefix with just 'literally'.
+
+   if map key is *just* 'literally' leave it alone
 */
 ConfigNode YAMLConfigProcessor::processReplaceNodes(ConfigNode const& in) {
   if (!in.IsMap()) return in;
@@ -645,18 +674,18 @@ ConfigNode YAMLConfigProcessor::processReplaceNodes(ConfigNode const& in) {
 
   for (YAML::const_iterator i = in.begin(), end = in.end(); i != end; ++i) {
     std::string const& key = i->first.Scalar();
-    SDL_TRACE(Configure.YAMLConfigProcessor, "Processing replace for: [ " << path() << "." << key << " ]");
+    SDL_TRACE(Config.YAMLConfigProcessor, "Processing replace for: [ " << path() << "." << key << " ]");
     if (key != kReplace) {
       ConfigNode const& replaceBy = replaces[key];
       // O(# of 'replace ' things) - not too bad. could transform into map<std::string,...> first
       if (replaceBy.IsNull())
-        SDL_TRACE(Configure.YAMLConfigProcessor,
+        SDL_TRACE(Config.YAMLConfigProcessor,
                   "Removing [ " << path() << "." << key
                                 << " ] because it was redefined as NULL by replace operator");
       else {
         if (replaceBy)
-          SDL_TRACE(Configure.YAMLConfigProcessor,
-                    "Replacing [ " << path() << "." << key << " ] by: " << printer(replaceBy, oneline));
+          SDL_TRACE(Config.YAMLConfigProcessor, "Replacing [ " << path() << "." << key
+                                                               << " ] by: " << printer(replaceBy, oneline));
         std::string keyUnescaped(key);
         Util::stripPrefix(keyUnescaped, kLiterally);
         push(keyUnescaped);
@@ -666,14 +695,14 @@ ConfigNode YAMLConfigProcessor::processReplaceNodes(ConfigNode const& in) {
       }
     }
   }
-  SDL_TRACE(Configure.YAMLConfigProcessor, "Done replacing: [ " << path() << " ] => " << printer(out, oneline));
+  SDL_TRACE(Config.YAMLConfigProcessor, "Done replacing: [ " << path() << " ] => " << printer(out, oneline));
   return out;
 }
 
 /**
-   groups multiple 'replace key: val' instructions into a single replace: {key: val, ...}. nonrecursive.
-   idempotent.
-   actual replace happens once with processReplaceNodes
+   groups multiple 'replace key: val' instructions into a single replace: {key:
+   val, ...}. nonrecursive.  idempotent.  actual replace happens once with
+   processReplaceNodes
 */
 ConfigNode YAMLConfigProcessor::resolveReplaceNodes(ConfigNode const& in) const {
   if (!in.IsMap())
@@ -681,8 +710,8 @@ ConfigNode YAMLConfigProcessor::resolveReplaceNodes(ConfigNode const& in) const 
   else {
     ConfigNode out;
     std::vector<std::string> nodesToRemove;
-    ConfigNode replacesGrouped = out["replace"];  // only gets created if we add to replacesGrouped. //TODO:
-    // is this copy necessary or const& ?
+    ConfigNode replacesGrouped = out["replace"];  // only gets created if we add to replacesGrouped.
+    // TODO: is this copy necessary or const& ?
     for (YAML::const_iterator i = in.begin(), end = in.end(); i != end; ++i) {
       std::string const& keyOrig = i->first.Scalar();
       ConfigNode const& valOrig = childNotParent(i->second, in);
@@ -693,10 +722,10 @@ ConfigNode YAMLConfigProcessor::resolveReplaceNodes(ConfigNode const& in) const 
         if (!replaceVal)
           replaceVal = valOrig;
         else
-          SDL_THROW_LOG(Configure.YAMLConfigProcessor, ConfigException, "Two replace ops defined for: \""
-                                                                            << key << "\"."
-                                                                            << " File: " << getFilePath()
-                                                                            << "path: [ " << path() << " ]");
+          SDL_THROW_LOG(Config.YAMLConfigProcessor, ConfigException, "Two replace ops defined for: \""
+                                                                         << key << "\"."
+                                                                         << " File: " << getFilePath()
+                                                                         << "path: [ " << path() << " ]");
       } else
         addKeyVal(out, keyOrig, valOrig, *this);
     }

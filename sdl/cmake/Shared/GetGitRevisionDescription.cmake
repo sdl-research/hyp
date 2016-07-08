@@ -78,6 +78,7 @@ function(get_git_head_revision _refspecvar _hashvar _path)
 
 	set(${_refspecvar} "${HEAD_REF}" PARENT_SCOPE)
 	set(${_hashvar} "${HEAD_HASH}" PARENT_SCOPE)
+
 endfunction()
 
 function(git_describe _var)

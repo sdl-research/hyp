@@ -53,28 +53,25 @@
 #define HYPERGRAPH_PREPEND_HYP(MAINCLASS) sdl::Hypergraph::Hyp##MAINCLASS
 #define HYPERGRAPH_NAMED_MAIN(MAINCLASS) GRAEHL_NAMED_MAIN(MAINCLASS, HYPERGRAPH_PREPEND_HYP(MAINCLASS))
 
-#include <sdl/Hypergraph/HypergraphMain.hpp>
-#include <sdl/LexicalCast.hpp>
-#include <sdl/Hypergraph/MutableHypergraph.hpp>
-#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/ArcParserFct.hpp>
+#include <sdl/Hypergraph/BestPath.hpp>
 #include <sdl/Hypergraph/ExpectationWeight.hpp>
 #include <sdl/Hypergraph/FeatureWeight.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/HypergraphMain.hpp>
 #include <sdl/Hypergraph/HypergraphWriter.hpp>
-#include <sdl/Hypergraph/ArcParserFct.hpp>
 #include <sdl/Hypergraph/InputHypergraphs.hpp>
-#include <sdl/Hypergraph/BestPath.hpp>
-
+#include <sdl/Hypergraph/MutableHypergraph.hpp>
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Hypergraph/WeightsFwdDecls.hpp>
+#include <sdl/Util/Flag.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/PrintRange.hpp>
+#include <sdl/Util/StringBuilder.hpp>
+#include <sdl/LexicalCast.hpp>
+#include <graehl/shared/configure_named_bits.hpp>
 #include <graehl/shared/hex_int.hpp>
 #include <graehl/shared/string_to.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-
-#include <sdl/Util/PrintRange.hpp>
-#include <sdl/Util/Flag.hpp>
-#include <sdl/Util/StringBuilder.hpp>
-#include <graehl/shared/configure_named_bits.hpp>
 
 namespace sdl {
 namespace Hypergraph {
@@ -262,22 +259,14 @@ struct TransformMain : TransformMainBase {
   int run_exit() override {
     bool r;
     switch ((unsigned)arcType) {
-      case kViterbiSemiring:
-        r = runWeight<ViterbiWeightTpl<SdlFloat>>();
-        break;
+      case kViterbiSemiring: r = runWeight<ViterbiWeightTpl<SdlFloat>>(); break;
 #if SDL_TRANSFORM_MAIN_LOG_WEIGHT
-      case kLogSemiring:
-        r = runWeight<LogWeightTpl<SdlFloat>>();
-        break;
+      case kLogSemiring: r = runWeight<LogWeightTpl<SdlFloat>>(); break;
 #endif
 #if SDL_TRANSFORM_MAIN_EXPECTATION_WEIGHT
-      case kExpectationSemiring:
-        r = runWeight<ExpectationWeight>();
-        break;
+      case kExpectationSemiring: r = runWeight<ExpectationWeight>(); break;
 #endif
-      case kFeatureSemiring:
-        r = runWeight<FeatureWeight>();
-        break;
+      case kFeatureSemiring: r = runWeight<FeatureWeight>(); break;
       default:
         SDL_THROW_LOG(Hypergraph, InvalidInputException,
                       this->name() << ": unknown weight semiring type name: " << arcType);
@@ -299,7 +288,7 @@ struct TransformMain : TransformMainBase {
     if (impl().has_inplace_input_transform) return impl().inputTransformInplace(*h, n);
     shared_ptr<IMutableHypergraph<Arc>> i = h;
     assert(n);
-    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(inputProperties(n-1));
+    MutableHypergraph<Arc>* m = new MutableHypergraph<Arc>(inputProperties(n - 1));
     h.reset(m);
     return impl().inputTransform((IHypergraph<Arc> const&)*i, m, n);
   }
@@ -464,13 +453,16 @@ struct TransformMain : TransformMainBase {
         // now h holds input, olast holds recent output
         if (impl().has2()) {
           std::string const& aname = o_name.str();
-          HTRANSFORM2_MSG(6, "a@" << (void*)olast.get() << ":\n" << *olast << "\nb@" << (void*)h.get()
-                                  << "=:\n" << *h,
+          HTRANSFORM2_MSG(6, "a@" << (void*)olast.get() << ":\n"
+                                  << *olast << "\nb@" << (void*)h.get() << "=:\n"
+                                  << *h,
                           aname, in.name);
           o_name << oname_sep << in.name;
           bool ok = impl().transform2InplaceP(olast, h);
           olast_name = o_name.str();
-          HTRANSFORM2_MSG(6, "result=" << olast_name << " (success=" << ok << "):\n" << *olast, aname, in.name);
+          HTRANSFORM2_MSG(6, "result=" << olast_name << " (success=" << ok << "):\n"
+                                       << *olast,
+                          aname, in.name);
           if (!ok) return false;
         }
         if (input == 1) cascade[0].reset();

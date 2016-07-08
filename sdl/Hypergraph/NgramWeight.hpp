@@ -19,30 +19,28 @@
 #pragma once
 
 
+#include <sdl/Hypergraph/Weight.hpp>
+#include <sdl/Hypergraph/WeightUtil.hpp>
+#include <sdl/Vocabulary/HelperFunctions.hpp>
+#include <sdl/Vocabulary/SpecialSymbols.hpp>
+#include <sdl/Util/Add.hpp>
+#include <sdl/Util/Compare.hpp>
+#include <sdl/Util/Constants.hpp>
+#include <sdl/Util/LogHelper.hpp>
+#include <sdl/Util/Map.hpp>
+#include <sdl/IntTypes.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <sdl/Syms.hpp>
+#include <sdl/Types.hpp>
 #include <algorithm>
-#include <vector>
-#include <map>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <cmath>
 #include <limits>
+#include <map>
 #include <string>
 #include <utility>
-
-#include <sdl/IntTypes.hpp>
-#include <sdl/Syms.hpp>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Hypergraph/WeightUtil.hpp>
-#include <sdl/Util/Add.hpp>
-#include <sdl/Util/Map.hpp>
-#include <sdl/Hypergraph/Weight.hpp>
-#include <sdl/Util/Constants.hpp>
-#include <sdl/Util/Compare.hpp>
-
-#include <sdl/Util/LogHelper.hpp>
-#include <sdl/Vocabulary/SpecialSymbols.hpp>
-#include <sdl/Vocabulary/HelperFunctions.hpp>
-#include <sdl/Types.hpp>
+#include <vector>
 
 namespace sdl {
 

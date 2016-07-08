@@ -20,16 +20,16 @@
 #define GRAEHL__SHARED__SIZE_MEGA_HPP
 #pragma once
 
-#include <iomanip>
-#include <stdexcept>
-#include <graehl/shared/stream_util.hpp>
-#include <graehl/shared/print_width.hpp>
 #include <graehl/shared/print_read.hpp>
+#include <graehl/shared/print_width.hpp>
 #include <graehl/shared/program_options.hpp>
-#include <sstream>
+#include <graehl/shared/stream_util.hpp>
 #include <cstddef>
-#include <string>
 #include <cstdio>
+#include <iomanip>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 namespace graehl {
 
@@ -42,8 +42,8 @@ inline outputstream& print_size(outputstream& o, size_type size, bool decimal_th
   size_compute_type thousand = decimal_thousand ? 1000 : 1024;
   if (size < thousand) return o << size;
   size_compute_type base = thousand;
-  const char* suffixes = decimal_thousand ? "kmgt" : "KMGT";
-  const char* suff = suffixes;
+  char const* suffixes = decimal_thousand ? "kmgt" : "KMGT";
+  char const* suff = suffixes;
   for (;;) {
     size_compute_type nextbase = base * thousand;
     if (size < nextbase || suff[1] == 0) {
@@ -61,30 +61,14 @@ inline outputstream& print_size(outputstream& o, size_type size, bool decimal_th
 template <class size_type>
 size_type scale_mega(char suffix, size_type number = 1) {
   switch (suffix) {
-    case 't':
-      number *= (1000. * 1000. * 1000. * 1000.);
-      break;
-    case 'T':
-      number *= (1024. * 1024. * 1024. * 1024.);
-      break;
-    case 'g':
-      number *= (1000. * 1000 * 1000);
-      break;
-    case 'G':
-      number *= (1024. * 1024 * 1024);
-      break;
-    case 'm':
-      number *= (1000 * 1000);
-      break;
-    case 'M':
-      number *= (1024 * 1024);
-      break;
-    case 'k':
-      number *= 1000;
-      break;
-    case 'K':
-      number *= 1024;
-      break;
+    case 't': number *= (1000. * 1000. * 1000. * 1000.); break;
+    case 'T': number *= (1024. * 1024. * 1024. * 1024.); break;
+    case 'g': number *= (1000. * 1000 * 1000); break;
+    case 'G': number *= (1024. * 1024 * 1024); break;
+    case 'm': number *= (1000 * 1000); break;
+    case 'M': number *= (1024 * 1024); break;
+    case 'k': number *= 1000; break;
+    case 'K': number *= 1024; break;
     default:
       throw std::runtime_error("unknown suffix - expected tTgGmMkK (tera giga mega kilo): "
                                + std::string(1, suffix));

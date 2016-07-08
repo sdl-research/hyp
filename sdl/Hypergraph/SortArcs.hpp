@@ -19,11 +19,9 @@
 #pragma once
 
 #include <sdl/Hypergraph/IHypergraph.hpp>
-#include <functional>
-
-#include <algorithm>
-
 #include <sdl/SharedPtr.hpp>
+#include <algorithm>
+#include <functional>
 
 
 namespace sdl {

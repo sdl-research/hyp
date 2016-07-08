@@ -15,7 +15,7 @@ namespace sdl {
 namespace Util {
 
 void throwInvalidInputException(std::istream& in, std::string const& error, std::size_t itemNumber,
-                                const char* item) {
+                                char const* item) {
   graehl::throw_input_exception<InvalidInputException>(in, error, item, itemNumber);
 }
 

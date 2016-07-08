@@ -20,32 +20,32 @@
 #define SDL_OPTIMIZATION_OBJECTIVEFUNCTION_HPP
 #pragma once
 
-#include <cassert>
-#include <list>
-#include <vector>
-#include <utility>
-#include <algorithm>
-
-#include <mutex>
-#include <thread>
-#include <sdl/SharedPtr.hpp>
-#include <sdl/Util/Unordered.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/lockfree/queue.hpp>
-#include <functional>
-#include <boost/bind.hpp>
-
-#include <atomic>
-#include <sdl/Exception.hpp>
 #include <sdl/Hypergraph/Types.hpp>
+#include <sdl/Optimization/IOriginalFeatureIds.hpp>
+#include <sdl/Optimization/Types.hpp>
+#include <sdl/Util/Delete.hpp>
 #include <sdl/Util/Equal.hpp>
 #include <sdl/Util/IsDebugBuild.hpp>
-#include <sdl/Util/Delete.hpp>
-#include <sdl/Optimization/IOriginalFeatureIds.hpp>
-#include <functional>
-#include <sdl/Optimization/Types.hpp>
 #include <sdl/Util/Sleep.hpp>
+#include <sdl/Util/Unordered.hpp>
+#include <sdl/Exception.hpp>
+#include <sdl/SharedPtr.hpp>
+#include <boost/bind.hpp>
+#include <boost/lockfree/queue.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <graehl/shared/thread_group.hpp>
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <functional>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <mutex>
+#include <thread>
+#include <utility>
+#include <vector>
 
 namespace sdl {
 namespace Optimization {
@@ -219,20 +219,20 @@ struct ScaledGradientUpdate : public IUpdate<FloatT> {
 template <class Queue, class FloatT>
 struct ConsumeUpdates {
 
-  ConsumeUpdates(IUpdate<FloatT>& updates_, Queue& queue_, std::atomic<bool>& areProducersDone_)
-      : updates(updates_), queue(queue_), areProducersDone(areProducersDone_) {}
+  ConsumeUpdates(IUpdate<FloatT>& updates, Queue& queue, std::atomic<bool>& areProducersDone)
+      : updates_(updates), queue_(queue), areProducersDone_(areProducersDone) {}
 
   typedef PodPair<FeatureId, FloatT> Pair;
 
-  void update(Pair p) { updates.update(p.first, p.second); }
+  void update(Pair p) { updates_.update(p.first, p.second); }
 
   enum { kSleepAfterFails = 1000 };  // avoid burning CPU when producers aren't keeping up
-  enum { kSleepForMicroSeconds = 100 };
+  enum { kSleepForMicroSeconds = 500 };
   void operator()() {
     unsigned fails = 0;
     Pair p;
-    while (!areProducersDone) {
-      while (queue.pop(p)) {
+    while (!areProducersDone_) {
+      while (queue_.pop(p)) {
         update(p);
         fails = 0;
       }
@@ -241,15 +241,15 @@ struct ConsumeUpdates {
       else
         ++fails;
     }
-    while (queue.pop(p)) update(p);
+    while (queue_.pop(p)) update(p);
   }
 
 #if SDL_DEBUG
   std::size_t n_;
 #endif
-  IUpdate<FloatT>& updates;
-  Queue& queue;
-  std::atomic<bool>& areProducersDone;
+  IUpdate<FloatT>& updates_;
+  Queue& queue_;
+  std::atomic<bool>& areProducersDone_;
 };
 
 /**
@@ -355,7 +355,7 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     typedef PodPair<FeatureId, FloatT> Pair;  // Windows compiler didn't like lockfree::queue<std::pair>
     typedef boost::lockfree::queue<Pair> Queue;
     assert(numThreads_ > 1);
-    TrainingDataIndex numProducers = numThreads_-1;  // one of the threads is the consumer
+    TrainingDataIndex numProducers = numThreads_ - 1;  // one of the threads is the consumer
     Queue queue(50 * numProducers);
 
     graehl::thread_group producerThreads, consumerThreads;
@@ -370,12 +370,16 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     GradientUpdate_Queue<FloatT, Queue> updateQueue(queue);
     CallGetUpdates* update;
     TrainingDataIndex prevBlockEnd = begin;
-    for (TrainingDataIndex i = 0; i < numProducers; ++i) {
+    for (TrainingDataIndex i = 0;;) {
       TrainingDataIndex const blockEnd = prevBlockEnd + blockSize + (i < rest);
       // process one more in the first 'rest' threads so no training examples are left out
       producers.push_back(update = new CallGetUpdates(this, prevBlockEnd, blockEnd, updateQueue));
       prevBlockEnd = blockEnd;
       producerThreads.create_thread(std::ref(*update));
+      if (++i >= numProducers) {
+        assert(blockEnd == size);
+        break;
+      }
     }
 
     std::atomic<bool> areProducersDone(false);
@@ -389,12 +393,9 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
     areProducersDone = true;
     consumerThreads.join_all();
 
-    FloatT fctValDelta(0.0f);
-
-    for (typename Producers::const_iterator i = producers.begin(), e = producers.end(); i != e; ++i)
-      fctValDelta += (*i)->result_;
-
-    return fctValDelta;
+    FloatT delta = 0.f;
+    for (CallGetUpdates* producer : producers) delta += producer->result_;
+    return delta;
   }
 
   virtual FloatT getFunctionValue() const { return fctVal_; }
@@ -428,33 +429,6 @@ class DataObjectiveFunction : public IObjectiveFunction<FloatT> {
   FloatT fctVal_;
   TrainingDataIndex numThreads_;
   bool doScale_;
-};
-
-/**
-   A toy objective function from http://www.chokkan.org/software/liblbfgs.
- */
-template <class FloatT>
-class MockObjectiveFunction : public IObjectiveFunction<FloatT> {
-
- public:
-  FloatT update(FloatT const* x, FloatT* g, FeatureId num_params) {
-    function_value_ = (FloatT)0.0;
-    for (int i = 0; i < num_params; i += 2) {
-      FloatT t1 = (FloatT)1.0-x[i];
-      FloatT t2 = (FloatT)10.0 * (x[i + 1]-x[i] * x[i]);
-      g[i + 1] = (FloatT)20.0 * t2;
-      g[i] = (FloatT)-2.0 * (x[i] * g[i + 1] + t1);
-      function_value_ += t1 * t1 + t2 * t2;
-    }
-    return function_value_;
-  }
-
-  FloatT getFunctionValue() const { return function_value_; }
-
-  void accept(IObjectiveFunctionVisitor<FloatT>* visitor) { visitor->visit(this); }
-
- private:
-  FloatT function_value_;
 };
 
 

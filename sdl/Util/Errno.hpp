@@ -27,11 +27,11 @@
 #define ERRNO_JG_2013_08_12_HPP
 #pragma once
 
+#include <Util/LogHelper.hpp>
 #include <ctype.h>
 #include <errno.h>
-#include <string.h>
 #include <stdlib.h>
-#include <Util/LogHelper.hpp>
+#include <string.h>
 
 
 namespace sdl {
@@ -46,7 +46,7 @@ inline void throwErrno(String const& callname, char const* logname = "sdl.Util.e
 #ifdef _WIN32
   char const* msg = buf;
   ::strerror_s(buf, kErrnoBufsize, errno);
-#elif(__APPLE__ || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE
+#elif (__APPLE__ || _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE
   char const* msg = buf;
   // XSI-compliant
   strerror_r(errno, buf, kErrnoBufsize);
