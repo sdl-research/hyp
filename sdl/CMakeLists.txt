@@ -375,6 +375,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 set(SPARSEHASH_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/sparsehash-c11")
+set(GOOGLEMINIHASH_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/google-mini_hash_map")
 set(GSL_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/GSL")
 set(RangeV3_SHARED_ROOT "${SDL_SHARED_EXTERNALS_PATH}/range-v3")
 
@@ -427,7 +428,7 @@ if(WIN32)
   # -DCRT_NO_DEPRECATE # could be used to get builtin vsnprintf if we want to try that
 
   # Set Boost options
-  set(SDL_BOOST_MINOR 61)
+  set(SDL_BOOST_MINOR 59)
   set(BOOST_ROOT "${SDL_EXTERNALS_PATH}/libraries/boost_1_${SDL_BOOST_MINOR}_0")
   set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
   set(Boost_FIND_VERSION "1.${SDL_BOOST_MINOR}.0")
@@ -478,6 +479,9 @@ message(STATUS "GSL (include only): ${GSL_INCLUDE_DIR}")
 
 find_package(SparseHash)
 message(STATUS "SPARSEHASH (include only): ${SPARSEHASH_INCLUDE_DIR}")
+
+find_package(GoogleMiniHash)
+message(STATUS "GOOGLEMINIHASH (include only): ${GOOGLEMINIHASH_INCLUDE_DIR}")
 
 
 set(SDL_NO_CLANG_OPTIMIZATIONS "-fcx-limited-range -fno-signaling-nans -fno-rounding-math")
@@ -640,7 +644,7 @@ if(CMAKE_COMPILER_IS_CLANGXX)
     SET(CMAKE_LINKER "clang++") # needed for sanitizes
 
     #  When linking shared libraries, the AddressSanitizer run-time is not
-    #  linked, so -Wl,-z,defs may cause link errors (don’t use it with
+    #  linked, so -Wl,-z,defs may cause link errors (don't use it with
     #  AddressSanitizer).
 
     set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
@@ -802,7 +806,6 @@ if(UNIX)
     set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
     set(Boost_USE_STATIC_LIBS OFF)
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
-    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/libd)
     set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-55.1")
 
@@ -827,7 +830,6 @@ if(UNIX)
     set(Boost_COMPILER "-gcc")
 
     set(LOG4CXX_ROOT ${SDL_EXTERNALS_PATH}/libraries/log4cxx-0.10.0)
-    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
     set(LOG4CXX_LIB_DEBUG_DIR ${LOG4CXX_ROOT}/lib) # always use release for Android
     set(ZLIB_PATH "${SDL_EXTERNALS_PATH}/libraries/zlib-1.2.3")
     set(ICU_ROOT "${SDL_EXTERNALS_PATH}/libraries/icu-49.1.2")
@@ -853,8 +855,6 @@ if(UNIX)
     endif()
     set(LOG4CXX_ROOT ${FOUND_LOG4CXX_ROOT}/..)
     show(LOG4CXX_ROOT)
-    set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
-    show(LOG4CXX_LIB_DIR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 
@@ -869,6 +869,7 @@ if(UNIX)
     if(OPEN_SOURCE_RELEASE)
       set(Boost_USE_STATIC_LIBS ON)
     endif()
+    set(DB_ROOT_PATH "/usr/local/opt/berkeley-db")
 
     if(CMAKE_COMPILER_IS_GNUCXX)
       #    sdl_exe_linker_flags(-static -static-libgcc -static-libstdc++)
@@ -892,7 +893,9 @@ if(UNIX)
     set(BOOST_INCLUDEDIR "${SDL_SHARED_EXTERNALS_PATH}/boost_1_${SDL_BOOST_MINOR}_0/include")
   endif()
 
-endif() # UNIX
+elseif(WIN32)
+endif()
+set(LOG4CXX_LIB_DIR ${LOG4CXX_ROOT}/lib)
 
 MARK_AS_ADVANCED(
   CMAKE_CXX_FLAGS_RELWITHOUTTBBMALLOC
